@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>WebGL_Engine</title>
+	<link rel="icon" type="image/x-icon" href="/resources/favicon.png">
+	<link rel="stylesheet" type="text/css" href="style/style.css">
+	<!-- This is to get the device dimentions -->
+	<meta name="viewport" content="height=device-height, initial-scale=1">
+</head>
+
+<body>
+	<centerFrame>
+		<img id="FontConsolasSdf35" src="/resources/fonts/consolas_sdf35/consolas_sdf35.png"/>
+		<img id="TextureAtlas" src="/resources/textures/TextureAtlas_1.png" />
+		<!-- <img id="FontConsolasSdf35" src="/resources/fonts/consolas_sdf35/consolas_sdf35.png" style="visibility: hidden;"/> -->
+		<!-- <img id="TextureAtlas" src="/resources/textures/TextureAtlas_1.png" style="visibility: hidden;"/> -->
+		<!-- IMPORTANT!!! For the touch screen devices the 'touch-action: none' must be set 
+			in order to disable scrolling on canvas touch drag events -->
+		<!-- <canvas id="glCanvas" width="0" height="0" style="touch-action: none"></canvas> -->
+		<canvas id="glCanvas" width="0" height="0" ></canvas>
+		</center-frame>
+</body>
+<script type="text/javascript" src="scripts/Engine/Global/EngineConstants.js"></script>
+<script type="text/javascript" src="scripts/Engine/Global/Tables.js"></script>
+<script type="text/javascript" src="scripts/Graphics/Global/GfxConstants.js"></script>
+<script type="text/javascript" src="scripts/App/Global/AppConstants.js"></script>
+<script type='module' 			 src="scripts/Entry.js "></script>
+</html>
+

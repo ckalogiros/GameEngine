@@ -1,0 +1,22 @@
+{
+    "name": "arkanoid",
+    "version": "1.0.0",
+    "description": "Game Engine",
+    "main": "Entry.js",
+    "type": "module",
+    "author": "CHR",
+    "license": "MIT",
+    "//": "nodemon ./src/scripts/Entry.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/three"
+    },
+    "scripts": {
+        "lite": "lite-server --port 6001",
+        "start": "npm run lite"
+    },
+    "dependencies": {
+        "lite-server": "^2.2.0"
+    }
+}

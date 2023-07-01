@@ -1,0 +1,14 @@
+
+{
+   "port":6001,
+   "files":["./src/**/*.{html,css}", "./src/scripts/**/*", "./resources"],
+   "server":{
+      "baseDir":"./src",
+      "routes": {
+         "/src": "./src",
+         "/scripts": "src/scripts",
+         "/resources": "./resources"
+     }
+   }
+}
+

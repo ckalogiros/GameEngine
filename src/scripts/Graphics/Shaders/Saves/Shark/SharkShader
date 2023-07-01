@@ -1,0 +1,215 @@
+export const TEMP = `#version 300 es
+
+#define MAX_NUM_PARAMS_BUFFER 5
+
+precision mediump float;
+
+in mediump vec4  v_Col;
+in mediump vec2  v_Wpos;
+in mediump vec2  v_Dim;
+in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
+
+out vec4 FragColor;
+vec2 hash22(vec2 p, float iTime) 
+{ 
+
+    // Faster, but doesn't disperse things quite as nicely as other combinations. :)
+    float n = sin(dot(p, vec2(41, 245)));
+    // float n = sin(dot(p, vec2(41, 289)));
+    return fract(vec2(262144, 32768)*n)*.75 + .25; 
+    
+    // Animated.
+    // p = (vec2(262144, 32768)*n); 
+    p = (vec2(262144, 32768)*n); 
+    return sin( p*6.2831853 + iTime )*.35 + .65;
+    
+}
+
+float Voronoi(vec2 p, float iTime)
+{
+    
+	vec2 g = floor(p), o; p -= g;
+	vec3 d = vec3(1); // 1.4, etc.
+    float r = 0.;
+    
+	for(int y = -1; y <= 1; y++)
+    {
+		for(int x = -1; x <= 1; x++)
+        {
+            
+			o = vec2(x, y);
+            o += hash22(g + o, iTime) - p;
+            
+			r = dot(o, o);
+            
+            // 1st, 2nd and 3rd nearest squared distances.
+            d.z = max(d.x, max(d.y, min(d.z, r))); // 3rd.
+            d.y = max(d.x, min(d.y, r)); // 2nd.
+            d.x = min(d.x, r); // Closest.
+                       
+		}
+	}
+    
+	d = sqrt(d); // Squared distance to distance.
+    
+    // Fabrice's formula.
+    return min(2./(1./max(d.y - d.x, .001) + 1./max(d.z - d.x, .001)), 1.);
+    // Dr2's variation - See "Voronoi Of The Week": https://www.shadertoy.com/view/lsjBz1
+    //return min(smin(d.z, d.y, .2) - d.x, 1.);
+}
+vec2 hMap(vec2 uv, float iTime)
+{
+    
+    // Plain Voronoi value. We're saving it and returning it to use when coloring.
+    // It's a little less tidy, but saves the need for recalculation later.
+    float h = Voronoi(uv*6., iTime);
+    
+    // Adding some bordering and returning the result as the height map value.
+    float c = smoothstep(0., fwidth(h)*2., h - .09)*h;
+    c += (1.-smoothstep(0., fwidth(h)*3., h - .22))*c*.5; 
+    
+    // Returning the rounded border Voronoi, and the straight Voronoi values.
+    return vec2(c, h);
+}
+
+void main()
+{
+    float t = v_Params[2]*.1;
+    // vec2 res = vec2(v_Params[0], v_Params[1])-v_Dim;     // Screen resolution
+    // res.x /= res.x/res.y;                                // Fix pixel ratio
+    // vec2 uv = gl_FragCoord.xy/res;                       // Transform to 0.0-1.0 coord space
+    
+    vec2 dim = v_Dim;                                       // Mesh Dimentions
+    dim /= (min(dim.x, dim.y) / max(dim.x, dim.y))*1.5;     // Mesh Dimentions
+    vec2 uv = (gl_FragCoord.xy)/dim;                         // Transform to 0.0-1.0 coord space
+    uv -= v_Wpos/dim;                                       // Transform to meshes local coord space 
+    // uv*=sin(t);
+    // dim /= (min(dim.x, dim.y) / max(dim.x, dim.y))*2.;     // Mesh Dimentions
+    // vec2 uv = ((gl_FragCoord.xy-0.5*dim.xy)/dim.y);                          // Transform to 0.0-1.0 coord space
+    // uv -= vec2((v_Wpos.x/dim.x)-.5, (v_Wpos.y/dim.y)-0.5);                                       // Transform to meshes local coord space 
+
+    vec3 col = mix(vec3(0.345, 0.780, 0.988), vec3(0.361, 0.020, 0.839), length(uv));
+    // vec3 col = mix(vec3(0.345, 0.780, 0.988), vec3(0.3, 0.020, 0.839), length(uv));
+    // vec3 col = mix(vec3(0.345, 0.780, 0.988), vec3((sin(t*4.)*.105)+.27, 0.020, 0.839), length(uv));
+
+	 vec2 c = hMap(uv, t);
+   //  vec3 col = vec3(1, .05, .25)*c.x; // Red base.
+   //  float sv = Voronoi(uv*16. + c.y, t)*.66 + (1.-Voronoi(uv*48. + c.y*2., t))*.34; // Finer overlay pattern.
+   //  col = col*.85 + vec3(1, .7, .5)*sv*sqrt(sv)*.3; // Mix in a little of the overlay.
+   //  col += (1. - col)*(1.-smoothstep(0., fwidth(c.y)*3., c.y - .22))*c.x; // Highlighting the border.
+    col += (1. - col)*(1.-smoothstep(0., fwidth(c.y)*4., c.y - .2)); // Highlighting the border.
+
+    FragColor = vec4(col, 1.);
+}
+`;
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+2
+
+export const TEMP = `#version 300 es
+
+#define MAX_NUM_PARAMS_BUFFER 5
+
+precision mediump float;
+
+in mediump vec4  v_Col;
+in mediump vec2  v_Wpos;
+in mediump vec2  v_Dim;
+in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
+
+out vec4 FragColor;
+vec2 hash22(vec2 p, float iTime) 
+{ 
+
+    // Faster, but doesn't disperse things quite as nicely as other combinations. :)
+    float n = sin(dot(p, vec2(41, 245)));
+    // float n = sin(dot(p, vec2(41, 289)));
+    return fract(vec2(262144, 32768)*n)*.75 + .25; 
+    
+    // Animated.
+    // p = (vec2(262144, 32768)*n); 
+    p = (vec2(262144, 32768)*n); 
+    return sin( p*6.2831853 + iTime )*.35 + .65;
+    
+}
+
+float Voronoi(vec2 p, float iTime)
+{
+    
+	vec2 g = floor(p), o; p -= g;
+	vec3 d = vec3(1); // 1.4, etc.
+    float r = 0.;
+    
+	for(int y = -1; y <= 1; y++)
+    {
+		for(int x = -1; x <= 1; x++)
+        {
+            
+			o = vec2(x, y);
+            o += hash22(g + o, iTime) - p;
+            
+			r = dot(o, o);
+            
+            // 1st, 2nd and 3rd nearest squared distances.
+            d.z = max(d.x, max(d.y, min(d.z, r))); // 3rd.
+            d.y = max(d.x, min(d.y, r)); // 2nd.
+            d.x = min(d.x, r); // Closest.
+                       
+		}
+	}
+    
+	d = sqrt(d); // Squared distance to distance.
+    
+    // Fabrice's formula.
+    return min(2./(1./max(d.y - d.x, .001) + 1./max(d.z - d.x, .001)), 1.);
+    // Dr2's variation - See "Voronoi Of The Week": https://www.shadertoy.com/view/lsjBz1
+    //return min(smin(d.z, d.y, .2) - d.x, 1.);
+}
+vec2 hMap(vec2 uv, float iTime)
+{
+    
+    // Plain Voronoi value. We're saving it and returning it to use when coloring.
+    // It's a little less tidy, but saves the need for recalculation later.
+    float h = Voronoi(uv*6., iTime);
+    
+    // Adding some bordering and returning the result as the height map value.
+    float c = smoothstep(0., fwidth(h)*2., h - .09)*h;
+    c += (1.-smoothstep(0., fwidth(h)*3., h - .22))*c*.5; 
+    
+    // Returning the rounded border Voronoi, and the straight Voronoi values.
+    return vec2(c, h);
+}
+
+void main()
+{
+    float t = v_Params[2]*.1;
+    // vec2 res = vec2(v_Params[0], v_Params[1])-v_Dim;     // Screen resolution
+    // res.x /= res.x/res.y;                                // Fix pixel ratio
+    // vec2 uv = gl_FragCoord.xy/res;                       // Transform to 0.0-1.0 coord space
+    
+    vec2 dim = v_Dim;                                       // Mesh Dimentions
+    dim /= (min(dim.x, dim.y) / max(dim.x, dim.y))*1.5;     // Mesh Dimentions
+    vec2 uv = (gl_FragCoord.xy)/dim;                         // Transform to 0.0-1.0 coord space
+    uv -= v_Wpos/dim;                                       // Transform to meshes local coord space 
+    // uv*=sin(t);
+    // dim /= (min(dim.x, dim.y) / max(dim.x, dim.y))*2.;     // Mesh Dimentions
+    // vec2 uv = ((gl_FragCoord.xy-0.5*dim.xy)/dim.y);                          // Transform to 0.0-1.0 coord space
+    // uv -= vec2((v_Wpos.x/dim.x)-.5, (v_Wpos.y/dim.y)-0.5);                                       // Transform to meshes local coord space 
+
+    vec3 col = mix(vec3(0.345, 0.780, 0.988), vec3(0.361, 0.020, 0.839), length(uv));
+    // vec3 col = mix(vec3(0.345, 0.780, 0.988), vec3(0.3, 0.020, 0.839), length(uv));
+    // vec3 col = mix(vec3(0.345, 0.780, 0.988), vec3((sin(t*4.)*.105)+.27, 0.020, 0.839), length(uv));
+
+	 vec2 c = hMap(uv, t);
+   //  vec3 col = vec3(1, .05, .25)*c.x; // Red base.
+	
+    float sv = Voronoi(uv*16. + c.y, t)*.66 + (1.-Voronoi(uv*48. + c.y*2., t))*.34; // Finer overlay pattern.
+   //  col = col*.85 + vec3(1, .7, .5)*sv*sqrt(sv)*.3; // Mix in a little of the overlay.
+   //  col += (1. - col)*(1.-smoothstep(0., fwidth(col.x)*3., col.x - .62))*col.y; // Highlighting the border.
+    col += (col)*(1.-smoothstep(0., fwidth(c.y)*3., c.y - .22))*c.x*.2; // Highlighting the border.
+   //  col += (1. - col)*(1.-smoothstep(0., fwidth(c.y*8.), c.y - .2)); // Highlighting the border.
+
+    FragColor = vec4(col, 1.);
+}
+`;

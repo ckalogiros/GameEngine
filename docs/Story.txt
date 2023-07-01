@@ -1,0 +1,4 @@
+Start the game by having all upgrades enabled for the first stage.
+
+After that the upgrades must be disabled.
+Create a story line to explain what is hapening.

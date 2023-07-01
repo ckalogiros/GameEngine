@@ -1,0 +1,48 @@
+Convert to Android App
+https://stackoverflow.com/questions/59389573/how-can-i-convert-my-javascript-web-application-into-android-application
+
+Player update:
+   create a player with it's sides close to a triangle angle like _\ 
+   and implement to the player-ball collission so that the player can
+   catch and hit the ball at it's minimum y position
+
+
+/// STAGES
+
+// Bonus Stages
+
+Rush stages
+
+May have some stages as bonus for extra points
+	the player have to hit a moving target ( or more )
+	there will be a timer. As the time goes by, points to earn by hitting the target will decrease
+	
+Have a shield going up 
+
+Have a stage that balls x pos is controlled by players x pos
+  to avoid -score modifier
+
+have a target with desent score modifier
+  passing by the screen
+	
+	
+	
+ Stage Themes
+-Earth,Jungle,desert
+-Ice,Diamond
+-Fire,Dark-red
+	
+
+
+/// PURCHASES
+
+may purchase a save ( for high score achievements )
+may purchase lives
+
+
+/// POWER UPS
+  create a "reduceBallSpeed", for sloMotion.
+
+  !!!
+Create a player with a horizontal line gap, so that there will be a blue round light
+that will point the balls hit pos on the player(actualy that follows-reflects the balls x pos) 

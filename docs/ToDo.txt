@@ -1,0 +1,106 @@
+ERASABLE
+  
+  br.powUp[i]   
+  
+  the many calls to: gl.uniform3fv( program.unifLoc.pos,   [ 0.0, 0.0, 0.0 ] );
+  
+  br.col, br.pos?, .....
+  
+  activate br.changed for all buffers
+  
+  function vertexWPos3( wPos, numObjects-. null )
+  
+--------------------------------------------------- ToDo
+
+typed Arrays views: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
+// for transforming all kind of arrays to typed ones. ex. "brIndex = new Array"
+
+typed Arrays methods : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array
+
+change powUp.type from string to contant number
+
+change all arrays [] to new32FloatArrays or uints
+
+try to make one for loop for drawing everything in render
+
+try to create rectangles with general call to createRect
+
+use return in all if 's (like collisions, for unnecessary for loops)
+
+Display realFps with call to date.now()(instead of for loop)
+
+create unsignedInt or bool type
+
+brake the createData function into seperate for each  type
+
+//if( powUps[i].pos[1] < player[ plIndex ].pos[1] +1 )
+
+make the .split for texts inside CalculateTextDimentions so it finds
+all characters
+
+Make:	bricksCollumsIndexArr	//for collisions
+Make:	bricksRowsIndexArr		//for collisions
+Make:	bricksPowUpsIndexArr 	//for different texturing
+
+  Reverse all loops (ex. --i)
+  All loops ++i NOT i++
+
+
+  ### 2
+  Make texture creating and loading robust 
+    When creating the font texture we want texWidth and height in the glTexture object(for use)
+    OR connect the font texture(with an array index??) with the glTexture object
+
+!!!
+In meshes that consist of an array of meshes, like balls and bricks etc,
+it is best to implement an 'all active' array to hold the indexes of the
+active meshes, insted of looping through all meshes and checking if(mesh.isActive)
+OR having to sort the array by active meshes.
+
+XXX
+Implement the Rect class as extension to every class  that has a rect mesh
+
+Remove all unecessary functions like: BallGetDim() etc
+
+XXX
+See if we can set all animations via Animation class
+(Current Animations are implemented as folows: 
+    export function RunAnimations() {
+
+      ButtonCreateScaleAnimation();
+      UiModRunAnimation();
+      PowerUpRunAnimation();
+      PlayerEnlargeAnimation();
+
+    }
+)
+
+Change the vars name 'name' in TextLabel class to 'str' or 'text'
+
+*** Implement the players xdir momentum to speed up ball
+    Make PlayerOnUpdate() or correct existing OnPlayerMove() function
+    to run on every frame so we can update the player's state.inMove, 
+
+
+Make the BallUpdateProjectLine() to run smoother with a timer(every 16 ms)
+
+
+Create some sort of timed events with a class similar to animations 
+so that we initiate an event, passing 2 callbacks.
+One callback is checking when the event is completed and the second callback 
+is for the following event to start
+
+Create a font that is [0,0] uv coords, if not already implemented
+
+!!
+All GetNextFree class member fuctions should not waste time
+doing a search for free element from the start every time,
+instead the function should have an iterator pointing to the next i-th
+element each time it is called, and the iterator should return to 0-th element at the end of the array. 
+
+
+
+!!!!
+Check all fragment shaders for constant variables for all fragments.
+If any, calculate them in vertex shader instead of making the calculations 
+for every fragment
