@@ -339,8 +339,8 @@ export function VertexShaderChoose(sid) {
     }
     else if (sid & SID.FX.FS_SHADOW) { return VS_SHADOW; }
     else if (sid & SID.ATTR.TEX2) { 
-        // return VertexShaderCreate();
-        return VS_DEFAULT_TEXTURE; 
+        return VertexShaderCreate(sid);
+        // return VS_DEFAULT_TEXTURE; 
     }
     else if (sid & SID.FX.FS_PARTICLES) { return VS_PARTICLES; }
     else if (sid & SID.FX.FS_GLOW) { return VS_GLOW; }

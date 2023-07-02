@@ -1,6 +1,6 @@
 "use=strict";
 
-import { Rect } from "../Engine/Drawables/Rect.js";
+import { Rect } from "../Engine/Drawables/Shapes/Rect.js";
 import { GfxSetVbShow, GlAddMesh, GlBindTexture, GlBindVAO, GlUpdateIndexBufferData, GlUpdateVertexBufferData, GlUseProgram } from "./GlBuffers.js";
 import { GlGetPrograms, GlGetVB } from "./GlProgram.js";
 import { GlCreateTexture, GlGetTexture } from "./GlTextures.js";

@@ -1,5 +1,5 @@
 import { GlAddMesh } from "../../../Graphics/GlBuffers.js";
-import { Rect } from "../Rect.js";
+import { Rect } from "../Shapes/Rect.js";
 import { TimerGetGlobalTimer } from "../../Timer/Timer.js";
 import { GlGetProgram } from "../../../Graphics/GlProgram.js";
 

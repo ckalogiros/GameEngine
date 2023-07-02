@@ -1,5 +1,5 @@
 "use strict";
-import { CreateText } from "../../../Engine/Drawables/Text.js";
+import { CreateText } from "../../../Engine/Drawables/Text/Text.js";
 import { GlSetScale, GlSetColor, GlSetTex, GlSetWposXY, GlSetDim } from "../../../Graphics/GlBufferOps.js";
 import { GlAddMesh } from "../../../Graphics/GlBuffers.js";
 import { FontGetUvCoords } from "../../../Engine/Loaders/Font/LoadFont.js";

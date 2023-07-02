@@ -2,7 +2,7 @@
 import { GlAddMesh } from '../../Graphics/GlBuffers.js'
 import { BallInitCurveMode, BallPlayerCollision, BallSetCurveMode } from './Ball.js';
 import { PowerUpPlayerCollision } from './PowerUp.js';
-import { Rect } from '../../Engine/Drawables/Rect.js';
+import { Rect } from '../../Engine/Drawables/Shapes/Rect.js';
 import { CoinPlayerCollision } from './Coin.js';
 import { Abs } from '../../Helpers/Math/MathOperations.js';
 import { StepTimersCreate } from '../../Engine/Timer/Time.js';

@@ -107,7 +107,7 @@ export function StageCreateStage1() {
     // let col = GetRandomColor();
     // const maxBr = 48 < BRICK.MAX_COUNT-1 ? 48 : BRICK.MAX_COUNT-1;
     // const maxBr = 6 < BRICK.MAX_COUNT-1 ? 6 : BRICK.MAX_COUNT-1;
-    const maxBr = 600 < BRICK.MAX_COUNT-1 ? 600 : BRICK.MAX_COUNT-1;
+    const maxBr = 28 < BRICK.MAX_COUNT-1 ? 28 : BRICK.MAX_COUNT-1;
     for (let i = 0; i < maxBr; i++) {
         // for (let i = 0; i < 1; i++) {
         let col = GetRanColor();

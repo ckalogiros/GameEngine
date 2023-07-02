@@ -1,8 +1,8 @@
 "use strict";
-import { CalculateSdfOuterFromDim } from '../../Helpers/Helpers.js';
-import * as math from '../../Helpers/Math/MathOperations.js'
-import { FontGetUvCoords, FontGetFontDimRatio } from '../Loaders/Font/LoadFont.js'
-import { Mesh } from './Mesh.js'
+import { CalculateSdfOuterFromDim } from '../../../Helpers/Helpers.js';
+import * as math from '../../../Helpers/Math/MathOperations.js'
+import { FontGetUvCoords, FontGetFontDimRatio } from '../../Loaders/Font/LoadFont.js'
+import { Mesh } from '../Mesh.js'
 
 
 

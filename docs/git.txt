@@ -29,7 +29,7 @@ AND recursive remove all sub-content with -r
 git rm --cached -r resources/
 
 /***************************
-# Clone specific branch
+# Clone specific branch 
 git clone -b branchName git@github.com:user/myproject.git
 
 /***************************

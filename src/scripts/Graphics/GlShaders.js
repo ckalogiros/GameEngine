@@ -2,7 +2,6 @@
 import { VertexShaderChoose } from './Shaders/VertexShaders.js'
 import { FragmentShaderChoose } from './Shaders/FragmentShaders.js'
 import * as dbg from './Debug/GfxDebug.js'
-import { VertexShaderCreate } from './Shaders/CreateShader.js';
 
 /**
  * How to add an attribute to a program

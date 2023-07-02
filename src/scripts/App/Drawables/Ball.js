@@ -8,7 +8,7 @@ import { GetSign } from "../../Helpers/Helpers.js";
 import { ParticleSystemCreateParticle, ParticleSystemDestroyParticle, ParticleSystemGetParticleColor, ParticleSystemGetParticleSystem, ParticleSystemSetParticleColor, ParticlesCreateSystem } from "../../Engine/ParticlesSystem/Particles.js";
 import { GlGetProgram } from "../../Graphics/GlProgram.js";
 import { AnimationsGet } from "../../Engine/Animations/Animations.js";
-import { Rect } from "../../Engine/Drawables/Rect.js";
+import { Rect } from "../../Engine/Drawables/Shapes/Rect.js";
 import { ExplosionsCreateSimpleExplosion } from "../../Engine/Drawables/Fx/Explosions.js";
 import { GlSetPriority } from "../../Graphics/GlBufferOps.js";
 import { TwistCreate, TwistDestroy, TwistSetAmtxSpeed, TwistSetTranslation } from "../../Engine/Drawables/Fx/Twist.js";

@@ -3,7 +3,7 @@ import { GlAddMesh } from "../../Graphics/GlBuffers.js";
 import { AnimTextsCreateValue, UiUpdate } from "./Ui/Ui.js";
 import { BallCreatePowUpBalls, BallCreatePowerUpPowerBalls, BallDestroyPowerUpPowerBalls } from "./Ball.js";
 import { PlayerCreateScaleAnimation } from "./Player.js";
-import { Rect } from "../../Engine/Drawables/Rect.js";
+import { Rect } from "../../Engine/Drawables/Shapes/Rect.js";
 import { ExplosionsCreateSimpleExplosion } from "../../Engine/Drawables/Fx/Explosions.js";
 import { GlowCreate, GlowDestroy, GlowSetTranslation } from "../../Engine/Drawables/Fx/Glow.js";
 import { GetRandomColor, GetRandomInt } from "../../Helpers/Helpers.js";

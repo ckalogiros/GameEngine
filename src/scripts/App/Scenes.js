@@ -2,8 +2,8 @@
 import { Player, CreatePlayer } from './Drawables/Player.js';
 import { Button, CreateButton } from '../Engine/Drawables/Widgets/Button.js';
 import { BallsInit, BallCreate, BallProjLineSetPriority, Balls } from './Drawables/Ball.js';
-import { Rect, RectCreateRect } from '../Engine/Drawables/Rect.js';
-import { Text, CalcTextWidth } from '../Engine/Drawables/Text.js';
+import { Rect, RectCreateRect } from '../Engine/Drawables/Shapes/Rect.js';
+import { Text, CalcTextWidth } from '../Engine/Drawables/Text/Text.js';
 import { DarkenColor } from '../Helpers/Helpers.js';
 import { UiCreateScore, UiCreateScoreModifier, UiCreateLives, UiCreateCombo, UiTextVariable, UiCreateTotalScore, UiCreateFps, AnimTextsInit, AnimTexts } from './Drawables/Ui/Ui.js';
 import { GlAddMesh, GfxSetVbShow } from '../Graphics/GlBuffers.js';

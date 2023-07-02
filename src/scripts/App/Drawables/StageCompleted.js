@@ -2,7 +2,7 @@
 
 import { AnimationsGet } from "../../Engine/Animations/Animations.js";
 import { GlowCreate, GlowGetGlow } from "../../Engine/Drawables/Fx/Glow.js";
-import { Rect } from "../../Engine/Drawables/Rect.js";
+import { Rect } from "../../Engine/Drawables/Shapes/Rect.js";
 import { TextLabel } from "../../Engine/Drawables/Widgets/TextLabel.js";
 import { TimerGetGlobalTimer } from "../../Engine/Timer/Timer.js";
 import { GlRotate } from "../../Graphics/GlBufferOps.js";

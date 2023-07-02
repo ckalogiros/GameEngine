@@ -228,12 +228,12 @@ const PLAYER = {
 /** Brick */
 const BRICK = {
     Z_INDEX:3,
-    MAX_COUNT: 1500,
+    MAX_COUNT: 30,
     
-    // WIDTH: 32,
-    // HEIGHT: 16,
-    WIDTH: 10,
-    HEIGHT: 5,
+    WIDTH: 32,
+    HEIGHT: 16,
+    // WIDTH: 10,
+    // HEIGHT: 5,
     // WIDTH: 46,
     // HEIGHT: 28,
     PAD: 0,

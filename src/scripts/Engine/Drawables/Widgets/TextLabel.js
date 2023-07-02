@@ -3,8 +3,8 @@
 import { GlSetTex } from "../../../Graphics/GlBufferOps.js";
 import { GlAddMesh } from "../../../Graphics/GlBuffers.js";
 import { FontGetUvCoords } from "../../Loaders/Font/LoadFont.js";
-import { Rect } from "../Rect.js";
-import { CreateText } from "../Text.js";
+import { Rect } from "../Shapes/Rect.js";
+import { CreateText } from "../Text/Text.js";
 
 /**
  * The difference with plain text is that a label draws the text inside a rect mesh

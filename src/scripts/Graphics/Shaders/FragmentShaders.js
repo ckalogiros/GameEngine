@@ -13,117 +13,6 @@ import { FS_SHADOW } from "./Shadow.js";
 /**
  * This is a replace for the background of text rendering
  */
-// const FS_DEFAULT2 = `#version 300 es
-// #define MAX_NUM_PARAMS_BUFFER 5
-
-
-
-// precision highp float;
-// out vec4 FragColor;
-
-
-// in mediump vec4 v_Col;
-// in mediump vec2 v_Dim;
-// in mediump vec2 v_Wpos;
-// in mediump vec2 v_Scale;
-// in mediump vec3 v_Style;
-// in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
-
-
-// vec4 pos = vec4(.5, .5, .0, .0);
-// vec3 _color = vec3(0.0);
-// float ScreenH;
-// float AA;
-
-
-// vec2 length2(vec4 a) {
-//     return vec2(length(a.xy),length(a.zw));
-// }
-// vec2 rounded_rectangle(vec2 s, float r, float bw) {
-//     s -= bw +.0002; // Subtract the border
-//     // s -= .01; // TEMP: Subtract the shadow
-//     r = min(r, min(s.x, s.y));
-//     s -= r; // Subtract the border-radius
-//     vec4 d = abs(pos) - s.xyxy;
-//     vec4 dmin = min(d,0.0);
-//     vec4 dmax = max(d,0.0);
-//     vec2 df = max(dmin.xz, dmin.yw) + length2(dmax);
-//     return (df - r);
-// }
-
-// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// void main(void) 
-// {
-//     float t = v_Params[2];
-//     float uRadius = v_Style.x * .008;                    // Radius(From 0.01 to 0.35 good values) for rounding corners
-//     float borderWidth = v_Style.y * 0.001;                  // Border Width. It is 0.001 for every pixel
-//     float feather = v_Style.z;         // Border Feather Distance
-
-//     vec2 res = vec2(v_Params[0], v_Params[1]);
-//     float clarity = 10.4; // From 0.3 to 1.2 good values 
-//     // float clarity = 1.; // From 0.3 to 1.2 good values 
-// 	ScreenH = min(res.x, res.y)*clarity;
-// 	AA = ScreenH*0.5;
-    
-//     res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
-//     vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
-//     uv -= vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y));        // Transform to meshes local coord space 
-//     vec2 dim = vec2(v_Dim.x/res.x, v_Dim.y/res.y)*v_Scale;
-
-//     pos.xy = uv;
-
-//     vec2 blur = vec2(0.0, feather * .001);
-//     vec3 fcol = vec3(0.0);
-    
-//     vec2 d = rounded_rectangle(dim, mix(0.0, .2, uRadius), 0.);
-//     vec4 col1 = vec4(0.0, 0.4, 1., 1.);
-//     vec4 col2 = vec4(0.9, .0, 0.0, 1.);
-
-
-//     //////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-//     // Calculate Gradient
-//     float dist = length(vec2(d.x, 0.1));
-//     vec2 p0 = vec2(-dist, 0.0);
-//     vec2 p1 = vec2(dist, 0.0);
-//     vec2 pa = pos.xy - p0;
-//     vec2 ba = p1 - p0;
-    
-//     vec4 src = v_Col;
-    
-//     // Calculate alpha (for rounding corners)
-//     float blend = 1.;
-//     float dd = d.x - blur.x;
-//     float wa = clamp(-dd * AA, 0.0, 1.);
-//     float wb = clamp(-dd / (blur.x+blur.y), 0.0, 1.);
-//     // float alpha = min(src.a * (wa * wb), blend);
-//     float alpha = src.a * (wa * wb);
-//     fcol += fcol * (1.0 - alpha) + src.rgb * alpha;
-    
-
-//     // BORDER
-//     float bd = (abs(d.x)-borderWidth) - blur.x;
-//     wa = clamp(-bd * AA, 0.0, 1.0);
-//     wb = clamp(-bd / (blur.x+blur.y), 0.0, 1.0);
-//     fcol += fcol*vec3(abs(wa * wb)-borderWidth);
-
-//     // Bevel
-//     float r = min(uRadius*.17, min(dim.x, dim.y));
-//     float f = smoothstep(r, .0, abs(d.x));
-//     fcol = mix(fcol, pow(fcol, vec3(2.))*.85, f);
-
-
-//     FragColor = vec4(fcol.rgb, alpha);
-//     // FragColor = vec4(1.);
-// }
-// `;
-
 const FS_DEFAULT2 = `#version 300 es
 
 #define MAX_NUM_PARAMS_BUFFER 5
@@ -131,278 +20,386 @@ const FS_DEFAULT2 = `#version 300 es
 precision highp float;
 out vec4 FragColor;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump float v_Time;
-in mediump vec2  v_Dim;
-in mediump vec2  v_Res;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER]; 
+in mediump vec4 v_Col;
+in mediump vec2 v_Dim;
+in mediump vec2 v_Wpos;
+in mediump vec2 v_Scale;
+in mediump vec3 v_Style;
+in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
+
+vec4 pos = vec4(.5, .5, .0, .0);
+vec3 _color = vec3(0.0);
+float ScreenH;
+float AA;
 
 
-#define STEPS 250.0
-#define MDIST 100.0
-#define pi 3.1415926535
-#define rot(a) mat2(cos(a), sin(a), -sin(a), cos(a))
-// #define rot(a) mat2(sin(a), cos(a), -cos(a), sin(a))
-#define sat(a) clamp(a, 0.0, 1.0)
-
-// #define WOBBLE 
-#define AA 30.0
-#define h13(n) fract((n)*vec3(12.9898,78.233,45.6114)*43758.5453123)
-
-
-vec2 vor(vec2 v, vec3 p, vec3 s){
-    p = abs(fract(p-s) - 0.5);
-    float a = max(p.x, max(p.y, p.z));
-    float b = min(v.x, a);
-    float c = max(v.x, min(v.y,a));
-    return vec2(b, c);
+vec2 length2(vec4 a) {
+    return vec2(length(a.xy),length(a.zw));
+}
+vec2 rounded_rectangle(vec2 s, float r, float bw) {
+    s -= bw +.0002; // Subtract the border
+    // s -= .01; // TEMP: Subtract the shadow
+    r = min(r, min(s.x, s.y));
+    s -= r; // Subtract the border-radius
+    vec4 d = abs(pos) - s.xyxy;
+    vec4 dmin = min(d,0.0);
+    vec4 dmax = max(d,0.0);
+    vec2 df = max(dmin.xz, dmin.yw) + length2(dmax);
+    return (df - r);
 }
 
-float vorMap(vec3 p){
-    vec2 v = vec2(5.0);
-    v = vor(v,p,h13(0.96));
-    p.xy*=rot(1.2);
-    v = vor(v,p,h13(0.55));
-    p.yz*=rot(2.);
-    v = vor(v,p,h13(0.718));
-    p.zx*=rot(2.7);
-    v = vor(v,p,h13(0.3));
-    return v.y-v.x; 
-}
-
-//box sdf
-float box(vec3 p, vec3 b){
-  vec3 q = abs(p)-b;
-  return length(max(q,0.0))+min(max(q.x,max(q.y,q.z)),0.0);
-}
-
-
-float va = 0.; //voronoi animations
-float sa = 0.; //size change animation
-float rlg; //global ray length
-bool hitonce = false; //for tracking complications with the voronoi 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
-vec2 map(vec3 p, vec3 n, float iTime)
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void main(void) 
 {
-    vec2 a = vec2(1);
-    vec2 b = vec2(2);
-    vec3 po = p;
-    vec3 no = n;
-    p-=n;
-    float len = 9.5;
-    len += sa;
-    float len2 = len-1.0;
-    p.x-=(len/2.0);
-    a.x = box(p, vec3(1, 1, len));
-    // float len2 = 1.0;
-    // a.x = box(p, vec3(1, 1, 1));
-    a.x = min(a.x,box(p-vec3(0, len2, len2),vec3(1, len, 1)));
-    a.x = min(a.x,box(p-vec3(-len2, 0, -len2),vec3(len, 1, 1)));
-    float tip = box(p-vec3(len2, len2*2.0, len2),vec3(len2, 1, 1));   
-    float cut = (p.xz*=rot(pi/4.0-0.15)).y;
-    tip = max(-cut+len2/2.0,tip);
-    a.x = min(a.x,tip);
-    b.x = tip;
-    a.x-=0.4;
-    p = po;
-    p.xz*=rot(pi/4.0);
-    p.xy*=rot(-0.9553155);
-    po = p;
-    n.xz*=rot(pi/4.0);
-    n.xy*=rot(-0.9553155);
-    p.xz-=n.xy;
-    p.xz*=rot(-iTime*0.3);
+    float t = v_Params[2];
+    float uRadius = v_Style.x * .008;                    // Radius(From 0.01 to 0.35 good values) for rounding corners
+    float borderWidth = v_Style.y * 0.001;                  // Border Width. It is 0.001 for every pixel
+    float feather = v_Style.z;         // Border Feather Distance
 
-    float breakPartsSize = 0.3; // Smaller val the bigger the size of break parts
-    float breakPartsDist = 0.4; // Smaller val the greter the distance parts take
-    if(hitonce)
-        a.x = max(a.x, -vorMap(vec3(p.x, p.z, rlg + n.z) * breakPartsSize + 3.) + va * breakPartsDist);
-    p = po;
-    b.y = 3.0;
-    p-=n;
-    p.xz*=rot(pi/6.0);
-    p.x+=1.75;
-    p.z+=0.4;
-    po = p;
-    // Blocks
-    // for(float i = 0.; i<3.; i++){ //blocks
-    //     b.y+=i;
-    //     p.xz*=rot((2.0*pi/3.0)*i);
-    //     float t = (iTime+i*((2.0*pi)/9.0))*3.;
-    //     p.y-=35.-50.*step(sin(t),0.);
-    //     p.x+=4.5;
-    //     p.xy*=rot(t);
-    //     p.x-=4.5;
-    //     p.xz*=rot(t);
-    //     b.x = box(p,vec3(1.5,.5,.5))-0.25;
-    //     a = (a.x<b.x)?a:b;
-    //     p = po;
-    // }
-    return a;
-}
-vec3 norm(vec3 p, float iTime)
-{
-    vec2 e= vec2(0.0001,0);
-    return normalize(map(p, vec3(0), iTime).x-vec3(
-    map(p, e.xyy, iTime).x,
-    map(p, e.yxy, iTime).x,
-    map(p, e.yyx, iTime).x));
-}
-
-vec4 render(vec2 fragCoord, float iTime)
-{
     vec2 res = vec2(v_Params[0], v_Params[1]);
-    vec2 uv = ((fragCoord-0.5*res.xy)/res.y) * 2.2;
-    vec3 col = vec3(0);
-    uv.x-=0.025;
-    vec2 uv2 = uv;
-    vec2 uv3 = uv;
+    float clarity = 10.4; // From 0.3 to 1.2 good values 
+    // float clarity = 1.; // From 0.3 to 1.2 good values 
+	ScreenH = min(res.x, res.y)*clarity;
+	AA = ScreenH*0.5;
     
-    //Calculating the animation for the size wobble and voronoi crumble
-    uv2.y-=0.1;
-    uv2*=rot(iTime*0.1);
-    float ang = atan(uv2.x,uv2.y)/(pi*2.)+0.5;
-    float range = 0.175;
-    #ifdef WOBBLE
-        sa = sin(ang*pi*2.+iTime*2.5)*0.3;
-    #endif
-    ang = smoothstep(0.0,range,ang)*smoothstep(0.0,range,1.0-ang);
-    //va = (1.0-ang)*0.175;
-    va = (1.0-ang);
-    uv*=rot(-pi/6.0);
+    res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
+    vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
+    uv -= vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y));        // Transform to meshes local coord space 
+    vec2 dim = vec2(v_Dim.x/res.x, v_Dim.y/res.y)*v_Scale;
+
+    pos.xy = uv;
+
+    vec2 blur = vec2(0.0, feather * .001);
+    vec3 fcol = vec3(0.0);
     
-    vec3 ro = vec3(5,5,5)*6.5;
+    vec2 d = rounded_rectangle(dim, mix(0.0, .2, uRadius), 0.);
+    vec4 col1 = vec4(0.0, 0.4, 1., 1.);
+    vec4 col2 = vec4(0.9, .0, 0.0, 1.);
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    // Calculate Gradient
+    float dist = length(vec2(d.x, 0.1));
+    vec2 p0 = vec2(-dist, 0.0);
+    vec2 p1 = vec2(dist, 0.0);
+    vec2 pa = pos.xy - p0;
+    vec2 ba = p1 - p0;
     
-    //Orthographic target camera
-    vec3 lk = vec3(0,0,0);
-    vec3 f = normalize(lk-ro);
-    vec3 r = normalize(cross(vec3(0,1,0),f));
-    vec3 rd = f+uv.x*r+uv.y*cross(f,r);
-    ro+=(rd-f)*17.0;
-    rd=f;
-
-    vec3 p = ro;
-    float rl = 0.;
-    vec2 d= vec2(0);
-    float shad = 0.;
-    float rlh = 0.;
-    float i2 = 0.; 
+    vec4 src = v_Col;
     
-    for(float i = 0.; i<STEPS; i++)
-    {   //Spaghetified raymarcher 
-        p = ro + (rd * rl);
-        d = map(p, vec3(0), iTime);
-        rl+=d.x;
-        if(d.x<0.0001)
-        {
-            shad = (i2/STEPS);
-            if(hitonce) break;
-            hitonce = true;
-            rlh = rl;
-        }
-        if(rl>MDIST||(!hitonce && i > STEPS-2.))
-        {
-            d.y = 0.;
-            break;
-        }
-        rlg = rl-rlh;
-        if(hitonce&&rlg>3.0){hitonce = false; i2 = 0.;}  
-        if(hitonce)i2++;
-    }
-    if(d.y>0.0) 
-    {   //Color Surface
-        vec3 n = norm(p, iTime);
-        vec3 r = reflect(rd,n);
-        vec3 ld = normalize(vec3(0,1,0));
-        float spec = pow(max(0. ,dot(r,ld)), 13.0);
-
-        //Color the triangle
-        vec3 n2 = n*0.65+0.35;
-        col += mix(vec3(1,0,0),vec3(0,1,0),sat(uv3.y*1.1))*n2.r;
-        uv3*=rot(-(2.0*pi)/3.0);
-        col += mix(vec3(0,1.0,0),vec3(0,0,1),sat(uv3.y*1.1))*n2.g;
-        uv3*=rot(-(2.0*pi)/3.0);
-        col += mix(vec3(0,0,1),vec3(1,0,0),sat(uv3.y*1.1))*n2.b;
-        
-
-        
-        //NuSan SSS
-        // float sss=.5;
-        // float sssteps = 10.;
-        // for(float i=1.; i<sssteps; ++i){
-        //     float dist = i*0.2;
-        //     sss += smoothstep(0., 1., map(p+ld*dist,vec3(0), iTime).x/dist)/(sssteps*1.5);
-        // }
-        // sss = clamp(sss,0.0,1.0);
-        
-        //blackle AO
-        #define AO(a,n,p) smoothstep(-a,a, map(p,-n*a, iTime).x)
-        float ao = AO(1.9, n, p) * AO(3., n, p) * AO(7., n, p);
-        
-        //Apply AO on the triangle
-        if(rlg<0.001){
-            col*=mix(ao,1.0,0.2);
-        }
-        //Color the inside of the crumbled bits 
-        else {
-            col = vec3(0.2-shad);
-        }
-        // //Color the moving blocks
-        // if(d.y>1.0){
-        //     col = (n*0.6+0.4)*vec3(sss)+spec;
-        // }
-        //a bit of gamma correction
-        col = pow(col,vec3(0.7));
-    }
-    // else{ //Color Background
-    //     vec3 bg = mix(vec3(0.345, 0.780, 0.988), vec3(0.361, 0.020, 0.839), length(uv));
-    //     col = bg;
-    // }
-    vec3 bg = mix(vec3(0.345, 0.780, 0.988), vec3(0.361, 0.020, 0.839), length(uv));
-    col = bg;
-
-    return vec4(col, 1.0);  
-}
-
-
-
-void main()
-{
-    // float iTime = v_Params[2];
-    // float iTime = v_Time;
-    float iTime = 1.2;
-    // vec2 uv = gl_FragCoord.xy;
-    vec2 uv = v_Res;
-    // vec2 uv = v_Dim;
-    float px = 1./AA, i, j; 
-    vec4 cl2, cl;
-
-    if(AA == 1.)
-    {
-        cl = render(uv, iTime);
-        FragColor = cl;
-        return;
-    }
+    // Calculate alpha (for rounding corners)
+    float blend = 1.;
+    float dd = d.x - blur.x;
+    float wa = clamp(-dd * AA, 0.0, 1.);
+    float wb = clamp(-dd / (blur.x+blur.y), 0.0, 1.);
+    // float alpha = min(src.a * (wa * wb), blend);
+    float alpha = src.a * (wa * wb);
+    fcol += fcol * (1.0 - alpha) + src.rgb * alpha;
     
-    for(i=0.; i<AA + min(iTime, 0.0); i++)
-    {
-        for(j=0.; j<AA; j++)
-        {
-            vec2 uv2 = vec2(uv.x+px*i, uv.y+px*j);
-            cl2 = render(uv2, iTime);
-            cl += cl2;
-            rlg = 0.; 
-            hitonce = false;
-        }
-    }
-    
-    cl /= AA*AA;
-    FragColor = cl;
+
+    // BORDER
+    float bd = (abs(d.x)-borderWidth) - blur.x;
+    wa = clamp(-bd * AA, 0.0, 1.0);
+    wb = clamp(-bd / (blur.x+blur.y), 0.0, 1.0);
+    fcol += fcol*vec3(abs(wa * wb)-borderWidth);
+
+    // Bevel
+    float r = min(uRadius*.17, min(dim.x, dim.y));
+    float f = smoothstep(r, .0, abs(d.x));
+    fcol = mix(fcol, pow(fcol, vec3(2.))*.85, f);
+
+
+    FragColor = vec4(fcol.rgb, alpha);
+    // FragColor = vec4(1.);
 }
 `;
+
+// const FS_DEFAULT2 = `#version 300 es
+
+// #define MAX_NUM_PARAMS_BUFFER 5
+
+// precision highp float;
+// out vec4 FragColor;
+
+// in mediump vec4  v_Col;
+// in mediump vec2  v_Wpos;
+// in mediump float v_Time;
+// in mediump vec2  v_Dim;
+// in mediump vec2  v_Res;
+// in mediump float v_Params[MAX_NUM_PARAMS_BUFFER]; 
+
+
+// #define STEPS 250.0
+// #define MDIST 100.0
+// #define pi 3.1415926535
+// #define rot(a) mat2(cos(a), sin(a), -sin(a), cos(a))
+// // #define rot(a) mat2(sin(a), cos(a), -cos(a), sin(a))
+// #define sat(a) clamp(a, 0.0, 1.0)
+
+// // #define WOBBLE 
+// #define AA 30.0
+// #define h13(n) fract((n)*vec3(12.9898,78.233,45.6114)*43758.5453123)
+
+
+// vec2 vor(vec2 v, vec3 p, vec3 s){
+//     p = abs(fract(p-s) - 0.5);
+//     float a = max(p.x, max(p.y, p.z));
+//     float b = min(v.x, a);
+//     float c = max(v.x, min(v.y,a));
+//     return vec2(b, c);
+// }
+
+// float vorMap(vec3 p){
+//     vec2 v = vec2(5.0);
+//     v = vor(v,p,h13(0.96));
+//     p.xy*=rot(1.2);
+//     v = vor(v,p,h13(0.55));
+//     p.yz*=rot(2.);
+//     v = vor(v,p,h13(0.718));
+//     p.zx*=rot(2.7);
+//     v = vor(v,p,h13(0.3));
+//     return v.y-v.x; 
+// }
+
+// //box sdf
+// float box(vec3 p, vec3 b){
+//   vec3 q = abs(p)-b;
+//   return length(max(q,0.0))+min(max(q.x,max(q.y,q.z)),0.0);
+// }
+
+
+// float va = 0.; //voronoi animations
+// float sa = 0.; //size change animation
+// float rlg; //global ray length
+// bool hitonce = false; //for tracking complications with the voronoi 
+
+
+
+// vec2 map(vec3 p, vec3 n, float iTime)
+// {
+//     vec2 a = vec2(1);
+//     vec2 b = vec2(2);
+//     vec3 po = p;
+//     vec3 no = n;
+//     p-=n;
+//     float len = 9.5;
+//     len += sa;
+//     float len2 = len-1.0;
+//     p.x-=(len/2.0);
+//     a.x = box(p, vec3(1, 1, len));
+//     // float len2 = 1.0;
+//     // a.x = box(p, vec3(1, 1, 1));
+//     a.x = min(a.x,box(p-vec3(0, len2, len2),vec3(1, len, 1)));
+//     a.x = min(a.x,box(p-vec3(-len2, 0, -len2),vec3(len, 1, 1)));
+//     float tip = box(p-vec3(len2, len2*2.0, len2),vec3(len2, 1, 1));   
+//     float cut = (p.xz*=rot(pi/4.0-0.15)).y;
+//     tip = max(-cut+len2/2.0,tip);
+//     a.x = min(a.x,tip);
+//     b.x = tip;
+//     a.x-=0.4;
+//     p = po;
+//     p.xz*=rot(pi/4.0);
+//     p.xy*=rot(-0.9553155);
+//     po = p;
+//     n.xz*=rot(pi/4.0);
+//     n.xy*=rot(-0.9553155);
+//     p.xz-=n.xy;
+//     p.xz*=rot(-iTime*0.3);
+
+//     float breakPartsSize = 0.3; // Smaller val the bigger the size of break parts
+//     float breakPartsDist = 0.4; // Smaller val the greter the distance parts take
+//     if(hitonce)
+//         a.x = max(a.x, -vorMap(vec3(p.x, p.z, rlg + n.z) * breakPartsSize + 3.) + va * breakPartsDist);
+//     p = po;
+//     b.y = 3.0;
+//     p-=n;
+//     p.xz*=rot(pi/6.0);
+//     p.x+=1.75;
+//     p.z+=0.4;
+//     po = p;
+//     // Blocks
+//     // for(float i = 0.; i<3.; i++){ //blocks
+//     //     b.y+=i;
+//     //     p.xz*=rot((2.0*pi/3.0)*i);
+//     //     float t = (iTime+i*((2.0*pi)/9.0))*3.;
+//     //     p.y-=35.-50.*step(sin(t),0.);
+//     //     p.x+=4.5;
+//     //     p.xy*=rot(t);
+//     //     p.x-=4.5;
+//     //     p.xz*=rot(t);
+//     //     b.x = box(p,vec3(1.5,.5,.5))-0.25;
+//     //     a = (a.x<b.x)?a:b;
+//     //     p = po;
+//     // }
+//     return a;
+// }
+// vec3 norm(vec3 p, float iTime)
+// {
+//     vec2 e= vec2(0.0001,0);
+//     return normalize(map(p, vec3(0), iTime).x-vec3(
+//     map(p, e.xyy, iTime).x,
+//     map(p, e.yxy, iTime).x,
+//     map(p, e.yyx, iTime).x));
+// }
+
+// vec4 render(vec2 fragCoord, float iTime)
+// {
+//     vec2 res = vec2(v_Params[0], v_Params[1]);
+//     vec2 uv = ((fragCoord-0.5*res.xy)/res.y) * 2.2;
+//     vec3 col = vec3(0);
+//     uv.x-=0.025;
+//     vec2 uv2 = uv;
+//     vec2 uv3 = uv;
+    
+//     //Calculating the animation for the size wobble and voronoi crumble
+//     uv2.y-=0.1;
+//     uv2*=rot(iTime*0.1);
+//     float ang = atan(uv2.x,uv2.y)/(pi*2.)+0.5;
+//     float range = 0.175;
+//     #ifdef WOBBLE
+//         sa = sin(ang*pi*2.+iTime*2.5)*0.3;
+//     #endif
+//     ang = smoothstep(0.0,range,ang)*smoothstep(0.0,range,1.0-ang);
+//     //va = (1.0-ang)*0.175;
+//     va = (1.0-ang);
+//     uv*=rot(-pi/6.0);
+    
+//     vec3 ro = vec3(5,5,5)*6.5;
+    
+//     //Orthographic target camera
+//     vec3 lk = vec3(0,0,0);
+//     vec3 f = normalize(lk-ro);
+//     vec3 r = normalize(cross(vec3(0,1,0),f));
+//     vec3 rd = f+uv.x*r+uv.y*cross(f,r);
+//     ro+=(rd-f)*17.0;
+//     rd=f;
+
+//     vec3 p = ro;
+//     float rl = 0.;
+//     vec2 d= vec2(0);
+//     float shad = 0.;
+//     float rlh = 0.;
+//     float i2 = 0.; 
+    
+//     for(float i = 0.; i<STEPS; i++)
+//     {   //Spaghetified raymarcher 
+//         p = ro + (rd * rl);
+//         d = map(p, vec3(0), iTime);
+//         rl+=d.x;
+//         if(d.x<0.0001)
+//         {
+//             shad = (i2/STEPS);
+//             if(hitonce) break;
+//             hitonce = true;
+//             rlh = rl;
+//         }
+//         if(rl>MDIST||(!hitonce && i > STEPS-2.))
+//         {
+//             d.y = 0.;
+//             break;
+//         }
+//         rlg = rl-rlh;
+//         if(hitonce&&rlg>3.0){hitonce = false; i2 = 0.;}  
+//         if(hitonce)i2++;
+//     }
+//     if(d.y>0.0) 
+//     {   //Color Surface
+//         vec3 n = norm(p, iTime);
+//         vec3 r = reflect(rd,n);
+//         vec3 ld = normalize(vec3(0,1,0));
+//         float spec = pow(max(0. ,dot(r,ld)), 13.0);
+
+//         //Color the triangle
+//         vec3 n2 = n*0.65+0.35;
+//         col += mix(vec3(1,0,0),vec3(0,1,0),sat(uv3.y*1.1))*n2.r;
+//         uv3*=rot(-(2.0*pi)/3.0);
+//         col += mix(vec3(0,1.0,0),vec3(0,0,1),sat(uv3.y*1.1))*n2.g;
+//         uv3*=rot(-(2.0*pi)/3.0);
+//         col += mix(vec3(0,0,1),vec3(1,0,0),sat(uv3.y*1.1))*n2.b;
+        
+
+        
+//         //NuSan SSS
+//         // float sss=.5;
+//         // float sssteps = 10.;
+//         // for(float i=1.; i<sssteps; ++i){
+//         //     float dist = i*0.2;
+//         //     sss += smoothstep(0., 1., map(p+ld*dist,vec3(0), iTime).x/dist)/(sssteps*1.5);
+//         // }
+//         // sss = clamp(sss,0.0,1.0);
+        
+//         //blackle AO
+//         #define AO(a,n,p) smoothstep(-a,a, map(p,-n*a, iTime).x)
+//         float ao = AO(1.9, n, p) * AO(3., n, p) * AO(7., n, p);
+        
+//         //Apply AO on the triangle
+//         if(rlg<0.001){
+//             col*=mix(ao,1.0,0.2);
+//         }
+//         //Color the inside of the crumbled bits 
+//         else {
+//             col = vec3(0.2-shad);
+//         }
+//         // //Color the moving blocks
+//         // if(d.y>1.0){
+//         //     col = (n*0.6+0.4)*vec3(sss)+spec;
+//         // }
+//         //a bit of gamma correction
+//         col = pow(col,vec3(0.7));
+//     }
+//     // else{ //Color Background
+//     //     vec3 bg = mix(vec3(0.345, 0.780, 0.988), vec3(0.361, 0.020, 0.839), length(uv));
+//     //     col = bg;
+//     // }
+//     vec3 bg = mix(vec3(0.345, 0.780, 0.988), vec3(0.361, 0.020, 0.839), length(uv));
+//     col = bg;
+
+//     return vec4(col, 1.0);  
+// }
+
+
+
+// void main()
+// {
+//     // float iTime = v_Params[2];
+//     // float iTime = v_Time;
+//     float iTime = 1.2;
+//     // vec2 uv = gl_FragCoord.xy;
+//     vec2 uv = v_Res;
+//     // vec2 uv = v_Dim;
+//     float px = 1./AA, i, j; 
+//     vec4 cl2, cl;
+
+//     if(AA == 1.)
+//     {
+//         cl = render(uv, iTime);
+//         FragColor = cl;
+//         return;
+//     }
+    
+//     for(i=0.; i<AA + min(iTime, 0.0); i++)
+//     {
+//         for(j=0.; j<AA; j++)
+//         {
+//             vec2 uv2 = vec2(uv.x+px*i, uv.y+px*j);
+//             cl2 = render(uv2, iTime);
+//             cl += cl2;
+//             rlg = 0.; 
+//             hitonce = false;
+//         }
+//     }
+    
+//     cl /= AA*AA;
+//     FragColor = cl;
+// }
+// `;
 
 
 const FS_DEFAULT3 = `#version 300 es
