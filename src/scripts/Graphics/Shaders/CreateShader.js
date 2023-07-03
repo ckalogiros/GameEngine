@@ -28,10 +28,14 @@ function generateDefines( defines ) {
 	return chunks.join( '\n' );
 }
 
+function filterEmptyLine( string ) {
+	return string !== '';
+}
+
 export function VertexShaderCreate(sid){
 
 
-   const shader_chunks = [
+   const vs_chunks = [
       true ? '#version 300 es' : '',
       true ? '#include <precision_medium>' : '',
       true ? '#define MAX_NUM_PARAMS_BUFFER 5' : '',
@@ -56,24 +60,24 @@ export function VertexShaderCreate(sid){
       true ? 'out mediump float v_params[MAX_NUM_PARAMS_BUFFER];' : '',
       true ? 'void main(void) ' : '',
       true ? '{' : '',
-      true ? '    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);' : '',
+      true ? '  gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);' : '',
       // TODO!!!: Create a SID.ATTR.PASS_TO_FRAGMENT, so that we control the passage of attributes to the fragment shader.
-      (sid & SID.ATTR.COL4) ? '    v_col = a_col;' : '', 
-      (sid & SID.ATTR.POS2) ? '    v_pos = a_pos;' : '',
-      (sid & SID.ATTR.WPOS_TIME4) ? '    v_wpos = a_wpos_time.xy;' : '',
-      (sid & SID.ATTR.TEX2) ? '    v_tex_coord = a_tex;' : '',
+      (sid & SID.ATTR.COL4) ? '  v_col = a_col;' : '', 
+      (sid & SID.ATTR.POS2) ? '  v_pos = a_pos;' : '',
+      (sid & SID.ATTR.WPOS_TIME4) ? '  v_wpos = a_wpos_time.xy;' : '',
+      (sid & SID.ATTR.TEX2) ? '  v_tex_coord = a_tex;' : '',
       (sid & SID.ATTR.SDF_PARAMS) ? '#include <sdf2_assign_sdf2>' : '',
       (sid & SID.ATTR.STYLE) ? '#include <vdim2_assign_apos2>' : '',
       (sid & SID.ATTR.STYLE) ? '#include <vstyle3_assign_astyle3>' : '',
       (sid & SID.ATTR.STYLE) ? '#include <vtime1_assign_awpostime1>' : '',
       (sid & SID.ATTR.STYLE) ? '#include <vres2_assign_uparams12>' : '',
-      true ? '    v_params = u_params;' : '',
+      true ? '  v_params = u_params;' : '',
       true ? '}' : '',
    ];
 
-   const vertex_shader = shader_chunks.join( '\n' )
+   const vertex_shader = vs_chunks.filter( filterEmptyLine ).join( '\n' )
 
-   let vs = resolveIncludes(vertex_shader);
+   const vs = resolveIncludes(vertex_shader);
 
 
    console.log(vs)

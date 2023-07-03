@@ -292,16 +292,16 @@ void main(void) {
 export function VertexShaderChoose(sid) {
 
     if (sid & SID.ATTR.STYLE) {
-        // return VertexShaderCreate(sid);
-        return VS_DEFAULT;
+        return VertexShaderCreate(sid);
+        // return VS_DEFAULT;
     }
 
     // else if (sid & SID.TEST_SHADER) { return VS_VORTEX; }
     else if (sid & SID.TEST_SHADER) { return VS_VORTEX2; }
     // else if (sid & SID.TEST_SHADER) { return VS_EXPLOSION_ATTR_TIMER; }
     else if (sid & SID.ATTR.TEX2 && sid & SID.ATTR.SDF_PARAMS) { 
-        // return VertexShaderCreate(sid);
-        return VS_DEFAULT_TEXTURE_SDF; 
+        return VertexShaderCreate(sid);
+        // return VS_DEFAULT_TEXTURE_SDF; 
     }
     else if (sid & SID.FX.FS_SHADOW) { return VS_SHADOW; }
     else if (sid & SID.ATTR.TEX2) { 
