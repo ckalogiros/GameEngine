@@ -89,10 +89,6 @@ export function Rotate2D(dim, pos, angle) {
 		Math.cos(angle), Math.sin(angle),
 		-Math.cos(angle), Math.sin(angle),
 	];
-	// const newPos = [
-	// 	(rot[0] * (dim[0] + pos[0])) + (rot[1] * (dim[1] + pos[1])),
-	// 	(rot[2] * (dim[0] + pos[0])) + (rot[3] * (dim[1] + pos[1])),
-	// ];
 	const newPos = [
 		(rot[0] * pos[0]) + (rot[1] * pos[1]),
 		(rot[2] * pos[0]) + (rot[3] * pos[1]),

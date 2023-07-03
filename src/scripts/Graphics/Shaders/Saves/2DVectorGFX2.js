@@ -4,10 +4,10 @@ export const FS_V2DGFX_ORI = `#version 300 es
 
 precision mediump float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump vec2  v_Dim;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump vec2  v_dim;
+in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
 
 out vec4 FragColor;
 
@@ -22,7 +22,7 @@ out vec4 FragColor;
 // uniform float time;
 uniform vec2 mouse;
 uniform vec2 resolution;
-// #define iTime v_Params[2]
+// #define iTime v_params[2]
 
 #define iResolution resolution
 #define iMouse mouse
@@ -928,16 +928,16 @@ void paint(float t) {
 //////////////////////////////////////////////////////////
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
-    float t = v_Params[2];
-    // vec2 res = vec2(v_Params[0], v_Params[1]);
-    vec2 dim = v_Dim;                                       // Mesh Dimentions
+    float t = v_params[2];
+    // vec2 res = vec2(v_params[0], v_params[1]);
+    vec2 dim = v_dim;                                       // Mesh Dimentions
     dim /= (min(dim.x, dim.y) / max(dim.x, dim.y));         // Mesh Dimentions
-    dim += v_Wpos/dim;
+    dim += v_wpos/dim;
     vec2 uv = (gl_FragCoord.xy)/dim;                        // Transform to 0.0-1.0 coord space
-    uv -= v_Wpos/dim;                                       // Transform to meshes local coord space 
+    uv -= v_wpos/dim;                                       // Transform to meshes local coord space 
 
 
-    init(fragCoord, vec2(1.,1.), v_Wpos*.5);
+    init(fragCoord, vec2(1.,1.), v_wpos*.5);
 
     paint(t);
 

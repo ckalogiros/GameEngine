@@ -4,17 +4,17 @@ export const VS_VORTEX = `#version 300 es
 
 #define MAX_NUM_PARAMS_BUFFER 3
 
-layout (location = 0) in mediump vec4  a_Col;
-layout (location = 1) in mediump vec2  a_Pos;
-layout (location = 2) in mediump vec4  a_WposTime;
-layout (location = 3) in mediump vec4  a_Params1;
+layout (location = 0) in mediump vec4  a_col;
+layout (location = 1) in mediump vec2  a_pos;
+layout (location = 2) in mediump vec4  a_wpos_time;
+layout (location = 3) in mediump vec4  a_params1;
 
-uniform mat4  u_OrthoProj;
-uniform mediump float u_Params[MAX_NUM_PARAMS_BUFFER];    
+uniform mat4  u_ortho_proj;
+uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];    
 
-out mediump vec4  v_Col; 
-out mediump vec2  v_Wpos; 
-out mediump vec2  v_Dim; 
+out mediump vec4  v_col; 
+out mediump vec2  v_wpos; 
+out mediump vec2  v_dim; 
 out mediump float v_Size; 
 
 out mediump float u_Time; 
@@ -23,15 +23,15 @@ out mediump vec2  u_Res;
     
 void main(void) {
     
-   gl_Position = u_OrthoProj * vec4(a_Pos.x + a_WposTime.x, a_Pos.y + a_WposTime.y, a_WposTime.z, 1.0);
+   gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
    
-   v_Col       = a_Col;
-   v_Dim       = a_Pos;
-   v_Wpos      = a_WposTime.xy;
-   // v_Time      = a_WposTime.w;
+   v_col       = a_col;
+   v_dim       = a_pos;
+   v_wpos      = a_wpos_time.xy;
+   // v_time      = a_wpos_time.w;
    
-   u_Res       = vec2(u_Params[0], u_Params[1]);
-   u_Time      = u_Params[2];
+   u_Res       = vec2(u_params[0], u_params[1]);
+   u_Time      = u_params[2];
 }
 `;
 
@@ -39,9 +39,9 @@ export const FS_VORTEX = `#version 300 es
 
 precision mediump float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Dim;
-in mediump vec2  v_Wpos;
+in mediump vec4  v_col;
+in mediump vec2  v_dim;
+in mediump vec2  v_wpos;
 
 in mediump float u_Time;
 in mediump vec2  u_Res;
@@ -174,8 +174,8 @@ vec4 func1(vec2 iRes, float iTime)
 
 void main()
 {
-   // vec2 uv = gl_FragCoord.xy/v_Dim;
-   vec2 uv = u_Res.xy/v_Dim;
+   // vec2 uv = gl_FragCoord.xy/v_dim;
+   vec2 uv = u_Res.xy/v_dim;
 
    float iTime = u_Time;
    
@@ -183,7 +183,7 @@ void main()
    // vec4 col = textureLod(iChannel0, uv, v);
    vec4 col = textureLod(u_Sampler0, uv, v);
    // vec4 col = vec4(0.);
-   col += func1(v_Dim, iTime);
+   col += func1(v_dim, iTime);
 
    FragColor = pow(col, vec4(2.0));
 }
@@ -199,18 +199,18 @@ export const VS_VORTEX2 = `#version 300 es
 
 #define MAX_NUM_PARAMS_BUFFER 3
 
-layout (location = 0) in mediump vec4  a_Col;
-layout (location = 1) in mediump vec2  a_Pos;
-layout (location = 2) in mediump vec4  a_WposTime;
-layout (location = 3) in mediump vec4  a_Params1;
+layout (location = 0) in mediump vec4  a_col;
+layout (location = 1) in mediump vec2  a_pos;
+layout (location = 2) in mediump vec4  a_wpos_time;
+layout (location = 3) in mediump vec4  a_params1;
 
-uniform mat4  u_OrthoProj;
-uniform mediump float u_Params[MAX_NUM_PARAMS_BUFFER];    
+uniform mat4  u_ortho_proj;
+uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];    
 
-flat out mediump vec4  v_Col; 
-flat out mediump vec2  v_Wpos; 
-out mediump vec2  v_Dim; 
-flat out mediump float v_Time; 
+flat out mediump vec4  v_col; 
+flat out mediump vec2  v_wpos; 
+out mediump vec2  v_dim; 
+flat out mediump float v_time; 
 
 flat out mediump vec2  u_Res; 
 flat out mediump float  u_Radius; 
@@ -221,17 +221,17 @@ flat out mediump int  v_Count;
     
 void main(void) {
     
-   gl_Position = u_OrthoProj * vec4(a_Pos.x + a_WposTime.x, a_Pos.y + a_WposTime.y, a_WposTime.z, 1.0);
+   gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
    
-   v_Col       = a_Col;
-   v_Dim       = a_Pos;
-   v_Wpos      = a_WposTime.xy;
-   v_Time      = a_WposTime.w;
-   v_Count     = int(a_Params1.x);
+   v_col       = a_col;
+   v_dim       = a_pos;
+   v_wpos      = a_wpos_time.xy;
+   v_time      = a_wpos_time.w;
+   v_Count     = int(a_params1.x);
    
-   u_Res       = vec2(u_Params[0], u_Params[1]);
+   u_Res       = vec2(u_params[0], u_params[1]);
 
-   u_Radius    = u_Params[2];
+   u_Radius    = u_params[2];
 }
 `;
 
@@ -241,10 +241,10 @@ export const FS_VORTEX2 = `#version 300 es
 
 precision mediump float;
 
-flat in mediump vec4  v_Col;
-in mediump vec2  v_Dim;
-flat in mediump vec2  v_Wpos;
-flat in mediump float v_Time;
+flat in mediump vec4  v_col;
+in mediump vec2  v_dim;
+flat in mediump vec2  v_wpos;
+flat in mediump float v_time;
 flat in mediump int v_Count;
 
 flat in mediump vec2  u_Res;
@@ -421,12 +421,12 @@ float getnoise(int octaves, float persistence, float freq, vec3 coords) {
 
 void main()
 {
-   float iTime = v_Time;
+   float iTime = v_time;
    vec2 res = u_Res;
    float count = float(v_Count);
-   vec2 wpos = vec2(v_Wpos.x, res.y-v_Wpos.y);
-   // vec2 dim = abs(v_Dim);                                    
-   vec2 dim = v_Dim;                                    
+   vec2 wpos = vec2(v_wpos.x, res.y-v_wpos.y);
+   // vec2 dim = abs(v_dim);                                    
+   vec2 dim = v_dim;                                    
    vec2 frag = gl_FragCoord.xy; 
    vec2 uv = (frag)/res;
 
@@ -437,7 +437,7 @@ void main()
    vec4 col = vec4(0.0);
    vec2 p = (uv - dim ) / u_Radius;
    // vec2 p = (uv - dim ) / min( dim.y, dim.x );
-   // vec2 p = (uv - abs(v_Dim) ) / min( abs(v_Dim.y), abs(v_Dim.x) );
+   // vec2 p = (uv - abs(v_dim) ) / min( abs(v_dim.y), abs(v_dim.x) );
    
    float ay = 0.0, ax = 0.0, az = 0.0;
 
@@ -541,7 +541,7 @@ void main()
    // FragColor.a = .0;
    
    // FragColor.rgb *= colorIntensity;
-   // if(abs(v_Dim.x) < 10.)
+   // if(abs(v_dim.x) < 10.)
    // if(float(v_Count) > 0.)
    // FragColor.rgb = vec3(.0);
 }
@@ -552,18 +552,18 @@ void main()
 
 // #define MAX_NUM_PARAMS_BUFFER 3
 
-// layout (location = 0) in mediump vec4  a_Col;
-// layout (location = 1) in mediump vec2  a_Pos;
-// layout (location = 2) in mediump vec4  a_WposTime;
-// layout (location = 3) in mediump vec4  a_Params1;
+// layout (location = 0) in mediump vec4  a_col;
+// layout (location = 1) in mediump vec2  a_pos;
+// layout (location = 2) in mediump vec4  a_wpos_time;
+// layout (location = 3) in mediump vec4  a_params1;
 
-// uniform mat4  u_OrthoProj;
-// uniform mediump float u_Params[MAX_NUM_PARAMS_BUFFER];    
+// uniform mat4  u_ortho_proj;
+// uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];    
 
-// out mediump vec4  v_Col; 
-// out mediump vec2  v_Wpos; 
-// out mediump vec2  v_Dim; 
-// out mediump float v_Time; 
+// out mediump vec4  v_col; 
+// out mediump vec2  v_wpos; 
+// out mediump vec2  v_dim; 
+// out mediump float v_time; 
 // // out mediump float v_Size; 
 
 // // out mediump float u_Time; 
@@ -572,16 +572,16 @@ void main()
     
 // void main(void) {
     
-//    gl_Position = u_OrthoProj * vec4(a_Pos.x + a_WposTime.x, a_Pos.y + a_WposTime.y, a_WposTime.z, 1.0);
+//    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
    
-//    v_Col       = a_Col;
-//    v_Dim       = a_Pos;
-//    // v_Dim       = abs(a_Pos);
-//    v_Wpos      = a_WposTime.xy;
-//    v_Time      = a_WposTime.w;
+//    v_col       = a_col;
+//    v_dim       = a_pos;
+//    // v_dim       = abs(a_pos);
+//    v_wpos      = a_wpos_time.xy;
+//    v_time      = a_wpos_time.w;
    
-//    u_Res       = vec2(u_Params[0], u_Params[1]);
-//    // u_Time      = u_Params[2];
+//    u_Res       = vec2(u_params[0], u_params[1]);
+//    // u_Time      = u_params[2];
 // }
 // `;
 
@@ -589,10 +589,10 @@ void main()
 
 // precision mediump float;
 
-// in mediump vec4  v_Col;
-// in mediump vec2  v_Dim;
-// in mediump vec2  v_Wpos;
-// in mediump float v_Time;
+// in mediump vec4  v_col;
+// in mediump vec2  v_dim;
+// in mediump vec2  v_wpos;
+// in mediump float v_time;
 
 // // in mediump float u_Time;
 // in mediump vec2  u_Res;
@@ -792,11 +792,11 @@ void main()
 
 // void main()
 // {
-//    float iTime = v_Time;
+//    float iTime = v_time;
 //    // float iTime = 2.9;
 //    vec2 res = u_Res;
-//    vec2 wpos = vec2(v_Wpos.x, res.y-v_Wpos.y);
-//    vec2 dim = v_Dim;                                       // Mesh Dimentions
+//    vec2 wpos = vec2(v_wpos.x, res.y-v_wpos.y);
+//    vec2 dim = v_dim;                                       // Mesh Dimentions
 //    vec2 frag = gl_FragCoord.xy; 
 //    vec2 uv = (frag)/res;
 
@@ -884,7 +884,7 @@ void main()
 //    // }
 
 //    float diameter = (1./res.x) * 50.;
-//    // float diameter = (1./res.x) * abs(v_Dim.x);
+//    // float diameter = (1./res.x) * abs(v_dim.x);
 //    // float diameter = 1./dim.x;
 //    vec2 r =  vec2(min( res.y, res.x ));
    

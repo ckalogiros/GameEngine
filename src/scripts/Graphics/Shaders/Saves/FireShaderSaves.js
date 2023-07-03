@@ -42,17 +42,17 @@
 
 
 // in mediump vec4 v_Color;
-// in mediump vec2 v_Pos;
-// in mediump vec2 v_Wpos;
-// in mediump float v_Params[5];           
+// in mediump vec2 v_pos;
+// in mediump vec2 v_wpos;
+// in mediump float v_params[5];           
 
 // out vec4 FragColor;
 
 // void main()
 // {
-//     float xdir = v_Params[0];
-//     float ydir = v_Params[1];
-//     float time = v_Params[2];
+//     float xdir = v_params[0];
+//     float ydir = v_params[1];
+//     float time = v_params[2];
 
 //     float dimf = 1.0;
 //     vec2 dim = vec2(700. * dimf, 800. * dimf);
@@ -60,8 +60,8 @@
 //     vec2 uv = gl_FragCoord.xy / dim;
 //     uv += vec2(-.5, -.0); // 0 to 1
 
-//     // vec2 mpos = vec2(v_Params[3]/dim.x, 1.-(v_Params[4]/dim.y)-0.5); 
-//     vec2 mpos = vec2(v_Params[3]/dim.x-.5, 1.-(v_Params[4]/dim.y)); 
+//     // vec2 mpos = vec2(v_params[3]/dim.x, 1.-(v_params[4]/dim.y)-0.5); 
+//     vec2 mpos = vec2(v_params[3]/dim.x-.5, 1.-(v_params[4]/dim.y)); 
 //     // mpos = abs(mpos);
 
 //     vec2 q = uv * vec2(2.,2.);
@@ -169,26 +169,26 @@
 
 
 //     in mediump vec4 v_Color;
-//     in mediump vec2 v_Pos;
-//     in mediump vec2 v_Wpos;
-//     in mediump float v_Params[5];         
+//     in mediump vec2 v_pos;
+//     in mediump vec2 v_wpos;
+//     in mediump float v_params[5];         
 
 //     out vec4 FragColor;
 
 //     void main()
 //     {
-//         float xdir   = v_Params[0];
-//         float ydir   = v_Params[1];
-//         float iTime  = v_Params[2];
-//         float ypos   = 700. - v_Pos.y;             // Transform y coord from top=0 to top=windowHeight
-//         float left   = (v_Pos.x - v_Wpos.x);                 // Left side of current geometry
-//         float right  = (v_Pos.x + v_Wpos.x);
-//         float top    = ypos + v_Wpos.y;
-//         float bottom = ypos - v_Wpos.y;
+//         float xdir   = v_params[0];
+//         float ydir   = v_params[1];
+//         float iTime  = v_params[2];
+//         float ypos   = 700. - v_pos.y;             // Transform y coord from top=0 to top=windowHeight
+//         float left   = (v_pos.x - v_wpos.x);                 // Left side of current geometry
+//         float right  = (v_pos.x + v_wpos.x);
+//         float top    = ypos + v_wpos.y;
+//         float bottom = ypos - v_wpos.y;
 
 //         float dimf = 1.1;
 //         vec2 dim = vec2(700. * dimf, 800. * dimf);
-//         vec2 localDim = vec2(v_Pos.x-v_Wpos.x*dimf, v_Pos.y+v_Wpos.y*dimf);
+//         vec2 localDim = vec2(v_pos.x-v_wpos.x*dimf, v_pos.y+v_wpos.y*dimf);
 
 //         vec2 uv = gl_FragCoord.xy / dim;
 //         vec2 q = uv;
@@ -276,26 +276,26 @@
 
 
 //     in mediump vec4 v_Color;
-//     in mediump vec2 v_Pos;
-//     in mediump vec2 v_Wpos;
-//     in mediump float v_Params[7];           // [0]:WinWidth, [1]:WinHeight, [3]:Time
+//     in mediump vec2 v_pos;
+//     in mediump vec2 v_wpos;
+//     in mediump float v_params[7];           // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 //     out vec4 FragColor;
 
 //     void main()
 //     {
-//         float xdir = v_Params[0];
-//         float ydir = v_Params[1];
-//         float time = v_Params[2];
-//         // vec2 mpos = vec2(v_Params[3], v_Params[4]);
-//         float xvecdiff = v_Params[5];
-//         float yvecdiff = v_Params[6];
+//         float xdir = v_params[0];
+//         float ydir = v_params[1];
+//         float time = v_params[2];
+//         // vec2 mpos = vec2(v_params[3], v_params[4]);
+//         float xvecdiff = v_params[5];
+//         float yvecdiff = v_params[6];
 
 //         float dimf = 1.0;
 //         vec2 dim = vec2(200.*dimf, 200.0*dimf);
-//         // vec2 mpos = vec2(v_Params[3]/dim.x, 1.-(v_Params[4]/dim.y)-0.5); 
-//         // vec2 mpos = vec2(v_Params[3]/dim.x+.5, 1.-(v_Params[4]/dim.y)); 
-//         vec2 mpos = vec2(v_Params[3]/dim.x, 1.-(v_Params[4]/dim.y)); 
+//         // vec2 mpos = vec2(v_params[3]/dim.x, 1.-(v_params[4]/dim.y)-0.5); 
+//         // vec2 mpos = vec2(v_params[3]/dim.x+.5, 1.-(v_params[4]/dim.y)); 
+//         vec2 mpos = vec2(v_params[3]/dim.x, 1.-(v_params[4]/dim.y)); 
 //         vec2 uv = gl_FragCoord.xy / dim;
 //         vec2 q = uv;
 
@@ -389,24 +389,24 @@
         
     
 //         in mediump vec4 v_Color;
-//         in mediump vec2 v_Pos;
-//         in mediump vec2 v_Wpos;
-//         in mediump float v_Params[7];           // [0]:WinWidth, [1]:WinHeight, [3]:Time
+//         in mediump vec2 v_pos;
+//         in mediump vec2 v_wpos;
+//         in mediump float v_params[7];           // [0]:WinWidth, [1]:WinHeight, [3]:Time
     
 //         out vec4 FragColor;
     
 //         void main()
 //         {
-//             float xdir = v_Params[0];
-//             float ydir = v_Params[1];
-//             float time = v_Params[2];
-//             // vec2 mpos = vec2(v_Params[3], v_Params[4]);
-//             float xvecdiff = v_Params[5];
-//             float yvecdiff = v_Params[6];
+//             float xdir = v_params[0];
+//             float ydir = v_params[1];
+//             float time = v_params[2];
+//             // vec2 mpos = vec2(v_params[3], v_params[4]);
+//             float xvecdiff = v_params[5];
+//             float yvecdiff = v_params[6];
             
 //             float dimf = 1.0;
 //             vec2 dim = vec2(200.*dimf, 200.0*dimf);
-//             vec2 mpos = vec2(v_Params[3]/dim.x, 1.-(v_Params[4]/dim.y)+3.); 
+//             vec2 mpos = vec2(v_params[3]/dim.x, 1.-(v_params[4]/dim.y)+3.); 
 //             vec2 uv = gl_FragCoord.xy / dim;
 //             vec2 q = uv;
 
@@ -505,22 +505,22 @@
         
     
 //         in mediump vec4 v_Color;
-//         in mediump vec2 v_Pos;
-//         in mediump vec2 v_Wpos;
-//         in mediump float v_Params[7];           // [0]:WinWidth, [1]:WinHeight, [3]:Time
+//         in mediump vec2 v_pos;
+//         in mediump vec2 v_wpos;
+//         in mediump float v_params[7];           // [0]:WinWidth, [1]:WinHeight, [3]:Time
     
 //         out vec4 FragColor;
     
 //         void main()
 //         {
-//             float xdir = v_Params[0];
-//             float ydir = v_Params[1];
-//             float time = v_Params[2];
-//             float xvecdiff = v_Params[5];
-//             float yvecdiff = v_Params[6];
+//             float xdir = v_params[0];
+//             float ydir = v_params[1];
+//             float time = v_params[2];
+//             float xvecdiff = v_params[5];
+//             float yvecdiff = v_params[6];
             
 //             vec2 dim = vec2(700., 700.0);
-//             vec2 mpos = vec2(v_Params[3]/dim.x-.5, 1.-(v_Params[4]/dim.y)-.5); 
+//             vec2 mpos = vec2(v_params[3]/dim.x-.5, 1.-(v_params[4]/dim.y)-.5); 
 //             // vec2 mpos = vec2(0.); 
             
 //             vec2 uv = gl_FragCoord.xy / dim;
@@ -622,9 +622,9 @@
 
 
 //     in mediump vec4 v_Color;
-//     in mediump vec2 v_Pos;
-//     in mediump vec2 v_Wpos;
-//     in highp vec3 v_Params;           // [0]:WinWidth, [1]:WinHeight, [3]:Time
+//     in mediump vec2 v_pos;
+//     in mediump vec2 v_wpos;
+//     in highp vec3 v_params;           // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 //     out vec4 FragColor;
 
@@ -632,14 +632,14 @@
 //     {
 //         vec2 iResolution = vec2(700, 800);
 //         // float iTime = 1.0;
-//         // vec2 iResolution = vec2(v_Params.x, v_Params.y);
-//         float iTime = v_Params.x;
+//         // vec2 iResolution = vec2(v_params.x, v_params.y);
+//         float iTime = v_params.x;
 
-//         float ypos   = iResolution.y - v_Pos.y;             // Transform y coord from top=0 to top=windowHeight
-//         float left   = (v_Pos.x - v_Wpos.x);                 // Left side of current geometry
-//         float right  = (v_Pos.x + v_Wpos.x);
-//         float top    = ypos + v_Wpos.y;
-//         float bottom = ypos - v_Wpos.y;
+//         float ypos   = iResolution.y - v_pos.y;             // Transform y coord from top=0 to top=windowHeight
+//         float left   = (v_pos.x - v_wpos.x);                 // Left side of current geometry
+//         float right  = (v_pos.x + v_wpos.x);
+//         float top    = ypos + v_wpos.y;
+//         float bottom = ypos - v_wpos.y;
 
 //         float dimf = 1.0;
 //         vec2 dim = vec2(700.*0.2*dimf, 800.0*0.4*dimf);
@@ -731,33 +731,33 @@
 
 
     //     in mediump vec4 v_Color;
-    //     in mediump vec2 v_Pos;
-    //     in mediump vec2 v_Wpos;
-    //     // in highp vec3 v_Params;           
-    //     in mediump float v_Params[5];           
+    //     in mediump vec2 v_pos;
+    //     in mediump vec2 v_wpos;
+    //     // in highp vec3 v_params;           
+    //     in mediump float v_params[5];           
 
     //     out vec4 FragColor;
 
     //     void main()
     //     {
-    //         float xdir = v_Params[0];
-    //         float ydir = v_Params[1];
-    //         float time = v_Params[2];
-    //         vec2 mpos = vec2(v_Params[3], v_Params[4]); // Mouse x pos
-    //         float ypos   = 800. - v_Pos.y;             // Transform y coord from top=0 to top=windowHeight
-    //         float left   = (v_Pos.x - v_Wpos.x);                 // Left side of current geometry
-    //         float right  = (v_Pos.x + v_Wpos.x);
-    //         float top    = ypos + v_Wpos.y;
-    //         float bottom = ypos - v_Wpos.y;
+    //         float xdir = v_params[0];
+    //         float ydir = v_params[1];
+    //         float time = v_params[2];
+    //         vec2 mpos = vec2(v_params[3], v_params[4]); // Mouse x pos
+    //         float ypos   = 800. - v_pos.y;             // Transform y coord from top=0 to top=windowHeight
+    //         float left   = (v_pos.x - v_wpos.x);                 // Left side of current geometry
+    //         float right  = (v_pos.x + v_wpos.x);
+    //         float top    = ypos + v_wpos.y;
+    //         float bottom = ypos - v_wpos.y;
 
-    //         // vec2 localDim = abs(v_Pos);// * vec2(2.);
-    //         // vec2 localDim = vec2((v_Wpos.x-v_Pos.x), (v_Wpos.y-v_Pos.y));
-    //         // vec2 localDim = vec2((v_Pos.x-v_Wpos.x), (v_Pos.y+v_Wpos.y));
+    //         // vec2 localDim = abs(v_pos);// * vec2(2.);
+    //         // vec2 localDim = vec2((v_wpos.x-v_pos.x), (v_wpos.y-v_pos.y));
+    //         // vec2 localDim = vec2((v_pos.x-v_wpos.x), (v_pos.y+v_wpos.y));
     //         // vec2 localDim = vec2((right-left), (top-bottom));
 
     //         float dimf = 1.0;
     //         vec2 dim = vec2(700. * dimf, 800. * dimf);
-    //         // vec2 dim = vec2(v_Pos.x-v_Wpos.x*dimf, v_Pos.y+v_Wpos.y*dimf);
+    //         // vec2 dim = vec2(v_pos.x-v_wpos.x*dimf, v_pos.y+v_wpos.y*dimf);
 
     //         vec2 uv = gl_FragCoord.xy / dim;
     //         uv += vec2(-.5, .0); // center
@@ -864,27 +864,27 @@
 
 
 //     in mediump vec4 v_Color;
-//     in mediump vec2 v_Pos;
-//     in mediump vec2 v_Wpos;
-//     in mediump float v_Params[5];           
+//     in mediump vec2 v_pos;
+//     in mediump vec2 v_wpos;
+//     in mediump float v_params[5];           
 
 //     out vec4 FragColor;
 
-//     // float ypos   = 800. - v_Pos.y;              // Transform y coord from top=0 to top=windowHeight
-//     // float left   = (v_Pos.x - v_Wpos.x);        // Left side of current geometry
-//     // float right  = (v_Pos.x + v_Wpos.x);
-//     // float top    = ypos + v_Wpos.y;
-//     // float bottom = ypos - v_Wpos.y;
+//     // float ypos   = 800. - v_pos.y;              // Transform y coord from top=0 to top=windowHeight
+//     // float left   = (v_pos.x - v_wpos.x);        // Left side of current geometry
+//     // float right  = (v_pos.x + v_wpos.x);
+//     // float top    = ypos + v_wpos.y;
+//     // float bottom = ypos - v_wpos.y;
 
-//     // vec2 localDim = abs(v_Pos);// * vec2(2.);
-//     // vec2 localDim = vec2((v_Wpos.x-v_Pos.x), (v_Wpos.y-v_Pos.y));
-//     // vec2 localDim = vec2((v_Pos.x-v_Wpos.x), (v_Pos.y+v_Wpos.y));
+//     // vec2 localDim = abs(v_pos);// * vec2(2.);
+//     // vec2 localDim = vec2((v_wpos.x-v_pos.x), (v_wpos.y-v_pos.y));
+//     // vec2 localDim = vec2((v_pos.x-v_wpos.x), (v_pos.y+v_wpos.y));
 //     // vec2 localDim = vec2((right-left), (top-bottom));
 //     void main()
 //     {
-//         float xdir = v_Params[0];
-//         float ydir = v_Params[1];
-//         float time = v_Params[2];
+//         float xdir = v_params[0];
+//         float ydir = v_params[1];
+//         float time = v_params[2];
 
 //         float dimf = 1.0;
 //         vec2 dim = vec2(700. * dimf, 800. * dimf);
@@ -892,8 +892,8 @@
 //         vec2 uv = gl_FragCoord.xy / dim;
 //         uv += vec2(-.5, -.0); // 0 to 1
 
-//         // vec2 mpos = vec2(v_Params[3]/dim.x, 1.-(v_Params[4]/dim.y)-0.5); 
-//         vec2 mpos = vec2(v_Params[3]/dim.x-.5, 1.-(v_Params[4]/dim.y)); 
+//         // vec2 mpos = vec2(v_params[3]/dim.x, 1.-(v_params[4]/dim.y)-0.5); 
+//         vec2 mpos = vec2(v_params[3]/dim.x-.5, 1.-(v_params[4]/dim.y)); 
 //         // mpos = abs(mpos);
 
 //         vec2 q = uv * vec2(2.,2.);
@@ -985,24 +985,24 @@
 
 
     //     in mediump vec4 v_Color;
-    //     in mediump vec2 v_Pos;
-    //     in mediump vec2 v_Wpos;
-    //     in highp vec3 v_Params;           // [0]:WinWidth, [1]:WinHeight, [3]:Time
+    //     in mediump vec2 v_pos;
+    //     in mediump vec2 v_wpos;
+    //     in highp vec3 v_params;           // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
     //     out vec4 FragColor;
 
     //     void main()
     //     {
-    //         float iTime = v_Params.x;
-    //         // float ypos   = iResolution.y - v_Pos.y;             // Transform y coord from top=0 to top=windowHeight
-    //         // float left   = (v_Pos.x - v_Wpos.x);                 // Left side of current geometry
-    //         // float right  = (v_Pos.x + v_Wpos.x);
-    //         // float top    = ypos + v_Wpos.y;
-    //         // float bottom = ypos - v_Wpos.y;
+    //         float iTime = v_params.x;
+    //         // float ypos   = iResolution.y - v_pos.y;             // Transform y coord from top=0 to top=windowHeight
+    //         // float left   = (v_pos.x - v_wpos.x);                 // Left side of current geometry
+    //         // float right  = (v_pos.x + v_wpos.x);
+    //         // float top    = ypos + v_wpos.y;
+    //         // float bottom = ypos - v_wpos.y;
 
     //         float dimf = 1.6;
     //         vec2 dim = vec2(700. * 0.2 * dimf, 800. * 0.4 * dimf);
-    //         vec2 localDim = vec2(v_Pos.x-v_Wpos.x*dimf, v_Pos.y+v_Wpos.y*dimf);
+    //         vec2 localDim = vec2(v_pos.x-v_wpos.x*dimf, v_pos.y+v_wpos.y*dimf);
 
     //         vec2 uv = gl_FragCoord.xy / dim;
     //         vec2 q = uv;

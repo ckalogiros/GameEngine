@@ -25,6 +25,7 @@ const GL = {
 
 // SID: Shader Type ID, for creating different g_glPrograms with 
 // different vertex and fragment shaders bbbased uppon the input attribbutes, input uniforms and other properties.
+// Shader creation flags 
 const SID = {
 	ATTR:{
         COL4: 	               0x1,
@@ -62,6 +63,43 @@ const SID = {
     TEST_SHADER:                    0x400000000,
 	
 };
+// const SID = {
+// 	ATTR:{
+//         COL4: 	               0x1,
+//         POS2: 	               0x2,
+//         SCALE2:                0x4,
+//         TEX2: 	               0x8,
+//         WPOS_TIME4:            0x20,
+//         STYLE:                 0x40,
+//         TIME:                  0x80,
+//         SDF_PARAMS:            0x100,
+//         PARAMS1:               0x200,
+//     },
+// 	INDEXED:                    0x400,
+// 	TEXT_SDF:                   0x800,
+//     // FX
+//     FX:{
+//         FS_PARTICLES:               0x1000,
+//         FS_FIRE:                    0x2000,
+//         FS_EXPLOSION_CIRCLE:        0x4000,
+//         FS_EXPLOSION_SIMPLE:        0x8000,
+//         FS_VORONOI_EXPLOSION:       0x10000,
+//         FS_GRADIENT:                0x20000,
+//         FS_HIGH_TECH:               0x40000,
+//         FS_CRAMBLE:                 0x80000,
+//         FS_NOISE:                   0x100000,
+//         FS_V2DGFX:                  0x200000,
+//         FS_GLOW:                    0x400000,
+//         FS_TWIST:                   0x800000,
+//         FS_VORTEX:                  0x1000000,
+//         FS_VOLUMETRIC_EXPLOSION:    0x2000000,
+//         FS_SHADOW:                  0x4000000,
+//     },
+//     DEF2:                           0x20000000,
+//     DEF3:                           0x40000000,
+//     TEST_SHADER:                    0x400000000,
+	
+// };
 let TEST_SHADERS_PROG_IDX = INT_NULL;
 
 

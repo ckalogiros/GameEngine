@@ -104,10 +104,10 @@ export class VertexBuffer {
 			GlOps.VbSetAttribPos(this, start + shaderInfo.posOffset,
 				count, shaderInfo.attribsPerVertex - V_POS_COUNT, mesh.dim);
 		}
-		if (sid & SID.ATTR.SCALE2) { // Add Scale, if the program has such an attribute 
-			GlOps.VbSetAttribScale(this, start + shaderInfo.scaleOffset,
-				count, shaderInfo.attribsPerVertex - V_SCALE_COUNT, mesh.scale);
-		}
+		// if (sid & SID.ATTR.SCALE2) { // Add Scale, if the program has such an attribute 
+		// 	GlOps.VbSetAttribScale(this, start + shaderInfo.scaleOffset,
+		// 		count, shaderInfo.attribsPerVertex - V_SCALE_COUNT, mesh.scale);
+		// }
 		if (sid & SID.ATTR.TEX2) { // Add Texture, if the program has such an attribute 
 			GlOps.VbSetAttribTex(this, start + shaderInfo.texOffset,
 				count, shaderInfo.attribsPerVertex - V_TEX_COUNT, mesh.tex);

@@ -5,10 +5,10 @@ export const FS_EXPLOSION_CIRCLE = `#version 300 es
 
 precision mediump float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump vec2  v_Dim;
-in mediump float v_Time;
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump vec2  v_dim;
+in mediump float v_time;
 in mediump vec2  u_Res;
 
 out vec4 FragColor;
@@ -16,12 +16,12 @@ out vec4 FragColor;
 
 void main()
 {
-   float t = v_Time;
+   float t = v_time;
    if(t>=1.) return;
    vec2 res = u_Res;
    float ratio = res.y/res.x;
    res.x *= ratio;
-   vec2 uv = v_Dim/res*10.;
+   vec2 uv = v_dim/res*10.;
 
 
    vec3 color = vec3(.0);
@@ -36,7 +36,7 @@ void main()
     
    color = vec3(.2) / min(ring*.5, ex*1.5);
     
-   color = mix(color, v_Col.rgb, 1.-(t*.2));
+   color = mix(color, v_col.rgb, 1.-(t*.2));
 	
 	FragColor = vec4(color*d*(1.-t), d*(1.-t));
 	// FragColor = vec4(1.);
@@ -48,10 +48,10 @@ export const FS_EXPLOSION_SIMPLE = `#version 300 es
 
 precision mediump float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump vec2  v_Dim;
-in mediump float v_Time;
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump vec2  v_dim;
+in mediump float v_time;
 in mediump vec2  u_Res;
 
 out vec4 FragColor;
@@ -60,12 +60,12 @@ out vec4 FragColor;
 
 void main()
 {
-   float t = v_Time;
+   float t = v_time;
    if(t>=1.) return;
    vec2 res = u_Res;
    float ratio = res.y/res.x;
    res.x *= ratio;
-   vec2 uv = v_Dim/res*10.;
+   vec2 uv = v_dim/res*10.;
 
    vec3 color = vec3(.0);
 
@@ -81,7 +81,7 @@ void main()
    color = (vec3(.5) / c) * d*(1.-t);
    // color = (vec3(1.) / c) * d*(1.-t);
    
-   color *= v_Col.rgb;
+   color *= v_col.rgb;
     
    // color = min(color, vec3(.3));
    FragColor = vec4(color*(1.-t*.2), color*(1.-t*.2));
@@ -96,11 +96,11 @@ void main()
 
 // precision mediump float;
 
-// in mediump vec4  v_Col;
-// in mediump vec2  v_Wpos;
-// in mediump vec2  v_Dim;
-// in mediump float v_Time;
-// in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
+// in mediump vec4  v_col;
+// in mediump vec2  v_wpos;
+// in mediump vec2  v_dim;
+// in mediump float v_time;
+// in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
 
 // out vec4 FragColor;
 
@@ -114,12 +114,12 @@ void main()
 
 // void main()
 // {
-//     vec2 res = vec2(v_Params[0], v_Params[1]);
+//     vec2 res = vec2(v_params[0], v_params[1]);
 //     float ratio = res.y/res.x;
 //     res.x *= ratio;
-//     float t = v_Time;
+//     float t = v_time;
 
-//     vec2 uv = v_Dim/res*10.;
+//     vec2 uv = v_dim/res*10.;
 //    	vec3 color = vec3(.0);
 
 //     float d = 1.-smoothstep(.0, .9, length(vec2((uv.x), uv.y)));

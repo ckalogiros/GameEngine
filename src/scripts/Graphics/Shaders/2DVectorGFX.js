@@ -4,11 +4,11 @@ export const FS_V2DGFX = `#version 300 es
 
 precision mediump float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump vec2  v_Dim;
-in mediump vec3 v_Style;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump vec2  v_dim;
+in mediump vec3 v_style;
+in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
 
 out vec4 FragColor;
 
@@ -27,7 +27,7 @@ vec4 pos = vec4(0.,0.,0.,0.);
 // uniform float time;
 uniform vec2 mouse;
 uniform vec2 resolution;
-// #define iTime v_Params[2]
+// #define iTime v_params[2]
 
 #define iResolution resolution
 #define iMouse mouse
@@ -334,7 +334,7 @@ void paint(float t, vec2 res)
 
     // borderWidth = .000;
     // rotate(radians(t*6.0));
-    vec2 dim = vec2(v_Dim.x/res.x, v_Dim.y/res.y);
+    vec2 dim = vec2(v_dim.x/res.x, v_dim.y/res.y);
     // rounded_rectangle(dim, sin(t*.3)*.5+.4);
     rounded_rectangle(dim, roundness);
     
@@ -357,10 +357,10 @@ vec2 init (vec2 fragCoord, vec2 mouse, vec2 resolution)
 	AAINV = 1.0 / AA;
     
 
-    vec2 res = vec2(v_Params[0], v_Params[1]);              // Screen resolution
+    vec2 res = vec2(v_params[0], v_params[1]);              // Screen resolution
     res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
     vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
-    uv -= vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y));        // Transform to meshes local coord space 
+    uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
     vec2 m = mouse / res;
     pos.xy = uv;
 
@@ -391,14 +391,14 @@ vec2 init (vec2 fragCoord, vec2 mouse, vec2 resolution)
 
 void main() 
 {
-    float t = v_Params[2];
-    vec2 res = vec2(v_Params[0], v_Params[1]);
+    float t = v_params[2];
+    vec2 res = vec2(v_params[0], v_params[1]);
     float clarity = 1.8; // The greater, the less blured is the stroke 
     res = init(gl_FragCoord.xy*1., vec2(1.,1.), res*clarity);
 
-    roundness = v_Style.x* .008;
-    borderWidth = v_Style.y * 0.001;
-    borderFeather = v_Style.z * .001;
+    roundness = v_style.x* .008;
+    borderWidth = v_style.y * 0.001;
+    borderFeather = v_style.z * .001;
 
     paint(t, res);
 
@@ -416,11 +416,11 @@ void main()
 
 // precision mediump float;
 
-// in mediump vec4  v_Col;
-// in mediump vec2  v_Wpos;
-// in mediump vec2  v_Dim;
-// in mediump vec3 v_Style;
-// in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
+// in mediump vec4  v_col;
+// in mediump vec2  v_wpos;
+// in mediump vec2  v_dim;
+// in mediump vec3 v_style;
+// in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
 
 // out vec4 FragColor;
 
@@ -439,7 +439,7 @@ void main()
 // // uniform float time;
 // uniform vec2 mouse;
 // uniform vec2 resolution;
-// // #define iTime v_Params[2]
+// // #define iTime v_params[2]
 
 // #define iResolution resolution
 // #define iMouse mouse
@@ -746,7 +746,7 @@ void main()
 
 //     // borderWidth = .000;
 //     // rotate(radians(t*6.0));
-//     vec2 dim = vec2(v_Dim.x/res.x, v_Dim.y/res.y);
+//     vec2 dim = vec2(v_dim.x/res.x, v_dim.y/res.y);
 //     // rounded_rectangle(dim, sin(t*.3)*.5+.4);
 //     rounded_rectangle(dim, roundness);
     
@@ -769,10 +769,10 @@ void main()
 // 	AAINV = 1.0 / AA;
     
 
-//     vec2 res = vec2(v_Params[0], v_Params[1]);              // Screen resolution
+//     vec2 res = vec2(v_params[0], v_params[1]);              // Screen resolution
 //     res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
 //     vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
-//     uv -= vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y));        // Transform to meshes local coord space 
+//     uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
 //     vec2 m = mouse / res;
 //     pos.xy = uv;
 
@@ -803,14 +803,14 @@ void main()
 
 // void main() 
 // {
-//     float t = v_Params[2];
-//     vec2 res = vec2(v_Params[0], v_Params[1]);
+//     float t = v_params[2];
+//     vec2 res = vec2(v_params[0], v_params[1]);
 //     float clarity = 1.8; // The greater, the less blured is the stroke 
 //     res = init(gl_FragCoord.xy*1., vec2(1.,1.), res*clarity);
 
-//     roundness = v_Style.x* .008;
-//     borderWidth = v_Style.y * 0.001;
-//     borderFeather = v_Style.z * .001;
+//     roundness = v_style.x* .008;
+//     borderWidth = v_style.y * 0.001;
+//     borderFeather = v_style.z * .001;
 
 //     paint(t, res);
 

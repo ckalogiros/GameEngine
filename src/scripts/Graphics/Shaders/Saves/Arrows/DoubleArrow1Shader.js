@@ -6,12 +6,12 @@ precision highp float;
 out vec4 FragColor;
 
 
-in mediump vec4 v_Col;
-in mediump vec2 v_Dim;
-in mediump vec2 v_Wpos;
+in mediump vec4 v_col;
+in mediump vec2 v_dim;
+in mediump vec2 v_wpos;
 in mediump vec2 v_Scale;
-in mediump vec3 v_Style;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
+in mediump vec3 v_style;
+in mediump float v_params[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 
 vec4 pos = vec4(.5, .5, .0, .0);
@@ -37,14 +37,14 @@ vec2 rounded_rectangle(vec2 s, float r, float bw) {
 
 void main(void) 
 {
-   float t = v_Params[2];
-   float uRadius = v_Style.x * .008;                    // Radius(From 0.01 to 0.35 good values) for rounding corners
-   float borderWidth = v_Style.y * 0.001;                  // Border Width. It is 0.001 for every pixel
-   float feather = v_Style.z;         // Border Feather Distance
+   float t = v_params[2];
+   float uRadius = v_style.x * .008;                    // Radius(From 0.01 to 0.35 good values) for rounding corners
+   float borderWidth = v_style.y * 0.001;                  // Border Width. It is 0.001 for every pixel
+   float feather = v_style.z;         // Border Feather Distance
    
    
 
-   vec2 res = vec2(v_Params[0], v_Params[1]);
+   vec2 res = vec2(v_params[0], v_params[1]);
    float clarity = 10.4; // From 0.3 to 1.2 good values 
    // float clarity = 1.; // From 0.3 to 1.2 good values 
    ScreenH = min(res.x, res.y)*clarity;
@@ -52,8 +52,8 @@ void main(void)
    
    res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
    vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
-   uv -= vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y));        // Transform to meshes local coord space 
-   vec2 dim = vec2(v_Dim.x/res.x, v_Dim.y/res.y)*v_Scale;
+   uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
+   vec2 dim = vec2(v_dim.x/res.x, v_dim.y/res.y)*v_Scale;
 
    pos.xy = uv;
 
@@ -74,7 +74,7 @@ void main(void)
    vec2 pa = pos.xy - p0;
    vec2 ba = p1 - p0;
    
-   vec4 src = v_Col;
+   vec4 src = v_col;
    // float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
    // vec4 src = mix(col1, col2, h);
    

@@ -4,10 +4,10 @@ export const TEMP = `#version 300 es
 
 precision mediump float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump vec2  v_Dim;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump vec2  v_dim;
+in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
 
 out vec4 FragColor;
 
@@ -104,12 +104,12 @@ float arrow( in vec2 p, in vec2 a, in vec2 b, float w1, float w2, float e )
 
 void main()
 {
-	float t = v_Params[2]*.1;
+	float t = v_params[2]*.1;
 
-	vec2 res = vec2(v_Params[0], v_Params[1]);              // Screen resolution
+	vec2 res = vec2(v_params[0], v_params[1]);              // Screen resolution
 	res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
 	vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
-	uv -= vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y));        // Transform to meshes local coord space 
+	uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
 	vec2 p = uv;
 	vec2 q = p;
 

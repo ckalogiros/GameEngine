@@ -20,12 +20,11 @@ const FS_DEFAULT2 = `#version 300 es
 precision highp float;
 out vec4 FragColor;
 
-in mediump vec4 v_Col;
-in mediump vec2 v_Dim;
-in mediump vec2 v_Wpos;
-in mediump vec2 v_Scale;
-in mediump vec3 v_Style;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
+in mediump vec4 v_col;
+in mediump vec2 v_dim;
+in mediump vec2 v_wpos;
+in mediump vec3 v_style;
+in mediump float v_params[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 vec4 pos = vec4(.5, .5, .0, .0);
 vec3 _color = vec3(0.0);
@@ -56,12 +55,12 @@ vec2 rounded_rectangle(vec2 s, float r, float bw) {
 
 void main(void) 
 {
-    float t = v_Params[2];
-    float uRadius = v_Style.x * .008;                    // Radius(From 0.01 to 0.35 good values) for rounding corners
-    float borderWidth = v_Style.y * 0.001;                  // Border Width. It is 0.001 for every pixel
-    float feather = v_Style.z;         // Border Feather Distance
+    float t = v_params[2];
+    float uRadius = v_style.x * .008;                    // Radius(From 0.01 to 0.35 good values) for rounding corners
+    float borderWidth = v_style.y * 0.001;                  // Border Width. It is 0.001 for every pixel
+    float feather = v_style.z;         // Border Feather Distance
 
-    vec2 res = vec2(v_Params[0], v_Params[1]);
+    vec2 res = vec2(v_params[0], v_params[1]);
     float clarity = 10.4; // From 0.3 to 1.2 good values 
     // float clarity = 1.; // From 0.3 to 1.2 good values 
 	ScreenH = min(res.x, res.y)*clarity;
@@ -69,8 +68,8 @@ void main(void)
     
     res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
     vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
-    uv -= vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y));        // Transform to meshes local coord space 
-    vec2 dim = vec2(v_Dim.x/res.x, v_Dim.y/res.y)*v_Scale;
+    uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
+    vec2 dim = vec2(v_dim.x/res.x, v_dim.y/res.y);
 
     pos.xy = uv;
 
@@ -92,7 +91,7 @@ void main(void)
     vec2 pa = pos.xy - p0;
     vec2 ba = p1 - p0;
     
-    vec4 src = v_Col;
+    vec4 src = v_col;
     
     // Calculate alpha (for rounding corners)
     float blend = 1.;
@@ -128,12 +127,12 @@ void main(void)
 // precision highp float;
 // out vec4 FragColor;
 
-// in mediump vec4  v_Col;
-// in mediump vec2  v_Wpos;
-// in mediump float v_Time;
-// in mediump vec2  v_Dim;
-// in mediump vec2  v_Res;
-// in mediump float v_Params[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump vec4  v_pos;
+// in mediump vec2  v_wpos;
+// in mediump float v_time;
+// in mediump vec2  v_dim;
+// in mediump vec2  v_res;
+// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
 
 
 // #define STEPS 250.0
@@ -251,7 +250,7 @@ void main(void)
 
 // vec4 render(vec2 fragCoord, float iTime)
 // {
-//     vec2 res = vec2(v_Params[0], v_Params[1]);
+//     vec2 res = vec2(v_params[0], v_params[1]);
 //     vec2 uv = ((fragCoord-0.5*res.xy)/res.y) * 2.2;
 //     vec3 col = vec3(0);
 //     uv.x-=0.025;
@@ -368,12 +367,12 @@ void main(void)
 
 // void main()
 // {
-//     // float iTime = v_Params[2];
-//     // float iTime = v_Time;
+//     // float iTime = v_params[2];
+//     // float iTime = v_time;
 //     float iTime = 1.2;
 //     // vec2 uv = gl_FragCoord.xy;
-//     vec2 uv = v_Res;
-//     // vec2 uv = v_Dim;
+//     vec2 uv = v_res;
+//     // vec2 uv = v_dim;
 //     float px = 1./AA, i, j; 
 //     vec4 cl2, cl;
 
@@ -410,13 +409,12 @@ precision highp float;
 out vec4 FragColor;
 
 
-in mediump vec4 v_Col;
-in mediump vec2 v_Dim;
-in mediump vec2 v_Wpos;
-in mediump vec2 v_Scale;
-in mediump vec3 v_Style;
-in mediump vec2 v_Res;
-// in mediump float v_Params[MAX_NUM_PARAMS_BUFFER]; 
+in mediump vec4 v_col;
+in mediump vec2 v_dim;
+in mediump vec2 v_wpos;
+in mediump vec3 v_style;
+in mediump vec2 v_res;
+// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
 
 float sdRoundBox( in vec2 p, in vec2 b, in vec4 r ) 
 {
@@ -429,12 +427,12 @@ float sdRoundBox( in vec2 p, in vec2 b, in vec4 r )
 void main( )
 {
     
-    vec2 ratio = v_Dim/v_Res;
-    vec2 res = v_Res;
+    vec2 ratio = v_dim/v_res;
+    vec2 res = v_res;
     // res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
     vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
-    uv -= vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y));        // Transform to meshes local coord space 
-    vec2 dim = vec2(v_Dim.x/res.x, v_Dim.y/res.y)*v_Scale;
+    uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
+    vec2 dim = vec2(v_dim.x/res.x, v_dim.y/res.y);
 
     vec2 p = uv;
     // p.x/=ratio.x;
@@ -480,45 +478,44 @@ precision highp float;
 out vec4 FragColor;
 
 
-in mediump vec4 v_Col;
-in mediump vec2 v_Dim;
-in mediump vec2 v_Wpos;
-in mediump float v_Time;
-in mediump vec2 v_Scale;
-in mediump vec3 v_Style;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
+in mediump vec4 v_col;
+in mediump vec2 v_dim;
+in mediump vec2 v_wpos;
+in mediump float v_time;
+in mediump vec3 v_style;
+in mediump float v_params[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 
 
 void main(void) 
 {
-    mediump float uRadius       = v_Style.x;                // Radius(in pixels) for rounding corners
-    mediump float borderWidth   = v_Style.y;                // Border Width
-    mediump float featherWidth  = v_Style.z;                // Border Feather Distance
+    mediump float uRadius       = v_style.x;                // Radius(in pixels) for rounding corners
+    mediump float borderWidth   = v_style.y;                // Border Width
+    mediump float featherWidth  = v_style.z;                // Border Feather Distance
 
-    float ypos   = v_Params[1] - v_Wpos.y;                  // Transform y coord from top=0 to top=windowHeight
-    float left   = v_Wpos.x - v_Dim.x * v_Scale.x;          // Left side of current geometry
-    float right  = v_Wpos.x + v_Dim.x * v_Scale.x;
-    float top    = ypos + v_Dim.y * v_Scale.x;
-    float bottom = ypos - v_Dim.y * v_Scale.x;
+    float ypos   = v_params[1] - v_wpos.y;                  // Transform y coord from top=0 to top=windowHeight
+    float left   = v_wpos.x - v_dim.x ;          // Left side of current geometry
+    float right  = v_wpos.x + v_dim.x;
+    float top    = ypos + v_dim.y;
+    float bottom = ypos - v_dim.y;
 
     
-    vec2 res = vec2(v_Params[0], v_Params[1]);              // Screen resolution
+    vec2 res = vec2(v_params[0], v_params[1]);              // Screen resolution
     res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
     vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
-    uv -= vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y));        // Transform to meshes local coord space 
+    uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
 
 
 
     float decr = .5;
-    vec3 bg = mix(v_Col.rgb, v_Col.rgb*decr, length(uv));
-    FragColor = vec4(bg, v_Col.a);
+    vec3 bg = mix(v_col.rgb, v_col.rgb*decr, length(uv));
+    FragColor = vec4(bg, v_col.a);
     FragColor.rgb *= FragColor.a;                           // Premultiply alpha
 
     vec4 borderColor = vec4(bg, 1.);
     if(borderWidth > 0.0)
-        borderColor *= 1.2;    // Just a bit lighter color from v_Col
-        // borderColor += vec4(0.233, 0.233, 0.233, 0.233);    // Just a bit lighter color from v_Col
+        borderColor *= 1.2;    // Just a bit lighter color from v_col
+        // borderColor += vec4(0.233, 0.233, 0.233, 0.233);    // Just a bit lighter color from v_col
 
     float pixelXpos = gl_FragCoord.x;
     float pixelYpos = gl_FragCoord.y;
@@ -528,7 +525,7 @@ void main(void)
     /* * * * * * * * * * * * * * * * * * * * * * * BORDER */
 
     // LEFT BORDER
-    if(v_Col.a > 0.0)
+    if(v_col.a > 0.0)
     if(pixelXpos < left+borderWidth+featherWidth )
     {
         FragColor = borderColor;
@@ -558,7 +555,7 @@ void main(void)
         }
     }
 
-    if(v_Col.a > 0.0)
+    if(v_col.a > 0.0)
     // TOP BORDER
     if(pixelYpos > top-borderWidth-featherWidth) 
         // && pixelXpos > left+borderWidth && pixelXpos < right-borderWidth) 
@@ -600,8 +597,8 @@ void main(void)
     float check = 0.0;
     vec2 pixelXYpos = gl_FragCoord.xy;
     // // Create Round Corners (for LEFT-UP corner)
-    if(v_Col.a > 0.0)
-    if(pixelXpos < v_Wpos.x && pixelYpos > ypos && pixelXpos < left+uRadius+featherWidth && pixelYpos > top-uRadius-featherWidth) 
+    if(v_col.a > 0.0)
+    if(pixelXpos < v_wpos.x && pixelYpos > ypos && pixelXpos < left+uRadius+featherWidth && pixelYpos > top-uRadius-featherWidth) 
     {
         pixelDist = length(pixelXYpos - vec2(left+uRadius+featherWidth, top-uRadius-featherWidth));        // Calc the distance of curr pixel pos to the meshe's corner pos
         if(pixelDist > uRadius)                                                                            // Set feathered outer border side
@@ -615,7 +612,7 @@ void main(void)
             FragColor = borderColor;
     }
     // Create Round Corners (for RIGTH-UP corner)
-    else if( pixelXpos > v_Wpos.x && pixelYpos > ypos && pixelXpos > right-uRadius-featherWidth && pixelYpos > top-uRadius-featherWidth) 
+    else if( pixelXpos > v_wpos.x && pixelYpos > ypos && pixelXpos > right-uRadius-featherWidth && pixelYpos > top-uRadius-featherWidth) 
     {
         pixelDist = length(pixelXYpos - vec2(right-uRadius-featherWidth, top-uRadius-featherWidth));        // Calc the distance of curr pixel pos to the meshe's corner pos
         if(pixelDist > uRadius)                                                                             // Set feathered outer border side
@@ -630,7 +627,7 @@ void main(void)
 
     }
     // Create Round Corners (for RIGHT-DOWN corner)
-    else if(pixelXpos > v_Wpos.x && pixelYpos < ypos && pixelXpos > right-uRadius-featherWidth && pixelYpos < bottom+uRadius+featherWidth) 
+    else if(pixelXpos > v_wpos.x && pixelYpos < ypos && pixelXpos > right-uRadius-featherWidth && pixelYpos < bottom+uRadius+featherWidth) 
     {
         pixelDist = length(pixelXYpos - vec2(right-uRadius-featherWidth, bottom+uRadius+featherWidth));         // Calc the distance of curr pixel pos to the meshe's corner pos
         if(pixelDist > uRadius)                                                                                 // Set feathered outer border side
@@ -644,7 +641,7 @@ void main(void)
             FragColor = borderColor;
     }
     // Create Round Corners (for LEFT-DOWN corner)
-    else if(pixelXpos < v_Wpos.x && pixelYpos < ypos && pixelXpos < left+uRadius+featherWidth && pixelYpos < bottom+uRadius+featherWidth) 
+    else if(pixelXpos < v_wpos.x && pixelYpos < ypos && pixelXpos < left+uRadius+featherWidth && pixelYpos < bottom+uRadius+featherWidth) 
     {
         pixelDist = length(pixelXYpos - vec2(left+uRadius+featherWidth, bottom+uRadius+featherWidth));          // Calc the distance of curr pixel pos to the meshe's corner pos
         if(pixelDist > uRadius)                                                                                 // Set feathered outer border side
@@ -670,21 +667,21 @@ const FS_GRADIENT = `#version 300 es
 
 precision mediump float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump vec2  v_Dim;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump vec2  v_dim;
+in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
 
 out vec4 FragColor;
 
 void main()
 {
-    float t = v_Params[2]*.1;
+    float t = v_params[2]*.1;
     
-    vec2 dim = v_Dim;                                       // Mesh Dimentions
+    vec2 dim = v_dim;                                       // Mesh Dimentions
     dim /= (min(dim.x, dim.y) / max(dim.x, dim.y))*1.5;     // Mesh Dimentions
     vec2 uv = (gl_FragCoord.xy)/dim;                        // Transform to 0.0-1.0 coord space
-    uv -= v_Wpos/dim;                                       // Transform to meshes local coord space 
+    uv -= v_wpos/dim;                                       // Transform to meshes local coord space 
     // uv*=sin(t*.5)-1.4;
 
     vec3 col = mix(vec3(0.345, 0.780, 0.988), vec3(0.361, 0.020, 0.839), length(uv));
@@ -696,9 +693,9 @@ const FS_DEFAULT_TEXTURE_SDF = `#version 300 es
     
 precision highp float;
 
-in highp vec4 v_Col;
-in highp vec2 v_TexCoord;
-in highp vec2 v_SdfParams;       // [0]:SdfInner, [1]:SdfOuter
+in highp vec4 v_col;
+in highp vec2 v_tex_coord;
+in highp vec2 v_sdf;       // [0]:SdfInner, [1]:SdfOuter
 
 uniform sampler2D u_Sampler0;
 
@@ -706,13 +703,13 @@ out vec4 FragColor;
 
 void main(void) {
     
-    float inner = v_SdfParams.x;
-    float outer = v_SdfParams.y;
+    float inner = v_sdf.x;
+    float outer = v_sdf.y;
         
-    float b = max(texture(u_Sampler0, v_TexCoord).r, max(texture(u_Sampler0, v_TexCoord).g, texture(u_Sampler0, v_TexCoord).b));
+    float b = max(texture(u_Sampler0, v_tex_coord).r, max(texture(u_Sampler0, v_tex_coord).g, texture(u_Sampler0, v_tex_coord).b));
     float pixelDist = 1. - b;
     float alpha = 1. - smoothstep(inner, inner + outer, pixelDist);
-    FragColor = v_Col * vec4(alpha);
+    FragColor = v_col * vec4(alpha);
     // FragColor = vec4(1);
 
 }
@@ -722,17 +719,17 @@ const FS_DEFAULT_TEXTURE = `#version 300 es
 
 precision mediump float;
 
-in mediump vec4 v_Col;
-in mediump vec2 v_TexCoord;
+in mediump vec4 v_col;
+in mediump vec2 v_tex_coord;
 
 uniform sampler2D u_Sampler0;
 out vec4 FragColor;
 
 void main(void) {
 
-    vec4 col = texture( u_Sampler0, v_TexCoord) * v_Col;
-    FragColor = col * texture(u_Sampler0, v_TexCoord).a;
-    // if(texture(u_Sampler0, v_TexCoord).x < 0.004)
+    vec4 col = texture( u_Sampler0, v_tex_coord) * v_col;
+    FragColor = col * texture(u_Sampler0, v_tex_coord).a;
+    // if(texture(u_Sampler0, v_tex_coord).x < 0.004)
     // FragColor = vec4(1.);
     // FragColor.rgb *= alpha;
 }
@@ -792,24 +789,24 @@ float sdUnevenCapsule( vec2 p, float r1, float r2, float h )
     return dot(p, vec2(a,b) ) - r1;
 }
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump float v_Time;
-in mediump vec2  v_Dim;
-in mediump vec2 v_Res;
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump float v_time;
+in mediump vec2  v_dim;
+in mediump vec2 v_res;
 
 out vec4 FragColor;
 
 void main(void)
 {
-    vec2 res = v_Res;
-    float time  = v_Time;
+    vec2 res = v_res;
+    float time  = v_time;
     float speed = 10.;
-    vec2 dim = v_Dim/res;
+    vec2 dim = v_dim/res;
     float ratio = res.x/res.y;
     res.x /= ratio;
     vec2 uv  = vec2(gl_FragCoord.x / res.x, gl_FragCoord.y / (res.y));
-    vec2 pos = vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y)); 
+    vec2 pos = vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y)); 
 
 	vec2 q = uv-pos;
     q.y*=-1.;
@@ -872,27 +869,27 @@ void main(void)
 //     return f;
 // }
 
-// in mediump vec4  v_Col;
-// in mediump vec2  v_Wpos;
-// in mediump float v_Time;
-// in mediump vec2  v_Dim;
-// in mediump vec2 v_Res;
+// in mediump vec4  v_pos;
+// in mediump vec2  v_wpos;
+// in mediump float v_time;
+// in mediump vec2  v_dim;
+// in mediump vec2 v_res;
 
 // out vec4 FragColor;
 
 // void main(void)
 // {
-//     // float time  = fract(v_Time);
-//     float time  = (sin(v_Time)*.5+.3);
+//     // float time  = fract(v_time);
+//     float time  = (sin(v_time)*.5+.3);
 //     // float time  = .6;
 //     float revT  = 1.-time; // Reverse time to be from 1 to 0
-//     vec2 res = v_Res;
+//     vec2 res = v_res;
 //     float speed = 10.;
-//     vec2 dim = v_Dim/res;
+//     vec2 dim = v_dim/res;
 //     float ratio = res.x/res.y;
 //     res.x /= ratio;
 //     vec2 uv  = vec2(gl_FragCoord.x / res.x, gl_FragCoord.y / (res.y));
-//     vec2 pos = vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y)); 
+//     vec2 pos = vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y)); 
     
 //     float d  = 1.- smoothstep(.0, .2, length(uv-pos));
 //     // float d  = 1.- smoothstep(6.*dim.x*revT, 9.3*dim.x*revT, (length(uv-pos)*10.));
@@ -908,8 +905,8 @@ void main(void)
 //     complexity *= length(uv-pos)*10.; 
 
 //     float c1 = FS_NOISE*d+1.;
-//     vec3 col = v_Col.rgb*c1*c1*c1;
-//     // vec3 col = v_Col.rgb;
+//     vec3 col = v_pos.rgb*c1*c1*c1;
+//     // vec3 col = v_pos.rgb;
 //     // vec3 col = vec3(c1*c1*c1);
 //     // col *= pow(shape, 1.); // Longer tail = smaller float
     
@@ -967,28 +964,28 @@ float fbm(vec2 uv)
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define MinVec3F(a, f)  vec3(MIN(a.x, f), MIN(a.y, f), MIN(a.z, f))
 
-in mediump vec4  v_Col;
-in mediump vec4  v_Params1;
-in mediump vec2  v_Wpos;
-in mediump float v_Time;
-in mediump vec2  v_Dim;
+in mediump vec4  v_col;
+in mediump vec4  v_params1;
+in mediump vec2  v_wpos;
+in mediump float v_time;
+in mediump vec2  v_dim;
 in mediump vec2  u_Res;
-// in mediump float v_Params[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
 
 out vec4 FragColor;
 
 void main(void)
 {
-    vec4 color = v_Col;
-    float time  = v_Time;
+    vec4 color = v_col;
+    float time  = v_time;
     float revT  = 1.-time; // Reverse time to be from 1 to 0
     vec2 res = u_Res;
-    float speed = v_Params1.x;
+    float speed = v_params1.x;
     
     float ratio = res.x/res.y;
     res.x /= ratio;
     vec2 uv  = vec2(gl_FragCoord.xy / res);
-    vec2 pos = vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y)); 
+    vec2 pos = vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y)); 
     
     float d = 1.- smoothstep(.0, .3, (length(uv-pos)*10.));
     float shape = d * min(2.9, speed*.5);
@@ -1023,11 +1020,11 @@ const FS_VORONOI_EXPLOSION = `#version 300 es
 #define MAX_NUM_PARAMS_BUFFER 5
 precision highp float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump float v_Time;
-in mediump vec2  v_Dim;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER]; 
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump float v_time;
+in mediump vec2  v_dim;
+in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
 
 out vec4 FragColor;
 
@@ -1181,12 +1178,12 @@ vec3 voronoi( vec3 x )
 
 void main()
 {
-    float t = v_Params[2]*.1;
+    float t = v_params[2]*.1;
 
-    vec2 res = vec2(v_Params[0], v_Params[1]);              // Screen resolution
+    vec2 res = vec2(v_params[0], v_params[1]);              // Screen resolution
     res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
     vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
-    uv -= vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y));        // Transform to meshes local coord space 
+    uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
     
     float z = abs(sin(t*1.7))+.5;
     // uv *= z;
@@ -1268,11 +1265,11 @@ const FS_CRAMBLE = `#version 300 es
 precision highp float;
 out vec4 FragColor;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump float v_Time;
-in mediump vec2  v_Dim;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER]; 
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump float v_time;
+in mediump vec2  v_dim;
+in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
 
 
 #define STEPS 250.0
@@ -1390,7 +1387,7 @@ vec3 norm(vec3 p, float iTime)
 
 vec4 render(vec2 fragCoord, float iTime)
 {
-    vec2 res = vec2(v_Params[0], v_Params[1]);
+    vec2 res = vec2(v_params[0], v_params[1]);
     vec2 uv = ((fragCoord-0.5*res.xy)/res.y) * 2.2;
     vec3 col = vec3(0);
     uv.x-=0.025;
@@ -1507,7 +1504,7 @@ vec4 render(vec2 fragCoord, float iTime)
 
 void main()
 {
-    float iTime = v_Params[2];
+    float iTime = v_params[2];
     vec2 uv = gl_FragCoord.xy;
     float px = 1./AA, i, j; 
     vec4 cl2, cl;
@@ -1586,11 +1583,11 @@ export function FragmentShaderChoose(sid) {
 // precision highp float;
 // out vec4 FragColor;
 
-// in mediump vec4  v_Col;
-// in mediump vec2  v_Wpos;
-// in mediump float v_Time;
-// in mediump vec2  v_Dim;
-// in mediump float v_Params[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump vec4  v_pos;
+// in mediump vec2  v_wpos;
+// in mediump float v_time;
+// in mediump vec2  v_dim;
+// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
 
 // float dbgT = 0.; // A global debug time
 
@@ -1728,17 +1725,17 @@ export function FragmentShaderChoose(sid) {
 //         col = bg;
 //     }
 
-//     return vec4(col, v_Col.a);  
+//     return vec4(col, v_pos.a);  
 // }
 
 
 
 // void main()
 // {
-//     float iTime = v_Params[2];
+//     float iTime = v_params[2];
 //     dbgT = cos(iTime*1.)*2.;
-//     vec2 res = vec2(v_Params[0], v_Params[1]);
-//     vec2 local = vec2(v_Wpos.x, (res.y-v_Wpos.y)); // Find local mesh coords(and reverse y)
+//     vec2 res = vec2(v_params[0], v_params[1]);
+//     vec2 local = vec2(v_wpos.x, (res.y-v_wpos.y)); // Find local mesh coords(and reverse y)
 //     vec2 uv = (gl_FragCoord.xy)/local; // Transform to 0.0-1.0 coord system
 //     uv -= 1.;
 
@@ -1777,11 +1774,11 @@ export function FragmentShaderChoose(sid) {
 // precision highp float;
 // out vec4 FragColor;
 
-// in mediump vec4  v_Col;
-// in mediump vec2  v_Wpos;
-// in mediump float v_Time;
-// in mediump vec2  v_Dim;
-// in mediump float v_Params[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump vec4  v_pos;
+// in mediump vec2  v_wpos;
+// in mediump float v_time;
+// in mediump vec2  v_dim;
+// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
 
 // float dbgT = 0.; // A global debug time
 
@@ -1825,10 +1822,10 @@ export function FragmentShaderChoose(sid) {
 // {
 //     vec2 a = vec2(1);
 //     float len = 5.;
-//     // float dimx = v_Dim.x*.05;
-//     // float dimy = v_Dim.y*.03;
-//     float dimx = v_Dim.x*.06;
-//     float dimy = v_Dim.y*.04;
+//     // float dimx = v_dim.x*.05;
+//     // float dimy = v_dim.y*.03;
+//     float dimx = v_dim.x*.06;
+//     float dimy = v_dim.y*.04;
 //     a.x = box(p, vec3(dimx, 1., dimy));
 
 //     p.yz *= rot(.5);         // 0.5 is the middle rot for y.yz 
@@ -1913,7 +1910,7 @@ export function FragmentShaderChoose(sid) {
 //         // float spec = pow(max(0.0 , dot(r, ld)), 13.0);
 
 //         // Color the surface
-//         if(rlg<0.001){ col = v_Col.rgb; }
+//         if(rlg<0.001){ col = v_pos.rgb; }
 //         //Color the inside of the crumbled bits 
 //         else { col = vec3(0.2-shad); }
 //         col = pow(col, vec3(0.55)); // a bit of gamma correction
@@ -1934,13 +1931,13 @@ export function FragmentShaderChoose(sid) {
 
 // void main()
 // {
-//     float iTime = v_Params[2];
+//     float iTime = v_params[2];
 //     dbgT = cos(iTime*1.)*2.;
-//     vec2 res = vec2(v_Params[0], v_Params[1]);
+//     vec2 res = vec2(v_params[0], v_params[1]);
 
 
 //     vec2 uv = (gl_FragCoord.xy)/res; // Transform to 0.0-1.0 coord system
-//     vec2 pos = vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y)); 
+//     vec2 pos = vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y)); 
 //     uv -= pos;
 
 //     FragColor = render(uv, iTime);
@@ -1981,11 +1978,11 @@ export function FragmentShaderChoose(sid) {
 // precision highp float;
 // out vec4 FragColor;
 
-// in mediump vec4  v_Col;
-// in mediump vec2  v_Wpos;
-// in mediump float v_Time;
-// in mediump vec2  v_Dim;
-// in mediump float v_Params[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump vec4  v_pos;
+// in mediump vec2  v_wpos;
+// in mediump float v_time;
+// in mediump vec2  v_dim;
+// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
 
 // float dbgT = 0.; // A global debug time
 
@@ -2023,10 +2020,10 @@ export function FragmentShaderChoose(sid) {
 // {
 //     vec2 a = vec2(1);
 //     float len = 5.;
-//     // float dimx = v_Dim.x*.05;
-//     // float dimy = v_Dim.y*.03;
-//     float dimx = v_Dim.x;
-//     float dimy = v_Dim.y;
+//     // float dimx = v_dim.x*.05;
+//     // float dimy = v_dim.y*.03;
+//     float dimx = v_dim.x;
+//     float dimy = v_dim.y;
 //     a.x = box(p, vec3(dimx, 1., dimy));
 
 //     // p.yz *= rot(.5);         // 0.5 is the middle rot for y.yz 
@@ -2104,7 +2101,7 @@ export function FragmentShaderChoose(sid) {
 //     if(d.y>0.0) 
 //     {   
 //         // Color the surface
-//         if(rlg<0.001){ col = v_Col.rgb; }
+//         if(rlg<0.001){ col = v_pos.rgb; }
 //         //Color the inside of the crumbled bits 
 //         else { col = vec3(0.4-shad); }
 //         // col = pow(col, vec3(0.55)); // a bit of gamma correction
@@ -2121,12 +2118,12 @@ export function FragmentShaderChoose(sid) {
 
 // void main()
 // {
-//     float iTime = v_Params[2];
+//     float iTime = v_params[2];
 //     dbgT = cos(iTime*1.)*2.;
-//     vec2 res = vec2(v_Params[0], v_Params[1]);
+//     vec2 res = vec2(v_params[0], v_params[1]);
 
 //     vec2 uv = (gl_FragCoord.xy)/res; // Transform to 0.0-1.0 coord system
-//     vec2 pos = vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y)); 
+//     vec2 pos = vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y)); 
 //     uv -= pos;
 
 //     FragColor = render(uv, iTime);
@@ -2163,11 +2160,11 @@ export function FragmentShaderChoose(sid) {
 // precision highp float;
 // out vec4 FragColor;
 
-// in mediump vec4  v_Col;
-// in mediump vec2  v_Wpos;
-// in mediump float v_Time;
-// in mediump vec2  v_Dim;
-// in mediump float v_Params[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump vec4  v_pos;
+// in mediump vec2  v_wpos;
+// in mediump float v_time;
+// in mediump vec2  v_dim;
+// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
 
 // vec2 vor(vec2 v, vec3 p, vec3 s)
 // {
@@ -2301,24 +2298,24 @@ export function FragmentShaderChoose(sid) {
 //         col = bg;
 //     }
 
-//     return vec4(col, v_Col.a);  
+//     return vec4(col, v_pos.a);  
 // }
 
 
 
 // void main()
 // {
-//     float iTime = v_Params[2];
-//     vec2 res = vec2(v_Params[0], v_Params[1]);
+//     float iTime = v_params[2];
+//     vec2 res = vec2(v_params[0], v_params[1]);
 //     // vec2 uv = ((gl_FragCoord.xy-0.5*res.xy)/res.y) * 2.2;
 //     // vec2 uv = ((gl_FragCoord.xy-0.5*res.xy)/res.y);
 
-//     vec2 local = vec2(v_Wpos.x, (res.y-v_Wpos.y)); // Find local mesh coords(and reverse y)
+//     vec2 local = vec2(v_wpos.x, (res.y-v_wpos.y)); // Find local mesh coords(and reverse y)
 //     vec2 uv = (gl_FragCoord.xy)/local; // Transform to 0.0-1.0 coord system
 //     // vec2 uv = gl_FragCoord.xy/res; // Transform to 0.0-1.0 coord system
 //     uv.x -= .5;
 //     uv.y -= .5;
-//     // uv *= 1.-(gl_FragCoord.xy/v_Dim);
+//     // uv *= 1.-(gl_FragCoord.xy/v_dim);
 
 //     FragColor = render(uv, iTime);
 // }

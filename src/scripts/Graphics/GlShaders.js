@@ -93,19 +93,19 @@ export function GlCreateShaderInfo(gl, program, sid) {
 		// must match the exact name in the vertex shader code.
 		attributes: {
 
-			colLoc: gl.getAttribLocation(program, 'a_Col'),	// Color attrib	
-			wposTimeLoc: gl.getAttribLocation(program, 'a_WposTime'),	// World Position + Time attrib	 		
-			params1Loc: gl.getAttribLocation(program, 'a_Params1'),	// A 4 component vector to pass any parameter to a vertex as an attribute 	 		
-			posLoc: gl.getAttribLocation(program, 'a_Pos'),	// Vertex Position attrib	 
-			scaleLoc: gl.getAttribLocation(program, 'a_Scale'),	// Scale attrib	 		
-			texLoc: gl.getAttribLocation(program, 'a_Tex'),	// texture Coords attrib	 		 		
-			sdfParamsLoc: gl.getAttribLocation(program, 'a_Sdf'),	// Sdf Params attrib 	 		 		
-			styleLoc: gl.getAttribLocation(program, 'a_Style'),	// Styyle Params attrib 	 		
+			colLoc: gl.getAttribLocation(program, 'a_col'),	// Color attrib	
+			wposTimeLoc: gl.getAttribLocation(program, 'a_wpos_time'),	// World Position + Time attrib	 		
+			params1Loc: gl.getAttribLocation(program, 'a_params1'),	// A 4 component vector to pass any parameter to a vertex as an attribute 	 		
+			posLoc: gl.getAttribLocation(program, 'a_pos'),	// Vertex Position attrib	 
+			scaleLoc: gl.getAttribLocation(program, 'a_scale'),	// Scale attrib	 		
+			texLoc: gl.getAttribLocation(program, 'a_tex'),	// texture Coords attrib	 		 		
+			sdfParamsLoc: gl.getAttribLocation(program, 'a_sdf'),	// Sdf Params attrib 	 		 		
+			styleLoc: gl.getAttribLocation(program, 'a_style'),	// Styyle Params attrib 	 		
 		},
 		uniforms: {
 
 			// Static uniforms
-			orthoProj: gl.getUniformLocation(program, 'u_OrthoProj'), 	// Orthographic Projection Matrix4 	
+			orthoProj: gl.getUniformLocation(program, 'u_ortho_proj'), 	// Orthographic Projection Matrix4 	
 			sampler: gl.getUniformLocation(program, 'u_Sampler0'),	// Sampler for texture units 	
 
 			/**
@@ -113,7 +113,7 @@ export function GlCreateShaderInfo(gl, program, sid) {
 				* Uniforms paramsBuffer is an array of floats to be used as a 
 			 * buffer to pass any kind of float values to the shaders.
 				*/
-			paramsBufferLoc: gl.getUniformLocation(program, 'u_Params'),	// The location of the uniform
+			paramsBufferLoc: gl.getUniformLocation(program, 'u_params'),	// The location of the uniform
 			paramsBuffer: null, // The actual array
 		},
 

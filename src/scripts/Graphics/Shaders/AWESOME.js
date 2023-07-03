@@ -4,11 +4,11 @@ export const FS_AWSOME = `#version 300 es
 
 precision mediump float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump vec2  v_Dim;
-in mediump float v_Time;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump vec2  v_dim;
+in mediump float v_time;
+in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
 // float time = 23.;
 
 
@@ -166,8 +166,8 @@ void main()
    float time = 11.8;
    float a=time*94.24777960;
    vec2 pa=.15*vec2(sin(a),cos(a));
-   // vec2 res = vec2(v_Params[0], v_Params[1]); 
-   vec2 res = v_Dim; 
+   // vec2 res = vec2(v_params[0], v_params[1]); 
+   vec2 res = v_dim; 
    float asp=res.x/res.y;
    vec2 p=(pa+gl_FragCoord.xy)/res.xy-0.5; 
    main_(time);

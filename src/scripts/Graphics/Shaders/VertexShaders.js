@@ -84,55 +84,43 @@ import { VS_VORTEX2 } from "./VortexShader.js";
 // }
 
 /**
- * u_Params[0] = Window Width
- * u_Params[1] = Window Height
+ * u_params[0] = Window Width
+ * u_params[1] = Window Height
  */
 const VS_DEFAULT = `#version 300 es
 
 #define MAX_NUM_PARAMS_BUFFER 5
 
+in mediump vec4 a_col;
+in mediump vec4 a_wpos_time;
+in mediump vec4 a_params1;
+in mediump vec2 a_pos;
+in mediump vec3 a_style;
 
-// layout (location = 0) in mediump vec4 a_Col;
-// layout (location = 1) in mediump vec4 a_WposTime;
-// layout (location = 2) in mediump vec4 a_Params1;
-// layout (location = 3) in mediump vec2 a_Pos;
-// layout (location = 4) in mediump vec2 a_Scale;
-// layout (location = 5) in mediump vec3 a_Style;
+uniform mat4  u_ortho_proj;
+uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];                  // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
-in mediump vec4 a_WposTime;
-in mediump vec4 a_Params1;
-in mediump vec2 a_Pos;
-in mediump vec2 a_Scale;
-in mediump vec3 a_Style;
-in mediump vec4 a_Col;
-
-uniform mat4  u_OrthoProj;
-uniform mediump float u_Params[MAX_NUM_PARAMS_BUFFER];                  // [0]:WinWidth, [1]:WinHeight, [3]:Time
-
-out mediump vec4 v_Col; 
-out mediump vec2 v_Dim; 
-out mediump vec2 v_Wpos; 
-out mediump float v_Time; 
-out mediump vec2 v_Scale; 
-out mediump vec3 v_Style; 
-out mediump vec2 v_Res; 
-out mediump vec4 v_Param1; 
-out mediump float v_Params[MAX_NUM_PARAMS_BUFFER];                   
+out mediump vec4 v_col; 
+out mediump vec2 v_dim; 
+out mediump vec2 v_wpos; 
+out mediump float v_time; 
+out mediump vec3 v_style; 
+out mediump vec2 v_res; 
+out mediump vec4 v_param1; 
+out mediump float v_params[MAX_NUM_PARAMS_BUFFER];                   
     
 void main(void) {
     
-    vec2 scaled = a_Pos  * a_Scale;
-    gl_Position = u_OrthoProj * vec4(scaled.x + a_WposTime.x, scaled.y + a_WposTime.y, a_WposTime.z, 1.0);
+    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
     
-    v_Col       = a_Col;
-    v_Dim       = abs(a_Pos)* a_Scale;
-    v_Wpos      = a_WposTime.xy;
-    v_Time      = a_WposTime.w;
-    v_Scale     = a_Scale;
-    v_Style     = a_Style * v_Scale.x; 
-    v_Res       = vec2(u_Params[0], u_Params[1]);
-    v_Param1    = a_Params1;
-    v_Params    = u_Params;
+    v_col       = a_col;
+    v_dim       = abs(a_pos);
+    v_wpos      = a_wpos_time.xy;
+    v_time      = a_wpos_time.w;
+    v_style     = a_style; 
+    v_res       = vec2(u_params[0], u_params[1]);
+    v_param1    = a_params1;
+    v_params    = u_params;
 }
 `;
 
@@ -140,80 +128,60 @@ const VS_DEFAULT_TEXTURE = `#version 300 es
 
 #define MAX_NUM_PARAMS_BUFFER 5
 
-// layout (location = 0) in vec4 a_Col;
-// layout (location = 1) in vec4 a_WposTime;
-// layout (location = 2) in vec2 a_Pos;
-// layout (location = 3) in vec2 a_Scale;
-// layout (location = 4) in vec2 a_Tex;
-
-in vec4 a_Col;
-in vec4 a_WposTime;
-in vec2 a_Pos;
-in vec2 a_Scale;
-in vec2 a_Tex;
+in vec4 a_col;
+in vec4 a_wpos_time;
+in vec2 a_pos;
+in vec2 a_tex;
 
 // In
-uniform mat4 u_OrthoProj;
-uniform mediump float u_Params[MAX_NUM_PARAMS_BUFFER];                  // [0]:SdfInner, [1]:SdfOuter, [3]?
+uniform mat4 u_ortho_proj;
+uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];                  // [0]:SdfInner, [1]:SdfOuter, [3]?
 
 
 // Out
-out mediump vec4 v_Col; 
-out mediump vec2 v_Pos;
-out mediump vec2 v_Wpos;
-out mediump vec2 v_TexCoord;
-out mediump float v_Params[MAX_NUM_PARAMS_BUFFER];
+out mediump vec4 v_col; 
+out mediump vec2 v_pos;
+out mediump vec2 v_wpos;
+out mediump vec2 v_tex_coord;
+out mediump float v_params[MAX_NUM_PARAMS_BUFFER];
 
 void main(void) 
 {
-    vec2 scaled = a_Pos * a_Scale;
-    gl_Position = u_OrthoProj * vec4(scaled.x + a_WposTime.x, scaled.y + a_WposTime.y, a_WposTime.z, 1.0);
+    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
 
-    v_Col = a_Col;
-    v_Pos = a_Pos;
-    v_Wpos = a_WposTime.xy;
-    v_TexCoord = a_Tex;
-    v_Params = u_Params;
+    v_col = a_col;
+    v_pos = a_pos;
+    v_wpos = a_wpos_time.xy;
+    v_tex_coord = a_tex;
+    v_params = u_params;
 }
 `;
 
 const VS_DEFAULT_TEXTURE_SDF = `#version 300 es
 
-// #define MAX_NUM_PARAMS_BUFFER 5
-
-// layout (location = 0) in vec4 a_Col;
-// layout (location = 1) in vec4 a_WposTime;
-// layout (location = 2) in vec2 a_Pos;
-// layout (location = 3) in vec2 a_Scale;
-// layout (location = 4) in vec2 a_Tex;
-// layout (location = 5) in vec2 a_Sdf;
-
-in vec4 a_WposTime;
-in vec2 a_Pos;
-in vec2 a_Scale;
-in vec2 a_Tex;
-in vec2 a_Sdf;
-in vec4 a_Col;
+in vec4 a_wpos_time;
+in vec2 a_pos;
+in vec2 a_tex;
+in vec2 a_sdf;
+in vec4 a_col;
 
 // Uniforms
-uniform mat4 u_OrthoProj;
-// uniform mediump float u_Params[MAX_NUM_PARAMS_BUFFER];                  // [0]:SdfInner, [1]:SdfOuter, [3]?
+uniform mat4 u_ortho_proj;
+// uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];                  // [0]:SdfInner, [1]:SdfOuter, [3]?
 
 
 // Out
-out mediump vec4 v_Col; 
-out mediump vec2 v_TexCoord;
-out mediump vec2 v_SdfParams;
+out mediump vec4 v_col; 
+out mediump vec2 v_tex_coord;
+out mediump vec2 v_sdf;
 
 void main(void) 
 {
+    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
 
-    vec2 scaled = a_Pos * a_Scale;
-    gl_Position = u_OrthoProj * vec4(scaled.x + a_WposTime.x, scaled.y + a_WposTime.y, a_WposTime.z, 1.0);
-
-    v_Col = a_Col;
-    v_TexCoord = a_Tex;
-    v_SdfParams = a_Sdf;
+    v_col = a_col;
+    v_tex_coord = a_tex;
+    v_sdf = a_sdf;
 }
 `;
 
@@ -225,32 +193,32 @@ const VS_EXPLOSION_ATTR_TIMER = `#version 300 es
 #define MAX_NUM_PARAMS_BUFFER 2
 #define MAX_NUM_POSITIONS_BUFFER 2
 
-layout (location = 0) in mediump vec4  a_Col;
-layout (location = 1) in mediump vec2  a_Pos;
-layout (location = 2) in mediump vec4  a_WposTime;
-layout (location = 3) in mediump vec4  a_Params1;
+in mediump vec4  a_col;
+in mediump vec2  a_pos;
+in mediump vec4  a_wpos_time;
+in mediump vec4  a_params1;
 
-uniform mat4  u_OrthoProj;
-uniform mediump float u_Params[MAX_NUM_PARAMS_BUFFER];    
+uniform mat4  u_ortho_proj;
+uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];    
 
-out mediump vec4  v_Col; 
-out mediump vec2  v_Wpos; 
-out mediump vec2  v_Dim; 
+out mediump vec4  v_col; 
+out mediump vec2  v_wpos; 
+out mediump vec2  v_dim; 
 out mediump float v_Size; 
-out mediump float v_Time; 
+out mediump float v_time; 
 out mediump vec2  u_Res; 
 
     
 void main(void) {
     
-    gl_Position = u_OrthoProj * vec4(a_Pos.x + a_WposTime.x, a_Pos.y + a_WposTime.y, a_WposTime.z, 1.0);
+    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
     
-    v_Col       = a_Col;
-    v_Dim       = a_Pos;
-    v_Wpos      = a_WposTime.xy;
-    v_Time      = a_WposTime.w;
-    v_Size      = a_Params1.x;
-    u_Res       = vec2(u_Params[0], u_Params[1]);
+    v_col       = a_col;
+    v_dim       = a_pos;
+    v_wpos      = a_wpos_time.xy;
+    v_time      = a_wpos_time.w;
+    v_Size      = a_params1.x;
+    u_Res       = vec2(u_params[0], u_params[1]);
 }
 `;
 
@@ -260,65 +228,61 @@ const VS_PARTICLES = `#version 300 es
 
 #define MAX_NUM_PARAMS_BUFFER 3
 
-layout (location = 0) in mediump vec4  a_Col;
-layout (location = 1) in mediump vec2  a_Pos;
-layout (location = 2) in mediump vec4  a_WposTime;
-layout (location = 3) in mediump vec4  a_Params1;
+in mediump vec4  a_col;
+in mediump vec2  a_pos;
+in mediump vec4  a_wpos_time;
+in mediump vec4  a_params1;
 
-uniform mat4  u_OrthoProj;
-uniform float u_Params[MAX_NUM_PARAMS_BUFFER];                 
+uniform mat4  u_ortho_proj;
+uniform float u_params[MAX_NUM_PARAMS_BUFFER];                 
 
-out mediump vec4  v_Col; 
-out mediump vec2  v_Wpos; 
-out mediump vec4  v_Params1; 
-out mediump vec2  v_Dim; 
-out mediump float v_Time; 
+out mediump vec4  v_col; 
+out mediump vec2  v_wpos; 
+out mediump vec4  v_params1; 
+out mediump vec2  v_dim; 
+out mediump float v_time; 
 out mediump vec2  u_Res; 
 
 void main(void) 
 {
-    gl_Position = u_OrthoProj * vec4(a_Pos.x + a_WposTime.x, a_Pos.y + a_WposTime.y, a_WposTime.z, 1.0);
+    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
     
-    v_Col  = a_Col;
-    v_Wpos = a_WposTime.xy;
-    v_Dim  = abs(a_Pos);
-    v_Time = a_WposTime.w;
-    v_Params1 = a_Params1;
-    u_Res = vec2(u_Params[0], u_Params[1]);
+    v_col  = a_col;
+    v_wpos = a_wpos_time.xy;
+    v_dim  = abs(a_pos);
+    v_time = a_wpos_time.w;
+    v_params1 = a_params1;
+    u_Res = vec2(u_params[0], u_params[1]);
 }`;
 
 const VS_CRAMBLE = `#version 300 es
 
 #define MAX_NUM_PARAMS_BUFFER 5
 
-layout (location = 0) in mediump vec4 a_Col;
-layout (location = 1) in mediump vec2 a_Pos;
-layout (location = 2) in mediump vec2 a_Scale;
-layout (location = 3) in mediump vec4 a_WposTime;
-layout (location = 4) in mediump vec3 a_Style;
+in mediump vec4 a_col;
+in mediump vec2 a_pos;
+in mediump vec4 a_wpos_time;
+in mediump vec3 a_style;
 
 
-uniform mat4  u_OrthoProj;
-uniform mediump float u_Params[MAX_NUM_PARAMS_BUFFER];
+uniform mat4  u_ortho_proj;
+uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];
 
-out mediump vec4 v_Col; 
-out mediump vec2 v_Wpos; 
-out mediump vec2 v_Dim; 
-out mediump vec2 v_Scale; 
-out mediump vec3 v_Style; 
-out mediump float v_Params[MAX_NUM_PARAMS_BUFFER];                   
+out mediump vec4 v_col; 
+out mediump vec2 v_wpos; 
+out mediump vec2 v_dim; 
+out mediump vec3 v_style; 
+out mediump float v_params[MAX_NUM_PARAMS_BUFFER];                   
     
 void main(void) {
     
-    vec2 scaled = a_Pos  * a_Scale;
-    gl_Position = u_OrthoProj * vec4(scaled.x + a_WposTime.x, scaled.y + a_WposTime.y, a_WposTime.z, 1.0);
+    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
     
-    v_Col       = a_Col;
-    v_Dim       = abs(a_Pos);
-    v_Wpos      = a_WposTime.xy;
-    v_Scale     = a_Scale;
-    v_Style     = a_Style; 
-    v_Params    = u_Params;
+    v_col       = a_col;
+    v_dim       = abs(a_pos);
+    v_wpos      = a_wpos_time.xy;
+    v_style     = a_style; 
+    v_params    = u_params;
 }
 `;
 
@@ -328,6 +292,7 @@ void main(void) {
 export function VertexShaderChoose(sid) {
 
     if (sid & SID.ATTR.STYLE) {
+        // return VertexShaderCreate(sid);
         return VS_DEFAULT;
     }
 
@@ -335,12 +300,13 @@ export function VertexShaderChoose(sid) {
     else if (sid & SID.TEST_SHADER) { return VS_VORTEX2; }
     // else if (sid & SID.TEST_SHADER) { return VS_EXPLOSION_ATTR_TIMER; }
     else if (sid & SID.ATTR.TEX2 && sid & SID.ATTR.SDF_PARAMS) { 
+        // return VertexShaderCreate(sid);
         return VS_DEFAULT_TEXTURE_SDF; 
     }
     else if (sid & SID.FX.FS_SHADOW) { return VS_SHADOW; }
     else if (sid & SID.ATTR.TEX2) { 
-        return VertexShaderCreate(sid);
-        // return VS_DEFAULT_TEXTURE; 
+        // return VertexShaderCreate(sid);
+        return VS_DEFAULT_TEXTURE; 
     }
     else if (sid & SID.FX.FS_PARTICLES) { return VS_PARTICLES; }
     else if (sid & SID.FX.FS_GLOW) { return VS_GLOW; }

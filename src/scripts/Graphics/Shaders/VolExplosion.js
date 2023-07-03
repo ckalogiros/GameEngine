@@ -2,11 +2,11 @@ export const FS_VOLUMETRIC_EXPLOSION = `#version 300 es
 
 precision mediump float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump vec2  v_Dim;
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump vec2  v_dim;
 in mediump vec2  u_Res;
-in mediump float v_Time;
+in mediump float v_time;
 
 uniform sampler2D u_Sampler0;
 
@@ -101,10 +101,10 @@ vec3 ToneMapFilmicALU(vec3 _color)
 void main()
 {  
    vec2 res = u_Res;
-   float time = v_Time;
+   float time = v_time;
    float ratio = res.y/res.x;
    res.x *= ratio;
-   vec2 uv = v_Dim/res.xy;
+   vec2 uv = v_dim/res.xy;
    uv *= 9.;
    
    
@@ -183,11 +183,11 @@ void main()
 
 // precision mediump float;
 
-// in mediump vec4  v_Col;
-// in mediump vec2  v_Wpos;
-// in mediump vec2  v_Dim;
-// in mediump float v_Time;
-// in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
+// in mediump vec4  v_col;
+// in mediump vec2  v_wpos;
+// in mediump vec2  v_dim;
+// in mediump float v_time;
+// in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
 
 // uniform sampler2D u_Sampler0;
 
@@ -284,14 +284,14 @@ void main()
 // void main()
 // {  
    
-//    vec2 res = vec2(v_Params[0], v_Params[1]);
-//    float glowSize = v_Params[2];
-//    float time = v_Time;
+//    vec2 res = vec2(v_params[0], v_params[1]);
+//    float glowSize = v_params[2];
+//    float time = v_time;
    
 //    float ratio = res.y/res.x;
 //    res.x *= ratio;
 //    // vec2 uv = gl_FragCoord.xy/res.xy;
-//    vec2 uv = v_Dim/res.xy;
+//    vec2 uv = v_dim/res.xy;
 //    // uv.x -= .27;
 //    // uv.y -= .44;
 //    // uv *= sin(time) *1.+4.;

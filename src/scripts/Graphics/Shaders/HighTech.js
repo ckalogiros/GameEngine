@@ -3,11 +3,11 @@ export const FS_HIGH_TECH = `#version 300 es
 #define MAX_NUM_PARAMS_BUFFER 5
 precision highp float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump float v_Time;
-in mediump vec2  v_Dim;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER]; 
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump float v_time;
+in mediump vec2  v_dim;
+in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
 
 out vec4 FragColor;
 
@@ -76,12 +76,12 @@ float voronoi(in vec2 x)
 
 void main()
 {
-	float t = v_Params[2]*.1;
+	float t = v_params[2]*.1;
 
-	vec2 res = vec2(v_Params[0], v_Params[1]);              // Screen resolution
+	vec2 res = vec2(v_params[0], v_params[1]);              // Screen resolution
 	res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
 	vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
-	uv -= vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y));        // Transform to meshes local coord space 
+	uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
 
 
    float flicker = noise1(t * 2.0) * 0.8 + 0.4;
@@ -180,10 +180,10 @@ void main()
 
 // precision mediump float;
 
-// in mediump vec4  v_Col;
-// in mediump vec2  v_Wpos;
-// in mediump vec2  v_Dim;
-// in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
+// in mediump vec4  v_col;
+// in mediump vec2  v_wpos;
+// in mediump vec2  v_dim;
+// in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
 
 // out vec4 FragColor;
 // vec2 hash22(vec2 p, float iTime) 
@@ -257,11 +257,11 @@ void main()
 
 // void main()
 // {
-//    float t = v_Params[2]*.1;
-//    vec2 dim = v_Dim;                                       // Mesh Dimentions
+//    float t = v_params[2]*.1;
+//    vec2 dim = v_dim;                                       // Mesh Dimentions
 //    dim /= (min(dim.x, dim.y) / max(dim.x, dim.y))*1.5;     // Mesh Dimentions
 //    vec2 uv = (gl_FragCoord.xy)/dim;                         // Transform to 0.0-1.0 coord space
-//    uv -= v_Wpos/dim;                                       // Transform to meshes local coord space 
+//    uv -= v_wpos/dim;                                       // Transform to meshes local coord space 
 //    // uv*=sin(t);
 
 // 	float len = length(uv);
@@ -309,10 +309,10 @@ export const TEMP = `#version 300 es
 
 precision mediump float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump vec2  v_Dim;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump vec2  v_dim;
+in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
 
 out vec4 FragColor;
 
@@ -344,17 +344,17 @@ float Rect(vec2 p, vec2 size)
 
 void main()
 {
-	float t = v_Params[2]*.1;
+	float t = v_params[2]*.1;
 
-	vec2 res = vec2(v_Params[0], v_Params[1]);              // Screen resolution
+	vec2 res = vec2(v_params[0], v_params[1]);              // Screen resolution
 	res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
 	vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
-	uv -= vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y));        // Transform to meshes local coord space 
+	uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
 	
-	vec2 dim = v_Dim;                                       // Mesh Dimentions
+	vec2 dim = v_dim;                                       // Mesh Dimentions
 	dim /= (min(dim.x, dim.y) / max(dim.x, dim.y));     // Mesh Dimentions
 	// vec2 uv = (gl_FragCoord.xy)/dim;                         // Transform to 0.0-1.0 coord space
-	// uv -= v_Wpos/dim;                                       // Transform to meshes local coord space 
+	// uv -= v_wpos/dim;                                       // Transform to meshes local coord space 
 	
 	vec2 p = uv;
 	
@@ -390,7 +390,7 @@ void main()
 	
 	// Rect
 	// vec2 size = vec2(.1, .1);
-	vec2 size = v_Dim/res *.7;
+	vec2 size = v_dim/res *.7;
 	// vec2 size = dim *0.5;
 	vec2 dd = abs(uv) - size; 
 	float rect1 = length(max(dd, vec2(.0))) + min(max(dd.x, dd.y), 0.);

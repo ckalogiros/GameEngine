@@ -4,10 +4,10 @@ export const TEMP = `#version 300 es
 
 precision mediump float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump vec2  v_Dim;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump vec2  v_dim;
+in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
 
 out vec4 FragColor;
 vec2 hash22(vec2 p, float iTime) 
@@ -74,19 +74,19 @@ vec2 hMap(vec2 uv, float iTime)
 
 void main()
 {
-    float t = v_Params[2]*.1;
-    // vec2 res = vec2(v_Params[0], v_Params[1])-v_Dim;     // Screen resolution
+    float t = v_params[2]*.1;
+    // vec2 res = vec2(v_params[0], v_params[1])-v_dim;     // Screen resolution
     // res.x /= res.x/res.y;                                // Fix pixel ratio
     // vec2 uv = gl_FragCoord.xy/res;                       // Transform to 0.0-1.0 coord space
     
-    vec2 dim = v_Dim;                                       // Mesh Dimentions
+    vec2 dim = v_dim;                                       // Mesh Dimentions
     dim /= (min(dim.x, dim.y) / max(dim.x, dim.y))*1.5;     // Mesh Dimentions
     vec2 uv = (gl_FragCoord.xy)/dim;                         // Transform to 0.0-1.0 coord space
-    uv -= v_Wpos/dim;                                       // Transform to meshes local coord space 
+    uv -= v_wpos/dim;                                       // Transform to meshes local coord space 
     // uv*=sin(t);
     // dim /= (min(dim.x, dim.y) / max(dim.x, dim.y))*2.;     // Mesh Dimentions
     // vec2 uv = ((gl_FragCoord.xy-0.5*dim.xy)/dim.y);                          // Transform to 0.0-1.0 coord space
-    // uv -= vec2((v_Wpos.x/dim.x)-.5, (v_Wpos.y/dim.y)-0.5);                                       // Transform to meshes local coord space 
+    // uv -= vec2((v_wpos.x/dim.x)-.5, (v_wpos.y/dim.y)-0.5);                                       // Transform to meshes local coord space 
 
     vec3 col = mix(vec3(0.345, 0.780, 0.988), vec3(0.361, 0.020, 0.839), length(uv));
     // vec3 col = mix(vec3(0.345, 0.780, 0.988), vec3(0.3, 0.020, 0.839), length(uv));
@@ -113,10 +113,10 @@ export const TEMP = `#version 300 es
 
 precision mediump float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump vec2  v_Dim;
-in mediump float v_Params[MAX_NUM_PARAMS_BUFFER];   
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump vec2  v_dim;
+in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
 
 out vec4 FragColor;
 vec2 hash22(vec2 p, float iTime) 
@@ -183,19 +183,19 @@ vec2 hMap(vec2 uv, float iTime)
 
 void main()
 {
-    float t = v_Params[2]*.1;
-    // vec2 res = vec2(v_Params[0], v_Params[1])-v_Dim;     // Screen resolution
+    float t = v_params[2]*.1;
+    // vec2 res = vec2(v_params[0], v_params[1])-v_dim;     // Screen resolution
     // res.x /= res.x/res.y;                                // Fix pixel ratio
     // vec2 uv = gl_FragCoord.xy/res;                       // Transform to 0.0-1.0 coord space
     
-    vec2 dim = v_Dim;                                       // Mesh Dimentions
+    vec2 dim = v_dim;                                       // Mesh Dimentions
     dim /= (min(dim.x, dim.y) / max(dim.x, dim.y))*1.5;     // Mesh Dimentions
     vec2 uv = (gl_FragCoord.xy)/dim;                         // Transform to 0.0-1.0 coord space
-    uv -= v_Wpos/dim;                                       // Transform to meshes local coord space 
+    uv -= v_wpos/dim;                                       // Transform to meshes local coord space 
     // uv*=sin(t);
     // dim /= (min(dim.x, dim.y) / max(dim.x, dim.y))*2.;     // Mesh Dimentions
     // vec2 uv = ((gl_FragCoord.xy-0.5*dim.xy)/dim.y);                          // Transform to 0.0-1.0 coord space
-    // uv -= vec2((v_Wpos.x/dim.x)-.5, (v_Wpos.y/dim.y)-0.5);                                       // Transform to meshes local coord space 
+    // uv -= vec2((v_wpos.x/dim.x)-.5, (v_wpos.y/dim.y)-0.5);                                       // Transform to meshes local coord space 
 
     vec3 col = mix(vec3(0.345, 0.780, 0.988), vec3(0.361, 0.020, 0.839), length(uv));
     // vec3 col = mix(vec3(0.345, 0.780, 0.988), vec3(0.3, 0.020, 0.839), length(uv));

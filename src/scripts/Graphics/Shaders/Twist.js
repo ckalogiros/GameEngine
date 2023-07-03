@@ -9,16 +9,16 @@ export const VS_TWIST = `#version 300 es
 #define MAX_NUM_PARAMS_BUFFER 4
 #define MAX_NUM_POSITIONS_BUFFER 4
 
-layout (location = 0) in mediump vec4  a_Col;
-layout (location = 1) in mediump vec2  a_Pos;
-layout (location = 2) in mediump vec4  a_WposTime;
+layout (location = 0) in mediump vec4  a_col;
+layout (location = 1) in mediump vec2  a_pos;
+layout (location = 2) in mediump vec4  a_wpos_time;
 
-uniform mat4  u_OrthoProj;
-uniform mediump float u_Params[MAX_NUM_PARAMS_BUFFER];    
+uniform mat4  u_ortho_proj;
+uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];    
 
-out mediump vec4  v_Col; 
-out mediump vec2  v_Wpos; 
-out mediump vec2  v_Dim; 
+out mediump vec4  v_col; 
+out mediump vec2  v_wpos; 
+out mediump vec2  v_dim; 
 out mediump vec2  u_Res; 
 out mediump float u_Time; 
 out mediump float u_Dir; 
@@ -26,14 +26,14 @@ out mediump float u_Dir;
     
 void main(void) {
     
-   gl_Position = u_OrthoProj * vec4(a_Pos.x + a_WposTime.x, a_Pos.y + a_WposTime.y, a_WposTime.z, 1.0);
+   gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
    
-   v_Col       = a_Col;
-   v_Dim       = a_Pos;
-   v_Wpos      = a_WposTime.xy;
-   u_Res       = vec2(u_Params[0], u_Params[1]);
-   u_Time      = u_Params[2];
-   u_Dir       = u_Params[3];
+   v_col       = a_col;
+   v_dim       = a_pos;
+   v_wpos      = a_wpos_time.xy;
+   u_Res       = vec2(u_params[0], u_params[1]);
+   u_Time      = u_params[2];
+   u_Dir       = u_params[3];
 }
 `;
 
@@ -41,9 +41,9 @@ export const FS_TWIST = `#version 300 es
 
 precision mediump float;
 
-in mediump vec4  v_Col;
-in mediump vec2  v_Wpos;
-in mediump vec2  v_Dim;
+in mediump vec4  v_col;
+in mediump vec2  v_wpos;
+in mediump vec2  v_dim;
 in mediump vec2  u_Res;
 in mediump float u_Time;
 in mediump float u_Dir;
@@ -94,7 +94,7 @@ void main()
    float dir = u_Dir;
    float ratio = res.y/res.x;
    res.x *= ratio;
-   vec2 uv = v_Dim/res*10.;
+   vec2 uv = v_dim/res*10.;
    
    float cTime = 8.  * .4;
    uv = twist(uv, vec2(.0), .6, cTime, dir, t*.1)*rotate(t*dir*1.6);
@@ -114,24 +114,24 @@ void main()
 
    float c = mix(color1, color2, .5);
 
-   FragColor = vec4(vec3(c)*v_Col.rgb, c);
+   FragColor = vec4(vec3(c)*v_col.rgb, c);
 }
 
 
 // Save 2
 // void main()
 // {
-//    float t = v_Params[2];
-//    float dir = v_Params[3];
-//    vec2 res = vec2(v_Params[0], v_Params[1]);
+//    float t = v_params[2];
+//    float dir = v_params[3];
+//    vec2 res = vec2(v_params[0], v_params[1]);
 //    float ratio = res.y/res.x;
 //    res.x *= ratio;
-//    // vec2 uv = v_Dim/res*10.;
-//    // vec2 uv = v_Dim/res*7.;
-//    // vec2 uv = v_Dim/res;
-//    vec2 uv = v_Dim/res;
+//    // vec2 uv = v_dim/res*10.;
+//    // vec2 uv = v_dim/res*7.;
+//    // vec2 uv = v_dim/res;
+//    vec2 uv = v_dim/res;
 //    // vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
-//    // uv -= vec2(v_Wpos.x/res.x, 1.-(v_Wpos.y/res.y));        // Transform to meshes local coord space 
+//    // uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
 //    uv*=5.;
    
 //    float cTime = 8.  * .4;
@@ -157,10 +157,10 @@ void main()
 
 //    // FragColor = vec4( color1*color1*color1, pow(max(color1,0.),2.)*0.3, color1*pow(max(color2,0.),1.)*2.15 , 0.0);
 //    // FragColor = vec4( 0., mix(color1, color2, .5)*.3, mix(color1, color2, .5) , 0.0);
-//    FragColor = vec4(vec3(mix(color1, color2, .5))*v_Col.rgb, 0.);
+//    FragColor = vec4(vec3(mix(color1, color2, .5))*v_col.rgb, 0.);
 //    // FragColor = vec4(vec3(color1, color2, 0.), 0.);
 //    // FragColor = vec4(rays);
-//    // FragColor = vec4(vec3(color2)*v_Col.rgb, 0.);
+//    // FragColor = vec4(vec3(color2)*v_col.rgb, 0.);
 //    // FragColor = vec4(vec3(color2), 0.);
 //    // FragColor = vec4(vec3(color), 1.-d);
 // }
@@ -168,13 +168,13 @@ void main()
 
 // void main()
 // {
-//    float t = v_Params[2];
-//    float dir = v_Params[3];
-//    vec2 res = vec2(v_Params[0], v_Params[1]);
+//    float t = v_params[2];
+//    float dir = v_params[3];
+//    vec2 res = vec2(v_params[0], v_params[1]);
 //    float ratio = res.y/res.x;
 //    res.x *= ratio;
-//    // vec2 uv = v_Dim/res*10.;
-//    vec2 uv = v_Dim/res*7.;
+//    // vec2 uv = v_dim/res*10.;
+//    vec2 uv = v_dim/res*7.;
 
 //    float cTime = STRENGTH  * SPEED;
 //    uv = twist(uv, vec2(.0), Range, cTime, dir)*rotate(t*dir*3.);
@@ -194,9 +194,9 @@ void main()
 //    vec3 col = vec3(color, pow(max(color,0.),2.)*0.4, pow(max(color,0.),3.)*0.15);
 //    // float alpha = 
 // 	// FragColor = vec4( .0, pow(max(color,0.),2.)*0.3, color*pow(max(color,0.),1.)*2.15 , 0.0);
-//    // FragColor = vec4(mix(vec3(color),v_Col.rgb,.9), 0.);
-//    FragColor = vec4(vec3(color*v_Col.rgb*.6), 0.);
-//    // FragColor = vec4(vec3(color*v_Col.rgb), 0.);
+//    // FragColor = vec4(mix(vec3(color),v_col.rgb,.9), 0.);
+//    FragColor = vec4(vec3(color*v_col.rgb*.6), 0.);
+//    // FragColor = vec4(vec3(color*v_col.rgb), 0.);
 //    // FragColor = vec4(vec3(color), 0.);
 // }
 
