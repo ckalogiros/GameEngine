@@ -423,8 +423,8 @@ function BrickDestroyPushStartAnimation(i) { // This is the callback to the Anim
 }
 function BrickDestroyPushStopAnimation(i) {
     bricks.buffer[i].SetColorAlpha(0.0);
-    // ExplosionsCreateCircleExplosion(bricks.buffer[i].mesh.pos, bricks.buffer[i].mesh.col, 1, .01);
-    // CoinCreate(bricks.buffer[i].mesh.pos);
+    ExplosionsCreateCircleExplosion(bricks.buffer[i].mesh.pos, bricks.buffer[i].mesh.col, 1, .01);
+    CoinCreate(bricks.buffer[i].mesh.pos);
     if(bricks.buffer[i].hasPowUp) PowerUpCreate(bricks.buffer[i].mesh.pos);
 }
 

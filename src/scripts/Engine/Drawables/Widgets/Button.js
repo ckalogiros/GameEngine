@@ -1,5 +1,5 @@
 "use strict";
-import { GlScale, GlSetDim, GlSetScale, GlSetWposX } from '../../../Graphics/GlBufferOps.js';
+import { GlSetDim, GlSetWposX } from '../../../Graphics/GlBufferOps.js';
 import { GlSetAttrRoundCorner, GlSetAttrBorderWidth, GlSetAttrBorderFeather, GlSetAttrSdfParamsOuter } from '../../../Graphics/GlBufferOps.js';
 import { TextLabel } from './TextLabel.js';
 import { CalculateSdfOuterFromDim } from '../../../Helpers/Helpers.js';
@@ -166,7 +166,6 @@ export function ButtonSetDefaultMeshProps(idx) {
     const textLen = buttons.btn[idx].text.letters.length;
     for (let i = 0; i < textLen; i++) {
 
-        // GlSetScale(buttons.btn[idx].text.letters[i].gfxInfo, [1, 1]);// Update Vertex Buffer
         buttons.btn[idx].text.letters[i].scale[0] = [1, 1];
         buttons.btn[idx].text.letters[i].scale[1] = [1, 1];
 

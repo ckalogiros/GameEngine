@@ -1,6 +1,10 @@
 "use strict";
 
-class Model3D{
+import { Geometry2D } from "./Geometry.js";
+
+let _object3DId = 0;
+
+class Model3D extends Geometry2D{
 	constructor() {
 
 		super();

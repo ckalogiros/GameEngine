@@ -389,46 +389,46 @@ export function GlSetTex(gfxInfo, uvs){
 
     vb.needsUpdate = true; // To Update vertex buffer with the changed 
 }
-export function GlScale(gfxInfo, val){
+// export function GlScale(gfxInfo, val){
 
-    const progs = GlGetPrograms();
-    const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
+//     const progs = GlGetPrograms();
+//     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.scaleOffset;
-    let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect; // Number of vertices
-    let stride = gfxInfo.attribsPerVertex - 2; // Offset to next scale[0] attribute
+//     let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.scaleOffset;
+//     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect; // Number of vertices
+//     let stride = gfxInfo.attribsPerVertex - 2; // Offset to next scale[0] attribute
 
-    while (verts) {
+//     while (verts) {
         
-        vb.data[index++] *= val[0]; 
-        vb.data[index++] *= val[1]; 
+//         vb.data[index++] *= val[0]; 
+//         vb.data[index++] *= val[1]; 
 
-        index += stride; // Go to next vertice's scale.
-        verts--;
-    }
+//         index += stride; // Go to next vertice's scale.
+//         verts--;
+//     }
 
-    vb.needsUpdate = true; // To Update vertex buffer with the changed data.
-}
-export function GlSetScale(gfxInfo, val){
+//     vb.needsUpdate = true; // To Update vertex buffer with the changed data.
+// }
+// export function GlSetScale(gfxInfo, val){
 
-    const progs = GlGetPrograms();
-    const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
+//     const progs = GlGetPrograms();
+//     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.scaleOffset;
-    let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect; // Number of vertices
-    let stride = gfxInfo.attribsPerVertex - 2; // Offset to next scale[0] attribute
+//     let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.scaleOffset;
+//     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect; // Number of vertices
+//     let stride = gfxInfo.attribsPerVertex - 2; // Offset to next scale[0] attribute
 
-    while (verts) {
+//     while (verts) {
         
-        vb.data[index++] = val[0]; 
-        vb.data[index++] = val[1]; 
+//         vb.data[index++] = val[0]; 
+//         vb.data[index++] = val[1]; 
 
-        index += stride; // Go to next vertice's scale.
-        verts--;
-    }
+//         index += stride; // Go to next vertice's scale.
+//         verts--;
+//     }
 
-    vb.needsUpdate = true; // To Update vertex buffer with the changed data.
-}
+//     vb.needsUpdate = true; // To Update vertex buffer with the changed data.
+// }
 export function GlMove(gfxInfo, wpos){
     
     const progs = GlGetPrograms();

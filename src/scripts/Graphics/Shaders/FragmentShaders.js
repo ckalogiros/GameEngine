@@ -1,14 +1,14 @@
 "use strict";
 
-import { FS_HIGH_TECH, TEMP } from "./HighTech.js";
-import { FS_EXPLOSION_CIRCLE, FS_EXPLOSION_SIMPLE } from "./FsExplosions.js";
-import { FS_V2DGFX } from "./2DVectorGFX.js";
-import { FS_GLOW } from "./Glow.js";
-import { FS_TWIST } from "./Twist.js";
-import { FS_VOLUMETRIC_EXPLOSION } from "./VolExplosion.js";
-import { FS_AWSOME } from "./AWESOME.js";
-import { FS_VORTEX, FS_VORTEX2 } from "./VortexShader.js";
-import { FS_SHADOW } from "./Shadow.js";
+import { FS_HIGH_TECH, TEMP } from "./ReadyShaders/HighTech.js";
+import { FS_EXPLOSION_CIRCLE, FS_EXPLOSION_SIMPLE } from "./ReadyShaders/FsExplosions.js";
+import { FS_V2DGFX } from "./ReadyShaders/2DVectorGFX.js";
+import { FS_GLOW } from "./ReadyShaders/Glow.js";
+import { FS_TWIST } from "./ReadyShaders/Twist.js";
+import { FS_VOLUMETRIC_EXPLOSION } from "./ReadyShaders/VolExplosion.js";
+import { FS_AWSOME } from "./ReadyShaders/AWESOME.js";
+import { FS_VORTEX, FS_VORTEX2 } from "./ReadyShaders/VortexShader.js";
+import { FS_SHADOW } from "./ReadyShaders/Shadow.js";
 
 /**
  * This is a replace for the background of text rendering

@@ -1,10 +1,10 @@
 "use strict";
 
-import { VS_GLOW } from "./Glow.js";
-import { VS_SHADOW } from "./Shadow.js";
-import { VS_TWIST } from "./Twist.js";
+import { VS_GLOW } from "./ReadyShaders/Glow.js";
+import { VS_SHADOW } from "./ReadyShaders/Shadow.js";
+import { VS_TWIST } from "./ReadyShaders/Twist.js";
 import { VertexShaderCreate } from "./CreateShader.js";
-import { VS_VORTEX2 } from "./VortexShader.js";
+import { VS_VORTEX2 } from "./ReadyShaders/VortexShader.js";
 
 /**
  * Raymarching Implementation

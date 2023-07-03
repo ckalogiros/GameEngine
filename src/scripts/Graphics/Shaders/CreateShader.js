@@ -2,7 +2,7 @@
 "use strict";
 
 
-import { vertex_shader_chunks } from './ShaderChunks.js'
+import { vertex_shader_chunks } from './ShaderChunks/ShaderChunks.js'
 
 // Resolve Includes
 function includeReplacer( matchPattern, chunkIdx ) {

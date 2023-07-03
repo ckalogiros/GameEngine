@@ -1,13 +1,12 @@
 "use strict";
 import { CreateText } from "../../../Engine/Drawables/Text/Text.js";
-import { GlSetScale, GlSetColor, GlSetTex, GlSetWposXY, GlSetDim } from "../../../Graphics/GlBufferOps.js";
+import { GlSetColor, GlSetTex, GlSetWposXY, GlSetDim } from "../../../Graphics/GlBufferOps.js";
 import { GlAddMesh } from "../../../Graphics/GlBuffers.js";
 import { FontGetUvCoords } from "../../../Engine/Loaders/Font/LoadFont.js";
 import * as math from "../../../Helpers/Math/MathOperations.js"
 import { AnimationsGet } from "../../../Engine/Animations/Animations.js";
 import { TimeIntervalsCreate, FpsGet } from "../../../Engine/Timer/Time.js";
 import { ExplosionSimpleSetTranslation, ExplosionsCreateSimpleExplosion } from "../../../Engine/Drawables/Fx/Explosions.js";
-import { GlowCreate } from "../../../Engine/Drawables/Fx/Glow.js";
 import { VortexUpdateAttribParams1_Count } from "../../../Engine/Drawables/Fx/Vortex.js";
 import { TimerResetGlobalTimer } from "../../../Engine/Timer/Timer.js";
 

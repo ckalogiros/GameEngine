@@ -8,6 +8,7 @@ import { Abs } from '../../Helpers/Math/MathOperations.js';
 import { StepTimersCreate } from '../../Engine/Timer/Time.js';
 import { AnimationsGet } from '../../Engine/Animations/Animations.js';
 import { TimersCreateTimer } from '../../Engine/Timer/Timer.js';
+import { GlSetDim } from '../../Graphics/GlBufferOps.js';
 
 const PLAYER_DEF_COLOR = BLUE_10_120_220;
 const PREV_POS_BUFFER_LEN = 5;

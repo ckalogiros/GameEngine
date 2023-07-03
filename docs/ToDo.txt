@@ -1,3 +1,15 @@
+--------------------------------------------------- New ToDo's
+Reimplement sid to be a class. 
+The class will return an sid 
+object:{
+  attr:,
+  unif:,
+  fx:,
+  etc ...
+}
+--------------------------------------------------- New ToDo's
+
+
 ERASABLE
   
   br.powUp[i]   

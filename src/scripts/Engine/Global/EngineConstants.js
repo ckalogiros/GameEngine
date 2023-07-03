@@ -251,3 +251,11 @@ const COMIC_FONT_TEXTURE_PATH = '../../../../resources/fonts/consolas_sdf35/cons
 const COMIC_FONT_METRICS_PATH = '../../../../consolas_sdf35/metrics/consolas_sdf35.txt'
 
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Debugging  
+ */
+const DEBUG = {
+	MATERIAL: true,
+	GEOMETRY: true,
+	MESH: true,
+};
