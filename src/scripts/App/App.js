@@ -1,7 +1,7 @@
 "use strict";
 import { GfxInitGraphics } from '../Graphics/GfxInit.js'
 import { LoadFontTextures, FontCreateUvMap } from '../Engine/Loaders/Font/LoadFont.js'
-import { ScenesLoadScene, ScenesCreateAllMeshes, ScenesCreateScene, ScenesCreateDrawQueue, ScenesUnloadAllScenes, ScenesSetFramebufferQueue } from './Scenes.js'
+import { ScenesLoadScene, ScenesCreateAllMeshes, ScenesCreateScene, ScenesCreateRenderQueue, ScenesUnloadAllScenes, ScenesSetFramebufferQueue } from './Scenes.js'
 import { Render } from '../Engine/Renderer/Render.js'
 import { AddEventListeners, } from '../Engine/Events/Events.js';
 import { PowerUpInit } from './Drawables/PowerUp.js';
@@ -12,7 +12,7 @@ import { CoinInit } from './Drawables/Coin.js';
 import { InterpolateToRange } from '../Helpers/Math/MathOperations.js';
 
 // Debug-Print
-import { FramebuffersSetActive } from '../Graphics/Renderbuffer.js';
+import { FramebuffersSetActive } from '../Graphics/Buffers/Renderbuffer.js';
 
 
 
@@ -43,11 +43,11 @@ export function AppInit() {
     ScenesCreateScene(SCENE.startStage);
     ScenesCreateScene(SCENE.finishStage);
     ScenesCreateScene(SCENE.stage);
-    ScenesUnloadAllScenes(); // Unload all GFX buffers.
-    ScenesCreateDrawQueue(); // Initilize a Draw Queue for drawing vertex buffers in a priority(z index) based aproach
-    ScenesLoadScene(SCENE.startMenu); // Load the first Scene
-    FramebuffersSetActive(true);
-    ScenesSetFramebufferQueue();
+    // ScenesUnloadAllScenes(); // Unload all GFX buffers.
+    ScenesCreateRenderQueue(); // Initilize a Draw Queue for drawing vertex buffers in a priority(z index) based aproach
+    // ScenesLoadScene(SCENE.startMenu); // Load the first Scene
+    // FramebuffersSetActive(true);
+    // ScenesSetFramebufferQueue();
 
     // Render
     window.requestAnimationFrame(Render);
@@ -125,8 +125,8 @@ function MeshConstantsSetUp(){
 }
 
 function AppInitReservedGlBuffers() {
-    PowerUpInit(SCENE.stage);
-    CoinInit(SCENE.stage);
+    // PowerUpInit(SCENE.stage);
+    // CoinInit(SCENE.stage);
 }
 
 function AddCssUiListeners() {
@@ -141,23 +141,23 @@ function AddCssUiListeners() {
 
     // Set Uniforms buffer params
     const prog = GlGetProgram(UNIFORM_PARAMS.sdf.progIdx);
-    prog.UniformsSetParamsBufferValue(InterpolateToRange(SdfInnerDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.innerIdx);
+    prog.UniformsSetuniformsBufferValue(InterpolateToRange(SdfInnerDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.innerIdx);
 
     // On event
     SdfInnerDistSlider.oninput = function () {
         SdfInnerDistOut.innerHTML = this.value;
-        prog.UniformsSetParamsBufferValue(InterpolateToRange(SdfInnerDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.innerIdx);
+        prog.UniformsSetuniformsBufferValue(InterpolateToRange(SdfInnerDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.innerIdx);
     }
 
     const SdfOuterDistSlider = document.getElementById("sdf-param2");
     const SdfOuterDistOut = document.getElementById("sdf-param2-val");
     SdfOuterDistOut.innerHTML = SdfOuterDistSlider.value;
 
-    prog.UniformsSetParamsBufferValue(InterpolateToRange(SdfOuterDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.outerIdx);
+    prog.UniformsSetuniformsBufferValue(InterpolateToRange(SdfOuterDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.outerIdx);
 
     SdfOuterDistSlider.oninput = function () {
         SdfOuterDistOut.innerHTML = this.value;
-        prog.UniformsSetParamsBufferValue(InterpolateToRange(SdfOuterDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.outerIdx);
+        prog.UniformsSetuniformsBufferValue(InterpolateToRange(SdfOuterDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.outerIdx);
     }
 
     /**

@@ -10,7 +10,7 @@ layout (location = 2) in mediump vec4  a_wpos_time;
 layout (location = 3) in mediump vec4  a_params1;
 
 uniform mat4  u_ortho_proj;
-uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];    
+uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];    
 
 out mediump vec4  v_col; 
 out mediump vec2  v_wpos; 
@@ -30,8 +30,8 @@ void main(void) {
    v_wpos      = a_wpos_time.xy;
    // v_time      = a_wpos_time.w;
    
-   u_Res       = vec2(u_params[0], u_params[1]);
-   u_Time      = u_params[2];
+   u_Res       = vec2(uniforms_buffer[0], uniforms_buffer[1]);
+   u_Time      = uniforms_buffer[2];
 }
 `;
 
@@ -48,7 +48,7 @@ in mediump vec2  u_Res;
 
 uniform sampler2D u_Sampler0;
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 
 #define PI 3.14159265359
@@ -185,7 +185,7 @@ void main()
    // vec4 col = vec4(0.);
    col += func1(v_dim, iTime);
 
-   FragColor = pow(col, vec4(2.0));
+   frag_color = pow(col, vec4(2.0));
 }
 
 `;
@@ -205,7 +205,7 @@ layout (location = 2) in mediump vec4  a_wpos_time;
 layout (location = 3) in mediump vec4  a_params1;
 
 uniform mat4  u_ortho_proj;
-uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];    
+uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];    
 
 flat out mediump vec4  v_col; 
 flat out mediump vec2  v_wpos; 
@@ -229,9 +229,9 @@ void main(void) {
    v_time      = a_wpos_time.w;
    v_Count     = int(a_params1.x);
    
-   u_Res       = vec2(u_params[0], u_params[1]);
+   u_Res       = vec2(uniforms_buffer[0], uniforms_buffer[1]);
 
-   u_Radius    = u_params[2];
+   u_Radius    = uniforms_buffer[2];
 }
 `;
 
@@ -253,7 +253,7 @@ flat in mediump float u_Radius;
 
 uniform sampler2D u_Sampler0;
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 #define PI 3.14159265359
 #define TWO_PI 6.28318530718
@@ -495,7 +495,7 @@ void main()
    col.rgb += clamp(vec3(disk_col), 0.0, 1.0);
 
    col.rgb = mix(col.rgb, vec3(1.0), w_total);
-   FragColor = vec4(col.rgb, 0.);
+   frag_color = vec4(col.rgb, 0.);
    
    // for (int s = 0; s < v_Count; s++) {
    //    vec2 u = (uv-dim+vec2(s%8,s/8)/8.)/res;
@@ -507,7 +507,7 @@ void main()
    //    float star_density = 140.;
    //    vec4 chroma = vec4(1,1,1,0);
    
-   //    FragColor += max(
+   //    frag_color += max(
    //       1.-fract(chroma*.02+(u.y*.02+u.x*.4)*
    //          fract(u.x*star_period)+iTime*star_speed)*star_density, 0.)/4.;
    // }
@@ -519,31 +519,31 @@ void main()
    r =  min(r, max(r*amt, .001));
    // r = res.x;
    
-   // FragColor = FragColor + vec4(vec3(max(3.5-iTime, 0.)),1.0);
+   // frag_color = frag_color + vec4(vec3(max(3.5-iTime, 0.)),1.0);
    float scaleDownTime = .6;
    float brightness = 5.;
    // float brightness = 3.1 + (count*.05);
    // TODO: MOVE to vertex shader or calculate in App
    if(brightness > 4.) brightness = 4.;  // Good from 3.-3.1 to 4.
-   // FragColor = FragColor + vec4(vec3(max((1.-fract(iTime)*.5), 0.)), 1.0);
-   // FragColor = FragColor + vec4(vec3(max(((brightness-iTime)*scaleDownTime)*.5, 0.)), 1.0);
+   // frag_color = frag_color + vec4(vec3(max((1.-fract(iTime)*.5), 0.)), 1.0);
+   // frag_color = frag_color + vec4(vec3(max(((brightness-iTime)*scaleDownTime)*.5, 0.)), 1.0);
    float c = max((brightness-iTime)*scaleDownTime, 0.);
-   FragColor = FragColor + vec4(vec3(0., c*.4, c*.7), 1.0);
+   frag_color = frag_color + vec4(vec3(0., c*.4, c*.7), 1.0);
    
    // float len = length((frag/res)-(wpos/res));
    float len = length((frag/r)-(wpos/r));
    float alpha = 1.-smoothstep(.0, diameter, len);
-   FragColor.rgb *= vec3(alpha);
-   // FragColor.a = alpha;
-   // FragColor.a = 1.-((FragColor.r + FragColor.g+FragColor.b)/3.);
-   FragColor.a = ((FragColor.r + FragColor.g+FragColor.b)/3.);
-   // FragColor.a *= alpha;
-   // FragColor.a = .0;
+   frag_color.rgb *= vec3(alpha);
+   // frag_color.a = alpha;
+   // frag_color.a = 1.-((frag_color.r + frag_color.g+frag_color.b)/3.);
+   frag_color.a = ((frag_color.r + frag_color.g+frag_color.b)/3.);
+   // frag_color.a *= alpha;
+   // frag_color.a = .0;
    
-   // FragColor.rgb *= colorIntensity;
+   // frag_color.rgb *= colorIntensity;
    // if(abs(v_dim.x) < 10.)
    // if(float(v_Count) > 0.)
-   // FragColor.rgb = vec3(.0);
+   // frag_color.rgb = vec3(.0);
 }
 
 `;
@@ -558,7 +558,7 @@ void main()
 // layout (location = 3) in mediump vec4  a_params1;
 
 // uniform mat4  u_ortho_proj;
-// uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];    
+// uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];    
 
 // out mediump vec4  v_col; 
 // out mediump vec2  v_wpos; 
@@ -580,8 +580,8 @@ void main()
 //    v_wpos      = a_wpos_time.xy;
 //    v_time      = a_wpos_time.w;
    
-//    u_Res       = vec2(u_params[0], u_params[1]);
-//    // u_Time      = u_params[2];
+//    u_Res       = vec2(uniforms_buffer[0], uniforms_buffer[1]);
+//    // u_Time      = uniforms_buffer[2];
 // }
 // `;
 
@@ -599,7 +599,7 @@ void main()
 
 // uniform sampler2D u_Sampler0;
 
-// out vec4 FragColor;
+// out vec4 frag_color;
 
 // #define PI 3.14159265359
 // #define TWO_PI 6.28318530718
@@ -866,7 +866,7 @@ void main()
 //    col.rgb += clamp(vec3(disk_col), 0.0, 1.0);
 
 //    col.rgb = mix(col.rgb, vec3(1.0), w_total);
-//    FragColor = vec4(col.rgb, 0.);
+//    frag_color = vec4(col.rgb, 0.);
    
    
 //    // for (int s = 0; s < 2; s++) {
@@ -878,7 +878,7 @@ void main()
 //    //    float star_density = 80.;
 //    //    vec4 chroma = vec4(1,1,1,0);
 
-//    //    // FragColor += max(
+//    //    // frag_color += max(
 //    //    //    1.-fract(chroma*.02+(u.y*.02+u.x*.4)*
 //    //    //       fract(u.x*star_period)+iTime*star_speed)*star_density, 0.)/4.;
 //    // }
@@ -888,19 +888,19 @@ void main()
 //    // float diameter = 1./dim.x;
 //    vec2 r =  vec2(min( res.y, res.x ));
    
-//    FragColor = FragColor + vec4(vec3(max(3.5-iTime, 0.)),1.0);
-//    // FragColor.a = 1.-((FragColor.r+FragColor.g+FragColor.b)/3.);
-//    // FragColor.a = ((FragColor.r+FragColor.g+FragColor.b)/3.);
+//    frag_color = frag_color + vec4(vec3(max(3.5-iTime, 0.)),1.0);
+//    // frag_color.a = 1.-((frag_color.r+frag_color.g+frag_color.b)/3.);
+//    // frag_color.a = ((frag_color.r+frag_color.g+frag_color.b)/3.);
 
 //    // float len = length((frag/res)-(wpos/res));
 //    float len = length((frag/r)-(wpos/r));
 //    float alpha = 1.-smoothstep(.0, diameter, len);
-//    FragColor.rgb *= vec3(alpha);
-//    // FragColor.a = alpha;
-//    FragColor.a = 0.;
+//    frag_color.rgb *= vec3(alpha);
+//    // frag_color.a = alpha;
+//    frag_color.a = 0.;
    
-//    // FragColor.rgb *= 3.2;
-//    // FragColor.rgb = vec3(.2);
+//    // frag_color.rgb *= 3.2;
+//    // frag_color.rgb = vec3(.2);
 // }
 
 // `;

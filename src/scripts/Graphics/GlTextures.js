@@ -1,6 +1,6 @@
 "use strict";
 
-import { GlBindTexture } from "./GlBuffers.js";
+import { GlBindTexture } from "./Buffers/GlBuffers.js";
 
 
 export class GlTexture {

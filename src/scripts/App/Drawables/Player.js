@@ -1,5 +1,4 @@
 "use strict";
-import { GlAddMesh } from '../../Graphics/GlBuffers.js'
 import { BallInitCurveMode, BallPlayerCollision, BallSetCurveMode } from './Ball.js';
 import { PowerUpPlayerCollision } from './PowerUp.js';
 import { Rect } from '../../Engine/Drawables/Shapes/Rect.js';
@@ -8,7 +7,7 @@ import { Abs } from '../../Helpers/Math/MathOperations.js';
 import { StepTimersCreate } from '../../Engine/Timer/Time.js';
 import { AnimationsGet } from '../../Engine/Animations/Animations.js';
 import { TimersCreateTimer } from '../../Engine/Timer/Timer.js';
-import { GlSetDim } from '../../Graphics/GlBufferOps.js';
+import { GlSetDim } from '../../Graphics/Buffers/GlBufferOps.js';
 
 const PLAYER_DEF_COLOR = BLUE_10_120_220;
 const PREV_POS_BUFFER_LEN = 5;
@@ -130,8 +129,11 @@ export function PlayerCollisions() {
     CoinPlayerCollision(player.mesh.pos, player.mesh.dim[0], player.mesh.dim[1]);
 }
 export function PlayerReset() {
-    player.SetColor(PLAYER_DEF_COLOR);
-    player.SetPos(player.mesh.defPos);
+    if(player){
+        player.SetColor(PLAYER_DEF_COLOR);
+        player.SetPos(player.mesh.defPos);
+    }
+    else console.error('Player does not exist')
 }
 
 

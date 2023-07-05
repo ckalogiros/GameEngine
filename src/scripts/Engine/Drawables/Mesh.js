@@ -1,23 +1,49 @@
 "use strict";
+import { GlGetContext } from "../../Graphics/Buffers/GlBuffers.js";
 import * as math from "../../Helpers/Math/MathOperations.js"
 
-/**
- * A structure to reflect a mesh's data to be inserted in the vertex buffer
- */
+
+class MeshGroup{
+    parent;
+    children;
+    constructor(parent = null, childrer = null){
+        this.parent = parent;
+        // this.children = children
+    }
+    addChild(object){
+        this.children.push(object);
+    }
+}
+
+
 let _meshId = 0;
 export class Mesh2 {
 
+    sid;
     geom;
     mat;
     style;
     time;
     attrParams1
-    sdfParams
+    gfx;
+    
 
     constructor(geom = null, mat = null, style = [0, 0, 0], time = 0, attrParams1 = [0, 0, 0, 0], sdfParams = [0, 0]) {
 
         this.geom = geom;
         this.mat = mat;
+
+        this.sid = (this.geom.sid | this.mat.sid | SID.ATTR.TIME | SID.SHAD.INDEXED);
+        this.sid = {
+            shad:  SID.SHAD.INDEXED,
+            attr: (this.geom.sid.attr | this.mat.sid.attr | SID.ATTR.TIME),
+            pass: (this.geom.sid.pass | this.mat.sid.pass),
+        };
+        
+        this.style = [0, 0, 0];
+        this.attrParams1 = [0, 0, 0];
+        this.sdfParams = [0, 0];
+        this.gfx = null;
 
         if (style) {
             this.style[0] = style.roundCorner;
@@ -40,9 +66,19 @@ export class Mesh2 {
         /** Debug properties */
         if(DEBUG.MESH){
             Object.defineProperty( this, 'id', { value: _meshId++ } );
-            Object.defineProperty( this, 'name', { value: 'Mesh' } );
+            Object.defineProperty( this, 'type', { value: 'Mesh' } );
+            Object.defineProperty( this, 'name', { value: '????' } );
         }
     }
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    AddToGraphicsBuffer(sceneIdx){
+        this.gfx = GlGetContext(this.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER)
+        this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
+        this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
+    }
+    
+     
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
 
     SetColor(col){
         this.mat.SetColor(col)

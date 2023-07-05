@@ -2,7 +2,7 @@
 import { GfxCreatePrograms } from './GfxCreateProgram.js';
 import { GlCreateTexture } from './GlTextures.js'
 // For Debuging
-import * as dbg from './Debug/GfxDebug.js'
+import * as dbg from './Z_Debug/GfxDebug.js'
 
 
 
@@ -71,7 +71,7 @@ export function GfxInitGraphics() {
     // gfxCtx.gl.enable(gfxCtx.gl.SAMPLE_COVERAGE);
     // gfxCtx.gl.sampleCoverage(2.2, false);
 
-    const progs = GfxCreatePrograms(gfxCtx.gl);
+    // const progs = GfxCreatePrograms(gfxCtx.gl);
     dbg.PrintAttributes(gfxCtx.gl);
 
     // TODO: the texture images initialization as GlTextures should be called elsewhere

@@ -1,6 +1,5 @@
 "use strict";
 import * as math from '../../Helpers/Math/MathOperations.js'
-import { GlAddMesh } from "../../Graphics/GlBuffers.js";
 import { PlayerGetPos, PlayerGetDim, PlayerCreateAnimStorePosTimer } from "./Player.js";
 import { AnimTextsCreateValue, UiUpdate, UiUpdateCombo } from './Ui/Ui.js'
 import { MouseGetXdir, MouseGetYdir } from "../../Engine/Events/MouseEvents.js";
@@ -10,7 +9,7 @@ import { GlGetProgram } from "../../Graphics/GlProgram.js";
 import { AnimationsGet } from "../../Engine/Animations/Animations.js";
 import { Rect } from "../../Engine/Drawables/Shapes/Rect.js";
 import { ExplosionsCreateSimpleExplosion } from "../../Engine/Drawables/Fx/Explosions.js";
-import { GlSetPriority } from "../../Graphics/GlBufferOps.js";
+import { GlSetPriority } from "../../Graphics/Buffers/GlBufferOps.js";
 import { TwistCreate, TwistDestroy, TwistSetAmtxSpeed, TwistSetTranslation } from "../../Engine/Drawables/Fx/Twist.js";
 import { PowerUpDestroyIntervalTimer } from "./PowerUp.js";
 import { MeshBuffer, TempMesh } from "../../Engine/Drawables/MeshBuffer.js";
@@ -466,20 +465,22 @@ export function BallRelease() {
     balls.inStartPos = false;
 }
 export function BallReset() {
-    balls.mainBall.ResetPos();
-    balls.inStartPos = true;
-    balls.mainBall.speed = BALL_DEF_SPEED;
-    balls.mainBall.SetColor(WHITE);
-    balls.mainBall.tail.flameIntensity = 1;
-    balls.mainBall.tail.powerBallMult = 1;
-    balls.mainBall.UpdateTailFlameIntensity();
-
-    for (let i = 1; i < MAX_BALLS_COUNT; i++) {
-        if (balls.buffer[i].isActive) {
-            balls.Destroy(i);
+    if(balls.mainBall){
+        balls.mainBall.ResetPos();
+        balls.inStartPos = true;
+        balls.mainBall.speed = BALL_DEF_SPEED;
+        balls.mainBall.SetColor(WHITE);
+        balls.mainBall.tail.flameIntensity = 1;
+        balls.mainBall.tail.powerBallMult = 1;
+        balls.mainBall.UpdateTailFlameIntensity();
+    
+        for (let i = 1; i < MAX_BALLS_COUNT; i++) {
+            if (balls.buffer[i].isActive) {
+                balls.Destroy(i);
+            }
         }
+        balls.isOnlyMainBall = true;
     }
-    balls.isOnlyMainBall = true;
 }
 export function BallResetPos() {
     balls.mainBall.ResetPos();

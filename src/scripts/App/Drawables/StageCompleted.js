@@ -5,8 +5,7 @@ import { GlowCreate, GlowGetGlow } from "../../Engine/Drawables/Fx/Glow.js";
 import { Rect } from "../../Engine/Drawables/Shapes/Rect.js";
 import { TextLabel } from "../../Engine/Drawables/Widgets/TextLabel.js";
 import { TimerGetGlobalTimer } from "../../Engine/Timer/Timer.js";
-import { GlRotate } from "../../Graphics/GlBufferOps.js";
-import { GlAddMesh } from "../../Graphics/GlBuffers.js";
+import { GlRotate } from "../../Graphics/Buffers/GlBufferOps.js";
 import { DimColor } from "../../Helpers/Helpers.js";
 
 
@@ -50,11 +49,11 @@ class Mechanicals {
         const idx = this.count;
         
         // Create glow effect
-        this.buffer[this.count].fx.glowIdx = GlowCreate(pos, PINK_240_60_160, false, true, .2, null);
+        // this.buffer[this.count].fx.glowIdx = GlowCreate(pos, PINK_240_60_160, false, true, .2, null);
         // Resize glow mesh 
-        const glow = GlowGetGlow(this.buffer[this.count].fx.glowIdx);
-        glow.SetDim([50, 50]);
-        glow.SetColorAlpha(0);
+        // const glow = GlowGetGlow(this.buffer[this.count].fx.glowIdx);
+        // glow.SetDim([50, 50]);
+        // glow.SetColorAlpha(0);
         
         this.count++;
 

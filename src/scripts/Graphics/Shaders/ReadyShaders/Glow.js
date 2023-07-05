@@ -10,7 +10,7 @@ layout (location = 2) in mediump vec4  a_wpos_time;
 layout (location = 3) in mediump vec4  a_params1;
 
 uniform mat4  u_ortho_proj;
-uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];    
+uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];    
 
 out mediump vec4  v_col; 
 out mediump vec2  v_wpos; 
@@ -30,7 +30,7 @@ void main(void) {
    v_wpos      = a_wpos_time.xy;
    v_time      = a_wpos_time.w;
    v_Size      = a_params1.x;
-   u_Res       = vec2(u_params[0], u_params[1]);
+   u_Res       = vec2(uniforms_buffer[0], uniforms_buffer[1]);
 }
 `;
 
@@ -47,7 +47,7 @@ in mediump float v_time;
 in mediump vec2  u_Res;
 
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 void main()
 {
@@ -75,7 +75,7 @@ void main()
    // color = mix(color, v_col.rgb, 1.-t);
    color = mix(color, v_col.rgb, t);
 	
-	FragColor = vec4(color*d*(1.-t), color*d*(1.-t));
+	frag_color = vec4(color*d*(1.-t), color*d*(1.-t));
 }
 `;
 
@@ -89,15 +89,15 @@ void main()
 // in mediump vec2  v_wpos;
 // in mediump vec2  v_dim;
 // // in mediump float v_time;
-// in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
+// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
 
-// out vec4 FragColor;
+// out vec4 frag_color;
 
 
 // void main()
 // {
-//    float t = v_params[2];
-//    vec2 res = vec2(v_params[0], v_params[1]);
+//    float t = v_uniforms_buffer[2];
+//    vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);
 //    res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
 //    vec2 dim = vec2(v_dim.x/res.x, v_dim.y/res.y);
 //    vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
@@ -129,13 +129,13 @@ void main()
 //    // color *= vec3(ring);
 //    color *= pow(ex, .3);
 
-// 	// FragColor = vec4(color*d*(1.-t*2.), color*d*(1.-t*2.));
-// 	FragColor = vec4(color*(d), d);
+// 	// frag_color = vec4(color*d*(1.-t*2.), color*d*(1.-t*2.));
+// 	frag_color = vec4(color*(d), d);
 
 
 
-// 	// if(d*10.2 > 1.) FragColor = vec4(1.,0.,1.,1.);
-// 	// else FragColor = vec4(1.,1.,.0,1.);
+// 	// if(d*10.2 > 1.) frag_color = vec4(1.,0.,1.,1.);
+// 	// else frag_color = vec4(1.,1.,.0,1.);
 // }
 // `;
 

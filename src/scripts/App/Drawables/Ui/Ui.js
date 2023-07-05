@@ -1,7 +1,6 @@
 "use strict";
 import { CreateText } from "../../../Engine/Drawables/Text/Text.js";
-import { GlSetColor, GlSetTex, GlSetWposXY, GlSetDim } from "../../../Graphics/GlBufferOps.js";
-import { GlAddMesh } from "../../../Graphics/GlBuffers.js";
+import { GlSetColor, GlSetTex, GlSetWposXY, GlSetDim } from "../../../Graphics/Buffers/GlBufferOps.js";
 import { FontGetUvCoords } from "../../../Engine/Loaders/Font/LoadFont.js";
 import * as math from "../../../Helpers/Math/MathOperations.js"
 import { AnimationsGet } from "../../../Engine/Animations/Animations.js";

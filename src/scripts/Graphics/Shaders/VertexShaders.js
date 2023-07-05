@@ -84,8 +84,8 @@ import { VS_VORTEX2 } from "./ReadyShaders/VortexShader.js";
 // }
 
 /**
- * u_params[0] = Window Width
- * u_params[1] = Window Height
+ * uniforms_buffer[0] = Window Width
+ * uniforms_buffer[1] = Window Height
  */
 const VS_DEFAULT = `#version 300 es
 
@@ -98,7 +98,7 @@ in mediump vec2 a_pos;
 in mediump vec3 a_style;
 
 uniform mat4  u_ortho_proj;
-uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];                  // [0]:WinWidth, [1]:WinHeight, [3]:Time
+uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                  // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 out mediump vec4 v_col; 
 out mediump vec2 v_dim; 
@@ -107,7 +107,7 @@ out mediump float v_time;
 out mediump vec3 v_style; 
 out mediump vec2 v_res; 
 out mediump vec4 v_param1; 
-out mediump float v_params[MAX_NUM_PARAMS_BUFFER];                   
+out mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                   
     
 void main(void) {
     
@@ -118,9 +118,9 @@ void main(void) {
     v_wpos      = a_wpos_time.xy;
     v_time      = a_wpos_time.w;
     v_style     = a_style; 
-    v_res       = vec2(u_params[0], u_params[1]);
+    v_res       = vec2(uniforms_buffer[0], uniforms_buffer[1]);
     v_param1    = a_params1;
-    v_params    = u_params;
+    v_uniforms_buffer    = uniforms_buffer;
 }
 `;
 
@@ -135,7 +135,7 @@ in vec2 a_tex;
 
 // In
 uniform mat4 u_ortho_proj;
-uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];                  // [0]:SdfInner, [1]:SdfOuter, [3]?
+uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                  // [0]:SdfInner, [1]:SdfOuter, [3]?
 
 
 // Out
@@ -143,7 +143,7 @@ out mediump vec4 v_col;
 out mediump vec2 v_pos;
 out mediump vec2 v_wpos;
 out mediump vec2 v_tex_coord;
-out mediump float v_params[MAX_NUM_PARAMS_BUFFER];
+out mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];
 
 void main(void) 
 {
@@ -153,7 +153,7 @@ void main(void)
     v_pos = a_pos;
     v_wpos = a_wpos_time.xy;
     v_tex_coord = a_tex;
-    v_params = u_params;
+    v_uniforms_buffer = uniforms_buffer;
 }
 `;
 
@@ -167,7 +167,7 @@ in vec4 a_col;
 
 // Uniforms
 uniform mat4 u_ortho_proj;
-// uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];                  // [0]:SdfInner, [1]:SdfOuter, [3]?
+// uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                  // [0]:SdfInner, [1]:SdfOuter, [3]?
 
 
 // Out
@@ -199,7 +199,7 @@ in mediump vec4  a_wpos_time;
 in mediump vec4  a_params1;
 
 uniform mat4  u_ortho_proj;
-uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];    
+uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];    
 
 out mediump vec4  v_col; 
 out mediump vec2  v_wpos; 
@@ -218,7 +218,7 @@ void main(void) {
     v_wpos      = a_wpos_time.xy;
     v_time      = a_wpos_time.w;
     v_Size      = a_params1.x;
-    u_Res       = vec2(u_params[0], u_params[1]);
+    u_Res       = vec2(uniforms_buffer[0], uniforms_buffer[1]);
 }
 `;
 
@@ -234,7 +234,7 @@ in mediump vec4  a_wpos_time;
 in mediump vec4  a_params1;
 
 uniform mat4  u_ortho_proj;
-uniform float u_params[MAX_NUM_PARAMS_BUFFER];                 
+uniform float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                 
 
 out mediump vec4  v_col; 
 out mediump vec2  v_wpos; 
@@ -252,7 +252,7 @@ void main(void)
     v_dim  = abs(a_pos);
     v_time = a_wpos_time.w;
     v_params1 = a_params1;
-    u_Res = vec2(u_params[0], u_params[1]);
+    u_Res = vec2(uniforms_buffer[0], uniforms_buffer[1]);
 }`;
 
 const VS_CRAMBLE = `#version 300 es
@@ -266,13 +266,13 @@ in mediump vec3 a_style;
 
 
 uniform mat4  u_ortho_proj;
-uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];
+uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];
 
 out mediump vec4 v_col; 
 out mediump vec2 v_wpos; 
 out mediump vec2 v_dim; 
 out mediump vec3 v_style; 
-out mediump float v_params[MAX_NUM_PARAMS_BUFFER];                   
+out mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                   
     
 void main(void) {
     
@@ -282,7 +282,7 @@ void main(void) {
     v_dim       = abs(a_pos);
     v_wpos      = a_wpos_time.xy;
     v_style     = a_style; 
-    v_params    = u_params;
+    v_uniforms_buffer    = uniforms_buffer;
 }
 `;
 
@@ -319,6 +319,9 @@ export function VertexShaderChoose(sid) {
     }
     else if (sid & SID.FX.FS_CRAMBLE) { return VS_CRAMBLE; }
 
-    alert('No Vertex Shader found with this SID');
+    console.warn('No Vertex Shader found with this SID. Loading Default.');
+    // alert('No Vertex Shader found with this SID');
+
+    return VertexShaderCreate(sid);
 }
 

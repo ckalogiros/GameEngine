@@ -1,8 +1,8 @@
 import { GlGetTexture } from './GlTextures.js';
-import { GlUpdateVertexBufferData, GlUpdateIndexBufferData, GfxSetVbShow, GlUseProgram, GlBindVAO, GlBindTexture } from './GlBuffers.js'
-import { DrawQueueGetActive, DrawQueueGetActiveCount } from '../Engine/Renderer/DrawQueue.js';
+import { GlUpdateVertexBufferData, GlUpdateIndexBufferData, GfxSetVbShow, GlUseProgram, GlBindVAO, GlBindTexture } from './Buffers/GlBuffers.js'
+import { RenderQueueGetActive, RenderQueueGetActiveCount } from '../Engine/Renderer/RenderQueue.js';
 import { GlGetPrograms } from './GlProgram.js';
-import { FramebufferRenderToFramebuffer, FramebuffersDraw, FramebuffersGet } from './Renderbuffer.js';
+import { FramebufferRenderToFramebuffer, FramebuffersDraw, FramebuffersGet } from './Buffers/Renderbuffer.js';
 import { TimerGetGlobalTimer } from '../Engine/Timer/Timer.js';
 
 
@@ -11,8 +11,8 @@ export function GlDraw() {
 
     const gl = gfxCtx.gl;
     const progs = GlGetPrograms();
-    const drawQueue = DrawQueueGetActive();
-    const drawQueueCount = DrawQueueGetActiveCount();
+    const drawQueue = RenderQueueGetActive();
+    const drawQueueCount = RenderQueueGetActiveCount();
 
     // const fb = FramebuffersGet();
     // if (fb.isActive) {
@@ -23,7 +23,7 @@ export function GlDraw() {
     // }
     
     // GfxSetVbShow(fb.fb.gfxInfo.prog.idx, fb.fb.gfxInfo.vb.idx, false);
-    // const drQ = DrawQueueGet();
+    // const drQ = RenderQueueGet();
     // drQ.Update();
 
     gl.clearColor(0.18, 0.18, 0.18, 1.0);
@@ -40,10 +40,10 @@ export function GlDraw() {
         
         // TEMP: TestShaders set timer
         if (progIdx === TEST_SHADERS_PROG_IDX) {
-            progs[TEST_SHADERS_PROG_IDX].UniformsSetParamsBufferValue(TimerGetGlobalTimer(), UNIFORM_PARAMS.WHT.timeIdx);
+            progs[TEST_SHADERS_PROG_IDX].UniformsSetuniformsBufferValue(TimerGetGlobalTimer(), UNIFORM_PARAMS.WHT.timeIdx);
         }
         if (progs[progIdx].timer.isOn) progs[progIdx].UpdateTimer();
-        if (progs[progIdx].uniformsNeedUpdate) progs[progIdx].UniformsUpdateParamsBuffer(gl);
+        if (progs[progIdx].uniformsNeedUpdate) progs[progIdx].UniformsUpdateuniformsBuffer(gl);
         
         
         const vb = progs[progIdx].vertexBuffer[vbIdx];
@@ -105,7 +105,7 @@ export function GlDraw() {
 //             GlUseProgram(progs[progIdx].program, progIdx)
         
 //         if (progs[progIdx].timer.isOn) progs[progIdx].UpdateTimer();
-//         if (progs[progIdx].uniformsNeedUpdate) progs[progIdx].UniformsUpdateParamsBuffer(gl);
+//         if (progs[progIdx].uniformsNeedUpdate) progs[progIdx].UniformsUpdateuniformsBuffer(gl);
         
         
 //         const vb = progs[progIdx].vertexBuffer[vbIdx];

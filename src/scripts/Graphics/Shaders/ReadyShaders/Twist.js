@@ -14,7 +14,7 @@ layout (location = 1) in mediump vec2  a_pos;
 layout (location = 2) in mediump vec4  a_wpos_time;
 
 uniform mat4  u_ortho_proj;
-uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];    
+uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];    
 
 out mediump vec4  v_col; 
 out mediump vec2  v_wpos; 
@@ -31,9 +31,9 @@ void main(void) {
    v_col       = a_col;
    v_dim       = a_pos;
    v_wpos      = a_wpos_time.xy;
-   u_Res       = vec2(u_params[0], u_params[1]);
-   u_Time      = u_params[2];
-   u_Dir       = u_params[3];
+   u_Res       = vec2(uniforms_buffer[0], uniforms_buffer[1]);
+   u_Time      = uniforms_buffer[2];
+   u_Dir       = uniforms_buffer[3];
 }
 `;
 
@@ -48,7 +48,7 @@ in mediump vec2  u_Res;
 in mediump float u_Time;
 in mediump float u_Dir;
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 #define Range .2
 #define SPEED 1.0
@@ -114,16 +114,16 @@ void main()
 
    float c = mix(color1, color2, .5);
 
-   FragColor = vec4(vec3(c)*v_col.rgb, c);
+   frag_color = vec4(vec3(c)*v_col.rgb, c);
 }
 
 
 // Save 2
 // void main()
 // {
-//    float t = v_params[2];
-//    float dir = v_params[3];
-//    vec2 res = vec2(v_params[0], v_params[1]);
+//    float t = v_uniforms_buffer[2];
+//    float dir = v_uniforms_buffer[3];
+//    vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);
 //    float ratio = res.y/res.x;
 //    res.x *= ratio;
 //    // vec2 uv = v_dim/res*10.;
@@ -155,22 +155,22 @@ void main()
 //    color2+=rays;
 //    // color2 *= .2;
 
-//    // FragColor = vec4( color1*color1*color1, pow(max(color1,0.),2.)*0.3, color1*pow(max(color2,0.),1.)*2.15 , 0.0);
-//    // FragColor = vec4( 0., mix(color1, color2, .5)*.3, mix(color1, color2, .5) , 0.0);
-//    FragColor = vec4(vec3(mix(color1, color2, .5))*v_col.rgb, 0.);
-//    // FragColor = vec4(vec3(color1, color2, 0.), 0.);
-//    // FragColor = vec4(rays);
-//    // FragColor = vec4(vec3(color2)*v_col.rgb, 0.);
-//    // FragColor = vec4(vec3(color2), 0.);
-//    // FragColor = vec4(vec3(color), 1.-d);
+//    // frag_color = vec4( color1*color1*color1, pow(max(color1,0.),2.)*0.3, color1*pow(max(color2,0.),1.)*2.15 , 0.0);
+//    // frag_color = vec4( 0., mix(color1, color2, .5)*.3, mix(color1, color2, .5) , 0.0);
+//    frag_color = vec4(vec3(mix(color1, color2, .5))*v_col.rgb, 0.);
+//    // frag_color = vec4(vec3(color1, color2, 0.), 0.);
+//    // frag_color = vec4(rays);
+//    // frag_color = vec4(vec3(color2)*v_col.rgb, 0.);
+//    // frag_color = vec4(vec3(color2), 0.);
+//    // frag_color = vec4(vec3(color), 1.-d);
 // }
 
 
 // void main()
 // {
-//    float t = v_params[2];
-//    float dir = v_params[3];
-//    vec2 res = vec2(v_params[0], v_params[1]);
+//    float t = v_uniforms_buffer[2];
+//    float dir = v_uniforms_buffer[3];
+//    vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);
 //    float ratio = res.y/res.x;
 //    res.x *= ratio;
 //    // vec2 uv = v_dim/res*10.;
@@ -193,11 +193,11 @@ void main()
 	
 //    vec3 col = vec3(color, pow(max(color,0.),2.)*0.4, pow(max(color,0.),3.)*0.15);
 //    // float alpha = 
-// 	// FragColor = vec4( .0, pow(max(color,0.),2.)*0.3, color*pow(max(color,0.),1.)*2.15 , 0.0);
-//    // FragColor = vec4(mix(vec3(color),v_col.rgb,.9), 0.);
-//    FragColor = vec4(vec3(color*v_col.rgb*.6), 0.);
-//    // FragColor = vec4(vec3(color*v_col.rgb), 0.);
-//    // FragColor = vec4(vec3(color), 0.);
+// 	// frag_color = vec4( .0, pow(max(color,0.),2.)*0.3, color*pow(max(color,0.),1.)*2.15 , 0.0);
+//    // frag_color = vec4(mix(vec3(color),v_col.rgb,.9), 0.);
+//    frag_color = vec4(vec3(color*v_col.rgb*.6), 0.);
+//    // frag_color = vec4(vec3(color*v_col.rgb), 0.);
+//    // frag_color = vec4(vec3(color), 0.);
 // }
 
 `;

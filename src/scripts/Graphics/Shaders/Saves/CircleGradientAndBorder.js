@@ -7,9 +7,9 @@ precision mediump float;
 in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump vec2  v_dim;
-in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
+in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 // Flip v if in the negative half plane defined by r (this works in 3D too)
 vec2 flipIfNeg( in vec2 v, in vec2 r )
@@ -104,9 +104,9 @@ float arrow( in vec2 p, in vec2 a, in vec2 b, float w1, float w2, float e )
 
 void main()
 {
-	float t = v_params[2]*.1;
+	float t = v_uniforms_buffer[2]*.1;
 
-	vec2 res = vec2(v_params[0], v_params[1]);              // Screen resolution
+	vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);              // Screen resolution
 	res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
 	vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
 	uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
@@ -154,6 +154,6 @@ void main()
 	col = mix( col, vec3(1.0,0.7,0.2), arrow(p, vec2(0.0), f, wi, 5.0*wi, e) );
 	}
 
-	FragColor = vec4( col, 0.5);
+	frag_color = vec4( col, 0.5);
 }
 `;

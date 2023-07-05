@@ -30,7 +30,7 @@ class Queue {
    }
 }
 
-class DrawQueue {
+class RenderQueue {
 
    buffer = [];
    count = 0;
@@ -78,7 +78,7 @@ class DrawQueue {
       this.count++;
 
       // DEBUG
-      if(this.count > this.size) alert('ERROR - DrawQueue buffer is FULL')
+      if(this.count > this.size) alert('ERROR - RenderQueue buffer is FULL')
    }
    Remove(progIdx, vbIdx) {
       const foundIdx = this.Find(progIdx, vbIdx);
@@ -94,11 +94,11 @@ class DrawQueue {
          this.UpdateActiveQueue();
 
          // DEBUG
-         if (this.count < 0) alert('ERROR - DrawQueue count is negative')
+         if (this.count < 0) alert('ERROR - RenderQueue count is negative')
       }
    }
    Find(progIdx, vbIdx) {
-      if(!this.count) return INT_NULL; // Case DrawQueue hasn't been initialized
+      if(!this.count) return INT_NULL; // Case RenderQueue hasn't been initialized
       for (let i = 0; i < this.size; i++) {
          if (this.buffer[i].vbIdx === vbIdx &&
             this.buffer[i].progIdx === progIdx) {
@@ -167,12 +167,12 @@ class DrawQueue {
    }
 }
 
-const drawQueue = new DrawQueue;
+const drawQueue = new RenderQueue;
 
-export function DrawQueueGet() { return drawQueue; }
+export function RenderQueueGet() { return drawQueue; }
 
-export function DrawQueueGetActive() { return drawQueue.active; }
-export function DrawQueueGetActiveCount() { return drawQueue.activeCount; }
+export function RenderQueueGetActive() { return drawQueue.active; }
+export function RenderQueueGetActiveCount() { return drawQueue.activeCount; }
 
 /**
  * Enable and Disable programs and vertex buffers from the draw queue.
@@ -180,12 +180,12 @@ export function DrawQueueGetActiveCount() { return drawQueue.activeCount; }
  * changed(enabled or disabled for drawing), we must add or remove
  * these programs-vertex buffers from the draw queue.
  */
-export function DrawQueueUpdate(progIdx, vbIdx, flag){ 
+export function RenderQueueUpdate(progIdx, vbIdx, flag){ 
    const idx = drawQueue.Find(progIdx, vbIdx);
    if(idx !== INT_NULL){
       drawQueue.buffer[idx].isActive = flag;
       drawQueue.UpdateActiveQueue(); // Create a new active buffer from the updated queue
    }
 }
-export function DrawQueueSetPriority(flag, progIdx, vbIdx) { drawQueue.SetPriority(flag, progIdx, vbIdx); }
+export function RenderQueueSetPriority(flag, progIdx, vbIdx) { drawQueue.SetPriority(flag, progIdx, vbIdx); }
 

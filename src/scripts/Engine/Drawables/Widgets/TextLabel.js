@@ -1,7 +1,6 @@
 "use strict";
 
-import { GlSetTex } from "../../../Graphics/GlBufferOps.js";
-import { GlAddMesh } from "../../../Graphics/GlBuffers.js";
+import { GlSetTex } from "../../../Graphics/Buffers/GlBufferOps.js";
 import { FontGetUvCoords } from "../../Loaders/Font/LoadFont.js";
 import { Rect } from "../Shapes/Rect.js";
 import { CreateText } from "../Text/Text.js";

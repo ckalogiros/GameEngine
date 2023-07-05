@@ -1,20 +1,27 @@
 "use strict";
 
 import * as math from '../../Helpers/Math/MathOperations.js'
-import * as glBufferOps from '../../Graphics/GlBufferOps.js'
+import * as glBufferOps from '../../Graphics/Buffers/GlBufferOps.js'
+import { GlAddGeometry } from '../../Graphics/Buffers/GlBuffers.js';
 
 let _geometryId = 0;
 
 export class Geometry2D {
 
-    pos; 
-    dim;
-    scale;
-    defPos;
-    defDim;
-    defScale;
+    sid;
+    pos = [0, 0, 0];
+    dim = [0, 0];
+    scale = [0, 0];
+    defPos = [0, 0, 0];
+    defDim = [0, 0];
+    defScale = [0, 0];
 
-    constructor(pos = [0, 0, 0], dim = [0, 0], scale = [0, 0]) {
+    constructor(pos = [0, 0, 0], dim = [0, 0], scale = [1, 1]) {
+
+        this.sid = {
+            attr: (SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4),
+            pass: SID.PASS.DIM2,
+        };
 
         math.CopyArr3(this.pos, pos);
         math.CopyArr2(this.dim, dim);
@@ -26,11 +33,17 @@ export class Geometry2D {
         math.CopyArr3(this.defPos, pos);
 
         /** Debug properties */
-        if(DEBUG.GEOMETRY){
-            Object.defineProperty( this, 'id', { value: _geometryId++ } );
-            Object.defineProperty( this, 'name', { value: 'Geometry' } );
+        if (DEBUG.GEOMETRY) {
+            Object.defineProperty(this, 'id', { value: _geometryId++ });
+            Object.defineProperty(this, 'type', { value: 'Geometry' });
         }
     }
+
+    //////////////////////////////////////////////////////////////
+    AddToGraphicsBuffer(sid, gfx, meshName) {
+        GlAddGeometry(sid, this.pos, this.dim, gfx, meshName)
+    }
+
     //////////////////////////////////////////////////////////////
     SetPos(pos) {
         math.CopyArr2(this.mesh.pos, pos);

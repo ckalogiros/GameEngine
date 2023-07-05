@@ -1,4 +1,3 @@
-import { GlAddMesh } from "../../Graphics/GlBuffers.js";
 import { Rect } from "./Shapes/Rect.js";
 
 export class TempMesh extends Rect{

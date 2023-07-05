@@ -1,9 +1,8 @@
 "use strict";
 
-import { GlAddMesh } from "../../../Graphics/GlBuffers.js";
 import { RectCreateRect } from "../Shapes/Rect.js";
 import { TimersCreateTimer } from "../../Timer/Timer.js";
-import { GlMove, GlSetAttrTime, GlSetColor, GlSetWposXY } from "../../../Graphics/GlBufferOps.js";
+import { GlMove, GlSetAttrTime, GlSetColor, GlSetWposXY } from "../../../Graphics/Buffers/GlBufferOps.js";
 import { MeshBuffer } from "../MeshBuffer.js";
 import { CopyArr2, CopyArr4 } from "../../../Helpers/Math/MathOperations.js";
 

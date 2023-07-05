@@ -9,6 +9,7 @@ import { FS_VOLUMETRIC_EXPLOSION } from "./ReadyShaders/VolExplosion.js";
 import { FS_AWSOME } from "./ReadyShaders/AWESOME.js";
 import { FS_VORTEX, FS_VORTEX2 } from "./ReadyShaders/VortexShader.js";
 import { FS_SHADOW } from "./ReadyShaders/Shadow.js";
+import { FragmentShaderCreate } from "./CreateShader.js";
 
 /**
  * This is a replace for the background of text rendering
@@ -18,13 +19,13 @@ const FS_DEFAULT2 = `#version 300 es
 #define MAX_NUM_PARAMS_BUFFER 5
 
 precision highp float;
-out vec4 FragColor;
+out vec4 frag_color;
 
 in mediump vec4 v_col;
 in mediump vec2 v_dim;
 in mediump vec2 v_wpos;
 in mediump vec3 v_style;
-in mediump float v_params[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
+in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 vec4 pos = vec4(.5, .5, .0, .0);
 vec3 _color = vec3(0.0);
@@ -55,12 +56,12 @@ vec2 rounded_rectangle(vec2 s, float r, float bw) {
 
 void main(void) 
 {
-    float t = v_params[2];
+    float t = v_uniforms_buffer[2];
     float uRadius = v_style.x * .008;                    // Radius(From 0.01 to 0.35 good values) for rounding corners
     float borderWidth = v_style.y * 0.001;                  // Border Width. It is 0.001 for every pixel
     float feather = v_style.z;         // Border Feather Distance
 
-    vec2 res = vec2(v_params[0], v_params[1]);
+    vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);
     float clarity = 10.4; // From 0.3 to 1.2 good values 
     // float clarity = 1.; // From 0.3 to 1.2 good values 
 	ScreenH = min(res.x, res.y)*clarity;
@@ -115,8 +116,8 @@ void main(void)
     fcol = mix(fcol, pow(fcol, vec3(2.))*.85, f);
 
 
-    FragColor = vec4(fcol.rgb, alpha);
-    // FragColor = vec4(1.);
+    frag_color = vec4(fcol.rgb, alpha);
+    // frag_color = vec4(1.);
 }
 `;
 
@@ -125,14 +126,14 @@ void main(void)
 // #define MAX_NUM_PARAMS_BUFFER 5
 
 // precision highp float;
-// out vec4 FragColor;
+// out vec4 frag_color;
 
 // in mediump vec4  v_pos;
 // in mediump vec2  v_wpos;
 // in mediump float v_time;
 // in mediump vec2  v_dim;
 // in mediump vec2  v_res;
-// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
 
 
 // #define STEPS 250.0
@@ -250,7 +251,7 @@ void main(void)
 
 // vec4 render(vec2 fragCoord, float iTime)
 // {
-//     vec2 res = vec2(v_params[0], v_params[1]);
+//     vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);
 //     vec2 uv = ((fragCoord-0.5*res.xy)/res.y) * 2.2;
 //     vec3 col = vec3(0);
 //     uv.x-=0.025;
@@ -367,7 +368,7 @@ void main(void)
 
 // void main()
 // {
-//     // float iTime = v_params[2];
+//     // float iTime = v_uniforms_buffer[2];
 //     // float iTime = v_time;
 //     float iTime = 1.2;
 //     // vec2 uv = gl_FragCoord.xy;
@@ -379,7 +380,7 @@ void main(void)
 //     if(AA == 1.)
 //     {
 //         cl = render(uv, iTime);
-//         FragColor = cl;
+//         frag_color = cl;
 //         return;
 //     }
     
@@ -396,7 +397,7 @@ void main(void)
 //     }
     
 //     cl /= AA*AA;
-//     FragColor = cl;
+//     frag_color = cl;
 // }
 // `;
 
@@ -406,7 +407,7 @@ const FS_DEFAULT3 = `#version 300 es
 #define MAX_NUM_PARAMS_BUFFER 5
 
 precision highp float;
-out vec4 FragColor;
+out vec4 frag_color;
 
 
 in mediump vec4 v_col;
@@ -414,7 +415,7 @@ in mediump vec2 v_dim;
 in mediump vec2 v_wpos;
 in mediump vec3 v_style;
 in mediump vec2 v_res;
-// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
 
 float sdRoundBox( in vec2 p, in vec2 b, in vec4 r ) 
 {
@@ -439,7 +440,7 @@ void main( )
     // p.x/=ratio.x;
     // p/=p.y;
 
-    // FragColor = vec4(p.x, p.y, 0., 1.);
+    // frag_color = vec4(p.x, p.y, 0., 1.);
     // return;
 
     vec2 si = vec2(0.3,0.05);
@@ -456,7 +457,7 @@ void main( )
     col = mix( col, vec3(1.0), 1.0-smoothstep(0.0,0.006,abs(d)) );
 
 
-    FragColor = vec4(col,1.0);
+    frag_color = vec4(col,1.0);
 }
 
 `;
@@ -475,7 +476,7 @@ const FS_DEFAULT = `#version 300 es
 #define mix2Orange vec3((1./255.)*220.,(1./255.)*190., (1./255.)*40.)
 
 precision highp float;
-out vec4 FragColor;
+out vec4 frag_color;
 
 
 in mediump vec4 v_col;
@@ -483,7 +484,7 @@ in mediump vec2 v_dim;
 in mediump vec2 v_wpos;
 in mediump float v_time;
 in mediump vec3 v_style;
-in mediump float v_params[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
+in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 
 
@@ -493,14 +494,14 @@ void main(void)
     mediump float borderWidth   = v_style.y;                // Border Width
     mediump float featherWidth  = v_style.z;                // Border Feather Distance
 
-    float ypos   = v_params[1] - v_wpos.y;                  // Transform y coord from top=0 to top=windowHeight
+    float ypos   = v_uniforms_buffer[1] - v_wpos.y;                  // Transform y coord from top=0 to top=windowHeight
     float left   = v_wpos.x - v_dim.x ;          // Left side of current geometry
     float right  = v_wpos.x + v_dim.x;
     float top    = ypos + v_dim.y;
     float bottom = ypos - v_dim.y;
 
     
-    vec2 res = vec2(v_params[0], v_params[1]);              // Screen resolution
+    vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);              // Screen resolution
     res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
     vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
     uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
@@ -509,8 +510,8 @@ void main(void)
 
     float decr = .5;
     vec3 bg = mix(v_col.rgb, v_col.rgb*decr, length(uv));
-    FragColor = vec4(bg, v_col.a);
-    FragColor.rgb *= FragColor.a;                           // Premultiply alpha
+    frag_color = vec4(bg, v_col.a);
+    frag_color.rgb *= frag_color.a;                           // Premultiply alpha
 
     vec4 borderColor = vec4(bg, 1.);
     if(borderWidth > 0.0)
@@ -528,7 +529,7 @@ void main(void)
     if(v_col.a > 0.0)
     if(pixelXpos < left+borderWidth+featherWidth )
     {
-        FragColor = borderColor;
+        frag_color = borderColor;
         
         if(pixelXpos < left+featherWidth
             && pixelYpos < top-borderWidth && pixelYpos > bottom+borderWidth) 
@@ -536,22 +537,22 @@ void main(void)
             // float alpha = (1.0/featherWidth) * (pixelXpos-left); 
             pixelDist = length(pixelXpos - left);
             float alpha = (1.0/featherWidth) * (pixelDist); 
-            FragColor *= alpha;
-            FragColor.a = alpha;
+            frag_color *= alpha;
+            frag_color.a = alpha;
         }
     }
     // RIGHT BORDER 
     else if(pixelXpos > right-borderWidth-featherWidth )
     {
-        FragColor = borderColor;
+        frag_color = borderColor;
             
         if(pixelXpos > right-featherWidth
             && pixelYpos < top-borderWidth && pixelYpos > bottom+borderWidth) 
         {
             pixelDist = length(right - pixelXpos);
             float alpha = (1.0/featherWidth) * (pixelDist); 
-            FragColor *= alpha;
-            FragColor.a = alpha;
+            frag_color *= alpha;
+            frag_color.a = alpha;
         }
     }
 
@@ -561,7 +562,7 @@ void main(void)
         // && pixelXpos > left+borderWidth && pixelXpos < right-borderWidth) 
     {
         if(pixelXpos > left+borderWidth+featherWidth && pixelXpos < right-borderWidth-featherWidth)
-            FragColor = borderColor;
+            frag_color = borderColor;
             
         if(pixelYpos > top-featherWidth
             && pixelXpos > left+borderWidth && pixelXpos < right-borderWidth) 
@@ -569,8 +570,8 @@ void main(void)
             // float alpha = (1.0/featherWidth) * (top - pixelYpos); 
             pixelDist = length(top - pixelYpos);
             float alpha = (1.0/featherWidth) * (pixelDist); 
-            FragColor.rgb *= alpha;
-            FragColor.a = alpha;
+            frag_color.rgb *= alpha;
+            frag_color.a = alpha;
         }
     }
     // BOTTOM BORDER
@@ -578,15 +579,15 @@ void main(void)
         && pixelXpos > left+borderWidth && pixelXpos < right-borderWidth) 
     {
         if(pixelXpos > left+borderWidth+featherWidth && pixelXpos < right-borderWidth-featherWidth)
-            FragColor = borderColor;
+            frag_color = borderColor;
         
         if(pixelYpos < bottom+featherWidth)
         {
             // float alpha = (1.0/featherWidth) * (pixelYpos-bottom); 
             pixelDist = length(pixelYpos - bottom);
             float alpha = (1.0/featherWidth) * (pixelDist); 
-            FragColor.rgb *= alpha;
-            FragColor.a = alpha;
+            frag_color.rgb *= alpha;
+            frag_color.a = alpha;
         }
     }
     
@@ -604,12 +605,12 @@ void main(void)
         if(pixelDist > uRadius)                                                                            // Set feathered outer border side
         {
             float alpha = 1.- (1.0/featherWidth) * (pixelDist-uRadius); 
-            FragColor = borderColor;
-            FragColor.rgb *= alpha;
-            FragColor.a = alpha;
+            frag_color = borderColor;
+            frag_color.rgb *= alpha;
+            frag_color.a = alpha;
         }
         else if(pixelDist > uRadius-borderWidth) // -borderWidth to have round inner corner
-            FragColor = borderColor;
+            frag_color = borderColor;
     }
     // Create Round Corners (for RIGTH-UP corner)
     else if( pixelXpos > v_wpos.x && pixelYpos > ypos && pixelXpos > right-uRadius-featherWidth && pixelYpos > top-uRadius-featherWidth) 
@@ -618,12 +619,12 @@ void main(void)
         if(pixelDist > uRadius)                                                                             // Set feathered outer border side
         {
             float alpha = 1.0-(1.0/featherWidth) * (pixelDist-uRadius); 
-            FragColor = borderColor;
-            FragColor.rgb *= alpha;
-            FragColor.a = alpha;
+            frag_color = borderColor;
+            frag_color.rgb *= alpha;
+            frag_color.a = alpha;
         }
         else if(pixelDist > uRadius-borderWidth) // -borderWidth to have round inner corner
-            FragColor = borderColor;
+            frag_color = borderColor;
 
     }
     // Create Round Corners (for RIGHT-DOWN corner)
@@ -633,12 +634,12 @@ void main(void)
         if(pixelDist > uRadius)                                                                                 // Set feathered outer border side
         {
             float alpha = 1.0-(1.0/featherWidth) * (pixelDist-uRadius); 
-            FragColor = borderColor;
-            FragColor.rgb *= alpha;
-            FragColor.a = alpha;
+            frag_color = borderColor;
+            frag_color.rgb *= alpha;
+            frag_color.a = alpha;
         }
         else if(pixelDist > uRadius-borderWidth) // -borderWidth to have round inner corner
-            FragColor = borderColor;
+            frag_color = borderColor;
     }
     // Create Round Corners (for LEFT-DOWN corner)
     else if(pixelXpos < v_wpos.x && pixelYpos < ypos && pixelXpos < left+uRadius+featherWidth && pixelYpos < bottom+uRadius+featherWidth) 
@@ -647,16 +648,16 @@ void main(void)
         if(pixelDist > uRadius)                                                                                 // Set feathered outer border side
         {
             float alpha = 1.0-(1.0/featherWidth) * (pixelDist-uRadius); 
-            FragColor = borderColor;
-            FragColor.rgb *= alpha;
-            FragColor.a = alpha;
+            frag_color = borderColor;
+            frag_color.rgb *= alpha;
+            frag_color.a = alpha;
         }
         else if(pixelDist > uRadius-borderWidth) // -borderWidth to have round inner corner
-        FragColor = borderColor;
+        frag_color = borderColor;
     }
     /* * * * * * * * * * * * * * * * * * * * * * * END OF FEATHER */
     
-    // FragColor = vec4(1.);
+    // frag_color = vec4(1.);
 
 }
 `;
@@ -670,13 +671,13 @@ precision mediump float;
 in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump vec2  v_dim;
-in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
+in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 void main()
 {
-    float t = v_params[2]*.1;
+    float t = v_uniforms_buffer[2]*.1;
     
     vec2 dim = v_dim;                                       // Mesh Dimentions
     dim /= (min(dim.x, dim.y) / max(dim.x, dim.y))*1.5;     // Mesh Dimentions
@@ -685,8 +686,8 @@ void main()
     // uv*=sin(t*.5)-1.4;
 
     vec3 col = mix(vec3(0.345, 0.780, 0.988), vec3(0.361, 0.020, 0.839), length(uv));
-    FragColor = vec4(col, 1.);
-    // FragColor = vec4(vec3(.0), 1.0);
+    frag_color = vec4(col, 1.);
+    // frag_color = vec4(vec3(.0), 1.0);
 }`;
 
 const FS_DEFAULT_TEXTURE_SDF = `#version 300 es
@@ -699,7 +700,7 @@ in highp vec2 v_sdf;       // [0]:SdfInner, [1]:SdfOuter
 
 uniform sampler2D u_Sampler0;
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 void main(void) {
     
@@ -709,8 +710,8 @@ void main(void) {
     float b = max(texture(u_Sampler0, v_tex_coord).r, max(texture(u_Sampler0, v_tex_coord).g, texture(u_Sampler0, v_tex_coord).b));
     float pixelDist = 1. - b;
     float alpha = 1. - smoothstep(inner, inner + outer, pixelDist);
-    FragColor = v_col * vec4(alpha);
-    // FragColor = vec4(1);
+    frag_color = v_col * vec4(alpha);
+    // frag_color = vec4(1);
 
 }
 `;
@@ -723,15 +724,15 @@ in mediump vec4 v_col;
 in mediump vec2 v_tex_coord;
 
 uniform sampler2D u_Sampler0;
-out vec4 FragColor;
+out vec4 frag_color;
 
 void main(void) {
 
     vec4 col = texture( u_Sampler0, v_tex_coord) * v_col;
-    FragColor = col * texture(u_Sampler0, v_tex_coord).a;
+    frag_color = col * texture(u_Sampler0, v_tex_coord).a;
     // if(texture(u_Sampler0, v_tex_coord).x < 0.004)
-    // FragColor = vec4(1.);
-    // FragColor.rgb *= alpha;
+    // frag_color = vec4(1.);
+    // frag_color.rgb *= alpha;
 }
 `;
 
@@ -795,7 +796,7 @@ in mediump float v_time;
 in mediump vec2  v_dim;
 in mediump vec2 v_res;
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 void main(void)
 {
@@ -827,7 +828,7 @@ void main(void)
     col = col.zyx;
 	
 	float a = c * (1.-pow(uv.y,3.));
-	FragColor = vec4( mix(vec3(0.),col,a), .0);
+	frag_color = vec4( mix(vec3(0.),col,a), .0);
 }
 `;
 // const FS_NOISE = `#version 300 es
@@ -875,7 +876,7 @@ void main(void)
 // in mediump vec2  v_dim;
 // in mediump vec2 v_res;
 
-// out vec4 FragColor;
+// out vec4 frag_color;
 
 // void main(void)
 // {
@@ -911,10 +912,10 @@ void main(void)
 //     // col *= pow(shape, 1.); // Longer tail = smaller float
     
 //     // float r = .3;
-//     // FragColor = vec4(col*d*revT , d*1.-c1);    
-//     FragColor = vec4(col*d , d*1.-c1);    
-//     // FragColor = vec4(1.);    
-//     // if(time > 0.1) FragColor = vec4(1.);    
+//     // frag_color = vec4(col*d*revT , d*1.-c1);    
+//     frag_color = vec4(col*d , d*1.-c1);    
+//     // frag_color = vec4(1.);    
+//     // if(time > 0.1) frag_color = vec4(1.);    
 // }
 // `;
 
@@ -970,9 +971,9 @@ in mediump vec2  v_wpos;
 in mediump float v_time;
 in mediump vec2  v_dim;
 in mediump vec2  u_Res;
-// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 void main(void)
 {
@@ -1008,9 +1009,9 @@ void main(void)
     vec3 nc = MinVec3F(PowVec3(color, power), 1.);
     vec4 c = mix(vec4(col,c1), vec4(vec3(noise1*nc), 0.), pow((shape-c1)*noise1*F*2.5, 3.0));
 
-    FragColor = c;    
-    // FragColor = vec4(nc, 1.);    
-    // FragColor.a += .1;    
+    frag_color = c;    
+    // frag_color = vec4(nc, 1.);    
+    // frag_color.a += .1;    
 
 }
 `;
@@ -1024,9 +1025,9 @@ in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump float v_time;
 in mediump vec2  v_dim;
-in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
+in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 
 
@@ -1178,9 +1179,9 @@ vec3 voronoi( vec3 x )
 
 void main()
 {
-    float t = v_params[2]*.1;
+    float t = v_uniforms_buffer[2]*.1;
 
-    vec2 res = vec2(v_params[0], v_params[1]);              // Screen resolution
+    vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);              // Screen resolution
     res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
     vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
     uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
@@ -1242,15 +1243,15 @@ void main()
 
     float v = VorMap(vec3(uv, uv.x));
     
-    // FragColor = vec4(abs(v)*1000000000000000000000000000000000000000., abs(v), 0., 1.);
+    // frag_color = vec4(abs(v)*1000000000000000000000000000000000000000., abs(v), 0., 1.);
 
-    FragColor = vec4(col2, 1.);
-    // FragColor = vec4(sqrt(clamp(col, 0., 1.)), 1);
+    frag_color = vec4(col2, 1.);
+    // frag_color = vec4(sqrt(clamp(col, 0., 1.)), 1);
     
     // if(uv.x < .11)
-    //     FragColor = vec4(1., 0., 0., 1.);
+    //     frag_color = vec4(1., 0., 0., 1.);
     // else if(pos.y < .5)
-    //     FragColor = vec4(0., 1., 1., 1.);
+    //     frag_color = vec4(0., 1., 1., 1.);
 }
 
 `;
@@ -1263,13 +1264,13 @@ const FS_CRAMBLE = `#version 300 es
 #define MAX_NUM_PARAMS_BUFFER 5
 
 precision highp float;
-out vec4 FragColor;
+out vec4 frag_color;
 
 in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump float v_time;
 in mediump vec2  v_dim;
-in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
+in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
 
 
 #define STEPS 250.0
@@ -1387,7 +1388,7 @@ vec3 norm(vec3 p, float iTime)
 
 vec4 render(vec2 fragCoord, float iTime)
 {
-    vec2 res = vec2(v_params[0], v_params[1]);
+    vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);
     vec2 uv = ((fragCoord-0.5*res.xy)/res.y) * 2.2;
     vec3 col = vec3(0);
     uv.x-=0.025;
@@ -1504,7 +1505,7 @@ vec4 render(vec2 fragCoord, float iTime)
 
 void main()
 {
-    float iTime = v_params[2];
+    float iTime = v_uniforms_buffer[2];
     vec2 uv = gl_FragCoord.xy;
     float px = 1./AA, i, j; 
     vec4 cl2, cl;
@@ -1512,7 +1513,7 @@ void main()
     if(AA == 1.)
     {
         cl = render(uv, iTime);
-        FragColor = cl;
+        frag_color = cl;
         return;
     }
     
@@ -1529,7 +1530,7 @@ void main()
     }
     
     cl /= AA*AA;
-    FragColor = cl;
+    frag_color = cl;
 }
 `;
 
@@ -1549,7 +1550,10 @@ export function FragmentShaderChoose(sid) {
     else if (sid & SID.FX.FS_NOISE) { return FS_NOISE; }
     else if (sid & SID.ATTR.STYLE) {
         if (sid & SID.FX.FS_CRAMBLE) { return FS_CRAMBLE; }
-        else if (sid & SID.DEF2) { return FS_DEFAULT2; }
+        else if (sid & SID.DEF2) { 
+            return FragmentShaderCreate(sid);
+            // return FS_DEFAULT2; 
+        }
         else if (sid & SID.DEF3) { return FS_DEFAULT3; }
         else return FS_DEFAULT;
     }
@@ -1560,7 +1564,12 @@ export function FragmentShaderChoose(sid) {
     else if (sid & SID.FX.FS_PARTICLES) { return FS_PARTICLES; }
     else if (sid & SID.FX.FS_EXPLOSION_CIRCLE) { return FS_EXPLOSION_CIRCLE; }
     else if (sid & SID.FX.FS_EXPLOSION_SIMPLE) { return FS_EXPLOSION_SIMPLE; }
+    
+    console.warn('No Fragment Shader found with this SID. Loading Default.');
+    // alert('No Vertex Shader found with this SID');
 
+    // return FS_DEFAULT2;
+    return FragmentShaderCreate(sid);
 }
 
 /*************************************************************************
@@ -1581,13 +1590,13 @@ export function FragmentShaderChoose(sid) {
 // // #define h13(n) fract((n)*vec3(13.9898, 57.233, 37.6114) * 43758.5453123)
 
 // precision highp float;
-// out vec4 FragColor;
+// out vec4 frag_color;
 
 // in mediump vec4  v_pos;
 // in mediump vec2  v_wpos;
 // in mediump float v_time;
 // in mediump vec2  v_dim;
-// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
 
 // float dbgT = 0.; // A global debug time
 
@@ -1732,17 +1741,17 @@ export function FragmentShaderChoose(sid) {
 
 // void main()
 // {
-//     float iTime = v_params[2];
+//     float iTime = v_uniforms_buffer[2];
 //     dbgT = cos(iTime*1.)*2.;
-//     vec2 res = vec2(v_params[0], v_params[1]);
+//     vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);
 //     vec2 local = vec2(v_wpos.x, (res.y-v_wpos.y)); // Find local mesh coords(and reverse y)
 //     vec2 uv = (gl_FragCoord.xy)/local; // Transform to 0.0-1.0 coord system
 //     uv -= 1.;
 
-//     FragColor = render(uv, iTime);
+//     frag_color = render(uv, iTime);
 
 //     // if(dbgT > 0.49 && dbgT < 0.51)
-//     // FragColor = vec4(1.,0.,1.,1.);
+//     // frag_color = vec4(1.,0.,1.,1.);
 
 //     // DEBUG
 //     bool center = false;
@@ -1751,9 +1760,9 @@ export function FragmentShaderChoose(sid) {
 
 //     if(center)
 //     {
-//         if(dbgT > 1.) FragColor = vec4(0.,1.,1.,1.);
-//         else if(dbgT < 0.) FragColor = vec4(1.,1.,0.,1.);
-//         else if(dbgT == 0.) FragColor = vec4(1.,0.,1.,1.);
+//         if(dbgT > 1.) frag_color = vec4(0.,1.,1.,1.);
+//         else if(dbgT < 0.) frag_color = vec4(1.,1.,0.,1.);
+//         else if(dbgT == 0.) frag_color = vec4(1.,0.,1.,1.);
 //     }
 
 // }
@@ -1772,13 +1781,13 @@ export function FragmentShaderChoose(sid) {
 // // #define h13(n) fract((n)*vec3(13.9898, 57.233, 37.6114) * 43758.5453123)
 
 // precision highp float;
-// out vec4 FragColor;
+// out vec4 frag_color;
 
 // in mediump vec4  v_pos;
 // in mediump vec2  v_wpos;
 // in mediump float v_time;
 // in mediump vec2  v_dim;
-// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
 
 // float dbgT = 0.; // A global debug time
 
@@ -1931,23 +1940,23 @@ export function FragmentShaderChoose(sid) {
 
 // void main()
 // {
-//     float iTime = v_params[2];
+//     float iTime = v_uniforms_buffer[2];
 //     dbgT = cos(iTime*1.)*2.;
-//     vec2 res = vec2(v_params[0], v_params[1]);
+//     vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);
 
 
 //     vec2 uv = (gl_FragCoord.xy)/res; // Transform to 0.0-1.0 coord system
 //     vec2 pos = vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y)); 
 //     uv -= pos;
 
-//     FragColor = render(uv, iTime);
+//     frag_color = render(uv, iTime);
 
 
 
 //     // DEBUG
 
 //     // if(dbgT > 0.49 && dbgT < 0.51)
-//     // FragColor = vec4(1.,0.,1.,1.);
+//     // frag_color = vec4(1.,0.,1.,1.);
 
 //     bool center = false;
 //     if( gl_FragCoord.x > 250. && gl_FragCoord.x < 360. &&
@@ -1955,9 +1964,9 @@ export function FragmentShaderChoose(sid) {
 
 //     if(center)
 //     {
-//         if(dbgT > 1.) FragColor = vec4(0.,1.,1.,1.);
-//         else if(dbgT < 0.) FragColor = vec4(1.,1.,0.,1.);
-//         else if(dbgT == 0.) FragColor = vec4(1.,0.,1.,1.);
+//         if(dbgT > 1.) frag_color = vec4(0.,1.,1.,1.);
+//         else if(dbgT < 0.) frag_color = vec4(1.,1.,0.,1.);
+//         else if(dbgT == 0.) frag_color = vec4(1.,0.,1.,1.);
 //     }
 
 // }
@@ -1976,13 +1985,13 @@ export function FragmentShaderChoose(sid) {
 // // #define h13(n) fract((n)*vec3(13.9898, 57.233, 37.6114) * 43758.5453123)
 
 // precision highp float;
-// out vec4 FragColor;
+// out vec4 frag_color;
 
 // in mediump vec4  v_pos;
 // in mediump vec2  v_wpos;
 // in mediump float v_time;
 // in mediump vec2  v_dim;
-// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
 
 // float dbgT = 0.; // A global debug time
 
@@ -2118,28 +2127,28 @@ export function FragmentShaderChoose(sid) {
 
 // void main()
 // {
-//     float iTime = v_params[2];
+//     float iTime = v_uniforms_buffer[2];
 //     dbgT = cos(iTime*1.)*2.;
-//     vec2 res = vec2(v_params[0], v_params[1]);
+//     vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);
 
 //     vec2 uv = (gl_FragCoord.xy)/res; // Transform to 0.0-1.0 coord system
 //     vec2 pos = vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y)); 
 //     uv -= pos;
 
-//     FragColor = render(uv, iTime);
+//     frag_color = render(uv, iTime);
 
 //     // DEBUG
 //     // if(dbgT > 0.49 && dbgT < 0.51)
-//     // FragColor = vec4(1.,0.,1.,1.);
+//     // frag_color = vec4(1.,0.,1.,1.);
 //     // bool center = false;
 //     // if( gl_FragCoord.x > 250. && gl_FragCoord.x < 360. &&
 //     //     gl_FragCoord.y > 390. && gl_FragCoord.y < 400.) center = true;
 
 //     // if(center)
 //     // {
-//     //     if(dbgT > 1.) FragColor = vec4(0.,1.,1.,1.);
-//     //     else if(dbgT < 0.) FragColor = vec4(1.,1.,0.,1.);
-//     //     else if(dbgT == 0.) FragColor = vec4(1.,0.,1.,1.);
+//     //     if(dbgT > 1.) frag_color = vec4(0.,1.,1.,1.);
+//     //     else if(dbgT < 0.) frag_color = vec4(1.,1.,0.,1.);
+//     //     else if(dbgT == 0.) frag_color = vec4(1.,0.,1.,1.);
 //     // }
 
 // }
@@ -2158,13 +2167,13 @@ export function FragmentShaderChoose(sid) {
 
 // // out vec4 O;
 // precision highp float;
-// out vec4 FragColor;
+// out vec4 frag_color;
 
 // in mediump vec4  v_pos;
 // in mediump vec2  v_wpos;
 // in mediump float v_time;
 // in mediump vec2  v_dim;
-// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
 
 // vec2 vor(vec2 v, vec3 p, vec3 s)
 // {
@@ -2305,8 +2314,8 @@ export function FragmentShaderChoose(sid) {
 
 // void main()
 // {
-//     float iTime = v_params[2];
-//     vec2 res = vec2(v_params[0], v_params[1]);
+//     float iTime = v_uniforms_buffer[2];
+//     vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);
 //     // vec2 uv = ((gl_FragCoord.xy-0.5*res.xy)/res.y) * 2.2;
 //     // vec2 uv = ((gl_FragCoord.xy-0.5*res.xy)/res.y);
 
@@ -2317,7 +2326,7 @@ export function FragmentShaderChoose(sid) {
 //     uv.y -= .5;
 //     // uv *= 1.-(gl_FragCoord.xy/v_dim);
 
-//     FragColor = render(uv, iTime);
+//     frag_color = render(uv, iTime);
 // }
 // `;
 

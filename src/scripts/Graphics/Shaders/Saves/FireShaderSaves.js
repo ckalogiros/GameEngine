@@ -44,15 +44,15 @@
 // in mediump vec4 v_Color;
 // in mediump vec2 v_pos;
 // in mediump vec2 v_wpos;
-// in mediump float v_params[5];           
+// in mediump float v_uniforms_buffer[5];           
 
-// out vec4 FragColor;
+// out vec4 frag_color;
 
 // void main()
 // {
-//     float xdir = v_params[0];
-//     float ydir = v_params[1];
-//     float time = v_params[2];
+//     float xdir = v_uniforms_buffer[0];
+//     float ydir = v_uniforms_buffer[1];
+//     float time = v_uniforms_buffer[2];
 
 //     float dimf = 1.0;
 //     vec2 dim = vec2(700. * dimf, 800. * dimf);
@@ -60,8 +60,8 @@
 //     vec2 uv = gl_FragCoord.xy / dim;
 //     uv += vec2(-.5, -.0); // 0 to 1
 
-//     // vec2 mpos = vec2(v_params[3]/dim.x, 1.-(v_params[4]/dim.y)-0.5); 
-//     vec2 mpos = vec2(v_params[3]/dim.x-.5, 1.-(v_params[4]/dim.y)); 
+//     // vec2 mpos = vec2(v_uniforms_buffer[3]/dim.x, 1.-(v_uniforms_buffer[4]/dim.y)-0.5); 
+//     vec2 mpos = vec2(v_uniforms_buffer[3]/dim.x-.5, 1.-(v_uniforms_buffer[4]/dim.y)); 
 //     // mpos = abs(mpos);
 
 //     vec2 q = uv * vec2(2.,2.);
@@ -108,14 +108,14 @@
 
 //     float a = 1.-c;
 //     col = col.zyx;                                      // BLUE_FLAME
-//     // FragColor = vec4(mix(vec3(0.),col*noiz, 1.-a), 1.);
-//     // FragColor = vec4(mix(vec3(0.),col, 1.-a), 1.);
-//     FragColor = vec4(vec3(noiz*col), 1.);
-//     // FragColor = vec4(vec3(v), z);
+//     // frag_color = vec4(mix(vec3(0.),col*noiz, 1.-a), 1.);
+//     // frag_color = vec4(mix(vec3(0.),col, 1.-a), 1.);
+//     frag_color = vec4(vec3(noiz*col), 1.);
+//     // frag_color = vec4(vec3(v), z);
 
 
-//     float alpha = smoothstep(0.0, 0.15, mix(FragColor.r, FragColor.g, FragColor.r));
-//     // FragColor.a *= alpha;
+//     float alpha = smoothstep(0.0, 0.15, mix(frag_color.r, frag_color.g, frag_color.r));
+//     // frag_color.a *= alpha;
 // }
 // `;
 
@@ -171,15 +171,15 @@
 //     in mediump vec4 v_Color;
 //     in mediump vec2 v_pos;
 //     in mediump vec2 v_wpos;
-//     in mediump float v_params[5];         
+//     in mediump float v_uniforms_buffer[5];         
 
-//     out vec4 FragColor;
+//     out vec4 frag_color;
 
 //     void main()
 //     {
-//         float xdir   = v_params[0];
-//         float ydir   = v_params[1];
-//         float iTime  = v_params[2];
+//         float xdir   = v_uniforms_buffer[0];
+//         float ydir   = v_uniforms_buffer[1];
+//         float iTime  = v_uniforms_buffer[2];
 //         float ypos   = 700. - v_pos.y;             // Transform y coord from top=0 to top=windowHeight
 //         float left   = (v_pos.x - v_wpos.x);                 // Left side of current geometry
 //         float right  = (v_pos.x + v_wpos.x);
@@ -220,10 +220,10 @@
 
 //         float a = c * (1.-pow(uv.y, 3.));
 //         col = col.zyx;                                      // BLUE_FLAME
-//         FragColor = vec4(mix(vec3(0.),col, a), 1.);
+//         frag_color = vec4(mix(vec3(0.),col, a), 1.);
 
-//         float alpha = smoothstep(0.0, 0.3, mix(FragColor.r, FragColor.g, FragColor.r));
-//         FragColor.a *= alpha;
+//         float alpha = smoothstep(0.0, 0.3, mix(frag_color.r, frag_color.g, frag_color.r));
+//         frag_color.a *= alpha;
 //     }
 // `;
 
@@ -278,24 +278,24 @@
 //     in mediump vec4 v_Color;
 //     in mediump vec2 v_pos;
 //     in mediump vec2 v_wpos;
-//     in mediump float v_params[7];           // [0]:WinWidth, [1]:WinHeight, [3]:Time
+//     in mediump float v_uniforms_buffer[7];           // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
-//     out vec4 FragColor;
+//     out vec4 frag_color;
 
 //     void main()
 //     {
-//         float xdir = v_params[0];
-//         float ydir = v_params[1];
-//         float time = v_params[2];
-//         // vec2 mpos = vec2(v_params[3], v_params[4]);
-//         float xvecdiff = v_params[5];
-//         float yvecdiff = v_params[6];
+//         float xdir = v_uniforms_buffer[0];
+//         float ydir = v_uniforms_buffer[1];
+//         float time = v_uniforms_buffer[2];
+//         // vec2 mpos = vec2(v_uniforms_buffer[3], v_uniforms_buffer[4]);
+//         float xvecdiff = v_uniforms_buffer[5];
+//         float yvecdiff = v_uniforms_buffer[6];
 
 //         float dimf = 1.0;
 //         vec2 dim = vec2(200.*dimf, 200.0*dimf);
-//         // vec2 mpos = vec2(v_params[3]/dim.x, 1.-(v_params[4]/dim.y)-0.5); 
-//         // vec2 mpos = vec2(v_params[3]/dim.x+.5, 1.-(v_params[4]/dim.y)); 
-//         vec2 mpos = vec2(v_params[3]/dim.x, 1.-(v_params[4]/dim.y)); 
+//         // vec2 mpos = vec2(v_uniforms_buffer[3]/dim.x, 1.-(v_uniforms_buffer[4]/dim.y)-0.5); 
+//         // vec2 mpos = vec2(v_uniforms_buffer[3]/dim.x+.5, 1.-(v_uniforms_buffer[4]/dim.y)); 
+//         vec2 mpos = vec2(v_uniforms_buffer[3]/dim.x, 1.-(v_uniforms_buffer[4]/dim.y)); 
 //         vec2 uv = gl_FragCoord.xy / dim;
 //         vec2 q = uv;
 
@@ -330,13 +330,13 @@
 //         col = col.zyx;              // BLUE_FLAME
 //         // float a = c * (1.-pow(uv.y, 3.));
 //         float a = c * (1.-pow(length(q-mpos), 5.));
-//         FragColor = vec4(mix(vec3(0.),col, a), 1.);
+//         frag_color = vec4(mix(vec3(0.),col, a), 1.);
 
 //         float alpha = 1.0;
-//         alpha *= smoothstep(0.0, 0.3, mix(FragColor.r, FragColor.g, FragColor.r));
-//         // alpha *= smoothstep(0.0, 0.1, mix(FragColor.r, FragColor.g, FragColor.r));
-//         // alpha *= smoothstep(0.0, 0.02, mix(FragColor.r, FragColor.g, FragColor.r));
-//         // FragColor.a *= alpha;
+//         alpha *= smoothstep(0.0, 0.3, mix(frag_color.r, frag_color.g, frag_color.r));
+//         // alpha *= smoothstep(0.0, 0.1, mix(frag_color.r, frag_color.g, frag_color.r));
+//         // alpha *= smoothstep(0.0, 0.02, mix(frag_color.r, frag_color.g, frag_color.r));
+//         // frag_color.a *= alpha;
 //     }
 // `;
 
@@ -391,22 +391,22 @@
 //         in mediump vec4 v_Color;
 //         in mediump vec2 v_pos;
 //         in mediump vec2 v_wpos;
-//         in mediump float v_params[7];           // [0]:WinWidth, [1]:WinHeight, [3]:Time
+//         in mediump float v_uniforms_buffer[7];           // [0]:WinWidth, [1]:WinHeight, [3]:Time
     
-//         out vec4 FragColor;
+//         out vec4 frag_color;
     
 //         void main()
 //         {
-//             float xdir = v_params[0];
-//             float ydir = v_params[1];
-//             float time = v_params[2];
-//             // vec2 mpos = vec2(v_params[3], v_params[4]);
-//             float xvecdiff = v_params[5];
-//             float yvecdiff = v_params[6];
+//             float xdir = v_uniforms_buffer[0];
+//             float ydir = v_uniforms_buffer[1];
+//             float time = v_uniforms_buffer[2];
+//             // vec2 mpos = vec2(v_uniforms_buffer[3], v_uniforms_buffer[4]);
+//             float xvecdiff = v_uniforms_buffer[5];
+//             float yvecdiff = v_uniforms_buffer[6];
             
 //             float dimf = 1.0;
 //             vec2 dim = vec2(200.*dimf, 200.0*dimf);
-//             vec2 mpos = vec2(v_params[3]/dim.x, 1.-(v_params[4]/dim.y)+3.); 
+//             vec2 mpos = vec2(v_uniforms_buffer[3]/dim.x, 1.-(v_uniforms_buffer[4]/dim.y)+3.); 
 //             vec2 uv = gl_FragCoord.xy / dim;
 //             vec2 q = uv;
 
@@ -446,13 +446,13 @@
 //             col = col.zyx;              // BLUE_FLAME
 //             // float a = c * (1.-pow(uv.y, 3.));
 //             float a = c * (1.-pow(length(q-mpos), 5.));
-//             FragColor = vec4(mix(vec3(0.),col, a), 1.);
+//             frag_color = vec4(mix(vec3(0.),col, a), 1.);
     
 //             float alpha = 1.0;
-//             alpha *= smoothstep(0.0, 0.3, mix(FragColor.r, FragColor.g, FragColor.r));
-//             // alpha *= smoothstep(0.0, 0.1, mix(FragColor.r, FragColor.g, FragColor.r));
-//             // alpha *= smoothstep(0.0, 0.02, mix(FragColor.r, FragColor.g, FragColor.r));
-//             // FragColor.a *= alpha;
+//             alpha *= smoothstep(0.0, 0.3, mix(frag_color.r, frag_color.g, frag_color.r));
+//             // alpha *= smoothstep(0.0, 0.1, mix(frag_color.r, frag_color.g, frag_color.r));
+//             // alpha *= smoothstep(0.0, 0.02, mix(frag_color.r, frag_color.g, frag_color.r));
+//             // frag_color.a *= alpha;
             
 //         }
 //     `;
@@ -507,20 +507,20 @@
 //         in mediump vec4 v_Color;
 //         in mediump vec2 v_pos;
 //         in mediump vec2 v_wpos;
-//         in mediump float v_params[7];           // [0]:WinWidth, [1]:WinHeight, [3]:Time
+//         in mediump float v_uniforms_buffer[7];           // [0]:WinWidth, [1]:WinHeight, [3]:Time
     
-//         out vec4 FragColor;
+//         out vec4 frag_color;
     
 //         void main()
 //         {
-//             float xdir = v_params[0];
-//             float ydir = v_params[1];
-//             float time = v_params[2];
-//             float xvecdiff = v_params[5];
-//             float yvecdiff = v_params[6];
+//             float xdir = v_uniforms_buffer[0];
+//             float ydir = v_uniforms_buffer[1];
+//             float time = v_uniforms_buffer[2];
+//             float xvecdiff = v_uniforms_buffer[5];
+//             float yvecdiff = v_uniforms_buffer[6];
             
 //             vec2 dim = vec2(700., 700.0);
-//             vec2 mpos = vec2(v_params[3]/dim.x-.5, 1.-(v_params[4]/dim.y)-.5); 
+//             vec2 mpos = vec2(v_uniforms_buffer[3]/dim.x-.5, 1.-(v_uniforms_buffer[4]/dim.y)-.5); 
 //             // vec2 mpos = vec2(0.); 
             
 //             vec2 uv = gl_FragCoord.xy / dim;
@@ -561,13 +561,13 @@
             
 //             // col = col.zyx;                                      // Red flame
 //             // float a = d * (pow(uv.y, 1.));
-//             // FragColor = vec4(mix(vec3(0.),col, noise), 1.);   
+//             // frag_color = vec4(mix(vec3(0.),col, noise), 1.);   
             
-//             float alpha = smoothstep(0.0, 1., mix(FragColor.r, FragColor.g, FragColor.r));
-//             // FragColor.a *= alpha;
-//             FragColor = vec4(col, 1.);    
-//             // FragColor = vec4(col, alpha);    
-//             // FragColor = vec4((col*col*col), alpha);    
+//             float alpha = smoothstep(0.0, 1., mix(frag_color.r, frag_color.g, frag_color.r));
+//             // frag_color.a *= alpha;
+//             frag_color = vec4(col, 1.);    
+//             // frag_color = vec4(col, alpha);    
+//             // frag_color = vec4((col*col*col), alpha);    
             
 //         }
 //     `;
@@ -624,16 +624,16 @@
 //     in mediump vec4 v_Color;
 //     in mediump vec2 v_pos;
 //     in mediump vec2 v_wpos;
-//     in highp vec3 v_params;           // [0]:WinWidth, [1]:WinHeight, [3]:Time
+//     in highp vec3 v_uniforms_buffer;           // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
-//     out vec4 FragColor;
+//     out vec4 frag_color;
 
 //     void main()
 //     {
 //         vec2 iResolution = vec2(700, 800);
 //         // float iTime = 1.0;
-//         // vec2 iResolution = vec2(v_params.x, v_params.y);
-//         float iTime = v_params.x;
+//         // vec2 iResolution = vec2(v_uniforms_buffer.x, v_uniforms_buffer.y);
+//         float iTime = v_uniforms_buffer.x;
 
 //         float ypos   = iResolution.y - v_pos.y;             // Transform y coord from top=0 to top=windowHeight
 //         float left   = (v_pos.x - v_wpos.x);                 // Left side of current geometry
@@ -669,13 +669,13 @@
 //         col = col.zyx;              // BLUE_FLAME
 //         // col = 0.85*col.yxz;      // GREEN_FLAME
 //         float a = c * (1.-pow(uv.y, 3.));
-//         FragColor = vec4(mix(vec3(0.),col, a), 1.);
+//         frag_color = vec4(mix(vec3(0.),col, a), 1.);
 
 //         float alpha = 1.0;
-//         alpha *= smoothstep(0.0, 0.3, mix(FragColor.r, FragColor.g, FragColor.r));
-//         // alpha *= smoothstep(0.0, 0.1, mix(FragColor.r, FragColor.g, FragColor.r));
-//         // alpha *= smoothstep(0.0, 0.02, mix(FragColor.r, FragColor.g, FragColor.r));
-//         // FragColor.a *= alpha;
+//         alpha *= smoothstep(0.0, 0.3, mix(frag_color.r, frag_color.g, frag_color.r));
+//         // alpha *= smoothstep(0.0, 0.1, mix(frag_color.r, frag_color.g, frag_color.r));
+//         // alpha *= smoothstep(0.0, 0.02, mix(frag_color.r, frag_color.g, frag_color.r));
+//         // frag_color.a *= alpha;
 //     }
 // `;
 
@@ -733,17 +733,17 @@
     //     in mediump vec4 v_Color;
     //     in mediump vec2 v_pos;
     //     in mediump vec2 v_wpos;
-    //     // in highp vec3 v_params;           
-    //     in mediump float v_params[5];           
+    //     // in highp vec3 v_uniforms_buffer;           
+    //     in mediump float v_uniforms_buffer[5];           
 
-    //     out vec4 FragColor;
+    //     out vec4 frag_color;
 
     //     void main()
     //     {
-    //         float xdir = v_params[0];
-    //         float ydir = v_params[1];
-    //         float time = v_params[2];
-    //         vec2 mpos = vec2(v_params[3], v_params[4]); // Mouse x pos
+    //         float xdir = v_uniforms_buffer[0];
+    //         float ydir = v_uniforms_buffer[1];
+    //         float time = v_uniforms_buffer[2];
+    //         vec2 mpos = vec2(v_uniforms_buffer[3], v_uniforms_buffer[4]); // Mouse x pos
     //         float ypos   = 800. - v_pos.y;             // Transform y coord from top=0 to top=windowHeight
     //         float left   = (v_pos.x - v_wpos.x);                 // Left side of current geometry
     //         float right  = (v_pos.x + v_wpos.x);
@@ -810,14 +810,14 @@
     //         // float a = c * (pow(uv.y, 3.));
     //         float a = 1.-c;
     //         col = col.zyx;                                      // BLUE_FLAME
-    //         // FragColor = vec4(mix(vec3(0.),col*noiz, 1.-a), 1.);
-    //         // FragColor = vec4(mix(vec3(0.),col, 1.-a), 1.);
-    //         FragColor = vec4(vec3(noiz*col), 1.);
-    //         // FragColor = vec4(vec3(noiz), a);
+    //         // frag_color = vec4(mix(vec3(0.),col*noiz, 1.-a), 1.);
+    //         // frag_color = vec4(mix(vec3(0.),col, 1.-a), 1.);
+    //         frag_color = vec4(vec3(noiz*col), 1.);
+    //         // frag_color = vec4(vec3(noiz), a);
 
 
-    //         float alpha = smoothstep(0.0, 0.15, mix(FragColor.r, FragColor.g, FragColor.r));
-    //         FragColor.a *= alpha;
+    //         float alpha = smoothstep(0.0, 0.15, mix(frag_color.r, frag_color.g, frag_color.r));
+    //         frag_color.a *= alpha;
     //     }
     // `;
 }
@@ -866,9 +866,9 @@
 //     in mediump vec4 v_Color;
 //     in mediump vec2 v_pos;
 //     in mediump vec2 v_wpos;
-//     in mediump float v_params[5];           
+//     in mediump float v_uniforms_buffer[5];           
 
-//     out vec4 FragColor;
+//     out vec4 frag_color;
 
 //     // float ypos   = 800. - v_pos.y;              // Transform y coord from top=0 to top=windowHeight
 //     // float left   = (v_pos.x - v_wpos.x);        // Left side of current geometry
@@ -882,9 +882,9 @@
 //     // vec2 localDim = vec2((right-left), (top-bottom));
 //     void main()
 //     {
-//         float xdir = v_params[0];
-//         float ydir = v_params[1];
-//         float time = v_params[2];
+//         float xdir = v_uniforms_buffer[0];
+//         float ydir = v_uniforms_buffer[1];
+//         float time = v_uniforms_buffer[2];
 
 //         float dimf = 1.0;
 //         vec2 dim = vec2(700. * dimf, 800. * dimf);
@@ -892,8 +892,8 @@
 //         vec2 uv = gl_FragCoord.xy / dim;
 //         uv += vec2(-.5, -.0); // 0 to 1
 
-//         // vec2 mpos = vec2(v_params[3]/dim.x, 1.-(v_params[4]/dim.y)-0.5); 
-//         vec2 mpos = vec2(v_params[3]/dim.x-.5, 1.-(v_params[4]/dim.y)); 
+//         // vec2 mpos = vec2(v_uniforms_buffer[3]/dim.x, 1.-(v_uniforms_buffer[4]/dim.y)-0.5); 
+//         vec2 mpos = vec2(v_uniforms_buffer[3]/dim.x-.5, 1.-(v_uniforms_buffer[4]/dim.y)); 
 //         // mpos = abs(mpos);
 
 //         vec2 q = uv * vec2(2.,2.);
@@ -927,14 +927,14 @@
 
 //         float a = 1.-c;
 //         col = col.zyx;                                      // BLUE_FLAME
-//         // FragColor = vec4(mix(vec3(0.),col*noiz, 1.-a), 1.);
-//         // FragColor = vec4(mix(vec3(0.),col, 1.-a), 1.);
-//         FragColor = vec4(vec3(noiz*col), 1.);
-//         // FragColor = vec4(vec3(v), z);
+//         // frag_color = vec4(mix(vec3(0.),col*noiz, 1.-a), 1.);
+//         // frag_color = vec4(mix(vec3(0.),col, 1.-a), 1.);
+//         frag_color = vec4(vec3(noiz*col), 1.);
+//         // frag_color = vec4(vec3(v), z);
 
 
-//         float alpha = smoothstep(0.0, 0.15, mix(FragColor.r, FragColor.g, FragColor.r));
-//         // FragColor.a *= alpha;
+//         float alpha = smoothstep(0.0, 0.15, mix(frag_color.r, frag_color.g, frag_color.r));
+//         // frag_color.a *= alpha;
 //     }
 // `;
 
@@ -987,13 +987,13 @@
     //     in mediump vec4 v_Color;
     //     in mediump vec2 v_pos;
     //     in mediump vec2 v_wpos;
-    //     in highp vec3 v_params;           // [0]:WinWidth, [1]:WinHeight, [3]:Time
+    //     in highp vec3 v_uniforms_buffer;           // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
-    //     out vec4 FragColor;
+    //     out vec4 frag_color;
 
     //     void main()
     //     {
-    //         float iTime = v_params.x;
+    //         float iTime = v_uniforms_buffer.x;
     //         // float ypos   = iResolution.y - v_pos.y;             // Transform y coord from top=0 to top=windowHeight
     //         // float left   = (v_pos.x - v_wpos.x);                 // Left side of current geometry
     //         // float right  = (v_pos.x + v_wpos.x);
@@ -1034,10 +1034,10 @@
 
     //         float a = c * (1.-pow(uv.y, 3.));
     //         col = col.zyx;                                      // BLUE_FLAME
-    //         FragColor = vec4(mix(vec3(0.),col, a), 1.);
+    //         frag_color = vec4(mix(vec3(0.),col, a), 1.);
 
-    //         float alpha = smoothstep(0.0, 0.3, mix(FragColor.r, FragColor.g, FragColor.r));
-    //         FragColor.a *= alpha;
+    //         float alpha = smoothstep(0.0, 0.3, mix(frag_color.r, frag_color.g, frag_color.r));
+    //         frag_color.a *= alpha;
     //     }
     // `;
 }

@@ -1,17 +1,17 @@
 "use=strict";
 
-import { Rect } from "../Engine/Drawables/Shapes/Rect.js";
-import { GfxSetVbShow, GlAddMesh, GlBindTexture, GlBindVAO, GlUpdateIndexBufferData, GlUpdateVertexBufferData, GlUseProgram } from "./GlBuffers.js";
-import { GlGetPrograms, GlGetVB } from "./GlProgram.js";
-import { GlCreateTexture, GlGetTexture } from "./GlTextures.js";
-import { AnimationsGet } from "../Engine/Animations/Animations.js";
-import { Min3 } from "../Helpers/Math/MathOperations.js";
-import { ShowTotalScore } from "../Engine/Events/SceneEvents.js";
-import { MeshBuffer, TempMesh } from "../Engine/Drawables/MeshBuffer.js";
+import { Rect } from "../../Engine/Drawables/Shapes/Rect.js";
+import { GfxSetVbShow, GlBindTexture, GlBindVAO, GlUpdateIndexBufferData, GlUpdateVertexBufferData, GlUseProgram } from "./GlBuffers.js";
+import { GlGetPrograms, GlGetVB } from "../GlProgram.js";
+import { GlCreateTexture, GlGetTexture } from "../GlTextures.js";
+import { AnimationsGet } from "../../Engine/Animations/Animations.js";
+import { Min3 } from "../../Helpers/Math/MathOperations.js";
+import { ShowTotalScore } from "../../Engine/Events/SceneEvents.js";
+import { MeshBuffer, TempMesh } from "../../Engine/Drawables/MeshBuffer.js";
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * DrawQueue's for Framebuffers 
+ * RenderQueue's for Framebuffers 
  */
 // const DRAWQUEUE_FRAMEBUFFERS_SIZE = 4;
 class FrameBuffersQueue {
@@ -232,7 +232,7 @@ export function FramebuffersDraw(fbidx) {
          GlUseProgram(progs[progIdx].program, progIdx)
 
    if (progs[progIdx].timer.isOn) progs[progIdx].UpdateTimer();
-   if (progs[progIdx].uniformsNeedUpdate) progs[progIdx].UniformsUpdateParamsBuffer(gl);
+   if (progs[progIdx].uniformsNeedUpdate) progs[progIdx].UniformsUpdateuniformsBuffer(gl);
    if(GL.BOUND_VAO !== ib.vao) GlBindVAO(ib.vao)
 
    
@@ -288,7 +288,7 @@ export function FramebufferRenderToFramebuffer(drawQueue, drawQueueCount) {
               GlUseProgram(progs[progIdx].program, progIdx)
           
           if (progs[progIdx].timer.isOn) progs[progIdx].UpdateTimer();
-          if (progs[progIdx].uniformsNeedUpdate) progs[progIdx].UniformsUpdateParamsBuffer(gl);
+          if (progs[progIdx].uniformsNeedUpdate) progs[progIdx].UniformsUpdateuniformsBuffer(gl);
    
           
           if (progs[progIdx].info.sid & SID.ATTR.TEX2) {

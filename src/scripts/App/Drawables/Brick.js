@@ -1,9 +1,8 @@
 "use strict";
-import { GlAddMesh } from '../../Graphics/GlBuffers.js'
 import * as math from '../../Helpers/Math/MathOperations.js'
 import { BallBrickCollision, BallSetIsReady } from './Ball.js';
-import { GlMove } from '../../Graphics/GlBufferOps.js';
-import { GlSetAttrRoundCorner, GlSetAttrBorderWidth, GlSetAttrBorderFeather } from '../../Graphics/GlBufferOps.js';
+import { GlMove } from '../../Graphics/Buffers/GlBufferOps.js';
+import { GlSetAttrRoundCorner, GlSetAttrBorderWidth, GlSetAttrBorderFeather } from '../../Graphics/Buffers/GlBufferOps.js';
 import { ExplosionsCreateCircleExplosion } from '../../Engine/Drawables/Fx/Explosions.js';
 import { ParticlesCreateSystem } from '../../Engine/ParticlesSystem/Particles.js';
 import { OnStageCompleted } from '../../Engine/Events/SceneEvents.js';

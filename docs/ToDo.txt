@@ -1,3 +1,24 @@
+--------------------------------------------------- ASAP
+implement the render queue
+
+implement uniforms
+For the uniforms buffer in the shaders to be dynamic size, we must implement a 
+force reload shaders and relink current program, in order to add meshes at runtime.  
+
+implement flags (for material), 
+so that we can modify gl options, different material's flags for dif shader rendering, lighting etc.  
+
+implement vertex coloring(4) or grade hori and vertical.
+
+Delete this.needsUpdate and vb.needsUpdate
+
+Implement a Renderer, that handles the webGl context
+and a Camera class that is part of the renderer class
+and can create Projection as orthographic views
+--------------------------------------------------- ASAP
+
+
+
 --------------------------------------------------- New ToDo's
 Reimplement sid to be a class. 
 The class will return an sid 
@@ -6,6 +27,8 @@ object:{
   unif:,
   fx:,
   etc ...
+
+
 }
 --------------------------------------------------- New ToDo's
 

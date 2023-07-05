@@ -7,9 +7,9 @@ precision mediump float;
 in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump vec2  v_dim;
-in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
+in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 
 
@@ -22,7 +22,7 @@ out vec4 FragColor;
 // uniform float time;
 uniform vec2 mouse;
 uniform vec2 resolution;
-// #define iTime v_params[2]
+// #define iTime v_uniforms_buffer[2]
 
 #define iResolution resolution
 #define iMouse mouse
@@ -928,8 +928,8 @@ void paint(float t) {
 //////////////////////////////////////////////////////////
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
-    float t = v_params[2];
-    // vec2 res = vec2(v_params[0], v_params[1]);
+    float t = v_uniforms_buffer[2];
+    // vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);
     vec2 dim = v_dim;                                       // Mesh Dimentions
     dim /= (min(dim.x, dim.y) / max(dim.x, dim.y));         // Mesh Dimentions
     dim += v_wpos/dim;
@@ -946,7 +946,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 
 #ifdef GLSLSANDBOX
 void main() {
-    mainImage(FragColor, gl_FragCoord.xy);
+    mainImage(frag_color, gl_FragCoord.xy);
 }
 #endif
 

@@ -8,11 +8,11 @@ in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump vec2  v_dim;
 in mediump float v_time;
-in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
+in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
 // float time = 23.;
 
 
-out vec4 FragColor;
+out vec4 frag_color;
               
 float pn(vec3 p) {
    vec3 i = floor(p); vec4 a = dot(i, vec3(1., 57., 21.)) + vec4(0., 57., 21., 78.);
@@ -166,7 +166,7 @@ void main()
    float time = 11.8;
    float a=time*94.24777960;
    vec2 pa=.15*vec2(sin(a),cos(a));
-   // vec2 res = vec2(v_params[0], v_params[1]); 
+   // vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]); 
    vec2 res = v_dim; 
    float asp=res.x/res.y;
    vec2 p=(pa+gl_FragCoord.xy)/res.xy-0.5; 
@@ -199,7 +199,7 @@ void main()
    vec3 fx=flx(p,t, time)*flx(2.1*p+10.,0.333+t*1.1, time); 
    fx*=vr1*2.;
    fx=pow(fx,vec3(vr3)); // CPU
-   FragColor.rgb=pow(s*fx*(0.5+0.5*e),co);
+   frag_color.rgb=pow(s*fx*(0.5+0.5*e),co);
    float lf=ll*vr4-(vr6-1.2);
    vec3 dir=normalize(vec3(pp*vec2(asp*1.6,-1),-1.5)),q,r=vec3(0.,0.,4.);
    float d,ii=1.;e=0.02;
@@ -212,9 +212,9 @@ void main()
       r+=d*dir; 
       if(d<e){ ii=i/64.;break; }
    }
-   FragColor.rgb+=vr7*mix(vec3(0.),mix(vec3(1.,.5,.1),vec3(0.1,.5,1),r.y*.02+.4),pow(ii*2.,4.*vr5));
-   // FragColor.a += .1;
-   // FragColor = vec4(1.);
+   frag_color.rgb+=vr7*mix(vec3(0.),mix(vec3(1.,.5,.1),vec3(0.1,.5,1),r.y*.02+.4),pow(ii*2.,4.*vr5));
+   // frag_color.a += .1;
+   // frag_color = vec4(1.);
 }
 
 `;

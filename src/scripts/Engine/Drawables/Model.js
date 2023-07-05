@@ -3,83 +3,35 @@
 import { Geometry2D } from "./Geometry.js";
 
 let _object3DId = 0;
+let _modelId = 0;
 
-class Model3D extends Geometry2D{
-	constructor() {
+class Model2D extends Geometry2D{
+	constructor(pos, dim, scale) {
 
-		super();
+		super(pos, dim, scale);
 
-		this.isObject3D = true;
-		Object.defineProperty( this, 'id', { value: _object3DId ++ } );
+		// this.isObject3D = true;
+		// this.parent = null;
+		// this.children = [];
+		// this.matrix = new Matrix4();
+		// this.matrixWorld = new Matrix4();
+		// this.matrixAutoUpdate = Object3D.DEFAULT_MATRIX_AUTO_UPDATE;
+		// this.matrixWorldNeedsUpdate = false;
+		// this.matrixWorldAutoUpdate = Object3D.DEFAULT_MATRIX_WORLD_AUTO_UPDATE; // checked by the renderer
+		// this.layers = new Layers();
+		// this.visible = true;
+		// this.castShadow = false;
+		// this.receiveShadow = false;
+		// this.frustumCulled = true;
+		// this.renderOrder = 0;
+		// this.animations = [];
+		// this.userData = {};
 
-		this.name = '';
-		this.type = 'Model3D';
 
-		this.parent = null;
-		this.children = [];
-
-		this.up = Object3D.DEFAULT_UP.clone();
-
-		const position = new Vector3();
-		const rotation = new Euler();
-		const quaternion = new Quaternion();
-		const scale = new Vector3( 1, 1, 1 );
-
-		function onRotationChange() { quaternion.setFromEuler( rotation, false ); }
-
-		function onQuaternionChange() { rotation.setFromQuaternion( quaternion, undefined, false ); }
-
-		rotation._onChange( onRotationChange );
-		quaternion._onChange( onQuaternionChange );
-
-		Object.defineProperties( this, {
-			position: {
-				configurable: true,
-				enumerable: true,
-				value: position
-			},
-			rotation: {
-				configurable: true,
-				enumerable: true,
-				value: rotation
-			},
-			quaternion: {
-				configurable: true,
-				enumerable: true,
-				value: quaternion
-			},
-			scale: {
-				configurable: true,
-				enumerable: true,
-				value: scale
-			},
-			modelViewMatrix: {
-				value: new Matrix4()
-			},
-			normalMatrix: {
-				value: new Matrix3()
-			}
-		} );
-
-		this.matrix = new Matrix4();
-		this.matrixWorld = new Matrix4();
-
-		this.matrixAutoUpdate = Object3D.DEFAULT_MATRIX_AUTO_UPDATE;
-		this.matrixWorldNeedsUpdate = false;
-
-		this.matrixWorldAutoUpdate = Object3D.DEFAULT_MATRIX_WORLD_AUTO_UPDATE; // checked by the renderer
-
-		this.layers = new Layers();
-		this.visible = true;
-
-		this.castShadow = false;
-		this.receiveShadow = false;
-
-		this.frustumCulled = true;
-		this.renderOrder = 0;
-
-		this.animations = [];
-
-		this.userData = {};
+		/** Debug properties */
+		if(DEBUG.MATERIAL){
+			Object.defineProperty( this, 'id', { value: _modelId++ } );
+			Object.defineProperty( this, 'type', { value: 'Model' } );
+		}
    }
 }

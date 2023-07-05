@@ -67,7 +67,7 @@ export function OnMouseMove(e) {
     
     const scene = ScenesGetScene(SCENE.active.idx);
     if(scene){ OnHover(scene, mouse); }
-    if (scene.sceneIdx === SCENE.stage) { OnPlayerMove(mouse.x, mouse.xdiff); }
+    if (scene && scene.sceneIdx === SCENE.stage) { OnPlayerMove(mouse.x, mouse.xdiff); }
 }
 export function OnMouseMove_Android(e) {
     MouseSetCoords([e.clientX, e.clientY]);
@@ -137,7 +137,7 @@ export function OnTouchStart(e) {
     console.log(`OnTouchStart: x:${mouse.x}, y:${mouse.y}`);
     const scene = ScenesGetScene(SCENE.active.idx);
     if(scene){ OnHover(scene, mouse); }
-    if (scene.sceneIdx === SCENE.stage) { OnPlayerMove(mouse.x, mouse.xdiff); }
+    if (scene && scene.sceneIdx === SCENE.stage) { OnPlayerMove(mouse.x, mouse.xdiff); }
 }
 export function OnTouchEnd(e) {
     console.log(`OnTouchEnd`);
@@ -157,7 +157,7 @@ export function OnTouchMove(e) {
         OnHover(scene, mouse);
     }
 
-    if (scene.sceneIdx === SCENE.stage) {
+    if (scene && scene.sceneIdx === SCENE.stage) {
         // Move Player 
         OnPlayerMove(mouse.x, mouse.xdiff);
     }

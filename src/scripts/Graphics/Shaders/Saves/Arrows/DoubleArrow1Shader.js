@@ -3,7 +3,7 @@ const FS_DEFAULT2 = `#version 300 es
 
 
 precision highp float;
-out vec4 FragColor;
+out vec4 frag_color;
 
 
 in mediump vec4 v_col;
@@ -11,7 +11,7 @@ in mediump vec2 v_dim;
 in mediump vec2 v_wpos;
 in mediump vec2 v_Scale;
 in mediump vec3 v_style;
-in mediump float v_params[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
+in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 
 vec4 pos = vec4(.5, .5, .0, .0);
@@ -37,14 +37,14 @@ vec2 rounded_rectangle(vec2 s, float r, float bw) {
 
 void main(void) 
 {
-   float t = v_params[2];
+   float t = v_uniforms_buffer[2];
    float uRadius = v_style.x * .008;                    // Radius(From 0.01 to 0.35 good values) for rounding corners
    float borderWidth = v_style.y * 0.001;                  // Border Width. It is 0.001 for every pixel
    float feather = v_style.z;         // Border Feather Distance
    
    
 
-   vec2 res = vec2(v_params[0], v_params[1]);
+   vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);
    float clarity = 10.4; // From 0.3 to 1.2 good values 
    // float clarity = 1.; // From 0.3 to 1.2 good values 
    ScreenH = min(res.x, res.y)*clarity;
@@ -116,7 +116,7 @@ void main(void)
    // fcol = mix(fcol, pow(fcol, vec3(2.))*.85, f);
 
 
-   FragColor = vec4(fcol.rgb, alpha);
-    // FragColor = vec4(1.);
+   frag_color = vec4(fcol.rgb, alpha);
+    // frag_color = vec4(1.);
 }
 `;

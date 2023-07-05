@@ -1,4 +1,3 @@
-import { GlAddMesh } from "../../../Graphics/GlBuffers.js";
 import { Rect } from "../Shapes/Rect.js";
 import { TimerGetGlobalTimer } from "../../Timer/Timer.js";
 import { GlGetProgram } from "../../../Graphics/GlProgram.js";
@@ -23,7 +22,7 @@ class VortexMesh extends Rect {
    }
    SetUniformRadius(val) {
       const prog = GlGetProgram(this.gfxInfo.prog.idx);
-      prog.UniformsSetParamsBufferValue(val, UNIFORM_PARAMS.VORTEX.radiusIdx);
+      prog.UniformsSetuniformsBufferValue(val, UNIFORM_PARAMS.VORTEX.radiusIdx);
    }
    SetAttribParams1_Count(count) {
       this.mesh.attrParams1[VORTEX_ATTR_PARAMS1.countIdx] = count;

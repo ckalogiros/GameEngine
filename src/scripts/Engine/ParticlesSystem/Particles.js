@@ -1,8 +1,7 @@
 "use strict";
 
 import * as math from '../../Helpers/Math/MathOperations.js'
-import { GlSetAttrTime, GlSetWposXY, GlSetColor, GlSetColorAlpha, GlSetAttrParams1 } from "../../Graphics/GlBufferOps.js";
-import { GlAddMesh } from "../../Graphics/GlBuffers.js";
+import { GlSetAttrTime, GlSetWposXY, GlSetColor, GlSetColorAlpha, GlSetAttrParams1 } from "../../Graphics/Buffers/GlBufferOps.js";
 import { Mesh } from "../Drawables/Mesh.js";
 import { TimersCreateTimer } from "../Timer/Timer.js";
 

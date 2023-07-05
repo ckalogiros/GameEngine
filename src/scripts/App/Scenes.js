@@ -6,21 +6,24 @@ import { Rect, RectCreateRect } from '../Engine/Drawables/Shapes/Rect.js';
 import { Text, CalcTextWidth } from '../Engine/Drawables/Text/Text.js';
 import { DarkenColor } from '../Helpers/Helpers.js';
 import { UiCreateScore, UiCreateScoreModifier, UiCreateLives, UiCreateCombo, UiTextVariable, UiCreateTotalScore, UiCreateFps, AnimTextsInit, AnimTexts } from './Drawables/Ui/Ui.js';
-import { GlAddMesh, GfxSetVbShow } from '../Graphics/GlBuffers.js';
+import { GfxSetVbShow } from '../Graphics/Buffers/GlBuffers.js';
 import { Explosions, ExplosionsGetCircle, ExplosionsGetSimple, ExplosionsGetVolumetricExplosions, ExplosionsInit } from '../Engine/Drawables/Fx/Explosions.js';
 import { ParticleSystem, ParticleSystemFindByName, Particles } from '../Engine/ParticlesSystem/Particles.js';
 import { PowerUpGet, PowerUps } from './Drawables/PowerUp.js';
 import { BrickInit, Bricks } from './Drawables/Brick.js';
 import { TextLabel } from '../Engine/Drawables/Widgets/TextLabel.js';
-import { DrawQueueGet, DrawQueueSetPriority } from '../Engine/Renderer/DrawQueue.js';
+import { RenderQueueGet, RenderQueueSetPriority } from '../Engine/Renderer/RenderQueue.js';
 import { CoinGet, Coins } from './Drawables/Coin.js';
 import { Glow, GlowGet, GlowInit } from '../Engine/Drawables/Fx/Glow.js';
 import { Twist, TwistGet, TwistInit } from '../Engine/Drawables/Fx/Twist.js';
 import { BulletGet, GunGet, GunInit } from './Drawables/Bullet.js';
-import { Framebuffer, FramebuffersCreate, FramebuffersGet, FramebuffersInit } from '../Graphics/Renderbuffer.js';
+import { Framebuffer, FramebuffersCreate, FramebuffersGet, FramebuffersInit } from '../Graphics/Buffers/Renderbuffer.js';
 import { StageCompletedCreate, StageCompletedCreateTotalScore } from './Drawables/StageCompleted.js';
 import { Vortex, VortexCreate, VortexGet, VortexGetVortex, VortexInit } from '../Engine/Drawables/Fx/Vortex.js';
 import { Shadow, ShadowCreate, ShadowGetShadow, ShadowInit } from '../Engine/Drawables/Fx/Shadow.js';
+import { Geometry2D } from '../Engine/Drawables/Geometry.js';
+import { Material } from '../Engine/Drawables/Material.js';
+import { Mesh2 } from '../Engine/Drawables/Mesh.js';
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *  LOGIC:
@@ -56,6 +59,34 @@ import { Shadow, ShadowCreate, ShadowGetShadow, ShadowInit } from '../Engine/Dra
 
 
 
+class Scene2 {
+    /**
+     * The only reason a Scene has refferences to meshes is that:
+     *      1. needs to have all programs and vertex buffers so it can toggle the drawing buffers
+     *      2. the Button meshes may differ from scene to scene
+     */
+    sceneIdx = 0; // Scene ID (of type: SCENE const structure).
+    buttons; // Must have all the buttons together in an array(of pointers) so that we can loop through only the buttons easily.
+    btnCount;
+    gfxBuffers; // Store the program and vertexBuffer indexes of all meshes of the app.
+
+    constructor() {
+        this.sceneIdx++;
+        this.gfxBuffers = [];
+        this.buttons = [];
+        this.btnCount = 0;
+    }
+
+
+    AddMesh(mesh) {
+        if(!(mesh instanceof Mesh2)) {
+            console.error('Cannot add mesh to scene. mesh= ', mesh)
+            return;
+        }
+        mesh.AddToGraphicsBuffer(this.sceneIdx);
+    }
+
+};
 class Scene {
     /**
      * The only reason a Scene has refferences to meshes is that:
@@ -223,7 +254,7 @@ class Scenes {
         if (meshGfxIdx === INT_NULL) return;
         const progsLen = meshGfxIdx.length;
         for (let i = 0; i < progsLen; i++) {
-            DrawQueueSetPriority(flag, meshGfxIdx[i][0], meshGfxIdx[i][1]);
+            RenderQueueSetPriority(flag, meshGfxIdx[i][0], meshGfxIdx[i][1]);
         }
     }
     GetScene(sceneIdx) {
@@ -246,8 +277,11 @@ class Scenes {
 const scenes = new Scenes;
 export function ScenesGetScene(sceneIdx) {
 
-    if (sceneIdx < 0 || sceneIdx > scenes.count)
-        alert('Scene Index Out Of Bounds!');
+    if (sceneIdx < 0 || sceneIdx > scenes.count){{
+        console.error('Scene Index Out Of Bounds!');
+        // alert('Scene Index Out Of Bounds!');
+        return null;
+    }}
 
     return scenes.scene[sceneIdx];
 }
@@ -273,72 +307,77 @@ export function ScenesCreateAllMeshes() {
     let pos = [Viewport.width / 2, Viewport.height / 2, 0];
     let style = { pad: 10, roundCorner: 6, border: 0, feather: 30 };
 
+    const geom = new Geometry2D([130,130,0], [100, 100]);
+    const mat = new Material(WHITE);
+    const mesh = new Mesh2(geom, mat);
+    const scene = new Scene2();
+    scene.AddMesh(mesh);
+
     { // backgrounds
-        const startMenuBk = RectCreateRect('startMenuBk', SID_DEFAULT | SID.FX.FS_GRADIENT, DarkenColor(GREENL2, 0.5), dim, [1, 1], null, pos, style, null, null);
-        startMenuBk.gfxInfo = GlAddMesh(startMenuBk.sid, startMenuBk.mesh, 1, SCENE.startMenu, 'Background StartMenu', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
-        scenes.AddMesh(startMenuBk, APP_MESHES_IDX.background.startMenu);
+        // const startMenuBk = RectCreateRect('startMenuBk', SID_DEFAULT | SID.FX.FS_GRADIENT, DarkenColor(GREENL2, 0.5), dim, [1, 1], null, pos, style, null, null);
+        // startMenuBk.gfxInfo = GlAddMesh(startMenuBk.sid, startMenuBk.mesh, 1, SCENE.startMenu, 'Background StartMenu', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
+        // scenes.AddMesh(startMenuBk, APP_MESHES_IDX.background.startMenu);
 
-        const startStageBk = RectCreateRect('startStageBk', SID_DEFAULT | SID.FX.FS_GRADIENT, DarkenColor(GREY2, 0.1), dim, [1, 1], null, pos, style, null, null);
-        startStageBk.gfxInfo = GlAddMesh(startStageBk.sid, startStageBk.mesh, 1, SCENE.startStage, 'Background StartStage', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
-        scenes.AddMesh(startStageBk, APP_MESHES_IDX.background.startStage);
+        // const startStageBk = RectCreateRect('startStageBk', SID_DEFAULT | SID.FX.FS_GRADIENT, DarkenColor(GREY2, 0.1), dim, [1, 1], null, pos, style, null, null);
+        // startStageBk.gfxInfo = GlAddMesh(startStageBk.sid, startStageBk.mesh, 1, SCENE.startStage, 'Background StartStage', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
+        // scenes.AddMesh(startStageBk, APP_MESHES_IDX.background.startStage);
 
-        // Create 'finish stage' background
-        const finishStageBk = RectCreateRect('finishStageBk', SID_DEFAULT | SID.FX.FS_GRADIENT, DarkenColor(BLUE_10_120_220, 0.3), dim, [1, 1], null, pos, style, null, null);
-        finishStageBk.gfxInfo = GlAddMesh(finishStageBk.sid, finishStageBk.mesh, 1, SCENE.finishStage, 'Background FinishStage', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
-        scenes.AddMesh(finishStageBk, APP_MESHES_IDX.background.finishStage);
+        // // Create 'finish stage' background
+        // const finishStageBk = RectCreateRect('finishStageBk', SID_DEFAULT | SID.FX.FS_GRADIENT, DarkenColor(BLUE_10_120_220, 0.3), dim, [1, 1], null, pos, style, null, null);
+        // finishStageBk.gfxInfo = GlAddMesh(finishStageBk.sid, finishStageBk.mesh, 1, SCENE.finishStage, 'Background FinishStage', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
+        // scenes.AddMesh(finishStageBk, APP_MESHES_IDX.background.finishStage);
 
-        // Create 'stage' background
-        pos = [Viewport.width / 2, Viewport.height / 2, -1];
-        const stageBk = RectCreateRect('stageBk', SID_DEFAULT | SID.FX.FS_GRADIENT, DarkenColor(BLUE_10_160_220, 0.1), dim, [1, 1], null, pos, style, null, null);
-        stageBk.gfxInfo = GlAddMesh(stageBk.sid, stageBk.mesh, 1, SCENE.stage, 'Background Stage', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
-        scenes.AddMesh(stageBk, APP_MESHES_IDX.background.stage);
+        // // Create 'stage' background
+        // pos = [Viewport.width / 2, Viewport.height / 2, -1];
+        // const stageBk = RectCreateRect('stageBk', SID_DEFAULT | SID.FX.FS_GRADIENT, DarkenColor(BLUE_10_160_220, 0.1), dim, [1, 1], null, pos, style, null, null);
+        // stageBk.gfxInfo = GlAddMesh(stageBk.sid, stageBk.mesh, 1, SCENE.stage, 'Background Stage', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
+        // scenes.AddMesh(stageBk, APP_MESHES_IDX.background.stage);
 
-        // Create stage menu background
-        dim = [Viewport.width / 2, STAGE.MENU.HEIGHT];
-        pos = [Viewport.width / 2, STAGE.MENU.HEIGHT, 1];
-        style = { pad: 10, roundCorner: 1, border: 5, feather: 10 };
-        const stageMenuBk = RectCreateRect('stageMenuBk', SID_DEFAULT | SID.FX.FS_V2DGFX, DarkenColor(ORANGE_240_130_10, 0.1), dim, [1, 1], null, pos, style, null, null);
-        stageMenuBk.gfxInfo = GlAddMesh(stageMenuBk.sid, stageMenuBk.mesh, 1, SCENE.stage, 'Background Stage Menu', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
-        scenes.AddMesh(stageMenuBk, APP_MESHES_IDX.background.stageMenu);
+        // // Create stage menu background
+        // dim = [Viewport.width / 2, STAGE.MENU.HEIGHT];
+        // pos = [Viewport.width / 2, STAGE.MENU.HEIGHT, 1];
+        // style = { pad: 10, roundCorner: 1, border: 5, feather: 10 };
+        // const stageMenuBk = RectCreateRect('stageMenuBk', SID_DEFAULT | SID.FX.FS_V2DGFX, DarkenColor(ORANGE_240_130_10, 0.1), dim, [1, 1], null, pos, style, null, null);
+        // stageMenuBk.gfxInfo = GlAddMesh(stageMenuBk.sid, stageMenuBk.mesh, 1, SCENE.stage, 'Background Stage Menu', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
+        // scenes.AddMesh(stageMenuBk, APP_MESHES_IDX.background.stageMenu);
     }
 
     { // Buttons
-        let btnDim = [200, 20];
-        let btnPos = [0, 100, 0];
-        style = { pad: 13, roundCorner: 15, border: 5, feather: 3 };
-        let fontSize = 20;
-        const sdfInner = 0.39;
-        // Create play button
-        const playBtn = CreateButton(SCENE.startMenu, 'PlayBtn', 'Play',
-            WHITE, DarkenColor(YELLOW_240_240_10, 0.1), btnDim, btnPos,
-            style, fontSize, true, sdfInner, ALIGN.CENTER_HOR | ALIGN.TOP);
-        // Add play button to scenes mesh to buffer
-        scenes.AddMesh(playBtn, APP_MESHES_IDX.buttons.play);
+        // let btnDim = [200, 20];
+        // let btnPos = [0, 100, 0];
+        // style = { pad: 13, roundCorner: 15, border: 5, feather: 3 };
+        // let fontSize = 20;
+        // const sdfInner = 0.39;
+        // // Create play button
+        // const playBtn = CreateButton(SCENE.startMenu, 'PlayBtn', 'Play',
+        //     WHITE, DarkenColor(YELLOW_240_240_10, 0.1), btnDim, btnPos,
+        //     style, fontSize, true, sdfInner, ALIGN.CENTER_HOR | ALIGN.TOP);
+        // // Add play button to scenes mesh to buffer
+        // scenes.AddMesh(playBtn, APP_MESHES_IDX.buttons.play);
 
-        // Options (in main start menu) button
-        btnPos[1] += playBtn.area.mesh.dim[1] * 2 + style.pad + style.border + style.feather; // Set next button's y pos (just bellow the prev button)
-        const optionsBtn = CreateButton(SCENE.startMenu, 'OptionsBtn', 'Options',
-            WHITE, DarkenColor(PINK_240_60_200, 0.1), btnDim, btnPos,
-            style, fontSize, true, sdfInner, ALIGN.CENTER_HOR | ALIGN.TOP);
-            // WHITE, DarkenColor(PINK_240_60_200, 0.1), [200, 300], [0, 100, 0],
-            // style, 40, true, sdfInner, ALIGN.CENTER_HOR | ALIGN.CENTER_VERT);
-        scenes.AddMesh(optionsBtn, APP_MESHES_IDX.buttons.options);
 
-        // Start Stage (in main start stage) button
-        btnPos[0] = 0;
-        const startStageBtn = CreateButton(SCENE.startStage, 'startStageBtn', 'Start',
-            WHITE, DarkenColor(GREENL1, 0.1), btnDim, btnPos,
-            style, fontSize, true, sdfInner, ALIGN.CENTER_HOR | ALIGN.CENTER_VERT);
-        scenes.AddMesh(startStageBtn, APP_MESHES_IDX.buttons.start);
+        // // Options (in main start menu) button
+        // btnPos[1] += playBtn.area.mesh.dim[1] * 2 + style.pad + style.border + style.feather; // Set next button's y pos (just bellow the prev button)
+        // const optionsBtn = CreateButton(SCENE.startMenu, 'OptionsBtn', 'Options',
+        //     WHITE, DarkenColor(PINK_240_60_200, 0.1), btnDim, btnPos,
+        //     style, fontSize, true, sdfInner, ALIGN.CENTER_HOR | ALIGN.TOP);
+        // scenes.AddMesh(optionsBtn, APP_MESHES_IDX.buttons.options);
 
-        fontSize = 10;
+        // // Start Stage (in main start stage) button
+        // btnPos[0] = 0;
+        // const startStageBtn = CreateButton(SCENE.startStage, 'startStageBtn', 'Start',
+        //     WHITE, DarkenColor(GREENL1, 0.1), btnDim, btnPos,
+        //     style, fontSize, true, sdfInner, ALIGN.CENTER_HOR | ALIGN.CENTER_VERT);
+        // scenes.AddMesh(startStageBtn, APP_MESHES_IDX.buttons.start);
 
-        // Continue (after completing a stage) button
-        btnDim[0] = CalcTextWidth('CONTINUE', fontSize);
-        btnPos = [0, -150, btnPos[2]];
-        const continueBtn = CreateButton(SCENE.finishStage, 'ContinueBtn', 'CONTINUE', WHITE, BLUE_10_120_220,
-            btnDim, btnPos, style, fontSize, true, sdfInner, ALIGN.CENTER_HOR | ALIGN.BOTTOM);
-        scenes.AddMesh(continueBtn, APP_MESHES_IDX.buttons.continue);
+        // fontSize = 10;
+
+        // // Continue (after completing a stage) button
+        // btnDim[0] = CalcTextWidth('CONTINUE', fontSize);
+        // btnPos = [0, -150, btnPos[2]];
+        // const continueBtn = CreateButton(SCENE.finishStage, 'ContinueBtn', 'CONTINUE', WHITE, BLUE_10_120_220,
+        //     btnDim, btnPos, style, fontSize, true, sdfInner, ALIGN.CENTER_HOR | ALIGN.BOTTOM);
+        // scenes.AddMesh(continueBtn, APP_MESHES_IDX.buttons.continue);
     }
 
     { // FX
@@ -464,29 +503,29 @@ export function ScenesCreateScene(sceneIdx) {
             const idx = scenes.AddScene(new Scene(sceneIdx));
 
             { // Drawables for all scenes
-                const ui_fps_buffer = UiCreateFps(sceneIdx);
-                scenes.AddMesh(ui_fps_buffer[0], APP_MESHES_IDX.ui.fps.avg);
-                scenes.scene[idx].AddMesh(ui_fps_buffer[0], APP_MESHES_IDX.ui.fps.avg);
-                scenes.scene[idx].AddMesh(ui_fps_buffer[0], APP_MESHES_IDX.fx.avg);
-                scenes.AddMesh(ui_fps_buffer[1], APP_MESHES_IDX.ui.fps.avg1s);
-                scenes.scene[idx].AddMesh(ui_fps_buffer[1], APP_MESHES_IDX.ui.fps.avg1s);
-                scenes.scene[idx].AddMesh(ui_fps_buffer[1], APP_MESHES_IDX.fx.avg1s);
+                // const ui_fps_buffer = UiCreateFps(sceneIdx);
+                // scenes.AddMesh(ui_fps_buffer[0], APP_MESHES_IDX.ui.fps.avg);
+                // scenes.scene[idx].AddMesh(ui_fps_buffer[0], APP_MESHES_IDX.ui.fps.avg);
+                // scenes.scene[idx].AddMesh(ui_fps_buffer[0], APP_MESHES_IDX.fx.avg);
+                // scenes.AddMesh(ui_fps_buffer[1], APP_MESHES_IDX.ui.fps.avg1s);
+                // scenes.scene[idx].AddMesh(ui_fps_buffer[1], APP_MESHES_IDX.ui.fps.avg1s);
+                // scenes.scene[idx].AddMesh(ui_fps_buffer[1], APP_MESHES_IDX.fx.avg1s);
 
-                GlowInit();
-                const glowBuffer = GlowGet();
-                scenes.AddMesh(glowBuffer.buffer[0], APP_MESHES_IDX.fx.glow);
-                scenes.scene[idx].AddMesh(glowBuffer, APP_MESHES_IDX.fx.glow);
+                // GlowInit();
+                // const glowBuffer = GlowGet();
+                // scenes.AddMesh(glowBuffer.buffer[0], APP_MESHES_IDX.fx.glow);
+                // scenes.scene[idx].AddMesh(glowBuffer, APP_MESHES_IDX.fx.glow);
 
-                TwistInit(SCENE.stage);
-                const twist = TwistGet();
-                scenes.AddMesh(twist.buffer[0], APP_MESHES_IDX.fx.twist);
-                scenes.scene[idx].AddMesh(twist, APP_MESHES_IDX.fx.twist);
+                // TwistInit(SCENE.stage);
+                // const twist = TwistGet();
+                // scenes.AddMesh(twist.buffer[0], APP_MESHES_IDX.fx.twist);
+                // scenes.scene[idx].AddMesh(twist, APP_MESHES_IDX.fx.twist);
 
-                VortexInit();
-                VortexCreate(WHITE, [306, 74], [130, 130]);
-                const vortexBuffer = VortexGet();
-                scenes.AddMesh(vortexBuffer.buffer[0], APP_MESHES_IDX.fx.vortex);
-                scenes.scene[idx].AddMesh(vortexBuffer, APP_MESHES_IDX.fx.vortex);
+                // VortexInit();
+                // VortexCreate(WHITE, [306, 74], [130, 130]);
+                // const vortexBuffer = VortexGet();
+                // scenes.AddMesh(vortexBuffer.buffer[0], APP_MESHES_IDX.fx.vortex);
+                // scenes.scene[idx].AddMesh(vortexBuffer, APP_MESHES_IDX.fx.vortex);
 
                 // Create shadow fx
                 // ShadowInit();
@@ -496,77 +535,77 @@ export function ScenesCreateScene(sceneIdx) {
                 // scenes.scene[idx].AddMesh(shadowFx, APP_MESHES_IDX.fx.shadow);
 
                 /** FrameBuffer. This is for the post processing of the Stage-Completed scene*/
-                FramebuffersInit(SCENE.all);
-                const width = Viewport.width / 2;
-                const height = Viewport.height / 2;
-                // const dim = [width, height];
-                // const pos = [width, height, -20];
-                const fb = FramebuffersCreate(
-                    SCENE.all,
-                    'StageCompleted',
-                    SID.FX.FS_SHADOW,
-                    [width, height],
-                    [width, height, -20]
-                );
+                // FramebuffersInit(SCENE.all);
+                // const width = Viewport.width / 2;
+                // const height = Viewport.height / 2;
+                // // const dim = [width, height];
+                // // const pos = [width, height, -20];
+                // const fb = FramebuffersCreate(
+                //     SCENE.all,
+                //     'StageCompleted',
+                //     SID.FX.FS_SHADOW,
+                //     [width, height],
+                //     [width, height, -20]
+                // );
 
-                scenes.AddMesh(fb.fb, APP_MESHES_IDX.framebuffer);
+                // scenes.AddMesh(fb.fb, APP_MESHES_IDX.framebuffer);
             }
 
-            scenes.scene[idx].sceneIdx = sceneIdx;
-            scenes.scene[idx].name = ScenesGetSceneName(sceneIdx);
-            scenes.scene[idx].LoadGfxBuffers();
-            break;
+            // scenes.scene[idx].sceneIdx = sceneIdx;
+            // scenes.scene[idx].name = ScenesGetSceneName(sceneIdx);
+            // scenes.scene[idx].LoadGfxBuffers();
+            // break;
         }
         case SCENE.startMenu: {
-            const idx = scenes.AddScene(new Scene(sceneIdx));
+            // const idx = scenes.AddScene(new Scene(sceneIdx));
 
-            // Add here all required meshes, for this specific scene, to the scene's mesh buffer
-            meshIdx = APP_MESHES_IDX.background.startMenu; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
-            meshIdx = APP_MESHES_IDX.buttons.play; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
-            meshIdx = APP_MESHES_IDX.buttons.options; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
+            // // Add here all required meshes, for this specific scene, to the scene's mesh buffer
+            // meshIdx = APP_MESHES_IDX.background.startMenu; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
 
-            scenes.scene[idx].sceneIdx = sceneIdx;
-            scenes.scene[idx].name = ScenesGetSceneName(sceneIdx);
-            break;
+            // meshIdx = APP_MESHES_IDX.buttons.options; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
+
+            // scenes.scene[idx].sceneIdx = sceneIdx;
+            // scenes.scene[idx].name = ScenesGetSceneName(sceneIdx);
+            // break;
         }
         /**
          * This is before starting a stage, where the player gets some info
          * and must press a button in order to start playing the game
          */
         case SCENE.startStage: {
-            const idx = scenes.AddScene(new Scene(sceneIdx));
+            // const idx = scenes.AddScene(new Scene(sceneIdx));
 
-            // Add here all required meshes, for this specific scene, to the scene's buffer
-            meshIdx = APP_MESHES_IDX.background.startStage; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
-            meshIdx = APP_MESHES_IDX.buttons.start; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
+            // // Add here all required meshes, for this specific scene, to the scene's buffer
+            // meshIdx = APP_MESHES_IDX.background.startStage; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
+            // meshIdx = APP_MESHES_IDX.buttons.start; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
 
-            scenes.scene[idx].sceneIdx = sceneIdx; scenes.scene[idx].name = ScenesGetSceneName(sceneIdx);
-            break;
+            // scenes.scene[idx].sceneIdx = sceneIdx; scenes.scene[idx].name = ScenesGetSceneName(sceneIdx);
+            // break;
         }
         /**
          * This is after finishing a stage, where some info are displayed...
          */
         case SCENE.finishStage: {
-            const idx = scenes.AddScene(new Scene(sceneIdx));
+            // const idx = scenes.AddScene(new Scene(sceneIdx));
 
-            {
-                scenes.scene[idx].AddMesh(scenes.allMeshes[APP_MESHES_IDX.background.finishStage], APP_MESHES_IDX.background.finishStage);
-                scenes.scene[idx].AddMesh(scenes.allMeshes[APP_MESHES_IDX.buttons.continue], APP_MESHES_IDX.buttons.continue);
+            // {
+            //     // scenes.scene[idx].AddMesh(scenes.allMeshes[APP_MESHES_IDX.background.finishStage], APP_MESHES_IDX.background.finishStage);
+            //     // scenes.scene[idx].AddMesh(scenes.allMeshes[APP_MESHES_IDX.buttons.continue], APP_MESHES_IDX.buttons.continue);
 
-                /** Total Score Counter */
-                const showTotalScore = StageCompletedCreateTotalScore();
-                scenes.AddMesh(showTotalScore, APP_MESHES_IDX.text.totalScore);
-                scenes.scene[idx].AddMesh(showTotalScore, APP_MESHES_IDX.text.totalScore);
+            //     // /** Total Score Counter */
+            //     // const showTotalScore = StageCompletedCreateTotalScore();
+            //     // scenes.AddMesh(showTotalScore, APP_MESHES_IDX.text.totalScore);
+            //     // scenes.scene[idx].AddMesh(showTotalScore, APP_MESHES_IDX.text.totalScore);
 
-                /** Mechanical Gear */
-                const stageCompleteMech = StageCompletedCreate();
-                scenes.AddMesh(stageCompleteMech.buffer, APP_MESHES_IDX.StageCompleted.all);
-                scenes.scene[idx].AddMesh(stageCompleteMech.buffer[0], APP_MESHES_IDX.StageCompleted.all);
-            }
+            //     // /** Mechanical Gear */
+            //     // const stageCompleteMech = StageCompletedCreate();
+            //     // scenes.AddMesh(stageCompleteMech.buffer, APP_MESHES_IDX.StageCompleted.all);
+            //     // scenes.scene[idx].AddMesh(stageCompleteMech.buffer[0], APP_MESHES_IDX.StageCompleted.all);
+            // }
 
-            scenes.scene[idx].sceneIdx = sceneIdx;
-            scenes.scene[idx].name = ScenesGetSceneName(sceneIdx);
-            break;
+            // scenes.scene[idx].sceneIdx = sceneIdx;
+            // scenes.scene[idx].name = ScenesGetSceneName(sceneIdx);
+            // break;
         }
         /**
          *  The actual stage scene where the player starts playing.
@@ -577,91 +616,91 @@ export function ScenesCreateScene(sceneIdx) {
 
 
             { /* Backgrounds */
-                meshIdx = APP_MESHES_IDX.background.stage; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx]), meshIdx;
-                meshIdx = APP_MESHES_IDX.background.stageMenu; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
+                // meshIdx = APP_MESHES_IDX.background.stage; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx]), meshIdx;
+                // meshIdx = APP_MESHES_IDX.background.stageMenu; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
             }
 
             { /* Basic Meshes */
-                /* Player */
-                meshIdx = APP_MESHES_IDX.player; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
-                const player = CreatePlayer(sceneIdx);
-                scenes.AddMesh(player, APP_MESHES_IDX.player);
-                scenes.scene[idx].AddMesh(player, APP_MESHES_IDX.player);
-                /* Bricks */
-                const brickBuffer = BrickInit(sceneIdx);
-                scenes.AddMesh(brickBuffer, APP_MESHES_IDX.bricks);
-                scenes.scene[idx].AddMesh(brickBuffer.buffer[0], APP_MESHES_IDX.bricks);
-                /* Ball */
-                const ballsBuffer = BallsInit(sceneIdx); // Initialize Ball's buffer
-                BallCreate([Viewport.width / 2, PLAYER.YPOS - 100], WHITE);
-                scenes.AddMesh(ballsBuffer, APP_MESHES_IDX.balls);
-                scenes.scene[idx].AddMesh(ballsBuffer.buffer[0], APP_MESHES_IDX.balls);
-                /* Power Ups */
-                const powUpsBuffer = PowerUpGet();
-                scenes.AddMesh(powUpsBuffer, APP_MESHES_IDX.powUps);
-                scenes.scene[idx].AddMesh(powUpsBuffer.buffer[0], APP_MESHES_IDX.powUps);
-                /* Power Ups - Bullet Gun */
-                GunInit();
-                const gun = GunGet();
-                scenes.AddMesh(gun, APP_MESHES_IDX.gun);
-                scenes.scene[idx].AddMesh(gun, APP_MESHES_IDX.gun);
-                /* Power Ups - Bullet */
-                const bulletBuffer = BulletGet();
-                bulletBuffer.Init(sceneIdx);
-                scenes.AddMesh(bulletBuffer, APP_MESHES_IDX.bullet);
-                scenes.scene[idx].AddMesh(bulletBuffer.buffer[0], APP_MESHES_IDX.bullet);
+                // /* Player */
+                // meshIdx = APP_MESHES_IDX.player; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
+                // const player = CreatePlayer(sceneIdx);
+                // scenes.AddMesh(player, APP_MESHES_IDX.player);
+                // scenes.scene[idx].AddMesh(player, APP_MESHES_IDX.player);
+                // /* Bricks */
+                // const brickBuffer = BrickInit(sceneIdx);
+                // scenes.AddMesh(brickBuffer, APP_MESHES_IDX.bricks);
+                // scenes.scene[idx].AddMesh(brickBuffer.buffer[0], APP_MESHES_IDX.bricks);
+                // /* Ball */
+                // const ballsBuffer = BallsInit(sceneIdx); // Initialize Ball's buffer
+                // BallCreate([Viewport.width / 2, PLAYER.YPOS - 100], WHITE);
+                // scenes.AddMesh(ballsBuffer, APP_MESHES_IDX.balls);
+                // scenes.scene[idx].AddMesh(ballsBuffer.buffer[0], APP_MESHES_IDX.balls);
+                // /* Power Ups */
+                // const powUpsBuffer = PowerUpGet();
+                // scenes.AddMesh(powUpsBuffer, APP_MESHES_IDX.powUps);
+                // scenes.scene[idx].AddMesh(powUpsBuffer.buffer[0], APP_MESHES_IDX.powUps);
+                // /* Power Ups - Bullet Gun */
+                // GunInit();
+                // const gun = GunGet();
+                // scenes.AddMesh(gun, APP_MESHES_IDX.gun);
+                // scenes.scene[idx].AddMesh(gun, APP_MESHES_IDX.gun);
+                // /* Power Ups - Bullet */
+                // const bulletBuffer = BulletGet();
+                // bulletBuffer.Init(sceneIdx);
+                // scenes.AddMesh(bulletBuffer, APP_MESHES_IDX.bullet);
+                // scenes.scene[idx].AddMesh(bulletBuffer.buffer[0], APP_MESHES_IDX.bullet);
 
-                /* Coin */
-                const coinsBuffer = CoinGet();
-                scenes.AddMesh(coinsBuffer, APP_MESHES_IDX.coins);
-                scenes.scene[idx].AddMesh(coinsBuffer.buffer[0], APP_MESHES_IDX.coin);
+                // /* Coin */
+                // const coinsBuffer = CoinGet();
+                // scenes.AddMesh(coinsBuffer, APP_MESHES_IDX.coins);
+                // scenes.scene[idx].AddMesh(coinsBuffer.buffer[0], APP_MESHES_IDX.coin);
             }
 
             { /* FX */
-                ExplosionsInit(); // Initialize explosions
-                const explosionsCircleBuffer = ExplosionsGetCircle();
-                scenes.AddMesh(explosionsCircleBuffer, APP_MESHES_IDX.fx.explosions.circle);
-                scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], APP_MESHES_IDX.fx.explosions.circle);
-                const explosionsSimpleBuffer = ExplosionsGetSimple();
-                scenes.AddMesh(explosionsSimpleBuffer, APP_MESHES_IDX.fx.explosions.simple);
-                scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], APP_MESHES_IDX.fx.explosions.simple);
+                // ExplosionsInit(); // Initialize explosions
+                // const explosionsCircleBuffer = ExplosionsGetCircle();
+                // scenes.AddMesh(explosionsCircleBuffer, APP_MESHES_IDX.fx.explosions.circle);
+                // scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], APP_MESHES_IDX.fx.explosions.circle);
+                // const explosionsSimpleBuffer = ExplosionsGetSimple();
+                // scenes.AddMesh(explosionsSimpleBuffer, APP_MESHES_IDX.fx.explosions.simple);
+                // scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], APP_MESHES_IDX.fx.explosions.simple);
 
-                /* ParticleSystem */
-                const particleBallTail = ParticleSystemFindByName('BallTail-0');
-                scenes.AddMesh(particleBallTail, APP_MESHES_IDX.fx.particleSystem.ballTail);
-                scenes.scene[idx].AddMesh(particleBallTail[0], APP_MESHES_IDX.fx.particleSystem.ballTail);
+                // /* ParticleSystem */
+                // const particleBallTail = ParticleSystemFindByName('BallTail-0');
+                // scenes.AddMesh(particleBallTail, APP_MESHES_IDX.fx.particleSystem.ballTail);
+                // scenes.scene[idx].AddMesh(particleBallTail[0], APP_MESHES_IDX.fx.particleSystem.ballTail);
             }
 
             { /* Ui */
                 /** Create and store them as pointers to a  meshes to  'allMeshes[]' buffer */
-                const ui_score = UiCreateScore(sceneIdx);
-                scenes.AddMesh(ui_score, APP_MESHES_IDX.ui.score);
-                scenes.scene[idx].AddMesh(ui_score, APP_MESHES_IDX.ui.score); // RECTREATED: Dont store mesh to allMeshes buffer, instead push the original mesh to store only the gfxInfo
+                // const ui_score = UiCreateScore(sceneIdx);
+                // scenes.AddMesh(ui_score, APP_MESHES_IDX.ui.score);
+                // scenes.scene[idx].AddMesh(ui_score, APP_MESHES_IDX.ui.score); // RECTREATED: Dont store mesh to allMeshes buffer, instead push the original mesh to store only the gfxInfo
 
-                const ui_totalScore = UiCreateTotalScore(sceneIdx);
-                scenes.AddMesh(ui_totalScore, APP_MESHES_IDX.ui.totalScore);
-                scenes.scene[idx].AddMesh(ui_totalScore, APP_MESHES_IDX.ui.totalScore);
+                // const ui_totalScore = UiCreateTotalScore(sceneIdx);
+                // scenes.AddMesh(ui_totalScore, APP_MESHES_IDX.ui.totalScore);
+                // scenes.scene[idx].AddMesh(ui_totalScore, APP_MESHES_IDX.ui.totalScore);
 
-                const ui_mod = UiCreateScoreModifier(sceneIdx);
-                scenes.AddMesh(ui_mod, APP_MESHES_IDX.ui.mod);
-                scenes.scene[idx].AddMesh(ui_mod, APP_MESHES_IDX.ui.mod);
+                // const ui_mod = UiCreateScoreModifier(sceneIdx);
+                // scenes.AddMesh(ui_mod, APP_MESHES_IDX.ui.mod);
+                // scenes.scene[idx].AddMesh(ui_mod, APP_MESHES_IDX.ui.mod);
 
-                const ui_lives = UiCreateLives(sceneIdx);
-                scenes.AddMesh(ui_lives, APP_MESHES_IDX.ui.lives);
-                scenes.scene[idx].AddMesh(ui_lives, APP_MESHES_IDX.ui.lives);
+                // const ui_lives = UiCreateLives(sceneIdx);
+                // scenes.AddMesh(ui_lives, APP_MESHES_IDX.ui.lives);
+                // scenes.scene[idx].AddMesh(ui_lives, APP_MESHES_IDX.ui.lives);
 
-                const ui_combo = UiCreateCombo(sceneIdx);
-                scenes.AddMesh(ui_combo, APP_MESHES_IDX.ui.combo);
-                scenes.scene[idx].AddMesh(ui_combo, APP_MESHES_IDX.ui.mod);
+                // const ui_combo = UiCreateCombo(sceneIdx);
+                // scenes.AddMesh(ui_combo, APP_MESHES_IDX.ui.combo);
+                // scenes.scene[idx].AddMesh(ui_combo, APP_MESHES_IDX.ui.mod);
 
-                const ui_m = AnimTextsInit(sceneIdx);
-                scenes.AddMesh(ui_m, APP_MESHES_IDX.ui.animText);
-                scenes.scene[idx].AddMesh(ui_m, APP_MESHES_IDX.ui.animText);
+                // const ui_m = AnimTextsInit(sceneIdx);
+                // scenes.AddMesh(ui_m, APP_MESHES_IDX.ui.animText);
+                // scenes.scene[idx].AddMesh(ui_m, APP_MESHES_IDX.ui.animText);
 
             }
 
-            scenes.scene[idx].sceneIdx = sceneIdx;
-            scenes.scene[idx].name = ScenesGetSceneName(sceneIdx);
+            // scenes.scene[idx].sceneIdx = sceneIdx;
+            // scenes.scene[idx].name = ScenesGetSceneName(sceneIdx);
 
             break;
         }
@@ -692,8 +731,8 @@ export function ScenesLoadScene(sceneIdx) {
 }
 
 
-export function ScenesCreateDrawQueue() {
-    const drawQueue = DrawQueueGet();
+export function ScenesCreateRenderQueue() {
+    const drawQueue = RenderQueueGet();
     drawQueue.Init(); // One time initialization(creates an empty buffer...)
     drawQueue.Create();
 
@@ -710,58 +749,58 @@ export function ScenesCreateDrawQueue() {
     //    scenes.SetPriority(APP_MESHES_IDX.bricks, 'first');
 
         // Ui. All ui are in one buffer, so setting any one ui is enough 
-        scenes.SetPriority(APP_MESHES_IDX.ui.animText, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.ui.animText, 'first');
 
-        scenes.SetPriority(APP_MESHES_IDX.coins, 'first');
-        scenes.SetPriority(APP_MESHES_IDX.powUps, 'first');
-        scenes.SetPriority(APP_MESHES_IDX.balls, 'first');
-
-
-        // Explosions
-        scenes.SetPriority(APP_MESHES_IDX.fx.twist, 'first');
-        scenes.SetPriority(APP_MESHES_IDX.fx.explosions.circle, 'first');
-        scenes.SetPriority(APP_MESHES_IDX.fx.explosions.simple, 'first');
-        scenes.SetPriority(APP_MESHES_IDX.fx.glow, 'first');
-        scenes.SetPriority(APP_MESHES_IDX.fx.shadow, 'first');
-
-        scenes.SetPriority(APP_MESHES_IDX.player, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.coins, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.powUps, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.balls, 'first');
 
 
-        // Particles
-        scenes.SetPriority(APP_MESHES_IDX.fx.particleSystem.ballTail, 'first');
+        // // Explosions
+        // scenes.SetPriority(APP_MESHES_IDX.fx.twist, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.fx.explosions.circle, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.fx.explosions.simple, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.fx.glow, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.fx.shadow, 'first');
 
-        scenes.SetPriority(APP_MESHES_IDX.ui.fps.avg1s, 'first');
-        scenes.SetPriority(APP_MESHES_IDX.ui.fps.avg, 'first');
-        scenes.SetPriority(APP_MESHES_IDX.fx.vortex, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.player, 'first');
 
-        scenes.SetPriority(APP_MESHES_IDX.bricks, 'first');
+
+        // // Particles
+        // scenes.SetPriority(APP_MESHES_IDX.fx.particleSystem.ballTail, 'first');
+
+        // scenes.SetPriority(APP_MESHES_IDX.ui.fps.avg1s, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.ui.fps.avg, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.fx.vortex, 'first');
+
+        // scenes.SetPriority(APP_MESHES_IDX.bricks, 'first');
         
-        // Buttons
-        scenes.SetPriority(APP_MESHES_IDX.buttons.play, 'first');
-        scenes.SetPriority(APP_MESHES_IDX.buttons.continue, 'first');
-        scenes.SetPriority(APP_MESHES_IDX.buttons.start, 'first');
+        // // Buttons
+        // scenes.SetPriority(APP_MESHES_IDX.buttons.play, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.buttons.continue, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.buttons.start, 'first');
         
-        scenes.SetPriority(APP_MESHES_IDX.framebuffer, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.framebuffer, 'first');
         
-        // DrawQueueSetPriority('last',5,3);
-        // Backgrounds
-        scenes.SetPriority(APP_MESHES_IDX.background.finishStage, 'first');
-        scenes.SetPriority(APP_MESHES_IDX.background.stageMenu, 'first');
-        scenes.SetPriority(APP_MESHES_IDX.background.stage, 'first');
-        scenes.SetPriority(APP_MESHES_IDX.background.startStage, 'first');
-        scenes.SetPriority(APP_MESHES_IDX.background.startMenu, 'first');
+        // // RenderQueueSetPriority('last',5,3);
+        // // Backgrounds
+        // scenes.SetPriority(APP_MESHES_IDX.background.finishStage, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.background.stageMenu, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.background.stage, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.background.startStage, 'first');
+        // scenes.SetPriority(APP_MESHES_IDX.background.startMenu, 'first');
         
     }
 
     drawQueue.UpdateActiveQueue();
     // drawQueue.PrintAll();
 
-    BallProjLineSetPriority();
+    // BallProjLineSetPriority();
 }
 
 
 export function ScenesSetFramebufferQueue(){
-    const drawQueue = DrawQueueGet();
+    const drawQueue = RenderQueueGet();
     // Framebuffer0
     const fb0 = FramebuffersGet(FRAMEBUFFERS_IDX.buffer0);
     let meshGfxIdx = scenes.GetGfxIdx(APP_MESHES_IDX.buttons.play);
@@ -774,7 +813,7 @@ export function ScenesSetFramebufferQueue(){
         // fb0.FbqStore(5, 0)
         // fb0.FbqStore(1, 0)
         // fb0.FbqStore(5, 3)
-        //TODO: Must remove from DrawQueue 
+        //TODO: Must remove from RenderQueue 
 
         // drawQueue.Remove(5, 0);
         // drawQueue.Remove(1, 0);

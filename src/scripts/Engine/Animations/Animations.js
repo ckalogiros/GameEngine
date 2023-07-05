@@ -101,9 +101,8 @@ export function AnimationsGet(){
 
 export function RunAnimations() {
     ButtonCreateScaleAnimation();
-    PowerUpRunAnimation();
-    CoinRunAnimation();
-    // PlayerEnlargeAnimation();
+    // PowerUpRunAnimation();
+    // CoinRunAnimation();
 }
 
 

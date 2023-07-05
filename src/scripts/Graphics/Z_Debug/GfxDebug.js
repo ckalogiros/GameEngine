@@ -20,14 +20,15 @@ export function GetShaderTypeId(sid){
 
     let str = 'Shader Attributes: ';
 
-    if(sid & SID.ATTR.COL4)     str += 'col4, '
-    if(sid & SID.ATTR.POS2)     str += 'pos2, '
-    if(sid & SID.ATTR.SCALE2)   str += 'scale2, '
-    if(sid & SID.ATTR.TEX2)     str += 'tex2, '
+    if(sid.shad & SID.SHAD.INDEXED)  str += 'Indexed Geometry.\n'
+    if(sid.attr & SID.ATTR.COL4)     str += 'col4, '
+    if(sid.attr & SID.ATTR.POS2)     str += 'pos2, '
+    if(sid.attr & SID.ATTR.SCALE2)   str += 'scale2, '
+    if(sid.attr & SID.ATTR.TEX2)     str += 'tex2, '
     // if(sid & SID.ATTR.WPOS3)    str += 'wpos3, '
-    if(sid & SID.ATTR.WPOS_TIME4) str += 'wposTime4, '
-    if(sid & SID.ATTR.TIME)  str += 'time, '
-    if(sid & SID.ATTR.SDF_PARAMS)  str += 'round corners, border width, border feather, '
+    if(sid.attr & SID.ATTR.WPOS_TIME4) str += 'wposTime4, '
+    if(sid.attr & SID.ATTR.TIME)  str += 'time, '
+    if(sid.attr & SID.ATTR.SDF_PARAMS)  str += 'round corners, border width, border feather, '
 
     return str;
 }
@@ -101,8 +102,8 @@ export function PrintAttributes(gl) {
         if (prog.shaderInfo.uniforms.sampler) {
             console.log('   Texture Sampler: ', prog.shaderInfo.uniforms.sampler)
         }
-        if (prog.shaderInfo.uniforms.paramsBufferLoc) {
-            console.log('   Sdf Font Params: ', prog.shaderInfo.uniforms.paramsBufferLoc)
+        if (prog.shaderInfo.uniforms.uniformsBufferLoc) {
+            console.log('   Sdf Font Params: ', prog.shaderInfo.uniforms.uniformsBufferLoc)
         }
 
     }

@@ -4,7 +4,6 @@ import { MeshBuffer, TempMesh } from "../../Engine/Drawables/MeshBuffer.js";
 import { Rect } from "../../Engine/Drawables/Shapes/Rect.js";
 import { AtlasTextureGetCoords } from "../../Engine/Loaders/Textures/Texture.js";
 import { TimersCreateTimer } from "../../Engine/Timer/Timer.js";
-import { GlAddMesh } from "../../Graphics/GlBuffers.js";
 import { PlayerGetPos } from "./Player.js";
 
 

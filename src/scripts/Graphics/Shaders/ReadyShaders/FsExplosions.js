@@ -11,7 +11,7 @@ in mediump vec2  v_dim;
 in mediump float v_time;
 in mediump vec2  u_Res;
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 
 void main()
@@ -38,8 +38,8 @@ void main()
     
    color = mix(color, v_col.rgb, 1.-(t*.2));
 	
-	FragColor = vec4(color*d*(1.-t), d*(1.-t));
-	// FragColor = vec4(1.);
+	frag_color = vec4(color*d*(1.-t), d*(1.-t));
+	// frag_color = vec4(1.);
 
 }
 `;
@@ -54,7 +54,7 @@ in mediump vec2  v_dim;
 in mediump float v_time;
 in mediump vec2  u_Res;
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 #define PI 3.14159;
 
@@ -84,9 +84,9 @@ void main()
    color *= v_col.rgb;
     
    // color = min(color, vec3(.3));
-   FragColor = vec4(color*(1.-t*.2), color*(1.-t*.2));
-   // FragColor = vec4(color*(1.-t), color*(1.-t*.2));
-   // FragColor = vec4(1.);
+   frag_color = vec4(color*(1.-t*.2), color*(1.-t*.2));
+   // frag_color = vec4(color*(1.-t), color*(1.-t*.2));
+   // frag_color = vec4(1.);
 }
 `;
 
@@ -100,9 +100,9 @@ void main()
 // in mediump vec2  v_wpos;
 // in mediump vec2  v_dim;
 // in mediump float v_time;
-// in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
+// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
 
-// out vec4 FragColor;
+// out vec4 frag_color;
 
 // #define PI 3.14159;
 
@@ -114,7 +114,7 @@ void main()
 
 // void main()
 // {
-//     vec2 res = vec2(v_params[0], v_params[1]);
+//     vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);
 //     float ratio = res.y/res.x;
 //     res.x *= ratio;
 //     float t = v_time;
@@ -128,6 +128,6 @@ void main()
 //     color = vec3(.2) / cr;
     
 //     color = min(color, vec3(0.5));
-// 	FragColor = vec4(color*d*(1.0-t*2.2), color.b*d*(1.0-t*2.2));
+// 	frag_color = vec4(color*d*(1.0-t*2.2), color.b*d*(1.0-t*2.2));
 // }
 // `;

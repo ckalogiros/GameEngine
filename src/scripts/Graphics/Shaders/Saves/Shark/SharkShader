@@ -7,9 +7,9 @@ precision mediump float;
 in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump vec2  v_dim;
-in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
+in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
 
-out vec4 FragColor;
+out vec4 frag_color;
 vec2 hash22(vec2 p, float iTime) 
 { 
 
@@ -74,8 +74,8 @@ vec2 hMap(vec2 uv, float iTime)
 
 void main()
 {
-    float t = v_params[2]*.1;
-    // vec2 res = vec2(v_params[0], v_params[1])-v_dim;     // Screen resolution
+    float t = v_uniforms_buffer[2]*.1;
+    // vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1])-v_dim;     // Screen resolution
     // res.x /= res.x/res.y;                                // Fix pixel ratio
     // vec2 uv = gl_FragCoord.xy/res;                       // Transform to 0.0-1.0 coord space
     
@@ -99,7 +99,7 @@ void main()
    //  col += (1. - col)*(1.-smoothstep(0., fwidth(c.y)*3., c.y - .22))*c.x; // Highlighting the border.
     col += (1. - col)*(1.-smoothstep(0., fwidth(c.y)*4., c.y - .2)); // Highlighting the border.
 
-    FragColor = vec4(col, 1.);
+    frag_color = vec4(col, 1.);
 }
 `;
 
@@ -116,9 +116,9 @@ precision mediump float;
 in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump vec2  v_dim;
-in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
+in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
 
-out vec4 FragColor;
+out vec4 frag_color;
 vec2 hash22(vec2 p, float iTime) 
 { 
 
@@ -183,8 +183,8 @@ vec2 hMap(vec2 uv, float iTime)
 
 void main()
 {
-    float t = v_params[2]*.1;
-    // vec2 res = vec2(v_params[0], v_params[1])-v_dim;     // Screen resolution
+    float t = v_uniforms_buffer[2]*.1;
+    // vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1])-v_dim;     // Screen resolution
     // res.x /= res.x/res.y;                                // Fix pixel ratio
     // vec2 uv = gl_FragCoord.xy/res;                       // Transform to 0.0-1.0 coord space
     
@@ -210,6 +210,6 @@ void main()
     col += (col)*(1.-smoothstep(0., fwidth(c.y)*3., c.y - .22))*c.x*.2; // Highlighting the border.
    //  col += (1. - col)*(1.-smoothstep(0., fwidth(c.y*8.), c.y - .2)); // Highlighting the border.
 
-    FragColor = vec4(col, 1.);
+    frag_color = vec4(col, 1.);
 }
 `;

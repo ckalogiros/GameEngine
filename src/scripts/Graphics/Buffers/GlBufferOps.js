@@ -1,7 +1,7 @@
 "use strict";
 
-import { Rotate4x4, Rotate4x42 } from "../Helpers/Math/Matrix.js";
-import {  GlGetPrograms, GlGetVB } from "./GlProgram.js";
+import { Rotate4x4, Rotate4x42 } from "../../Helpers/Math/Matrix.js";
+import {  GlGetPrograms, GlGetVB } from "../GlProgram.js";
 
 
 
@@ -58,7 +58,7 @@ export function GlSetPriority(progIdx, vbIdx, meshIdx, meshCount)
         start = cnt;
     }
 
-    vb.needsUpdate = true;
+    // this.needsUpdate = true;
 }
 
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -300,7 +300,7 @@ export function GlSetColor(gfxInfo, color){
         verts--;
     }
 
-    vb.needsUpdate = true; // To Update vertex buffer with the changed 
+    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 export function GlSetColorAlpha(gfxInfo, val){
 
@@ -322,7 +322,7 @@ export function GlSetColorAlpha(gfxInfo, val){
         verts--;
     }
 
-    vb.needsUpdate = true; // To Update vertex buffer with the changed 
+    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 export function GlSetDim(gfxInfo, dim) {
 
@@ -355,7 +355,7 @@ export function GlSetDim(gfxInfo, dim) {
         faces--;
     }
 
-    vb.needsUpdate = true; // To Update vertex buffer with the changed 
+    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 export function GlSetTex(gfxInfo, uvs){
 
@@ -387,7 +387,7 @@ export function GlSetTex(gfxInfo, uvs){
         numTimes--;
     }
 
-    vb.needsUpdate = true; // To Update vertex buffer with the changed 
+    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 // export function GlScale(gfxInfo, val){
 
@@ -407,7 +407,7 @@ export function GlSetTex(gfxInfo, uvs){
 //         verts--;
 //     }
 
-//     vb.needsUpdate = true; // To Update vertex buffer with the changed data.
+//     // this.needsUpdate = true; // To Update vertex buffer with the changed data.
 // }
 // export function GlSetScale(gfxInfo, val){
 
@@ -427,7 +427,7 @@ export function GlSetTex(gfxInfo, uvs){
 //         verts--;
 //     }
 
-//     vb.needsUpdate = true; // To Update vertex buffer with the changed data.
+//     // this.needsUpdate = true; // To Update vertex buffer with the changed data.
 // }
 export function GlMove(gfxInfo, wpos){
     
@@ -448,7 +448,7 @@ export function GlMove(gfxInfo, wpos){
         verts--;
     }
 
-    vb.needsUpdate = true; // To Update vertex buffer with the changed 
+    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 export function GlSetWpos(gfxInfo, pos){
 
@@ -469,7 +469,7 @@ export function GlSetWpos(gfxInfo, pos){
         verts--;
     }
 
-    vb.needsUpdate = true; // To Update vertex buffer with the changed 
+    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 export function GlSetWposXY(gfxInfo, pos){
 
@@ -490,7 +490,7 @@ export function GlSetWposXY(gfxInfo, pos){
         verts--;
     }
 
-    vb.needsUpdate = true; // To Update vertex buffer with the changed 
+    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 export function GlSetWposX(gfxInfo, posx){
 
@@ -515,7 +515,7 @@ export function GlSetWposX(gfxInfo, posx){
         faces--;
     }
     // console.log(vb.data)
-    vb.needsUpdate = true; // To Update vertex buffer with the changed data.
+    // this.needsUpdate = true; // To Update vertex buffer with the changed data.
 }
 export function GlSetWposY(gfxInfo, posy){
 
@@ -540,7 +540,7 @@ export function GlSetWposY(gfxInfo, posy){
         faces--;
     }
     // console.log(vb.data)
-    vb.needsUpdate = true; // To Update vertex buffer with the changed data.
+    // this.needsUpdate = true; // To Update vertex buffer with the changed data.
 }
 export function GlSetWposZ(gfxInfo, posz){
 
@@ -565,7 +565,7 @@ export function GlSetWposZ(gfxInfo, posz){
         faces--;
     }
     // console.log(vb.data)
-    vb.needsUpdate = true; // To Update vertex buffer with the changed data.
+    // this.needsUpdate = true; // To Update vertex buffer with the changed data.
 }
 export function GlSetAttrRoundCorner(gfxInfo, val) {
 
@@ -584,7 +584,7 @@ export function GlSetAttrRoundCorner(gfxInfo, val) {
         verts--;
     }
 
-    vb.needsUpdate = true;
+    // this.needsUpdate = true;
 }
 export function GlSetAttrBorderWidth(gfxInfo, val) {
 
@@ -603,7 +603,7 @@ export function GlSetAttrBorderWidth(gfxInfo, val) {
         verts--;
     }
 
-    vb.needsUpdate = true;
+    // this.needsUpdate = true;
 }
 export function GlSetAttrBorderFeather(gfxInfo, val) {
 
@@ -622,7 +622,7 @@ export function GlSetAttrBorderFeather(gfxInfo, val) {
         verts--;
     }
 
-    vb.needsUpdate = true;
+    // this.needsUpdate = true;
 }
 export function GlSetAttrTime(gfxInfo, val) {
 
@@ -641,7 +641,7 @@ export function GlSetAttrTime(gfxInfo, val) {
         verts--;
     }
 
-    vb.needsUpdate = true;
+    // this.needsUpdate = true;
 }
 export function GlSetAttrSdfParams(gfxInfo, val) {
 
@@ -661,7 +661,7 @@ export function GlSetAttrSdfParams(gfxInfo, val) {
         verts--;
     }
 
-    vb.needsUpdate = true;
+    // this.needsUpdate = true;
 }
 export function GlSetAttrSdfParamsOuter(gfxInfo, val) {
 
@@ -681,7 +681,7 @@ export function GlSetAttrSdfParamsOuter(gfxInfo, val) {
         verts--;
     }
 
-    vb.needsUpdate = true;
+    // this.needsUpdate = true;
 }
 export function GlSetAttrTex(gfxInfo, uvs){
 
@@ -714,7 +714,7 @@ export function GlSetAttrTex(gfxInfo, uvs){
         numTimes--;
     }
 
-    vb.needsUpdate = true; // To Update vertex buffer with the changed 
+    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 /**
  * 
@@ -737,7 +737,7 @@ export function GlSetAttrParams1(gfxInfo, param, paramOffset){
         verts--;
     }
 
-    vb.needsUpdate = true; // To Update vertex buffer with the changed 
+    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 
 export function GlRotate(gfxInfo, dim, angle){
@@ -763,5 +763,5 @@ export function GlRotate(gfxInfo, dim, angle){
     vb.data[index++] = newPos[6];
     vb.data[index++] = newPos[7];
 
-    vb.needsUpdate = true; // To Update vertex buffer with the changed 
+    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }

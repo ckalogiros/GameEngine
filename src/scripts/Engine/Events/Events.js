@@ -1,7 +1,7 @@
 "use strict";
 import { OnMouseMove, OnMouseClick, OnMouseMove_Android, OnTouchStart, OnTouchEnd, OnTouchCancel, OnTouchMove } from "./MouseEvents.js";
-import { PrintBuffersAttribsCount, PrintBuffersMeshesNames, PrintVertexBufferAll } from "../../Graphics/Debug/GfxDebug.js";
-import { DrawQueueGet } from "../Renderer/DrawQueue.js";
+import { PrintBuffersAttribsCount, PrintBuffersMeshesNames, PrintVertexBufferAll } from "../../Graphics/Z_Debug/GfxDebug.js";
+import { RenderQueueGet } from "../Renderer/RenderQueue.js";
 import { ScenesPrintAllGfxBuffers } from "../../App/Scenes.js";
 import { TimersPrintimers } from "../Timer/Timer.js";
 
@@ -92,7 +92,7 @@ export function AddEventListeners() {
         }
         else if (event.key === 'C' || event.key === 'c') {
             console.log('- DRAW QUEUE -')
-            const drawQueue = DrawQueueGet();
+            const drawQueue = RenderQueueGet();
             drawQueue.PrintAll();
         }
         else if (event.key === 'V' || event.key === 'v') {

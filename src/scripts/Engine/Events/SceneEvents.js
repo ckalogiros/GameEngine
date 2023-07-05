@@ -9,7 +9,7 @@ import { UiResetScore, UiGetScore, UiGetTotalScore, UiSetTotalScore, UiUpdateSco
 import { GlowUpdate } from "../Drawables/Fx/Glow.js";
 import { TwistUpdate } from "../Drawables/Fx/Twist.js";
 import { GunUpdate } from "../../App/Drawables/Bullet.js";
-import { FramebuffersCreateDimColorAnimation, FramebuffersSetActive } from "../../Graphics/Renderbuffer.js";
+import { FramebuffersCreateDimColorAnimation, FramebuffersSetActive } from "../../Graphics/Buffers/Renderbuffer.js";
 import { StageCompleteAnimationsCreateRotation, StageCompleteAnimationsCreateScaleText } from "../../App/Drawables/StageCompleted.js";
 import { VortexUpdate } from "../Drawables/Fx/Vortex.js";
 

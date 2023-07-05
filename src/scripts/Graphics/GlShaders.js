@@ -1,7 +1,8 @@
 "use strict";
 import { VertexShaderChoose } from './Shaders/VertexShaders.js'
 import { FragmentShaderChoose } from './Shaders/FragmentShaders.js'
-import * as dbg from './Debug/GfxDebug.js'
+import * as dbg from './Z_Debug/GfxDebug.js'
+import { FragmentShaderCreate, VertexShaderCreate } from './Shaders/CreateShader.js';
 
 /**
  * How to add an attribute to a program
@@ -20,12 +21,14 @@ import * as dbg from './Debug/GfxDebug.js'
 export function LoadShaderProgram(gl, sid) {
 
 	const shader = {
-		vShader: VertexShaderChoose(sid),
-		fShader: FragmentShaderChoose(sid),
+		// vShader: VertexShaderChoose(sid),
+		// fShader: FragmentShaderChoose(sid),
+		vShader: VertexShaderCreate(sid),
+		fShader: FragmentShaderCreate(sid),
 	};
 	const program = LoadShaders(gl, shader);
 	if (program) {
-		if (dbg.GL_DEBUG_SHADERS) console.log('Shader Program Created Sucessuly!\nShader Type ID: ', dbg.GetShaderTypeId(sid));
+		if (dbg.GL_DEBUG_SHADERS) console.log('Shader Program Created Successfully!\nShader Type ID: ', dbg.GetShaderTypeId(sid));
 	} else {
 		alert('Unable to CREATE shader program: ' + gl.getProgramInfoLog(program));
 	}
@@ -47,12 +50,13 @@ function LoadShaders(gl, shader) {
 
 	const status = gl.getProgramParameter(program, gl.LINK_STATUS);
 	if (!status) {
-		alert('Unable to LINK the shader program: ' + gl.getProgramInfoLog(program));
-		glDeleteProgram(program);
+		console.error('Unable to LINK the shader program: ' + gl.getProgramInfoLog(program));
+		// alert('Unable to LINK the shader program: ' + gl.getProgramInfoLog(program));
+		gl.deleteProgram(program);
 		program = 0;
 		return null;
 	} else {
-		console.log('Shaders Linked Sucessuly!');
+		console.log('Shaders Linked Successfully!');
 	}
 
 	return program;
@@ -72,7 +76,7 @@ function loadShaders(gl, shaderType, source, type) {
 		return null;
 	} 
 	else {
-		console.log('Shader Compiled Sucessuly!');
+		console.log('Shader Compiled Successfully!');
 	}
 
 	return shader;
@@ -110,11 +114,11 @@ export function GlCreateShaderInfo(gl, program, sid) {
 
 			/**
 			 * Variable Uniforms
-				* Uniforms paramsBuffer is an array of floats to be used as a 
+				* Uniforms uniformsBuffer is an array of floats to be used as a 
 			 * buffer to pass any kind of float values to the shaders.
 				*/
-			paramsBufferLoc: gl.getUniformLocation(program, 'u_params'),	// The location of the uniform
-			paramsBuffer: null, // The actual array
+			uniformsBufferLoc: gl.getUniformLocation(program, 'uniforms_buffer'),	// The location of the uniform
+			uniformsBuffer: null, // The actual array
 		},
 
 	}
@@ -195,7 +199,7 @@ export function GlCreateShaderInfo(gl, program, sid) {
 
 	shaderInfo.attribsPerVertex = attribsOffset;
 
-	if (sid & SID.INDEXED)
+	if (sid.shad & SID.SHAD.INDEXED)
 		shaderInfo.verticesPerRect = VERTS_PER_RECT_INDEXED;
 
 	return shaderInfo;

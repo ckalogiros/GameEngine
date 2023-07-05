@@ -8,14 +8,14 @@ layout (location = 2) in mediump vec2 a_pos;
 layout (location = 3) in mediump vec2 a_tex;
 
 uniform mat4  u_ortho_proj;
-uniform mediump float u_params[MAX_NUM_PARAMS_BUFFER];                  // [0]:WinWidth, [1]:WinHeight, [3]:Time
+uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                  // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 out mediump vec4 v_col; 
 out mediump vec2 v_dim; 
 out mediump vec2 v_wpos; 
 out mediump float v_time; 
 out mediump vec2 v_tex_coord;
-// out mediump float v_params[MAX_NUM_PARAMS_BUFFER];                   
+// out mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                   
     
 void main(void) {
     
@@ -27,7 +27,7 @@ void main(void) {
     v_wpos      = a_wpos_time.xy;
     v_time      = a_wpos_time.w;
     v_tex_coord = a_tex;
-    // v_params    = u_params;
+    // v_uniforms_buffer    = uniforms_buffer;
 }
 
 `;
@@ -35,7 +35,7 @@ void main(void) {
 export const FS_SHADOW = `#version 300 es
 
 precision highp float;
-out vec4 FragColor;
+out vec4 frag_color;
 
 in mediump vec4  v_col;
 in mediump vec2  v_wpos;
@@ -45,7 +45,7 @@ in mediump vec2  v_tex_coord;
 
 uniform sampler2D u_Sampler0;
 
-// in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
 
 #define PI 3.1415926535897932384626433832795
 #define PI2 6.283185307179586476925286766559
@@ -105,17 +105,17 @@ void main(void) {
     // c = mix( vec3(0.0,0.0,0.0), col.rgb, smoothstep(-w,w,d-.32) );
     // c = col.rgb;
 
-    // FragColor.rgb = c*2.;
-    // FragColor.rgb = c*c*c*4.;
-    // FragColor.rgb = c*c*c*8.;
-    // FragColor.rgb = c*c*4.;
-    // FragColor.rgb = mix( vec3(0.0,0.0,0.0), vec3(c*c*4.), smoothstep(-w,w,d-.32) );;
-    FragColor.rgb = mix( vec3(0.0,0.0,0.0), vec3(c*c*4.), smoothstep(.0,.05, d-.14) );
-    // FragColor.rgb = (c*c)+.5;
-    // FragColor = col * texture(u_Sampler0, v_tex_coord).a;
-    // FragColor = col;
-    // FragColor = smoothstep(.0, .3, col) * texture(u_Sampler0, v_tex_coord).a;
-    // FragColor = smoothstep(.0, .8, col);
+    // frag_color.rgb = c*2.;
+    // frag_color.rgb = c*c*c*4.;
+    // frag_color.rgb = c*c*c*8.;
+    // frag_color.rgb = c*c*4.;
+    // frag_color.rgb = mix( vec3(0.0,0.0,0.0), vec3(c*c*4.), smoothstep(-w,w,d-.32) );;
+    frag_color.rgb = mix( vec3(0.0,0.0,0.0), vec3(c*c*4.), smoothstep(.0,.05, d-.14) );
+    // frag_color.rgb = (c*c)+.5;
+    // frag_color = col * texture(u_Sampler0, v_tex_coord).a;
+    // frag_color = col;
+    // frag_color = smoothstep(.0, .3, col) * texture(u_Sampler0, v_tex_coord).a;
+    // frag_color = smoothstep(.0, .8, col);
 
     
     // Create the alpha channel from the current pixel color
@@ -124,18 +124,18 @@ void main(void) {
      */
     // float a = min(col.r, min(col.g, col.b));
     float a = max(col.r, max(col.g, col.b));
-    // if(a <= 0.) FragColor.a = 0.;
+    // if(a <= 0.) frag_color.a = 0.;
     // else{
-    //     FragColor.a = (col.r + col.g + col.b) /3.;
+    //     frag_color.a = (col.r + col.g + col.b) /3.;
     // }
     /* 
      * 2. Render transparency from color average value 
      */
-    // FragColor.a = (col.r + col.g + col.b) /3.;
+    // frag_color.a = (col.r + col.g + col.b) /3.;
     /* 
      * 3. Render transparency from color value 
      */
-    // FragColor.a = max(col.r, max(col.g, col.b));
+    // frag_color.a = max(col.r, max(col.g, col.b));
 
 }
 

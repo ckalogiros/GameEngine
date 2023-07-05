@@ -10,7 +10,7 @@ in mediump float v_time;
 
 uniform sampler2D u_Sampler0;
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 
 #define pi 3.14159265
@@ -171,8 +171,8 @@ void main()
    }
    
 
-   // FragColor = vec4(sum.xyz,1.0);
-   FragColor = vec4(sum.xyz,0.0);
+   // frag_color = vec4(sum.xyz,1.0);
+   frag_color = vec4(sum.xyz,0.0);
 
 }
 `
@@ -187,11 +187,11 @@ void main()
 // in mediump vec2  v_wpos;
 // in mediump vec2  v_dim;
 // in mediump float v_time;
-// in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
+// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
 
 // uniform sampler2D u_Sampler0;
 
-// out vec4 FragColor;
+// out vec4 frag_color;
 
 
 // #define pi 3.14159265
@@ -284,8 +284,8 @@ void main()
 // void main()
 // {  
    
-//    vec2 res = vec2(v_params[0], v_params[1]);
-//    float glowSize = v_params[2];
+//    vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);
+//    float glowSize = v_uniforms_buffer[2];
 //    float time = v_time;
    
 //    float ratio = res.y/res.x;
@@ -360,8 +360,8 @@ void main()
 //    }
    
 
-//    // FragColor = vec4(sum.xyz,0.0);
-//    FragColor = vec4(sum.xyz,0.0);
+//    // frag_color = vec4(sum.xyz,0.0);
+//    frag_color = vec4(sum.xyz,0.0);
 
 // }
 // `

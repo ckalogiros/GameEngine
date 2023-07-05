@@ -1,6 +1,6 @@
 "use strict";
-import { GlSetDim, GlSetWposX } from '../../../Graphics/GlBufferOps.js';
-import { GlSetAttrRoundCorner, GlSetAttrBorderWidth, GlSetAttrBorderFeather, GlSetAttrSdfParamsOuter } from '../../../Graphics/GlBufferOps.js';
+import { GlSetDim, GlSetWposX } from '../../../Graphics/Buffers/GlBufferOps.js';
+import { GlSetAttrRoundCorner, GlSetAttrBorderWidth, GlSetAttrBorderFeather, GlSetAttrSdfParamsOuter } from '../../../Graphics/Buffers/GlBufferOps.js';
 import { TextLabel } from './TextLabel.js';
 import { CalculateSdfOuterFromDim } from '../../../Helpers/Helpers.js';
 

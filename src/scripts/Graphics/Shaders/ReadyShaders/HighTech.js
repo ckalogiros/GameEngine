@@ -7,9 +7,9 @@ in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump float v_time;
 in mediump vec2  v_dim;
-in mediump float v_params[MAX_NUM_PARAMS_BUFFER]; 
+in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 // by srtuss, 2013
 
@@ -76,9 +76,9 @@ float voronoi(in vec2 x)
 
 void main()
 {
-	float t = v_params[2]*.1;
+	float t = v_uniforms_buffer[2]*.1;
 
-	vec2 res = vec2(v_params[0], v_params[1]);              // Screen resolution
+	vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);              // Screen resolution
 	res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
 	vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
 	uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
@@ -170,7 +170,7 @@ void main()
 	vec3 col = vec3(pow(v, cexp.x), pow(v, cexp.y), pow(v, cexp.z)) ;
 	// vec3 col = vec3(fract(v));
 	
-	FragColor = vec4(col, 1.0);
+	frag_color = vec4(col, 1.0);
 }
 `;
 
@@ -183,9 +183,9 @@ void main()
 // in mediump vec4  v_col;
 // in mediump vec2  v_wpos;
 // in mediump vec2  v_dim;
-// in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
+// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
 
-// out vec4 FragColor;
+// out vec4 frag_color;
 // vec2 hash22(vec2 p, float iTime) 
 // { 
 
@@ -257,7 +257,7 @@ void main()
 
 // void main()
 // {
-//    float t = v_params[2]*.1;
+//    float t = v_uniforms_buffer[2]*.1;
 //    vec2 dim = v_dim;                                       // Mesh Dimentions
 //    dim /= (min(dim.x, dim.y) / max(dim.x, dim.y))*1.5;     // Mesh Dimentions
 //    vec2 uv = (gl_FragCoord.xy)/dim;                         // Transform to 0.0-1.0 coord space
@@ -298,9 +298,9 @@ void main()
 // 	col += vec3(pixel)*1.; // Highlighting the border.
 // 	// col += vec3(pixel*c)*.1; // Highlighting the border.
 
-//    FragColor = vec4(col, 1.);
+//    frag_color = vec4(col, 1.);
 // 	float alpha = .7;
-//    // FragColor = vec4(col*alpha, alpha);
+//    // frag_color = vec4(col*alpha, alpha);
 // }
 // `;
 export const TEMP = `#version 300 es
@@ -312,9 +312,9 @@ precision mediump float;
 in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump vec2  v_dim;
-in mediump float v_params[MAX_NUM_PARAMS_BUFFER];   
+in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
 
-out vec4 FragColor;
+out vec4 frag_color;
 
 //===============================================================
 
@@ -344,9 +344,9 @@ float Rect(vec2 p, vec2 size)
 
 void main()
 {
-	float t = v_params[2]*.1;
+	float t = v_uniforms_buffer[2]*.1;
 
-	vec2 res = vec2(v_params[0], v_params[1]);              // Screen resolution
+	vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);              // Screen resolution
 	res.x /= res.x/res.y;                                   // Transform from screen resolution to mesh resolution
 	vec2 uv = gl_FragCoord.xy/res;                          // Transform to 0.0-1.0 coord space
 	uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));        // Transform to meshes local coord space 
@@ -413,8 +413,8 @@ void main()
 	// col += line(uv, -.2*pe, .2*pe, .1, .04);
 
 	float alpha = max(col.r, max(col.g, col.b));
-	// FragColor = vec4(col, alpha);
-	// FragColor = vec4(col*alpha, 1.-alpha);
-	FragColor = vec4(col, .5);
+	// frag_color = vec4(col, alpha);
+	// frag_color = vec4(col*alpha, 1.-alpha);
+	frag_color = vec4(col, .5);
 }
 `;
