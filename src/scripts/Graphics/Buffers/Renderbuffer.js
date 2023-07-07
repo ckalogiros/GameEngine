@@ -1,6 +1,6 @@
 "use=strict";
 
-import { Rect } from "../../Engine/Drawables/Shapes/Rect.js";
+import { Rect2D } from "../../Engine/Drawables/Geometries/Rect2D.js";
 import { GfxSetVbShow, GlBindTexture, GlBindVAO, GlUpdateIndexBufferData, GlUpdateVertexBufferData, GlUseProgram } from "./GlBuffers.js";
 import { GlGetPrograms, GlGetVB } from "../GlProgram.js";
 import { GlCreateTexture, GlGetTexture } from "../GlTextures.js";
@@ -231,12 +231,12 @@ export function FramebuffersDraw(fbidx) {
    if(GL.BOUND_PROG_IDX !== progIdx)
          GlUseProgram(progs[progIdx].program, progIdx)
 
-   if (progs[progIdx].timer.isOn) progs[progIdx].UpdateTimer();
-   if (progs[progIdx].uniformsNeedUpdate) progs[progIdx].UniformsUpdateuniformsBuffer(gl);
+   if (progs[progIdx].timer.isActive) progs[progIdx].UpdateTimer();
+   if (progs[progIdx].uniformsNeedUpdate) progs[progIdx].UniformsUpdateUniformsBuffer(gl);
    if(GL.BOUND_VAO !== ib.vao) GlBindVAO(ib.vao)
 
    
-   if (progs[progIdx].info.sid & SID.ATTR.TEX2) {
+   if (progs[progIdx].sid.attr & SID.ATTR.TEX2) {
        if (vb.texIdx >= 0) {
            const texture = GlGetTexture(vb.texIdx);
            GlBindTexture(texture);
@@ -256,7 +256,6 @@ export function FramebufferRenderToFramebuffer(drawQueue, drawQueueCount) {
 
    const gl = gfxCtx.gl;
    const progs = GlGetPrograms();
-   // const fb = GlFrameBuffer;
    const fb = FramebuffersGet(FRAMEBUFFERS_IDX.buffer0);
 
    gl.bindFramebuffer(gl.FRAMEBUFFER, fb.glfb);
@@ -285,10 +284,10 @@ export function FramebufferRenderToFramebuffer(drawQueue, drawQueueCount) {
           
    
           if(GL.BOUND_PROG_IDX !== progIdx)
-              GlUseProgram(progs[progIdx].program, progIdx)
+              GlUseProgram(progs[progIdx].webgl_program, progIdx)
           
-          if (progs[progIdx].timer.isOn) progs[progIdx].UpdateTimer();
-          if (progs[progIdx].uniformsNeedUpdate) progs[progIdx].UniformsUpdateuniformsBuffer(gl);
+          if (progs[progIdx].timer.isActive) progs[progIdx].UpdateTimer();
+          if (progs[progIdx].uniformsNeedUpdate) progs[progIdx].UniformsUpdateUniformsBuffer(gl);
    
           
           if (progs[progIdx].info.sid & SID.ATTR.TEX2) {

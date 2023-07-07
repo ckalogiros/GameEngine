@@ -1,7 +1,7 @@
 "use strict";
 import { BallInitCurveMode, BallPlayerCollision, BallSetCurveMode } from './Ball.js';
 import { PowerUpPlayerCollision } from './PowerUp.js';
-import { Rect } from '../../Engine/Drawables/Shapes/Rect.js';
+import { Rect2D } from '../../Engine/Drawables/Geometries/Rect2D.js';
 import { CoinPlayerCollision } from './Coin.js';
 import { Abs } from '../../Helpers/Math/MathOperations.js';
 import { StepTimersCreate } from '../../Engine/Timer/Time.js';
@@ -15,7 +15,7 @@ let storePosCounter = 0;
 let counter = 0;
 
 // Exporting is only for the class type(to compare with the instanceof operator)
-export class Player extends Rect {
+export class Player extends Rect2D {
 
     speed;
     mouseDist;

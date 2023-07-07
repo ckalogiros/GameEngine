@@ -2,7 +2,7 @@
 
 import { GlSetTex } from "../../../Graphics/Buffers/GlBufferOps.js";
 import { FontGetUvCoords } from "../../Loaders/Font/LoadFont.js";
-import { Rect } from "../Shapes/Rect.js";
+import { Rect2D } from "../Geometries/Rect2D.js";
 import { CreateText } from "../Text/Text.js";
 
 /**

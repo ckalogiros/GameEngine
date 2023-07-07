@@ -1,7 +1,7 @@
 "use strict";
 import { GfxInitGraphics } from '../Graphics/GfxInit.js'
 import { LoadFontTextures, FontCreateUvMap } from '../Engine/Loaders/Font/LoadFont.js'
-import { ScenesLoadScene, ScenesCreateAllMeshes, ScenesCreateScene, ScenesCreateRenderQueue, ScenesUnloadAllScenes, ScenesSetFramebufferQueue } from './Scenes.js'
+import { ScenesCreateAllMeshes, ScenesCreateRenderQueue, } from './Scenes.js'
 import { Render } from '../Engine/Renderer/Render.js'
 import { AddEventListeners, } from '../Engine/Events/Events.js';
 import { PowerUpInit } from './Drawables/PowerUp.js';
@@ -38,11 +38,11 @@ export function AppInit() {
     // Init all app's object meshes
     ScenesCreateAllMeshes();
     // Create All Scenes
-    ScenesCreateScene(SCENE.all); 
-    ScenesCreateScene(SCENE.startMenu);
-    ScenesCreateScene(SCENE.startStage);
-    ScenesCreateScene(SCENE.finishStage);
-    ScenesCreateScene(SCENE.stage);
+    // ScenesCreateScene(SCENE.all); 
+    // ScenesCreateScene(SCENE.startMenu);
+    // ScenesCreateScene(SCENE.startStage);
+    // ScenesCreateScene(SCENE.finishStage);
+    // ScenesCreateScene(SCENE.stage);
     // ScenesUnloadAllScenes(); // Unload all GFX buffers.
     ScenesCreateRenderQueue(); // Initilize a Draw Queue for drawing vertex buffers in a priority(z index) based aproach
     // ScenesLoadScene(SCENE.startMenu); // Load the first Scene
@@ -141,23 +141,23 @@ function AddCssUiListeners() {
 
     // Set Uniforms buffer params
     const prog = GlGetProgram(UNIFORM_PARAMS.sdf.progIdx);
-    prog.UniformsSetuniformsBufferValue(InterpolateToRange(SdfInnerDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.innerIdx);
+    prog.UniformsSetUniformsBuffer(InterpolateToRange(SdfInnerDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.innerIdx);
 
     // On event
     SdfInnerDistSlider.oninput = function () {
         SdfInnerDistOut.innerHTML = this.value;
-        prog.UniformsSetuniformsBufferValue(InterpolateToRange(SdfInnerDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.innerIdx);
+        prog.UniformsSetUniformsBuffer(InterpolateToRange(SdfInnerDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.innerIdx);
     }
 
     const SdfOuterDistSlider = document.getElementById("sdf-param2");
     const SdfOuterDistOut = document.getElementById("sdf-param2-val");
     SdfOuterDistOut.innerHTML = SdfOuterDistSlider.value;
 
-    prog.UniformsSetuniformsBufferValue(InterpolateToRange(SdfOuterDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.outerIdx);
+    prog.UniformsSetUniformsBuffer(InterpolateToRange(SdfOuterDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.outerIdx);
 
     SdfOuterDistSlider.oninput = function () {
         SdfOuterDistOut.innerHTML = this.value;
-        prog.UniformsSetuniformsBufferValue(InterpolateToRange(SdfOuterDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.outerIdx);
+        prog.UniformsSetUniformsBuffer(InterpolateToRange(SdfOuterDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.outerIdx);
     }
 
     /**

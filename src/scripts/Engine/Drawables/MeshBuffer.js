@@ -1,6 +1,6 @@
-import { Rect } from "./Shapes/Rect.js";
+import { Rect2D } from "./Geometries/Rect2D.js";
 
-export class TempMesh extends Rect{
+export class TempMesh extends Rect2D{
 
    /** TODO: Timer is included in Mesh.Maybe use that one...    */
    timer = {

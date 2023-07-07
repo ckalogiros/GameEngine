@@ -34,15 +34,17 @@ const SID = {
         DEF3:       0x8,
     },
 	ATTR:{
-        COL4: 	               0x1,
-        POS2: 	               0x2,
-        SCALE2:                0x4,
-        TEX2: 	               0x8,
-        WPOS_TIME4:            0x20,
-        STYLE:                 0x40,
-        TIME:                  0x80,
-        SDF_PARAMS:            0x100,
-        PARAMS1:               0x200,
+        COL4: 	                0x1,
+        POS2: 	                0x2,
+        SCALE2:                 0x4,
+        TEX2: 	                0x8,
+        WPOS_TIME4:             0x10,
+        TIME:                   0x20,
+        SDF_PARAMS:             0x40,
+        PARAMS1:                0x80,
+        BORDER:                 0x100,
+        R_CORNERS:              0x200,
+        FEATHER:                0x400,
     },
 	UNIF:{
         ORTHO:      0x1,
@@ -194,7 +196,7 @@ const V_TEX_COUNT 		     = 2
 const V_WPOS_COUNT 		     = 3 
 const V_WPOS_TIME_COUNT      = 4 // Use the 4th element for the time attribute 
 const V_STYLE_COUNT          = 3 
-const V_SDF_PARAMS_COUNT     = 2 
+const V_BORDER_WIDTH = 1, V_BORDER_FEATHER = 1, V_ROUND_CORNERS = 1 ;
 const V_TIME_COUNT           = 1 
 const V_PARAMS1_COUNT        = 4 
 

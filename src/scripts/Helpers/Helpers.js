@@ -125,3 +125,25 @@ export function GetSign(val){
     return (2 * (val >> 31) + 1);
 }
 
+/**
+ * Sorting na object based on property's value
+ * 
+    const obj = {
+        james: 10,
+        jane: 9,
+        bob: 30
+    }
+ * 1. Stores only the sorted keys.
+    const keysSorted = Object.keys(obj).sort(function(a,b){return obj[a]-obj[b]})
+	console.log(keysSorted);
+ 
+ * 2. Stores the sorted key-value pair.
+    const sorted = Object.entries(obj)
+        .sort(([, v1], [, v2]) => v1 - v2)
+        .reduce((obj, [k, v]) => ({
+            ...obj,
+            [k]: v
+    }), {})
+    console.log(sorted)
+
+ */

@@ -53,7 +53,7 @@ class RenderQueue {
       for (let i = 0; i < progCount; i++) {
          for (let j = 0; j < progs[i].vertexBufferCount; j++) {
             const isActive = progs[i].vertexBuffer[j].show; 
-            const progIdx = progs[i].info.progIdx;
+            const progIdx = progs[i].idx;
             const vbIdx = progs[i].vertexBuffer[j].idx;
             this.Store(progIdx, vbIdx, isActive);
          }

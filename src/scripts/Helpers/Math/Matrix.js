@@ -6,34 +6,106 @@
 import { AddArr2 } from "./MathOperations.js";
 
 // |-(r+l)/(r-l)|-(t+b) / (t-b) |-(zFar+zNear)/(zFar-zNear)	| 1 |
-export function Mat4Orthographic(left, right, bottom, top, zNear, zFar) {
+export function Mat4Orthographic(left, right, bottom, top, near, far) {
 
+	// const out = [
+	// 	 2.0 / (right - left),					// 0 											
+	// 	 0.0,											// 1 
+	// 	 0.0,											// 2 
+	// 	 0.0,											// 3 
+	// 	 0.0,											// 4 
+	// 	 2.0 / (top - bottom),					// 5 						
+	// 	 0.0,											// 6 
+	// 	 0.0,											// 7 
+	// 	 0.0,											// 8 
+	// 	 0.0,											// 9 
+	// 	-2.0 / (far - near),						// 10						
+	// 	 0.0,											// 11
+	// 	-(right + left) / (right - left),	// 12										
+	// 	-(top + bottom) / (top - bottom),	// 13										
+	// 	-(far + near) / (far - near),			// 14								
+	// 	 1.0											// 15
+	// ]
 	const out = [
-		2.0 / (right - left),
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		2.0 / (top - bottom),
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		-2.0 / (zFar - zNear),
-		0.0,
-		-(right + left) / (right - left),
-		-(top + bottom) / (top - bottom),
-		-(zFar + zNear) / (zFar - zNear),
-		1.0
+		 2.0 / (right - left),					// 0 											
+		 0.0,											// 1 
+		 0.0,											// 2 
+		 0.0,											// 3 
+		 0.0,											// 4 
+		 2.0 / (top - bottom),					// 5 						
+		 0.0,											// 6 
+		 0.0,											// 7 
+		 0.0,											// 8 
+		 0.0,											// 9 
+		-2.0 / (far - near),						// 10						
+		 0.0,											// 11
+		-(right + left) / (right - left),	// 12										
+		-(top + bottom) / (top - bottom),	// 13										
+		-(far + near) / (far - near),			// 14								
+		 1.0											// 15
 	]
 	return out;
 }
 
-class Mat4x4 {
-	constructor() {
+export function Mat4Perspective( left, right, bottom, top, near, far ) {
 
-	}
-};
+	// const out = [
+	// 	 2 * near / (right - left),			// 0 
+	// 	 0,											// 1 
+	// 	 0,											// 2 
+	// 	 0,											// 3 
+	// 	 0,											// 4 
+	// 	 2 * near / (top - bottom),			// 5 
+	// 	 0,											// 6 
+	// 	 0,											// 7 
+	// 	 (right + left) / (right - left),	// 8 
+	// 	 (top + bottom) / (top - bottom),		// 9 
+	// 	-(far + near) / (far - near),			// 10
+	// 	-1,											// 11
+	// 	 0,											// 12
+	// 	 0,											// 13
+	// 	-2 * far * near / (far - near),		// 14
+	// 	 0,											// 15
+	// ];
+	const out = [
+		 2  / (right / left),			// 0 
+		 0,											// 1 
+		 0,											// 2 
+		 0,											// 3 
+		 0,											// 4 
+		 2 / (top - bottom),			// 5 
+		 0,											// 6 
+		 0,											// 7 
+		 0,
+		 0
+		 -2 * far  / (far - near),		// 14
+		 -((far * near) / (far - near)),			// 10
+		 0,											// 12
+		 0,											// 13
+		-1,											// 15
+		 0,											// 11
+	];
+	// const out = [
+	// 	 2 * near / (right - left),			// 0 
+	// 	 0,											// 1 
+	// 	 0,											// 2 
+	// 	 0,											// 3 
+	// 	 0,											// 4 
+	// 	 2 / (top - bottom),			// 5 
+	// 	 0,											// 6 
+	// 	 0,											// 7 
+	// 	 0,											// 12
+	// 	 0,											// 13
+	// 	 -2  / (far - near),		// 14
+	// 	 0,											// 15
+	// 	-(right + left) / (right - left),	// 8 
+	// 	-(top + bottom) / (top-bottom),		// 9 
+	// 	-(far + near) / (far - near),			// 10
+	// 	1,											// 11
+	// ];
+	return out;
+
+}
 
 // function Mult(mat4, vec2){
 // 	const res = [

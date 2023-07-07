@@ -255,7 +255,9 @@ const COMIC_FONT_METRICS_PATH = '../../../../consolas_sdf35/metrics/consolas_sdf
  * Debugging  
  */
 const DEBUG = {
+	WEB_GL: true,
 	MATERIAL: true,
 	GEOMETRY: true,
 	MESH: true,
+	RECT: true,
 };

@@ -2,7 +2,7 @@
 
 import { AnimationsGet } from "../../Engine/Animations/Animations.js";
 import { GlowCreate, GlowGetGlow } from "../../Engine/Drawables/Fx/Glow.js";
-import { Rect } from "../../Engine/Drawables/Shapes/Rect.js";
+import { Rect2D } from "../../Engine/Drawables/Geometries/Rect2D.js";
 import { TextLabel } from "../../Engine/Drawables/Widgets/TextLabel.js";
 import { TimerGetGlobalTimer } from "../../Engine/Timer/Timer.js";
 import { GlRotate } from "../../Graphics/Buffers/GlBufferOps.js";
@@ -10,7 +10,7 @@ import { DimColor } from "../../Helpers/Helpers.js";
 
 
 
-class Mechanical extends Rect {
+class Mechanical extends Rect2D {
 
     animations = {
         scaleText: {

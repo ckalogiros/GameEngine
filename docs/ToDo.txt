@@ -1,3 +1,6 @@
+--------------------------------------------------- CONTINUE
+
+--------------------------------------------------- CONTINUE
 --------------------------------------------------- ASAP
 implement the render queue
 
@@ -6,11 +9,9 @@ For the uniforms buffer in the shaders to be dynamic size, we must implement a
 force reload shaders and relink current program, in order to add meshes at runtime.  
 
 implement flags (for material), 
-so that we can modify gl options, different material's flags for dif shader rendering, lighting etc.  
+so that we can modify gl options, different material flags for dif shader rendering, lighting etc.  
 
 implement vertex coloring(4) or grade hori and vertical.
-
-Delete this.needsUpdate and vb.needsUpdate
 
 Implement a Renderer, that handles the webGl context
 and a Camera class that is part of the renderer class

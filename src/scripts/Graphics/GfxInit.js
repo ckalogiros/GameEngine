@@ -1,5 +1,5 @@
 "use strict";
-import { GfxCreatePrograms } from './GfxCreateProgram.js';
+// import { GfxCreatePrograms } from './GfxCreateProgram.js';
 import { GlCreateTexture } from './GlTextures.js'
 // For Debuging
 import * as dbg from './Z_Debug/GfxDebug.js'

@@ -2,7 +2,7 @@
 import { Player, CreatePlayer } from './Drawables/Player.js';
 import { Button, CreateButton } from '../Engine/Drawables/Widgets/Button.js';
 import { BallsInit, BallCreate, BallProjLineSetPriority, Balls } from './Drawables/Ball.js';
-import { Rect, RectCreateRect } from '../Engine/Drawables/Shapes/Rect.js';
+import { Rect2D, RectCreateRect } from '../Engine/Drawables/Geometries/Rect2D.js';
 import { Text, CalcTextWidth } from '../Engine/Drawables/Text/Text.js';
 import { DarkenColor } from '../Helpers/Helpers.js';
 import { UiCreateScore, UiCreateScoreModifier, UiCreateLives, UiCreateCombo, UiTextVariable, UiCreateTotalScore, UiCreateFps, AnimTextsInit, AnimTexts } from './Drawables/Ui/Ui.js';
@@ -23,7 +23,9 @@ import { Vortex, VortexCreate, VortexGet, VortexGetVortex, VortexInit } from '..
 import { Shadow, ShadowCreate, ShadowGetShadow, ShadowInit } from '../Engine/Drawables/Fx/Shadow.js';
 import { Geometry2D } from '../Engine/Drawables/Geometry.js';
 import { Material } from '../Engine/Drawables/Material.js';
-import { Mesh2 } from '../Engine/Drawables/Mesh.js';
+import { Mesh } from '../Engine/Drawables/Mesh.js';
+import { TimerGetGlobalTimer } from '../Engine/Timer/Timer.js';
+import { GlGetProgram } from '../Graphics/GlProgram.js';
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *  LOGIC:
@@ -79,7 +81,7 @@ class Scene2 {
 
 
     AddMesh(mesh) {
-        if(!(mesh instanceof Mesh2)) {
+        if(!(mesh instanceof Mesh)) {
             console.error('Cannot add mesh to scene. mesh= ', mesh)
             return;
         }
@@ -275,24 +277,24 @@ class Scenes {
 };
 
 const scenes = new Scenes;
-export function ScenesGetScene(sceneIdx) {
+// export function ScenesGetScene(sceneIdx) {
 
-    if (sceneIdx < 0 || sceneIdx > scenes.count){{
-        console.error('Scene Index Out Of Bounds!');
-        // alert('Scene Index Out Of Bounds!');
-        return null;
-    }}
+//     if (sceneIdx < 0 || sceneIdx > scenes.count){{
+//         console.error('Scene Index Out Of Bounds!');
+//         // alert('Scene Index Out Of Bounds!');
+//         return null;
+//     }}
 
-    return scenes.scene[sceneIdx];
-}
-export function ScenesGetMesh(meshIdx) {
-    const mesh = scenes.allMeshes[meshIdx];
-    return mesh;
-}
+//     return scenes.scene[sceneIdx];
+// }
+// export function ScenesGetMesh(meshIdx) {
+//     const mesh = scenes.allMeshes[meshIdx];
+//     return mesh;
+// }
 // Set the gfx buffers to 'hidden', so that the meshes will not been drawn until the function
-export function ScenesUnloadAllScenes() {
-    scenes.UnloadAllGfxBuffers();
-}
+// export function ScenesUnloadAllScenes() {
+//     scenes.UnloadAllGfxBuffers();
+// }
 
 /**
  * Creates all meshes of the application. Also initializes all required Graphics programs and vertex buffers
@@ -301,17 +303,22 @@ export function ScenesCreateAllMeshes() {
 
     // Must initialize a meshes buffer, with count the count of all app's meshes,
     // so that we are able to add meshes to any index(not in consecutive order)  base on the const struct APP_MESHES_IDX
-    scenes.InitAllMeshesBuffer();
+    // scenes.InitAllMeshesBuffer();
 
     let dim = [Viewport.width / 2, Viewport.height / 2];
     let pos = [Viewport.width / 2, Viewport.height / 2, 0];
     let style = { pad: 10, roundCorner: 6, border: 0, feather: 30 };
 
-    const geom = new Geometry2D([130,130,0], [100, 100]);
-    const mat = new Material(WHITE);
-    const mesh = new Mesh2(geom, mat);
+    const geom = new Rect2D([130,130,0], [100, 100]);
+    const mat = new Material(ORANGE_240_130_10);
+    mat.SetStyle(60, 30, 20);
+    const mesh = new Mesh(geom, mat);
     const scene = new Scene2();
     scene.AddMesh(mesh);
+    const prog = GlGetProgram(mesh.gfx.prog.idx);
+    prog.CreateUniformScreenRes();
+    prog.CreateUniformTimer(0.1)
+
 
     { // backgrounds
         // const startMenuBk = RectCreateRect('startMenuBk', SID_DEFAULT | SID.FX.FS_GRADIENT, DarkenColor(GREENL2, 0.5), dim, [1, 1], null, pos, style, null, null);

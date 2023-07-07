@@ -1,4 +1,7 @@
 "use strict";
+
+import { GlUseProgram } from "./GlBuffers.js";
+
 const TYPES = {
    FLOAT  : 0x1406, // FLOAT
    FVEC2  : 0x8b50, // _VEC2
@@ -27,6 +30,7 @@ export class Uniform {
    loc;
    gl_uniform_func;
    constructor(val = null, loc = null, type = null){
+      
       this.val = val;// Uniform value
       this.loc = loc; // Uniform Location
       this.gl_uniform_func = null; //gl uniform type function
@@ -132,33 +136,41 @@ export class Uniform {
 }
 
 export class UniformsBuffer {
-   buffer;
+   ub;
+   names; // A way to get a specific uniforms index.
+   count;
    loc;
    needsUpdate;
 
    constructor(gl, prog, size){
-      this.loc = gl.getUniformLocation(prog, 'uniforms_buffer');
+      this.needsUpdate = false;
+      this.count = 0;
+      
+      GlUseProgram(prog.webgl_program, prog.idx)
+      this.loc = gl.getUniformLocation(prog.webgl_program, 'uniforms_buffer');
       if(!this.loc) {
          console.error('Could not locate uniform: \'uniforms_buffer\'');
-         this.buffer = null;
+         this.ub = null;
+         this.names = null;
       } 
       else {
-         this.buffer = new Float32Array(size);
+         this.ub = new Float32Array(size);
+         this.names = [];
          console.log('Uniform: \'uniforms_buffer\' located successfully!')
       } 
-      this.needsUpdate = false;
    }
 
-   Failure(){ return null; }
-   // Init(size){
-   //    this.buffer = new Float32Array(size);
-   // }
+   CreateUniform(name) {
+      const idx = this.count++;
+      this.names[idx] = name;
+      return idx;
+	}
    Set(value, index) {
-		this.buffer[index] = value;
-		this.uniformsNeedUpdate = true;
+		this.ub[index] = value;
+		this.needsUpdate = true;
 	}
 	Update(gl) {
-		gl.uniform1fv(this.loc, this.buffer); // And the shader decides the number of elements to draw from the buffer
-		this.uniformsNeedUpdate = false;
+		gl.uniform1fv(this.loc, this.ub); // And the shader decides the number of elements to draw from the buffer
+		this.needsUpdate = false;
 	}
 }

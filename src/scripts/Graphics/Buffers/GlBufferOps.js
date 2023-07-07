@@ -24,10 +24,10 @@ export function GlSetPriority(progIdx, vbIdx, meshIdx, meshCount)
     }
 
     /**
-     *	Slide all other meshes to the left by one mesh
+     *	'Slide' all other meshes to the left by one mesh
      */ 
     let start = vb.meshes[meshIdx].vb.start;
-    let c2 = start;
+    let k = start;
     let meshNewIdx = meshIdx;
 
     for(let i = meshIdx+meshCount; i<allmeshCount; i++){
@@ -35,13 +35,13 @@ export function GlSetPriority(progIdx, vbIdx, meshIdx, meshCount)
         // const newStart = i*meshSize;
         const newSize = vb.meshes[i].vb.count;
         for(let j = newStart; j<newStart+newSize; j++){
-            vb.data[c2] = vb.data[j];
-            c2++;
+            vb.data[k] = vb.data[j];
+            k++;
         }
         vb.meshes[i].vb.start = start;
         vb.meshes[i].meshIdx = meshNewIdx; // Update the meshe's index
         meshNewIdx++;
-        start = c2; // Keep the start of current mesh as the next's iteration previus meshe's start
+        start = k; // Keep the start of current mesh as the next's iteration previus meshe's start
     }
 
     /**
@@ -57,8 +57,6 @@ export function GlSetPriority(progIdx, vbIdx, meshIdx, meshCount)
         vb.meshes[meshIdx+i].meshIdx = meshNewIdx; // Update the meshe's index
         start = cnt;
     }
-
-    // this.needsUpdate = true;
 }
 
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -299,8 +297,6 @@ export function GlSetColor(gfxInfo, color){
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z
         verts--;
     }
-
-    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 export function GlSetColorAlpha(gfxInfo, val){
 
@@ -321,8 +317,6 @@ export function GlSetColorAlpha(gfxInfo, val){
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z
         verts--;
     }
-
-    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 export function GlSetDim(gfxInfo, dim) {
 
@@ -354,8 +348,6 @@ export function GlSetDim(gfxInfo, dim) {
 
         faces--;
     }
-
-    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 export function GlSetTex(gfxInfo, uvs){
 
@@ -386,49 +378,7 @@ export function GlSetTex(gfxInfo, uvs){
 
         numTimes--;
     }
-
-    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
-// export function GlScale(gfxInfo, val){
-
-//     const progs = GlGetPrograms();
-//     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
-
-//     let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.scaleOffset;
-//     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect; // Number of vertices
-//     let stride = gfxInfo.attribsPerVertex - 2; // Offset to next scale[0] attribute
-
-//     while (verts) {
-        
-//         vb.data[index++] *= val[0]; 
-//         vb.data[index++] *= val[1]; 
-
-//         index += stride; // Go to next vertice's scale.
-//         verts--;
-//     }
-
-//     // this.needsUpdate = true; // To Update vertex buffer with the changed data.
-// }
-// export function GlSetScale(gfxInfo, val){
-
-//     const progs = GlGetPrograms();
-//     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
-
-//     let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.scaleOffset;
-//     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect; // Number of vertices
-//     let stride = gfxInfo.attribsPerVertex - 2; // Offset to next scale[0] attribute
-
-//     while (verts) {
-        
-//         vb.data[index++] = val[0]; 
-//         vb.data[index++] = val[1]; 
-
-//         index += stride; // Go to next vertice's scale.
-//         verts--;
-//     }
-
-//     // this.needsUpdate = true; // To Update vertex buffer with the changed data.
-// }
 export function GlMove(gfxInfo, wpos){
     
     const progs = GlGetPrograms();
@@ -447,8 +397,6 @@ export function GlMove(gfxInfo, wpos){
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z
         verts--;
     }
-
-    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 export function GlSetWpos(gfxInfo, pos){
 
@@ -468,8 +416,6 @@ export function GlSetWpos(gfxInfo, pos){
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z
         verts--;
     }
-
-    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 export function GlSetWposXY(gfxInfo, pos){
 
@@ -489,8 +435,6 @@ export function GlSetWposXY(gfxInfo, pos){
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z
         verts--;
     }
-
-    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 export function GlSetWposX(gfxInfo, posx){
 
@@ -514,8 +458,6 @@ export function GlSetWposX(gfxInfo, posx){
 
         faces--;
     }
-    // console.log(vb.data)
-    // this.needsUpdate = true; // To Update vertex buffer with the changed data.
 }
 export function GlSetWposY(gfxInfo, posy){
 
@@ -539,8 +481,6 @@ export function GlSetWposY(gfxInfo, posy){
 
         faces--;
     }
-    // console.log(vb.data)
-    // this.needsUpdate = true; // To Update vertex buffer with the changed data.
 }
 export function GlSetWposZ(gfxInfo, posz){
 
@@ -564,8 +504,6 @@ export function GlSetWposZ(gfxInfo, posz){
 
         faces--;
     }
-    // console.log(vb.data)
-    // this.needsUpdate = true; // To Update vertex buffer with the changed data.
 }
 export function GlSetAttrRoundCorner(gfxInfo, val) {
 
@@ -583,8 +521,6 @@ export function GlSetAttrRoundCorner(gfxInfo, val) {
         index += stride; // Go to next vertice's borderWidth attrib.
         verts--;
     }
-
-    // this.needsUpdate = true;
 }
 export function GlSetAttrBorderWidth(gfxInfo, val) {
 
@@ -602,8 +538,6 @@ export function GlSetAttrBorderWidth(gfxInfo, val) {
         index += stride; // Go to next vertice's borderWidth attrib.
         verts--;
     }
-
-    // this.needsUpdate = true;
 }
 export function GlSetAttrBorderFeather(gfxInfo, val) {
 
@@ -621,8 +555,6 @@ export function GlSetAttrBorderFeather(gfxInfo, val) {
         index += stride; // Go to next vertice's borderWidth attrib.
         verts--;
     }
-
-    // this.needsUpdate = true;
 }
 export function GlSetAttrTime(gfxInfo, val) {
 
@@ -640,15 +572,13 @@ export function GlSetAttrTime(gfxInfo, val) {
         index += stride; // Go to next vertice's borderWidth attrib.
         verts--;
     }
-
-    // this.needsUpdate = true;
 }
 export function GlSetAttrSdfParams(gfxInfo, val) {
 
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.sdfParamsOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.sdfOffset;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - V_SDF_PARAMS_COUNT;
 
@@ -660,15 +590,13 @@ export function GlSetAttrSdfParams(gfxInfo, val) {
         index += stride; // Go to next vertice's borderWidth attrib.
         verts--;
     }
-
-    // this.needsUpdate = true;
 }
 export function GlSetAttrSdfParamsOuter(gfxInfo, val) {
 
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.sdfParamsOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.sdfOffset;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - V_SDF_PARAMS_COUNT;
 
@@ -680,8 +608,6 @@ export function GlSetAttrSdfParamsOuter(gfxInfo, val) {
         index += stride; // Go to next vertice's borderWidth attrib.
         verts--;
     }
-
-    // this.needsUpdate = true;
 }
 export function GlSetAttrTex(gfxInfo, uvs){
 
@@ -713,8 +639,6 @@ export function GlSetAttrTex(gfxInfo, uvs){
 
         numTimes--;
     }
-
-    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 /**
  * 
@@ -736,8 +660,6 @@ export function GlSetAttrParams1(gfxInfo, param, paramOffset){
         index += stride;
         verts--;
     }
-
-    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }
 
 export function GlRotate(gfxInfo, dim, angle){
@@ -762,6 +684,4 @@ export function GlRotate(gfxInfo, dim, angle){
     index += stride;
     vb.data[index++] = newPos[6];
     vb.data[index++] = newPos[7];
-
-    // this.needsUpdate = true; // To Update vertex buffer with the changed 
 }

@@ -9,8 +9,8 @@ let _materialId = 0;
 export class Material {
 
    sid;
-   col = [0, 0, 0, 0];
-   tex = [0, 0, 0, 0];
+   col;
+   tex;
 
    constructor(col = [0, 0, 0, 0], tex = null) {
 
@@ -20,6 +20,7 @@ export class Material {
       };
       if(tex) this.sid = SID.ATTR.TEX2;
 
+      this.col = [0,0,0,0];
       math.CopyArr4(this.col, col);
       if (tex) { math.CopyArr4(this.tex, tex); }
 
@@ -30,13 +31,13 @@ export class Material {
       }
    }
 
-   //////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////////////////////////////
    AddToGraphicsBuffer(sid, gfx) {
-      GlAddMaterial(sid, this.col, this.tex, gfx)
+      GlAddMaterial(sid, gfx, this.col, this.tex, this.style)
    }
-
-   //////////////////////////////////////////////////////////////
-
+   
+   
+   ////////////////////////////////////////////////////////////////////////////////////////////////////////
    GetColor() { return this.col; }
    GetColorRed() { return this.col[0]; }
    GetColorGreen() { return this.col[1]; }
@@ -50,4 +51,15 @@ export class Material {
       this.col[3], alpha;
       GlSetColorAlpha(this.col[3]);
    }
+   
+   ////////////////////////////////////////////////////////////////////////////////////////////////////////
+   SetStyle(border = 0, rCorners = 0, feather = 0){
+      this.style = {
+         border:border,
+         rCorners:rCorners,
+         feather:feather,
+      }
+      this.sid.attr |= (SID.ATTR.BORDER | SID.ATTR.R_CORNERS | SID.ATTR.FEATHER) | SID.ATTR.PARAMS1; 
+   }
+
 }

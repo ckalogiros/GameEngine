@@ -48,7 +48,7 @@ export function Render() {
 
 
 export function SetUniformParamsTimer(prog, step, index){
-    prog.UniformsSetuniformsBufferValue(prog.t, index);
+    prog.UniformsSetUniformsBuffer(prog.t, index);
     prog.t += step;
 }
 
@@ -62,7 +62,7 @@ const max = .5;
 
 function TempUpdateCrambleShader(){
     const prog = GlGetProgram(UNIFORM_PARAMS.CRAMBLE.progIdx); 
-    prog.UniformsSetuniformsBufferValue(t, UNIFORM_PARAMS.CRAMBLE.timeIdx);
+    prog.UniformsSetUniformsBuffer(t, UNIFORM_PARAMS.CRAMBLE.timeIdx);
     // if(!lock_t) {t-=speed; if(t<=0)lock_t=true;}
     // else {t+=speed; if(t>=3)lock_t=false;}
     t += speed; 
@@ -75,7 +75,7 @@ let t2 = 0.0;
 const speed2 = 0.1;
 function TempUpdateVoronoiExplosionShaderTimer(){
     const prog = GlGetProgram(UNIFORM_PARAMS.VORONOI_EXPLOSION.progIdx); 
-    prog.UniformsSetuniformsBufferValue(t2, UNIFORM_PARAMS.VORONOI_EXPLOSION.timeIdx);
+    prog.UniformsSetUniformsBuffer(t2, UNIFORM_PARAMS.VORONOI_EXPLOSION.timeIdx);
     // if(!lock_t) {t-=speed; if(t<=0)lock_t=true;}
     // else {t+=speed; if(t>=3)lock_t=false;}
     t2 += speed2; 

@@ -10,7 +10,7 @@ import {frag_round_corners_call, frag_round_corners} from './ReadyShaders/Shader
 const includePattern = /^[ \t]*#include +<([\w\d./]+)>/gm;
 function includeReplacerVertex( matchPattern, key ) {
    const string = vertex_shader_chunks[ key ];
-   if ( string === undefined ) { throw new Error( 'Can not resolve #include <' + key + '>' ); }
+   if ( string === undefined ) { throw new Error( 'Can not resolve #include <' + key + '> in Vertex Shader' ); }
    return resolveIncludesVertex( string );
 }
 function resolveIncludesVertex( string ) {
@@ -18,7 +18,7 @@ function resolveIncludesVertex( string ) {
 }
 function includeReplacerFragment( matchPattern, key ) {
    const string = fragment_shader_chunks[ key ];
-   if ( string === undefined ) { throw new Error( 'Can not resolve #include <' + key + '>' ); }
+   if ( string === undefined ) { throw new Error( 'Can not resolve #include <' + key + '> in Fragment Shader' ); }
    return resolveIncludesFragment( string );
 }
 function resolveIncludesFragment( string ) {
@@ -46,39 +46,46 @@ export function VertexShaderCreate(sid){
       '// Vertex Shader',
       true ? '#include <precision_medium>' : '',
       true ? '#define MAX_NUM_PARAMS_BUFFER 5' : '',
-      (sid.attr & SID.ATTR.COL4) ? '#include <in_attr_col4>' : '',
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      // INS
       (sid.attr & SID.ATTR.WPOS_TIME4) ? 'in vec4 a_wpos_time;' : '',
       (sid.attr & SID.ATTR.POS2) ? 'in vec2 a_pos;' : '',
+      (sid.attr & SID.ATTR.COL4) ? '#include <in_attr_col4>' : '',
       (sid.attr & SID.ATTR.TEX2) ? 'in vec2 a_tex;' : '',
       (sid.attr & SID.ATTR.SDF_PARAMS) ? '#include <in_attr_sdf2>' : '',
-      (sid.attr & SID.ATTR.STYLE) ? '#include <in_attr_style3>' : '',
+      (sid.attr & (SID.ATTR.BORDER | SID.ATTR.R_CORNERS | SID.ATTR.FEATHER)) ? '#include <in_a_vec4_params1>' : '',
       true ? 'uniform mat4 u_ortho_proj;' : '',
       true ? 'uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];' : '',
-      // TODO!!!: Create a SID.ATTR.PASS_TO_FRAGMENT, so that we control the passage of attributes to the fragment shader.
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      // OUTS
+      (sid.attr & SID.ATTR.BORDER) ? '#include <out_border_width>' : '',
+      (sid.attr & SID.ATTR.R_CORNERS) ? '#include <out_rCorners>' : '',
+      (sid.attr & SID.ATTR.FEATHER) ? '#include <out_border_feather>' : '',
       (sid.attr & SID.ATTR.COL4) ? 'out mediump vec4 v_col; ' : '',
       (sid.attr & SID.ATTR.POS2) ? 'out mediump vec2 v_pos;' : '',
       (sid.attr & SID.ATTR.WPOS_TIME4) ? 'out mediump vec2 v_wpos;' : '',
       (sid.attr & SID.ATTR.TEX2) ? 'out mediump vec2 v_tex_coord;' : '',
       (sid.attr & SID.ATTR.SDF_PARAMS) ? '#include <out_attr_sdf2>' : '',
-      (sid.attr & SID.ATTR.STYLE) ? '#include <out_vdim2>' : '',
+      (true) ? '#include <out_vdim2>' : '',
       (true) ? '#include <out_attr_style3>' : '',
       (sid.attr & SID.ATTR.STYLE) ? '#include <out_vtime1>' : '',
       (sid.attr & SID.ATTR.STYLE) ? '#include <out_vres2>' : '',
-      true ? '#include <out_vdim2>' : '',
       true ? 'out mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];' : '',
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       true ? 'void main(void) ' : '',
       true ? '{' : '',
       true ? '  gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);' : '',
-      // TODO!!!: Create a SID.ATTR.PASS_TO_FRAGMENT, so that we control the passage of attributes to the fragment shader.
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      // ASSIGNMENTS
       (sid.attr & SID.ATTR.COL4) ? '  v_col = a_col;' : '', 
       (sid.attr & SID.ATTR.POS2) ? '  v_pos = a_pos;' : '',
       (sid.attr & SID.ATTR.WPOS_TIME4) ? '  v_wpos = a_wpos_time.xy;' : '',
       (sid.attr & SID.ATTR.TEX2) ? '  v_tex_coord = a_tex;' : '',
       (sid.attr & SID.ATTR.SDF_PARAMS) ? '#include <sdf2_assign_sdf2>' : '',
-      (sid.attr & SID.ATTR.STYLE) ? '#include <vdim2_assign_apos2>' : '',
-      (sid.attr & SID.ATTR.STYLE) ? '#include <vstyle3_assign_astyle3>' : '',
-      (sid.attr & SID.ATTR.STYLE) ? '#include <vtime1_assign_awpostime1>' : '',
-      (sid.attr & SID.ATTR.STYLE) ? '#include <vres2_assign_uparams12>' : '',
+      (true) ? '#include <vdim2_assign_apos2>' : '',
+      (sid.attr & SID.ATTR.BORDER) ? '#include <assign_out_border_width>' : '',
+      (sid.attr & SID.ATTR.R_CORNERS) ? '#include <assign_out_rCorners>' : '',
+      (sid.attr & SID.ATTR.FEATHER) ? '#include <assign_out_border_feather>' : '',
       true ? '  v_uniforms_buffer = uniforms_buffer;' : '',
       true ? '}' : '',
    ];
@@ -103,14 +110,17 @@ export function FragmentShaderCreate(sid){
       (true) ? '#include <in_frag_col4>' : '',
       (true) ? '#include <in_frag_dim2>'   : '',
       (true) ? '#include <in_frag_wpos2>' : '',
-      (true) ? '#include <in_frag_style3>': '',
-      (true) ? '#include <in_frag_vparams>': '',
+      (sid.attr & SID.ATTR.BORDER) ? '#include <in_frag_border_width>' : '',
+      (sid.attr & SID.ATTR.R_CORNERS) ? '#include <in_frag_rCorners>' : '',
+      (sid.attr & SID.ATTR.FEATHER) ? '#include <in_frag_border_feather>' : '',
+      (false) ? '#include <in_frag_style3>': '',
+      (true) ? '#include <in_frag_v_uniforms_buffer>': '',
       (true) ? frag_round_corners : '',
       (true) ? 'void main(void) ' : '',
       (true) ? '{' : '',
-      // (true) ? frag_round_corners_call : '',
-      // (true) ? '    #include <frag_color_assign>' : '',
-      (true) ? '    frag_color = vec4(1.);' : '',
+      (true) ? frag_round_corners_call : '',
+      (true) ? '    #include <frag_color_assign>' : '',
+      // (true) ? '    frag_color = vec4(1.);' : '',
       (true) ? '}' : '',
    ];
 
@@ -142,3 +152,5 @@ export function FragmentShaderCreate(sid){
 //    }
 //    return shader;
 // }
+
+
