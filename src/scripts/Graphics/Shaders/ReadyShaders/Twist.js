@@ -6,15 +6,15 @@
 
 export const VS_TWIST = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 4
+#define UNIFORM_BUFFER_COUNT 4
 #define MAX_NUM_POSITIONS_BUFFER 4
 
 layout (location = 0) in mediump vec4  a_col;
 layout (location = 1) in mediump vec2  a_pos;
 layout (location = 2) in mediump vec4  a_wpos_time;
 
-uniform mat4  u_ortho_proj;
-uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];    
+uniform mat4  u_projection;
+uniform mediump float uniforms_buffer[UNIFORM_BUFFER_COUNT];    
 
 out mediump vec4  v_col; 
 out mediump vec2  v_wpos; 
@@ -26,7 +26,7 @@ out mediump float u_Dir;
     
 void main(void) {
     
-   gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
+   gl_Position = u_projection * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
    
    v_col       = a_col;
    v_dim       = a_pos;

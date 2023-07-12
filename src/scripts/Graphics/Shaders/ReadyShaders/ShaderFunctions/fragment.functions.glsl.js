@@ -1,8 +1,8 @@
 
 
-export const frag_round_corners_call = '    vec4 color = Stylize();';
+export const frag_round_corners_call = '    color = Stylize();';
 export const frag_round_corners = '\
-vec4 pos = vec4(.5, .5, .0, .0); \n\
+vec4 pos = vec4(.0, .0, .0, .0); \n\
 float ScreenH; \n\
 float AA;   \n\
 vec2 length2(vec4 a) {  \n\
@@ -13,8 +13,8 @@ vec2 rounded_rectangle(vec2 s, float r, float bw) {               \n\
     r = min(r, min(s.x, s.y));                                    \n\
     s -= r; // Subtract the border-radius                         \n\
     vec4 d = abs(pos) - s.xyxy;                                   \n\
-    vec4 dmin = min(d,0.0);                                       \n\
-    vec4 dmax = max(d,0.0);                                       \n\
+    vec4 dmin = min(d, 0.0);                                       \n\
+    vec4 dmax = max(d, 0.0);                                       \n\
     vec2 df = max(dmin.xz, dmin.yw) + length2(dmax);              \n\
     return (df - r);                                              \n\
 }                                                                 \n\
@@ -25,8 +25,15 @@ vec4 Stylize()                                                    \n\
   float rCorners = v_rCorners * .008;                                     \n\
   float feather = v_border_feather;                                  \n\
   \n\
-  vec2 res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]);    \n\
+  #include <test>\n\
+#ifdef UB_HAS_RESOLUTION\n\
+vec2 res = vec2(v_uniforms_buffer[UB_IDX0], v_uniforms_buffer[UB_IDX1]);    \n\
+res.x /= res.x/res.y;                                           \n\
+#else \n\
+// ELSE STATEMENT\n\
+  vec2 res = vec2(761., 893.);    \n\
   res.x /= res.x/res.y;                                           \n\
+#endif \n\
   vec2 uv = gl_FragCoord.xy/res;                                  \n\
   uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));                \n\
   vec2 dim = vec2(v_dim.x/res.x, v_dim.y/res.y);                  \n\
@@ -90,7 +97,7 @@ vec4 Stylize()                                                    \n\
 ';
 
 // #version 300 es
-// #define MAX_NUM_PARAMS_BUFFER 5
+// #define UNIFORM_BUFFER_COUNT 5
 // // Fragment Shader
 // precision mediump float;
 // out vec4 frag_color;

@@ -2,15 +2,15 @@
 
 export const VS_GLOW = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 2
+#define UNIFORM_BUFFER_COUNT 2
 
 layout (location = 0) in mediump vec4  a_col;
 layout (location = 1) in mediump vec2  a_pos;
 layout (location = 2) in mediump vec4  a_wpos_time;
 layout (location = 3) in mediump vec4  a_params1;
 
-uniform mat4  u_ortho_proj;
-uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];    
+uniform mat4  u_projection;
+uniform mediump float uniforms_buffer[UNIFORM_BUFFER_COUNT];    
 
 out mediump vec4  v_col; 
 out mediump vec2  v_wpos; 
@@ -23,7 +23,7 @@ out mediump vec2  u_Res;
     
 void main(void) {
     
-   gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
+   gl_Position = u_projection * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
    
    v_col       = a_col;
    v_dim       = a_pos;
@@ -81,7 +81,7 @@ void main()
 
 // export const FS_GLOW = `#version 300 es
 // #define WHITE  vec4(1., 1., 1., 1.)
-// #define MAX_NUM_PARAMS_BUFFER 5
+// #define UNIFORM_BUFFER_COUNT 5
 
 // precision mediump float;
 
@@ -89,7 +89,7 @@ void main()
 // in mediump vec2  v_wpos;
 // in mediump vec2  v_dim;
 // // in mediump float v_time;
-// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
+// in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT];   
 
 // out vec4 frag_color;
 

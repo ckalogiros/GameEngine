@@ -3,7 +3,7 @@ const UNIFORMS_BUFFER_SIZE = 5;
 const version                    = "#version 300 es";
 const precision_medium           = "precision mediump float;";
 const precision_high             = "precision highp float;";
-const u_params_size_def          = '#define MAX_NUM_PARAMS_BUFFER 5';
+const u_params_size_def          = '#define UNIFORM_BUFFER_COUNT 5';
 const in_attr_col4               = 'in vec4 a_col;';
 const in_attr_wposTime4          = 'in vec4 a_wpos_time;';
 const in_attr_pos2               = "in vec2 a_pos;";
@@ -13,7 +13,7 @@ const in_attr_style3             = 'in vec3 a_style;';
 const out_border_width           = 'out float v_border_width;';
 const out_border_feather         = 'out float v_border_feather;';
 const out_rCorners               = 'out float v_rCorners;';
-const u_orthoProj_in             = 'uniform mat4 u_ortho_proj;';
+const u_orthoProj_in             = 'uniform mat4 u_projection;';
 const in_a_vec4_params1          = 'in vec4 a_params1;';
 const out_attr_col4              = 'out vec4 v_col; ';
 const out_attr_wpos2             = 'out vec2 v_wpos;';
@@ -39,8 +39,8 @@ const assign_out_border_width    = '  v_border_width = a_params1.x;';
 const assign_out_rCorners        = '  v_rCorners = a_params1.y;';
 const assign_out_border_feather  = '  v_border_feather = a_params1.z;';
 const u_params_assign            = '  v_uniforms_buffer = uniforms_buffer;';
-const gl_position                = '  gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);';
-
+const gl_position                = '  gl_Position = u_projection * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);';
+const test = '// THIS IS A TEST INCLUDE'
 
 export const vertex_shader_chunks = {
    version                 : version,
@@ -84,11 +84,14 @@ export const vertex_shader_chunks = {
    assign_out_border_width:assign_out_border_width  ,  
    assign_out_rCorners:assign_out_rCorners      ,      
    assign_out_border_feather:assign_out_border_feather,
+
+   test:test,
 };
 
 
 // Fragment Shader
-const frag_color_assign  = '    frag_color = vec4(color);';
+const frag_color_create  = '    vec4 color = v_col;';
+const frag_color_assign  = '    frag_color = color;';
 const out_frag_color     = 'out vec4 frag_color;';
 const in_frag_col4       = 'in vec4 v_col;';
 const in_frag_dim2       = 'in vec2 v_dim;';
@@ -103,6 +106,7 @@ export const fragment_shader_chunks = {
    version: version,
    precision_medium  : precision_medium,
    precision_high    : precision_high,
+   frag_color_create : frag_color_create,
    frag_color_assign : frag_color_assign,
    out_frag_color    : out_frag_color   ,
    in_frag_col4      : in_frag_col4     ,
@@ -113,6 +117,8 @@ export const fragment_shader_chunks = {
    in_frag_border_width   : in_frag_border_width  ,
    in_frag_border_feather   : in_frag_border_feather  ,
    in_frag_rCorners   : in_frag_rCorners  ,
+
+   test:test,
 };
 
 

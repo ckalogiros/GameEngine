@@ -1,5 +1,5 @@
 const FS_DEFAULT2 = `#version 300 es
-#define MAX_NUM_PARAMS_BUFFER 5
+#define UNIFORM_BUFFER_COUNT 5
 
 
 precision highp float;
@@ -11,7 +11,7 @@ in mediump vec2 v_dim;
 in mediump vec2 v_wpos;
 in mediump vec2 v_Scale;
 in mediump vec3 v_style;
-in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
+in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 
 vec4 pos = vec4(.5, .5, .0, .0);

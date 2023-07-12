@@ -1,6 +1,6 @@
 export const FS_AWSOME = `#version 300 es
 #define WHITE  vec4(1., 1., 1., 1.)
-#define MAX_NUM_PARAMS_BUFFER 5
+#define UNIFORM_BUFFER_COUNT 5
 
 precision mediump float;
 
@@ -8,7 +8,7 @@ in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump vec2  v_dim;
 in mediump float v_time;
-in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
+in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT];   
 // float time = 23.;
 
 

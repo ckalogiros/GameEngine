@@ -1,32 +1,16 @@
 //===================== Orthographic Matrix =====================
-// | left-right 	| 0				| 0							| 0 |
-// | 0				| top - bottom	|								| 0 |
-// |					|					| zFar - zNear				| 0 |
+// | r-l			 | 0			 | 0			 | 0 |
+// | 0			 | t-b		 | 0			 | 0 |
+// | 0			 | 0			 | f-n		 | 0 |
+// | -r+l / r-l |-t+b / t-b | f+n / f-n | 1 |
 
+import { Matrix4 } from "../../Engine/math/Matrix4.js";
 import { AddArr2 } from "./MathOperations.js";
 
 // |-(r+l)/(r-l)|-(t+b) / (t-b) |-(zFar+zNear)/(zFar-zNear)	| 1 |
 export function Mat4Orthographic(left, right, bottom, top, near, far) {
 
-	// const out = [
-	// 	 2.0 / (right - left),					// 0 											
-	// 	 0.0,											// 1 
-	// 	 0.0,											// 2 
-	// 	 0.0,											// 3 
-	// 	 0.0,											// 4 
-	// 	 2.0 / (top - bottom),					// 5 						
-	// 	 0.0,											// 6 
-	// 	 0.0,											// 7 
-	// 	 0.0,											// 8 
-	// 	 0.0,											// 9 
-	// 	-2.0 / (far - near),						// 10						
-	// 	 0.0,											// 11
-	// 	-(right + left) / (right - left),	// 12										
-	// 	-(top + bottom) / (top - bottom),	// 13										
-	// 	-(far + near) / (far - near),			// 14								
-	// 	 1.0											// 15
-	// ]
-	const out = [
+	const mat4 = [
 		 2.0 / (right - left),					// 0 											
 		 0.0,											// 1 
 		 0.0,											// 2 
@@ -43,67 +27,77 @@ export function Mat4Orthographic(left, right, bottom, top, near, far) {
 		-(top + bottom) / (top - bottom),	// 13										
 		-(far + near) / (far - near),			// 14								
 		 1.0											// 15
-	]
-	return out;
+	];
+
+	// return new Matrix4().makeOrthographic(left, right, top, bottom, near, far).elements;
+	return new Matrix4().makePerspective(left, right, top, bottom, 100, 1).elements;
+	console.log('Orthographic:', mat4);
+	return mat4;
 }
 
-export function Mat4Perspective( left, right, bottom, top, near, far ) {
+//===================== Perspective Matrix =====================
+// | r-l			 | 0			 | 0			 | 0 |
+// | 0			 | t-b		 | 0			 | 0 |
+// | 0			 | 0			 | f-n		 | 0 |
+// | -r+l / r-l |-t+b / t-b | f+n / f-n | 1 |
+export function Mat4Perspective( left, right, top, bottom, near, far ) {
 
-	// const out = [
-	// 	 2 * near / (right - left),			// 0 
-	// 	 0,											// 1 
-	// 	 0,											// 2 
-	// 	 0,											// 3 
-	// 	 0,											// 4 
-	// 	 2 * near / (top - bottom),			// 5 
-	// 	 0,											// 6 
-	// 	 0,											// 7 
-	// 	 (right + left) / (right - left),	// 8 
-	// 	 (top + bottom) / (top - bottom),		// 9 
-	// 	-(far + near) / (far - near),			// 10
-	// 	-1,											// 11
-	// 	 0,											// 12
-	// 	 0,											// 13
-	// 	-2 * far * near / (far - near),		// 14
-	// 	 0,											// 15
-	// ];
-	const out = [
-		 2  / (right / left),			// 0 
+	const mat4 = [
+		 2 * near / ( right - left ),			// 0 
 		 0,											// 1 
 		 0,											// 2 
 		 0,											// 3 
 		 0,											// 4 
-		 2 / (top - bottom),			// 5 
+		 2 * near / ( top - bottom ),			// 5 
 		 0,											// 6 
 		 0,											// 7 
-		 0,
-		 0
-		 -2 * far  / (far - near),		// 14
-		 -((far * near) / (far - near)),			// 10
+		 (right + left) / (right - left),	// 8 
+		 (top + bottom) / (top - bottom),	// 9 
+		-(far + near) / (far - near),			// 10
+		-1,											// 11
 		 0,											// 12
 		 0,											// 13
-		-1,											// 15
-		 0,											// 11
+		-2 / far * near / (far - near),		// 14
+		 0,											// 15
 	];
-	// const out = [
-	// 	 2 * near / (right - left),			// 0 
+	// const mat4 = [
+	// 	 2 / near / (right - left),			// 0 
 	// 	 0,											// 1 
 	// 	 0,											// 2 
 	// 	 0,											// 3 
 	// 	 0,											// 4 
-	// 	 2 / (top - bottom),			// 5 
+	// 	 2 / near / (top - bottom),			// 5 
 	// 	 0,											// 6 
 	// 	 0,											// 7 
+	// 	 (right + left) / (right - left),	// 8 
+	// 	 (top + bottom) / (top - bottom),	// 9 
+	// 	-(far + near) / (far - near),			// 10
+	// 	-1,											// 11
 	// 	 0,											// 12
 	// 	 0,											// 13
-	// 	 -2  / (far - near),		// 14
+	// 	-2 / far * near / (far - near),		// 14
 	// 	 0,											// 15
-	// 	-(right + left) / (right - left),	// 8 
-	// 	-(top + bottom) / (top-bottom),		// 9 
-	// 	-(far + near) / (far - near),			// 10
-	// 	1,											// 11
 	// ];
-	return out;
+	// const mat4 = [
+	// 	2.0 * near / (right - left),				// 0 	
+	// 	0.0,											// 1 
+	// 	0.0,											// 2 
+	// 	0.0,											// 3 
+	// 	0.0,											// 4 
+	// 	2.0 * near / (top - bottom),				// 5 
+	// 	0.0,											// 6 
+	// 	0.0,											// 7 
+	// 	(right + left) / (right - left),		// 8 
+	// 	(top + bottom) / (top - bottom),		// 9 
+	// 	-(far - near) / (far - near),			// 10
+	// 	-1.0,											// 11
+	// 	 0.0,											// 12
+	// 	 0.0,											// 13
+	// 	-(2.0 * near * far) / (far - near),	// 14
+	// 	 0.0,											// 15
+	// ];
+	console.log('Perpsective:', mat4);
+	return mat4;
 
 }
 
@@ -124,25 +118,6 @@ export function Mat4Perspective( left, right, bottom, top, near, far ) {
 // 	return res;
 // }
 function Mult(mat4, vec2) {
-	// 	const res = [
-	// 		(  mat4[0] *   vec2[0]) + (  mat4[1] *   vec2[0]) + (  mat4[2] *  vec2[0]) + (  mat4[3] *   vec2[0]),
-	// 		(  mat4[0] *   vec2[1]) + (  mat4[1] *   vec2[1]) + (  mat4[2] *  vec2[1]) + (  mat4[3] *   vec2[1]),
-
-	// 		(  mat4[4] *   vec2[0]) + (  mat4[5] *   vec2[0]) + (  mat4[6] *  vec2[0]) + (  mat4[7] *   vec2[0]),
-	// 		(  mat4[4] *   vec2[1]) + (  mat4[5] *   vec2[1]) + (  mat4[6] *  vec2[1]) + (  mat4[7] *   vec2[1]),
-
-	// 		(  mat4[8] *   vec2[0]) + (  mat4[9] *   vec2[0]) + (  mat4[10] *  vec2[0]) + (  mat4[11] *   vec2[0]),
-	// 		(  mat4[8] *   vec2[1]) + (  mat4[9] *   vec2[1]) + (  mat4[10] *  vec2[1]) + (  mat4[11] *   vec2[1]),
-	
-	// 		(  mat4[12] *   vec2[0]) + (  mat4[13] *   vec2[0]) + (  mat4[14] *  vec2[0]) + (  mat4[15] *  vec2[0]),
-	// 		(  mat4[12] *   vec2[1]) + (  mat4[13] *   vec2[1]) + (  mat4[14] *  vec2[1]) + (  mat4[15] *  vec2[1]),
-	// 	];
-	/**
-	 	0 1 2 
-		4 5 6 7 
-		8 9 10 
-		15
-	 */ 
 	const res = [ 
 		mat4[0]*vec2[0] + mat4[1]*vec2[0] + mat4[2]*vec2[0], 
 		mat4[0]*vec2[0] + mat4[1]*vec2[0] + mat4[2]*vec2[0], 

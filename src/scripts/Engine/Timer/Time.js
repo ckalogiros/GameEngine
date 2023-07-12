@@ -1,6 +1,6 @@
 "use strict";
 
-const SECONDS = 0.001;
+const MILISEC = 0.001;
 
 
 class Time {
@@ -335,14 +335,14 @@ class Fps {
       // intervalTimers.Create(1000, this.GetAvg_1S, 'Fps-1sec', TIME_INTERVAL_REPEAT_ALWAYS)
    }
    Update() {
-      this.t = Date.now() * SECONDS;
+      this.t = Date.now() * MILISEC;
    }
    Start() {
       this.Update();
    }
 
    Stop() {
-      this.delta = (Date.now() * SECONDS) - this.t;
+      this.delta = (Date.now() * MILISEC) - this.t;
       this.accum += this.delta;
       this.cnt++;
       this.elapsedAccum += this.delta

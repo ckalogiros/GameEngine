@@ -16,7 +16,7 @@ import { FragmentShaderCreate } from "./CreateShader.js";
  */
 const FS_DEFAULT2 = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 5
+#define UNIFORM_BUFFER_COUNT 5
 
 precision highp float;
 out vec4 frag_color;
@@ -25,7 +25,7 @@ in mediump vec4 v_col;
 in mediump vec2 v_dim;
 in mediump vec2 v_wpos;
 in mediump vec3 v_style;
-in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
+in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 vec4 pos = vec4(.5, .5, .0, .0);
 vec3 _color = vec3(0.0);
@@ -123,7 +123,7 @@ void main(void)
 
 // const FS_DEFAULT2 = `#version 300 es
 
-// #define MAX_NUM_PARAMS_BUFFER 5
+// #define UNIFORM_BUFFER_COUNT 5
 
 // precision highp float;
 // out vec4 frag_color;
@@ -133,7 +133,7 @@ void main(void)
 // in mediump float v_time;
 // in mediump vec2  v_dim;
 // in mediump vec2  v_res;
-// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT]; 
 
 
 // #define STEPS 250.0
@@ -404,7 +404,7 @@ void main(void)
 
 const FS_DEFAULT3 = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 5
+#define UNIFORM_BUFFER_COUNT 5
 
 precision highp float;
 out vec4 frag_color;
@@ -415,7 +415,7 @@ in mediump vec2 v_dim;
 in mediump vec2 v_wpos;
 in mediump vec3 v_style;
 in mediump vec2 v_res;
-// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT]; 
 
 float sdRoundBox( in vec2 p, in vec2 b, in vec4 r ) 
 {
@@ -463,7 +463,7 @@ void main( )
 `;
 
 const FS_DEFAULT = `#version 300 es
-#define MAX_NUM_PARAMS_BUFFER 5
+#define UNIFORM_BUFFER_COUNT 5
 #define YELLOW  vec3(.612, .555, 0.04)
 #define BLUE    vec3(0.05, 0.99, 0.12)
 #define BLACK   vec3(.0, .0, .0)
@@ -484,7 +484,7 @@ in mediump vec2 v_dim;
 in mediump vec2 v_wpos;
 in mediump float v_time;
 in mediump vec3 v_style;
-in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
+in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT];                               // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 
 
@@ -664,14 +664,14 @@ void main(void)
 
 const FS_GRADIENT = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 5
+#define UNIFORM_BUFFER_COUNT 5
 
 precision mediump float;
 
 in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump vec2  v_dim;
-in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
+in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT];   
 
 out vec4 frag_color;
 
@@ -698,7 +698,7 @@ in highp vec4 v_col;
 in highp vec2 v_tex_coord;
 in highp vec2 v_sdf;       // [0]:SdfInner, [1]:SdfOuter
 
-uniform sampler2D u_Sampler0;
+uniform sampler2D u_sampler0;
 
 out vec4 frag_color;
 
@@ -707,7 +707,7 @@ void main(void) {
     float inner = v_sdf.x;
     float outer = v_sdf.y;
         
-    float b = max(texture(u_Sampler0, v_tex_coord).r, max(texture(u_Sampler0, v_tex_coord).g, texture(u_Sampler0, v_tex_coord).b));
+    float b = max(texture(u_sampler0, v_tex_coord).r, max(texture(u_sampler0, v_tex_coord).g, texture(u_sampler0, v_tex_coord).b));
     float pixelDist = 1. - b;
     float alpha = 1. - smoothstep(inner, inner + outer, pixelDist);
     frag_color = v_col * vec4(alpha);
@@ -723,14 +723,14 @@ precision mediump float;
 in mediump vec4 v_col;
 in mediump vec2 v_tex_coord;
 
-uniform sampler2D u_Sampler0;
+uniform sampler2D u_sampler0;
 out vec4 frag_color;
 
 void main(void) {
 
-    vec4 col = texture( u_Sampler0, v_tex_coord) * v_col;
-    frag_color = col * texture(u_Sampler0, v_tex_coord).a;
-    // if(texture(u_Sampler0, v_tex_coord).x < 0.004)
+    vec4 col = texture( u_sampler0, v_tex_coord) * v_col;
+    frag_color = col * texture(u_sampler0, v_tex_coord).a;
+    // if(texture(u_sampler0, v_tex_coord).x < 0.004)
     // frag_color = vec4(1.);
     // frag_color.rgb *= alpha;
 }
@@ -739,7 +739,7 @@ void main(void) {
 const FS_NOISE = `#version 300 es
     
 #define BLACK vec4(.0,.0,.0,1.)
-#define MAX_NUM_PARAMS_BUFFER 2
+#define UNIFORM_BUFFER_COUNT 2
 #define MAX_SPEED 20.
 precision highp float;
 
@@ -834,7 +834,7 @@ void main(void)
 // const FS_NOISE = `#version 300 es
     
 // #define BLACK vec4(.0,.0,.0,1.)
-// #define MAX_NUM_PARAMS_BUFFER 2
+// #define UNIFORM_BUFFER_COUNT 2
 // #define MAX_SPEED 20.
 // precision highp float;
 
@@ -922,7 +922,7 @@ void main(void)
 const FS_PARTICLES = `#version 300 es
 
 #define BLACK vec4(.0,.0,.0,1.)
-#define MAX_NUM_PARAMS_BUFFER 3
+#define UNIFORM_BUFFER_COUNT 3
 #define MAX_SPEED 20.
 precision highp float;
 precision highp int;
@@ -971,7 +971,7 @@ in mediump vec2  v_wpos;
 in mediump float v_time;
 in mediump vec2  v_dim;
 in mediump vec2  u_Res;
-// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT]; 
 
 out vec4 frag_color;
 
@@ -1018,14 +1018,14 @@ void main(void)
 
 const FS_VORONOI_EXPLOSION = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 5
+#define UNIFORM_BUFFER_COUNT 5
 precision highp float;
 
 in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump float v_time;
 in mediump vec2  v_dim;
-in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
+in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT]; 
 
 out vec4 frag_color;
 
@@ -1261,7 +1261,7 @@ void main()
  */
 const FS_CRAMBLE = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 5
+#define UNIFORM_BUFFER_COUNT 5
 
 precision highp float;
 out vec4 frag_color;
@@ -1270,7 +1270,7 @@ in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump float v_time;
 in mediump vec2  v_dim;
-in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
+in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT]; 
 
 
 #define STEPS 250.0
@@ -1580,7 +1580,7 @@ export function FragmentShaderChoose(sid) {
 /** SAVE 3 */
 // const FS_CRAMBLE = `#version 300 es
 
-// #define MAX_NUM_PARAMS_BUFFER 5
+// #define UNIFORM_BUFFER_COUNT 5
 // #define STEPS 250.0
 // #define MDIST 100.0
 // #define pi 3.1415926535
@@ -1596,7 +1596,7 @@ export function FragmentShaderChoose(sid) {
 // in mediump vec2  v_wpos;
 // in mediump float v_time;
 // in mediump vec2  v_dim;
-// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT]; 
 
 // float dbgT = 0.; // A global debug time
 
@@ -1771,7 +1771,7 @@ export function FragmentShaderChoose(sid) {
 /** FINAL SAVE FOR BRICKS BREAK ANIMATION  */
 // const FS_CRAMBLE = `#version 300 es
 
-// #define MAX_NUM_PARAMS_BUFFER 5
+// #define UNIFORM_BUFFER_COUNT 5
 // #define STEPS 250.0
 // #define MDIST 100.0
 // #define pi 3.1415926535
@@ -1787,7 +1787,7 @@ export function FragmentShaderChoose(sid) {
 // in mediump vec2  v_wpos;
 // in mediump float v_time;
 // in mediump vec2  v_dim;
-// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT]; 
 
 // float dbgT = 0.; // A global debug time
 
@@ -1975,7 +1975,7 @@ export function FragmentShaderChoose(sid) {
 
 // const FS_CRAMBLE = `#version 300 es
 
-// #define MAX_NUM_PARAMS_BUFFER 5
+// #define UNIFORM_BUFFER_COUNT 5
 // #define STEPS 250.0
 // #define MDIST 100.0
 // #define pi 3.1415926535
@@ -1991,7 +1991,7 @@ export function FragmentShaderChoose(sid) {
 // in mediump vec2  v_wpos;
 // in mediump float v_time;
 // in mediump vec2  v_dim;
-// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT]; 
 
 // float dbgT = 0.; // A global debug time
 
@@ -2157,7 +2157,7 @@ export function FragmentShaderChoose(sid) {
 /** SAVE 2 */
 // const FS_CRAMBLE = `#version 300 es
 
-// #define MAX_NUM_PARAMS_BUFFER 5
+// #define UNIFORM_BUFFER_COUNT 5
 // #define STEPS 250.0
 // #define MDIST 100.0
 // #define pi 3.1415926535
@@ -2173,7 +2173,7 @@ export function FragmentShaderChoose(sid) {
 // in mediump vec2  v_wpos;
 // in mediump float v_time;
 // in mediump vec2  v_dim;
-// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT]; 
 
 // vec2 vor(vec2 v, vec3 p, vec3 s)
 // {

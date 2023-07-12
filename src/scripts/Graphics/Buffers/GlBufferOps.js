@@ -204,7 +204,7 @@ export function VbSetAttrRoundCorner(vb, start, count, stride, radius) {
         vb.data[index++] = radius;
 
         index += stride;
-        vb.count += 2; // for the rest style attributes
+        vb.count++; // for the rest style attributes
     }
 }
 export function VbSetAttrBorderWidth(vb, start, count, stride, border) {
@@ -217,7 +217,7 @@ export function VbSetAttrBorderWidth(vb, start, count, stride, border) {
         vb.data[index++] = border;
 
         index += stride;
-        vb.count += 2; // for the rest style attributes
+        vb.count++; // for the rest style attributes
     }
 }
 export function VbSetAttrBorderFeather(vb, start, count, stride, feather) {
@@ -230,7 +230,7 @@ export function VbSetAttrBorderFeather(vb, start, count, stride, feather) {
         vb.data[index++] = feather;
 
         index += stride;
-        vb.count += 2; // for the rest style attributes
+        vb.count++; // for the rest style attributes
     }
 }
 export function VbSetAttrTime(vb, start, count, stride, time) {
@@ -283,7 +283,7 @@ export function GlSetColor(gfxInfo, color){
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.colOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.col;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - V_COL_COUNT;
 
@@ -303,7 +303,7 @@ export function GlSetColorAlpha(gfxInfo, val){
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.colOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.col;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - V_COL_COUNT;
 
@@ -323,7 +323,7 @@ export function GlSetDim(gfxInfo, dim) {
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.posOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.pos;
     let faces  = gfxInfo.numFaces;
     let stride = gfxInfo.attribsPerVertex - V_POS_COUNT;
 
@@ -354,7 +354,7 @@ export function GlSetTex(gfxInfo, uvs){
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.texOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.tex;
     let numTimes  = gfxInfo.numFaces;
     let stride = gfxInfo.attribsPerVertex - V_TEX_COUNT;
 
@@ -384,7 +384,7 @@ export function GlMove(gfxInfo, wpos){
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.wposTimeOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.wposTime;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - V_WPOS_COUNT;
 
@@ -403,7 +403,7 @@ export function GlSetWpos(gfxInfo, pos){
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.wposTimeOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.wposTime;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - V_WPOS_COUNT;
 
@@ -422,7 +422,7 @@ export function GlSetWposXY(gfxInfo, pos){
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.wposTimeOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.wposTime;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - V_WPOS_COUNT;
 
@@ -441,7 +441,7 @@ export function GlSetWposX(gfxInfo, posx){
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.wposTimeOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.wposTime;
     let faces  = gfxInfo.numFaces; // Number of vertices
     let stride = gfxInfo.attribsPerVertex; // Offset to next scale[0] attribute
 
@@ -464,7 +464,7 @@ export function GlSetWposY(gfxInfo, posy){
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.wposTimeOffset + 1;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.wposTime + 1;
     let faces  = gfxInfo.numFaces; // Number of vertices
     let stride = gfxInfo.attribsPerVertex; // Offset to next scale[0] attribute
 
@@ -487,7 +487,7 @@ export function GlSetWposZ(gfxInfo, posz){
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.wposTimeOffset + 2;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.wposTime + 2;
     let faces  = gfxInfo.numFaces; // Number of vertices
     let stride = gfxInfo.attribsPerVertex; // Offset to next scale[0] attribute
 
@@ -510,7 +510,7 @@ export function GlSetAttrRoundCorner(gfxInfo, val) {
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.styleOffset + V_ROUND_CORNER_STRIDE;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.style + V_ROUND_CORNER_STRIDE;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - 1; // Minus 1 attr that we are setting
 
@@ -527,7 +527,7 @@ export function GlSetAttrBorderWidth(gfxInfo, val) {
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.styleOffset + V_BORDER_WIDTH_STRIDE;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.style + V_BORDER_WIDTH_STRIDE;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - 1; // Minus 1 attr that we are setting
 
@@ -544,7 +544,7 @@ export function GlSetAttrBorderFeather(gfxInfo, val) {
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.styleOffset + V_BORDER_FEATHER_STRIDE;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.style + V_BORDER_FEATHER_STRIDE;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - 1; // Minus 1 attr that we are setting
 
@@ -561,7 +561,7 @@ export function GlSetAttrTime(gfxInfo, val) {
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.timeOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.time;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - V_TIME_COUNT;
 
@@ -572,13 +572,14 @@ export function GlSetAttrTime(gfxInfo, val) {
         index += stride; // Go to next vertice's borderWidth attrib.
         verts--;
     }
+    vb.needsUpdate = true; // HACK. TODO suppose to be implemented in MESH????
 }
 export function GlSetAttrSdfParams(gfxInfo, val) {
 
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.sdfOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.sdf;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - V_SDF_PARAMS_COUNT;
 
@@ -596,7 +597,7 @@ export function GlSetAttrSdfParamsOuter(gfxInfo, val) {
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.sdfOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.sdf;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - V_SDF_PARAMS_COUNT;
 
@@ -614,7 +615,7 @@ export function GlSetAttrTex(gfxInfo, uvs){
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.texOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.tex;
 
     let numTimes  = gfxInfo.numFaces;
     let stride = gfxInfo.attribsPerVertex - V_TEX_COUNT;
@@ -651,7 +652,7 @@ export function GlSetAttrParams1(gfxInfo, param, paramOffset){
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.params1Offset + paramOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.params1 + paramOffset;
     let verts  = gfxInfo.numFaces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - 1;
 
@@ -667,7 +668,7 @@ export function GlRotate(gfxInfo, dim, angle){
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx]; 
 
-    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.posOffset;
+    let index  = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.pos;
     let stride = gfxInfo.attribsPerVertex - V_POS_COUNT;
 
     // const newPos = Rotate4x4(dim, angle)

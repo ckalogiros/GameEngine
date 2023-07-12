@@ -2,137 +2,76 @@
 
 import { GlUseProgram } from "./GlBuffers.js";
 
-const TYPES = {
-   FLOAT  : 0x1406, // FLOAT
-   FVEC2  : 0x8b50, // _VEC2
-   FVEC3  : 0x8b51, // _VEC3
-   FVEC4  : 0x8b52, // _VEC4
-   MAT2   : 0x8b5a, // _MAT2
-   MAT3   : 0x8b5b, // _MAT3
-   MAT4   : 0x8b5c, // _MAT4
-   //     : 0x1404,  
-   INT    : 0x8b56, // INT, 
-   BOOL   : 0x8b53, // BOOL 
-   IVEC2  : 0x8b57, // _VEC2
-   //     : 0x8b54,  
-   IVEC3  : 0x8b58, // _VEC3
-   //     : 0x8b55,  
-   UIVEC4  : 0x8b59, // _VEC4
-
-   UINT   : 0x1405, // UINT
-   UIVEC2 : 0x8dc6, // _VEC2
-   UIVEC3 : 0x8dc7, // _VEC3
-   UIVEC4 : 0x8dc8, // _VEC4
-};
-
 export class Uniform {
    val;
    loc;
-   gl_uniform_func;
-   constructor(val = null, loc = null, type = null){
-      
+   Update;
+   constructor(val = null, loc = null, type = null) {
+
       this.val = val;// Uniform value
       this.loc = loc; // Uniform Location
-      this.gl_uniform_func = null; //gl uniform type function
-      this.needsUpdate = false;
+      this.Update = null; // Function
+      // this.needsUpdate = false;
 
       // 
-      switch(type){
+      switch (type) {
          // From THREE.js
-         case 0x1406: this.gl_uniform_func = this.setValueV1f; // FLOAT
-         case 0x8b50: this.gl_uniform_func = this.setValueV2f; // _VEC2
-         case 0x8b51: this.gl_uniform_func = this.setValueV3f; // _VEC3
-         case 0x8b52: this.gl_uniform_func = this.setValueV4f; // _VEC4
-   
-         case 0x8b5a: this.gl_uniform_func = this.setValueM2; // _MAT2
-         case 0x8b5b: this.gl_uniform_func = this.setValueM3; // _MAT3
-         case 0x8b5c: this.gl_uniform_func = this.setValueM4; // _MAT4
-   
-         case 0x1404: case 0x8b56:  this.gl_uniform_func = this.setValueV1i; // INT, BOOL
-         case 0x8b53: case 0x8b57:  this.gl_uniform_func = this.setValueV2i; // _VEC2
-         case 0x8b54: case 0x8b58:  this.gl_uniform_func = this.setValueV3i; // _VEC3
-         case 0x8b55: case 0x8b59:  this.gl_uniform_func = this.setValueV4i; // _VEC4
-   
-         case 0x1405: this.gl_uniform_func = this.setValueV1ui; // UINT
-         case 0x8dc6: this.gl_uniform_func = this.setValueV2ui; // _VEC2
-         case 0x8dc7: this.gl_uniform_func = this.setValueV3ui; // _VEC3
-         case 0x8dc8: this.gl_uniform_func = this.setValueV4ui; // _VEC4
-      
-         default: {
-            console.error('The type of the uniform\'s value is unknown');
-            break; 
-         }
-         
+         case UNIF_TYPES.FLOAT: { this.Update = this.SetValueV1f; break; } // FLOAT
+         case UNIF_TYPES.FVEC2: { this.Update = this.SetValueV2f; break; } // F_VEC2
+         case UNIF_TYPES.FVEC3: { this.Update = this.SetValueV3f; break; } // F_VEC3
+         case UNIF_TYPES.FVEC4: { this.Update = this.SetValueV4f; break; } // F_VEC4
+
+         case UNIF_TYPES.MAT2: { this.Update = this.SetValueM2; break; } // F_MAT2
+         case UNIF_TYPES.MAT3: { this.Update = this.SetValueM3; break; } // F_MAT3
+         case UNIF_TYPES.MAT4: { this.Update = this.SetValueM4; break; } // F_MAT4
+
+         case UNIF_TYPES.INT: { this.Update = this.SetValueV1i; break; } // INT, BOOL
+         case UNIF_TYPES.BOOL: { this.Update = this.SetValueV1i; break; } // INT, BOOL
+         case UNIF_TYPES.IVEC2: { this.Update = this.SetValueV2i; break; } // I_VEC2
+         case UNIF_TYPES.IVEC3: { this.Update = this.SetValueV3i; break; } // I_VEC3
+         case UNIF_TYPES.UIVEC4: { this.Update = this.SetValueV4i; break; } // I_VEC4
+
+         case UNIF_TYPES.UINT: { this.Update = this.SetValueV1ui; break; } // UINT
+         case UNIF_TYPES.UIVEC2: { this.Update = this.SetValueV2ui; break; } // UI_VEC2
+         case UNIF_TYPES.UIVEC3: { this.Update = this.SetValueV3ui; break; } // UI_VEC3
+         case UNIF_TYPES.UIVEC4: { this.Update = this.SetValueV4ui; break; } // UI_VEC4
+
+         default: { console.error('The type of the uniform\'s value is unknown'); break; }
+
       }
    }
 
-   Set(value) {
-		this.val = value;
-		this.uniformsNeedUpdate = true;
-	}
-	Update(gl) {
-      this.gl_uniform_func(gl);
-		this.uniformsNeedUpdate = false;
-	}
+   Set(val) {
+      this.val = val;
+      // this.needsUpdate = true;
+   }
+   Update(gl, val) {
+      this.Update(gl, val);
+      // this.needsUpdate = false;
+   }
 
    // Array of scalars
-   setValueV1fArray( gl, v ) {
-      gl.uniform1fv( this.loc, v );
-   }
+   SetValueV1f(gl) { gl.uniform1fv(this.loc, this.val); }
    // Array of vectors (from flat array or array of THREE.VectorN)
-   setValueV2fArray( gl, v ) {
-      const data = flatten( v, this.size, 2 );
-      gl.uniform2fv( this.loc, data );
-   }
-   setValueV3fArray( gl, v ) {
-      const data = flatten( v, this.size, 3 );
-      gl.uniform3fv( this.loc, data );
-   }
-   setValueV4fArray( gl, v ) {
-      const data = flatten( v, this.size, 4 );
-      gl.uniform4fv( this.loc, data );
-   }
+   SetValueV2f(gl) { gl.uniform2fv(this.loc, this.val); }
+   SetValueV3f(gl) { gl.uniform3fv(this.loc, this.val); }
+   SetValueV4f(gl) { gl.uniform4fv(this.loc, this.val); }
    // Array of matrices (from flat array or array of THREE.MatrixN)
-   setValueM2Array( gl, v ) {
-      const data = flatten( v, this.size, 4 );
-      gl.uniformMatrix2fv( this.loc, false, data );
-   }
-   setValueM3Array( gl, v ) {
-      const data = flatten( v, this.size, 9 );
-      gl.uniformMatrix3fv( this.loc, false, data );
-   }
-   setValueM4Array( gl, v ) {
-      const data = flatten( v, this.size, 16 );
-      gl.uniformMatrix4fv( this.loc, false, data );
-   }
+   SetValueM2(gl) { gl.uniformMatrix2fv(this.loc, false, this.val); }
+   SetValueM3(gl) { gl.uniformMatrix3fv(this.loc, false, this.val); }
+   SetValueM4(gl) { gl.uniformMatrix4fv(this.loc, false, this.val); }
    // Array of integer / boolean
-   setValueV1iArray( gl, v ) {
-      gl.uniform1iv( this.loc, v );
-   }
+   SetValueV1i(gl) { gl.uniform1iv(this.loc, this.val); }
    // Array of integer / boolean vectors (from flat array)
-   setValueV2iArray( gl, v ) {
-      gl.uniform2iv( this.loc, v );
-   }
-   setValueV3iArray( gl, v ) {
-      gl.uniform3iv( this.loc, v );
-   }
-   setValueV4iArray( gl, v ) {
-      gl.uniform4iv( this.loc, v );
-   }
+   SetValueV2i(gl) { gl.uniform2iv(this.loc, this.val); }
+   SetValueV3i(gl) { gl.uniform3iv(this.loc, this.val); }
+   SetValueV4i(gl) { gl.uniform4iv(this.loc, this.val); }
    // Array of unsigned integer
-   setValueV1uiArray( gl, v ) {
-      gl.uniform1uiv( this.loc, v );
-   }
+   SetValueV1ui(gl) { gl.uniform1uiv(this.loc, this.val); }
    // Array of unsigned integer vectors (from flat array)
-   setValueV2uiArray( gl, v ) {
-      gl.uniform2uiv( this.loc, v );
-   }
-   setValueV3uiArray( gl, v ) {
-      gl.uniform3uiv( this.loc, v );
-   }
-   setValueV4uiArray( gl, v ) {
-      gl.uniform4uiv( this.loc, v );
-   }
+   SetValueV2ui(gl) { gl.uniform2uiv(this.loc, this.val); }
+   SetValueV3ui(gl) { gl.uniform3uiv(this.loc, this.val); }
+   SetValueV4ui(gl) { gl.uniform4uiv(this.loc, this.val); }
 }
 
 export class UniformsBuffer {
@@ -142,35 +81,35 @@ export class UniformsBuffer {
    loc;
    needsUpdate;
 
-   constructor(gl, prog, size){
+   constructor(gl, prog, size) {
       this.needsUpdate = false;
       this.count = 0;
-      
+
       GlUseProgram(prog.webgl_program, prog.idx)
       this.loc = gl.getUniformLocation(prog.webgl_program, 'uniforms_buffer');
-      if(!this.loc) {
+      if (!this.loc) {
          console.error('Could not locate uniform: \'uniforms_buffer\'');
          this.ub = null;
          this.names = null;
-      } 
+      }
       else {
          this.ub = new Float32Array(size);
          this.names = [];
          console.log('Uniform: \'uniforms_buffer\' located successfully!')
-      } 
+      }
    }
 
    CreateUniform(name) {
       const idx = this.count++;
       this.names[idx] = name;
       return idx;
-	}
+   }
    Set(value, index) {
-		this.ub[index] = value;
-		this.needsUpdate = true;
-	}
-	Update(gl) {
-		gl.uniform1fv(this.loc, this.ub); // And the shader decides the number of elements to draw from the buffer
-		this.needsUpdate = false;
-	}
+      this.ub[index] = value;
+      this.needsUpdate = true;
+   }
+   Update(gl) {
+      gl.uniform1fv(this.loc, this.ub); // And the shader decides the number of elements to draw from the buffer
+      this.needsUpdate = false;
+   }
 }

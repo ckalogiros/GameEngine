@@ -1,7 +1,7 @@
 "use strict";
 
 const INT_NULL = -1; // For case like 0 index arrays, where the number 0 index cannot be used as null element for a buffer
-
+var u_projection = null;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * Graphics Constants */
@@ -45,10 +45,12 @@ const SID = {
         BORDER:                 0x100,
         R_CORNERS:              0x200,
         FEATHER:                0x400,
+        EMPTY:                  0x10000000,
     },
 	UNIF:{
         ORTHO:      0x1,
-        U_PARAMS:   0x2,
+        U_BUFFER:   0x2,
+        BUFFER_RES: 0x4,
     },
     // FX
     FX:{
@@ -311,7 +313,28 @@ const Texture = {
 };
 
 
-
+/**
+ * UNIFORMS
+ */
+const UNIF_TYPES = {
+    FLOAT  : 0x1406, // FLOAT
+    FVEC2  : 0x8b50, // _VEC2
+    FVEC3  : 0x8b51, // _VEC3
+    FVEC4  : 0x8b52, // _VEC4
+    MAT2   : 0x8b5a, // _MAT2
+    MAT3   : 0x8b5b, // _MAT3
+    MAT4   : 0x8b5c, // _MAT4
+    INT    : 0x8b56, // INT, 
+    BOOL   : 0x8b53, // BOOL 
+    IVEC2  : 0x8b57, // _VEC2
+    IVEC3  : 0x8b58, // _VEC3
+    UIVEC4  : 0x8b59, // _VEC4
+ 
+    UINT   : 0x1405, // UINT
+    UIVEC2 : 0x8dc6, // _VEC2
+    UIVEC3 : 0x8dc7, // _VEC3
+    UIVEC4 : 0x8dc8, // _VEC4
+ };
 
 const FLOAT = 4; // 4 Bytes
 

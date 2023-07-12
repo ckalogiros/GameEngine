@@ -1,26 +1,26 @@
 export const VS_SHADOW = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 3
+#define UNIFORM_BUFFER_COUNT 3
 
 layout (location = 0) in mediump vec4 a_col;
 layout (location = 1) in mediump vec4 a_wpos_time;
 layout (location = 2) in mediump vec2 a_pos;
 layout (location = 3) in mediump vec2 a_tex;
 
-uniform mat4  u_ortho_proj;
-uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                  // [0]:WinWidth, [1]:WinHeight, [3]:Time
+uniform mat4  u_projection;
+uniform mediump float uniforms_buffer[UNIFORM_BUFFER_COUNT];                  // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 out mediump vec4 v_col; 
 out mediump vec2 v_dim; 
 out mediump vec2 v_wpos; 
 out mediump float v_time; 
 out mediump vec2 v_tex_coord;
-// out mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                   
+// out mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT];                   
     
 void main(void) {
     
     vec2 scaled = a_pos;
-    gl_Position = u_ortho_proj * vec4(scaled.x + a_wpos_time.x, scaled.y + a_wpos_time.y, a_wpos_time.z, 1.0);
+    gl_Position = u_projection * vec4(scaled.x + a_wpos_time.x, scaled.y + a_wpos_time.y, a_wpos_time.z, 1.0);
     
     v_col       = a_col;
     v_dim       = abs(a_pos);
@@ -43,9 +43,9 @@ in mediump float v_time;
 in mediump vec2  v_dim;
 in mediump vec2  v_tex_coord;
 
-uniform sampler2D u_Sampler0;
+uniform sampler2D u_sampler0;
 
-// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
+// in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT]; 
 
 #define PI 3.1415926535897932384626433832795
 #define PI2 6.283185307179586476925286766559
@@ -95,10 +95,10 @@ void main(void) {
     // float w = 0.5*fwidth(d); 
     // w *= 1.5; // extra blur
 
-    vec4 col = texture( u_Sampler0, v_tex_coord) * v_col;
+    vec4 col = texture( u_sampler0, v_tex_coord) * v_col;
     vec3 c = vec3(0.);
     for(int i = 0; i < KERNEL_SIZE; i++)
-        c +=  vec3(texture( u_Sampler0, v_tex_coord + offsets[i])) * v_col.rgb * kernel[i];
+        c +=  vec3(texture( u_sampler0, v_tex_coord + offsets[i])) * v_col.rgb * kernel[i];
 
     // float cc = h;
     // col.rgb *= cc;
@@ -112,9 +112,9 @@ void main(void) {
     // frag_color.rgb = mix( vec3(0.0,0.0,0.0), vec3(c*c*4.), smoothstep(-w,w,d-.32) );;
     // frag_color.rgb = mix( vec3(0.0,0.0,0.0), vec3(c*c*4.), smoothstep(.0,.05, d-.14) );
     // frag_color.rgb = (c*c)+.5;
-    // frag_color = col * texture(u_Sampler0, v_tex_coord).a;
+    // frag_color = col * texture(u_sampler0, v_tex_coord).a;
     // frag_color = col;
-    // frag_color = smoothstep(.0, .3, col) * texture(u_Sampler0, v_tex_coord).a;
+    // frag_color = smoothstep(.0, .3, col) * texture(u_sampler0, v_tex_coord).a;
     // frag_color = smoothstep(.0, .8, col);
 
     

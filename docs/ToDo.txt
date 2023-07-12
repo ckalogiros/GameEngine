@@ -1,8 +1,11 @@
 --------------------------------------------------- CONTINUE
+Finish the event dispatchEvent
 
+Create Camera controls 
 --------------------------------------------------- CONTINUE
 --------------------------------------------------- ASAP
-implement the render queue
+
+Implement Renderer
 
 implement uniforms
 For the uniforms buffer in the shaders to be dynamic size, we must implement a 
@@ -22,7 +25,7 @@ and can create Projection as orthographic views
 
 --------------------------------------------------- New ToDo's
 Reimplement sid to be a class. 
-The class will return an sid 
+The class will return a sid 
 object:{
   attr:,
   unif:,

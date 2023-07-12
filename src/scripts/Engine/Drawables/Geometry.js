@@ -3,6 +3,7 @@
 import * as math from '../../Helpers/Math/MathOperations.js'
 import * as glBufferOps from '../../Graphics/Buffers/GlBufferOps.js'
 import { GlAddGeometry } from '../../Graphics/Buffers/GlBuffers.js';
+import { TimerGetGlobalTimer } from '../Timer/Timer.js';
 
 let _geometryId = 0;
 
@@ -15,6 +16,7 @@ export class Geometry2D {
     defPos = [0, 0, 0];
     defDim = [0, 0];
     defScale = [0, 0];
+    time = 0;
 
     constructor(pos = [0, 0, 0], dim = [0, 0], scale = [1, 1]) {
 
@@ -32,6 +34,8 @@ export class Geometry2D {
         math.CopyArr2(this.defScale, scale);
         math.CopyArr3(this.defPos, pos);
 
+        this.time = TimerGetGlobalTimer();
+
         /** Debug properties */
         if (DEBUG.GEOMETRY) {
             Object.defineProperty(this, 'id', { value: _geometryId++ });
@@ -41,7 +45,7 @@ export class Geometry2D {
 
     //////////////////////////////////////////////////////////////
     AddToGraphicsBuffer(sid, gfx, meshName) {
-        GlAddGeometry(sid, this.pos, this.dim, gfx, meshName)
+        GlAddGeometry(sid, this.pos, this.dim, this.time, gfx, meshName)
     }
 
     //////////////////////////////////////////////////////////////

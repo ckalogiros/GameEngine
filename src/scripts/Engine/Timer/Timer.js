@@ -192,7 +192,7 @@ export function TimersUpdateTimers(){
 /**
  * Debug
  */
-export function TimersPrintimers(){
+export function TimersPrinTimers(){
 
     for(let i=0; i<timers.size; i++){
         const t = timers.buffer[i]; // Cash

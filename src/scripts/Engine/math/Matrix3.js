@@ -4,6 +4,7 @@ class Matrix3 {
 
 		Matrix3.prototype.isMatrix3 = true;
 
+		this.elements = new Float32Array(3*3);
 		this.elements = [
 
 			1, 0, 0,

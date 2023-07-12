@@ -2,15 +2,15 @@
 
 export const VS_VORTEX = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 3
+#define UNIFORM_BUFFER_COUNT 3
 
 layout (location = 0) in mediump vec4  a_col;
 layout (location = 1) in mediump vec2  a_pos;
 layout (location = 2) in mediump vec4  a_wpos_time;
 layout (location = 3) in mediump vec4  a_params1;
 
-uniform mat4  u_ortho_proj;
-uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];    
+uniform mat4  u_projection;
+uniform mediump float uniforms_buffer[UNIFORM_BUFFER_COUNT];    
 
 out mediump vec4  v_col; 
 out mediump vec2  v_wpos; 
@@ -23,7 +23,7 @@ out mediump vec2  u_Res;
     
 void main(void) {
     
-   gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
+   gl_Position = u_projection * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
    
    v_col       = a_col;
    v_dim       = a_pos;
@@ -46,7 +46,7 @@ in mediump vec2  v_wpos;
 in mediump float u_Time;
 in mediump vec2  u_Res;
 
-uniform sampler2D u_Sampler0;
+uniform sampler2D u_sampler0;
 
 out vec4 frag_color;
 
@@ -143,7 +143,7 @@ vec4 func1(vec2 iRes, float iTime)
       
       vec2 uv2 = uv * size + r * 100.0 + (r - 0.5) * iTime * 0.25;
       res += starField(uv2, iTime) * fade.x * fade.y * 0.65;
-      tex = texture(u_Sampler0, uv2*0.1 + tex * 0.15).x;
+      tex = texture(u_sampler0, uv2*0.1 + tex * 0.15).x;
       disto += vec2(tex) / itter;
       res += tex * tex * 3.0 * fade.x * fade.y * vec4(0.25, 0.35, 0.5, 1.0) / itter;
    }
@@ -157,7 +157,7 @@ vec4 func1(vec2 iRes, float iTime)
    pc.x = iTime*0.02;
    pc.y = (atan(distuv.x, distuv.y) / PI) + iTime * 0.05;
    
-   // float rays = (texture(u_Sampler0, pc).x + texture(u_Sampler0, pc * vec2(1.0, 0.5)).x) * sun.y * 0.5;
+   // float rays = (texture(u_sampler0, pc).x + texture(u_sampler0, pc * vec2(1.0, 0.5)).x) * sun.y * 0.5;
    float rays = (pc.x + (pc * vec2(1.0, 0.5)).x) * sun.y * 0.5;
    
    vec4 bg = mix(vec4(0.01, 0.01, 0.075, 1.0), vec4(0.05, 0.065, 0.1, 1.0), clamp(sun.x + rays, 0.0, 1.0) + sun.y);
@@ -166,7 +166,7 @@ vec4 func1(vec2 iRes, float iTime)
    vec4 c = bg + res * bg * 0.5 + res*0.5;
    c *= sun.w;
    
-   vec4 old = texture(u_Sampler0, gl_FragCoord.xy/iRes.xy);
+   vec4 old = texture(u_sampler0, gl_FragCoord.xy/iRes.xy);
    return c + old * 0.85;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -181,7 +181,7 @@ void main()
    
    float v = max(0.0, length(uv - 0.5) * 7.0 - 2.0);
    // vec4 col = textureLod(iChannel0, uv, v);
-   vec4 col = textureLod(u_Sampler0, uv, v);
+   vec4 col = textureLod(u_sampler0, uv, v);
    // vec4 col = vec4(0.);
    col += func1(v_dim, iTime);
 
@@ -197,15 +197,15 @@ void main()
  */
 export const VS_VORTEX2 = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 3
+#define UNIFORM_BUFFER_COUNT 3
 
 layout (location = 0) in mediump vec4  a_col;
 layout (location = 1) in mediump vec2  a_pos;
 layout (location = 2) in mediump vec4  a_wpos_time;
 layout (location = 3) in mediump vec4  a_params1;
 
-uniform mat4  u_ortho_proj;
-uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];    
+uniform mat4  u_projection;
+uniform mediump float uniforms_buffer[UNIFORM_BUFFER_COUNT];    
 
 flat out mediump vec4  v_col; 
 flat out mediump vec2  v_wpos; 
@@ -221,7 +221,7 @@ flat out mediump int  v_Count;
     
 void main(void) {
     
-   gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
+   gl_Position = u_projection * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
    
    v_col       = a_col;
    v_dim       = a_pos;
@@ -251,7 +251,7 @@ flat in mediump vec2  u_Res;
 flat in mediump float u_Radius;
 
 
-uniform sampler2D u_Sampler0;
+uniform sampler2D u_sampler0;
 
 out vec4 frag_color;
 
@@ -550,15 +550,15 @@ void main()
 /** Save 1 */
 // export const VS_VORTEX2 = `#version 300 es
 
-// #define MAX_NUM_PARAMS_BUFFER 3
+// #define UNIFORM_BUFFER_COUNT 3
 
 // layout (location = 0) in mediump vec4  a_col;
 // layout (location = 1) in mediump vec2  a_pos;
 // layout (location = 2) in mediump vec4  a_wpos_time;
 // layout (location = 3) in mediump vec4  a_params1;
 
-// uniform mat4  u_ortho_proj;
-// uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];    
+// uniform mat4  u_projection;
+// uniform mediump float uniforms_buffer[UNIFORM_BUFFER_COUNT];    
 
 // out mediump vec4  v_col; 
 // out mediump vec2  v_wpos; 
@@ -572,7 +572,7 @@ void main()
     
 // void main(void) {
     
-//    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
+//    gl_Position = u_projection * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
    
 //    v_col       = a_col;
 //    v_dim       = a_pos;
@@ -597,7 +597,7 @@ void main()
 // // in mediump float u_Time;
 // in mediump vec2  u_Res;
 
-// uniform sampler2D u_Sampler0;
+// uniform sampler2D u_sampler0;
 
 // out vec4 frag_color;
 

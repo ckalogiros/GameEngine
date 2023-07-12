@@ -5,7 +5,7 @@ import * as GlOps from './GlBufferOps.js';
 import * as dbg from '../Z_Debug/GfxDebug.js'
 import { GlCreateProgram } from '../GlProgram.js'
 import { GlGetIB, GlGetProgram, GlGetPrograms, GlGetVB } from '../GlProgram.js';
-import { RenderQueueUpdate } from '../../Engine/Renderer/RenderQueue.js';
+import { RenderQueueUpdate } from '../../Engine/Renderers/Renderer/RenderQueue.js';
 
 
 class VertexBuffer {
@@ -44,53 +44,68 @@ class VertexBuffer {
         this.sceneIdx = sceneIdx;
         this.idx = idx;
     }
-    AddGeometry(sid, pos, dim, shaderInfo, numFaces, start, count) {
+    AddGeometry(sid, pos, dim, time, shaderInfo, numFaces, start, count) {
         if (sid.attr & SID.ATTR.POS2) { // Add Position, if the program has such an attribute 
-            GlOps.VbSetAttribPos(this, start + shaderInfo.posOffset,
+            GlOps.VbSetAttribPos(this, start + shaderInfo.attributes.offset.pos,
                 count, shaderInfo.attribsPerVertex - V_POS_COUNT, dim);
         }
         if (sid.attr & SID.ATTR.WPOS_TIME4) { // Add World Position, if the program has such an attribute 
-            GlOps.VbSetAttribWpos(this, start + shaderInfo.wposTimeOffset,
+            GlOps.VbSetAttribWpos(this, start + shaderInfo.attributes.offset.wposTime,
                 count, shaderInfo.attribsPerVertex - V_WPOS_COUNT, pos);
         }
-        if (sid & SID.ATTR.TIME) { // Per Vertex Timer (meant to be per mesh, 4 vertices) 
-            GlOps.VbSetAttrTime(this, start + shaderInfo.timeOffset,
-                count, shaderInfo.attribsPerVertex - V_TIME_COUNT, mesh.time);
+        if (sid.attr & SID.ATTR.TIME) { // Per Vertex Timer (meant to be per mesh, 4 vertices) 
+            GlOps.VbSetAttrTime(this, start + shaderInfo.attributes.offset.time,
+                count, shaderInfo.attribsPerVertex - V_TIME_COUNT, time);
         }
         this.needsUpdate = true;
     }
     AddMaterial(sid, shaderInfo, numFaces, start, count, col, tex, style = null) {
         if (sid.attr & SID.ATTR.COL4 && col) { // Add Color, if the program has such an attribute
             if (!col && DEBUG.WEB_GL) console.error('Style hasn\'t being set. @AddMaterial(), GlBuffers.js')
-            GlOps.VbSetAttribCol(this, start + shaderInfo.colOffset,
+            GlOps.VbSetAttribCol(this, start + shaderInfo.attributes.offset.col,
                 count, shaderInfo.attribsPerVertex - V_COL_COUNT, col);
         }
         if (sid.attr & SID.ATTR.TEX2 && tex) { // Add Texture, if the program has such an attribute 
             if (!tex && DEBUG.WEB_GL) console.error('Style hasn\'t being set. @AddMaterial(), GlBuffers.js')
-            GlOps.VbSetAttribTex(this, start + shaderInfo.texOffset,
+            GlOps.VbSetAttribTex(this, start + shaderInfo.attributes.offset.tex,
                 count, shaderInfo.attribsPerVertex - V_TEX_COUNT, tex);
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
         let params1Index = 0; //  Should increment with every enabled attribute. Use: Only to pass the correct start  
         if (sid.attr & SID.ATTR.BORDER) { // Mesh round corners
-            if (!style.border && DEBUG.WEB_GL) console.error('Style.border hasn\'t being set. @AddMaterial(), GlBuffers.js')
-            GlOps.VbSetAttrBorderWidth(this, start + shaderInfo.params1Offset + params1Index,
-                count, shaderInfo.attribsPerVertex - V_BORDER_WIDTH, style.border)
-            params1Index++;
+            if (!style && DEBUG.WEB_GL) console.error('Style.border hasn\'t being set. @AddMaterial(), GlBuffers.js')
+            else{
+                GlOps.VbSetAttrBorderWidth(this, start + shaderInfo.attributes.offset.params1 + params1Index,
+                    count, shaderInfo.attribsPerVertex - V_BORDER_WIDTH, style.border)
+                params1Index++;
+            }
         }
         if (sid.attr & SID.ATTR.R_CORNERS) { // Mesh round corners
-            if (!style.rCorners && DEBUG.WEB_GL) console.error('Style.rCorners hasn\'t being set. @AddMaterial(), GlBuffers.js')
-            GlOps.VbSetAttrRoundCorner(this, start + shaderInfo.params1Offset + params1Index,
-                count, shaderInfo.attribsPerVertex - V_ROUND_CORNERS, style.rCorners)
-            params1Index++;
+            if (!style && DEBUG.WEB_GL) console.error('Style.rCorners hasn\'t being set. @AddMaterial(), GlBuffers.js')
+            else{
+                GlOps.VbSetAttrRoundCorner(this, start + shaderInfo.attributes.offset.params1 + params1Index,
+                    count, shaderInfo.attribsPerVertex - V_ROUND_CORNERS, style.rCorners)
+                params1Index++;
+            }
         }
         if (sid.attr & SID.ATTR.FEATHER) { // Mesh round corners
-            if (!style.feather && DEBUG.WEB_GL) console.error('Style.feather hasn\'t being set. @AddMaterial(), GlBuffers.js')
-            GlOps.VbSetAttrBorderFeather(this, start + shaderInfo.params1Offset + params1Index,
-                count, shaderInfo.attribsPerVertex - V_BORDER_FEATHER, style.feather)
-            params1Index++;
+            if (!style && DEBUG.WEB_GL) console.error('Style.feather hasn\'t being set. @AddMaterial(), GlBuffers.js')
+            else{
+                GlOps.VbSetAttrBorderFeather(this, start + shaderInfo.attributes.offset.params1 + params1Index,
+                    count, shaderInfo.attribsPerVertex - V_BORDER_FEATHER, style.feather)
+                params1Index++;
+            }
         }
+        if (sid.attr & SID.ATTR.EMPTY) { // Mesh round corners
+            this.count += shaderInfo.verticesPerRect;
+        }
+
+        //TODO!!! FIX // HACK. If params1 are enabled and 3 attribs are used, then we are -4 vb.count. 
+        // In order for a quick fix, we set the vb.count = vertexAttribs*verticesPerRect 
+        // const totalAttribs = shaderInfo.attribsPerVertex * shaderInfo.verticesPerRect;
+        // if(this.count < totalAttribs)
+        //     this.count = totalAttribs;
         this.needsUpdate = true;
     }
 
@@ -102,31 +117,31 @@ class VertexBuffer {
     // 			count, shaderInfo.attribsPerVertex - V_COL_COUNT, mesh.col);
     // 	}
     // 	if (sid & SID.ATTR.POS2) { // Add Position, if the program has such an attribute 
-    // 		GlOps.VbSetAttribPos(this, start + shaderInfo.posOffset,
+    // 		GlOps.VbSetAttribPos(this, start + shaderInfo.attributes.offset.pos,
     // 			count, shaderInfo.attribsPerVertex - V_POS_COUNT, mesh.dim);
     // 	}
     // 	if (sid & SID.ATTR.TEX2) { // Add Texture, if the program has such an attribute 
-    // 		GlOps.VbSetAttribTex(this, start + shaderInfo.texOffset,
+    // 		GlOps.VbSetAttribTex(this, start + shaderInfo.attributes.offset.tex,
     // 			count, shaderInfo.attribsPerVertex - V_TEX_COUNT, mesh.tex);
     // 	}
     // 	if (sid & SID.ATTR.WPOS_TIME4) { // Add World Position, if the program has such an attribute 
-    // 		GlOps.VbSetAttribWpos(this, start +shaderInfo.wposTimeOffset,
+    // 		GlOps.VbSetAttribWpos(this, start +shaderInfo.attributes.offset.wposTime,
     // 			count, shaderInfo.attribsPerVertex - V_WPOS_COUNT, mesh.pos);
     // 	}
     // 	if (sid & SID.ATTR.PARAMS1) { // Add World Position, if the program has such an attribute 
-    // 		GlOps.VbSetAttribParams1(this, start + shaderInfo.params1Offset,
+    // 		GlOps.VbSetAttribParams1(this, start + shaderInfo.attributes.offset.params1,
     // 			count, shaderInfo.attribsPerVertex - V_PARAMS1_COUNT, mesh.attrParams1);
     // 	}
     // 	if (sid & SID.ATTR.SDF_PARAMS) { // The parameters for the rendering of SDF text
-    // 		GlOps.VbSetAttrSdfParams(this, start + shaderInfo.sdfOffset,
+    // 		GlOps.VbSetAttrSdfParams(this, start + shaderInfo.attributes.offset.sdf,
     // 			count, shaderInfo.attribsPerVertex - V_SDF_PARAMS_COUNT, mesh.sdfParams)
     // 	}
     // 	if (sid & SID.ATTR.STYLE) { // Mesh round corners
-    // 		GlOps.VbSetAttrStyle(this, start + shaderInfo.styleOffset,
+    // 		GlOps.VbSetAttrStyle(this, start + shaderInfo.attributes.offset.style,
     // 			count, shaderInfo.attribsPerVertex - V_STYLE_COUNT, mesh.style)
     // 	}
     // 	if (sid & SID.ATTR.TIME) { // Per Vertex Timer (meant to be per mesh, 4 vertices) 
-    // 		GlOps.VbSetAttrTime(this, start + shaderInfo.timeOffset,
+    // 		GlOps.VbSetAttrTime(this, start + shaderInfo.attributes.offset.time,
     // 			count, shaderInfo.attribsPerVertex - V_TIME_COUNT, mesh.time);
     // 	}
 
@@ -289,7 +304,7 @@ export function GlGetContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer) {
 
 
     // Update viewport for the curent program
-    progs[progIdx].CameraUpdate(gfxCtx.gl);
+    // progs[progIdx].CameraUpdate(gfxCtx.gl);
 
     const index = progs[progIdx].vertexBuffer[vbIdx].meshes.length;
     gfxInfo.meshIdx = index; // Store the current meshe's index so the mesh know in what index can find it's self in the vertexBuffer's meshes array.
@@ -301,7 +316,7 @@ export function GlGetContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer) {
 }
 
 
-export function GlAddGeometry(sid, pos, dim, gfx, meshName) {
+export function GlAddGeometry(sid, pos, dim, time, gfx, meshName) {
 
     // TODO: TEMP
     const numFaces = 1;
@@ -320,7 +335,7 @@ export function GlAddGeometry(sid, pos, dim, gfx, meshName) {
 
     CreateUniqueMesh(vb.debug.meshesNames, meshName);
 
-    vb.AddGeometry(sid, pos, dim, prog.shaderInfo, numFaces, gfx.vb.start, gfx.vb.count);
+    vb.AddGeometry(sid, pos, dim, time, prog.shaderInfo, numFaces, gfx.vb.start, gfx.vb.count);
     prog.isActive = true; // Sets a program to 'active', only if there are meshes in the program's vb
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

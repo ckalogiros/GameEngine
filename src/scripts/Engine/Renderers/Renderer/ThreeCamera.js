@@ -1,5 +1,5 @@
-import { Matrix4 } from '../math/Matrix4.js';
-import { Object3D } from '../Drawables/Object3D.js';
+import { Matrix4 } from '../../math/Matrix4.js';
+import { Object3D } from '../../Drawables/Object3D.js';
 
 class ThreeCamera extends Object3D {
 

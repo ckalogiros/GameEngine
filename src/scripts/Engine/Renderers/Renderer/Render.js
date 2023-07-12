@@ -1,14 +1,14 @@
 "use strict";
-import { GlDraw } from '../../Graphics/GlDraw.js'
-import { TimerUpdateGlobalTimers, TimersUpdateTimers } from '../Timer/Timer.js';
-import { HandleEvents } from '../Events/Events.js';
-import { AnimationsGet, RunAnimations } from '../Animations/Animations.js';
-import { CheckCollisions, Update } from '../Events/SceneEvents.js';
-import { OnMouseMove } from '../Events/MouseEvents.js';
-import { GlGetProgram } from '../../Graphics/GlProgram.js';
-import { FpsGet, TimeIntervalsUpdateAll, TimeUpdate, TimersUpdateStepTimers } from '../Timer/Time.js';
-import { ExplosionsUpdate } from '../Drawables/Fx/Explosions.js';
-import { ParticleSystemGet } from '../ParticlesSystem/Particles.js';
+import { GlDraw } from '../../../Graphics/GlDraw.js'
+import { TimerUpdateGlobalTimers, TimersUpdateTimers } from '../../Timer/Timer.js';
+import { HandleEvents } from '../../Events/Events.js';
+import { AnimationsGet, RunAnimations } from '../../Animations/Animations.js';
+import { CheckCollisions, Update } from '../../Events/SceneEvents.js';
+import { OnMouseMove } from '../../Events/MouseEvents.js';
+import { GlGetProgram } from '../../../Graphics/GlProgram.js';
+import { FpsGet, TimeIntervalsUpdateAll, TimeUpdate, TimersUpdateStepTimers } from '../../Timer/Time.js';
+import { ExplosionsUpdate } from '../../Drawables/Fx/Explosions.js';
+import { ParticleSystemGet } from '../../ParticlesSystem/Particles.js';
 
 
 
@@ -34,21 +34,22 @@ export function Render() {
         animations.Run();
         particles.Update();
         CheckCollisions();
-        Update();
+        // Update();
         //OnMouseMove();
-        ExplosionsUpdate();
+        // ExplosionsUpdate();
 
         GlDraw();
     }
     
-    requestAnimationFrame(Render);
+    const res = requestAnimationFrame(Render);
+    // console.log(res)
     fps.Stop();
     
 }
 
 
 export function SetUniformParamsTimer(prog, step, index){
-    prog.UniformsSetUniformsBuffer(prog.t, index);
+    prog.UniformsSetBufferUniform(prog.t, index);
     prog.t += step;
 }
 
@@ -62,7 +63,7 @@ const max = .5;
 
 function TempUpdateCrambleShader(){
     const prog = GlGetProgram(UNIFORM_PARAMS.CRAMBLE.progIdx); 
-    prog.UniformsSetUniformsBuffer(t, UNIFORM_PARAMS.CRAMBLE.timeIdx);
+    prog.UniformsSetBufferUniform(t, UNIFORM_PARAMS.CRAMBLE.timeIdx);
     // if(!lock_t) {t-=speed; if(t<=0)lock_t=true;}
     // else {t+=speed; if(t>=3)lock_t=false;}
     t += speed; 
@@ -75,7 +76,7 @@ let t2 = 0.0;
 const speed2 = 0.1;
 function TempUpdateVoronoiExplosionShaderTimer(){
     const prog = GlGetProgram(UNIFORM_PARAMS.VORONOI_EXPLOSION.progIdx); 
-    prog.UniformsSetUniformsBuffer(t2, UNIFORM_PARAMS.VORONOI_EXPLOSION.timeIdx);
+    prog.UniformsSetBufferUniform(t2, UNIFORM_PARAMS.VORONOI_EXPLOSION.timeIdx);
     // if(!lock_t) {t-=speed; if(t<=0)lock_t=true;}
     // else {t+=speed; if(t>=3)lock_t=false;}
     t2 += speed2; 

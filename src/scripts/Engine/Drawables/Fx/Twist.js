@@ -49,7 +49,7 @@ export class Twist extends MeshBuffer{
    }
    SetAmtxSpeed(val) {
       const prog = GlGetProgram(this.buffer[0].gfxInfo.prog.idx);
-      prog.UniformsSetUniformsBuffer(val, UNIFORM_PARAMS.TWIST.dirIdx);
+      prog.UniformsSetBufferUniform(val, UNIFORM_PARAMS.TWIST.dirIdx);
    }
 };
 

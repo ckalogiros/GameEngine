@@ -55,12 +55,12 @@ export function PrintAttributes(gl) {
         if (prog.shaderInfo.attributes.colLoc >= 0) {
             console.log('   COLOR: loc:', prog.shaderInfo.attributes.colLoc,
                 ' count:', V_COL_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.colOffset)
+                ' offset:', prog.shaderInfo.attributes.offset.col)
         }
         if (prog.shaderInfo.attributes.posLoc >= 0) {
             console.log('   POS: loc:', prog.shaderInfo.attributes.posLoc,
                 ' count:', V_POS_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.posOffset)
+                ' offset:', prog.shaderInfo.attributes.offset.pos)
         }
         if (prog.shaderInfo.attributes.scaleLoc >= 0) {
             console.log('   SCALE: loc:', prog.shaderInfo.attributes.scaleLoc,
@@ -70,34 +70,34 @@ export function PrintAttributes(gl) {
         if (prog.shaderInfo.attributes.texLoc >= 0) {
             console.log('   TEX: loc:', prog.shaderInfo.attributes.texLoc,
                 ' count:', V_TEX_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.texOffset)
+                ' offset:', prog.shaderInfo.attributes.offset.tex)
         }
         if (prog.shaderInfo.attributes.wposTimeLoc >= 0) {
             console.log('   WPOS_TIME: loc:', prog.shaderInfo.attributes.wposTimeLoc,
                 ' count:', V_WPOS_TIME_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.wposTimeOffset)
+                ' offset:', prog.shaderInfo.attributes.offset.wposTime)
         }
-        if (prog.shaderInfo.attributes.params1Loc >= 0) {
-            console.log('   PARAMS1: loc:', prog.shaderInfo.attributes.params1Loc,
+        if (prog.shaderInfo.attributes.loc.params1 >= 0) {
+            console.log('   PARAMS1: loc:', prog.shaderInfo.attributes.loc.params1,
                 ' count:', V_PARAMS1_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.params1Offset)
+                ' offset:', prog.shaderInfo.attributes.offset.params1)
         }
-        if (prog.shaderInfo.attributes.styleLoc >= 0) {
+        if (prog.shaderInfo.attributes.loc.style >= 0) {
             console.log('   RADIUS: loc:', prog.shaderInfo.attributes.roundLoc,
                 ' count:', V_STYLE_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.styleOffset)
+                ' offset:', prog.shaderInfo.attributes.offset.style)
         }
-        if (prog.shaderInfo.attributes.timeLoc >= 0) {
-            console.log('   TIME: loc:', prog.shaderInfo.attributes.timeLoc,
+        if (prog.shaderInfo.attributes.loc.time >= 0) {
+            console.log('   TIME: loc:', prog.shaderInfo.attributes.loc.time,
                 ' count:', V_TIME_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.timeOffset)
+                ' offset:', prog.shaderInfo.attributes.offset.time)
         }
     
         console.log('\n')
         console.log('\nGL Enable Uniforms:')
     
-        if (prog.shaderInfo.uniforms.orthoProj) {
-            console.log('   Orthographic Projection: ', prog.shaderInfo.uniforms.orthoProj)
+        if (prog.shaderInfo.uniforms.projection) {
+            console.log('   Orthographic Projection: ', prog.shaderInfo.uniforms.projection)
         }
         if (prog.shaderInfo.uniforms.sampler) {
             console.log('   Texture Sampler: ', prog.shaderInfo.uniforms.sampler)

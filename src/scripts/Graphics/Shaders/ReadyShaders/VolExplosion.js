@@ -8,7 +8,7 @@ in mediump vec2  v_dim;
 in mediump vec2  u_Res;
 in mediump float v_time;
 
-uniform sampler2D u_Sampler0;
+uniform sampler2D u_sampler0;
 
 out vec4 frag_color;
 
@@ -22,7 +22,7 @@ float noise( in vec3 x )
    vec3 p = floor(x); vec3 f = fract(x);
 	f = f*f*(3.0-2.0*f);
 	vec2 uv = (p.xy+vec2(37.0,17.0)*p.z) + f.xy;
-	vec2 rg = textureLod( u_Sampler0, (uv+ 0.5)/256.0, 20.0 ).yx;
+	vec2 rg = textureLod( u_sampler0, (uv+ 0.5)/256.0, 20.0 ).yx;
 	return 1. - 0.82*mix( rg.x, rg.y, f.z );
 }
 
@@ -179,7 +179,7 @@ void main()
 /** Save */
 // export const FS_VOLUMETRIC_EXPLOSION = `#version 300 es
 // #define WHITE  vec4(1., 1., 1., 1.)
-// #define MAX_NUM_PARAMS_BUFFER 5
+// #define UNIFORM_BUFFER_COUNT 5
 
 // precision mediump float;
 
@@ -187,9 +187,9 @@ void main()
 // in mediump vec2  v_wpos;
 // in mediump vec2  v_dim;
 // in mediump float v_time;
-// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
+// in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT];   
 
-// uniform sampler2D u_Sampler0;
+// uniform sampler2D u_sampler0;
 
 // out vec4 frag_color;
 
@@ -203,7 +203,7 @@ void main()
 //    vec3 p = floor(x); vec3 f = fract(x);
 // 	f = f*f*(3.0-2.0*f);
 // 	vec2 uv = (p.xy+vec2(37.0,17.0)*p.z) + f.xy;
-// 	vec2 rg = textureLod( u_Sampler0, (uv+ 0.5)/256.0, 20.0 ).yx;
+// 	vec2 rg = textureLod( u_sampler0, (uv+ 0.5)/256.0, 20.0 ).yx;
 // 	return 1. - 0.82*mix( rg.x, rg.y, f.z );
 // }
 

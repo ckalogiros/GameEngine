@@ -260,4 +260,5 @@ const DEBUG = {
 	GEOMETRY: true,
 	MESH: true,
 	RECT: true,
+	CAMERA: true,
 };

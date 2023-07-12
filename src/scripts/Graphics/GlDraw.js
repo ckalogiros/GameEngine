@@ -1,15 +1,15 @@
 import { GlGetTexture } from './GlTextures.js';
 import { GlUpdateVertexBufferData, GlUpdateIndexBufferData, GfxSetVbShow, GlUseProgram, GlBindVAO, GlBindTexture } from './Buffers/GlBuffers.js'
-import { RenderQueueGetActive, RenderQueueGetActiveCount } from '../Engine/Renderer/RenderQueue.js';
+import { RenderQueueGetActive, RenderQueueGetActiveCount } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { GlGetPrograms } from './GlProgram.js';
 import { FramebufferRenderToFramebuffer, FramebuffersDraw, FramebuffersGet } from './Buffers/Renderbuffer.js';
 import { TimerGetGlobalTimer } from '../Engine/Timer/Timer.js';
 
 
 
-export function GlDraw() {
+export function GlDraw(gl) {
 
-    const gl = gfxCtx.gl;
+    // const gl = gl;
     const progs = GlGetPrograms();
     const drawQueue = RenderQueueGetActive();
     const drawQueueCount = RenderQueueGetActiveCount();
@@ -38,8 +38,10 @@ export function GlDraw() {
         if(GL.BOUND_PROG_IDX !== progIdx)
             GlUseProgram(progs[progIdx].webgl_program, progIdx)
         
-        if (progs[progIdx].timer.isActive) progs[progIdx].UpdateUniformTimer();
-        if (progs[progIdx].uniformsNeedUpdate) progs[progIdx].UniformsUpdateUniformsBuffer(gl);
+        if (progs[progIdx].timer.isActive) progs[progIdx].UniformsUpdateTimer();
+        // Update the uniforms buffer
+        progs[progIdx].UniformsUpdateBufferUniforms(gl);
+        
         
         
         const vb = progs[progIdx].vertexBuffer[vbIdx];

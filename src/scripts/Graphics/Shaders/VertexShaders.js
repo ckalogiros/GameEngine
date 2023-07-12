@@ -89,7 +89,7 @@ import { VS_VORTEX2 } from "./ReadyShaders/VortexShader.js";
  */
 const VS_DEFAULT = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 5
+#define UNIFORM_BUFFER_COUNT 5
 
 in mediump vec4 a_col;
 in mediump vec4 a_wpos_time;
@@ -97,8 +97,8 @@ in mediump vec4 a_params1;
 in mediump vec2 a_pos;
 in mediump vec3 a_style;
 
-uniform mat4  u_ortho_proj;
-uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                  // [0]:WinWidth, [1]:WinHeight, [3]:Time
+uniform mat4  u_projection;
+uniform mediump float uniforms_buffer[UNIFORM_BUFFER_COUNT];                  // [0]:WinWidth, [1]:WinHeight, [3]:Time
 
 out mediump vec4 v_col; 
 out mediump vec2 v_dim; 
@@ -107,11 +107,11 @@ out mediump float v_time;
 out mediump vec3 v_style; 
 out mediump vec2 v_res; 
 out mediump vec4 v_param1; 
-out mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                   
+out mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT];                   
     
 void main(void) {
     
-    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
+    gl_Position = u_projection * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
     
     v_col       = a_col;
     v_dim       = abs(a_pos);
@@ -126,7 +126,7 @@ void main(void) {
 
 const VS_DEFAULT_TEXTURE = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 5
+#define UNIFORM_BUFFER_COUNT 5
 
 in vec4 a_col;
 in vec4 a_wpos_time;
@@ -134,8 +134,8 @@ in vec2 a_pos;
 in vec2 a_tex;
 
 // In
-uniform mat4 u_ortho_proj;
-uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                  // [0]:SdfInner, [1]:SdfOuter, [3]?
+uniform mat4 u_projection;
+uniform mediump float uniforms_buffer[UNIFORM_BUFFER_COUNT];                  // [0]:SdfInner, [1]:SdfOuter, [3]?
 
 
 // Out
@@ -143,11 +143,11 @@ out mediump vec4 v_col;
 out mediump vec2 v_pos;
 out mediump vec2 v_wpos;
 out mediump vec2 v_tex_coord;
-out mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];
+out mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT];
 
 void main(void) 
 {
-    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
+    gl_Position = u_projection * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
 
     v_col = a_col;
     v_pos = a_pos;
@@ -166,8 +166,8 @@ in vec2 a_sdf;
 in vec4 a_col;
 
 // Uniforms
-uniform mat4 u_ortho_proj;
-// uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                  // [0]:SdfInner, [1]:SdfOuter, [3]?
+uniform mat4 u_projection;
+// uniform mediump float uniforms_buffer[UNIFORM_BUFFER_COUNT];                  // [0]:SdfInner, [1]:SdfOuter, [3]?
 
 
 // Out
@@ -177,7 +177,7 @@ out mediump vec2 v_sdf;
 
 void main(void) 
 {
-    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
+    gl_Position = u_projection * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
 
     v_col = a_col;
     v_tex_coord = a_tex;
@@ -190,7 +190,7 @@ void main(void)
  */
 const VS_EXPLOSION_ATTR_TIMER = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 2
+#define UNIFORM_BUFFER_COUNT 2
 #define MAX_NUM_POSITIONS_BUFFER 2
 
 in mediump vec4  a_col;
@@ -198,8 +198,8 @@ in mediump vec2  a_pos;
 in mediump vec4  a_wpos_time;
 in mediump vec4  a_params1;
 
-uniform mat4  u_ortho_proj;
-uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];    
+uniform mat4  u_projection;
+uniform mediump float uniforms_buffer[UNIFORM_BUFFER_COUNT];    
 
 out mediump vec4  v_col; 
 out mediump vec2  v_wpos; 
@@ -211,7 +211,7 @@ out mediump vec2  u_Res;
     
 void main(void) {
     
-    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
+    gl_Position = u_projection * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
     
     v_col       = a_col;
     v_dim       = a_pos;
@@ -226,15 +226,15 @@ void main(void) {
 
 const VS_PARTICLES = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 3
+#define UNIFORM_BUFFER_COUNT 3
 
 in mediump vec4  a_col;
 in mediump vec2  a_pos;
 in mediump vec4  a_wpos_time;
 in mediump vec4  a_params1;
 
-uniform mat4  u_ortho_proj;
-uniform float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                 
+uniform mat4  u_projection;
+uniform float uniforms_buffer[UNIFORM_BUFFER_COUNT];                 
 
 out mediump vec4  v_col; 
 out mediump vec2  v_wpos; 
@@ -245,7 +245,7 @@ out mediump vec2  u_Res;
 
 void main(void) 
 {
-    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
+    gl_Position = u_projection * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
     
     v_col  = a_col;
     v_wpos = a_wpos_time.xy;
@@ -257,7 +257,7 @@ void main(void)
 
 const VS_CRAMBLE = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 5
+#define UNIFORM_BUFFER_COUNT 5
 
 in mediump vec4 a_col;
 in mediump vec2 a_pos;
@@ -265,18 +265,18 @@ in mediump vec4 a_wpos_time;
 in mediump vec3 a_style;
 
 
-uniform mat4  u_ortho_proj;
-uniform mediump float uniforms_buffer[MAX_NUM_PARAMS_BUFFER];
+uniform mat4  u_projection;
+uniform mediump float uniforms_buffer[UNIFORM_BUFFER_COUNT];
 
 out mediump vec4 v_col; 
 out mediump vec2 v_wpos; 
 out mediump vec2 v_dim; 
 out mediump vec3 v_style; 
-out mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];                   
+out mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT];                   
     
 void main(void) {
     
-    gl_Position = u_ortho_proj * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
+    gl_Position = u_projection * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);
     
     v_col       = a_col;
     v_dim       = abs(a_pos);

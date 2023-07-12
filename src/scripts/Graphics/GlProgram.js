@@ -1,10 +1,10 @@
 "use strict";
-import { CameraOrthographic, CameraProjection } from '../Engine/Renderer/Camera.js'
+import { CameraOrthographic, CameraPerspective } from '../Engine/Renderers/Renderer/Camera.js'
 import { GetShaderTypeId, PrintAttributes, PrintShaderInfo } from './Z_Debug/GfxDebug.js';
 import * as GlOps from './Buffers/GlBufferOps.js';
 import { GlCreateShaderInfo, LoadShaderProgram } from './GlShaders.js';
 import { GlUseProgram } from './Buffers/GlBuffers.js';
-import { UniformsBuffer } from './Buffers/GlUniformBuffer.js';
+import { Uniform, UniformsBuffer } from './Buffers/GlUniformBuffer.js';
 import { TimerGetGlobalTimer } from '../Engine/Timer/Timer.js';
 
 // Global Gl Program object
@@ -19,6 +19,9 @@ export function GlGetProgram(progIdx) { return g_glPrograms[progIdx]; }
 export function GlStoreProgram(progIdx, program) { g_glPrograms[progIdx] = program; }
 export function GlGetVB(progIdx, vbIdx) { return g_glPrograms[progIdx].vertexBuffer[vbIdx]; }
 export function GlGetIB(progIdx, ibIdx) { return g_glPrograms[progIdx].indexBuffer[ibIdx]; }
+
+export function GlGetProgramShaderInfo(progIdx) { return g_glPrograms[progIdx].shaderInfo; }
+export function GlGetProgramUniformLocations(progIdx) { return g_glPrograms[progIdx].shaderInfo.uniforms; }
 
 
 
@@ -61,12 +64,13 @@ export class GfxInfoMesh {
 
 
 
-export class GlProgram extends CameraOrthographic {
+// export class GlProgram extends CameraOrthographic {
+// export class GlProgram extends CameraPerspective {
+export class GlProgram {
 
 	constructor(gl, sid) {
-		super();
 
-		this.sid = sid;				// Shader Type ID (E.g. ATTR_COL4 | ATTR_POS2 | INDEXED)
+		this.sid = sid; // Shader Type ID (E.g. ATTR_COL4 | ATTR_POS2 | INDEXED)
 		this.idx = GlGetProgramsCnt();
 		GlIncrProgramsCnt();
 
@@ -84,59 +88,50 @@ export class GlProgram extends CameraOrthographic {
 		this.webgl_program = LoadShaderProgram(gfxCtx.gl, sid);
 
 		GlUseProgram(this.webgl_program, this.idx)
-		// this.shaderInfo = GlCreateShaderInfo(gfxCtx.gl, this.webgl_program, sid);
 		PrintShaderInfo(this);
-
-
-
-		/** Set up static uniforms (static: exist for all programs) */
-		// Initialize Camera
-		this.CameraSet();
-
 
 		this.shaderInfo = {
 
 			attributes: {
-				// loc: null,
 				size: this.#PrivateCalculateAttributesSize(this.sid),
-				// offset: null,
-				colLoc: gl.getAttribLocation(this.webgl_program, 'a_col'),				// Color attrib	
-				wposTimeLoc: gl.getAttribLocation(this.webgl_program, 'a_wpos_time'),// World Position + Time attrib	 		
-				posLoc: gl.getAttribLocation(this.webgl_program, 'a_pos'),				// Vertex Position attrib	 
-				texLoc: gl.getAttribLocation(this.webgl_program, 'a_tex'),				// texture Coords attrib	 		 		
-				params1Loc: gl.getAttribLocation(this.webgl_program, 'a_params1'),	// A 4 component vector to pass any parameter to a vertex as an attribute 	 		
-				sdfLoc: gl.getAttribLocation(this.webgl_program, 'a_sdf'),				// Sdf Params attrib 	 		 		
-				// styleLoc: gl.getAttribLocation(this.webgl_program, 'a_style'),			// Styyle Params attrib 
+				loc: {
+					col: gl.getAttribLocation(this.webgl_program, 'a_col'), // Color	
+					wposTime: gl.getAttribLocation(this.webgl_program, 'a_wpos_time'), // World Position + Time attrib	 		
+					pos: gl.getAttribLocation(this.webgl_program, 'a_pos'),	// Vertex Position	 
+					tex: gl.getAttribLocation(this.webgl_program, 'a_tex'), // texture Coords	 		 		
+					params1: gl.getAttribLocation(this.webgl_program, 'a_params1'), // A 4 component vector to pass any parameter to a vertex as an attribute 	 		
+					sdf: gl.getAttribLocation(this.webgl_program, 'a_sdf'),	// For Sdf's  	 		 		
+				},
+				offset: {
+					col: INT_NULL,
+					wposTime: INT_NULL,
+					pos: INT_NULL,
+					tex: INT_NULL,
+					params1: INT_NULL,
+					sdf: INT_NULL,
+				},
 			},
-
-			colOffset: 		INT_NULL,
-			posOffset: 		INT_NULL,
-			texOffset: 		INT_NULL,
-			wposTimeOffset: INT_NULL,
-			styleOffset: 	INT_NULL,   // Radius for rounding corners
-			timeOffset: 	INT_NULL,	// Border feather distance	
-			sdfOffset: 		INT_NULL,	// The inner and outer variables to render sdf text
-			params1Offset: INT_NULL,	// The inner and outer variables to render sdf text
 
 			uniforms: {
 				// Static uniforms
-				orthoProj: gl.getUniformLocation(this.webgl_program, 'u_ortho_proj'), 	// Orthographic Projection Matrix4 	
-				sampler: gl.getUniformLocation(this.webgl_program, 'u_Sampler0'),	// Sampler for texture units 	
-				buffer: null,
+				// projection: gl.getUniformLocation(this.webgl_program, 'u_projection'), 	// Projection Matrix4 	
+				projection: new Uniform(
+					/* value */ 	0,
+					/* Location */ gl.getUniformLocation(this.webgl_program, 'u_projection'),
+					/* type */		UNIF_TYPES.MAT4,
+				),
+				sampler: gl.getUniformLocation(this.webgl_program, 'u_sampler0'),	// Sampler for texture units 	
+				buffer: new UniformsBuffer(gfxCtx.gl, this, 5),
+				// needsUpdate: false,
 			},
 
 			attribsPerVertex: 0,
 			verticesPerRect: 0,
 		};
 
-		// let private = function()
-
 		// Create uniforms buffer. TODO: Create a dynamic buffer Float32Array, by knowing the num of uniforms all meshes will create.
-		// this.shaderInfo.uniforms.buffer.ub = null;
-		// const ub = new UniformsBuffer(gfxCtx.gl, this, 5);
-		// if (ub) this.shaderInfo.uniforms.buffer.ub = ub;
-		this.shaderInfo.uniforms.buffer = new UniformsBuffer(gfxCtx.gl, this, 5);
-		
+		// this.shaderInfo.uniforms.buffer = new UniformsBuffer(gfxCtx.gl, this, 5);
+
 		this.timer = {
 			val: 0., // A uniform variable to time counter
 			step: 0.,
@@ -166,22 +161,22 @@ export class GlProgram extends CameraOrthographic {
 	#PrivateCreateAttribsOffsets() {
 		{
 			// Sort the attributes by their location in the shader
-			const obj = this.shaderInfo.attributes;
-			const sortedAttributes = Object.entries(obj)
+			const obj = this.shaderInfo.attributes.loc;
+			const sortedAttribLocations = Object.entries(obj)
 				.sort(([, v1], [, v2]) => v1 - v2)
 				.reduce((obj, [k, v]) => ({
 					...obj,
 					[k]: v
 				}), {});
 
-			// for (let prop in sortedAttributes) {
-			// 	if (sortedAttributes[prop] > INT_NULL) {
-			// 		console.log(prop, ':', sortedAttributes[prop])
+			// for (let prop in sortedAttribLocations) {
+			// 	if (sortedAttribLocations[prop] > INT_NULL) {
+			// 		console.log(prop, ':', sortedAttribLocations[prop])
 			// 	}
 			// }
 
 			// Store back the sorted version
-			this.shaderInfo.attributes = sortedAttributes;
+			this.shaderInfo.attributes.loc = sortedAttribLocations;
 
 
 			/**
@@ -189,39 +184,42 @@ export class GlProgram extends CameraOrthographic {
 			 * !IMPORTANT!: For any new attributes added in any vertex shader, include it as shown below 
 			 */
 			let attribsOffset = 0;
-			for(let prop in sortedAttributes){
-				if(sortedAttributes[prop] > INT_NULL){
-					if(prop === 'colLoc'){
-						this.shaderInfo.colOffset = attribsOffset;
+			for (let prop in sortedAttribLocations) {
+				if (sortedAttribLocations[prop] > INT_NULL) {
+					if (prop === 'col') {
+						this.shaderInfo.attributes.offset.col = attribsOffset;
 						attribsOffset += this.shaderInfo.attributes.size.col;
 					}
-					else if(prop === 'posLoc'){
-						this.shaderInfo.posOffset = attribsOffset;
+					else if (prop === 'pos') {
+						this.shaderInfo.attributes.offset.pos = attribsOffset;
 						attribsOffset += this.shaderInfo.attributes.size.pos;
 					}
-					else if(prop === 'wposTimeLoc'){
-						this.shaderInfo.wposTimeOffset = attribsOffset;
-						attribsOffset += this.shaderInfo.attributes.size.wposTime;
+					else if (prop === 'wposTime') {
+						this.shaderInfo.attributes.offset.wposTime = attribsOffset;
+						attribsOffset += this.shaderInfo.attributes.size.wposTime - 1;
+						// HACK. TODO, correct
+						this.shaderInfo.attributes.offset.time = attribsOffset;
+						attribsOffset += 1;
 					}
-					else if(prop === 'texLoc'){
-						this.shaderInfo.texOffset = attribsOffset;
+					else if (prop === 'tex') {
+						this.shaderInfo.attributes.offset.tex = attribsOffset;
 						attribsOffset += this.shaderInfo.attributes.size.tex;
 					}
-					else if(prop === 'params1Loc'){
-						this.shaderInfo.params1Offset = attribsOffset;
+					else if (prop === 'params1') {
+						this.shaderInfo.attributes.offset.params1 = attribsOffset;
 						attribsOffset += this.shaderInfo.attributes.size.params1;
 					}
-					else if(prop === 'styleLoc'){
-						this.shaderInfo.styleOffset = attribsOffset;
+					else if (prop === 'style') {
+						this.shaderInfo.attributes.offset.style = attribsOffset;
 						attribsOffset += this.shaderInfo.attributes.size.style;
 					}
-					else if(prop === 'sdfLoc'){
-						this.shaderInfo.sdfOffset = attribsOffset;
+					else if (prop === 'sdf') {
+						this.shaderInfo.attributes.offset.sdf = attribsOffset;
 						attribsOffset += this.shaderInfo.attributes.size.sdf;
 					}
 				}
 			}
-			
+
 			// Store the total attributes count
 			this.shaderInfo.attribsPerVertex = attribsOffset;
 			// Store the total vertices per rectangle mesh based on Indexed geometry or not
@@ -235,35 +233,88 @@ export class GlProgram extends CameraOrthographic {
 		}
 	}
 
+	/**
+	 * Uniforms Buffer
+	 */
+	UniformsCreateBufferUniform(name) {
+		this.shaderInfo.uniforms.buffer.CreateUniform(name);
+	}
+	UniformsSetBufferUniform(val, index) {
+		this.shaderInfo.uniforms.buffer.Set(val, index);
+	}
+	UniformsCreateSetBufferUniform(name, val) {
+		const idx = this.shaderInfo.uniforms.buffer.CreateUniform(name);
+		this.shaderInfo.uniforms.buffer.Set(val, idx);
+	}
+	UniformsUpdateBufferUniforms(gl) {
+		if (this.shaderInfo.uniforms.buffer.needsUpdate) {
+			this.shaderInfo.uniforms.buffer.Update(gl);
+		}
+	}
+	UniformsSetUpdateBufferUniform(gl, val, index) {
+		this.shaderInfo.uniforms.buffer.Set(val, index);
+		this.shaderInfo.uniforms.buffer.Update(gl);
+	}
 
-
-	CreateUniformTimer(step) {
+	/**
+	 * Unique Uniforms.
+	 * New uniforms that are set by the client and are created as a seperate uniforms in the shaders.
+	 */
+	UniformsCreateTimer(step) {
 		this.timer.isActive = true;
 		this.timer.step = step;
 		this.timer.index = this.shaderInfo.uniforms.buffer.CreateUniform('Timer');
 	}
-	UpdateUniformTimer() {
+	UniformsUpdateTimer() {
 		this.shaderInfo.uniforms.buffer.Set(this.timer.val, this.timer.index);
 		this.uniformsNeedUpdate = true;
 		this.timer.val += this.timer.step;
 	}
-	CreateUniformScreenRes(){
-		// The 
+	UniformsBufferCreateScreenRes() {
 		const resXidx = this.shaderInfo.uniforms.buffer.CreateUniform('ScreenResX');
 		const resYidx = this.shaderInfo.uniforms.buffer.CreateUniform('ScreenResY');
-		this.shaderInfo.uniforms.buffer.Set(Viewport.width, resXidx);
-		this.shaderInfo.uniforms.buffer.Set(Viewport.height, resYidx);
-		
+		// this.shaderInfo.uniforms.buffer.Set(Viewport.width, resXidx);
+		// this.shaderInfo.uniforms.buffer.Set(Viewport.height, resYidx);
+		return {
+			resXidx:resXidx,
+			resYidx:resYidx,
+		};
 	}
-	UniformsUpdateUniformsBuffer(gl){
-		this.shaderInfo.uniforms.buffer.Update(gl);
-	}
-	// UpdateUniformsBuffer() {
-	// 	const len = this.uniforms.shaderInfo.uniforms.buffer.ub.length;
-	// 	for(let i=0; i<len; i++){
-	// 		this.shaderInfo.uniforms.buffer.Update();
-	// 	}
+	// UniformsBufferUpdateScreenRes(xidx, yidx) {
+	// 	this.shaderInfo.uniforms.buffer.Set(Viewport.width, xidx);
+	// 	this.shaderInfo.uniforms.buffer.Set(Viewport.height, yidx);
 	// }
+
+
+	/**
+	 * Static Uniforms
+	 * Uniforms that are defined in every new program creation.
+	 */
+	UniformsSetProjectionMatrix(val) {
+		this.shaderInfo.uniforms.projection.Set(val);
+	}
+	UniformsUpdateProjectionMatrix(gl) {
+		this.shaderInfo.uniforms.projection.Update(gl);
+	}
+	UniformsSetUpdateProjectionMatrix(gl, val) {
+		this.shaderInfo.uniforms.projection.Set(val);
+		this.shaderInfo.uniforms.projection.Update(gl);
+	}
+
+	/**
+	 * Update all uniforms of glProgram.
+	 * Not neccesary cause it needs a lot of conditional statements
+	 */
+	UniformsUpdate(gl) {
+		if (this.shaderInfo.uniforms.buffer.needsUpdate) {
+			this.shaderInfo.uniforms.buffer.Update(gl);
+		}
+		if (this.shaderInfo.uniforms.projection.needsUpdate) {
+			this.shaderInfo.uniforms.projection.Update(gl, val);
+		}
+		this.uniformsNeedUpdate = false;
+	}
+
 
 	/**
 	 * Uniform buffer for miscellaneous-arbitary number of uniforms for a specific gl program 
@@ -273,7 +324,7 @@ export class GlProgram extends CameraOrthographic {
 	// 	this.uniformsNeedUpdate = true;
 	// 	return this.shaderInfo.uniforms.buffer.Create(value);
 	// }
-	// UniformsSetUniformsBuffer(value, index) {
+	// UniformsSetBufferUniform(value, index) {
 	// 	this.shaderInfo.uniforms.buffer.Set(value, index);
 	// 	this.uniformsNeedUpdate = true;
 	// }
@@ -308,54 +359,58 @@ export function GlEnableAttribsLocations(gl, prog) {
 
 	const attribsPerVertex = prog.shaderInfo.attribsPerVertex;
 	// For Uniforms
-	if (prog.shaderInfo.attributes.colLoc >= 0) {
-		 gl.enableVertexAttribArray(prog.shaderInfo.attributes.colLoc);
-		 gl.vertexAttribPointer(prog.shaderInfo.attributes.colLoc,
-			  V_COL_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.colOffset * FLOAT);
+	if (prog.shaderInfo.attributes.loc.col >= 0) {
+		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.col);
+		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.col,
+			V_COL_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.col * FLOAT);
 	}
-	if (prog.shaderInfo.attributes.posLoc >= 0) {
-		 gl.enableVertexAttribArray(prog.shaderInfo.attributes.posLoc);
-		 gl.vertexAttribPointer(prog.shaderInfo.attributes.posLoc,
-			  V_POS_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.posOffset * FLOAT);
+	if (prog.shaderInfo.attributes.loc.pos >= 0) {
+		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.pos);
+		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.pos,
+			V_POS_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.pos * FLOAT);
 	}
-	if (prog.shaderInfo.attributes.scaleLoc >= 0) {
-		 gl.enableVertexAttribArray(prog.shaderInfo.attributes.scaleLoc);
-		 gl.vertexAttribPointer(prog.shaderInfo.attributes.scaleLoc,
-			  V_SCALE_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.scaleOffset * FLOAT);
+	if (prog.shaderInfo.attributes.loc.tex >= 0) {
+		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.tex);
+		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.tex,
+			V_TEX_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.tex * FLOAT);
 	}
-	if (prog.shaderInfo.attributes.texLoc >= 0) {
-		 gl.enableVertexAttribArray(prog.shaderInfo.attributes.texLoc);
-		 gl.vertexAttribPointer(prog.shaderInfo.attributes.texLoc,
-			  V_TEX_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.texOffset * FLOAT);
+	if (prog.shaderInfo.attributes.loc.wposTime >= 0) {
+		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.wposTime);
+		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.wposTime,
+			V_WPOS_TIME_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.wposTime * FLOAT);
 	}
-	if (prog.shaderInfo.attributes.wposTimeLoc >= 0) {
-		 gl.enableVertexAttribArray(prog.shaderInfo.attributes.wposTimeLoc);
-		 gl.vertexAttribPointer(prog.shaderInfo.attributes.wposTimeLoc,
-			  V_WPOS_TIME_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.wposTimeOffset * FLOAT);
+	if (prog.shaderInfo.attributes.loc.params1 >= 0) {
+		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.params1);
+		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.params1,
+			V_PARAMS1_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.params1 * FLOAT);
 	}
-	if (prog.shaderInfo.attributes.params1Loc >= 0) {
-		 gl.enableVertexAttribArray(prog.shaderInfo.attributes.params1Loc);
-		 gl.vertexAttribPointer(prog.shaderInfo.attributes.params1Loc,
-			  V_PARAMS1_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.params1Offset * FLOAT);
+	if (prog.shaderInfo.attributes.loc.style >= 0) {
+		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.style);
+		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.style,
+			V_STYLE_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.style * FLOAT);
 	}
-	if (prog.shaderInfo.attributes.styleLoc >= 0) {
-		 gl.enableVertexAttribArray(prog.shaderInfo.attributes.styleLoc);
-		 gl.vertexAttribPointer(prog.shaderInfo.attributes.styleLoc,
-			  V_STYLE_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.styleOffset * FLOAT);
+	if (prog.shaderInfo.attributes.loc.time >= 0) {
+		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.time);
+		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.time,
+			V_TIME_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.time * FLOAT);
 	}
-	if (prog.shaderInfo.attributes.timeLoc >= 0) {
-		 gl.enableVertexAttribArray(prog.shaderInfo.attributes.timeLoc);
-		 gl.vertexAttribPointer(prog.shaderInfo.attributes.timeLoc,
-			  V_TIME_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.timeOffset * FLOAT);
-	}
-	if (prog.shaderInfo.attributes.sdfLoc >= 0) {
-		 gl.enableVertexAttribArray(prog.shaderInfo.attributes.sdfLoc);
-		 gl.vertexAttribPointer(prog.shaderInfo.attributes.sdfLoc,
-			  V_SDF_PARAMS_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.sdfOffset * FLOAT);
+	if (prog.shaderInfo.attributes.loc.sdf >= 0) {
+		gl.enableVertexAttribArray(prog.shaderInfo.attributes.sdfLoc);
+		gl.vertexAttribPointer(prog.shaderInfo.attributes.sdfLoc,
+			V_SDF_PARAMS_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.sdf * FLOAT);
 	}
 }
 
 
+export function GlProgramUpdateUniformProjectionMatrix(gl, mat4){
+	const progs = g_glPrograms;
+	const count = g_glProgramsCount;
+	for(let i=0; i<count; i++){
+		if(progs[i].shaderInfo.uniforms.projection){
+			progs[i].UniformsSetUpdateProjectionMatrix(gl, mat4);
+		}
+	}
+}
 
 
 let GlUID = INT_NULL; // A unique id for every vertex buffer, to distinguish which meshes belong to which buffer 

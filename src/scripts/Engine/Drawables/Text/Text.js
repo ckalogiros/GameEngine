@@ -2,17 +2,18 @@
 import { CalculateSdfOuterFromDim } from '../../../Helpers/Helpers.js';
 import * as math from '../../../Helpers/Math/MathOperations.js'
 import { FontGetUvCoords, FontGetFontDimRatio } from '../../Loaders/Font/LoadFont.js'
+import { Rect2D } from '../Geometries/Rect2D.js';
 import { Mesh } from '../Mesh.js'
 
 
 
-export class Text {
-	sid = 0;
+export class Text extends Rect2D{
+	// sid = 0;
 	len = 0; // Number of characters in the text
 	text = ''; // The actual text. 
-	dim = [0, 0]; // The width and height of the whole text
-	pos = [0, 0, 0]; // The position of the whole text
-	gfxInfo = null; // 
+	// dim = [0, 0]; // The width and height of the whole text
+	// pos = [0, 0, 0]; // The position of the whole text
+	// gfxInfo = null; // 
 
 	faceWidth = 0; // Only for monospace fonts
 	faceHeight = 0;

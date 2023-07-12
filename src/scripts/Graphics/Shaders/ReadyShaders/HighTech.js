@@ -1,13 +1,13 @@
 export const FS_HIGH_TECH = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 5
+#define UNIFORM_BUFFER_COUNT 5
 precision highp float;
 
 in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump float v_time;
 in mediump vec2  v_dim;
-in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER]; 
+in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT]; 
 
 out vec4 frag_color;
 
@@ -176,14 +176,14 @@ void main()
 
 // export const TEMP = `#version 300 es
 
-// #define MAX_NUM_PARAMS_BUFFER 5
+// #define UNIFORM_BUFFER_COUNT 5
 
 // precision mediump float;
 
 // in mediump vec4  v_col;
 // in mediump vec2  v_wpos;
 // in mediump vec2  v_dim;
-// in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
+// in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT];   
 
 // out vec4 frag_color;
 // vec2 hash22(vec2 p, float iTime) 
@@ -305,14 +305,14 @@ void main()
 // `;
 export const TEMP = `#version 300 es
 
-#define MAX_NUM_PARAMS_BUFFER 5
+#define UNIFORM_BUFFER_COUNT 5
 
 precision mediump float;
 
 in mediump vec4  v_col;
 in mediump vec2  v_wpos;
 in mediump vec2  v_dim;
-in mediump float v_uniforms_buffer[MAX_NUM_PARAMS_BUFFER];   
+in mediump float v_uniforms_buffer[UNIFORM_BUFFER_COUNT];   
 
 out vec4 frag_color;
 

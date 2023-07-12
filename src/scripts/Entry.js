@@ -1,9 +1,10 @@
 "use strict";
-import { AppInit } from './App/App.js';
+import { AppInit, AppRender } from './App/App.js';
 
 
 window.onload = Entry;
 
 function Entry(){
   AppInit();
+  AppRender();
 }

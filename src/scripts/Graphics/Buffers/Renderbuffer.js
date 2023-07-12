@@ -1,6 +1,5 @@
 "use=strict";
 
-import { Rect2D } from "../../Engine/Drawables/Geometries/Rect2D.js";
 import { GfxSetVbShow, GlBindTexture, GlBindVAO, GlUpdateIndexBufferData, GlUpdateVertexBufferData, GlUseProgram } from "./GlBuffers.js";
 import { GlGetPrograms, GlGetVB } from "../GlProgram.js";
 import { GlCreateTexture, GlGetTexture } from "../GlTextures.js";

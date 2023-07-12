@@ -1,10 +1,7 @@
 "use strict";
-import { OnMouseMove, OnMouseClick, OnMouseMove_Android, OnTouchStart, OnTouchEnd, OnTouchCancel, OnTouchMove } from "./MouseEvents.js";
-import { PrintBuffersAttribsCount, PrintBuffersMeshesNames, PrintVertexBufferAll } from "../../Graphics/Z_Debug/GfxDebug.js";
-import { RenderQueueGet } from "../Renderer/RenderQueue.js";
-import { ScenesPrintAllGfxBuffers } from "../../App/Scenes.js";
-import { TimersPrintimers } from "../Timer/Timer.js";
-
+import { OnMouseMove_Android, OnTouchStart, OnTouchEnd, OnTouchCancel, OnTouchMove } from "./MouseEvents.js";
+import { OnMouseMove, OnMouseDown, OnMouseUp, OnMouseOut, OnMouseWheell } from "../Controls/Input/Mouse.js";
+import { OnKeyDown, OnKeyUp } from "../Controls/Input/Keys.js";
 
 const events = []; // Aplication's events array
 let evtsIdx = 0; // Index for events array
@@ -32,23 +29,18 @@ export function HandleEvents() {
     }
 }
 
-export function HandleEventsEmidiate() {
+export function HandleEventsImediate() {
 }
 
 function OnWindowResize() {
     console.log('WINDOW RESIZE')
 }
 
-export function AddEventListeners() {
+export function EventsAddListeners() {
 
     if(PLATFORM.ANDROID_IMPL){
         document.addEventListener('mousemove', OnMouseMove_Android, false);
         // Touch screen events
-        // const canvas = document.getElementById("canvas");
-        // canvas.addEventListener("touchstart", OnTouchStart);
-        // canvas.addEventListener("touchend", OnTouchEnd);
-        // canvas.addEventListener("touchcancel", OnTouchCancel);
-        // canvas.addEventListener("touchmove", OnTouchMove);
         document.addEventListener("touchstart", OnTouchStart);
         document.addEventListener("touchend", OnTouchEnd);
         document.addEventListener("touchcancel", OnTouchCancel);
@@ -56,11 +48,12 @@ export function AddEventListeners() {
     }
     else{
         document.addEventListener('mousemove', OnMouseMove, false);
+        document.addEventListener('mouseout', OnMouseOut, false);
+        document.addEventListener('wheel', OnMouseWheell, false);
     }
-    document.addEventListener('click', OnMouseClick, false);
+    document.addEventListener('mousedown', OnMouseDown, false);
+    document.addEventListener('mouseup', OnMouseUp, false);
     document.addEventListener("resize", OnWindowResize, false);
-
-    
 
     // Disabling the context menu on long taps on Android. 
     document.oncontextmenu = function(event) {
@@ -69,43 +62,8 @@ export function AddEventListeners() {
         return false;
     };
 
+    document.addEventListener('keydown', OnKeyDown, false);
+    document.addEventListener('keyup', OnKeyUp, false);
 
-
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'P' || event.key === 'p') {
-            if (g_state.game.paused === false) {
-                g_state.game.paused = true;
-                // console.log('Game Resumed');
-            }
-            else {
-                g_state.game.paused = false;
-                // console.log('Game Paused');
-            }
-        }
-        else if (event.key === 'Z' || event.key === 'z') {
-            console.log('- BUFFER MESHES NAMES -')
-            PrintBuffersMeshesNames();
-        }
-        else if (event.key === 'X' || event.key === 'x') {
-            console.log('- VERTEX BUFFER -')
-            PrintVertexBufferAll();
-        }
-        else if (event.key === 'C' || event.key === 'c') {
-            console.log('- DRAW QUEUE -')
-            const drawQueue = RenderQueueGet();
-            drawQueue.PrintAll();
-        }
-        else if (event.key === 'V' || event.key === 'v') {
-            console.log('- SCENE\'S GFX BUFFERS -')
-            ScenesPrintAllGfxBuffers();
-        }
-        else if (event.key === 'A' || event.key === 'a') {
-            console.log('- TIMERS BUFFER -')
-            TimersPrintimers();
-        }
-        else if (event.key === 'M' || event.key === 'm') {
-            PrintBuffersAttribsCount();
-        }
-    }, false);
 }
 

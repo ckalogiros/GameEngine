@@ -10,12 +10,16 @@ import { BulletCreate } from "../../App/Drawables/Bullet.js";
 
 
 const mouse = {
-    x: 0,
-    y: 0,
-    xprev: 0, // Mouse previous x pos
-    yprev: 0, // Mouse previous y pos
-    xdiff: 0, // Mouse X difference in pixels(from previous mesurment)
-    ydiff: 0, // Mouse X difference in pixels(from previous mesurment)
+    pos:{
+        x: 0, y: 0,
+        xprev: 0, yprev: 0, // Mouse previous pos
+        xdiff: 0, ydiff: 0, // Mouse pos difference form previous pos (in pixels)
+    },
+    click:{
+        x:0, y:0,
+        xprev: 0, yprev: 0, // Mouse previous pos
+        // xdiff: 0, ydiff: 0, // Mouse click difference form previous click (in pixels)
+    },
 };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -36,11 +40,11 @@ export function MouseGetXdir() {
 export function MouseGetYdir() {
     return mouse.ydiff;
 }
-function MouseSetDif(){{
+function MouseSetDif(){
     mouse.xdiff = mouse.x - mouse.xprev;
     mouse.ydiff = -(mouse.y - mouse.yprev); // Reverse the direction(negative for down dir and positive for up dir) 
 
-}}
+}
 
 
 
@@ -50,25 +54,25 @@ function MouseSetDif(){{
  * the OnMouseMove or OnMouseMove_Android event AND the onMouseClick event,
  * as the OnTouchStart and OnTouchEnd events. 
  */
-function MouseSetCoords(coord){
+// function MouseSetCoords(coord){
     
-    mouse.xprev = mouse.x;
-    mouse.yprev = mouse.y;
+//     mouse.xprev = mouse.x;
+//     mouse.yprev = mouse.y;
 
-    mouse.x = coord[0] - Viewport.leftMargin; 
-    mouse.y = coord[1] + Viewport.topMargin; 
+//     mouse.x = coord[0] - Viewport.leftMargin; 
+//     mouse.y = coord[1] + Viewport.topMargin; 
 
-    mouse.xdiff = mouse.x - mouse.xprev;
-    mouse.ydiff = -(mouse.y - mouse.yprev); // Reverse the direction(negative for down dir and positive for up dir) 
+//     mouse.xdiff = mouse.x - mouse.xprev;
+//     mouse.ydiff = -(mouse.y - mouse.yprev); // Reverse the direction(negative for down dir and positive for up dir) 
 
-}
-export function OnMouseMove(e) {
-    MouseSetCoords([e.clientX, e.clientY]);
+// }
+// export function OnMouseMove(e) {
+//     MouseSetCoords([e.clientX, e.clientY]);
     
-    const scene = ScenesGetScene(SCENE.active.idx);
-    if(scene){ OnHover(scene, mouse); }
-    if (scene && scene.sceneIdx === SCENE.stage) { OnPlayerMove(mouse.x, mouse.xdiff); }
-}
+//     // const scene = ScenesGetScene(SCENE.active.idx);
+//     // if(scene){ OnHover(scene, mouse); }
+//     // if (scene && scene.sceneIdx === SCENE.stage) { OnPlayerMove(mouse.x, mouse.xdiff); }
+// }
 export function OnMouseMove_Android(e) {
     MouseSetCoords([e.clientX, e.clientY]);
     console.log('OnMouseMove_Android: ', mouse.x, mouse.y)
@@ -131,13 +135,13 @@ export function OnMouseClick(e) {
  * Touchscreen Events
  */
 export function OnTouchStart(e) {
-    const x = e.changedTouches[0].clientX;
-    const y = e.changedTouches[0].clientY;
-    MouseSetCoords([x,y]);
-    console.log(`OnTouchStart: x:${mouse.x}, y:${mouse.y}`);
-    const scene = ScenesGetScene(SCENE.active.idx);
-    if(scene){ OnHover(scene, mouse); }
-    if (scene && scene.sceneIdx === SCENE.stage) { OnPlayerMove(mouse.x, mouse.xdiff); }
+    // const x = e.changedTouches[0].clientX;
+    // const y = e.changedTouches[0].clientY;
+    // MouseSetCoords([x,y]);
+    // console.log(`OnTouchStart: x:${mouse.x}, y:${mouse.y}`);
+    // const scene = ScenesGetScene(SCENE.active.idx);
+    // if(scene){ OnHover(scene, mouse); }
+    // if (scene && scene.sceneIdx === SCENE.stage) { OnPlayerMove(mouse.x, mouse.xdiff); }
 }
 export function OnTouchEnd(e) {
     console.log(`OnTouchEnd`);
@@ -152,15 +156,15 @@ export function OnTouchMove(e) {
     const y = e.changedTouches[0].clientY;
     MouseSetCoords([x,y]);
 
-    const scene = ScenesGetScene(SCENE.active.idx);
-    if(scene){
-        OnHover(scene, mouse);
-    }
+    // const scene = ScenesGetScene(SCENE.active.idx);
+    // if(scene){
+    //     OnHover(scene, mouse);
+    // }
 
-    if (scene && scene.sceneIdx === SCENE.stage) {
-        // Move Player 
-        OnPlayerMove(mouse.x, mouse.xdiff);
-    }
+    // if (scene && scene.sceneIdx === SCENE.stage) {
+    //     // Move Player 
+    //     OnPlayerMove(mouse.x, mouse.xdiff);
+    // }
 }
 
   
