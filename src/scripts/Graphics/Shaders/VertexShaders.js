@@ -3,7 +3,7 @@
 import { VS_GLOW } from "./ReadyShaders/Glow.js";
 import { VS_SHADOW } from "./ReadyShaders/Shadow.js";
 import { VS_TWIST } from "./ReadyShaders/Twist.js";
-import { VertexShaderCreate } from "./CreateShader.js";
+import { GlVertexShaderConstruct } from "./ConstructShader.js";
 import { VS_VORTEX2 } from "./ReadyShaders/VortexShader.js";
 
 /**
@@ -188,7 +188,7 @@ void main(void)
 /**
  * The timer used is from an attribute
  */
-const VS_EXPLOSION_ATTR_TIMER = `#version 300 es
+const VS_EXPLOSION_ATTR_TIME = `#version 300 es
 
 #define UNIFORM_BUFFER_COUNT 2
 #define MAX_NUM_POSITIONS_BUFFER 2
@@ -292,20 +292,20 @@ void main(void) {
 export function VertexShaderChoose(sid) {
 
     if (sid & SID.ATTR.STYLE) {
-        return VertexShaderCreate(sid);
+        return GlVertexShaderConstruct(sid);
         // return VS_DEFAULT;
     }
 
     // else if (sid & SID.TEST_SHADER) { return VS_VORTEX; }
     else if (sid & SID.TEST_SHADER) { return VS_VORTEX2; }
-    // else if (sid & SID.TEST_SHADER) { return VS_EXPLOSION_ATTR_TIMER; }
-    else if (sid & SID.ATTR.TEX2 && sid & SID.ATTR.SDF_PARAMS) { 
-        return VertexShaderCreate(sid);
+    // else if (sid & SID.TEST_SHADER) { return VS_EXPLOSION_ATTR_TIME; }
+    else if (sid & SID.ATTR.TEX2 && sid & SID.ATTR.SDF) { 
+        return GlVertexShaderConstruct(sid);
         // return VS_DEFAULT_TEXTURE_SDF; 
     }
     else if (sid & SID.FX.FS_SHADOW) { return VS_SHADOW; }
     else if (sid & SID.ATTR.TEX2) { 
-        // return VertexShaderCreate(sid);
+        // return GlVertexShaderConstruct(sid);
         return VS_DEFAULT_TEXTURE; 
     }
     else if (sid & SID.FX.FS_PARTICLES) { return VS_PARTICLES; }
@@ -315,13 +315,13 @@ export function VertexShaderChoose(sid) {
     else if (sid & SID.FX.FS_EXPLOSION_CIRCLE
         || sid & SID.FX.FS_EXPLOSION_SIMPLE
         || sid & SID.FX.FS_VOLUMETRIC_EXPLOSION) {
-        return VS_EXPLOSION_ATTR_TIMER;
+        return VS_EXPLOSION_ATTR_TIME;
     }
     else if (sid & SID.FX.FS_CRAMBLE) { return VS_CRAMBLE; }
 
     console.warn('No Vertex Shader found with this SID. Loading Default.');
     // alert('No Vertex Shader found with this SID');
 
-    return VertexShaderCreate(sid);
+    return GlVertexShaderConstruct(sid);
 }
 

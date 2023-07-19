@@ -2,7 +2,7 @@
 import { AnimTextsCreateValue, UiUpdate } from "./Ui/Ui.js";
 import { BallCreatePowUpBalls, BallCreatePowerUpPowerBalls, BallDestroyPowerUpPowerBalls } from "./Ball.js";
 import { PlayerCreateScaleAnimation } from "./Player.js";
-import { Rect2D } from "../../Engine/Drawables/Geometries/Rect2D.js";
+import { Rect2D } from "../../Engine/Drawables/Geometry/Rect2D.js";
 import { ExplosionsCreateSimpleExplosion } from "../../Engine/Drawables/Fx/Explosions.js";
 import { GlowCreate, GlowDestroy, GlowSetTranslation } from "../../Engine/Drawables/Fx/Glow.js";
 import { GetRandomColor, GetRandomInt } from "../../Helpers/Helpers.js";

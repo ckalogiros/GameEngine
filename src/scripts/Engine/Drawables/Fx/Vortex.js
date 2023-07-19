@@ -1,4 +1,4 @@
-import { Rect2D } from "../Geometries/Rect2D.js";
+import { Rect2D } from "../Geometry/Rect2D.js";
 import { TimerGetGlobalTimer } from "../../Timer/Timer.js";
 import { GlGetProgram } from "../../../Graphics/GlProgram.js";
 

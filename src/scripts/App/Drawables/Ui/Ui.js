@@ -1,7 +1,7 @@
 "use strict";
 import { CreateText } from "../../../Engine/Drawables/Text/Text.js";
 import { GlSetColor, GlSetTex, GlSetWposXY, GlSetDim } from "../../../Graphics/Buffers/GlBufferOps.js";
-import { FontGetUvCoords } from "../../../Engine/Loaders/Font/LoadFont.js";
+import { FontGetUvCoords } from "../../../Engine/Loaders/Font/Font.js";
 import * as math from "../../../Helpers/Math/MathOperations.js"
 import { AnimationsGet } from "../../../Engine/Animations/Animations.js";
 import { TimeIntervalsCreate, FpsGet } from "../../../Engine/Timer/Time.js";

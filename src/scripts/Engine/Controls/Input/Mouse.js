@@ -1,5 +1,7 @@
 "use strict";
 
+import { GetSign } from "../../../Helpers/Helpers.js";
+
 
 const mouse = {
 /**
@@ -13,7 +15,6 @@ const mouse = {
  *    just store the new pos in the prevPos variable. 
  */
 
-   out: false,
 
    pos: {
       x: 0, y: 0,
@@ -106,6 +107,14 @@ const mouse = {
          }
       },
    },
+   wheel: {
+      x:0, // The mouse position at the time of the wheel scroll
+      y:0, // The mouse position at the time of the wheel scroll
+      delta: 0, // The - of the delta value is for scrolling up, the + is for down.
+      Reset(){
+         this.delta = 0;
+      }
+   }
 
    
 };
@@ -131,6 +140,14 @@ export function MouseResetDif(factor) {
    // mouse.pos.ResetDif()
    mouse.pos.DampenDif(factor)
 }
+// Mouse Wheel
+export function MouseGetWheel(){
+   return mouse.wheel;
+}
+export function MouseResetWheel(){
+   mouse.wheel.Reset();
+}
+
 
 /**
  * Mouse Event Listeners
@@ -140,29 +157,25 @@ export function OnMouseMove(e) {
    e.stopPropagation();
    e.preventDefault(); 
 
-   // if(!mouse.out){
-      const newPosX = e.clientX - Viewport.leftMargin;
-      const newPosY = e.clientY + Viewport.topMargin;
-      const oldPosx = mouse.pos.x;
-      const oldPosy = mouse.pos.y;
-         
-      mouse.pos.x = newPosX;
-      mouse.pos.y = newPosY;
-   
-      if(mouse.pos.xprev !== INT_NULL){
-         mouse.pos.xprev = oldPosx;
-         mouse.pos.yprev = oldPosy;
-      }
-      else{
-         mouse.pos.xprev = newPosX;
-         mouse.pos.yprev = newPosY;
-      }
+   const newPosX = e.clientX - Viewport.leftMargin;
+   const newPosY = e.clientY + Viewport.topMargin;
+   const oldPosx = mouse.pos.x;
+   const oldPosy = mouse.pos.y;
+      
+   mouse.pos.x = newPosX;
+   mouse.pos.y = newPosY;
 
-   
-      mouse.pos.xdiff = mouse.pos.x - mouse.pos.xprev;
-      mouse.pos.ydiff = -(mouse.pos.y - mouse.pos.yprev); // Reverse the direction(negative for down dir and positive for up dir) 
-      // console.log(mouse.pos.GetDif())
-   // }
+   if(mouse.pos.xprev !== INT_NULL){
+      mouse.pos.xprev = oldPosx;
+      mouse.pos.yprev = oldPosy;
+   }
+   else{
+      mouse.pos.xprev = newPosX;
+      mouse.pos.yprev = newPosY;
+   }
+
+   mouse.pos.xdiff = mouse.pos.x - mouse.pos.xprev;
+   mouse.pos.ydiff = -(mouse.pos.y - mouse.pos.yprev); // Reverse the direction(negative for down dir and positive for up dir) 
 
 }
 export function OnMouseOut(e){
@@ -171,22 +184,25 @@ export function OnMouseOut(e){
    e.preventDefault();
 
    // mouseout { target: img#TextureAtlas, buttons: 0, clientX: 63, clientY: 463, layerX: 5, layerY: 463 }
-   console.log(e)
+   // console.log(e)
    // if(e.mouseout.target && !mouse.out)
    //    mouse.out = false;
 
    mouse.pos.SetPrevPos(INT_NULL, INT_NULL);
    mouse.pos.ResetPos();
-   // mouse.out = true;
-
-   console.log('MOUSE OUT !!!!!!')
 }
-export function OnMouseWheell(e){
+export function OnMouseWheel(e){
 
    e.stopPropagation();
    e.preventDefault();
 
-   console.log('MOUSE WHEEL !!!!!!')
+   // client.x-y, the mouse pos at the time of the wheel scroll 
+   // wheelDelta for the sign (- wheel down, + wheel up) and the value probablyy represents the wheel move in pixels
+   mouse.wheel.x = e.clientX;
+   mouse.wheel.x =  e.clientY;
+   mouse.wheel.delta = GetSign(e.wheelDelta);
+
+   console.log(`MOUSE WHEEL: pos: ${e.x} ${e.y}, delta: ${e.wheelDelta}`)
 }
 export function OnMouseDown(e) {
 

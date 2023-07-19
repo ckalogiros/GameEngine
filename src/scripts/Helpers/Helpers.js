@@ -93,16 +93,31 @@ export function CalculateSdfParamsFromFont(fontSize){
 //     // console.log('Ratio:', ((.5/45)*(60-dim)))
 //     return sdfOuter;
 // }
-export function CalculateSdfOuterFromDim(dim, maxDim){
+
+const SDF_OUTER_VAL_TABLE = [
+    .90, // dim = 0
+    .60, // dim = 10
+    .30, // dim = 20
+    .20, // dim = 30
+    .15, // dim = 40
+    .10, // dim = 50
+    .07, // dim = 60
+    .05, // dim = 70
+    .05, // dim = 80
+    .04, // dim = 90
+    .04, // dim = 100
+];
+
+export function CalculateSdfOuterFromDim(size){
     // b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 )
-    const sdf = MapLinear(dim, 0, 120, .5, .1);
-    // console.log(dim, sdf)
+    const sdf = MapLinear(size, 0, 120, .5, .1);
+    // console.log(size, sdf)
     return sdf;
-    // return MapLinear(dim, 10, 90, .5, .1);
+    // return MapLinear(size, 10, 90, .5, .1);
 
-    // let sdfOuter = (((.5)/(90))*(90-dim));
+    // let sdfOuter = (((.5)/(90))*(90-size));
 
-    const ratio = dim / 60;
+    const ratio = size / 60;
     const min = SDF_PARAMS_VALS.outerMin;
     const max = SDF_PARAMS_VALS.outerMax;
     //a + (b - a) * p
@@ -122,6 +137,7 @@ export function CalculateSdfOuterFromDim(dim, maxDim){
 
 // Returns the sign (-1,+1) out of any number
 export function GetSign(val){
+    if(val === 0) return 0;
     return (2 * (val >> 31) + 1);
 }
 

@@ -9,7 +9,7 @@ import { FS_VOLUMETRIC_EXPLOSION } from "./ReadyShaders/VolExplosion.js";
 import { FS_AWSOME } from "./ReadyShaders/AWESOME.js";
 import { FS_VORTEX, FS_VORTEX2 } from "./ReadyShaders/VortexShader.js";
 import { FS_SHADOW } from "./ReadyShaders/Shadow.js";
-import { FragmentShaderCreate } from "./CreateShader.js";
+import { GlFragmentShaderConstruct } from "./ConstructShader.js";
 
 /**
  * This is a replace for the background of text rendering
@@ -1551,14 +1551,14 @@ export function FragmentShaderChoose(sid) {
     else if (sid & SID.ATTR.STYLE) {
         if (sid & SID.FX.FS_CRAMBLE) { return FS_CRAMBLE; }
         else if (sid & SID.DEF2) { 
-            return FragmentShaderCreate(sid);
+            return GlFragmentShaderConstruct(sid);
             // return FS_DEFAULT2; 
         }
         else if (sid & SID.DEF3) { return FS_DEFAULT3; }
         else return FS_DEFAULT;
     }
     else if (sid & SID.ATTR.TEX2) {
-        if (sid & SID.TEXT_SDF && sid & SID.ATTR.SDF_PARAMS) { return FS_DEFAULT_TEXTURE_SDF; }
+        if (sid & SID.TEXT_SDF && sid & SID.ATTR.SDF) { return FS_DEFAULT_TEXTURE_SDF; }
         else { return FS_DEFAULT_TEXTURE; }
     }
     else if (sid & SID.FX.FS_PARTICLES) { return FS_PARTICLES; }
@@ -1569,7 +1569,7 @@ export function FragmentShaderChoose(sid) {
     // alert('No Vertex Shader found with this SID');
 
     // return FS_DEFAULT2;
-    return FragmentShaderCreate(sid);
+    return GlFragmentShaderConstruct(sid);
 }
 
 /*************************************************************************

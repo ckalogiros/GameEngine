@@ -6,7 +6,7 @@
       "baseDir":"./src",
       "routes": {
          "/src": "./src",
-         "/scripts": "src/scripts",
+         "/scripts": "./src/scripts",
          "/resources": "./resources"
      }
    }

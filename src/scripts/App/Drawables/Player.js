@@ -1,7 +1,7 @@
 "use strict";
 import { BallInitCurveMode, BallPlayerCollision, BallSetCurveMode } from './Ball.js';
 import { PowerUpPlayerCollision } from './PowerUp.js';
-import { Rect2D } from '../../Engine/Drawables/Geometries/Rect2D.js';
+import { Rect2D } from '../../Engine/Drawables/Geometry/Rect2D.js';
 import { CoinPlayerCollision } from './Coin.js';
 import { Abs } from '../../Helpers/Math/MathOperations.js';
 import { StepTimersCreate } from '../../Engine/Timer/Time.js';

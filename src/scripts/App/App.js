@@ -1,5 +1,5 @@
 "use strict";
-import { LoadFontTextures, FontCreateUvMap } from '../Engine/Loaders/Font/LoadFont.js'
+import { FontInitBuffers } from '../Engine/Loaders/Font/Font.js'
 import { Scene } from '../Engine/Scenes.js'
 import { EventsAddListeners, } from '../Engine/Events/Events.js';
 import { GlGetProgram } from '../Graphics/GlProgram.js';
@@ -8,63 +8,124 @@ import { BrickSetRoundCorner, BrickSetBorderWidth, BrickSetBorderFeather } from 
 import { InterpolateToRange } from '../Helpers/Math/MathOperations.js';
 
 // Debug-Print
-import { Rect2D } from '../Engine/Drawables/Geometries/Rect2D.js';
-import { MAT_ENABLE, Material } from '../Engine/Drawables/Material.js';
-import { MESH_ENABLE, Mesh, TempSetMesh } from '../Engine/Drawables/Mesh.js';
+import { Rect2D } from '../Engine/Drawables/Geometry/Rect2D.js';
+import { FontMaterial, MAT_ENABLE, Material } from '../Engine/Drawables/Material.js';
+import { MESH_ENABLE, Mesh, TextMesh } from '../Engine/Drawables/Mesh.js';
 import { RenderQueueCreate } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { WebGlRenderer } from '../Engine/Renderers/WebGlRenderer.js';
-import { CameraOrthographic, CameraPerspective } from '../Engine/Renderers/Renderer/Camera.js';
+import { CAMERA_CONTROLS, CameraOrthographic, CameraPerspective } from '../Engine/Renderers/Renderer/Camera.js';
+// import { TextGeometry2D } from '../Engine/Drawables/Geometry.js';
+import { CalculateSdfOuterFromDim } from '../Helpers/Helpers.js';
+import { ImageLoader } from '../Engine/Loaders/ImageLoader.js';
+import { TextGeometry2D } from '../Engine/Drawables/Geometry.js';
+import { TextureInitBuffers } from '../Engine/Loaders/Textures/Texture.js';
+import { Cube } from '../Engine/Drawables/Geometry/Cube.js';
 
 
 let renderer = null;
 
+
+
 export function AppInit() {
 
-    // Load Fonts, load metrics and create uv map for each loaded font 
-    LoadFontTextures();
-    FontCreateUvMap();
+    // Load font image to the browser.
+    // LoadFontImage(FONT_CONSOLAS_SDF_LARGE, FONT_TEXTURE_PATH_CONSOLAS_SDF_11115w, FONT_TYPE_CONSOLAS, 'png');
+
+    // const fontConsolas = new ImageLoader('fonts/consolas_sdf', FONT_CONSOLAS_SDF_LARGE, 'png');
+    // const fontConsolas = ImageLoader.Load('fonts/consolas_sdf', FONT_CONSOLAS_SDF_LARGE, 'png');
+    // TEMP_FONT = fontConsolas
+
+    // Create and initialize the buffers that will be storing texture-font-uv data. 
+    TextureInitBuffers();
+
+
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * *
     * Create Renderer and Scene
     */
-   const scene = new Scene();
-   const camera = new CameraOrthographic();
-//    const camera = new CameraPerspective;
-   renderer = new WebGlRenderer(scene, camera);
-   
-   EventsAddListeners();
-   MeshConstantsSetUp();
-   
-   
-   /* * * * * * * * * * * * * * * * * * * * * * * * * * *
-   * Create meshes
-   */
-    const geom = new Rect2D([Viewport.width/2, Viewport.height/2, 0], [100, 100]);
-    const mat = new Material(ORANGE_240_130_10);
-    // mat.Enable([MAT_ENABLE.UNIF_RESOLUTION, MAT_ENABLE.ATTR_STYLE]); 
-    // mat.Enable(MAT_ENABLE.UNIF_RESOLUTION); 
-    // mat.Enable(MAT_ENABLE.ATTR_STYLE); 
-    // mat.SetStyle(10, 30, 3); // TODO: How we can set the style params with no extra call??? Maybe in the mat creation new Material(..., style)
+    const scene = new Scene();
+    const camera = new CameraOrthographic();
+    // const camera = new CameraPerspective();
+    camera.SetControls(CAMERA_CONTROLS.PAN);
+    renderer = new WebGlRenderer(scene, camera);
+
+    EventsAddListeners();
+    // MeshConstantsSetUp();
+
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * *
+    * Create meshes
+    */
+
+    /**
+     * TODO: For now the enabling of the RESOLUTION uniform is  valid
+     * in the first mesh, on shader creation. 
+     */
+    let geom = new Rect2D([Viewport.width / 2, 200, 0], [100, 100]);
+    // const geom = new Rect2D([90, 99, 0], [100, 100]);
+    let mat = new Material(ORANGE_240_130_10);
+
+    // mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {color: [WHITE, CYAN_10_230_180, BLUE_10_120_220, PINK_240_60_200]})
+    // mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {color: [CYAN_10_230_180, CYAN_10_230_180, PINK_240_60_200, PINK_240_60_200]})
+    mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, { color: [CYAN_10_230_180, YELLOW_240_240_10, PINK_240_60_200, BLUE_10_120_220] })
+
+
     const mesh = new Mesh(geom, mat);
-    // mesh.Enable(MESH_ENABLE.ATTR_STYLE);
-    // mesh.Enable(MESH_ENABLE.UNIF_RESOLUTION);
-    scene.AddMesh(mesh);
-    TempSetMesh(mesh);
+    {
+        mesh.Enable(MESH_ENABLE.ATTR_STYLE);
+        mesh.SetStyle(8, 35, 3);
+        // mesh.Enable(MESH_ENABLE.ATTR_TIME);
+        // mesh.Enable(MESH_ENABLE.PASS_DIM2);
+        // mesh.Enable(MESH_ENABLE.PASS_WPOS2);
+    }
+    // scene.AddMesh(mesh);
     const mesh1 = new Mesh(geom, mat);
-    mesh1.geom.pos[1] += 204; 
-    scene.AddMesh(mesh1);
-    TempSetMesh(mesh1);
+    {
+        mesh1.Enable(MESH_ENABLE.ATTR_STYLE);
+        mesh1.Enable(MESH_ENABLE.UNIF_RESOLUTION);
+        mesh1.SetStyle(15, 15, 3);
+        mesh1.Enable(MESH_ENABLE.ATTR_TIME);
+        mesh1.Enable(MESH_ENABLE.PASS_DIM2);
+        mesh1.Enable(MESH_ENABLE.PASS_WPOS2);
+        // mesh1.geom.pos[1] += 204;
+    }
+    // scene.AddMesh(mesh1);
+
     const mesh2 = new Mesh(geom, mat);
-    mesh2.geom.pos[1] += 204; 
+    {
+        mesh2.Enable(MESH_ENABLE.ATTR_STYLE);
+        // mesh2.Enable(MESH_ENABLE.UNIF_RESOLUTION);
+        // mesh2.Enable(MESH_ENABLE.PASS_WPOS2);
+        // mesh2.Enable(MESH_ENABLE.PASS_DIM2);
+        // mesh2.Enable(MESH_ENABLE.PASS_COL4);
+        // mesh2.geom.pos[1] += 204;
+    }
     scene.AddMesh(mesh2);
-    TempSetMesh(mesh2);
-    // const prog = GlGetProgram(mesh.gfx.prog.idx);
-    // const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
-    // prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
-    // prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
-    // prog.UniformsCreateTimer(0.1)
+
+    // Create text
+    const text = 'Hello';
+    geom = new TextGeometry2D([Viewport.width / 2, 200, 0], 200, [1,1], 'HELLO', FONTS.SDF_CONSOLAS_LARGE);
+    mat = new FontMaterial(WHITE, FONTS.SDF_CONSOLAS_LARGE, 'HELLO', [.2, .02])
+    const rect = new TextMesh(geom, mat);
+    {
+        // rect.Enable(MESH_ENABLE.ATTR_STYLE);
+        // rect.Enable(MESH_ENABLE.UNIF_RESOLUTION);
+        // rect.Enable(MESH_ENABLE.PASS_WPOS2);
+        // rect.Enable(MESH_ENABLE.PASS_DIM2);
+        rect.Enable(MESH_ENABLE.PASS_COL4);
+        rect.geom.pos[1] += 204;
+    }
+    scene.AddMesh(rect);
+    
+
+    // If camera is static, update projection matrix uniform only once
+    camera.UpdateProjectionUniform(renderer.gl);
 
     RenderQueueCreate(); // Initilize the render Queue for drawing vertex buffers in a priority(z index) based aproach
+
+
+
+    // OLD
     // ScenesLoadScene(SCENE.startMenu); // Load the first Scene
     // FramebuffersSetActive(true);
     // ScenesSetFramebufferQueue();
@@ -256,10 +317,10 @@ export function AppInit() {
     // window.requestAnimationFrame(Render);
     // requestAnimationFrame(Render);
     // window.requestAnimationFrame(renderer.Render);
-    
+
 }
 
-export function AppRender(){
+export function AppRender() {
     requestAnimationFrame(AppRender);
     renderer.Render();
 }

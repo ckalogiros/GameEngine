@@ -7,7 +7,7 @@ import { GetSign } from "../../Helpers/Helpers.js";
 import { ParticleSystemCreateParticle, ParticleSystemDestroyParticle, ParticleSystemGetParticleColor, ParticleSystemGetParticleSystem, ParticleSystemSetParticleColor, ParticlesCreateSystem } from "../../Engine/ParticlesSystem/Particles.js";
 import { GlGetProgram } from "../../Graphics/GlProgram.js";
 import { AnimationsGet } from "../../Engine/Animations/Animations.js";
-import { Rect2D } from "../../Engine/Drawables/Geometries/Rect2D.js";
+import { Rect2D } from "../../Engine/Drawables/Geometry/Rect2D.js";
 import { ExplosionsCreateSimpleExplosion } from "../../Engine/Drawables/Fx/Explosions.js";
 import { GlSetPriority } from "../../Graphics/Buffers/GlBufferOps.js";
 import { TwistCreate, TwistDestroy, TwistSetAmtxSpeed, TwistSetTranslation } from "../../Engine/Drawables/Fx/Twist.js";

@@ -1,4 +1,11 @@
 --------------------------------------------------- CONTINUE
+
+Correct the meshes dimentions to not create double the width and height
+
+Implement: An easy way of write and use custom shaders:
+  1. Create a geo and mat.
+  2. Implement: pass shaders to ???
+
 Finish the event dispatchEvent
 
 Create Camera controls 

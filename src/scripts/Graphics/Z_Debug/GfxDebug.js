@@ -6,7 +6,7 @@ import { GlGetPrograms } from "../GlProgram.js";
 /**
  * Enable-Disable Debuging
  */
-const GL_DEBUG_ATTRIBUTES     = false;
+const GL_DEBUG_ATTRIBUTES     = true;
 const GL_DEBUG_PROGRAM        = false;
 const GL_DEBUG_SHADERS        = false;
 const GL_DEBUG_SHADER_INFO    = false;
@@ -20,15 +20,37 @@ export function GetShaderTypeId(sid){
 
     let str = 'Shader Attributes: ';
 
-    if(sid.shad & SID.SHAD.INDEXED)  str += 'Indexed Geometry.\n'
+    if(sid.shad)  str += 'Shader General Properties:'
+    if(sid.shad & SID.SHAD.INDEXED)  str += 'Indexed Geometry.'
+    if(sid.shad)  str += '\n'
+
+    if(sid.attr)  str += 'Attribs:'
     if(sid.attr & SID.ATTR.COL4)     str += 'col4, '
     if(sid.attr & SID.ATTR.POS2)     str += 'pos2, '
     if(sid.attr & SID.ATTR.SCALE2)   str += 'scale2, '
     if(sid.attr & SID.ATTR.TEX2)     str += 'tex2, '
-    // if(sid & SID.ATTR.WPOS3)    str += 'wpos3, '
+    if(sid.attr & SID.ATTR.WPOS_TIME4)    str += 'wpos3, time1, '
     if(sid.attr & SID.ATTR.WPOS_TIME4) str += 'wposTime4, '
     if(sid.attr & SID.ATTR.TIME)  str += 'time, '
-    if(sid.attr & SID.ATTR.SDF_PARAMS)  str += 'round corners, border width, border feather, '
+    if(sid.attr & SID.ATTR.SDF)  str += 'Sdf, '
+    if(sid.attr & (SID.ATTR.BORDER & SID.ATTR.FEATHER  & SID.ATTR.R_CORNERS))  str += 'round corners, border width, border feather, '
+    if(sid.attr)  str += '\n'
+    
+    if(sid.unif)  str += 'Uniforms:'
+    if(sid.unif & SID.UNIF.PROJECTION)  str += 'Projection Matrix, '
+    if(sid.unif & SID.UNIF.U_BUFFER)  str += 'Uniform Buffer, '
+    if(sid.unif & SID.UNIF.BUFFER_RES)  str += 'Send Screen Resolution, '
+    if(sid.unif)  str += '\n'
+
+    if(sid.pass)  str += 'Passes:'
+    if(sid.pass & SID.PASS.COL4)  str += 'col4, '
+    if(sid.pass & SID.PASS.DIM2)  str += 'dim2, '
+    if(sid.pass & SID.PASS.RES2)  str += 'res2, '
+    if(sid.pass & SID.PASS.TEX2)  str += 'tex2, '
+    if(sid.pass & SID.PASS.TIME1)  str += 'time1, '
+    if(sid.pass & SID.PASS.WPOS2)  str += 'wpos2, '
+    if(sid.pass & SID.PASS)  str += 'Passes:'
+    if(sid.pass)  str += '\n'
 
     return str;
 }
@@ -39,7 +61,7 @@ export function GetShaderTypeId(sid){
  * @param {*} prog 
  * @returns 
  */
-export function PrintAttributes(gl) {
+export function PrintAttributes() {
     if(!GL_DEBUG_ATTRIBUTES) return;
 
     
@@ -48,39 +70,39 @@ export function PrintAttributes(gl) {
     for(let i = 0; i < progs.length; i++){
         
         const prog = progs[i];        
-        console.log('\n-[GL Enabled Attributes]-\nFor Shader Program: ', GetShaderTypeId(prog.info.sid))
+        console.log('\n-[GL Enabled Attributes]-\nFor Shader Program: ', GetShaderTypeId(prog.sid))
         const attribsPerVertex = prog.shaderInfo.attribsPerVertex;
     
         // For Uniforms
-        if (prog.shaderInfo.attributes.colLoc >= 0) {
-            console.log('   COLOR: loc:', prog.shaderInfo.attributes.colLoc,
+        if (prog.shaderInfo.attributes.loc.col >= 0) {
+            console.log('   COLOR: loc:', prog.shaderInfo.attributes.loc.col,
                 ' count:', V_COL_COUNT, ' stride:', attribsPerVertex, 
                 ' offset:', prog.shaderInfo.attributes.offset.col)
         }
-        if (prog.shaderInfo.attributes.posLoc >= 0) {
-            console.log('   POS: loc:', prog.shaderInfo.attributes.posLoc,
+        if (prog.shaderInfo.attributes.loc.wposTime >= 0) {
+            console.log('   WPOS_TIME: loc:', prog.shaderInfo.attributes.loc.wposTime,
+                ' count:', V_WPOS_TIME_COUNT, ' stride:', attribsPerVertex, 
+                ' offset:', prog.shaderInfo.attributes.offset.wposTime)
+        }
+        if (prog.shaderInfo.attributes.loc.pos >= 0) {
+            console.log('   POS: loc:', prog.shaderInfo.attributes.loc.pos,
                 ' count:', V_POS_COUNT, ' stride:', attribsPerVertex, 
                 ' offset:', prog.shaderInfo.attributes.offset.pos)
         }
-        if (prog.shaderInfo.attributes.scaleLoc >= 0) {
-            console.log('   SCALE: loc:', prog.shaderInfo.attributes.scaleLoc,
-                ' count:', V_SCALE_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.scaleOffset)
-        }
-        if (prog.shaderInfo.attributes.texLoc >= 0) {
-            console.log('   TEX: loc:', prog.shaderInfo.attributes.texLoc,
+        if (prog.shaderInfo.attributes.loc.tex >= 0) {
+            console.log('   TEX: loc:', prog.shaderInfo.attributes.loc.tex,
                 ' count:', V_TEX_COUNT, ' stride:', attribsPerVertex, 
                 ' offset:', prog.shaderInfo.attributes.offset.tex)
-        }
-        if (prog.shaderInfo.attributes.wposTimeLoc >= 0) {
-            console.log('   WPOS_TIME: loc:', prog.shaderInfo.attributes.wposTimeLoc,
-                ' count:', V_WPOS_TIME_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.attributes.offset.wposTime)
         }
         if (prog.shaderInfo.attributes.loc.params1 >= 0) {
             console.log('   PARAMS1: loc:', prog.shaderInfo.attributes.loc.params1,
                 ' count:', V_PARAMS1_COUNT, ' stride:', attribsPerVertex, 
                 ' offset:', prog.shaderInfo.attributes.offset.params1)
+        }
+        if (prog.shaderInfo.attributes.loc.sdf >= 0) {
+            console.log('   Sdf: loc:', prog.shaderInfo.attributes.loc.sdf,
+                ' count:', V_SDF_COUNT, ' stride:', attribsPerVertex, 
+                ' offset:', prog.shaderInfo.attributes.offset.sdf)
         }
         if (prog.shaderInfo.attributes.loc.style >= 0) {
             console.log('   RADIUS: loc:', prog.shaderInfo.attributes.roundLoc,

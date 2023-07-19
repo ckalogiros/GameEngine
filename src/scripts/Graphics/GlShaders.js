@@ -2,7 +2,7 @@
 import { VertexShaderChoose } from './Shaders/VertexShaders.js'
 import { FragmentShaderChoose } from './Shaders/FragmentShaders.js'
 import * as dbg from './Z_Debug/GfxDebug.js'
-import { FragmentShaderCreate, VertexShaderCreate } from './Shaders/CreateShader.js';
+import { GlFragmentShaderConstruct, GlVertexShaderConstruct } from './Shaders/ConstructShader.js';
 
 /**
  * How to add an attribute to a program
@@ -23,8 +23,8 @@ export function LoadShaderProgram(gl, sid) {
 	const shader = {
 		// vShader: VertexShaderChoose(sid),
 		// fShader: FragmentShaderChoose(sid),
-		vShader: VertexShaderCreate(sid),
-		fShader: FragmentShaderCreate(sid),
+		vShader: GlVertexShaderConstruct(sid),
+		fShader: GlFragmentShaderConstruct(sid),
 	};
 	const webgl_program = LoadShaders(gl, shader);
 	if (webgl_program) {

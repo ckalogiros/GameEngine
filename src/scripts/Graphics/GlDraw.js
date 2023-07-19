@@ -1,4 +1,4 @@
-import { GlGetTexture } from './GlTextures.js';
+import { TextureGetTextureByIdx } from '../Engine/Loaders/Textures/Texture.js';
 import { GlUpdateVertexBufferData, GlUpdateIndexBufferData, GfxSetVbShow, GlUseProgram, GlBindVAO, GlBindTexture } from './Buffers/GlBuffers.js'
 import { RenderQueueGetActive, RenderQueueGetActiveCount } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { GlGetPrograms } from './GlProgram.js';
@@ -51,7 +51,7 @@ export function GlDraw(gl) {
         
         if (progs[progIdx].sid.attr & SID.ATTR.TEX2) {
             if (vb.texIdx >= 0) {
-                const texture = GlGetTexture(vb.texIdx);
+                const texture = TextureGetTextureByIdx(vb.texIdx);
                 GlBindTexture(texture);
                 gl.uniform1i(progs[progIdx].shaderInfo.uniforms.sampler, texture.idx);
             }

@@ -21,3 +21,16 @@
  *    1 'in' float, 1 'out' float and 1 assigment statement for each of the styles are added to the vertex shader.
  * 4. At the frament shader the apropriate 'in' floats are constructed and then used for the final result  
  */
+
+/**
+ * Automatic Shaders Creation.
+ * 
+ * Enabling uniforms and attributes in shaders.
+ *    Different 'enables' of uniforms for different meshes,
+ *    creates differnt glPrograms. On the other hand
+ *    Uniforms have to be set, attributes already exist in the shaders.
+ *    That saying, enable a uniform can only happen from the first mesh, 
+ *    cause the shader will be created with the state at the creation time.
+ *    Attributes on the other hand, may be enabled from any mesh belonging to the 
+ *    shader program,   
+ */

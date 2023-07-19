@@ -36,3 +36,9 @@
 .slider{
 	bottom: 0px;
 }
+.fonts{
+    visibility: hidden;
+}
+.textures{
+    visibility: hidden;
+}

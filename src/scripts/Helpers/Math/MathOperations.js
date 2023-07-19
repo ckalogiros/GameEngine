@@ -23,42 +23,72 @@ export function Pow(base, exp){
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Set Array */
-// TODO: src and dst are logicaly opposite, swap them
-export function CopyArr4(src, dst){
-    src[0] = dst[0];
-    src[1] = dst[1];
-    src[2] = dst[2];
-    src[3] = dst[3];
+// TODO: dst and src are logicaly opposite, swap them
+export function CopyArr(dst, src){
+    
+    if(!src || src === undefined){
+        console.error('src is null. @ MathOperations.js');
+        return null;
+    }
+    
+    const len = src.length;
+    let out = new Array(len);
+
+    if(Array.isArray(src[0])){
+
+        const len2 = src[0].length;
+        
+        for(let i=0; i<len; i++){
+            out[i] = new Array(len2);
+            for(let j=0; j<len2; j++){
+                out[i][j] = src[i][j]
+            }
+        }
+    }
+    else{
+        for(let i=0; i<len; i++){
+            out[i] = src[i]
+        }
+    }
+    
+    dst = out;
+    return dst;
 }
-export function CopyArr3(src, dst){
-    src[0] = dst[0];
-    src[1] = dst[1];
-    src[2] = dst[2];
+export function CopyArr4(dst, src){
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
+    dst[3] = src[3];
 }
-export function CopyArr2(src, dst){
-    src[0] = dst[0];
-    src[1] = dst[1];
+export function CopyArr3(dst, src){
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
 }
-export function CopyArr1(src, dst){
-    src[0] = dst[0];
+export function CopyArr2(dst, src){
+    dst[0] = src[0];
+    dst[1] = src[1];
 }
-export function SetArrElem(src, dst, idx){
-    src[idx] = dst[idx];
+export function CopyArr1(dst, src){
+    dst[0] = src[0];
 }
-export function CopyArr1_4(src, val){
-    src[0] = val;
-    src[1] = val;
-    src[2] = val;
-    src[3] = val;
+export function SetArrElem(dst, src, idx){
+    dst[idx] = src[idx];
 }
-export function CopyArr1_3(src, val){
-    src[0] = val;
-    src[1] = val;
-    src[2] = val;
+export function CopyArr1_4(dst, val){
+    dst[0] = val;
+    dst[1] = val;
+    dst[2] = val;
+    dst[3] = val;
 }
-export function CopyArr1_2(src, val){
-    src[0] = val;
-    src[1] = val;
+export function CopyArr1_3(dst, val){
+    dst[0] = val;
+    dst[1] = val;
+    dst[2] = val;
+}
+export function CopyArr1_2(dst, val){
+    dst[0] = val;
+    dst[1] = val;
 }
 
 export function AddArr2(arr1, arr2){

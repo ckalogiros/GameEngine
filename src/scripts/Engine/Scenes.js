@@ -8,40 +8,100 @@ import { Mesh } from './Drawables/Mesh.js';
  * TODO
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+class SBuffer {
 
+    buffer;
+    count;
+    is;
+
+    constructor() {
+        this.buffer = []
+        this.count = 0;
+        this.is = false;
+    }
+
+    Store(elem){
+        const idx = this.count;
+        this.buffer[idx] = elem;
+        this.count++;
+        this.buffer[idx].is = true;
+        return idx;
+    }
+
+    // GetNextFree() {
+    //     for (let i = 0; i < this.count; i++)
+    //         if (this.buffer[i].is === false)
+    //             return i;
+                
+    //     console.error('Buffer Out Of Index:')
+    //     return null;
+    // }
+
+}
 
 
 export class Scene {
-    /**
-     * The only reason a Scene has refferences to meshes is that:
-     *      1. needs to have all programs and vertex buffers so it can toggle the drawing buffers
-     *      2. the Button meshes may differ from scene to scene
-     */
-    sceneIdx = 0; // Scene ID (of type: SCENE const structure).
-    buttons; // Must have all the buttons together in an array(of pointers) so that we can loop through only the buttons easily.
-    btnCount;
-    gfxBuffer; // Store the program and vertexBuffer indexes of all meshes of the app.
-    meshBuffer
 
-    constructor() {
+    sceneIdx = 0; // Scene ID (of type: SCENE const structure).
+    gfxBuffer;    // Store the program and vertexBuffer indexes (by value) of all meshes that belong to the scene.
+    meshBuffer;   // Store all meshes (by refference) that belong to the scene.
+    cameras;      // Cameras buffer used by the scene
+
+    constructor(elem = {}) {
         this.sceneIdx++;
         this.gfxBuffer = [];
-        this.buttons = [];
-        this.btnCount = 0;
+        this.meshBuffer = new SBuffer;
+        this.cameras = [];
     }
 
+    // OnUpdate should handle all meshes requirements. E.x. uniform update, etc...
+    OnUpdate() {
+        // Update attribute values for every mesh
+        for(let i=0; i<this.meshBuffer.count; i++){
+            this.meshBuffer.buffer[i].SetAttrTime();
+        }
+
+        // Update uniform values for gl Program
+
+    }
 
     AddMesh(mesh) {
-        if(!(mesh instanceof Mesh)) {
+        if (!(mesh instanceof Mesh)) {
             console.error('Cannot add mesh to scene. mesh= ', mesh)
             return;
         }
+        // else if(!(mesh instanceof ))
+
+        // Store a refference to the added mesh
+        this.meshBuffer.Store(mesh);
+
+        // 
         const gfx = mesh.AddToGraphicsBuffer(this.sceneIdx);
         this.StoreGfxInfo(gfx);
+
+        // Currently works for camera[0].
+        // TODO: Implement correctly, if more than one cameras are set for the scene
+        this.cameras[0].StoreProgIdx(gfx.prog.idx);
     }
-    StoreGfxInfo(gfxInfo) { // This is the way for a scene to know what and how many gfx buffers it's meshes have
-        if (gfxInfo === undefined)
-            console.log()
+
+    StoreMesh(mesh) {
+        this.meshBuffer[i] = mesh;
+    }
+    GetNextFree() {
+        for (let i = 0; i < this.count; i++)
+            if (this.buffer[i].isAlive === false)
+                return i;
+        console.log('Not enough Particles for:' + this.name)
+        return null;
+    }
+
+    // Store meshe's graphics info (program index, vertex buffer index), 
+    // as an easy and light-weight way of dealing with all Graphics buffers of the scene.
+    StoreGfxInfo(gfxInfo) {
+        if (gfxInfo === undefined) {
+            console.error('GfxInfo is undefined. @ Scenes.js');
+            return;
+        }
 
         // Check if the glVertexBuffer index of the current Mesh is already stored
         let found = false;
@@ -59,6 +119,11 @@ export class Scene {
         }
     }
 
+    // Store a refference to the camera object
+    UseCamera(camera) {
+        this.cameras.push(camera);
+    }
+
 };
 
 
@@ -70,7 +135,7 @@ export class Scene {
 //      * If there is not any previusly loaded scene(stored globally),
 //      * find the scene by name and load it.
 //      * If a previous scene is loaded,
-//      * unload it and load the new scene. 
+//      * unload it and load the new scene.
 //      */
 //     if (sceneIdx !== SCENE.active.idx) {
 //         const idx = SCENE.active.idx; // Current loaded scene index
@@ -102,7 +167,7 @@ export class Scene {
 //         // fb0.FbqStore(5, 0)
 //         // fb0.FbqStore(1, 0)
 //         // fb0.FbqStore(5, 3)
-//         //TODO: Must remove from RenderQueue 
+//         //TODO: Must remove from RenderQueue
 
 //         // drawQueue.Remove(5, 0);
 //         // drawQueue.Remove(1, 0);
@@ -176,7 +241,7 @@ export class Scene {
 //             this.StoreGfxBuffer(mesh.buffer[0].gfxInfo);
 //         }
 //         else if (mesh instanceof UiTextVariable) {
-//             // Because constText and variText belong to the same buffer, 
+//             // Because constText and variText belong to the same buffer,
 //             // the gfx info of any letter is enough to store progIdx and vbIdx.
 //             this.StoreGfxBuffer(mesh.constText.letters[0].gfxInfo);
 //         }

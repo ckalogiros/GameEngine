@@ -25,19 +25,19 @@ vec4 Stylize()                                                    \n\
   float rCorners = v_rCorners * .008;                                     \n\
   float feather = v_border_feather;                                  \n\
   \n\
-  #include <test>\n\
 #ifdef UB_HAS_RESOLUTION\n\
-vec2 res = vec2(v_uniforms_buffer[UB_IDX0], v_uniforms_buffer[UB_IDX1]);    \n\
-res.x /= res.x/res.y;                                           \n\
-#else \n\
-// ELSE STATEMENT\n\
-  vec2 res = vec2(761., 893.);    \n\
+  vec2 res = vec2(v_uniforms_buffer[UB_IDX0], v_uniforms_buffer[UB_IDX1]);    \n\
   res.x /= res.x/res.y;                                           \n\
+#else \n\
+vec2 res = vec2(824., 893.);    \n\
+  res.x /= res.x/res.y;                                           \n\
+  return vec4(1.); \n\
 #endif \n\
   vec2 uv = gl_FragCoord.xy/res;                                  \n\
   uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));                \n\
-  vec2 dim = vec2(v_dim.x/res.x, v_dim.y/res.y);                  \n\
   pos.xy = uv;                                                    \n\
+  vec2 dim = vec2(v_dim.x/res.x, v_dim.y/res.y);                  \n\
+  // vec2 dim = vec2(v_dim.x, v_dim.y);                  \n\
   \n\
   // From 0.3 to 1.2 good values                                  \n\
   float clarity = 10.4;                                           \n\

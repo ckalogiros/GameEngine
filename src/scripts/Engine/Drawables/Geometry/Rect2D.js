@@ -1,20 +1,9 @@
 "use strict";
-import * as math from '../../../Helpers/Math/MathOperations.js'
-import { GlSetColor, GlSetWposXY, GlSetDim, GlSetColorAlpha, GlSetWposX, GlSetAttrRoundCorner, GlMove, GlSetWposY, GlSetAttrTex, GlSetAttrTime, GlSetAttrParams1 } from "../../../Graphics/Buffers/GlBufferOps.js";
-import { DimColor } from "../../../Helpers/Helpers.js";
-import { Max3 } from "../../../Helpers/Math/MathOperations.js";
-import { Mesh } from "../Mesh.js";
-import { AtlasTextureGetCoords } from '../../Loaders/Textures/Texture.js';
-import { GlSetWposZ } from '../../../Graphics/Buffers/GlBufferOps.js';
-import { TimerGetGlobalTimer } from '../../Timer/Timer.js';
 import { Geometry2D } from '../Geometry.js';
 
 
-let _rectId = 0;
-
 export class Rect2D extends Geometry2D{
 
-    // constructor(name, sid, col, dim, scale, tex, pos, style, time, attrParams1) {
     constructor(pos, dim, scale) {
         super(pos, dim, scale);
     }
@@ -154,6 +143,3 @@ export class Rect2D extends Geometry2D{
 
 }
 
-export function RectCreateRect(name, sid, col, dim, scale, tex, pos, style, time, attrParams1) {
-    return new Rect(name, sid, col, dim, scale, tex, pos, style, time, attrParams1);
-}

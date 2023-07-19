@@ -2,7 +2,7 @@
 
 import { GfxSetVbShow, GlBindTexture, GlBindVAO, GlUpdateIndexBufferData, GlUpdateVertexBufferData, GlUseProgram } from "./GlBuffers.js";
 import { GlGetPrograms, GlGetVB } from "../GlProgram.js";
-import { GlCreateTexture, GlGetTexture } from "../GlTextures.js";
+import { GlCreateTexture } from "../GlTextures.js";
 import { AnimationsGet } from "../../Engine/Animations/Animations.js";
 import { Min3 } from "../../Helpers/Math/MathOperations.js";
 import { ShowTotalScore } from "../../Engine/Events/SceneEvents.js";
@@ -237,7 +237,7 @@ export function FramebuffersDraw(fbidx) {
    
    if (progs[progIdx].sid.attr & SID.ATTR.TEX2) {
        if (vb.texIdx >= 0) {
-           const texture = GlGetTexture(vb.texIdx);
+           const texture = TextureGetTextureByIdx(vb.texIdx);
            GlBindTexture(texture);
            gl.uniform1i(progs[progIdx].shaderInfo.uniforms.sampler, texture.idx);
        }
@@ -291,7 +291,7 @@ export function FramebufferRenderToFramebuffer(drawQueue, drawQueueCount) {
           
           if (progs[progIdx].info.sid & SID.ATTR.TEX2) {
               if (vb.texIdx >= 0) {
-                  const texture = GlGetTexture(vb.texIdx);
+                  const texture = TextureGetTextureByIdx(vb.texIdx);
                   GlBindTexture(texture);
                   gl.uniform1i(progs[progIdx].shaderInfo.uniforms.sampler, texture.idx);
               }

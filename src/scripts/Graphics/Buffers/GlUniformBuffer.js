@@ -16,25 +16,25 @@ export class Uniform {
       // 
       switch (type) {
          // From THREE.js
-         case UNIF_TYPES.FLOAT: { this.Update = this.SetValueV1f; break; } // FLOAT
-         case UNIF_TYPES.FVEC2: { this.Update = this.SetValueV2f; break; } // F_VEC2
-         case UNIF_TYPES.FVEC3: { this.Update = this.SetValueV3f; break; } // F_VEC3
-         case UNIF_TYPES.FVEC4: { this.Update = this.SetValueV4f; break; } // F_VEC4
+         case UNIF_TYPE.FLOAT: { this.Update = this.SetValueV1f; break; } // FLOAT
+         case UNIF_TYPE.FVEC2: { this.Update = this.SetValueV2f; break; } // F_VEC2
+         case UNIF_TYPE.FVEC3: { this.Update = this.SetValueV3f; break; } // F_VEC3
+         case UNIF_TYPE.FVEC4: { this.Update = this.SetValueV4f; break; } // F_VEC4
 
-         case UNIF_TYPES.MAT2: { this.Update = this.SetValueM2; break; } // F_MAT2
-         case UNIF_TYPES.MAT3: { this.Update = this.SetValueM3; break; } // F_MAT3
-         case UNIF_TYPES.MAT4: { this.Update = this.SetValueM4; break; } // F_MAT4
+         case UNIF_TYPE.MAT2: { this.Update = this.SetValueM2; break; } // F_MAT2
+         case UNIF_TYPE.MAT3: { this.Update = this.SetValueM3; break; } // F_MAT3
+         case UNIF_TYPE.MAT4: { this.Update = this.SetValueM4; break; } // F_MAT4
 
-         case UNIF_TYPES.INT: { this.Update = this.SetValueV1i; break; } // INT, BOOL
-         case UNIF_TYPES.BOOL: { this.Update = this.SetValueV1i; break; } // INT, BOOL
-         case UNIF_TYPES.IVEC2: { this.Update = this.SetValueV2i; break; } // I_VEC2
-         case UNIF_TYPES.IVEC3: { this.Update = this.SetValueV3i; break; } // I_VEC3
-         case UNIF_TYPES.UIVEC4: { this.Update = this.SetValueV4i; break; } // I_VEC4
+         case UNIF_TYPE.INT: { this.Update = this.SetValueV1i; break; } // INT, BOOL
+         case UNIF_TYPE.BOOL: { this.Update = this.SetValueV1i; break; } // INT, BOOL
+         case UNIF_TYPE.IVEC2: { this.Update = this.SetValueV2i; break; } // I_VEC2
+         case UNIF_TYPE.IVEC3: { this.Update = this.SetValueV3i; break; } // I_VEC3
+         case UNIF_TYPE.UIVEC4: { this.Update = this.SetValueV4i; break; } // I_VEC4
 
-         case UNIF_TYPES.UINT: { this.Update = this.SetValueV1ui; break; } // UINT
-         case UNIF_TYPES.UIVEC2: { this.Update = this.SetValueV2ui; break; } // UI_VEC2
-         case UNIF_TYPES.UIVEC3: { this.Update = this.SetValueV3ui; break; } // UI_VEC3
-         case UNIF_TYPES.UIVEC4: { this.Update = this.SetValueV4ui; break; } // UI_VEC4
+         case UNIF_TYPE.UINT: { this.Update = this.SetValueV1ui; break; } // UINT
+         case UNIF_TYPE.UIVEC2: { this.Update = this.SetValueV2ui; break; } // UI_VEC2
+         case UNIF_TYPE.UIVEC3: { this.Update = this.SetValueV3ui; break; } // UI_VEC3
+         case UNIF_TYPE.UIVEC4: { this.Update = this.SetValueV4ui; break; } // UI_VEC4
 
          default: { console.error('The type of the uniform\'s value is unknown'); break; }
 
@@ -88,7 +88,7 @@ export class UniformsBuffer {
       GlUseProgram(prog.webgl_program, prog.idx)
       this.loc = gl.getUniformLocation(prog.webgl_program, 'uniforms_buffer');
       if (!this.loc) {
-         console.error('Could not locate uniform: \'uniforms_buffer\'');
+         // console.error('Could not locate uniform: \'uniforms_buffer\'');
          this.ub = null;
          this.names = null;
       }

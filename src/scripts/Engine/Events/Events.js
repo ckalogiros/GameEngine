@@ -1,6 +1,6 @@
 "use strict";
 import { OnMouseMove_Android, OnTouchStart, OnTouchEnd, OnTouchCancel, OnTouchMove } from "./MouseEvents.js";
-import { OnMouseMove, OnMouseDown, OnMouseUp, OnMouseOut, OnMouseWheell } from "../Controls/Input/Mouse.js";
+import { OnMouseMove, OnMouseDown, OnMouseUp, OnMouseOut, OnMouseWheel } from "../Controls/Input/Mouse.js";
 import { OnKeyDown, OnKeyUp } from "../Controls/Input/Keys.js";
 
 const events = []; // Aplication's events array
@@ -49,7 +49,7 @@ export function EventsAddListeners() {
     else{
         document.addEventListener('mousemove', OnMouseMove, false);
         document.addEventListener('mouseout', OnMouseOut, false);
-        document.addEventListener('wheel', OnMouseWheell, false);
+        document.addEventListener('wheel', OnMouseWheel, false);
     }
     document.addEventListener('mousedown', OnMouseDown, false);
     document.addEventListener('mouseup', OnMouseUp, false);

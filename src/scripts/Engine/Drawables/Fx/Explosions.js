@@ -1,6 +1,5 @@
 "use strict";
 
-import { RectCreateRect } from "../Geometries/Rect2D.js";
 import { TimersCreateTimer } from "../../Timer/Timer.js";
 import { GlMove, GlSetAttrTime, GlSetColor, GlSetWposXY } from "../../../Graphics/Buffers/GlBufferOps.js";
 import { MeshBuffer } from "../MeshBuffer.js";

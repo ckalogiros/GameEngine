@@ -1,6 +1,6 @@
 "use strict";
 
-import { PrintVertexBufferAll } from "../../../Graphics/Z_Debug/GfxDebug.js";
+import { PrintAttributes, PrintVertexBufferAll } from "../../../Graphics/Z_Debug/GfxDebug.js";
 import { FpsGet } from "../../Timer/Time.js";
 
 
@@ -21,6 +21,11 @@ export function OnKeyDown(e){
       case ('x' || 'X'):{
          console.log(e.key);
          PrintVertexBufferAll();
+         break;
+      }
+      case ('z' || 'Z'):{
+         console.log(e.key);
+         PrintAttributes();
          break;
       }
       case ('f' || 'F'):{

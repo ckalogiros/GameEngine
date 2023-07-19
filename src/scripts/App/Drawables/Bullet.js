@@ -1,7 +1,7 @@
 "use strict";
 
 import { MeshBuffer, TempMesh } from "../../Engine/Drawables/MeshBuffer.js";
-import { Rect2D } from "../../Engine/Drawables/Geometries/Rect2D.js";
+import { Rect2D } from "../../Engine/Drawables/Geometry/Rect2D.js";
 import { AtlasTextureGetCoords } from "../../Engine/Loaders/Textures/Texture.js";
 import { TimersCreateTimer } from "../../Engine/Timer/Timer.js";
 import { PlayerGetPos } from "./Player.js";

@@ -1,13 +1,9 @@
 "use strict";
 
 import { GlDraw } from "../../Graphics/GlDraw.js";
-import { GlGetProgram, GlGetProgramUniformLocations } from "../../Graphics/GlProgram.js";
 import { GlCreateTexture } from "../../Graphics/GlTextures.js";
 import { PrintAttributes } from "../../Graphics/Z_Debug/GfxDebug.js";
-import { AnimationsGet } from "../Animations/Animations.js";
-import { MouseResetDif } from "../Controls/Input/Mouse.js";
-import { TempSetAttrTimer } from "../Drawables/Mesh.js";
-import { ParticleSystemGet } from "../ParticlesSystem/Particles.js";
+import { MouseResetDif, MouseResetWheel } from "../Controls/Input/Mouse.js";
 import { FpsGet, TimeIntervalsUpdateAll, TimeUpdate, TimersUpdateStepTimers } from "../Timer/Time.js";
 import { TimerUpdateGlobalTimers, TimersUpdateTimers } from "../Timer/Timer.js";
 import { Matrix4 } from "../math/Matrix4.js";
@@ -67,9 +63,10 @@ export class WebGlRenderer {
       this.Init();
       
       this.scene = scene;
+      scene.UseCamera(camera);
 
       this.camera = camera;
-      camera.Set();
+      this.camera.Set();
 
       this.fpsTimer = FpsGet();
    }
@@ -89,11 +86,9 @@ export class WebGlRenderer {
          TimersUpdateTimers();
          TimersUpdateStepTimers();
    
-         TempSetAttrTimer();
-
          // TODO!!! Update camera uniform if camera needs update 
-         this.camera.Pan()
          this.camera.Update(this.gl)
+         this.scene.OnUpdate();
 
          // if(this.camera.needsUpdateUniform){
          //    const prog = GlGetProgram(this.scene.gfxBuffer[0].progIdx);
@@ -111,6 +106,7 @@ export class WebGlRenderer {
    
          GlDraw(this.gl);
          MouseResetDif(.5);
+         MouseResetWheel();
       }
       this.fpsTimer.Stop();
    }
@@ -144,16 +140,11 @@ export class WebGlRenderer {
       // this.gl.enable(this.gl.SAMPLE_COVERAGE);
       // this.gl.sampleCoverage(2.2, false);
 
-      PrintAttributes(this.gl);
       DetectHostPlatform();
 
       gfxCtx.gl = this.gl;
       gfxCtx.ext = this.extensions;
 
-
-      // TODO: the texture images initialization as GlTextures should be called elsewhere
-      GlCreateTexture('FontConsolasSdf35', this.gl, COMIC_FONT_TEXTURE_PATH);
-      GlCreateTexture('TextureAtlas', this.gl, TEXTURE_ATLAS_PATH);
 
       // Debug some gl info
       console.log("gl.RENDERER: " + this.gl.getParameter(this.gl.RENDERER));
