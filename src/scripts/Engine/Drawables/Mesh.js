@@ -1,6 +1,6 @@
 "use strict";
 import { GlSetAttrTime } from "../../Graphics/Buffers/GlBufferOps.js";
-import { GlGetContext } from "../../Graphics/Buffers/GlBuffers.js";
+import { GlGetContext, GlHandlerAddIndicesBuffer } from "../../Graphics/Buffers/GlBuffers.js";
 import { GlGetProgram, GlSetTexture } from "../../Graphics/GlProgram.js";
 import { FontGetFontDimRatio } from "../Loaders/Font/Font.js";
 import { TextureLoadTexture } from "../Loaders/Textures/Texture.js";
@@ -95,7 +95,7 @@ export class Mesh {
         // Set Texture
         if (this.mat.texId !== INT_NULL) { // texId is init with INT_NULL that means there is no texture passed to the Material constructor.
 
-            if(this.mat.hasFontTex){
+            if (this.mat.hasFontTex) {
                 this.isFontSet = true;
                 // Correct the geometry height.
                 this.geom.dim[1] *= FontGetFontDimRatio(this.mat.uvIdx);
@@ -116,7 +116,7 @@ export class Mesh {
         this.mat.SetColor(alpha)
     }
     SetPos(pos) {
-        this.geom.SetPos(pos)
+        this.geom.SetPos(pos, this.gfx)
     }
     SetDim(dim) {
         this.geom.SetDim(dim)
@@ -135,6 +135,45 @@ export class Mesh {
     SetStyle(border, rCorners, feather) {
         this.mat.SetStyle(border, rCorners, feather);
     }
+
+    //////////////////////////////////////////////////////////////
+    // Position
+    // SetPos(pos) {
+    //     math.CopyArr2(this.pos, pos);
+    //     glBufferOps.GlSetWposXY(this.gfxInfo, pos);
+    // }
+    // SetPosXY(pos) {
+    //     math.CopyArr2(this.mesh.pos, pos);
+    //     glBufferOps.GlSetWposXY(this.gfxInfo, pos);
+    // }
+    // SetPosX(x) {
+    //     this.mesh.pos[0] = x;
+    //     glBufferOps.GlSetWposX(this.gfxInfo, x);
+    // }
+    // SetPosY(y) {
+    //     this.mesh.pos[1] = y;
+    //     glBufferOps.GlSetWposY(this.gfxInfo, y);
+    // }
+    // UpdatePosXY() {
+    //     glBufferOps.GlSetWposXY(this.gfxInfo, this.mesh.pos);
+    // }
+    // SetZindex(z) {
+    //     this.mesh.pos[2] = z;
+    //     glBufferOps.GlSetWposZ(this.gfxInfo, z);
+    // }
+    // Move(x, y) {
+    //     this.mesh.pos[0] += x;
+    //     this.mesh.pos[1] += y;
+    //     GlMove(this.gfxInfo, [x, y]);
+    // }
+    // MoveX(x) {
+    //     this.mesh.pos[0] += x;
+    //     glBufferOps.GlMove(this.gfxInfo, [x, 0]);
+    // }
+    // MoveY(y) {
+    //     this.mesh.pos[1] += y;
+    //     glBufferOps.GlMove(this.gfxInfo, [0, y]);
+    // }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Enable shader properties
@@ -176,12 +215,7 @@ export class Mesh {
                 this.sid.attr |= SID.ATTR.TIME;
                 break;
             }
-            // case MESH_ENABLE.UNIF_TIMER: {
-            //     this.sid.attr |= SID.UNIF.TIME;
-            //     break;
-            // }
-            // Passes from vertex to fragment shader
-            // case MESH_ENABLE.PASS_COL4: { this.sid.pass |= SID.PASS.COL4; break; }
+
             case MESH_ENABLE.PASS_WPOS2: { this.sid.pass |= SID.PASS.WPOS2; break; }
             case MESH_ENABLE.PASS_DIM2: { this.sid.pass |= SID.PASS.DIM2; break; }
             case MESH_ENABLE.PASS_RES2: { this.sid.pass |= SID.PASS.RES2; break; }
@@ -209,6 +243,7 @@ export class TextMesh extends Mesh {
     sdfParams;
     isFontSet;
 
+
     constructor(geom, mat) {
 
         super(geom, mat);
@@ -226,8 +261,8 @@ export class TextMesh extends Mesh {
             prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
         }
 
-        if(this.mat.hasFontTex){
-            
+        if (this.mat.hasFontTex) {
+
             // Create texture
             const indexes = TextureLoadTexture(this.mat.texId);
             this.gfx.tb.idx = indexes.texIdx;
@@ -246,6 +281,12 @@ export class TextMesh extends Mesh {
         return this.gfx;
     }
 
+    MoveXY(pos) {
+        this.geom.MoveXY(pos, this.gfx)
+        // for(let i=0; i<this.geom.numChars; i++){
+        //     this.geom.SetPos(pos, this.gfx)
+        // }
+    }
     // UseFont(fontIdx) {
     //     // Prevent replacing an existing loaded font texture.
     //     // Currently onlyy one texture per vertex buffer is allowed

@@ -8,7 +8,7 @@ import { ImageLoader } from "../ImageLoader.js";
 
 
 const TEXTURES_MAX_COUNT = TEXTURES.COUNT;
-const _activeTextures = new Uint8Array(TEXTURES_MAX_COUNT);
+const _activeTextures = new Int8Array(TEXTURES_MAX_COUNT);
 const _textureBuffer = [];
 let _textureBufferCount = 0;
 const _uvMapBuffer = [];
@@ -31,7 +31,9 @@ export class Texture {
 };
 
 export function TextureInitBuffers() {
+
 	for (let i = 0; i < TEXTURES_MAX_COUNT; i++) {
+
 		_activeTextures[i] = INT_NULL;
 		_textureBuffer[i] = new Texture;
 	}
@@ -62,7 +64,7 @@ export function TextureIsLoaded(texId) {
 function TextureRetrieveTextureIdx(texId) {
 	return _activeTextures[texId];
 }
-function TextureRetrieveUvMapIdx(texId) {
+export function TextureRetrieveUvMapIdx(texId) {
 	switch(texId){
 		case TEXTURES.SDF_CONSOLAS_LARGE: 
 		case TEXTURES.SDF_CONSOLAS_SMALL:{
@@ -86,7 +88,8 @@ export function TextureLoadTexture(texId) {
 		uvIdx: INT_NULL, // The index of the uv coordinates. All coordinates for all , 
 	};
 
-	if ( !(FontIsLoaded(texId) && TextureIsLoaded(texId)) ) {
+	// if ( !FontIsLoaded(texId) || !TextureIsLoaded(texId) ) {
+	if ( !FontIsLoaded(texId) ) {
 
 		switch (texId) {
 
@@ -95,7 +98,7 @@ export function TextureLoadTexture(texId) {
 				// Load the font image
 				const img = ImageLoader.Load('fonts/consolas_sdf', FONT_CONSOLAS_SDF_LARGE, 'png');
 				ret.texIdx = TextureCreateTexture(gfxCtx.gl, img, FONT_CONSOLAS_SDF_LARGE)
-				ret.uvIdx = FontLoadUvs();
+				ret.uvIdx = FontLoadUvs(texId);
 
 				break;
 			}
@@ -103,7 +106,7 @@ export function TextureLoadTexture(texId) {
 				// Load the font image
 				const img = ImageLoader.Load('fonts/consolas_sdf', FONT_CONSOLAS_SDF_SMALL, 'png');
 				ret.texIdx = TextureCreateTexture(gfxCtx.gl, img, FONT_CONSOLAS_SDF_SMALL)
-				ret.uvIdx = FontLoadUvs();
+				ret.uvIdx = FontLoadUvs(texId);
 				break;
 			}
 			case TEXTURES.TEST: {

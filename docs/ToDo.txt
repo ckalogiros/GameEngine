@@ -21,8 +21,6 @@ force reload shaders and relink current program, in order to add meshes at runti
 implement flags (for material), 
 so that we can modify gl options, different material flags for dif shader rendering, lighting etc.  
 
-implement vertex coloring(4) or grade hori and vertical.
-
 Implement a Renderer, that handles the webGl context
 and a Camera class that is part of the renderer class
 and can create Projection as orthographic views

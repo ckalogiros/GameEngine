@@ -167,14 +167,14 @@ class RenderQueue {
    }
 }
 
-const drawQueue = new RenderQueue;
+const renderQueue = new RenderQueue;
 
-export function RenderQueueGet() { return drawQueue; }
+export function RenderQueueGet() { return renderQueue; }
 
-export function RenderQueueGetActive() { return drawQueue.active; }
-export function RenderQueueGetActiveCount() { return drawQueue.activeCount; }
+export function RenderQueueGetActive() { return renderQueue.active; }
+export function RenderQueueGetActiveCount() { return renderQueue.activeCount; }
 
-export function RenderQueueSetPriority(flag, progIdx, vbIdx) { drawQueue.SetPriority(flag, progIdx, vbIdx); }
+export function RenderQueueSetPriority(flag, progIdx, vbIdx) { renderQueue.SetPriority(flag, progIdx, vbIdx); }
 
 /**
  * Enable and Disable programs and vertex buffers from the draw queue.
@@ -183,17 +183,17 @@ export function RenderQueueSetPriority(flag, progIdx, vbIdx) { drawQueue.SetPrio
  * these programs-vertex buffers from the draw queue.
  */
 export function RenderQueueUpdate(progIdx, vbIdx, flag){ 
-   const idx = drawQueue.Find(progIdx, vbIdx);
+   const idx = renderQueue.Find(progIdx, vbIdx);
    if(idx !== INT_NULL){
-      drawQueue.buffer[idx].isActive = flag;
-      drawQueue.UpdateActiveQueue(); // Create a new active buffer from the updated queue
+      renderQueue.buffer[idx].isActive = flag;
+      renderQueue.UpdateActiveQueue(); // Create a new active buffer from the updated queue
    }
 }
 
 
 export function RenderQueueCreate() {
-   drawQueue.Init(); // One time initialization(creates an empty buffer...)
-   drawQueue.Create();
+   renderQueue.Init(); // One time initialization(creates an empty buffer...)
+   renderQueue.Create();
 
    /** Build up the draw queue, to draw all meshes in the correct order */
    {
@@ -251,8 +251,8 @@ export function RenderQueueCreate() {
        
    }
 
-   drawQueue.UpdateActiveQueue();
-   // drawQueue.PrintAll();
+   renderQueue.UpdateActiveQueue();
+   // renderQueue.PrintAll();
 
    // BallProjLineSetPriority();
 }

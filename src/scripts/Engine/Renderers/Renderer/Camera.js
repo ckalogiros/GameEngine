@@ -1,7 +1,5 @@
-import { GlProgram, GlProgramUpdateUniformProjectionMatrix } from '../../../Graphics/GlProgram.js';
-import { GetSign } from '../../../Helpers/Helpers.js';
-import { Mat4Orthographic, Mat4Perspective } from '../../../Helpers/Math/Matrix.js';
-import { MouseGetMousePos, MouseGetPosDif, MouseGetWheel } from '../../Controls/Input/Mouse.js';
+import { GlProgramUpdateUniformProjectionMatrix } from '../../../Graphics/GlProgram.js';
+import { MouseGetPosDif, MouseGetWheel } from '../../Controls/Input/Mouse.js';
 import { Matrix4 } from '../../math/Matrix4.js';
 
 /**
@@ -15,6 +13,8 @@ import { Matrix4 } from '../../math/Matrix4.js';
  * 
  * 
  */
+
+const DEG2RAD = Math.PI / 180;
 
 let _cnt = 1;
 export const CAMERA_CONTROLS = {
@@ -54,6 +54,9 @@ export class Camera extends Matrix4 {
 		if(this.controller.controls[CAMERA_CONTROLS.PAN]){
 			this.Zoom();
 		}
+		if(this.controller.controls[CAMERA_CONTROLS.ROTATE]){
+			this.Rotate();
+		}
 
 		this.UpdateProjectionUniform(gl);
 	}
@@ -64,7 +67,6 @@ export class Camera extends Matrix4 {
 			GlProgramUpdateUniformProjectionMatrix(gl, this.gfxBuffer[i], this.elements);
 		}
 	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Camera controls
@@ -100,6 +102,16 @@ export class Camera extends Matrix4 {
 	Translate(x, y, z) {
 		super.Translate(x, y, z);
 	}
+	Rotate(theta){
+		const c = Math.cos(theta), s = Math.sin(theta);
+		const Z1 = 0, Z2 = 1, Z3 = 4, Z4 = 5; // Y Axis
+		const Y1 = 0, Y2 = 2, Y3 = 8, Y4 = 10; // Y Axis
+		const X1 = 5, X2 = 6, X3 = 10, X4 = 11; // Y Axis
+		this.elements[Z1] *=  c;
+		this.elements[Z2] *= -s;
+		this.elements[Z3] *=  s;
+		this.elements[Z4] *=  c;
+	}
 
 	StoreProgIdx(progIdx) { // This is the way for a camera to be updated(as a uniform mat4) in all gl programs. 
 
@@ -126,20 +138,41 @@ export class CameraOrthographic extends Camera {
 		super();
 	}
 	Set() {
-		this.makeOrthographic(0, Viewport.width, 0, Viewport.height, -1000, 1000);
-		if(DEBUG.CAMERA) console.log('Orthographic Camera:', this.elements);
+
+		const zoom = 1;
+		const dx = ( Viewport.width- 0 ) / ( 2 * zoom );
+		const dy = ( 0 - Viewport.height ) / ( 2 * zoom );
+		const cx = ( Viewport.width + 0 ) / 2;
+		const cy = ( 0 + Viewport.height ) / 2;
+
+		let left = cx - dx;
+		let right = cx + dx;
+		let top = cy + dy;
+		let bottom = cy - dy;
+
+		const near = 0, far = 100;
+
+		this.makeOrthographic( left, right, top, bottom, near, far );
 		this.isSet = true;
 	}
 }
 export class CameraPerspective extends Camera {
 	constructor() {
 		super();
+		
 	}
 	Set() {
-		this.makePerspective(0, Viewport.width, 0, Viewport.height, -1000, 1000);
-		if(DEBUG.CAMERA) console.log('Perspective Camera:', this.elements)
+
+		const near = 0.1, far = 2000;
+		let top = near * Math.tan( DEG2RAD * 0.5 * 75 ) / 1;
+		let height = 2 * top;
+		let width = 1 * height;
+		let left = - 0.5 * width;
+
+		this.makePerspective( left, left + width, top, top - height, near, far );
 		this.isSet = true;
 	}
+
 }
 
 export function CameraStoreProgramIdx(progIdx){

@@ -1,29 +1,27 @@
 "use strict";
-import { FontInitBuffers } from '../Engine/Loaders/Font/Font.js'
 import { Scene } from '../Engine/Scenes.js'
 import { EventsAddListeners, } from '../Engine/Events/Events.js';
 import { GlGetProgram } from '../Graphics/GlProgram.js';
 import { ButtonSetRoundCorner, ButtonSetBorderWidth, ButtonSetBorderFeather } from '../Engine/Drawables/Widgets/Button.js';
 import { BrickSetRoundCorner, BrickSetBorderWidth, BrickSetBorderFeather } from './Drawables/Brick.js';
 import { InterpolateToRange } from '../Helpers/Math/MathOperations.js';
-
-// Debug-Print
 import { Rect2D } from '../Engine/Drawables/Geometry/Rect2D.js';
-import { FontMaterial, MAT_ENABLE, Material } from '../Engine/Drawables/Material.js';
+import { FontMaterial, MAT_ENABLE, Material, Material_TEMP_fromBufferFor3D } from '../Engine/Drawables/Material.js';
 import { MESH_ENABLE, Mesh, TextMesh } from '../Engine/Drawables/Mesh.js';
 import { RenderQueueCreate } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { WebGlRenderer } from '../Engine/Renderers/WebGlRenderer.js';
 import { CAMERA_CONTROLS, CameraOrthographic, CameraPerspective } from '../Engine/Renderers/Renderer/Camera.js';
-// import { TextGeometry2D } from '../Engine/Drawables/Geometry.js';
-import { CalculateSdfOuterFromDim } from '../Helpers/Helpers.js';
-import { ImageLoader } from '../Engine/Loaders/ImageLoader.js';
-import { TextGeometry2D } from '../Engine/Drawables/Geometry.js';
+import { CubeGeometry } from '../Engine/Drawables/Geometry.js';
 import { TextureInitBuffers } from '../Engine/Loaders/Textures/Texture.js';
-import { Cube } from '../Engine/Drawables/Geometry/Cube.js';
+import { TextGeometry2D } from '../Engine/Drawables/Geometry/TextGeometry.js';
+import { UiFpsGeometry } from '../Engine/Drawables/Widgets/Ui/UiFps.js';
+import { FpsGet, FpsGetAvg, FpsGetAvg1S } from '../Engine/Timer/Time.js';
+
+// Debug-Print
 
 
 let renderer = null;
-
+let TEMP_MESH = null
 
 
 export function AppInit() {
@@ -46,7 +44,15 @@ export function AppInit() {
     const scene = new Scene();
     const camera = new CameraOrthographic();
     // const camera = new CameraPerspective();
-    camera.SetControls(CAMERA_CONTROLS.PAN);
+    camera.Set();
+    camera.SetControls(CAMERA_CONTROLS.ZOOM);
+    // camera.SetControls(CAMERA_CONTROLS.PAN);
+    // camera.SetControls(CAMERA_CONTROLS.ROTATE);
+    // camera.Rotate(200)
+    // const target = {x:Viewport.width / 2, y:200, z:0};
+    // const camerapos = {x:80, y:80, z:20};
+    // camera.Translate(80, 80, 20)
+    // camera.lookAt(camerapos, target, {x:0,y:0,z:1})
     renderer = new WebGlRenderer(scene, camera);
 
     EventsAddListeners();
@@ -68,59 +74,77 @@ export function AppInit() {
     // mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {color: [WHITE, CYAN_10_230_180, BLUE_10_120_220, PINK_240_60_200]})
     // mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {color: [CYAN_10_230_180, CYAN_10_230_180, PINK_240_60_200, PINK_240_60_200]})
     mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, { color: [CYAN_10_230_180, YELLOW_240_240_10, PINK_240_60_200, BLUE_10_120_220] })
-
-
+    
+    
     const mesh = new Mesh(geom, mat);
     {
         mesh.Enable(MESH_ENABLE.ATTR_STYLE);
         mesh.SetStyle(8, 35, 3);
-        // mesh.Enable(MESH_ENABLE.ATTR_TIME);
-        // mesh.Enable(MESH_ENABLE.PASS_DIM2);
-        // mesh.Enable(MESH_ENABLE.PASS_WPOS2);
     }
     // scene.AddMesh(mesh);
     const mesh1 = new Mesh(geom, mat);
     {
         mesh1.Enable(MESH_ENABLE.ATTR_STYLE);
-        mesh1.Enable(MESH_ENABLE.UNIF_RESOLUTION);
         mesh1.SetStyle(15, 15, 3);
-        mesh1.Enable(MESH_ENABLE.ATTR_TIME);
-        mesh1.Enable(MESH_ENABLE.PASS_DIM2);
-        mesh1.Enable(MESH_ENABLE.PASS_WPOS2);
-        // mesh1.geom.pos[1] += 204;
+        mesh1.geom.pos[1] += 204;
     }
     // scene.AddMesh(mesh1);
-
     const mesh2 = new Mesh(geom, mat);
     {
         mesh2.Enable(MESH_ENABLE.ATTR_STYLE);
-        // mesh2.Enable(MESH_ENABLE.UNIF_RESOLUTION);
-        // mesh2.Enable(MESH_ENABLE.PASS_WPOS2);
-        // mesh2.Enable(MESH_ENABLE.PASS_DIM2);
-        // mesh2.Enable(MESH_ENABLE.PASS_COL4);
-        // mesh2.geom.pos[1] += 204;
+        mesh1.geom.pos[1] += 204;
     }
-    scene.AddMesh(mesh2);
-
+    // scene.AddMesh(mesh2);
+    
     // Create text
-    const text = 'Hello';
-    geom = new TextGeometry2D([Viewport.width / 2, 200, 0], 200, [1,1], 'HELLO', FONTS.SDF_CONSOLAS_LARGE);
-    mat = new FontMaterial(WHITE, FONTS.SDF_CONSOLAS_LARGE, 'HELLO', [.2, .02])
+    const text = 'HelloHelloHelloHelloHelloHelloHelloHelloHe';
+    geom = new TextGeometry2D([Viewport.width / 2, 200, 0], 10, [1,1], text, FONTS.SDF_CONSOLAS_LARGE);
+    mat = new FontMaterial(WHITE, FONTS.SDF_CONSOLAS_LARGE, text, [.5, .05])
+    mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, { color: [GREEN_33_208_40, YELLOW_240_240_10, PINK_240_60_160, BLUE_10_160_220] })
     const rect = new TextMesh(geom, mat);
     {
         // rect.Enable(MESH_ENABLE.ATTR_STYLE);
-        // rect.Enable(MESH_ENABLE.UNIF_RESOLUTION);
-        // rect.Enable(MESH_ENABLE.PASS_WPOS2);
-        // rect.Enable(MESH_ENABLE.PASS_DIM2);
         rect.Enable(MESH_ENABLE.PASS_COL4);
         rect.geom.pos[1] += 204;
     }
     scene.AddMesh(rect);
+    rect.MoveXY([-100, 100, 0])
     
+    // Create ui fps text
+    const fpsFontSize = 10;
+    const uiFpsAvg = new UiFpsGeometry('Fps Avg:', [50, 200, 0], [1,1,1], fpsFontSize);
+    scene.AddMesh(uiFpsAvg.constTextMesh);
+    scene.AddMesh(uiFpsAvg.variableTextMesh);
+    uiFpsAvg.SetTimerUpdate(600, FpsGetAvg)
+    
+    const ypos = uiFpsAvg.constTextMesh.geom.pos[1] + uiFpsAvg.constTextMesh.geom.dim[1]*2;
+    const uiFpsAvg1sec = new UiFpsGeometry('Fps Avg1s:', [50, ypos, 0], [1,1,1], fpsFontSize);
+    scene.AddMesh(uiFpsAvg1sec.constTextMesh);
+    scene.AddMesh(uiFpsAvg1sec.variableTextMesh);
+    uiFpsAvg1sec.SetTimerUpdate(600, FpsGetAvg1S)
+    
+    // Create cube
+    geom = new CubeGeometry([Viewport.width / 2, 450, -1],[100,100,100],[1,1,1]);
+    mat = new Material_TEMP_fromBufferFor3D(WHITE)
+    const cube = new Mesh(geom, mat);
+    {
+        mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, { 
+            color: [
+                0.9, 0.0, 0.0, .2, 
+                0.0, 0.9, 0.1, .2, 
+                0.0, 0.0, 0.9, .2, 
+                0.9, 0.0, 0.9, .2] 
+        })
+    }
+    // scene.AddMesh(cube);
+    // TEMP_MESH = cube;
+    TEMP_MESH = null;
 
+
+        
+    
     // If camera is static, update projection matrix uniform only once
     camera.UpdateProjectionUniform(renderer.gl);
-
     RenderQueueCreate(); // Initilize the render Queue for drawing vertex buffers in a priority(z index) based aproach
 
 
@@ -322,7 +346,7 @@ export function AppInit() {
 
 export function AppRender() {
     requestAnimationFrame(AppRender);
-    renderer.Render();
+    renderer.Render(TEMP_MESH);
 }
 
 

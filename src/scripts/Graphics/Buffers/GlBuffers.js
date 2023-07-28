@@ -17,10 +17,10 @@ class VertexBuffer {
     meshes = [];        // An array of pointers to all vertexBuffer's meshes. Has the type of 'GfxInfoMesh'
 
     idx = INT_NULL;	    // The vertex buffer (float*) idx that this Mesh is stored to.
-    count = 0;			// Current size of the float buffer (in floats)
+    count = 0;			// Current size of the attributes in data buffer (in floats)
     size = 0;			// Total   size of the float buffer (in floats)
     start = 0;			// The current meshe's starting idx in the vertex buffer. 
-    vCount = 0;			// Nuuumber of vertices
+    vCount = 0;			// Number of vertices
 
     vao = null;		    // Vertex Array 
     vboId = INT_NULL;	// Vertex Buffer Gl-Id
@@ -39,20 +39,34 @@ class VertexBuffer {
     // Debug
     debug = { meshesNames: [], sidName: '' };
 
-    constructor(sid, sceneIdx, idx) {
+    constructor(sid, sceneIdx, idx, gl) {
+
         this.debug.sidName = dbg.GetShaderTypeId(sid);
         this.sceneIdx = sceneIdx;
         this.idx = idx;
+
+        this.vao = gl.createVertexArray();
+        gl.bindVertexArray(this.vao);
+        this.webgl_buffer = gl.createBuffer();
+        // gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_buffer);
+        /**
+         * Hack for large enough buffer
+         */
+        this.size = MAX_VERTEX_BUFFER_COUNT;
+        this.data = new Float32Array(this.size);
+
     }
-    AddGeometry(sid, pos, dim, time, shaderInfo, numFaces, start, count) {
+
+    AddGeometry(sid, pos, dim, time, shaderInfo, numFaces, start, count) 
+    {
         if (sid.attr & SID.ATTR.POS2) { // Add Position, if the program has such an attribute 
             GlOps.VbSetAttribPos(this, start + shaderInfo.attributes.offset.pos,
                 count, shaderInfo.attribsPerVertex - shaderInfo.attributes.size.pos, dim, numFaces);
         }
-        // else if (sid.attr & SID.ATTR.POS3) {
-        //     GlOps.VbSetAttribPos3D(this, start + shaderInfo.attributes.offset.pos,
-        //         count, shaderInfo.attribsPerVertex - shaderInfo.attributes.size.pos, dim, numFaces, shaderInfo);
-        // }
+        else if (sid.attr & SID.ATTR.POS3) {
+            GlOps.VbSetAttribPos3D(this, start + shaderInfo.attributes.offset.pos,
+                count, shaderInfo.attribsPerVertex - shaderInfo.attributes.size.pos, dim, numFaces, shaderInfo);
+        }
         if (sid.attr & SID.ATTR.WPOS_TIME4) { // Add World Position, if the program has such an attribute 
             if (sid.attr & SID.ATTR.POS3) {
                 GlOps.VbSetAttribWpos(this, start + shaderInfo.attributes.offset.wposTime,
@@ -68,33 +82,24 @@ class VertexBuffer {
                 count, shaderInfo.attribsPerVertex - shaderInfo.attributes.size.wpos, time, numFaces);
         }
         this.needsUpdate = true;
+        this.vCount += shaderInfo.verticesPerRect * numFaces
     }
-    AddMaterial(sid, shaderInfo, numFaces, start, count, col, tex, style = null, sdf = null) {
+
+    AddMaterial(sid, shaderInfo, numFaces, start, count, col, tex, style = null, sdf = null) 
+    {
         if (sid.attr & SID.ATTR.COL4 && col) { // Add Color, if the program has such an attribute
+  
             if (!col && DEBUG.WEB_GL) console.error('Style hasn\'t being set. @AddMaterial(), GlBuffers.js')
 
-            // if (sid.attr & SID.ATTR.POS3) {
-            //     // 4 color vertex
-            //     if (sid.attr & SID.ATTR.COL4_PER_VERTEX) {
-            //         GlOps.VbSetAttribColPerVertex(this, start + shaderInfo.attributes.offset.col,
-            //             count, shaderInfo.attribsPerVertex - shaderInfo.attributes.size.col, col, 2);
-            //     }
-            //     else { // Regular color. 1 color for all vertices
-            //         GlOps.VbSetAttribCol(this, start + shaderInfo.attributes.offset.col,
-            //             count, shaderInfo.attribsPerVertex - shaderInfo.attributes.size.col, col, 2);
-            //     }
-            // }
-            // else {
-                // 4 color vertex
-                if (sid.attr & SID.ATTR.COL4_PER_VERTEX) {
-                    GlOps.VbSetAttribColPerVertex(this, start + shaderInfo.attributes.offset.col,
-                        count, shaderInfo.attribsPerVertex - shaderInfo.attributes.size.col, col, numFaces);
-                }
-                else { // Regular color. 1 color for all vertices
-                    GlOps.VbSetAttribCol(this, start + shaderInfo.attributes.offset.col,
-                        count, shaderInfo.attribsPerVertex - shaderInfo.attributes.size.col, col, numFaces);
-                }
-            // }
+            // 4 color vertex
+            if (sid.attr & SID.ATTR.COL4_PER_VERTEX) {
+                GlOps.VbSetAttribColPerVertex(this, start + shaderInfo.attributes.offset.col,
+                    count, shaderInfo.attribsPerVertex - shaderInfo.attributes.size.col, col, numFaces);
+            }
+            else { // Regular color. 1 color for all vertices
+                GlOps.VbSetAttribCol(this, start + shaderInfo.attributes.offset.col,
+                    count, shaderInfo.attribsPerVertex - shaderInfo.attributes.size.col, col, numFaces);
+            }
         }
         if (sid.attr & SID.ATTR.TEX2 && tex) { // Add Texture, if the program has such an attribute 
             if (!tex && DEBUG.WEB_GL) console.error('Style hasn\'t being set. @AddMaterial(), GlBuffers.js')
@@ -141,6 +146,22 @@ class VertexBuffer {
         this.needsUpdate = true;
     }
 
+    Realloc(){
+
+        this.size *= 2;
+        const oldData = this.data;
+        this.data = new Float32Array(this.size);
+        this.CopyBuffer(oldData)
+        console.error('Resizing vertex buffer!')
+    }
+    CopyBuffer(oldData){
+
+        const size = oldData.length;
+        for(let i=0; i<size; i++){
+           this.data[i] = oldData[i];
+        }
+    }
+
 };
 
 class IndexBuffer {
@@ -160,8 +181,52 @@ class IndexBuffer {
 
     needsUpdate = false;
 
-    constructor(idx) {
+    constructor(sid, sceneIdx, idx, gl) {
+
         this.idx = idx;
+
+        this.webgl_buffer = gl.createBuffer();
+        this.name = dbg.GetShaderTypeId(sid);
+        this.sceneIdx = sceneIdx;
+
+        this.size = MAX_INDEX_BUFFER_COUNT;
+        this.data = new Uint16Array(this.size);
+    }
+
+    Add(numFaces) {
+
+        const offset = 4;
+        let k = this.vCount;
+    
+        for (let i = 0; i < numFaces; ++i) {
+    
+            for (let j = 0; j < 2; j++) {
+    
+                this.data[this.count++] = k + j;
+                this.data[this.count++] = k + j + 1;
+                this.data[this.count++] = k + j + 2;
+            }
+    
+            k += offset;
+            this.vCount += offset;
+        }
+    
+        this.needsUpdate = true; // Make sure that we update GL bufferData 
+    }
+    Realloc(){
+
+        this.size *= 2;
+        const oldData = this.data;
+        this.data = new Float32Array(this.size);
+        this.CopyBuffer(oldData)
+        console.error('Resizing index buffer!')
+    }
+    CopyBuffer(oldData){
+
+        const size = oldData.length;
+        for(let i=0; i<size; i++){
+           this.data[i] = oldData[i];
+        }
     }
 };
 
@@ -185,7 +250,6 @@ export let GlFrameBuffer = {
 
 export function GlGetContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer) {
 
-    // TODO: TEMP
     const numFaces = 1;
     const progs = GlGetPrograms();
     // ProgramExists returns 0 index based program or -1 for not found
@@ -221,20 +285,11 @@ export function GlGetContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer) {
     * Add Mesh to Vertex Buffer
     */
     if (vbIdx < 0) { // Create gl buffer
+
         vbIdx = progs[progIdx].vertexBufferCount++;
-        progs[progIdx].vertexBuffer[vbIdx] = vb = new VertexBuffer(sid, sceneIdx, vbIdx);
+        progs[progIdx].vertexBuffer[vbIdx] = vb = new VertexBuffer(sid, sceneIdx, vbIdx, gfxCtx.gl);
 
-        const vao = gfxCtx.gl.createVertexArray();
-        gfxCtx.gl.bindVertexArray(vao);
-        vb.webgl_buffer = gfxCtx.gl.createBuffer();
         gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
-        /**
-         * Hack for large enough buffer
-         */
-        vb.size = MAX_VERTEX_BUFFER_COUNT;
-        vb.data = new Float32Array(vb.size);
-        vb.vao = vao;
-
         // Initialize attribute locations of the shader for every newly created program
         GlEnableAttribsLocations(gfxCtx.gl, progs[progIdx]);
         // Connect the vertex buffer with the atlas texture. 
@@ -248,22 +303,15 @@ export function GlGetContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer) {
          * Create Index buffer
          */
         if (sid.shad & SID.SHAD.INDEXED) {
-            ibIdx = progs[progIdx].indexBufferCount++;
-            progs[progIdx].indexBuffer[ibIdx] = new IndexBuffer(ibIdx);
-            ib = progs[progIdx].indexBuffer[ibIdx];
-            ib.name = dbg.GetShaderTypeId(sid);
-            ib.sceneIdx = sceneIdx;
-            ib.count = numFaces * VERTS_PER_RECT;
 
-            ib.webgl_buffer = gfxCtx.gl.createBuffer();
-            gfxCtx.gl.bindBuffer(gfxCtx.gl.ELEMENT_ARRAY_BUFFER, ib.webgl_buffer);
-            ib.size = MAX_INDEX_BUFFER_COUNT;
-            ib.data = new Uint16Array(ib.size);
-            ib.vao = vb.vao;
+            ibIdx = progs[progIdx].indexBufferCount++;
+            progs[progIdx].indexBuffer[ibIdx] = ib = new IndexBuffer(sid, sceneIdx, ibIdx, gfxCtx.gl);
+            ib.vao = vb.vao; // Let index buffer have a copy of the vao
             if (dbg.GL_DEBUG_BUFFERS_ALL) console.log('----- VertexBuffer -----\nibIdx:', ibIdx, 'progIdx:', progIdx)
         }
     }
     else {
+
         vb = progs[progIdx].vertexBuffer[vbIdx];
         gfxCtx.gl.bindVertexArray(vb.vao)
         gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer)
@@ -294,10 +342,6 @@ export function GlGetContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer) {
     gfxInfo.ib.idx = ibIdx;
     gfxInfo.ib.count = ib.count;
 
-
-    // Update viewport for the curent program
-    // progs[progIdx].CameraUpdate(gfxCtx.gl);
-
     const index = progs[progIdx].vertexBuffer[vbIdx].meshes.length;
     gfxInfo.meshIdx = index; // Store the current meshe's index so the mesh know in what index can find it's self in the vertexBuffer's meshes array.
 
@@ -310,9 +354,6 @@ export function GlGetContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer) {
 
 export function GlAddGeometry(sid, pos, dim, time, gfx, meshName, numFaces) {
 
-    // TODO: TEMP
-    // const numFaces = 1;
-
     const progIdx = gfx.prog.idx;
     const vbIdx = gfx.vb.idx;
     const ibIdx = gfx.ib.idx;
@@ -320,12 +361,23 @@ export function GlAddGeometry(sid, pos, dim, time, gfx, meshName, numFaces) {
     const vb = GlGetVB(progIdx, vbIdx);
     const ib = GlGetIB(progIdx, ibIdx);
 
-    GlUseProgram(prog.webgl_program, progIdx);
-
-    gfxCtx.gl.bindVertexArray(vb.vao)
-    gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer)
+    if(GL.BOUND_PROG_IDX !== progIdx){
+        GlUseProgram(prog.webgl_program, progIdx);
+        GL.BOUND_PROG_IDX = progIdx;
+    }
+    if(GL.BOUND_VBO_IDX !== vbIdx){
+        gfxCtx.gl.bindVertexArray(vb.vao)
+        gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
+        GL.BOUND_VBO_IDX = vbIdx;
+    }
 
     CreateUniqueMesh(vb.debug.meshesNames, meshName);
+
+    // Reallocate vertex buffer if it has no more space
+    const meshSize = gfx.attribsPerVertex * gfx.vertsPerRect * numFaces;
+    if(vb.vCount*gfx.attribsPerVertex + meshSize >= vb.size){
+        vb.Realloc();
+    }
 
     vb.AddGeometry(sid, pos, dim, time, prog.shaderInfo, numFaces, gfx.vb.start, gfx.vb.count);
     prog.isActive = true; // Sets a program to 'active', only if there are meshes in the program's vb
@@ -334,12 +386,73 @@ export function GlAddGeometry(sid, pos, dim, time, gfx, meshName, numFaces) {
      * Add Mesh to Index Buffer
      */
     if (sid.shad & SID.SHAD.INDEXED) {
+
+        // Check for buffer realloc
+        if(ib.count + numFaces*INDICES_PER_RECT > ib.size){
+            ib.Realloc();
+        }
+
         gfx.ib.start = ib.count;
-        CreateIndices(ib, numFaces);
+        ib.Add(numFaces)
         gfx.ib.count = ib.count;
-        console.log('indexBuffer:', ib)
     }
 }
+
+export function GlHandlerAddGeometryBuffer(sid, gfx, meshName, posBuffer, dimBuffer) {
+
+    const progIdx = gfx.prog.idx;
+    const vbIdx = gfx.vb.idx;
+    const ibIdx = gfx.ib.idx;
+    const prog = GlGetProgram(progIdx);
+    const vb = GlGetVB(progIdx, vbIdx);
+    const ib = GlGetIB(progIdx, ibIdx);
+
+    if(GL.BOUND_PROG_IDX !== progIdx){
+        GlUseProgram(prog.webgl_program, progIdx);
+        GL.BOUND_PROG_IDX = progIdx;
+    }
+    if(GL.BOUND_VBO_IDX !== vbIdx){
+        gfxCtx.gl.bindVertexArray(vb.vao)
+        gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
+        GL.BOUND_VBO_IDX = vbIdx;
+    }
+
+    CreateUniqueMesh(vb.debug.meshesNames, meshName);
+
+    // Reallocate vertex buffer if it has no more space
+    const meshSize = gfx.attribsPerVertex * gfx.vertsPerRect * gfx.numFaces;
+    if(vb.vCount*gfx.attribsPerVertex + meshSize >= vb.size){
+        vb.Realloc();
+    }
+
+    const stride = prog.shaderInfo.attribsPerVertex;
+    let start = gfx.vb.start + prog.shaderInfo.attributes.offset.pos;
+    const vbCount = (prog.shaderInfo.attribsPerVertex * prog.shaderInfo.verticesPerRect) * gfx.numFaces;
+    GlOps.VbSetAttribBuffer(vb, start, vbCount, stride, dimBuffer, prog.shaderInfo.attributes.size.pos);
+    start = gfx.vb.start + prog.shaderInfo.attributes.offset.wposTime;
+    GlOps.VbSetAttribBuffer(vb, start, vbCount, stride, posBuffer, prog.shaderInfo.attributes.size.pos); // Repeat the wpos for every vertex(vb.count)
+
+
+    prog.isActive = true; // Sets a program to 'active', only if there are meshes in the program's vb
+    vb.needsUpdate = true;
+    vb.vCount += prog.shaderInfo.verticesPerRect * gfx.numFaces
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     * Add Mesh to Index Buffer
+     */
+    if (sid.shad & SID.SHAD.INDEXED) {
+
+        // Check for buffer realloc
+        if(ib.count + gfx.numFaces * INDICES_PER_RECT > ib.size){
+            ib.Realloc();
+        }
+
+        gfx.ib.start = ib.count;
+        ib.Add(gfx.numFaces)
+        gfx.ib.count = ib.count;
+    }
+}
+
 
 
 
@@ -353,14 +466,80 @@ export function GlAddMaterial(sid, gfx, col, tex, style, sdf) {
     const prog = GlGetProgram(progIdx);
     const vb = GlGetVB(progIdx, vbIdx);
 
-    GlUseProgram(prog.webgl_program, progIdx);
-
-    gfxCtx.gl.bindVertexArray(vb.vao)
-    gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer)
+    if(GL.BOUND_PROG_IDX !== progIdx){
+        GlUseProgram(prog.webgl_program, progIdx);
+        GL.BOUND_PROG_IDX = progIdx;
+    }
+    if(GL.BOUND_VBO_IDX !== vbIdx){
+        gfxCtx.gl.bindVertexArray(vb.vao)
+        gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
+        GL.BOUND_VBO_IDX = vbIdx;
+    }
 
     vb.AddMaterial(sid, prog.shaderInfo, numFaces, gfx.vb.start, gfx.vb.count, col, tex, style, sdf);
 }
 
+export function GlHandlerAddMaterialBuffer(sid, gfx, colBuffer, texBuffer) {
+
+    const progIdx = gfx.prog.idx;
+    const vbIdx = gfx.vb.idx;
+    const prog = GlGetProgram(progIdx);
+    const vb = GlGetVB(progIdx, vbIdx);
+
+    if(GL.BOUND_PROG_IDX !== progIdx){
+        GlUseProgram(prog.webgl_program, progIdx);
+        GL.BOUND_PROG_IDX = progIdx;
+    }
+    if(GL.BOUND_VBO_IDX !== vbIdx){
+        gfxCtx.gl.bindVertexArray(vb.vao)
+        gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
+        GL.BOUND_VBO_IDX = vbIdx;
+    }
+
+    const attribSize = prog.shaderInfo.attributes.size.col;
+    const stride = prog.shaderInfo.attribsPerVertex;
+    let start = gfx.vb.start + prog.shaderInfo.attributes.offset.col;
+    const vbCount = (prog.shaderInfo.attribsPerVertex * prog.shaderInfo.verticesPerRect) * gfx.numFaces;
+    GlOps.VbSetAttribBuffer(vb, start, vbCount, stride, colBuffer, attribSize); // Repeat the col for every vertex(vb.count)
+    prog.isActive = true; // Sets a program to 'active', only if there are meshes in the program's vb
+    vb.needsUpdate = true;
+
+}
+export function GlHandlerAddIndicesBuffer(gfx, buffer) {
+
+    const progIdx = gfx.prog.idx;
+    const vbIdx = gfx.vb.idx;
+    const ibIdx = gfx.ib.idx;
+    const prog = GlGetProgram(progIdx);
+    const ib = GlGetIB(progIdx, ibIdx);
+
+    if(GL.BOUND_PROG_IDX !== progIdx){
+        GlUseProgram(prog.webgl_program, progIdx);
+        GL.BOUND_PROG_IDX = progIdx;
+    }
+    if(GL.BOUND_VBO_IDX !== vbIdx){
+        console.error('Fix the buffer binding for index buffer insertion. @ GlBuffers.js')
+    }
+
+    // gfx.ib.start = ib.count;
+    IndicesCreateFromBuffer(ib, buffer);
+    gfx.ib.count = ib.count;
+    console.log('indexBuffer:', ib)
+}
+function IndicesCreateFromBuffer(ib, buffer) {
+
+    // let cnt = ib.vCount;
+    // const len = buffer.length;
+
+    // let i = 0;
+    // while (i < len) {
+
+    //     ib.data[cnt++] = buffer[cnt2++]
+    //     i++;
+    // }
+
+    ib.needsUpdate = true; // Make sure that we update GL bufferData 
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -474,6 +653,7 @@ function CreateIndices(ib, numFaces) {
 
     ib.needsUpdate = true; // Make sure that we update GL bufferData 
 }
+
 
 
 

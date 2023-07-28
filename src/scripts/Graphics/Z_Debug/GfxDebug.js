@@ -11,7 +11,7 @@ const GL_DEBUG_PROGRAM        = false;
 const GL_DEBUG_SHADERS        = false;
 const GL_DEBUG_SHADER_INFO    = false;
 const GL_DEBUG_VERTEX_BUFFER  = true;
-const GL_DEBUG_INDEX_BUFFER   = false;
+const GL_DEBUG_INDEX_BUFFER   = true;
 const GL_DEBUG_BUFFERS_ALL    = true;
 
 
@@ -166,6 +166,34 @@ export function PrintVertexBufferAll(){
         console.log( i, ': ', progs[i].vertexBuffer)
     }
 }
+export function PrintVertexBufferAllPretty(){
+    if(!GL_DEBUG_VERTEX_BUFFER) return;
+    
+    const progs = GlGetPrograms();
+    for(let i=0; i<progs.length; i++){
+        console.log('-[Gl Vertex Buffer]-')
+        for(let j=0; j<progs[i].vertexBufferCount; j++){
+            for(let k=0; k<progs[i].vertexBuffer[j].count; k++){
+                console.log( 'vertex', k);
+                console.log( 'color:')
+                console.log( progs[i].vertexBuffer[j].data[k++], progs[i].vertexBuffer[j].data[k++], progs[i].vertexBuffer[j].data[k++], progs[i].vertexBuffer[j].data[k++])
+                console.log('wpos:')
+                console.log(progs[i].vertexBuffer[j].data[k++], progs[i].vertexBuffer[j].data[k++], progs[i].vertexBuffer[j].data[k++], progs[i].vertexBuffer[j].data[k++])
+                console.log('vpos:', progs[i].vertexBuffer[j].data[k++],progs[i].vertexBuffer[j].data[k++],progs[i].vertexBuffer[j].data[k++])
+                console.log(progs[i].vertexBuffer[j].data[k++])
+                // for(let a=0; a<4; a++){
+                //     console.log( ', color:', progs[i].vertexBuffer[j].data[k++])
+                // }
+                // for(let a=0; a<4; a++){
+                //     console.log(', wpos', progs[i].vertexBuffer[j].data[k++])
+                // }
+                // for(let a=0; a<3; a++){
+                //     console.log(', vpos', progs[i].vertexBuffer[j].data[k++])
+                // }
+            }
+        }
+    }
+}
 export function PrintIndexBuffer(ib){
     if(!GL_DEBUG_INDEX_BUFFER) return;
     console.log('-[Gl Index Buffer]-\n', ib)
@@ -175,8 +203,7 @@ export function PrintIndexBufferAll(){
     
     const progs = GlGetPrograms();
     for(let i=0; i<progs.length; i++){
-        
-        console.log('-[Gl Index Buffer]-\n ', i, ': ', progs[i].ib)
+        console.log('-[Gl Index Buffer]-\n ', i, ': ', progs[i].indexBuffer)
     }
 }
 export function PrintBuffersAll(){

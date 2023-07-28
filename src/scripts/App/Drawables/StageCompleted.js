@@ -5,7 +5,7 @@ import { GlowCreate, GlowGetGlow } from "../../Engine/Drawables/Fx/Glow.js";
 import { Rect2D } from "../../Engine/Drawables/Geometry/Rect2D.js";
 import { TextLabel } from "../../Engine/Drawables/Widgets/TextLabel.js";
 import { TimerGetGlobalTimer } from "../../Engine/Timer/Timer.js";
-import { GlRotate } from "../../Graphics/Buffers/GlBufferOps.js";
+import { GlRotate2D } from "../../Graphics/Buffers/GlBufferOps.js";
 import { DimColor } from "../../Helpers/Helpers.js";
 
 
@@ -160,7 +160,7 @@ function AnimationsCreateRotationStart(params) {
     const len = idxArr.length;
     for (let i = 0; i < len; i++) {
         t *= -1;
-        GlRotate(mechanicals.buffer[idxArr[i]].gfxInfo, mechanicals.buffer[idxArr[i]].mesh.dim, t);
+        GlRotate2D(mechanicals.buffer[idxArr[i]].gfxInfo, mechanicals.buffer[idxArr[i]].mesh.dim, t);
     }
     return true;
 }

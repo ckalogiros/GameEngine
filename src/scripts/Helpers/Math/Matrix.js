@@ -175,24 +175,7 @@ export function Rotate4x4(dim, pos, angle) {
 		0, s,  c, 0,	
 		0, 0,  0, 1,	
 	];
-	// const pitch = [
-	// 	-s, 0, c, 0,	
-	// 	0, 1, 0, 0,
-	// 	c, 0, s, 0,
-	// 	0, 0, 0, 1,	
-	// ];
-	// const rol = [
-	// 	1, 1, 1, 0,
-	// 	1, c, -s, 0,
-	// 	1, s, c, 0,
-	// 	1, 1, 1, 1,
-	// ];
-	// const yaw = [
-	// 	c, -s, -s, 0,
-	// 	s, c, 0, 0,
-	// 	s, 0, c, 0,
-	// 	0, 0, 0, 1,
-	// ];
+
 
 	let newPos = Mult(yaw, p);
 	// newPos = Mult(yaw, newPos);
@@ -271,7 +254,7 @@ export function Rotate4x4(dim, pos, angle) {
 	// ];
 	return newPos;
 };
-function CreateRectVertexPos(pos){
+function CreateRectVertexPos2D(pos){
 	return [
 		-pos[0],  pos[1], // v1 
 		-pos[0], -pos[1], // v2
@@ -279,11 +262,26 @@ function CreateRectVertexPos(pos){
 		 pos[0], -pos[1], // v4
 	];
 }
-export function Rotate4x42(dim, angle) {
+function CreateRectVertexPos3D(pos){
+	return [
+		-pos[0],  pos[1], pos[2], // v1 
+		-pos[0], -pos[1], pos[2], // v2
+		 pos[0],  pos[1], pos[2], // v3 
+		 pos[0], -pos[1], pos[2], // v4
+	];
+}
+
+
+export function RotateZ(dim, angle) {
+
+	// c, 0, -s, 0,
+	// s, 0, c, 0,
+	// 0, 0, 1, 0,
+	// 0, 0, 0, 1
 
 	const c = Math.cos(angle);
 	const s = Math.sin(angle);
-	const p = CreateRectVertexPos(dim);
+	const p = CreateRectVertexPos2D(dim);
 	const r = [ c, -s, s, c, ];
 
 	const newPos = [
@@ -301,4 +299,103 @@ export function Rotate4x42(dim, angle) {
 	];
 
 	return newPos;
+};
+
+function Matrix4x3_3x3Mult(m1, m2){
+
+	return [
+					
+		m1[0]*m2[0] + m1[1]*m2[3] + m1[2]*m2[6], // rowX 1 * col 1
+		m1[0]*m2[1] + m1[1]*m2[4] + m1[2]*m2[7], // rowY 1 * col 2
+		m1[0]*m2[2] + m1[1]*m2[5] + m1[2]*m2[8], // rowZ 1 * col 3
+
+		m1[3]*m2[0] + m1[4]*m2[3] + m1[5]*m2[6], // row 2 * col 1
+		m1[3]*m2[1] + m1[4]*m2[4] + m1[5]*m2[7], // row 2 * col 2
+		m1[3]*m2[2] + m1[4]*m2[5] + m1[5]*m2[8], // row 2 * col 3
+
+		m1[6]*m2[0] + m1[7]*m2[3] + m1[8]*m2[6], // row 3 * col 1
+		m1[6]*m2[1] + m1[7]*m2[4] + m1[8]*m2[7], // row 3 * col 2
+		m1[6]*m2[2] + m1[7]*m2[5] + m1[8]*m2[8], // row 3 * col 3
+
+		m1[9]*m2[0] + m1[10]*m2[3] + m1[11]*m2[6], // row 4 * col 1
+		m1[9]*m2[1] + m1[10]*m2[4] + m1[11]*m2[7], // row 4 * col 2
+		m1[9]*m2[2] + m1[10]*m2[5] + m1[11]*m2[8], // row 4 * col 3
+	];
+}
+export function MatrixAdd(m1, m2){
+
+	const len = m1.length;
+	if(len !== m2.length) {
+		console.error('Array adition mismatch. @ Matrix4Add(m1, m2), Matrix.js')
+		return null;
+	}
+	for(let i=0; i<len; i++){
+		m1[i] += m2[i];
+	}
+}
+
+export function RotateX3D(dim, angle) {
+
+	const c = Math.cos(angle);
+	const s = Math.sin(angle);
+	const p = CreateRectVertexPos3D(dim);
+	/**
+		  	X:yaw			 
+			c, -s, 0, 0,
+			s,  c, 0, 0,	
+			0,  1, 0, 0,			
+			0,  0, 0, 1,
+	 */
+	const r = [ 
+		c, -s, 0,
+		s,  c, 0,
+		0,  0, 1,
+	];
+
+	return Matrix4x3_3x3Mult(p, r);
+};
+export function RotateY3D(dim, angle) {
+
+	const c = Math.cos(angle);
+	const s = Math.sin(angle);
+	// const p = CreateRectVertexPos3D(dim);
+	const p = [
+		1, 0, 0, 
+		0, 1, 0, 
+		0, 0, 1,
+	];
+	/**
+		  	pitch			
+			c, 0, s, 0,	
+			0, 1, 0, 0,		
+			-s, 0, c, 0,			
+			0, 0, 0, 1,	
+	 */
+	const r = [
+		c, 0,-s, 
+		0, 1, 0, 
+		s, 0, c,
+	];
+
+	return Matrix4x3_3x3Mult(p, r);
+};
+export function RotateZ3D(dim, angle) {
+
+	const c = Math.cos(angle);
+	const s = Math.sin(angle);
+	const p = CreateRectVertexPos3D(dim);
+	/**
+		  	rol 			
+			1, 0,  0, 0,	
+			0, c, -s, 0,		
+			0, s,  c, 0,				
+			0, 0,  0, 1,	
+	 */
+	const r = [ 
+		1, 0,  0,
+		0, c, -s,
+		0, s,  c,
+	];
+
+	return Matrix4x3_3x3Mult(p, r);
 };

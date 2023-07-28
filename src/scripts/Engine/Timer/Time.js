@@ -132,9 +132,13 @@ class TimeIntervals {
          this.ti[i] = new Interval(INT_NULL, null, i, '', 0);
       }
    }
-   Create(interval, name, repeat, clbk) {
+   Create(interval, name, repeat, clbk, params) {
       const freeIdx = this.GetNextFree();
-      this.ti[freeIdx].Create(interval, this.count, name, repeat, clbk, freeIdx);
+      const parameters = {
+         idx: freeIdx,
+         params: params,
+      }; 
+      this.ti[freeIdx].Create(interval, this.count, name, repeat, clbk, parameters);
       this.count++;
       return freeIdx;
    }
@@ -182,8 +186,8 @@ export function TimeIntervalsUpdateAll() {
    intervalTimers.Update();
 }
 //  Returns the timeInterval index
-export function TimeIntervalsCreate(interval, name, repeat, clbk) {
-   return intervalTimers.Create(interval, name, repeat, clbk);
+export function TimeIntervalsCreate(interval, name, repeat, clbk, params) {
+   return intervalTimers.Create(interval, name, repeat, clbk, params);
 }
 
 // DEBUG
@@ -375,4 +379,6 @@ class Fps {
 
 const fps = new Fps;
 export function FpsGet() { return fps; }
+export function FpsGetAvg() { return fps.GetAvg(); }
+export function FpsGetAvg1S() { return fps.GetAvg_1S(); }
 

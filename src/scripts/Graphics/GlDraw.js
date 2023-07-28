@@ -50,7 +50,7 @@ export function GlDraw(gl) {
 
         
         if (progs[progIdx].sid.attr & SID.ATTR.TEX2) {
-            if (vb.texIdx >= 0) {
+            if (vb.texIdx !== INT_NULL) {
                 const texture = TextureGetTextureByIdx(vb.texIdx);
                 GlBindTexture(texture);
                 gl.uniform1i(progs[progIdx].shaderInfo.uniforms.sampler, texture.idx);

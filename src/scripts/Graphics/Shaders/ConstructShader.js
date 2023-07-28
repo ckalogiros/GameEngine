@@ -174,6 +174,7 @@ export function GlFragmentShaderConstruct(sid){
       (sid.attr & SID.ATTR.SDF) ? frag_sdf_call : '',
       // (sid.attr & SID.ATTR.TEX2) ? frag_msdf_call : '',
       true ? '    frag_color = color;' : '',
+      true ? '    frag_color.xyz *= color.a;' : '',
       // (true) ? '    frag_color = v_col;' : '',
       // 'if(v_col.b < 0.5) frag_color = vec4(1.,0.,0.,1.);',
       // (true) ? '    frag_color *= v_col.b;' : '',

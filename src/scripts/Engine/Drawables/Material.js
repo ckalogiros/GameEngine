@@ -2,7 +2,7 @@
 
 import * as math from '../../Helpers/Math/MathOperations.js'
 import { GlSetColor, GlSetColorAlpha } from "../../Graphics/Buffers/GlBufferOps.js";
-import { GlAddMaterial } from '../../Graphics/Buffers/GlBuffers.js';
+import { GlAddMaterial, GlHandlerAddMaterialBuffer } from '../../Graphics/Buffers/GlBuffers.js';
 import { FontGetUvCoords } from '../Loaders/Font/Font.js';
 import { GfxInfoMesh } from '../../Graphics/GlProgram.js';
 
@@ -190,4 +190,18 @@ export class FontMaterial extends Material {
      }
    }
 
+}
+
+export class Material_TEMP_fromBufferFor3D extends Material{
+   
+   constructor(col, texId){
+      super(col, texId);
+   }
+
+   ////////////////////////////////////////////////////////////////////////////////////////////////////////
+   AddToGraphicsBuffer(sid, gfx) {
+
+      GlHandlerAddMaterialBuffer(sid, gfx, this.col, null);
+      this.alreadyAdded = true;
+   }
 }

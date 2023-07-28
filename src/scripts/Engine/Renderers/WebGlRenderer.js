@@ -1,5 +1,6 @@
 "use strict";
 
+import { GlRotateX3D, GlRotateY3D, GlRotateZ3D } from "../../Graphics/Buffers/GlBufferOps.js";
 import { GlDraw } from "../../Graphics/GlDraw.js";
 import { GlCreateTexture } from "../../Graphics/GlTextures.js";
 import { PrintAttributes } from "../../Graphics/Z_Debug/GfxDebug.js";
@@ -71,17 +72,18 @@ export class WebGlRenderer {
       this.fpsTimer = FpsGet();
    }
 
-   Render() {
+   Render(mesh) {
 
-      this.fpsTimer.Start();
-      TimeUpdate(); // Update the Global Timer (real time, in miliseconds)
-      TimeIntervalsUpdateAll(); // Update and run callbacks for each interval timer that has been set.
-   
+      
       // const animations = AnimationsGet();
       // const particles = ParticleSystemGet();
-   
+      
       if (g_state.game.paused === false) {
-   
+         
+         this.fpsTimer.Start();
+         TimeUpdate(); // Update the Global Timer (real time, in miliseconds)
+         TimeIntervalsUpdateAll(); // Update and run callbacks for each interval timer that has been set.
+         
          TimerUpdateGlobalTimers(); // This is a globbal timer, going only forward
          TimersUpdateTimers();
          TimersUpdateStepTimers();
@@ -89,6 +91,12 @@ export class WebGlRenderer {
          // TODO!!! Update camera uniform if camera needs update 
          this.camera.Update(this.gl)
          this.scene.OnUpdate();
+         
+         if(mesh){
+            GlRotateZ3D(mesh.gfx, mesh.geom.dim, this.fpsTimer.cnt*.02)
+            // GlRotateX3D(mesh.gfx, mesh.geom.dim, this.fpsTimer.cnt*.002)
+            // GlRotateY3D(mesh.gfx, mesh.geom.dim, this.fpsTimer.cnt*.002)
+         }
 
          // if(this.camera.needsUpdateUniform){
          //    const prog = GlGetProgram(this.scene.gfxBuffer[0].progIdx);
@@ -107,8 +115,8 @@ export class WebGlRenderer {
          GlDraw(this.gl);
          MouseResetDif(.5);
          MouseResetWheel();
+         this.fpsTimer.Stop();
       }
-      this.fpsTimer.Stop();
    }
    Init() {
       console.log('Initializing Graphics.')
@@ -186,7 +194,10 @@ export class WebGlRenderer {
 
    }
 }
-
+/**
+ * 
+ * qwreyuekjsksjkdjfoqk
+ */
 
 function DetectHostPlatform() {
 

@@ -1,0 +1,133 @@
+https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices
+
+
+Vertex Specification Best Practices
+
+Contents
+
+    1 Overview
+    2 Size of a buffer object
+    3 Formatting VBO Data
+        3.1 Minimize vertex state changes
+        3.2 Attribute sizes
+        3.3 Interleaving
+        3.4 Streamed attributes
+    4 Vertex, normals, texcoords
+    5 Dynamic VBO
+    6 Vertex Layout Specification
+    7 See Also
+
+Overview
+
+See VBO for general details.
+Size of a buffer object
+
+You can use whatever size you like when allocating storage for buffer objects. However, there are some rules to bear in mind.
+
+Making lots of tiny buffers (with sizes on the order of Kilobytes) can cause the driver problems. Some drivers can only make so many allocations from graphics memory, regardless of what size those allocations are. Note that "lots of" could mean thousands. So putting smaller objects in one large buffer is a good idea.
+
+There are two competing issues with buffer sizes.
+
+    Larger buffers means putting multiple objects in one buffer. This allows you to render more objects without having to change buffer object state. Thus improving performance.
+    Larger buffers means putting multiple objects in one buffer. However, mapping a buffer means that the entire buffer cannot be used (unless you map it persistently). So if you have many objects in one, and you need to map the data for one object, then the others will not be usable while you are modifying that one object.
+
+Formatting VBO Data
+
+VBOs are quite flexible in how you use them. For instance, there are a number of ways you can represent vertex attribute data in VBOs:
+
+(VVVV) (NNNN) (CCCC)
+    One option for using them would be, for each batch (draw call) allocate a separate VBO per vertex attribute. This is certainly possible. If you have vertex, normal, and color as vertex attributes, pictorially this is: (VVVV) (NNNN) (CCCC)
+
+(VVVVNNNNCCCC)
+    Another approach is to store the vertex attribute blocks in a batch, one right after the other, in the same block and stuff them all in the same VBO. When specifying the vertex attributes via glVertexAttribPointer calls you'd pass byte offsets into the VBO to the ptr parameters. Pictorially, this is: (VVVVNNNNCCCC).
+
+(VNCVNCVNCVNC)
+    Yet another approach is to interleave the vertex attributes for each vertex in a batch, and then store each of these interleaved vertex blocks sequentially, again combining all the vertex attributes into a single buffer. As before, you'd pass byte offsets into the VBO to the glVertexAttribPointer ptr parameters, but you'd also use the stride parameter to ensure each vertex attribute array access only touched elements for that attribute array. Pictorially, this option is: (VNCVNCVNCVNC)
+
+Now this is just a single batch. There's also nothing stopping you from storing the vertex attribute data for multiple batches inside a single VBO or set of VBOs.
+
+The optimal layout depends on the specific GPU and driver (plus OpenGL implementation), but there are some things that are just generally good ideas.
+Minimize vertex state changes
+
+When rendering multiple different meshes, try to organize your data so that as many meshes as possible reside in the same buffer object with the same vertex format. In short, you want to minimize the number of glVertexAttribPointer (or glVertexAttribFormat where available) calls you make.
+
+glDrawArrays and other array-style rendering can easily be used to select sub-regions of this buffer for rendering.
+
+Indexed rendering is a little tricker. You have to bias each mesh's index data based on how many other vertices came before it in the buffer. You can do this manually, by incrementing the index data before uploading it, or you can use BaseVertex rendering calls, such as glDrawElementsBaseVertex. The base vertex is an offset applied to each index. The good part about this draw function is that meshes with less than 65536 vertices can be stored sequentially in the same vertex buffer, because the indices (stored without any change as GLushort) can be used for indexing the vertices that are at position greater than 65536.
+Attribute sizes
+
+The smaller you can make your attribute data, the better (though with certain alignment restrictions). Take advantage of the ability to use signed/unsigned normalized shorts and bytes, as well as other specialized formats. Here are some recommendations for particular types of data:
+
+2D Texture Coordinates
+    In most cases, they can be stored in normalized GL_SHORT or GL_UNSIGNED_SHORT with no loss of quality.
+Normals
+    The precision of normals usually isn't that important. And since normalized vectors are always on the range [-1, 1], its best to use a Normalized Integer format of some kind. The three components of a normal can be stored in a single 32-bit integer via the GL_INT_2_10_10_10_REV type. You can ignore the last, 2-bit component, or you can find something useful to stick into it.
+Colors
+    Unless they need to be HDR colors, they can be stored in normalized GL_UNSIGNED_BYTEs, so a single color can be packed into 4 bytes. If you need more color precision, GL_UNSIGNED_INT_2_10_10_10_REV is available, with 2 bits for alpha. If you absolutely need HDR colors, you can make use of GL_R11F_G11F_B10F, assuming the Float Precision works out. If not, you can employ GL_HALF_FLOATs instead of the expense of GL_FLOAT.
+Positions
+    These are fairly hard to pack more efficiently than GL_FLOAT, but this depends on your data and how much work you're willing to do. You can employ GL_HALF_FLOAT, but remember the range and precision limits relative to 32-bit floats.
+    A time-tested alternative is to use normalized GLshorts. To do this, you rearrange your model space data so that all positions are packed in a [-1, 1] box around the origin. You do that by finding the min/max values in XYZ among all positions. Then you subtract the center point of the min/max box from all vertex positions; followed by scaling all of the positions by half the width/height/depth of the min/max box. You need to keep the center point and scaling factors around.
+    When you build your model-to-view matrix (or model-to-whatever matrix), you need to apply the center point offset and scale at the top of the transform stack (so at the end, right before you draw). Note that this offset and scale should not be applied to normals, as they have a separate model space.
+
+There is something you should watch out for. The alignment of any attribute's data should be no less than 4 bytes. So if you have a vec3 of GLushorts, you can't use that 4th component for a new attribute (such as a vec2 of GLbytes). If you want to pack something into that instead of having useless padding, you need to make it a vec4 of GLushorts.
+Interleaving
+
+How much interleaving attributes helps in rendering performance is not well understood. Profiling data are needed. Interleaved vertex data may take up more room than un-interleaved due to alignment needs.
+Streamed attributes
+
+Streamed attributes (attributes that change every frame or otherwise very frequently) requires using Buffer Object Streaming techniques. These generally don't play nicely with static attributes, and many of the streaming techniques require discarding an entire buffer object. As such, there's really no point in putting streamed attributes in the same buffer as unstreamed ones.
+Vertex, normals, texcoords
+
+    Should you create a separate VBO for each? Would you lose performance?
+
+If your objects are static, then merge them all into as few VBOs as possible for best performance. See above section for more details on layout considerations.
+
+If only some of the vertex attributes are dynamic, i.e. often changing, placing them in separate VBO makes updates easier and faster.
+
+For example, if you are simulating water on the CPU, the position of each vertex might change all the time, but its color stays the same.
+EXAMPLE: Multiple Vertex Attribute VBOs Per Batch
+
+// Binding the vertex
+glBindBuffer(GL_ARRAY_BUFFER, vertexVBOID);
+glVertexPointer(3, GL_FLOAT, sizeof(float)*3, NULL); // Vertex start position address
+
+// Bind normal and texcoord
+glBindBuffer(GL_ARRAY_BUFFER, otherVBOID);
+glNormalPointer(GL_FLOAT, sizeof(float)*6, NULL); // Normal start position address
+glTexCoordPointer(2, GL_FLOAT, sizeof(float)*6, sizeof(float*3)); // Texcoord start position address
+
+Dynamic VBO
+Main article: Buffer Object Streaming
+
+    If the contents of your VBO will be dynamic, should you call glBufferData or glBufferSubData (or glMapBuffer)?
+
+If you will be updating a small section, use glBufferSubData. If you will update the entire VBO, use glBufferData (this information reportedly comes from a nVidia document). However, another approach reputed to work well when updating an entire buffer is to call glBufferData with a NULL pointer, and then glBufferSubData with the new contents. The NULL pointer to glBufferData lets the driver know you don't care about the previous contents so it's free to substitute a totally different buffer, and that helps the driver pipeline uploads more efficiently.
+
+Another thing you can do is double buffered VBO. This means you make 2 VBOs. On frame N, you update VBO 2 and you render with VBO 1. On frame N+1, you update VBO 1 and you render from VBO 2. This also gives a nice boost in performance for nVidia and ATI/AMD.
+Vertex Layout Specification
+
+A lot of new code gets written this way
+
+glBindBuffer(GL_ARRAY_BUFFER, vboID);
+glEnableClientState(GL_VERTEX_ARRAY);
+glVertexPointer(3, GL_FLOAT, sizeof(TVertex_VNTWI), info->posOffset);
+glTexCoordPointer(2, GL_FLOAT, sizeof(TVertex_VNTWI), info->texOffset);
+glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+glNormalPointer(GL_FLOAT, sizeof(TVertex_VNTWI), info->nmlOffset);
+glEnableClientState(GL_NORMAL_ARRAY);
+// --------------------
+int weightPosition = glGetAttribLocation(programID, "blendWeights");
+glVertexAttribPointer(weightPosition, 4, GL_FLOAT, GL_FALSE, sizeof(TVertex_VNTWI), info->weightOffset);
+glEnableVertexAttribArray(weightPosition);
+// --------------------
+int indexPosition = glGetAttribLocation(programID, "blendIndices");
+glVertexAttribPointer(indexPosition, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(TVertex_VNTWI), info->indexOffset);
+glEnableVertexAttribArray(indexPosition);
+// --------------------
+glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboID);
+glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
+
+and in the shader, would be using gl_Vertex, gl_Normal and gl_MultiTexCoord0. It is better to use generic vertex attributes for your vertex, normal and texcoord as well, since it is the modern way of specifying your vertex layout. You are already using it for your blendWeights and blendIndices.
+
+In GL 3.1+ core contexts, you are forced to use your own vertex attributes with calls to glVertexAttribPointer.
+See Also

@@ -161,28 +161,28 @@ const PROGRAM = {
 const VS_CRAMBLE_TRIANGLE = 'CrambleTriangle';
 
 // TODO: Create a smaller buffer that ca resize its self
-const MAX_VERTEX_BUFFER_COUNT = 16000;
-const MAX_INDEX_BUFFER_COUNT = MAX_VERTEX_BUFFER_COUNT / 2;
-const INDICES_PER_RECT = 6
-const VERTS_PER_RECT = 6
-const VERTS_PER_RECT_INDEXED = 4
+const MAX_VERTEX_BUFFER_COUNT = 512;
+const MAX_INDEX_BUFFER_COUNT = 256;
+const INDICES_PER_RECT = 6;
+const VERTS_PER_RECT = 6;
+const VERTS_PER_RECT_INDEXED = 4;
 
-const V_COL_COUNT = 4 // Number of floats for vertex buffer's attribute
-const V_POS_COUNT = 2
-const V_SCALE_COUNT = 2
-const V_TEX_COUNT = 2
-const V_WPOS_COUNT = 3
-const V_WPOS_TIME_COUNT = 4 // Use the 4th element for the time attribute 
-const V_STYLE_COUNT = 3
+const V_COL_COUNT = 4; // Number of floats for vertex buffer's attribute
+const V_POS_COUNT = 2;
+const V_SCALE_COUNT = 2;
+const V_TEX_COUNT = 2;
+const V_WPOS_COUNT = 3;
+const V_WPOS_TIME_COUNT = 4; // Use the 4th element for the time attribute 
+const V_STYLE_COUNT = 3;
 const V_BORDER_WIDTH = 1, V_BORDER_FEATHER = 1, V_ROUND_CORNERS = 1;
-const V_TIME_COUNT = 1
-const V_PARAMS1_COUNT = 4
-const V_SDF_COUNT = 2
+const V_TIME_COUNT = 1;
+const V_PARAMS1_COUNT = 4;
+const V_SDF_COUNT = 2;
 
 // The style's buffer attribute strides(buffer indexes) 
-const V_ROUND_CORNER_STRIDE = 0
-const V_BORDER_WIDTH_STRIDE = 1
-const V_BORDER_FEATHER_STRIDE = 2
+const V_ROUND_CORNER_STRIDE = 0;
+const V_BORDER_WIDTH_STRIDE = 1;
+const V_BORDER_FEATHER_STRIDE = 2;
 
 // 
 const NO_SPECIFIC_GL_BUFFER = INT_NULL;

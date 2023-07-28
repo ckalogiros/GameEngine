@@ -28,8 +28,6 @@ export class Animation{
         this.name = name;
     }
     Run(){
-        if(this.name === 'jsj')
-        console.log(this.index, this.name, this.isActive)
         this.inAnimation = this.animationClbk(this.params);
     }
     Stop(){

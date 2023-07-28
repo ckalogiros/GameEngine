@@ -1,6 +1,7 @@
 "use strict";
 
-import { Rotate4x4, Rotate4x42 } from "../../Helpers/Math/Matrix.js";
+import { GetSign } from "../../Helpers/Helpers.js";
+import { Rotate4x4, RotateZ, RotateY3D, RotateZ3D, RotateX3D, MatrixAdd } from "../../Helpers/Math/Matrix.js";
 import { GlGetPrograms, GlGetVB } from "../GlProgram.js";
 
 
@@ -87,7 +88,7 @@ export function VbSetAttribColPerVertex(vb, start, count, stride, col, numFaces)
         index += stride;
         vb.count += V_COL_COUNT;
         k++;
-        if(k >= 4) k = 0;
+        if (k >= 4) k = 0;
     }
 }
 export function VbSetAttribCol(vb, start, count, stride, col, numFaces) {
@@ -130,20 +131,6 @@ export function VbSetAttribPos(vb, start, count, stride, dim, numFaces) {
         index += stride;
 
         vb.count += V_POS_COUNT * VERTS_PER_RECT_INDEXED;
-    }
-}
-export function VbSetAttribScale(vb, start, count, stride, scale) {
-
-    let index = start;
-    const end = start + count;
-
-    while (index < end) {
-
-        vb.data[index++] = scale[0];
-        vb.data[index++] = scale[1];
-
-        index += stride;
-        vb.count += V_SCALE_COUNT;
     }
 }
 export function VbSetAttribTex(vb, start, count, stride, tex, numFaces) {
@@ -300,79 +287,27 @@ export function VbSetAttribParams1(vb, start, count, stride, params) {
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * 
+ * Add vertex attributes from buffer(buffer with already calculated values).
+ * The repeat is used if we have a repeated attribute, like world position which is the same x,y,z for every vertex.
  */
-// export function VbSetAttribPos3D(vb, start, count, stride, dim, numFaces, shaderInfo) {
+export function VbSetAttribBuffer(vb, start, count, stride, buffer, attribSize) {
 
-//     let index = start;
-//     const end = start + (count * numFaces);
+    let cnt = start;
+    let len = buffer.length;
+    let cnt2 = 0;
 
-//     while (index < end) {
+    for (let i = 0; i < count; i += stride) {
+        for (let j = 0; j < attribSize; j++) {
+            vb.data[cnt++] = buffer[cnt2++];
+            if (cnt2 >= len) cnt2 = 0;
+            vb.count++;
+        }
 
-//         /*
-//         -1 -1 -1 ltb
-//         -1 -1  1 ltf
-//         -1  1 -1 lb
-//         -1  1  1 
-//         1 -1 -1 
-//         1 -1  1 
-//         1  1 -1 
-//         1  1  1
-//         */
+        cnt += stride - attribSize;
+    }
+}
 
-//         // front-back /////////////////////////////////////////////////////////////
-//         // First Face
-//         //    -1 -1 -1 
-//         vb.data[index++] = -dim[0];
-//         vb.data[index++] = -dim[1];
-//         vb.data[index++] = -dim[2];
-//         index += stride;
 
-//         //    -1 -1  1 
-//         vb.data[index++] = -dim[0];
-//         vb.data[index++] = -dim[1];
-//         vb.data[index++] =  dim[2];
-//         index += stride;
-
-//         //    -1  1 -1 
-//         vb.data[index++] = -dim[0];
-//         vb.data[index++] =  dim[1];
-//         vb.data[index++] = -dim[2];
-//         index += stride;
-
-//         //    -1  1  1 
-//         vb.data[index++] = -dim[0];
-//         vb.data[index++] =  dim[1];
-//         vb.data[index++] =  dim[2];
-//         index += stride;
-
-//         //     1 -1 -1 
-//         vb.data[index++] = dim[0];
-//         vb.data[index++] =-dim[1];
-//         vb.data[index++] =-dim[2];
-//         index += stride;
-
-//         //     1 -1  1 
-//         vb.data[index++] = dim[0];
-//         vb.data[index++] =-dim[1];
-//         vb.data[index++] = dim[2];
-//         index += stride;
-
-//         //     1  1 -1 
-//         vb.data[index++] = dim[0];
-//         vb.data[index++] = dim[1];
-//         vb.data[index++] =-dim[2];
-//         index += stride;
-
-//         //     1  1  1
-//         vb.data[index++] = dim[0];
-//         vb.data[index++] = dim[1];
-//         vb.data[index++] = dim[2];
-//         index += stride;
-
-//         vb.count += shaderInfo.attributes.size.pos * VERTS_PER_RECT_INDEXED;
-//     }
-// }
 
 
 
@@ -479,6 +414,8 @@ export function GlSetTex(gfxInfo, uvs) {
 
         numTimes--;
     }
+
+    vb.needsUpdate = true;
 }
 export function GlMove(gfxInfo, wpos) {
 
@@ -764,7 +701,58 @@ export function GlSetAttrParams1(gfxInfo, param, paramOffset) {
     }
 }
 
-export function GlRotate(gfxInfo, dim, angle) {
+/** Set many meshes in a loop */
+// Move all meshes from a buffer with the starting indexes
+export function GlSetWposXYMany(gfxInfo, pos, startsBuffer) {
+
+    const progs = GlGetPrograms();
+    const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
+
+    let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.wposTime;
+    let verts = gfxInfo.numFaces * gfxInfo.vertsPerRect;
+    let stride = gfxInfo.attribsPerVertex - V_WPOS_COUNT;
+
+    let numMeshes = startsBuffer.length-1;
+    while (numMeshes) {
+        while (verts) {
+
+            vb.data[index++] = pos[0];
+            vb.data[index++] = pos[1];
+            index++
+
+            index += stride; // Go to next vertice's pos. +1 for skipping pos.z
+            verts--;
+        }
+
+        // Next iteration access the nest mesh provided by startsBuffer that has the starting index of the mesh in the vertex buffer.
+        index = startsBuffer[numMeshes--];
+    }
+}
+// Move all meshes from found in vertex buffer in consecutive order, 'start'ing from a specific mesh
+export function GlMoveXYConcecutive(gfxInfo, pos, numMeshes) {
+
+    const progs = GlGetPrograms();
+    const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
+
+    let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.wposTime;
+    let stride = gfxInfo.attribsPerVertex - V_WPOS_COUNT;
+    
+    while (numMeshes) {
+        let verts = gfxInfo.numFaces * gfxInfo.vertsPerRect;
+        while (verts) {
+
+            vb.data[index++] += pos[0];
+            vb.data[index++] += pos[1];
+            index++
+
+            index += stride; // Go to next vertice's pos. +1 for skipping pos.z
+            verts--;
+        }
+        numMeshes--;
+    }
+}
+
+export function GlRotate2D(gfxInfo, dim, angle) {
 
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
@@ -773,7 +761,7 @@ export function GlRotate(gfxInfo, dim, angle) {
     let stride = gfxInfo.attribsPerVertex - V_POS_COUNT;
 
     // const newPos = Rotate4x4(dim, angle)
-    const newPos = Rotate4x42(dim, angle)
+    const newPos = RotateZ(dim, angle)
 
     vb.data[index++] = newPos[0];
     vb.data[index++] = newPos[1];
@@ -787,3 +775,352 @@ export function GlRotate(gfxInfo, dim, angle) {
     vb.data[index++] = newPos[6];
     vb.data[index++] = newPos[7];
 }
+
+/** */
+export function GlRotateX3D(gfxInfo, dim, angle) {
+
+    const progs = GlGetPrograms();
+    const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
+
+    let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.pos;
+    let stride = gfxInfo.attribsPerVertex;
+    let vertices = gfxInfo.numFaces * gfxInfo.vertsPerRect;
+
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const r = [
+        c, -s,
+        s, c,
+    ];
+
+    const vPosF = [
+        -1 * dim[0], 1 * dim[1], 1 * dim[2],
+        -1 * dim[0], -1 * dim[1], 1 * dim[2],
+        1 * dim[0], 1 * dim[1], 1 * dim[2],
+        1 * dim[0], -1 * dim[1], 1 * dim[2],
+    ];
+    const vPosBK = [
+        -1 * dim[0], 1 * dim[1], -1 * dim[2],
+        -1 * dim[0], -1 * dim[1], -1 * dim[2],
+        1 * dim[0], 1 * dim[1], -1 * dim[2],
+        1 * dim[0], -1 * dim[1], -1 * dim[2],
+    ];
+    const vPosR = [
+        1 * dim[0], -1 * dim[1], 1 * dim[2],
+        1 * dim[0], -1 * dim[1], -1 * dim[2],
+        1 * dim[0], 1 * dim[1], 1 * dim[2],
+        1 * dim[0], 1 * dim[1], -1 * dim[2],
+    ];
+    const vPosL = [
+        -1 * dim[0], -1 * dim[1], 1 * dim[2],
+        -1 * dim[0], -1 * dim[1], -1 * dim[2],
+        -1 * dim[0], 1 * dim[1], 1 * dim[2],
+        -1 * dim[0], 1 * dim[1], -1 * dim[2],
+    ];
+    const vPosT = [
+        -1 * dim[0], 1 * dim[1], 1 * dim[2],
+        -1 * dim[0], 1 * dim[1], -1 * dim[2],
+        1 * dim[0], 1 * dim[1], 1 * dim[2],
+        1 * dim[0], 1 * dim[1], -1 * dim[2],
+    ];
+    const vPosBot = [
+        -1 * dim[0], -1 * dim[1], 1 * dim[2],
+        -1 * dim[0], -1 * dim[1], -1 * dim[2],
+        1 * dim[0], -1 * dim[1], 1 * dim[2],
+        1 * dim[0], -1 * dim[1], -1 * dim[2],
+    ];
+
+    let xf = 0,
+        yf = 1,
+        zf = 2;
+
+    vertices = 4;
+    while (vertices) {
+        vb.data[index + 1] = vPosF[yf] * r[0] + vPosF[zf] * r[2];
+        vb.data[index + 2] = vPosF[yf] * r[1] + vPosF[zf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    vertices = 4;
+    xf = 0, yf = 1, zf = 2;
+    while (vertices) {
+        vb.data[index + 1] = vPosL[yf] * r[0] + vPosL[zf] * r[2];
+        vb.data[index + 2] = vPosL[yf] * r[1] + vPosL[zf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    vertices = 4;
+    xf = 0, yf = 1, zf = 2;
+    while (vertices) {
+        vb.data[index + 1] = vPosBK[yf] * r[0] + vPosBK[zf] * r[2];
+        vb.data[index + 2] = vPosBK[yf] * r[1] + vPosBK[zf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    xf = 0, yf = 1, zf = 2;
+    vertices = 4;
+    while (vertices) {
+        vb.data[index + 1] = vPosR[yf] * r[0] + vPosR[zf] * r[2];
+        vb.data[index + 2] = vPosR[yf] * r[1] + vPosR[zf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    vertices = 4;
+    xf = 0, yf = 1, zf = 2;
+    while (vertices) {
+        vb.data[index + 1] = vPosT[yf] * r[0] + vPosT[zf] * r[2];
+        vb.data[index + 2] = vPosT[yf] * r[1] + vPosT[zf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    vertices = 4;
+    xf = 0, yf = 1, zf = 2;
+    while (vertices) {
+        vb.data[index + 1] = vPosBot[yf] * r[0] + vPosBot[zf] * r[2];
+        vb.data[index + 2] = vPosBot[yf] * r[1] + vPosBot[zf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+
+    vb.needsUpdate = true;
+}
+/** */
+export function GlRotateY3D(gfxInfo, dim, angle) {
+
+    const progs = GlGetPrograms();
+    const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
+
+    let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.pos;
+    let stride = gfxInfo.attribsPerVertex;
+    let vertices = gfxInfo.numFaces * gfxInfo.vertsPerRect;
+
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const r = [
+        c, -s,
+        s, c,
+    ];
+
+    const vPosF = [
+        -1 * dim[0], 1 * dim[1], 1 * dim[2],
+        -1 * dim[0], -1 * dim[1], 1 * dim[2],
+        1 * dim[0], 1 * dim[1], 1 * dim[2],
+        1 * dim[0], -1 * dim[1], 1 * dim[2],
+    ];
+    const vPosBK = [
+        -1 * dim[0], 1 * dim[1], -1 * dim[2],
+        -1 * dim[0], -1 * dim[1], -1 * dim[2],
+        1 * dim[0], 1 * dim[1], -1 * dim[2],
+        1 * dim[0], -1 * dim[1], -1 * dim[2],
+    ];
+    const vPosR = [
+        1 * dim[0], -1 * dim[1], 1 * dim[2],
+        1 * dim[0], -1 * dim[1], -1 * dim[2],
+        1 * dim[0], 1 * dim[1], 1 * dim[2],
+        1 * dim[0], 1 * dim[1], -1 * dim[2],
+    ];
+    const vPosL = [
+        -1 * dim[0], -1 * dim[1], 1 * dim[2],
+        -1 * dim[0], -1 * dim[1], -1 * dim[2],
+        -1 * dim[0], 1 * dim[1], 1 * dim[2],
+        -1 * dim[0], 1 * dim[1], -1 * dim[2],
+    ];
+    const vPosT = [
+        -1 * dim[0], 1 * dim[1], 1 * dim[2],
+        -1 * dim[0], 1 * dim[1], -1 * dim[2],
+        1 * dim[0], 1 * dim[1], 1 * dim[2],
+        1 * dim[0], 1 * dim[1], -1 * dim[2],
+    ];
+    const vPosBot = [
+        -1 * dim[0], -1 * dim[1], 1 * dim[2],
+        -1 * dim[0], -1 * dim[1], -1 * dim[2],
+        1 * dim[0], -1 * dim[1], 1 * dim[2],
+        1 * dim[0], -1 * dim[1], -1 * dim[2],
+    ];
+
+    let xf = 0,
+        yf = 1,
+        zf = 2;
+
+
+    vertices = 4;
+    while (vertices) {
+        vb.data[index + 0] = vPosF[xf] * r[0] + vPosF[zf] * r[2];
+        vb.data[index + 2] = vPosF[xf] * r[1] + vPosF[zf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    vertices = 4;
+    xf = 0, yf = 1, zf = 2;
+    while (vertices) {
+        vb.data[index + 0] = vPosL[xf] * r[0] + vPosL[zf] * r[2];
+        vb.data[index + 2] = vPosL[xf] * r[1] + vPosL[zf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    vertices = 4;
+    xf = 0, yf = 1, zf = 2;
+    while (vertices) {
+        vb.data[index + 0] = vPosBK[xf] * r[0] + vPosBK[zf] * r[2];
+        vb.data[index + 2] = vPosBK[xf] * r[1] + vPosBK[zf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    xf = 0, yf = 1, zf = 2;
+    vertices = 4;
+    while (vertices) {
+        vb.data[index + 0] = vPosR[xf] * r[0] + vPosR[zf] * r[2];
+        vb.data[index + 2] = vPosR[xf] * r[1] + vPosR[zf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    vertices = 4;
+    xf = 0, yf = 1, zf = 2;
+    while (vertices) {
+        vb.data[index + 0] = vPosT[xf] * r[0] + vPosT[zf] * r[2];
+        vb.data[index + 2] = vPosT[xf] * r[1] + vPosT[zf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    vertices = 4;
+    xf = 0, yf = 1, zf = 2;
+    while (vertices) {
+        vb.data[index + 0] = vPosBot[xf] * r[0] + vPosBot[zf] * r[2];
+        vb.data[index + 2] = vPosBot[xf] * r[1] + vPosBot[zf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+
+    vb.needsUpdate = true;
+}
+/** */
+
+/** */
+export function GlRotateZ3D(gfxInfo, dim, angle) {
+
+    const progs = GlGetPrograms();
+    const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
+
+    let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.pos;
+    let stride = gfxInfo.attribsPerVertex;
+    let vertices = gfxInfo.numFaces * gfxInfo.vertsPerRect;
+
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    const r = [
+        c, -s,
+        s, c,
+    ];
+
+    const vPosF = [
+        -1 * dim[0], 1 * dim[1], 1 * dim[2],
+        -1 * dim[0], -1 * dim[1], 1 * dim[2],
+        1 * dim[0], 1 * dim[1], 1 * dim[2],
+        1 * dim[0], -1 * dim[1], 1 * dim[2],
+    ];
+    const vPosBK = [
+        -1 * dim[0], 1 * dim[1], -1 * dim[2],
+        -1 * dim[0], -1 * dim[1], -1 * dim[2],
+        1 * dim[0], 1 * dim[1], -1 * dim[2],
+        1 * dim[0], -1 * dim[1], -1 * dim[2],
+    ];
+    const vPosL = [
+        -1 * dim[0], 1 * dim[1], -1 * dim[2],
+        -1 * dim[0], -1 * dim[1], -1 * dim[2],
+        -1 * dim[0], 1 * dim[1], 1 * dim[2],
+        -1 * dim[0], -1 * dim[1], 1 * dim[2],
+    ];
+    const vPosR = [
+        1 * dim[0], 1 * dim[1], -1 * dim[2],
+        1 * dim[0], -1 * dim[1], -1 * dim[2],
+        1 * dim[0], 1 * dim[1], 1 * dim[2],
+        1 * dim[0], -1 * dim[1], 1 * dim[2],
+    ];
+    const vPosT = [
+        -1 * dim[0], 1 * dim[1], 1 * dim[2],
+        -1 * dim[0], 1 * dim[1], -1 * dim[2],
+        1 * dim[0], 1 * dim[1], 1 * dim[2],
+        1 * dim[0], 1 * dim[1], -1 * dim[2],
+    ];
+    const vPosBT = [
+        -1 * dim[0], -1 * dim[1], 1 * dim[2],
+        -1 * dim[0], -1 * dim[1], -1 * dim[2],
+        1 * dim[0], -1 * dim[1], 1 * dim[2],
+        1 * dim[0], -1 * dim[1], -1 * dim[2],
+    ];
+
+    let xf = 0,
+        yf = 1,
+        zf = 2;
+
+
+    vertices = 4;
+    xf = 0, yf = 1, zf = 2;
+    while (vertices) {
+        vb.data[index + 0] = vPosF[xf] * r[0] + vPosF[yf] * r[2];
+        vb.data[index + 1] = vPosF[xf] * r[1] + vPosF[yf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    vertices = 4;
+    xf = 0, yf = 1, zf = 2;
+    while (vertices) {
+        vb.data[index + 0] = vPosBK[xf] * r[0] + vPosBK[yf] * r[2];
+        vb.data[index + 1] = vPosBK[xf] * r[1] + vPosBK[yf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    vertices = 4;
+    xf = 0, yf = 1, zf = 2;
+    while (vertices) {
+        vb.data[index + 0] = vPosR[xf] * r[0] + vPosR[yf] * r[2];
+        vb.data[index + 1] = vPosR[xf] * r[1] + vPosR[yf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    vertices = 4;
+    xf = 0, yf = 1, zf = 2;
+    while (vertices) {
+        vb.data[index + 0] = vPosL[xf] * r[0] + vPosL[yf] * r[2];
+        vb.data[index + 1] = vPosL[xf] * r[1] + vPosL[yf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    vertices = 4;
+    xf = 0, yf = 1, zf = 2;
+    while (vertices) {
+        vb.data[index + 0] = vPosT[xf] * r[0] + vPosT[yf] * r[2];
+        vb.data[index + 1] = vPosT[xf] * r[1] + vPosT[yf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+    vertices = 4;
+    xf = 0, yf = 1, zf = 2;
+    while (vertices) {
+        vb.data[index + 0] = vPosBT[xf] * r[0] + vPosBT[yf] * r[2];
+        vb.data[index + 1] = vPosBT[xf] * r[1] + vPosBT[yf] * r[3];
+        xf += 3; yf += 3; zf += 3;
+        index += stride;
+        vertices--;
+    }
+
+    vb.needsUpdate = true;
+}
+

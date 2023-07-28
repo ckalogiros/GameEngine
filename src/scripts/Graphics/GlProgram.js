@@ -1,11 +1,8 @@
 "use strict";
-import { CameraOrthographic, CameraPerspective } from '../Engine/Renderers/Renderer/Camera.js'
-import { GetShaderTypeId, PrintAttributes, PrintShaderInfo } from './Z_Debug/GfxDebug.js';
-import * as GlOps from './Buffers/GlBufferOps.js';
-import { GlCreateShaderInfo, LoadShaderProgram } from './GlShaders.js';
+import { PrintShaderInfo } from './Z_Debug/GfxDebug.js';
+import { LoadShaderProgram } from './GlShaders.js';
 import { GlUseProgram } from './Buffers/GlBuffers.js';
 import { Uniform, UniformsBuffer } from './Buffers/GlUniformBuffer.js';
-import { TimerGetGlobalTimer } from '../Engine/Timer/Timer.js';
 import { SHADER_CONSTANTS } from './Shaders/ConstructShader.js';
 
 // Global Gl Program object
@@ -63,7 +60,9 @@ export class GfxInfoMesh {
 	};
 
 	constructor(gfxInfoMesh = {}) {
+
 		if (gfxInfoMesh instanceof GfxInfoMesh) {
+
 			this.sid = gfxInfoMesh.sid;
 			this.sceneIdx = gfxInfoMesh.sceneIdx;
 			this.numFaces = gfxInfoMesh.numFaces;
@@ -111,7 +110,6 @@ export class GlProgram {
 
 		this.webgl_program = LoadShaderProgram(gfxCtx.gl, sid);
 
-		// GlUseProgram(this.webgl_program, this.idx)
 		PrintShaderInfo(this);
 
 		this.shaderInfo = {
