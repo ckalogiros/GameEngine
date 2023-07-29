@@ -216,6 +216,7 @@ export class Mesh {
                 break;
             }
 
+            case MESH_ENABLE.PASS_COL4: { this.sid.pass |= SID.PASS.COL4; break; }
             case MESH_ENABLE.PASS_WPOS2: { this.sid.pass |= SID.PASS.WPOS2; break; }
             case MESH_ENABLE.PASS_DIM2: { this.sid.pass |= SID.PASS.DIM2; break; }
             case MESH_ENABLE.PASS_RES2: { this.sid.pass |= SID.PASS.RES2; break; }
@@ -261,19 +262,17 @@ export class TextMesh extends Mesh {
             prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
         }
 
-        if (this.mat.hasFontTex) {
+        // if (this.mat.hasFontTex) {
 
-            // Create texture
-            const indexes = TextureLoadTexture(this.mat.texId);
-            this.gfx.tb.idx = indexes.texIdx;
-            GlSetTexture(this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.tb.idx); // Update the vertex buffer to store the texture index
+        //     // Create texture
+        //     // Store the texture index in the curent mesh and also in the vertex buffer that the mesh is going to be saved to.
+        //     this.gfx.tb.idx = this.mat.texIdx;
+        //     GlSetTexture(this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.tb.idx); // Update the vertex buffer to store the texture index
 
-            this.mat.texIdx = indexes.texIdx;
-            this.mat.uvIdx = indexes.uvIdx;
+        //     // this.mat.texIdx = indexes.texIdx;
+        //     // this.mat.uvIdx = indexes.uvIdx;
 
-            // Correct the geometry height.
-            this.geom.dim[1] *= FontGetFontDimRatio(this.mat.uvIdx);
-        }
+        // }
 
         this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
         this.mat.AddToGraphicsBuffer(this.sid, this.gfx);

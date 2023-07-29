@@ -1,9 +1,7 @@
 import { TextureGetTextureByIdx } from '../Engine/Loaders/Textures/Texture.js';
-import { GlUpdateVertexBufferData, GlUpdateIndexBufferData, GfxSetVbShow, GlUseProgram, GlBindVAO, GlBindTexture } from './Buffers/GlBuffers.js'
+import { GlUpdateVertexBufferData, GlUpdateIndexBufferData, GlUseProgram, GlBindVAO, GlBindTexture } from './Buffers/GlBuffers.js'
 import { RenderQueueGetActive, RenderQueueGetActiveCount } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { GlGetPrograms } from './GlProgram.js';
-import { FramebufferRenderToFramebuffer, FramebuffersDraw, FramebuffersGet } from './Buffers/Renderbuffer.js';
-import { TimerGetGlobalTimer } from '../Engine/Timer/Timer.js';
 
 
 
@@ -38,16 +36,13 @@ export function GlDraw(gl) {
         if(GL.BOUND_PROG_IDX !== progIdx)
             GlUseProgram(progs[progIdx].webgl_program, progIdx)
         
-        if (progs[progIdx].timer.isActive) progs[progIdx].UniformsUpdateTimer();
-        // Update the uniforms buffer
-        progs[progIdx].UniformsUpdateBufferUniforms(gl);
-        
-        
+        // Update all program uniforms
+        progs[progIdx].UniformsUpdate(gl);
         
         const vb = progs[progIdx].vertexBuffer[vbIdx];
         const ib = progs[progIdx].indexBuffer[vbIdx];
+        
         if(GL.BOUND_VAO !== ib.vao) GlBindVAO(ib.vao)
-
         
         if (progs[progIdx].sid.attr & SID.ATTR.TEX2) {
             if (vb.texIdx !== INT_NULL) {
@@ -61,9 +56,10 @@ export function GlDraw(gl) {
         if (vb.needsUpdate) GlUpdateVertexBufferData(gl, vb)
 
         gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
+        // gl.drawElements(gl.TRIANGLES, 250, gl.UNSIGNED_SHORT, 0);
     }
     
-    const fb = FramebuffersGet(FRAMEBUFFERS_IDX.buffer0);
+    // const fb = FramebuffersGet(FRAMEBUFFERS_IDX.buffer0);
     // if (fb.isActive) {
     //     // FramebufferRenderToFramebuffer(drawQueue, drawQueueCount);
     //     FramebufferRenderToFramebuffer(fb.fbq.buffer, fb.fbq.count);

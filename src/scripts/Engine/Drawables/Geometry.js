@@ -3,7 +3,6 @@
 import * as math from '../../Helpers/Math/MathOperations.js'
 import * as glBufferOps from '../../Graphics/Buffers/GlBufferOps.js'
 import { GlAddGeometry, GlHandlerAddGeometryBuffer, GlHandlerAddIndicesBuffer } from '../../Graphics/Buffers/GlBuffers.js';
-import { GfxInfoMesh } from '../../Graphics/GlProgram.js';
 
 let _geometryId = 0;
 
@@ -230,8 +229,111 @@ export class Geometry3D {
 
 export class CubeGeometry extends Geometry3D {
     
+    faces; // TODO: Bad nam, Rename this.
+
     constructor(pos, dim, scale) {
         super(pos, dim, scale);
+        // this.faces = [
+        //     // Front 
+        //     -1,  1, 1, // v1
+        //     -1, -1, 1, // v2
+        //      1,  1, 1, // v3
+        //      1, -1, 1, // v4
+        //      // Left
+        //      -1,  1, -1,
+        //      -1, -1, -1,
+        //      -1,  1,  1,
+        //      -1, -1,  1,
+        //      // Back
+        //      -1,  1, -1,
+        //      -1, -1, -1,
+        //       1,  1, -1,
+        //       1, -1, -1,
+        //     // Right
+        //      1,  1, -1,
+        //      1, -1, -1,
+        //      1,  1,  1,
+        //      1, -1,  1,
+        //     // Top
+        //     -1, 1,  1,
+        //     -1, 1, -1,
+        //      1, 1,  1,
+        //      1, 1, -1,
+        //     // Bottom
+        //     -1, -1,  1,
+        //     -1, -1, -1,
+        //      1, -1,  1,
+        //      1, -1, -1,
+        // ];
+        // this.faces = [
+        //     // Front 
+        //     -1,  1, 1, // v1
+        //     -1, -1, 1, // v2
+        //      1,  1, 1, // v3
+        //      1, -1, 1, // v4
+        //      // Right
+        //      1, -1,  1,
+        //      1, -1, -1,
+        //      1,  1,  1,
+        //      1,  1, -1,
+        //      // Back
+        //      -1,  1, -1,
+        //      -1, -1, -1,
+        //      1,  1, -1,
+        //      1, -1, -1,
+        //      // Left
+        //      -1, -1,  1,
+        //      -1, -1, -1,
+        //      -1,  1,  1,
+        //      -1,  1, -1,
+        //     // Top
+        //     -1, 1,  1,
+        //     -1, 1, -1,
+        //      1, 1,  1,
+        //      1, 1, -1,
+        //     // Bottom
+        //     -1, -1,  1,
+        //     -1, -1, -1,
+        //      1, -1,  1,
+        //      1, -1, -1,
+        // ];
+        this.faces = [
+            // Face Front
+            -.5,  .5, .5, // v1
+            -.5, -.5, .5, // v2
+             .5,  .5, .5, // v3
+             .5, -.5, .5, // v4
+             
+             // Face Left
+             -.5, -.5, .5, // v1
+             -.5, -.5,-.5, // v2
+             -.5,  .5, .5, // v3
+             -.5,  .5,-.5, // v4
+             
+             // Face Back
+             -.5,  .5, -.5, // v1
+             -.5, -.5, -.5, // v2
+             .5,  .5, -.5, // v3
+             .5, -.5, -.5, // v4
+             
+             // Face Right
+             .5,-.5, .5, // v1
+             .5,-.5,-.5, // v2
+             .5, .5, .5, // v3
+             .5, .5,-.5, // v4
+            
+            // Face Top
+            -.5,  .5,  .5, // v1
+            -.5,  .5, -.5, // v2
+             .5,  .5,  .5, // v3
+             .5,  .5, -.5, // v4
+            
+            // Face Bottom
+            -.5, -.5,  .5, // v1
+            -.5, -.5, -.5, // v2
+             .5, -.5,  .5, // v3
+             .5, -.5, -.5, // v4
+        ];
     }
 
     AddToGraphicsBuffer(sid, gfx, meshName) {
@@ -252,49 +354,55 @@ export class CubeGeometry extends Geometry3D {
 
         // TODO: Calculate the number of attributes for the buffers
         const vertexPos = new Float32Array(72); // localy allocated mem space for creating vertex positions from meshes.
-        const vertexWPos = new Float32Array(72); // localy allocated mem space for creating vertex positions from meshes.
         // TODO: Calculate the number of indices for the buffer
         const indexBuffer = new Int32Array(6*6); // localy allocated mem space for creating vertex positions from meshes.
         
         const x = this.dim[0], y = this.dim[1], z = this.dim[2];
         let i = 0; // 
-        {
-            // Face Front
-            vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v1
-            vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v2
-            vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
-            vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v4
-            
-            // Face Right
-            vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
-            vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
-            vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
-            vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
-            
-            // Face Back
-            vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v1
-            vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
-            vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v3
-            vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v4
-            
-            // Face Left
-            vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
-            vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
-            vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
-            vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
-            
-            // Face Top
-            vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v1
-            vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v2
-            vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
-            vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
-            
-            // Face Bottom
-            vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
-            vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
-            vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v3
-            vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v4
+        const len = this.faces.length;
+        while (i<len){
+            vertexPos[i] = this.faces[i++] * x;
+            vertexPos[i] = this.faces[i++] * y;
+            vertexPos[i] = this.faces[i++] * z;
         }
+        // {
+        //     i=0;
+        //     // Face Front
+        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v1
+        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v2
+        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
+        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v4
+            
+        //     // Face Right
+        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
+        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
+        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
+        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
+            
+        //     // Face Back
+        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v1
+        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
+        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v3
+        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v4
+            
+        //     // Face Left
+        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
+        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
+        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
+        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
+            
+        //     // Face Top
+        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v1
+        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v2
+        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
+        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
+            
+        //     // Face Bottom
+        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
+        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
+        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v3
+        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v4
+        // }
         
         
         let counters = {

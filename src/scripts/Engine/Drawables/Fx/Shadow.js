@@ -1,5 +1,5 @@
 import { TimerGetGlobalTimerCycle } from "../../Timer/Timer.js";
-import { TempMesh } from "../MeshBuffer.js";
+import { TempMesh } from "../MeshBuffer_OLD.js";
 
 // For readability of the attribute params1 vector
 const SHADOW_ATTR_PARAMS1 = {

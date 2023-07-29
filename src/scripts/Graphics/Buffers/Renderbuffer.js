@@ -6,7 +6,7 @@ import { GlCreateTexture } from "../GlTextures.js";
 import { AnimationsGet } from "../../Engine/Animations/Animations.js";
 import { Min3 } from "../../Helpers/Math/MathOperations.js";
 import { ShowTotalScore } from "../../Engine/Events/SceneEvents.js";
-import { MeshBuffer, TempMesh } from "../../Engine/Drawables/MeshBuffer.js";
+import { MeshBuffer, TempMesh } from "../../Engine/Drawables/MeshBuffer_OLD.js";
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

@@ -4,14 +4,13 @@ import * as math from '../../Helpers/Math/MathOperations.js'
 import { GlSetColor, GlSetColorAlpha } from "../../Graphics/Buffers/GlBufferOps.js";
 import { GlAddMaterial, GlHandlerAddMaterialBuffer } from '../../Graphics/Buffers/GlBuffers.js';
 import { FontGetUvCoords } from '../Loaders/Font/Font.js';
-import { GfxInfoMesh } from '../../Graphics/GlProgram.js';
+import { GfxInfoMesh, GlSetTexture } from '../../Graphics/GlProgram.js';
+import { TextureLoadTexture } from '../Loaders/Textures/Texture.js';
 
 let _materialId = 0;
 
 let _cnt = 1;
 export const MAT_ENABLE = {
-   // UNIF_RESOLUTION: _cnt++,
-   // ATTR_STYLE: _cnt++,
    ATTR_VERTEX_COLOR: _cnt++,
    ATTR_VERTEX_GRADIENT_HORIZONTAL: _cnt++,
    ATTR_VERTEX_GRADIENT_VERTICAL: _cnt++,
@@ -172,6 +171,13 @@ export class FontMaterial extends Material {
       this.sdfParams = [0, 0];
       math.CopyArr2(this.sdfParams, sdfParams);
 
+      // Create texture
+      const indexes = TextureLoadTexture(this.texId);
+      // this.gfx.tb.idx = indexes.texIdx;
+      // GlSetTexture(this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.tb.idx); // Update the vertex buffer to store the texture index
+
+      this.texIdx = indexes.texIdx;
+      this.uvIdx = indexes.uvIdx;
    }
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -187,6 +193,10 @@ export class FontMaterial extends Material {
          if(DEBUG.MESH_ALL_UVS) console.log('uv:', uv)
          GlAddMaterial(sid, gfxCopy, this.col, uv, this.style, this.sdfParams);
          gfxCopy.vb.start += gfxCopy.vb.count;
+         
+         gfx.tb.idx = this.texIdx;
+         GlSetTexture(gfx.prog.idx, gfx.vb.idx, gfx.tb.idx); // Update the vertex buffer to store the texture index
+
      }
    }
 

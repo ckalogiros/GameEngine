@@ -187,13 +187,13 @@ export class GlProgram {
 					[k]: v
 				}), {});
 
-			if(DEBUG.SHADER_INFO){
-				for (let prop in sortedAttribLocations) {
-					if (sortedAttribLocations[prop] > INT_NULL) {
-						console.log(prop, ':', sortedAttribLocations[prop])
-					}
-				}
-			}
+			// if(DEBUG.SHADER_INFO){
+			// 	for (let prop in sortedAttribLocations) {
+			// 		if (sortedAttribLocations[prop] > INT_NULL) {
+			// 			console.log(prop, ':', sortedAttribLocations[prop])
+			// 		}
+			// 	}
+			// }
 
 			// Store back the sorted version
 			this.shaderInfo.attributes.loc = sortedAttribLocations;
@@ -253,6 +253,14 @@ export class GlProgram {
 		}
 	}
 
+	/** Update all program's Uniforms */
+	UpdateUniforms(gl){
+		if (this.timer.isActive) this,UniformsUpdateTimer();
+		if (this.shaderInfo.uniforms.buffer.needsUpdate) {
+			this.UniformsUpdateBufferUniforms(gl);
+		}
+	}
+
 	/**
 	 * Uniforms Buffer
 	 */
@@ -267,15 +275,13 @@ export class GlProgram {
 		this.shaderInfo.uniforms.buffer.Set(val, idx);
 	}
 	UniformsUpdateBufferUniforms(gl) {
-		if (this.shaderInfo.uniforms.buffer.needsUpdate) {
 			this.shaderInfo.uniforms.buffer.Update(gl);
-		}
 	}
 	UniformsSetUpdateBufferUniform(gl, val, index) {
 		this.shaderInfo.uniforms.buffer.Set(val, index);
 		this.shaderInfo.uniforms.buffer.Update(gl);
 	}
-
+//if (progs[progIdx].timer.isActive) progs[progIdx].UniformsUpdateTimer();
 	/**
 	 * Unique Uniforms.
 	 * New uniforms that are set by the client and are created as a seperate uniforms in the shaders.

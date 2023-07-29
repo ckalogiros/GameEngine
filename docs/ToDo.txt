@@ -1,5 +1,24 @@
+--------------------------------------------------- TODO
+. Create a division of canvas, for colission detection, 
+  place meshes in 2D(like UI) and many more.
+. Implement RenderBuffers.
+. Finish a good implementation for Animations.
+. Event driven system and how it can offer efficiency and/or flexibility.
+. Implement glBufferSubData.
+. Implement the strategy for divide meshes into static draw and dynamic draw.
+
+. - Index Buffers - 
+  . Test draw specific meshes from creating another index buffer, 
+    or if possible select indices from an index buffer.
+  . Maybe create groups of indices stored in meshes, that
+    will allow the re-rendering of certain groups of meshes,
+    also maybe we implement an index-based solution to
+    address vertices and its attributes instead of gfxInfo start????  
+--------------------------------------------------- TODO
+
 --------------------------------------------------- CONTINUE
 
+--------------------------------------------------- CONTINUE
 Correct the meshes dimentions to not create double the width and height
 
 Implement: An easy way of write and use custom shaders:
@@ -9,7 +28,6 @@ Implement: An easy way of write and use custom shaders:
 Finish the event dispatchEvent
 
 Create Camera controls 
---------------------------------------------------- CONTINUE
 --------------------------------------------------- ASAP
 
 Implement Renderer

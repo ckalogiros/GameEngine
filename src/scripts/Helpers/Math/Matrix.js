@@ -29,8 +29,6 @@ export function Mat4Orthographic(left, right, bottom, top, near, far) {
 		 1.0											// 15
 	];
 
-	// return new Matrix4().makeOrthographic(left, right, top, bottom, near, far).elements;
-	return new Matrix4().makePerspective(left, right, top, bottom, 100, 1).elements;
 	console.log('Orthographic:', mat4);
 	return mat4;
 }
@@ -301,7 +299,7 @@ export function RotateZ(dim, angle) {
 	return newPos;
 };
 
-function Matrix4x3_3x3Mult(m1, m2){
+export function Matrix4x3_3x3Mult(m1, m2){
 
 	return [
 					
@@ -321,6 +319,24 @@ function Matrix4x3_3x3Mult(m1, m2){
 		m1[9]*m2[1] + m1[10]*m2[4] + m1[11]*m2[7], // row 4 * col 2
 		m1[9]*m2[2] + m1[10]*m2[5] + m1[11]*m2[8], // row 4 * col 3
 	];
+}
+export function Matrix3x3_3x3Mult(m1, m2){
+
+	const mat = [
+		m1[0]*m2[0] + m1[1]*m2[3] + m1[2]*m2[6], // rowX 1 * col 1
+		m1[0]*m2[1] + m1[1]*m2[4] + m1[2]*m2[7], // rowY 1 * col 2
+		m1[0]*m2[2] + m1[1]*m2[5] + m1[2]*m2[8], // rowZ 1 * col 3
+
+		m1[3]*m2[0] + m1[4]*m2[3] + m1[5]*m2[6], // row 2 * col 1
+		m1[3]*m2[1] + m1[4]*m2[4] + m1[5]*m2[7], // row 2 * col 2
+		m1[3]*m2[2] + m1[4]*m2[5] + m1[5]*m2[8], // row 2 * col 3
+
+		m1[6]*m2[0] + m1[7]*m2[3] + m1[8]*m2[6], // row 3 * col 1
+		m1[6]*m2[1] + m1[7]*m2[4] + m1[8]*m2[7], // row 3 * col 2
+		m1[6]*m2[2] + m1[7]*m2[5] + m1[8]*m2[8], // row 3 * col 3
+	]
+
+	return mat;
 }
 export function MatrixAdd(m1, m2){
 

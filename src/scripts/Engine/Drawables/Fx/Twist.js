@@ -1,5 +1,5 @@
 import { GlGetProgram } from "../../../Graphics/GlProgram.js";
-import { MeshBuffer, TempMesh } from "../MeshBuffer.js";
+import { MeshBuffer, TempMesh } from "../MeshBuffer_OLD.js";
 
 class TwistMesh extends TempMesh {
 

@@ -3,7 +3,7 @@ import { GetRandomInt } from "../../Helpers/Helpers.js";
 import { AnimTextsCreateValue, UiUpdate } from "./Ui/Ui.js";
 import { TimersCreateTimer } from "../../Engine/Timer/Timer.js";
 import { GlowCreate, GlowCreateAnimation, GlowSetTranslation } from "../../Engine/Drawables/Fx/Glow.js";
-import { MeshBuffer, TempMesh } from "../../Engine/Drawables/MeshBuffer.js";
+import { MeshBuffer, TempMesh } from "../../Engine/Drawables/MeshBuffer_OLD.js";
 
 const TIMER_MAX = 2; // Make large enough so the timer does not end and start from 0 again, because the animation will start over 
 const TIMER_STEP = 0.01;

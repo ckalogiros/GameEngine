@@ -27,13 +27,6 @@ const GL = {
 // different vertex and fragment shaders bbbased uppon the input attribbutes, input uniforms and other properties.
 // Shader creation flags 
 
-let val = 1;
-for(let i=0; i<10; i++){
-
-    console.log(val)
-    val = val << 1;
-}
-
 let BIT1 = 1, BIT2 = 1, BIT3 = 1, BIT4 = 1;
 const SID = {
     SHAD: {
@@ -322,6 +315,121 @@ const FLOAT = 4; // 4 Bytes
 
 /* Graphics Constants
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
+const TRIG = {
+    COS: 0,
+    SIN: 0,
 
+}; 
 
+/** Rotation Matrices */
+class ROTATION3D{
+    RX = [ 
+        1,   0,              0,
+        0, TRIG.COS, -TRIG.SIN, 
+        0, TRIG.SIN,  TRIG.COS, 
+    ];
+    RY = [ 
+         TRIG.COS, 0, TRIG.SIN,
+                0, 1,        0, 
+        -TRIG.SIN, 0, TRIG.COS, 
+    ];
+    RZ = [ 
+        TRIG.COS, -TRIG.SIN, 0, 
+        TRIG.SIN,  TRIG.COS, 0,
+               0,         0, 1,
+    ];
+
+    Set(cos, sin){
+
+        this.RX[4] = cos;
+        this.RX[5] = -sin;
+        this.RX[7] = sin;
+        this.RX[8] = cos;
+
+        this.RY[0] = cos;
+        this.RY[2] = -sin;
+        this.RY[6] = sin;
+        this.RY[8] = cos;
+
+        this.RZ[0] = cos;
+        this.RZ[1] = -sin;
+        this.RZ[3] = sin;
+        this.RZ[4] = cos;
+    }
+
+    SetRX(cos, sin){
+        this.RX[4] = cos;
+        this.RX[5] = -sin;
+        this.RX[7] = sin;
+        this.RX[8] = cos;
+    }
+    SetRY(cos, sin){
+        this.RY[0] = cos;
+        this.RY[2] = -sin;
+        this.RY[6] = sin;
+        this.RY[8] = cos;
+    }
+    SetRZ(cos, sin){
+        this.RZ[0] = cos;
+        this.RZ[1] = -sin;
+        this.RZ[3] = sin;
+        this.RZ[4] = cos;
+    }
+}
+
+const ROT3D = new ROTATION3D();
+
+const RX3D = [ 
+    1,   0,              0,
+    0, TRIG.COS, -TRIG.SIN, 
+    0, TRIG.SIN,  TRIG.COS, 
+];
+const RY3D = [ 
+     TRIG.COS, 0, TRIG.SIN,
+            0, 1,        0, 
+    -TRIG.SIN, 0, TRIG.COS, 
+];
+const RZ3D = [ 
+    TRIG.COS, -TRIG.SIN, 0, 
+    TRIG.SIN,  TRIG.COS, 0,
+           0,         0, 1,
+];
+
+/** Cube Faces */
+// const vPosF = [
+//     -1,  1, 1,
+//     -1, -1, 1,
+//      1,  1, 1,
+//      1, -1, 1,
+// ];
+// const vPosBK = [
+//     -1,  1, -1,
+//     -1, -1, -1,
+//      1,  1, -1,
+//      1, -1, -1,
+// ];
+// const vPosL = [
+//     -1,  1, -1,
+//     -1, -1, -1,
+//     -1,  1,  1,
+//     -1, -1,  1,
+// ];
+// const vPosR = [
+//     1,  1, -1,
+//     1, -1, -1,
+//     1,  1,  1,
+//     1, -1,  1,
+// ];
+// const vPosT = [
+//     -1, 1,  1,
+//     -1, 1, -1,
+//      1, 1,  1,
+//      1, 1, -1,
+// ];
+// const vPosBT = [
+//     -1, -1,  1,
+//     -1, -1, -1,
+//      1, -1,  1,
+//      1, -1, -1,
+// ];
 

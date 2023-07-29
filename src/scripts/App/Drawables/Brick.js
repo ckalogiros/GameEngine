@@ -9,7 +9,7 @@ import { OnStageCompleted } from '../../Engine/Events/SceneEvents.js';
 import { AnimationsGet } from '../../Engine/Animations/Animations.js';
 import { PowerUpCreate } from './PowerUp.js';
 import { CoinCreate } from './Coin.js';
-import { MeshBuffer, TempMesh } from '../../Engine/Drawables/MeshBuffer.js';
+import { MeshBuffer, TempMesh } from '../../Engine/Drawables/MeshBuffer_OLD.js';
 import { BulletGet, GunGet } from './Bullet.js';
 
 

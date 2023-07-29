@@ -1,6 +1,6 @@
 "use strict";
 
-import { GlRotateX3D, GlRotateY3D, GlRotateZ3D } from "../../Graphics/Buffers/GlBufferOps.js";
+import { GlRotateX3D, GlRotateXY3D, GlRotateY3D, GlRotateZ3D } from "../../Graphics/Buffers/GlBufferOps.js";
 import { GlDraw } from "../../Graphics/GlDraw.js";
 import { GlCreateTexture } from "../../Graphics/GlTextures.js";
 import { PrintAttributes } from "../../Graphics/Z_Debug/GfxDebug.js";
@@ -81,6 +81,7 @@ export class WebGlRenderer {
       if (g_state.game.paused === false) {
          
          this.fpsTimer.Start();
+
          TimeUpdate(); // Update the Global Timer (real time, in miliseconds)
          TimeIntervalsUpdateAll(); // Update and run callbacks for each interval timer that has been set.
          
@@ -93,7 +94,12 @@ export class WebGlRenderer {
          this.scene.OnUpdate();
          
          if(mesh){
-            GlRotateZ3D(mesh.gfx, mesh.geom.dim, this.fpsTimer.cnt*.02)
+            // GlRotateZ3D(mesh, this.fpsTimer.cnt*.02);
+            // GlRotateY3D(mesh, this.fpsTimer.cnt*.02)
+            // GlRotateX3D(mesh, this.fpsTimer.cnt*.02)
+            GlRotateXY3D(mesh, this.fpsTimer.cnt*.02)
+            
+            // GlRotateZ3D(mesh.gfx, mesh.geom.dim, this.fpsTimer.cnt*.02);
             // GlRotateX3D(mesh.gfx, mesh.geom.dim, this.fpsTimer.cnt*.002)
             // GlRotateY3D(mesh.gfx, mesh.geom.dim, this.fpsTimer.cnt*.002)
          }

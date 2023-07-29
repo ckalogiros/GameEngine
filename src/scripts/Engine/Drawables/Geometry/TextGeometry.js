@@ -2,6 +2,7 @@
 
 import { GlAddGeometry, GlHandlerAddGeometryBuffer } from "../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh } from "../../../Graphics/GlProgram.js";
+import { FontGetFontDimRatio } from "../../Loaders/Font/Font.js";
 import { Geometry2D } from "../Geometry.js";
 
 
@@ -10,8 +11,15 @@ export class TextGeometry2D extends Geometry2D {
    numChars;
    text;
 
-   constructor(pos, fontSize, scale, text) {
-      const dim = [fontSize, fontSize];
+   constructor(pos, fontSize, scale, text, texId=INT_NULL) {
+
+      let dim = [0,0]
+      dim = [fontSize, fontSize];
+      if(texId !== INT_NULL) {
+         dim[1] *= FontGetFontDimRatio(texId);
+         pos[0] += fontSize; // Case pos is set to 0, then we must add half text face width.
+      }
+      
       super(pos, dim, scale);
       this.text = text;
       this.numChars = text.length;

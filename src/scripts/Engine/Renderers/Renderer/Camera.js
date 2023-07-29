@@ -104,9 +104,9 @@ export class Camera extends Matrix4 {
 	}
 	Rotate(theta){
 		const c = Math.cos(theta), s = Math.sin(theta);
-		const Z1 = 0, Z2 = 1, Z3 = 4, Z4 = 5; // Y Axis
+		const Z1 = 0, Z2 = 1, Z3 = 4, Z4 = 5; // Z Axis
 		const Y1 = 0, Y2 = 2, Y3 = 8, Y4 = 10; // Y Axis
-		const X1 = 5, X2 = 6, X3 = 10, X4 = 11; // Y Axis
+		const X1 = 5, X2 = 6, X3 = 10, X4 = 11; // X Axis
 		this.elements[Z1] *=  c;
 		this.elements[Z2] *= -s;
 		this.elements[Z3] *=  s;

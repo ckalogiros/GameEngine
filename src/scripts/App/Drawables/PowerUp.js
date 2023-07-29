@@ -8,7 +8,7 @@ import { GlowCreate, GlowDestroy, GlowSetTranslation } from "../../Engine/Drawab
 import { GetRandomColor, GetRandomInt } from "../../Helpers/Helpers.js";
 import { GunGet } from "./Bullet.js";
 import { TimeIntervalResetTimer, TimeIntervalsCreate } from "../../Engine/Timer/Time.js";
-import { MeshBuffer, TempMesh } from "../../Engine/Drawables/MeshBuffer.js";
+import { MeshBuffer, TempMesh } from "../../Engine/Drawables/MeshBuffer_OLD.js";
 
 
 

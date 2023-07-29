@@ -168,8 +168,8 @@ const DEBUG = {
 	RECT: true,
 	CAMERA: false,
 
-	TEXTURE: true,
-	UVS: true,
+	TEXTURE: false,
+	UVS: false,
 	
 	// Graphics
 	WEB_GL: true,

@@ -2,7 +2,7 @@ import { AnimationsGet } from "../../Animations/Animations.js";
 import { Abs, CopyArr2 } from '../../../Helpers/Math/MathOperations.js'
 import { UiGetUi } from "../../../App/Drawables/Ui/Ui.js";
 import { TimerGetGlobalTimerCycle } from "../../Timer/Timer.js";
-import { MeshBuffer, TempMesh } from "../MeshBuffer.js";
+import { MeshBuffer, TempMesh } from "../MeshBuffer_OLD.js";
 
 // For readability of the attribute params1 vector
 const GLOW_ATTR_PARAMS1 = {
