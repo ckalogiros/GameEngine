@@ -1,302 +1,18 @@
 "use strict";
 
-import * as math from '../../Helpers/Math/MathOperations.js'
-import * as glBufferOps from '../../Graphics/Buffers/GlBufferOps.js'
-import { GlAddGeometry, GlHandlerAddGeometryBuffer, GlHandlerAddIndicesBuffer } from '../../Graphics/Buffers/GlBuffers.js';
-
-let _geometryId = 0;
-
-export class Geometry2D {
-
-    sid;
-    pos = [0, 0, 0];
-    dim = [0, 0];
-    scale = [0, 0];
-    defPos = [0, 0, 0];
-    defDim = [0, 0];
-    defScale = [0, 0];
-    time = 0;
-
-    constructor(pos = [0, 0, 0], dim = [0, 0], scale = [1, 1]) {
-
-        this.sid = {
-            shad: 0,
-            attr: (SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4),
-            unif: 0,
-            pass: 0,
-        };
-
-        math.CopyArr3(this.pos, pos);
-        math.CopyArr2(this.dim, dim);
-        math.CopyArr2(this.scale, scale);
-
-        // Keep a copy of the starting dimention and position
-        math.CopyArr2(this.defDim, dim);
-        math.CopyArr2(this.defScale, scale);
-        math.CopyArr3(this.defPos, pos);
-
-        /** Debug properties */
-        if (DEBUG.GEOMETRY) {
-            Object.defineProperty(this, 'id', { value: _geometryId++ });
-            Object.defineProperty(this, 'type', { value: 'Geometry' });
-        }
-    }
-
-    //////////////////////////////////////////////////////////////
-    AddToGraphicsBuffer(sid, gfx, meshName) {
-        GlAddGeometry(sid, this.pos, this.dim, this.time, gfx, meshName, 1)
-        // GlHandlerAddGeometryBuffer(sid, this.time, gfx, meshName, this.pos, this.dim)
-    }
-
-    //////////////////////////////////////////////////////////////
-    SetPos(pos, gfx) {
-        math.CopyArr3(this.pos, pos);
-        glBufferOps.GlSetWposXY(gfx, pos);
-    }
-    MoveXYConcecutive(pos, gfx, numMeshes) {
-        math.CopyArr2(this.pos, pos);
-        glBufferOps.GlMoveXYConcecutive(gfx, pos,numMeshes);
-    }
-
-    SetPosXY(pos) {
-        math.CopyArr2(this.mesh.pos, pos);
-        glBufferOps.GlSetWposXY(this.gfxInfo, pos);
-    }
-    SetPosX(x) {
-        this.mesh.pos[0] = x;
-        glBufferOps.GlSetWposX(this.gfxInfo, x);
-    }
-    SetPosY(y) {
-        this.mesh.pos[1] = y;
-        glBufferOps.GlSetWposY(this.gfxInfo, y);
-    }
-    UpdatePosXY() {
-        glBufferOps.GlSetWposXY(this.gfxInfo, this.mesh.pos);
-    }
-    SetZindex(z) {
-        this.mesh.pos[2] = z;
-        glBufferOps.GlSetWposZ(this.gfxInfo, z);
-    }
-    Move(x, y) {
-        this.mesh.pos[0] += x;
-        this.mesh.pos[1] += y;
-        GlMove(this.gfxInfo, [x, y]);
-    }
-    MoveX(x) {
-        this.mesh.pos[0] += x;
-        glBufferOps.GlMove(this.gfxInfo, [x, 0]);
-    }
-    MoveY(y) {
-        this.mesh.pos[1] += y;
-        glBufferOps.GlMove(this.gfxInfo, [0, y]);
-    }
-    //////////////////////////////////////////////////////////////
-    SetDim(dim) {
-        math.CopyArr2(this.mesh.dim, dim);
-        glBufferOps.GlSetDim(this.gfxInfo, dim);
-    }
-    // Shrink(val) {
-    //     this.mesh.dim[0] *= val;
-    //     this.mesh.dim[1] *= val;
-    //     glBufferOps.GlSetDim(this.gfxInfo, this.mesh.dim);
-    // }
-    UpdateScale() {
-        glBufferOps.GlSetScale(this.gfxInfo, this.mesh.scale);
-    }
-    SetScale(s) {
-        this.mesh.scale[0] *= s;
-        this.mesh.scale[1] *= s;
-        glBufferOps.GlSetScale(this.gfxInfo, this.mesh.scale);
-    }
-    ScaleFromVal(val) {
-        this.mesh.scale[0] *= val;
-        this.mesh.scale[1] *= val;
-        glBufferOps.GlSetScale(this.gfxInfo, this.mesh.scale);
-        // Also set dim to mirror the scale
-        this.mesh.dim[0] *= val;
-        this.mesh.dim[1] *= val;
-    }
-    StoreDefPos(pos) {
-        math.CopyArr2(this.mesh.defPos, pos);
-    }
-
-}
+import { GlHandlerAddGeometryBuffer, GlHandlerAddIndicesBuffer } from "../../../Graphics/Buffers/GlBuffers.js";
+import { Geometry3D } from "./Base/Geometry.js";
 
 
-export class Geometry3D {
-
-    sid;
-
-    pos   = [0, 0, 0];
-    dim   = [0, 0, 0];
-    scale = [0, 0, 0];
-    time  = 0;
-
-    constructor(pos = [0, 0, 0], dim = [0, 0, 0], scale = [1, 1, 1]) {
-
-        this.sid = {
-            shad: 0,
-            attr: (SID.ATTR.POS3 | SID.ATTR.WPOS_TIME4),
-            unif: 0,
-            pass: 0,
-        };
-
-        math.CopyArr3(this.pos, pos);
-        math.CopyArr3(this.dim, dim);
-        math.CopyArr3(this.scale, scale);
-
-        /** Debug properties */
-        if (DEBUG.GEOMETRY) {
-            Object.defineProperty(this, 'id', { value: _geometryId++ });
-            Object.defineProperty(this, 'type', { value: 'Geometry' });
-        }
-    }
-
-    //////////////////////////////////////////////////////////////
-    // AddToGraphicsBuffer(sid, gfx, meshName) {
-    //     // GlAddGeometry(sid, this.pos, this.dim, this.time, gfx, meshName, 1)
-
-    // }
-
-    //////////////////////////////////////////////////////////////
-    SetPos(pos, gfx) {
-        math.CopyArr3(this.mesh.pos, pos);
-        glBufferOps.GlSetWposXY(gfx, pos);
-    }
-    SetPosXY(pos, gfx) {
-        math.CopyArr2(this.mesh.pos, pos);
-        glBufferOps.GlSetWposXY(this.gfxInfo, pos);
-    }
-    SetPosX(x, gfx) {
-        this.mesh.pos[0] = x;
-        glBufferOps.GlSetWposX(this.gfxInfo, x);
-    }
-    SetPosY(y) {
-        this.mesh.pos[1] = y;
-        glBufferOps.GlSetWposY(this.gfxInfo, y);
-    }
-    UpdatePosXY() {
-        glBufferOps.GlSetWposXY(this.gfxInfo, this.mesh.pos);
-    }
-    SetZindex(z) {
-        this.mesh.pos[2] = z;
-        glBufferOps.GlSetWposZ(this.gfxInfo, z);
-    }
-    Move(x, y) {
-        this.mesh.pos[0] += x;
-        this.mesh.pos[1] += y;
-        GlMove(this.gfxInfo, [x, y]);
-    }
-    MoveX(x) {
-        this.mesh.pos[0] += x;
-        glBufferOps.GlMove(this.gfxInfo, [x, 0]);
-    }
-    MoveY(y) {
-        this.mesh.pos[1] += y;
-        glBufferOps.GlMove(this.gfxInfo, [0, y]);
-    }
-    //////////////////////////////////////////////////////////////
-    SetDim(dim) {
-        math.CopyArr2(this.mesh.dim, dim);
-        glBufferOps.GlSetDim(this.gfxInfo, dim);
-    }
-    // Shrink(val) {
-    //     this.mesh.dim[0] *= val;
-    //     this.mesh.dim[1] *= val;
-    //     glBufferOps.GlSetDim(this.gfxInfo, this.mesh.dim);
-    // }
-    UpdateScale() {
-        glBufferOps.GlSetScale(this.gfxInfo, this.mesh.scale);
-    }
-    SetScale(s) {
-        this.mesh.scale[0] *= s;
-        this.mesh.scale[1] *= s;
-        glBufferOps.GlSetScale(this.gfxInfo, this.mesh.scale);
-    }
-    ScaleFromVal(val) {
-        this.mesh.scale[0] *= val;
-        this.mesh.scale[1] *= val;
-        glBufferOps.GlSetScale(this.gfxInfo, this.mesh.scale);
-        // Also set dim to mirror the scale
-        this.mesh.dim[0] *= val;
-        this.mesh.dim[1] *= val;
-    }
-    StoreDefPos(pos) {
-        math.CopyArr2(this.mesh.defPos, pos);
-    }
-
-}
 
 export class CubeGeometry extends Geometry3D {
     
     faces; // TODO: Bad nam, Rename this.
 
     constructor(pos, dim, scale) {
+
         super(pos, dim, scale);
-        // this.faces = [
-        //     // Front 
-        //     -1,  1, 1, // v1
-        //     -1, -1, 1, // v2
-        //      1,  1, 1, // v3
-        //      1, -1, 1, // v4
-        //      // Left
-        //      -1,  1, -1,
-        //      -1, -1, -1,
-        //      -1,  1,  1,
-        //      -1, -1,  1,
-        //      // Back
-        //      -1,  1, -1,
-        //      -1, -1, -1,
-        //       1,  1, -1,
-        //       1, -1, -1,
-        //     // Right
-        //      1,  1, -1,
-        //      1, -1, -1,
-        //      1,  1,  1,
-        //      1, -1,  1,
-        //     // Top
-        //     -1, 1,  1,
-        //     -1, 1, -1,
-        //      1, 1,  1,
-        //      1, 1, -1,
-        //     // Bottom
-        //     -1, -1,  1,
-        //     -1, -1, -1,
-        //      1, -1,  1,
-        //      1, -1, -1,
-        // ];
-        // this.faces = [
-        //     // Front 
-        //     -1,  1, 1, // v1
-        //     -1, -1, 1, // v2
-        //      1,  1, 1, // v3
-        //      1, -1, 1, // v4
-        //      // Right
-        //      1, -1,  1,
-        //      1, -1, -1,
-        //      1,  1,  1,
-        //      1,  1, -1,
-        //      // Back
-        //      -1,  1, -1,
-        //      -1, -1, -1,
-        //      1,  1, -1,
-        //      1, -1, -1,
-        //      // Left
-        //      -1, -1,  1,
-        //      -1, -1, -1,
-        //      -1,  1,  1,
-        //      -1,  1, -1,
-        //     // Top
-        //     -1, 1,  1,
-        //     -1, 1, -1,
-        //      1, 1,  1,
-        //      1, 1, -1,
-        //     // Bottom
-        //     -1, -1,  1,
-        //     -1, -1, -1,
-        //      1, -1,  1,
-        //      1, -1, -1,
-        // ];
+
         this.faces = [
             // Face Front
             -.5,  .5, .5, // v1
@@ -334,6 +50,8 @@ export class CubeGeometry extends Geometry3D {
              .5, -.5,  .5, // v3
              .5, -.5, -.5, // v4
         ];
+
+        this.type |= MESH_TYPES.CUBE_GEOMETRY;
     }
 
     AddToGraphicsBuffer(sid, gfx, meshName) {
@@ -350,8 +68,6 @@ export class CubeGeometry extends Geometry3D {
              x -y -z       -x -y  z        x -y  z   
         */
 
-        
-
         // TODO: Calculate the number of attributes for the buffers
         const vertexPos = new Float32Array(72); // localy allocated mem space for creating vertex positions from meshes.
         // TODO: Calculate the number of indices for the buffer
@@ -365,57 +81,13 @@ export class CubeGeometry extends Geometry3D {
             vertexPos[i] = this.faces[i++] * y;
             vertexPos[i] = this.faces[i++] * z;
         }
-        // {
-        //     i=0;
-        //     // Face Front
-        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v1
-        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v2
-        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
-        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v4
-            
-        //     // Face Right
-        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
-        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
-        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
-        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
-            
-        //     // Face Back
-        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v1
-        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
-        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v3
-        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v4
-            
-        //     // Face Left
-        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
-        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
-        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
-        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
-            
-        //     // Face Top
-        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v1
-        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v2
-        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
-        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
-            
-        //     // Face Bottom
-        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
-        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
-        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v3
-        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v4
-        // }
+
         
         
         let counters = {
             cntPos:0, cntNorm:0, cntUv:0, indicesStart: gfx.ib.count,
         };
-        /**
-         'x', 'z', 'y',  1,  1, width, depth,   height, 
-         'x', 'y', 'z', -1, -1, width, height, -depth,  
-         'x', 'z', 'y',  1, -1, width, depth,  -height, 
-         'x', 'y', 'z',  1, -1, width, height,  depth,  
-         'z', 'y', 'x', -1, -1, depth, height,  width, 
-         'z', 'y', 'x',  1, -1, depth, height, -width, 
-        //  */
+
         // counters = this.CreateFace( 0, 2, 1, 1, 1, this.dim[0], this.dim[2], this.dim[1], 1, 1, {vertexPos:vertexPos, normal:null, uv:null, index:indexBuffer}, counters); // Front face
         // counters = this.CreateFace( 0, 1, 2, 1, 1, this.dim[2], this.dim[1], this.dim[0], 1, 1, {vertexPos:vertexPos, normal:null, uv:null, index:indexBuffer}, counters ); // Front face
         // counters = this.CreateFace( 0, 1, 2, 1, 1, this.dim[1], this.dim[0], this.dim[2], 1, 1, {vertexPos:vertexPos, normal:null, uv:null, index:indexBuffer}, counters); // Front face
@@ -501,6 +173,7 @@ export class CubeGeometry extends Geometry3D {
         // indices
         const indexBuffer = buffers.index;
         let cnt = indicesStart;
+
         // 1. you need three indices to draw a single face
         // 2. a single segment consists of two faces
         // 3. so we need to generate six (2*3) indices per segment
@@ -553,6 +226,7 @@ export class CubeGeometry extends Geometry3D {
         // console.log('indexBuffer', indexBuffer)
         return {cntPos:cntPos, cntNorm:cntNorm, cntUv:cntUv, indicesStart:indicesStart,}
     }
+
     // CreateFace( udir, vdir, width, height, depth, gridX, gridY ) {
 
     //     /** */ // From THREE.js
@@ -636,3 +310,56 @@ export class CubeGeometry extends Geometry3D {
     // }
 
 }
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        // {
+        //     i=0;
+        //     // Face Front
+        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v1
+        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v2
+        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
+        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v4
+            
+        //     // Face Right
+        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
+        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
+        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
+        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
+            
+        //     // Face Back
+        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v1
+        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
+        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v3
+        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v4
+            
+        //     // Face Left
+        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
+        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
+        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
+        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
+            
+        //     // Face Top
+        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v1
+        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v2
+        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
+        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
+            
+        //     // Face Bottom
+        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
+        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
+        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v3
+        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v4
+    // }
+
+    /**
+     'x', 'z', 'y',  1,  1, width, depth,   height, 
+        'x', 'y', 'z', -1, -1, width, height, -depth,  
+        'x', 'z', 'y',  1, -1, width, depth,  -height, 
+        'x', 'y', 'z',  1, -1, width, height,  depth,  
+        'z', 'y', 'x', -1, -1, depth, height,  width, 
+        'z', 'y', 'x',  1, -1, depth, height, -width, 
+        */

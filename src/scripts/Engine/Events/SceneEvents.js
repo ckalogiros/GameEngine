@@ -2,10 +2,10 @@
 import { PlayerCreateDimColorAnimation, PlayerCollisions, PlayerReset, UpdatePlayerPosX } from "../../App/Drawables/Player.js";
 import { BallCreateDimColorAnimation, BallCreateSlowSpeedAnimation, BallOnUpdate, BallReset } from "../../App/Drawables/Ball.js";
 import { BrickBallCollision, BrickOnUpdate, BrickReset } from "../../App/Drawables/Brick.js";
-import { AnimationsGet } from "../Animations/Animations.js";
-import { PowerUpReset } from "../../App/Drawables/PowerUp.js";
-import { UiResetScore, UiGetScore, UiGetTotalScore, UiSetTotalScore, UiUpdateScore, UiUpdateTotalScore } from "../../App/Drawables/Ui/Ui.js";
-import { GlowUpdate } from "../Drawables/Fx/Glow.js";
+// import { AnimationsGet } from "../Animations/Animations.js";
+// import { PowerUpReset } from "../../App/Drawables/PowerUp.js";
+// import { UiResetScore, UiGetScore, UiGetTotalScore, UiSetTotalScore, UiUpdateScore, UiUpdateTotalScore } from "../../App/Drawables/Ui/Ui.js";
+// import { GlowUpdate } from "../Drawables/Fx/Glow.js";
 import { TwistUpdate } from "../Drawables/Fx/Twist.js";
 import { GunUpdate } from "../../App/Drawables/Bullet.js";
 import { FramebuffersCreateDimColorAnimation, FramebuffersSetActive } from "../../Graphics/Buffers/Renderbuffer.js";
@@ -134,7 +134,7 @@ function ShowTotalScoreStart(params){
     }
     
     
-    // Get the mesh TextLabel with the total score
+    // Get the mesh Widget_Text_Label with the total score
     const scoreLabel = ScenesGetMesh(APP_MESHES_IDX.text.totalScore);
     if(scoreLabel !== null || scoreLabel !== undefined){
         scoreLabel.ChangeText('Total Score: ' + params.totalScore);

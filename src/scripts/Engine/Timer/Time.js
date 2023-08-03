@@ -335,7 +335,7 @@ class Fps {
       this.elapsedAccum = 0;
 
       // Create an 1 second average fps couunter
-      TimeIntervalsCreate(1000, 'Fps-1sec', TIME_INTERVAL_REPEAT_ALWAYS, this.GetAvg_1S);
+      TimeIntervalsCreate(1000, 'Fps-1sec', TIME_INTERVAL_REPEAT_ALWAYS, this.Avg_1S);
       // intervalTimers.Create(1000, this.GetAvg_1S, 'Fps-1sec', TIME_INTERVAL_REPEAT_ALWAYS)
    }
    Update() {
@@ -363,10 +363,14 @@ class Fps {
    GetAvg() {
       return Math.floor(1 / (this.accum / this.cnt))
    }
-   GetAvg_1S() {
+   Avg_1S() {
       const avg1s = this.elapsedAccum / this.elapsedCnt;
       this.elapsedAccum = 0.;
       this.elapsedCnt = 0.;
+      return Math.floor(1 / avg1s);
+   }
+   GetAvg_1S() {
+      const avg1s = this.elapsedAccum / this.elapsedCnt;
       return Math.floor(1 / avg1s);
    }
    GetWorst() { return Math.floor(1 / this.worst.delta) }

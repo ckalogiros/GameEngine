@@ -1,13 +1,14 @@
 "use strict";
 import { BallInitCurveMode, BallPlayerCollision, BallSetCurveMode } from './Ball.js';
-import { PowerUpPlayerCollision } from './PowerUp.js';
-import { Rect2D } from '../../Engine/Drawables/Geometry/Rect2D.js';
-import { CoinPlayerCollision } from './Coin.js';
+// import { PowerUpPlayerCollision } from './PowerUp.js';
+// import { Rect2D } from '../../Engine/Drawables/Geometry/Rect2D.js';
+// import { CoinPlayerCollision } from './Coin.js';
 import { Abs } from '../../Helpers/Math/MathOperations.js';
 import { StepTimersCreate } from '../../Engine/Timer/Time.js';
-import { AnimationsGet } from '../../Engine/Animations/Animations.js';
+// import { AnimationsGet } from '../../Engine/Animations/Animations.js';
 import { TimersCreateTimer } from '../../Engine/Timer/Timer.js';
 import { GlSetDim } from '../../Graphics/Buffers/GlBufferOps.js';
+import { Geometry2D } from '../../Engine/Drawables/Geometry/Base/Geometry.js';
 
 const PLAYER_DEF_COLOR = BLUE_10_120_220;
 const PREV_POS_BUFFER_LEN = 5;
@@ -15,7 +16,7 @@ let storePosCounter = 0;
 let counter = 0;
 
 // Exporting is only for the class type(to compare with the instanceof operator)
-export class Player extends Rect2D {
+export class Player extends Geometry2D {
 
     speed;
     mouseDist;

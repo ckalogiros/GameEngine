@@ -299,8 +299,8 @@ export function VbSetAttribBuffer(vb, start, count, stride, buffer, attribSize) 
     for (let i = 0; i < count; i += stride) {
         for (let j = 0; j < attribSize; j++) {
             vb.data[cnt++] = buffer[cnt2++];
-            if (cnt2 >= len) cnt2 = 0;
             vb.count++;
+            if (cnt2 >= len) cnt2 = 0;
         }
 
         cnt += stride - attribSize;

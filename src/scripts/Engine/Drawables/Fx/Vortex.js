@@ -1,6 +1,7 @@
-import { Rect2D } from "../Geometry/Rect2D.js";
+// import { Rect2D } from "../Geometry/Rect2D.js";
 import { TimerGetGlobalTimer } from "../../Timer/Timer.js";
 import { GlGetProgram } from "../../../Graphics/GlProgram.js";
+import { Geometry2D } from "../Geometry/Base/Geometry.js";
 
 // For readability of the attribute params1 array vector
 const VORTEX_ATTR_PARAMS1 = {
@@ -8,7 +9,7 @@ const VORTEX_ATTR_PARAMS1 = {
 };
 
 
-class VortexMesh extends Rect2D {
+class VortexMesh extends Geometry2D {
 
    isActive = false;
    timer = {

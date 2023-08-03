@@ -1,7 +1,8 @@
 "use strict";
 
+import { Geometry2D } from "../../Engine/Drawables/Geometry/Base/Geometry.js";
 import { MeshBuffer, TempMesh } from "../../Engine/Drawables/MeshBuffer_OLD.js";
-import { Rect2D } from "../../Engine/Drawables/Geometry/Rect2D.js";
+// import { Rect2D } from "../../Engine/Drawables/Geometry/Rect2D.js";
 import { AtlasTextureGetCoords } from "../../Engine/Loaders/Textures/Texture.js";
 import { TimersCreateTimer } from "../../Engine/Timer/Timer.js";
 import { PlayerGetPos } from "./Player.js";
@@ -108,7 +109,7 @@ export function BulletGet() {
 
 
 
-export class Gun extends Rect2D {
+export class Gun extends Geometry2D {
    isActive;
    numBullets; // Counter on how many bullets the player has to spend
    constructor() {

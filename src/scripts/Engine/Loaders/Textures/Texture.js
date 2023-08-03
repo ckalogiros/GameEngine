@@ -18,6 +18,7 @@ export class Texture {
 
 	tex = null;
 	texId = -1;
+	Idx = -1;
 	width = 0;
 	height = 0;
 	level = -1;
@@ -97,22 +98,25 @@ export function TextureLoadTexture(texId) {
 
 				// Load the font image
 				const img = ImageLoader.Load('fonts/consolas_sdf', FONT_CONSOLAS_SDF_LARGE, 'png');
-				ret.texIdx = TextureCreateTexture(gfxCtx.gl, img, FONT_CONSOLAS_SDF_LARGE)
+				_activeTextures[texId] = TextureCreateTexture(gfxCtx.gl, img, FONT_CONSOLAS_SDF_LARGE);
+				ret.texIdx = _activeTextures[texId];
 				ret.uvIdx = FontLoadUvs(texId);
-
+				
 				break;
 			}
 			case FONTS.SDF_CONSOLAS_SMALL: {
 				// Load the font image
 				const img = ImageLoader.Load('fonts/consolas_sdf', FONT_CONSOLAS_SDF_SMALL, 'png');
-				ret.texIdx = TextureCreateTexture(gfxCtx.gl, img, FONT_CONSOLAS_SDF_SMALL)
+				_activeTextures[texId] = TextureCreateTexture(gfxCtx.gl, img, FONT_CONSOLAS_SDF_SMALL);
+				ret.texIdx = _activeTextures[texId];
 				ret.uvIdx = FontLoadUvs(texId);
 				break;
 			}
 			case TEXTURES.TEST: {
 				// Load the texture image
 				const img = ImageLoader.Load('textures', TEXTURE_TEST, 'png');
-				ret.texIdx = TextureCreateTexture(gfxCtx.gl, img, TEXTURE_TEST)
+				_activeTextures[texId] = TextureCreateTexture(gfxCtx.gl, img, TEXTURE_TEST);
+				ret.texIdx = _activeTextures[texId];
 				ret.uvIdx = TextureLoadUvs(); // If uvs not found, fallback to [0,1] coordinates
 				break;
 			}

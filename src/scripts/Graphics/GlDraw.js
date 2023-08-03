@@ -56,7 +56,7 @@ export function GlDraw(gl) {
         if (vb.needsUpdate) GlUpdateVertexBufferData(gl, vb)
 
         gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
-        // gl.drawElements(gl.TRIANGLES, 250, gl.UNSIGNED_SHORT, 0);
+        // gl.drawElements(gl.TRIANGLES, 8024, gl.UNSIGNED_SHORT, 0);
     }
     
     // const fb = FramebuffersGet(FRAMEBUFFERS_IDX.buffer0);

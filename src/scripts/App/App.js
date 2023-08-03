@@ -1,24 +1,21 @@
 "use strict";
 import { Scene } from '../Engine/Scenes.js'
 import { EventsAddListeners, } from '../Engine/Events/Events.js';
-import { GlGetProgram } from '../Graphics/GlProgram.js';
-import { ButtonSetRoundCorner, ButtonSetBorderWidth, ButtonSetBorderFeather } from '../Engine/Drawables/Widgets/Button.js';
-import { BrickSetRoundCorner, BrickSetBorderWidth, BrickSetBorderFeather } from './Drawables/Brick.js';
-import { InterpolateToRange } from '../Helpers/Math/MathOperations.js';
-import { Rect2D } from '../Engine/Drawables/Geometry/Rect2D.js';
-import { FontMaterial, MAT_ENABLE, Material, Material_TEMP_fromBufferFor3D } from '../Engine/Drawables/Material.js';
-import { MESH_ENABLE, Mesh, TextMesh } from '../Engine/Drawables/Mesh.js';
-import { RenderQueueCreate, RenderQueueSetPriority } from '../Engine/Renderers/Renderer/RenderQueue.js';
+import { MAT_ENABLE, Material, Material_TEMP_fromBufferFor3D } from '../Engine/Drawables/Material/Material.js';
+import { MESH_ENABLE, Mesh, Text_Mesh } from '../Engine/Drawables/Mesh.js';
+import { RenderQueueGet, RenderQueueInit, RenderQueueSetPriority, RenderQueueUpdate } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { WebGlRenderer } from '../Engine/Renderers/WebGlRenderer.js';
 import { CAMERA_CONTROLS, CameraOrthographic, CameraPerspective } from '../Engine/Renderers/Renderer/Camera.js';
-import { CubeGeometry } from '../Engine/Drawables/Geometry.js';
+import { Geometry2D } from '../Engine/Drawables/Geometry/Base/Geometry.js';
 import { TextureInitBuffers } from '../Engine/Loaders/Textures/Texture.js';
-import { TextGeometry2D } from '../Engine/Drawables/Geometry/TextGeometry.js';
-import { UiFps } from '../Engine/Drawables/Widgets/Ui/UiFps.js';
-import { FpsGet, FpsGetAvg, FpsGetAvg1S } from '../Engine/Timer/Time.js';
-import { TextLabel } from '../Engine/Drawables/Widgets/TextLabel.js';
+import { FpsGetAvg, FpsGetAvg1S } from '../Engine/Timer/Time.js';
+import { Widget_Text_Label } from '../Engine/Drawables/Widgets/WidgetTextLabel.js';
+import { Widget_Button } from '../Engine/Drawables/Widgets/WidgetButton.js';
+import { Widget_Text, Widget_Text_Dynamic } from '../Engine/Drawables/Widgets/WidgetText.js';
+import { GetShaderTypeId } from '../Graphics/Z_Debug/GfxDebug.js';
+import { CubeGeometry } from '../Engine/Drawables/Geometry/Geometry3DCube.js';
+import { SizeOfObject } from '../Helpers/Helpers.js';
 
-// Debug-Print
 
 
 let renderer = null;
@@ -54,6 +51,7 @@ export function AppInit() {
     renderer = new WebGlRenderer(scene, camera);
 
     EventsAddListeners();
+    RenderQueueInit();
     // MeshConstantsSetUp();
 
 
@@ -62,93 +60,162 @@ export function AppInit() {
     */
 
     { // Rect with style
-        // const geom = new Rect2D([Viewport.width / 2, 200, 0], [100, 100]);
-        // const mat = new Material(ORANGE_240_130_10);
+        {
+            const geom = new Geometry2D([100, 50, 0], [50, 50]);
+            const mat = new Material(ORANGE_240_130_10);
+            
+            const mesh = new Mesh(geom, mat);
+            mesh.Enable(MESH_ENABLE.ATTR_STYLE);
+            mesh.SetStyle(8, 35, 3);
+            scene.AddMesh(mesh);
+            mesh.CreateListener('onhover')
+        }
+        {
+            const geom = new Geometry2D([204, 50, 0], [50, 50]);
+            const mat = new Material(PINK_240_60_160);
+            mat.col = PINK_240_60_160;
+            const mesh = new Mesh(geom, mat);
+            mesh.Enable(MESH_ENABLE.ATTR_STYLE);
+            mesh.SetStyle(20, 35, 3);
+            scene.AddMesh(mesh);
+            // mesh.CreateListener('onhover')
+            // mesh.SetPos([0, 300, 0])
+            
+        }
+        
+        {
+            const geom = new Geometry2D([308, 50, 0], [50, 50]);
+            const mat = new Material(ORANGE_240_130_10);
+            const mesh = new Mesh(geom, mat);
+            mesh.Enable(MESH_ENABLE.ATTR_STYLE);
+            mesh.SetStyle(10, 15, 3);
+            scene.AddMesh(mesh);
+            mesh.SetColor(WHITE);
+            mesh.CreateListener('onhover')
 
-        // const mesh = new Mesh(geom, mat);
-        // mesh.Enable(MESH_ENABLE.ATTR_STYLE);
-        // mesh.Enable(MESH_ENABLE.PASS_COL4);
-        // mesh.SetStyle(8, 35, 3);
-        // scene.AddMesh(mesh);
-
-        // const mesh1 = new Mesh(geom, mat);
-        // mesh1.Enable(MESH_ENABLE.ATTR_STYLE);
-        // mesh1.Enable(MESH_ENABLE.PASS_COL4);
-        // mesh1.SetStyle(15, 15, 3);
-        // mesh1.geom.pos[1] += 204;
-        // scene.AddMesh(mesh1);
-
-        // const mesh2 = new Mesh(geom, mat);
-        // mesh2.Enable(MESH_ENABLE.ATTR_STYLE);
-        // mesh2.Enable(MESH_ENABLE.PASS_COL4);
-        // mesh2.geom.pos[1] += 204;
-        // scene.AddMesh(mesh2);
+        }
+        
+        {
+            const geom = new Geometry2D([412, 50, 0], [50, 50]);
+            const mat = new Material(ORANGE_240_130_10);
+            const mesh = new Mesh(geom, mat);
+            mesh.Enable(MESH_ENABLE.ATTR_STYLE);
+            mesh.SetStyle(25, 15, 3);
+            scene.AddMesh(mesh);
+            mesh.SetColor(BLUE_10_120_220);
+        }
     }
 
 
     { // Create ui fps text
         const fpsFontSize = 10;
-        const uiFpsAvg = new UiFps('Fps Avg:', [0, Viewport.height - 60, 0], [1, 1, 1], fpsFontSize);
-        scene.AddMesh(uiFpsAvg.constTextMesh);
-        scene.AddMesh(uiFpsAvg.variableTextMesh);
-        uiFpsAvg.SetTimerUpdate(600, FpsGetAvg)
-
-        const ypos = uiFpsAvg.constTextMesh.geom.pos[1] + uiFpsAvg.constTextMesh.geom.dim[1] * 2;
-        const uiFpsAvg1sec = new UiFps('Fps Avg1s:', [0, ypos, 0], [1, 1, 1], fpsFontSize);
-        scene.AddMesh(uiFpsAvg1sec.constTextMesh);
-        scene.AddMesh(uiFpsAvg1sec.variableTextMesh);
-        uiFpsAvg1sec.SetTimerUpdate(600, FpsGetAvg1S)
+        const uiFpsAvg = new Widget_Text_Dynamic('Fps Avg::', '000000',  [0, Viewport.height - 60, 0], fpsFontSize, [1,1], WHITE, GREEN, .4);
+        scene.AddMesh(uiFpsAvg);
+        uiFpsAvg.SetDynamicText(600, FpsGetAvg)
+        
+        const ypos = uiFpsAvg.geom.pos[1] + uiFpsAvg.geom.dim[1] * 2;
+        const uiFpsAvg1sec = new Widget_Text_Dynamic('Fps Avg1s:', '000000', [0, ypos, 0], fpsFontSize, [1,1], WHITE, GREEN, .4);
+        scene.AddMesh(uiFpsAvg1sec);
+        uiFpsAvg1sec.SetDynamicText(600, FpsGetAvg1S)
 
     }
+
     { // Simple text
-        // const txt = 'HelloH';
-        // const geom = new TextGeometry2D([0, 200, 0], 10, [1,1], txt, FONTS.SDF_CONSOLAS_LARGE);
-        // const mat = new FontMaterial(WHITE, FONTS.SDF_CONSOLAS_LARGE, txt, [.5, .3])
-        // mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, { color: [GREEN_33_208_40, YELLOW_240_240_10, PINK_240_60_160, BLUE_10_160_220] })
-        // const text = new TextMesh(geom, mat);
-        // scene.AddMesh(text);
-        // // rect.MoveXY([-100, 100, 0])
+        const txt = 'HelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHello';
+        const text = new Widget_Text(txt, [-100, 120, 0], 10, [1, 1], WHITE, .5);
+        scene.AddMesh(text);
+        text.geom.pos[1] += 30;
+        scene.AddMesh(text);
+        text.geom.pos[1] += 30;
+        scene.AddMesh(text);
+        text.geom.pos[1] += 30;
+        scene.AddMesh(text);
+        // RenderQueueGet().SetPriority('last',text.gfx.prog.idx, text.gfx.vb.idx);
     }
 
     { // Text Label
-        // // Create Text Label
-        // const textLabel = new TextLabel('Text Label', [0, 600, 0], 20);
-        // scene.AddMesh(textLabel.textMesh);
-        // scene.AddMesh(textLabel.areaMesh);
+        const textLabel = new Widget_Text_Label('Text Label', [0, 270, 0], 10);
+        scene.AddMesh(textLabel);
+        // RenderQueueGet().SetPriority('last', textLabel.areaMesh.children.buffer[0].gfx.prog.idx, textLabel.areaMesh.children.buffer[0].gfx.vb.idx);
+    }
+
+    { // Dynamic Text
+        const dynamicText = new Widget_Text_Dynamic('DynamicText:', '0000',  [0, 340, 0], 7, [1,1], WHITE, GREEN, .3);
+        scene.AddMesh(dynamicText);
+        dynamicText.SetDynamicText(600, FpsGetAvg1S)
+        // RenderQueueGet().SetPriority('last', textLabel.areaMesh.children.buffer[0].gfx.prog.idx, textLabel.areaMesh.children.buffer[0].gfx.vb.idx);
     }
 
     { // Create cube
-        const geom = new CubeGeometry([Viewport.width / 2, 450, -1], [100, 100, 100], [1, 1, 1]);
-        const mat = new Material_TEMP_fromBufferFor3D(WHITE)
-        const cube = new Mesh(geom, mat);
         {
+            const geom = new CubeGeometry([80, 450, -1], [100, 100, 100], [1, 1, 1]);
+            const mat = new Material_TEMP_fromBufferFor3D(WHITE)
             mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {
                 color: [
                     0.9, 0.0, 0.0, .4,
                     0.0, 0.9, 0.1, .4,
                     0.0, 0.0, 0.9, .4,
-                    0.9, 0.0, 0.9, .4]
-            })
+                    0.9, 0.0, 0.9, .4
+                ]});
+            const cube = new Mesh(geom, mat);
+            scene.AddMesh(cube);
+            console.log('cube', GetShaderTypeId(cube.sid), cube.sid)
+            cube.type |= geom.type;
+            cube.type |= mat.type;
+
         }
-        scene.AddMesh(cube);
-        TEMP_MESH = cube;
+        {
+            const geom = new CubeGeometry([240, 450, -1], [100, 100, 100], [1, 1, 1]);
+            const mat = new Material_TEMP_fromBufferFor3D(WHITE);
+            mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {
+                color: [
+                    1.0, 1.0, 0.0, .4,
+                    0.0, 0.7, 0.4, .4,
+                    0.0, 1.0, 0.0, .4,
+                    1.0, 0.0, 1.0, .4,
+            ]});
+            const cube2 = new Mesh(geom, mat);
+            scene.AddMesh(cube2);
+            console.log('cube2:', GetShaderTypeId(cube2.sid), cube2.sid)
+            cube2.type |= geom.type;
+            cube2.type |= mat.type;
+
+        }
+        {
+            const geom = new CubeGeometry([400, 450, -1], [100, 100, 100], [1, 1, 1]);
+            const mat = new Material_TEMP_fromBufferFor3D(WHITE);
+            mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {
+                color: [
+                    0.9, 0.0, 0.0, .4,
+                    0.0, 0.9, 0.1, .4,
+                    0.0, 0.0, 0.9, .4,
+                    0.9, 0.0, 0.9, .4
+            ]});
+            const cube3 = new Mesh(geom, mat);
+            scene.AddMesh(cube3);
+            console.log('cube3:', GetShaderTypeId(cube3.sid), cube3.sid)
+            cube3.type |= geom.type;
+            cube3.type |= mat.type;
+
+        }
+
     }
 
-
+    Test1(scene);
 
 
     // If camera is static, update projection matrix uniform only once
     camera.UpdateProjectionUniform(renderer.gl);
-    RenderQueueCreate(); // Initilize the render Queue for drawing vertex buffers in a priority(z index) based aproach
-    // RenderQueueSetPriority('first', 2, 0);
+    RenderQueueGet().UpdateActiveQueue(); // Update active queue buffer with the vertex buffers set to be drawn
 
 
-    // OLD
-    // ScenesLoadScene(SCENE.startMenu); // Load the first Scene
-    // FramebuffersSetActive(true);
-    // ScenesSetFramebufferQueue();
-    // renderer.camera.Update(gfxCtx.gl, u_projection);
     {
+        // OLD
+        // ScenesLoadScene(SCENE.startMenu); // Load the first Scene
+        // FramebuffersSetActive(true);
+        // ScenesSetFramebufferQueue();
+        // renderer.camera.Update(gfxCtx.gl, u_projection);
+
         { // backgrounds
             // const startMenuBk = RectCreateRect('startMenuBk', SID_DEFAULT | SID.FX.FS_GRADIENT, DarkenColor(GREENL2, 0.5), dim, [1, 1], null, pos, style, null, null);
             // startMenuBk.gfxInfo = GlAddMesh(startMenuBk.sid, startMenuBk.mesh, 1, SCENE.startMenu, 'Background StartMenu', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
@@ -331,11 +398,6 @@ export function AppInit() {
         }
     }
 
-    // Render
-    // window.requestAnimationFrame(Render);
-    // requestAnimationFrame(Render);
-    // window.requestAnimationFrame(renderer.Render);
-
 }
 
 export function AppRender() {
@@ -343,6 +405,24 @@ export function AppRender() {
     renderer.Render(TEMP_MESH);
 }
 
+
+function Test1(scene) {
+    const btn1 = new Widget_Button('BTutton_g|{', [0, 420, 0], 15);
+    scene.AddMesh(btn1);
+    btn1.CreateListener('onhover');
+    btn1.SetPos([300, 420,0])
+    console.log('OBJECT SIZE: ', SizeOfObject(btn1))
+    // console.log('++++++++ BUTTON:', GetMeshType(btn1.type))
+    
+    const btn2 = new Widget_Button('Button_2', [0, 550, 0], 10);
+    scene.AddMesh(btn2);
+    btn2.CreateListener('onhover');
+    const btn3 = new Widget_Button('Button_3', [0, 700, 0], 10);
+    scene.AddMesh(btn3);
+    btn3.CreateListener('onhover');
+
+    RenderQueueGet().SetPriority('last', btn1.children.buffer[0].gfx.prog.idx, btn1.gfx.vb.idx);
+}
 
 
 
@@ -380,100 +460,100 @@ function MeshConstantsSetUp() {
 
 }
 
-function AppInitReservedGlBuffers() {
-    // PowerUpInit(SCENE.stage);
-    // CoinInit(SCENE.stage);
-}
+// function AppInitReservedGlBuffers() {
+//     // PowerUpInit(SCENE.stage);
+//     // CoinInit(SCENE.stage);
+// }
 
-function AddCssUiListeners() {
-    const SdfInnerDistSlider = document.getElementById("sdf-param1");
-    const SdfInnerDistOut = document.getElementById("sdf-param1-val");
-    SdfInnerDistOut.innerHTML = SdfInnerDistSlider.value;
+// function AddCssUiListeners() {
+//     const SdfInnerDistSlider = document.getElementById("sdf-param1");
+//     const SdfInnerDistOut = document.getElementById("sdf-param1-val");
+//     SdfInnerDistOut.innerHTML = SdfInnerDistSlider.value;
 
-    /**
-     * Below are the event listeners for every time a slider ui is changed,
-     * we make a call to update the uniform values of the gl program
-     */
+//     /**
+//      * Below are the event listeners for every time a slider ui is changed,
+//      * we make a call to update the uniform values of the gl program
+//      */
 
-    // Set Uniforms buffer params
-    const prog = GlGetProgram(UNIFORM_PARAMS.sdf.progIdx);
-    prog.UniformsSetBufferUniform(InterpolateToRange(SdfInnerDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.innerIdx);
+//     // Set Uniforms buffer params
+//     const prog = GlGetProgram(UNIFORM_PARAMS.sdf.progIdx);
+//     prog.UniformsSetBufferUniform(InterpolateToRange(SdfInnerDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.innerIdx);
 
-    // On event
-    SdfInnerDistSlider.oninput = function () {
-        SdfInnerDistOut.innerHTML = this.value;
-        prog.UniformsSetBufferUniform(InterpolateToRange(SdfInnerDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.innerIdx);
-    }
+//     // On event
+//     SdfInnerDistSlider.oninput = function () {
+//         SdfInnerDistOut.innerHTML = this.value;
+//         prog.UniformsSetBufferUniform(InterpolateToRange(SdfInnerDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.innerIdx);
+//     }
 
-    const SdfOuterDistSlider = document.getElementById("sdf-param2");
-    const SdfOuterDistOut = document.getElementById("sdf-param2-val");
-    SdfOuterDistOut.innerHTML = SdfOuterDistSlider.value;
+//     const SdfOuterDistSlider = document.getElementById("sdf-param2");
+//     const SdfOuterDistOut = document.getElementById("sdf-param2-val");
+//     SdfOuterDistOut.innerHTML = SdfOuterDistSlider.value;
 
-    prog.UniformsSetBufferUniform(InterpolateToRange(SdfOuterDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.outerIdx);
+//     prog.UniformsSetBufferUniform(InterpolateToRange(SdfOuterDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.outerIdx);
 
-    SdfOuterDistSlider.oninput = function () {
-        SdfOuterDistOut.innerHTML = this.value;
-        prog.UniformsSetBufferUniform(InterpolateToRange(SdfOuterDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.outerIdx);
-    }
+//     SdfOuterDistSlider.oninput = function () {
+//         SdfOuterDistOut.innerHTML = this.value;
+//         prog.UniformsSetBufferUniform(InterpolateToRange(SdfOuterDistSlider.value, 100, 1), UNIFORM_PARAMS.sdf.outerIdx);
+//     }
 
-    /**
-     * Below we set the listeners for attributs that have to change through
-     * ui sliders(like the roundnes, bborder, etc). We update directly the 
-     * vertex buffer values, so there is no need for uniform buffer update .
-     */
-    const roundRatio = 0.5;
-    const borderRatio = 0.15;
-    const featherRatio = 0.2;
+//     /**
+//      * Below we set the listeners for attributs that have to change through
+//      * ui sliders(like the roundnes, bborder, etc). We update directly the 
+//      * vertex buffer values, so there is no need for uniform buffer update .
+//      */
+//     const roundRatio = 0.5;
+//     const borderRatio = 0.15;
+//     const featherRatio = 0.2;
 
-    // Button's Sliders
-    const buttonRoundCornerSlider = document.getElementById('button-round-corner');
-    const buttonRoundCornerOut = document.getElementById("button-round-corner-val");
-    buttonRoundCornerOut.innerHTML = buttonRoundCornerSlider.value;
-    buttonRoundCornerSlider.oninput = function () {
-        buttonRoundCornerOut.innerHTML = this.value;
-        ButtonSetRoundCorner(Number(this.value));
-    }
+//     // Button's Sliders
+//     const buttonRoundCornerSlider = document.getElementById('button-round-corner');
+//     const buttonRoundCornerOut = document.getElementById("button-round-corner-val");
+//     buttonRoundCornerOut.innerHTML = buttonRoundCornerSlider.value;
+//     buttonRoundCornerSlider.oninput = function () {
+//         buttonRoundCornerOut.innerHTML = this.value;
+//         ButtonSetRoundCorner(Number(this.value));
+//     }
 
-    const buttonBorderWidthSlider = document.getElementById('button-border-width');
-    const buttonBorderWidthOut = document.getElementById("button-border-width-val");
-    buttonBorderWidthOut.innerHTML = buttonRoundCornerSlider.value;
-    buttonBorderWidthSlider.oninput = function () {
-        buttonBorderWidthOut.innerHTML = this.value;
-        ButtonSetBorderWidth(Number(this.value));
-    }
+//     const buttonBorderWidthSlider = document.getElementById('button-border-width');
+//     const buttonBorderWidthOut = document.getElementById("button-border-width-val");
+//     buttonBorderWidthOut.innerHTML = buttonRoundCornerSlider.value;
+//     buttonBorderWidthSlider.oninput = function () {
+//         buttonBorderWidthOut.innerHTML = this.value;
+//         ButtonSetBorderWidth(Number(this.value));
+//     }
 
-    const buttonBorderFeatherSlider = document.getElementById('button-border-feather');
-    const buttonBorderFeatherOut = document.getElementById("button-border-feather-val");
-    buttonBorderFeatherOut.innerHTML = buttonRoundCornerSlider.value;
-    buttonBorderFeatherSlider.oninput = function () {
-        buttonBorderFeatherOut.innerHTML = this.value;
-        ButtonSetBorderFeather(Number(this.value))
-    }
+//     const buttonBorderFeatherSlider = document.getElementById('button-border-feather');
+//     const buttonBorderFeatherOut = document.getElementById("button-border-feather-val");
+//     buttonBorderFeatherOut.innerHTML = buttonRoundCornerSlider.value;
+//     buttonBorderFeatherSlider.oninput = function () {
+//         buttonBorderFeatherOut.innerHTML = this.value;
+//         ButtonSetBorderFeather(Number(this.value))
+//     }
 
 
-    // Brick's Sliders
-    const brickRoundCornerSlider = document.getElementById('brick-round-corner');
-    const brickRoundCornerOut = document.getElementById("brick-round-corner-val");
-    brickRoundCornerOut.innerHTML = brickRoundCornerSlider.value;
-    brickRoundCornerSlider.oninput = function () {
-        brickRoundCornerOut.innerHTML = this.value;
-        BrickSetRoundCorner(Number(this.value) * roundRatio);
-    }
+//     // Brick's Sliders
+//     const brickRoundCornerSlider = document.getElementById('brick-round-corner');
+//     const brickRoundCornerOut = document.getElementById("brick-round-corner-val");
+//     brickRoundCornerOut.innerHTML = brickRoundCornerSlider.value;
+//     brickRoundCornerSlider.oninput = function () {
+//         brickRoundCornerOut.innerHTML = this.value;
+//         BrickSetRoundCorner(Number(this.value) * roundRatio);
+//     }
 
-    const brickBorderWidthSlider = document.getElementById('brick-border-width');
-    const brickBorderWidthOut = document.getElementById("brick-border-width-val");
-    brickBorderWidthOut.innerHTML = brickRoundCornerSlider.value;
-    brickBorderWidthSlider.oninput = function () {
-        brickBorderWidthOut.innerHTML = this.value;
-        BrickSetBorderWidth(Number(this.value) * borderRatio);
-    }
+//     const brickBorderWidthSlider = document.getElementById('brick-border-width');
+//     const brickBorderWidthOut = document.getElementById("brick-border-width-val");
+//     brickBorderWidthOut.innerHTML = brickRoundCornerSlider.value;
+//     brickBorderWidthSlider.oninput = function () {
+//         brickBorderWidthOut.innerHTML = this.value;
+//         BrickSetBorderWidth(Number(this.value) * borderRatio);
+//     }
 
-    const brickBorderFeatherSlider = document.getElementById('brick-border-feather');
-    const brickBorderFeatherOut = document.getElementById("brick-border-feather-val");
-    brickBorderFeatherOut.innerHTML = brickRoundCornerSlider.value;
-    brickBorderFeatherSlider.oninput = function () {
-        brickBorderFeatherOut.innerHTML = this.value;
-        BrickSetBorderFeather(Number(this.value) * featherRatio);
-    }
+//     const brickBorderFeatherSlider = document.getElementById('brick-border-feather');
+//     const brickBorderFeatherOut = document.getElementById("brick-border-feather-val");
+//     brickBorderFeatherOut.innerHTML = brickRoundCornerSlider.value;
+//     brickBorderFeatherSlider.oninput = function () {
+//         brickBorderFeatherOut.innerHTML = this.value;
+//         BrickSetBorderFeather(Number(this.value) * featherRatio);
+//     }
 
-}
+// }

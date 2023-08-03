@@ -5,7 +5,7 @@ import * as GlOps from './GlBufferOps.js';
 import * as dbg from '../Z_Debug/GfxDebug.js'
 import { GlCreateProgram } from '../GlProgram.js'
 import { GlGetIB, GlGetProgram, GlGetPrograms, GlGetVB } from '../GlProgram.js';
-import { RenderQueueUpdate } from '../../Engine/Renderers/Renderer/RenderQueue.js';
+import { RenderQueueGet, RenderQueueUpdate } from '../../Engine/Renderers/Renderer/RenderQueue.js';
 
 
 class VertexBuffer {
@@ -151,10 +151,10 @@ class VertexBuffer {
         this.size *= 2;
         const oldData = this.data;
         this.data = new Float32Array(this.size);
-        this.CopyBuffer(oldData)
-        console.error('Resizing vertex buffer!')
+        this.#CopyBuffer(oldData)
+        console.warn('Resizing vertex buffer!')
     }
-    CopyBuffer(oldData){
+    #CopyBuffer(oldData){
 
         const size = oldData.length;
         for(let i=0; i<size; i++){
@@ -186,6 +186,7 @@ class IndexBuffer {
         this.idx = idx;
 
         this.webgl_buffer = gl.createBuffer();
+        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.webgl_buffer);
         this.name = dbg.GetShaderTypeId(sid);
         this.sceneIdx = sceneIdx;
 
@@ -217,9 +218,9 @@ class IndexBuffer {
 
         this.size *= 2;
         const oldData = this.data;
-        this.data = new Float32Array(this.size);
+        this.data = new Uint16Array(this.size);
         this.CopyBuffer(oldData)
-        console.error('Resizing index buffer!')
+        console.warn('Resizing index buffer!')
     }
     CopyBuffer(oldData){
 
@@ -309,6 +310,10 @@ export function GlGetContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer) {
             ib.vao = vb.vao; // Let index buffer have a copy of the vao
             if (dbg.GL_DEBUG_BUFFERS_ALL) console.log('----- VertexBuffer -----\nibIdx:', ibIdx, 'progIdx:', progIdx)
         }
+
+        
+        // Add the new vertexBuffer to render queue
+        RenderQueueGet().Add(progIdx, vbIdx, vb.show);
     }
     else {
 
@@ -364,6 +369,9 @@ export function GlAddGeometry(sid, pos, dim, time, gfx, meshName, numFaces) {
     if(GL.BOUND_PROG_IDX !== progIdx){
         GlUseProgram(prog.webgl_program, progIdx);
         GL.BOUND_PROG_IDX = progIdx;
+        gfxCtx.gl.bindVertexArray(vb.vao)
+        gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
+        GL.BOUND_VBO_IDX = vbIdx;
     }
     if(GL.BOUND_VBO_IDX !== vbIdx){
         gfxCtx.gl.bindVertexArray(vb.vao)
@@ -427,11 +435,15 @@ export function GlHandlerAddGeometryBuffer(sid, gfx, meshName, posBuffer, dimBuf
 
     const stride = prog.shaderInfo.attribsPerVertex;
     let start = gfx.vb.start + prog.shaderInfo.attributes.offset.pos;
-    const vbCount = (prog.shaderInfo.attribsPerVertex * prog.shaderInfo.verticesPerRect) * gfx.numFaces;
-    GlOps.VbSetAttribBuffer(vb, start, vbCount, stride, dimBuffer, prog.shaderInfo.attributes.size.pos);
+    const vbAttrCount = (prog.shaderInfo.attribsPerVertex * prog.shaderInfo.verticesPerRect) * gfx.numFaces;
+    GlOps.VbSetAttribBuffer(vb, start, vbAttrCount, stride, dimBuffer, prog.shaderInfo.attributes.size.pos);
     start = gfx.vb.start + prog.shaderInfo.attributes.offset.wposTime;
-    GlOps.VbSetAttribBuffer(vb, start, vbCount, stride, posBuffer, prog.shaderInfo.attributes.size.pos); // Repeat the wpos for every vertex(vb.count)
-
+    GlOps.VbSetAttribBuffer(vb, start, vbAttrCount, stride, posBuffer, prog.shaderInfo.attributes.size.pos); // Repeat the wpos for every vertex(vb.count)
+    if(sid.attr & SID.ATTR.WPOS_TIME4){
+        start = gfx.vb.start + prog.shaderInfo.attributes.offset.time;
+        const time = [1,]; 
+        GlOps.VbSetAttribBuffer(vb, start, vbAttrCount, stride, time, prog.shaderInfo.attributes.size.time); // Repeat the wpos for every vertex(vb.count)
+    }
 
     prog.isActive = true; // Sets a program to 'active', only if there are meshes in the program's vb
     vb.needsUpdate = true;
@@ -453,9 +465,6 @@ export function GlHandlerAddGeometryBuffer(sid, gfx, meshName, posBuffer, dimBuf
     }
 }
 
-
-
-
 export function GlAddMaterial(sid, gfx, col, tex, style, sdf) {
 
     // TODO: TEMP
@@ -469,6 +478,9 @@ export function GlAddMaterial(sid, gfx, col, tex, style, sdf) {
     if(GL.BOUND_PROG_IDX !== progIdx){
         GlUseProgram(prog.webgl_program, progIdx);
         GL.BOUND_PROG_IDX = progIdx;
+        gfxCtx.gl.bindVertexArray(vb.vao)
+        gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
+        GL.BOUND_VBO_IDX = vbIdx;
     }
     if(GL.BOUND_VBO_IDX !== vbIdx){
         gfxCtx.gl.bindVertexArray(vb.vao)
@@ -505,6 +517,7 @@ export function GlHandlerAddMaterialBuffer(sid, gfx, colBuffer, texBuffer) {
     vb.needsUpdate = true;
 
 }
+
 export function GlHandlerAddIndicesBuffer(gfx, buffer) {
 
     const progIdx = gfx.prog.idx;
@@ -526,6 +539,7 @@ export function GlHandlerAddIndicesBuffer(gfx, buffer) {
     gfx.ib.count = ib.count;
     console.log('indexBuffer:', ib)
 }
+
 function IndicesCreateFromBuffer(ib, buffer) {
 
     // let cnt = ib.vCount;

@@ -1,6 +1,6 @@
 "use strict";
 
 
-class Line extends Rect2D {
+// class Line extends Rect2D {
 
-}
+// }

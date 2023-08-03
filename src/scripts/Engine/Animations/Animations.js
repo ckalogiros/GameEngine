@@ -1,7 +1,7 @@
 "use strict";
-import { CoinRunAnimation } from "../../App/Drawables/Coin.js";
+// import { CoinRunAnimation } from "../../App/Drawables/Coin.js";
 import { PlayerGetPlayer, PlayerRunEnlargeAnimation } from "../../App/Drawables/Player.js";
-import { PowerUpRunAnimation } from "../../App/Drawables/PowerUp.js";
+// import { PowerUpRunAnimation } from "../../App/Drawables/PowerUp.js";
 import { ButtonGetButtons, ButtonRunScaleAnimation, ButtonSetDefaultMeshProps } from "../Drawables/Widgets/Button.js";
 
 

@@ -3,6 +3,7 @@ import { OnMouseMove_Android, OnTouchStart, OnTouchEnd, OnTouchCancel, OnTouchMo
 import { OnMouseMove, OnMouseDown, OnMouseUp, OnMouseOut, OnMouseWheel } from "../Controls/Input/Mouse.js";
 import { OnKeyDown, OnKeyUp } from "../Controls/Input/Keys.js";
 
+
 const events = []; // Aplication's events array
 let evtsIdx = 0; // Index for events array
 
@@ -38,7 +39,7 @@ function OnWindowResize() {
 
 export function EventsAddListeners() {
 
-    if(PLATFORM.ANDROID_IMPL){
+    if (PLATFORM.ANDROID_IMPL) {
         document.addEventListener('mousemove', OnMouseMove_Android, false);
         // Touch screen events
         document.addEventListener("touchstart", OnTouchStart);
@@ -46,7 +47,7 @@ export function EventsAddListeners() {
         document.addEventListener("touchcancel", OnTouchCancel);
         document.addEventListener("touchmove", OnTouchMove);
     }
-    else{
+    else {
         document.addEventListener('mousemove', OnMouseMove, false);
         document.addEventListener('mouseout', OnMouseOut, false);
         document.addEventListener('wheel', OnMouseWheel, false);
@@ -56,7 +57,7 @@ export function EventsAddListeners() {
     document.addEventListener("resize", OnWindowResize, false);
 
     // Disabling the context menu on long taps on Android. 
-    document.oncontextmenu = function(event) {
+    document.oncontextmenu = function (event) {
         event.preventDefault();
         event.stopPropagation();
         return false;

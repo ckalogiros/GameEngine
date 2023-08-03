@@ -115,24 +115,19 @@ export function CalculateSdfOuterFromDim(size){
     return sdf;
     // return MapLinear(size, 10, 90, .5, .1);
 
-    // let sdfOuter = (((.5)/(90))*(90-size));
+    // const ratio = size / 60;
+    // const min = SDF_PARAMS_VALS.outerMin;
+    // const max = SDF_PARAMS_VALS.outerMax;
+    // //a + (b - a) * p
+    // const sdfOuter = max - (min + (max - min) * ratio);
 
-    const ratio = size / 60;
-    const min = SDF_PARAMS_VALS.outerMin;
-    const max = SDF_PARAMS_VALS.outerMax;
-    //a + (b - a) * p
-    const sdfOuter = max - (min + (max - min) * ratio);
-
-
-    if(sdfOuter >= SDF_PARAMS_VALS.outerMax){
-        return SDF_PARAMS_VALS.outerMax
-    }else if(sdfOuter <= SDF_PARAMS_VALS.outerMin){
-        return SDF_PARAMS_VALS.outerMin
-    }
+    // if(sdfOuter >= SDF_PARAMS_VALS.outerMax){
+    //     return SDF_PARAMS_VALS.outerMax
+    // }else if(sdfOuter <= SDF_PARAMS_VALS.outerMin){
+    //     return SDF_PARAMS_VALS.outerMin
+    // }
     
-    // console.log('sdf:', sdfOuter, 'dim:',dim, maxDim)
-    // console.log('Ratio:', ((.5/45)*(60-dim)))
-    return sdfOuter;
+    // return sdfOuter;
 }
 
 // Returns the sign (-1,+1) out of any number
@@ -163,3 +158,42 @@ export function GetSign(val){
     console.log(sorted)
 
  */
+
+/** Calculate the size of a object */
+export function SizeOfObject( object ) {
+
+    var objectList = [];
+    var stack = [ object ];
+    var bytes = 0;
+
+    while ( stack.length ) {
+        var value = stack.pop();
+
+        if ( typeof value === 'boolean' ) {
+            bytes += 4;
+            // console.log('boolean')
+        }
+        else if ( typeof value === 'string' ) {
+            bytes += value.length * 2;
+            // console.log('string, length:', value.length)
+        }
+        else if ( typeof value === 'number' ) {
+            bytes += 8;
+            // console.log('number')
+        }
+        else if
+        (
+            typeof value === 'object'
+            && objectList.indexOf( value ) === -1
+            )
+            {
+                objectList.push( value );
+                
+                for( var i in value ) {
+                    stack.push( value[ i ] );
+                    // console.log(value[ i ])
+            }
+        }
+    }
+    return bytes;
+}

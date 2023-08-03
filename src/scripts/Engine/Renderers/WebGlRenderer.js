@@ -73,7 +73,6 @@ export class WebGlRenderer {
    }
 
    Render(mesh) {
-
       
       // const animations = AnimationsGet();
       // const particles = ParticleSystemGet();
@@ -93,16 +92,6 @@ export class WebGlRenderer {
          this.camera.Update(this.gl)
          this.scene.OnUpdate();
          
-         if(mesh){
-            // GlRotateZ3D(mesh, this.fpsTimer.cnt*.02);
-            // GlRotateY3D(mesh, this.fpsTimer.cnt*.02)
-            // GlRotateX3D(mesh, this.fpsTimer.cnt*.02)
-            GlRotateXY3D(mesh, this.fpsTimer.cnt*.02)
-            
-            // GlRotateZ3D(mesh.gfx, mesh.geom.dim, this.fpsTimer.cnt*.02);
-            // GlRotateX3D(mesh.gfx, mesh.geom.dim, this.fpsTimer.cnt*.002)
-            // GlRotateY3D(mesh.gfx, mesh.geom.dim, this.fpsTimer.cnt*.002)
-         }
 
          // if(this.camera.needsUpdateUniform){
          //    const prog = GlGetProgram(this.scene.gfxBuffer[0].progIdx);
@@ -146,9 +135,9 @@ export class WebGlRenderer {
 
       this.gl.enable(this.gl.DEPTH_TEST);
       this.gl.depthFunc(this.gl.LEQUAL)
-      this.gl.depthMask(true);
+      // this.gl.depthMask(true);
+      
       this.gl.enable(this.gl.BLEND);
-
       this.gl.blendFunc(this.gl.DST_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
       // this.gl.enable(this.gl.SAMPLE_COVERAGE);
@@ -200,10 +189,6 @@ export class WebGlRenderer {
 
    }
 }
-/**
- * 
- * qwreyuekjsksjkdjfoqk
- */
 
 function DetectHostPlatform() {
 
@@ -264,21 +249,4 @@ function DetectHostPlatform() {
     */
 }
 
-// function DebubRotationTranslation(){
-//    rotz.makeRotationZ(.001)
-//    // rotx.makeRotationY(.001)
-//    // const rot = rotx.multiply(rotz)
-//    // const rot = rotz.multiply(rotx)
-//    const rot = rotz
-//    // tra.makeTranslation(0, 0, 0)
-//    // tra.setPosition(1, 0, 0)
-//    const a = rot.multiply(tra)
-//    // const a = tra.multiply(rot)
-//    // this.camera.camera.multiply(tra)
-//    // this.camera.camera.multiply(a)
-//    // rot.multiply(tra)
-//    // 
-
-//    return a;
-// }
 

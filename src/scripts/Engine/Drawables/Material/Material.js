@@ -1,11 +1,11 @@
 "use strict";
 
-import * as math from '../../Helpers/Math/MathOperations.js'
-import { GlSetColor, GlSetColorAlpha } from "../../Graphics/Buffers/GlBufferOps.js";
-import { GlAddMaterial, GlHandlerAddMaterialBuffer } from '../../Graphics/Buffers/GlBuffers.js';
-import { FontGetUvCoords } from '../Loaders/Font/Font.js';
-import { GfxInfoMesh, GlSetTexture } from '../../Graphics/GlProgram.js';
-import { TextureLoadTexture } from '../Loaders/Textures/Texture.js';
+import * as math from '../../../Helpers/Math/MathOperations.js'
+import { GlSetColor, GlSetColorAlpha } from "../../../Graphics/Buffers/GlBufferOps.js";
+import { GlAddMaterial, GlHandlerAddMaterialBuffer } from '../../../Graphics/Buffers/GlBuffers.js';
+import { FontGetUvCoords } from '../../Loaders/Font/Font.js';
+import { GfxInfoMesh, GlSetTexture } from '../../../Graphics/GlProgram.js';
+import { TextureLoadTexture } from '../../Loaders/Textures/Texture.js';
 
 let _materialId = 0;
 
@@ -35,6 +35,7 @@ export class Material {
    texIdx;
    uvIdx;
    hasFontTex;
+   type = 0;
 
    constructor(col = [1,1,1,1], texId = INT_NULL) {
 
@@ -77,18 +78,18 @@ export class Material {
       
       this.alreadyAdded = false; // To check if the shaders have been created
 
+      this.type |= MESH_TYPES.MATERIAL;
 
       /** Debug properties */
       if (DEBUG.MATERIAL) {
          Object.defineProperty(this, 'id', { value: _materialId++ });
-         Object.defineProperty(this, 'type', { value: 'Material' });
+         // Object.defineProperty(this, 'type', { value: 'Material' });
       }
    }
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////
    AddToGraphicsBuffer(sid, gfx) {
 
-      console.log('MATERIAL SID:', sid)
       GlAddMaterial(sid, gfx, this.col, this.uv, this.style);
       this.alreadyAdded = true;
    }
@@ -100,9 +101,9 @@ export class Material {
    GetColorGreen() { return this.col[1]; }
    GetColorBlue() { return this.col[2]; }
    GetColorAlpha() { return this.col[3]; }
-   SetColor(col) {
+   SetColor(col, gfx) {
       math.CopyArr4(this.col, col);
-      GlSetColor(this.col);
+      GlSetColor(gfx, this.col);
    }
    SetColorAlpha(alpha) {
       this.col[3], alpha;
@@ -173,11 +174,12 @@ export class FontMaterial extends Material {
 
       // Create texture
       const indexes = TextureLoadTexture(this.texId);
-      // this.gfx.tb.idx = indexes.texIdx;
-      // GlSetTexture(this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.tb.idx); // Update the vertex buffer to store the texture index
 
       this.texIdx = indexes.texIdx;
       this.uvIdx = indexes.uvIdx;
+      if(this.texIdx === INT_NULL) console.error('2222222 Texture Index is NULL')
+
+      this.type |= MESH_TYPES.FONT_MATERIAL;
    }
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -194,10 +196,13 @@ export class FontMaterial extends Material {
          GlAddMaterial(sid, gfxCopy, this.col, uv, this.style, this.sdfParams);
          gfxCopy.vb.start += gfxCopy.vb.count;
          
-         gfx.tb.idx = this.texIdx;
-         GlSetTexture(gfx.prog.idx, gfx.vb.idx, gfx.tb.idx); // Update the vertex buffer to store the texture index
-
-     }
+         // If texture is exists, store texture index, else if font texture exists, store font texture index, else store null
+         gfx.tb.idx = this.texIdx !== INT_NULL ? this.texIdx : (this.uvIdx !== INT_NULL ? this.uvIdx : INT_NULL);
+         if(this.texIdx === INT_NULL) 
+            console.error('Texture Index is NULL')
+            
+      }
+      GlSetTexture(gfx.prog.idx, gfx.vb.idx, gfx.tb.idx); // Update the vertex buffer to store the texture index
    }
 
 }

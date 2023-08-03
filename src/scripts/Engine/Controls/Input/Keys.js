@@ -1,6 +1,7 @@
 "use strict";
 
 import { PrintAttributes, PrintIndexBufferAll, PrintVertexBufferAll, PrintVertexBufferAllPretty } from "../../../Graphics/Z_Debug/GfxDebug.js";
+import { RenderQueueGet } from "../../Renderers/Renderer/RenderQueue.js";
 import { FpsGet } from "../../Timer/Time.js";
 
 
@@ -12,25 +13,35 @@ export function OnKeyDown(e){
    // console.log(e.key)
 
    switch(e.key){
-      case ('p' || 'P'):{
+      case ('p'):{
          console.log(e.key);
          if(g_state.game.paused) g_state.game.paused = false
          else g_state.game.paused = true
          break;
       }
-      case ('x' || 'X'):{
+      case ('x'):{
          console.log(e.key);
          PrintVertexBufferAll();
          break;
       }
-      case ('c' || 'C'):{
+      case ('c'):{
          console.log(e.key);
          PrintIndexBufferAll();
          break;
       }
-      case ('z' || 'Z'):{
+      case ('z'):{
          console.log(e.key);
          PrintAttributes();
+         break;
+      }
+      case ('r'):{
+         console.log(e.key);
+         RenderQueueGet().PrintAll();
+         break;
+      }
+      case ('R'):{
+         console.log(e.key);
+         RenderQueueGet().PrintActive();
          break;
       }
       case ('f' || 'F'):{

@@ -172,7 +172,7 @@ export class GlProgram {
 			pos: (sid.attr & SID.ATTR.POS2) ? 2 : (sid.attr & SID.ATTR.POS3) ? 3 : (0),
 			tex: (sid.attr & SID.ATTR.TEX2) ? 2 : (0),
 			params1: (sid.attr & SID.ATTR.PARAMS1) ? 4 : (0),
-			time: (sid.attr & SID.ATTR.TIME) ? 1 : (0),
+			time: ((sid.attr & SID.ATTR.TIME) || (sid.attr & SID.ATTR.WPOS_TIME4)) ? 1 : (0),
 			sdf: (sid.attr & SID.ATTR.SDF) ? 2 : (0),
 		}
 	}
@@ -281,7 +281,7 @@ export class GlProgram {
 		this.shaderInfo.uniforms.buffer.Set(val, index);
 		this.shaderInfo.uniforms.buffer.Update(gl);
 	}
-//if (progs[progIdx].timer.isActive) progs[progIdx].UniformsUpdateTimer();
+
 	/**
 	 * Unique Uniforms.
 	 * New uniforms that are set by the client and are created as a seperate uniforms in the shaders.
@@ -358,6 +358,7 @@ export function GlCreateProgram(sid) {
 export function GlEnableAttribsLocations(gl, prog) {
 
 	const attribsPerVertex = prog.shaderInfo.attribsPerVertex;
+
 	// For Uniforms
 	if (prog.shaderInfo.attributes.loc.col >= 0) {
 		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.col);

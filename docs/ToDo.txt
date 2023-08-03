@@ -1,4 +1,6 @@
 --------------------------------------------------- TODO
+. Implement child-parent relationship
+. Set events. Set event listener for button hover, click, etc.
 . Create a division of canvas, for colission detection, 
   place meshes in 2D(like UI) and many more.
 . Implement RenderBuffers.
@@ -17,7 +19,8 @@
 --------------------------------------------------- TODO
 
 --------------------------------------------------- CONTINUE
-
+. Create add event listener.
+  The checkHover callback is a method and cannot be called upon a specific mesh 
 --------------------------------------------------- CONTINUE
 Correct the meshes dimentions to not create double the width and height
 

@@ -55,10 +55,11 @@ class RenderQueue {
             const isActive = progs[i].vertexBuffer[j].show; 
             const progIdx = progs[i].idx;
             const vbIdx = progs[i].vertexBuffer[j].idx;
-            this.Store(progIdx, vbIdx, isActive);
+            this.Add(progIdx, vbIdx, isActive);
          }
       }
    }
+
    UpdateActiveQueue(){ // Recreates an array of all active vertex buffers from the draw queue on every Frame.
       this.activeCount = 0;
       for (let i = 0; i < this.size; i++) {
@@ -67,7 +68,7 @@ class RenderQueue {
          }
       }
    }
-   Store(progIdx, vbIdx, isActive) {
+   Add(progIdx, vbIdx, isActive) {
       const obj = {
          progIdx: progIdx,
          vbIdx: vbIdx,
@@ -128,7 +129,6 @@ class RenderQueue {
             }
             // Store back prioritized element
             this.buffer[0].Set(temp);
-            // this.PrintAll();
          }
          else if(flag === 'last' && idx<this.count-1){
             // Move all elements to the left
@@ -153,17 +153,12 @@ class RenderQueue {
 
    // Debug
    PrintAll() {
-      console.log('----------------------------------------------------------------');
-      for (let i = 0; i < this.size; i++) {
-         if (this.buffer[i].progIdx !== INT_NULL) {
-            const prog = GlGetProgram(this.buffer[i].progIdx);
-            const progActive = prog.isActive;
-            const vbActive = prog.vertexBuffer[this.buffer[i].vbIdx].show;
-            console.log(this.buffer[i]);
-            console.log(`progActive:${progActive} vbActive:${vbActive}`);
-         }
-      }
-
+      console.log('--- RenderQueue All');
+      console.log(this.buffer);
+   }
+   PrintActive() {
+      console.log('--- RenderQueue Active');
+      console.log(this.active);
    }
 }
 
@@ -191,8 +186,11 @@ export function RenderQueueUpdate(progIdx, vbIdx, flag){
 }
 
 
-export function RenderQueueCreate() {
+export function RenderQueueInit() {
    renderQueue.Init(); // One time initialization(creates an empty buffer...)
+}
+export function RenderQueueCreate() {
+   // renderQueue.Init(); // One time initialization(creates an empty buffer...)
    renderQueue.Create();
 
    /** Build up the draw queue, to draw all meshes in the correct order */

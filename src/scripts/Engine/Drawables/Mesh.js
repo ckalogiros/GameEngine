@@ -1,10 +1,13 @@
 "use strict";
 import { GlSetAttrTime } from "../../Graphics/Buffers/GlBufferOps.js";
-import { GlGetContext, GlHandlerAddIndicesBuffer } from "../../Graphics/Buffers/GlBuffers.js";
-import { GlGetProgram, GlSetTexture } from "../../Graphics/GlProgram.js";
+import { GlGetContext } from "../../Graphics/Buffers/GlBuffers.js";
+import { GlGetProgram } from "../../Graphics/GlProgram.js";
+import { M_Buffer } from "../Core/Buffers.js";
 import { FontGetFontDimRatio } from "../Loaders/Font/Font.js";
-import { TextureLoadTexture } from "../Loaders/Textures/Texture.js";
 import { TimerGetGlobalTimer } from "../Timer/Timer.js";
+import { EventListener, CheckHover } from "../Events/EventListeners.js";
+
+
 
 
 let _cnt = 1;
@@ -36,8 +39,13 @@ export class Mesh {
     gfx;
     uniforms;
     shaderParams;
+    type; // A bit masked large integer to represent all different types of a mesh. 
+    listeners;
+    children;
 
     constructor(geom = null, mat = null, time = 0, attrParams1 = [0, 0, 0, 0], name = '???') {
+
+        // super();
 
         this.geom = geom;
         this.mat = mat;
@@ -73,10 +81,18 @@ export class Mesh {
         // Guard against enable a param for the shaders after the gl program has been created
         this.alreadyAdded = false;
 
+        // Add the type 'Mesh'
+        this.type |= MESH_TYPES.MESH;
+
+        this.listeners = null;
+
+        this.children = new M_Buffer();
+        this.children.Init(1); // Needs to be at least 1 because
+
         /** Debug properties */
         if (DEBUG.MESH) {
             Object.defineProperty(this, 'id', { value: _meshId++ });
-            Object.defineProperty(this, 'type', { value: 'Mesh' });
+            // Object.defineProperty(this, 'type', { value: 'Mesh' });
             Object.defineProperty(this, 'name', { value: name });
         }
     }
@@ -106,11 +122,15 @@ export class Mesh {
         this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
         return this.gfx;
     }
+    AddChild(mesh){
+
+        this.children.Add(mesh);
+    }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // SETTERS
     SetColor(col) {
-        this.mat.SetColor(col)
+        this.mat.SetColor(col, this.gfx)
     }
     SetColorAlpha(alpha) {
         this.mat.SetColor(alpha)
@@ -236,10 +256,35 @@ export class Mesh {
         const prog = GlGetProgram(this.gfx.prog.idx);
         prog.UniformsSetBufferUniform(this.time);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Event Listeners
+    CreateListener(type){
+        if(!this.listeners){
+            this.listeners = new EventListener(10, type);
+        }
+
+        switch(type){
+            case 'onhover':{
+                const params = {
+                    pos: this.geom.pos,
+                    dim: this.geom.dim,
+                };
+                this.listeners.Add(CheckHover, params);
+                break;
+            }
+
+        }
+    }
+    Temp_RunListeners(){
+
+        this.listeners.Call();
+    }
+
 }
 
 
-export class TextMesh extends Mesh {
+export class Text_Mesh extends Mesh {
 
     sdfParams;
     isFontSet;
@@ -250,6 +295,7 @@ export class TextMesh extends Mesh {
         super(geom, mat);
         this.isFontSet = false;
 
+        this.type |= MESH_TYPES.TEXT_MESH;
     }
 
     AddToGraphicsBuffer(sceneIdx) {
@@ -262,16 +308,14 @@ export class TextMesh extends Mesh {
             prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
         }
 
-        // if (this.mat.hasFontTex) {
+        // // Set Texture
+        // if (this.mat.texId !== INT_NULL) { // texId is init with INT_NULL that means there is no texture passed to the Material constructor.
 
-        //     // Create texture
-        //     // Store the texture index in the curent mesh and also in the vertex buffer that the mesh is going to be saved to.
-        //     this.gfx.tb.idx = this.mat.texIdx;
-        //     GlSetTexture(this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.tb.idx); // Update the vertex buffer to store the texture index
-
-        //     // this.mat.texIdx = indexes.texIdx;
-        //     // this.mat.uvIdx = indexes.uvIdx;
-
+        //     if (this.mat.hasFontTex) {
+        //         this.isFontSet = true;
+        //         // Correct the geometry height.
+        //         this.geom.dim[1] *= FontGetFontDimRatio(this.mat.uvIdx);
+        //     }
         // }
 
         this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);

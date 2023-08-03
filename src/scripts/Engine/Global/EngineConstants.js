@@ -157,6 +157,52 @@ const COMIC_FONT_METRICS_PATH = '../../../../consolas_sdf/metrics/consolas_sdf.t
 const TEXTURE_TEST = 'msdf';
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Meshes  
+ */
+let _cnt = 0x1;
+const MESH_TYPES = {
+	GEOMETRY2D:  		_cnt <<= 1,
+	TEXT_GEOMETRY2D: 	_cnt <<= 1,
+	GEOMETRY3D:  		_cnt <<= 1,
+	CUBE_GEOMETRY:  	_cnt <<= 1,
+	
+	MATERIAL: 			_cnt <<= 1,
+	FONT_MATERIAL: 	_cnt <<= 1,
+
+	MESH:  			_cnt <<= 1,
+	TEXT_MESH:  	_cnt <<= 1,
+	
+	TEXT_LABEL: _cnt <<= 1,
+	BUTTON:  	_cnt <<= 1,
+	UI_FPS: 		_cnt <<= 1,
+	WIDGET_TEXT:  	_cnt <<= 1,
+	WIDGET_TEXT_DYNAMIC:  	_cnt <<= 1,
+};
+
+function GetMeshType(type){
+
+	let meshType = []
+	
+	if( type & MESH_TYPES.GEOMETRY2D ) { meshType.push('Geometry2D'); }
+	if( type & MESH_TYPES.TEXT_GEOMETRY2D ) { meshType.push('Geometry2D_Text'); }
+	if( type & MESH_TYPES.GEOMETRY3D ) { meshType.push('Geometry3D'); }
+	if( type & MESH_TYPES.CUBE_GEOMETRY ) { meshType.push('CubeGeometry'); }
+	if( type & MESH_TYPES.MATERIAL ) { meshType.push('Material'); }
+	if( type & MESH_TYPES.FONT_MATERIAL ) { meshType.push('FontMaterial'); }
+	if( type & MESH_TYPES.MESH ) { meshType.push('Mesh'); }
+	if( type & MESH_TYPES.TEXT_MESH ) { meshType.push('Text_Mesh'); }
+	if( type & MESH_TYPES.TEXT_LABEL ) { meshType.push('Widget_Text_Label'); }
+	if( type & MESH_TYPES.WIDGET_TEXT ) { meshType.push('Widget_Text'); }
+	if( type & MESH_TYPES.WIDGET_TEXT_DYNAMIC ) { meshType.push('Widget_Text_Dynamic'); }
+	if( type & MESH_TYPES.BUTTON ) { meshType.push('Widget_Button'); }
+	if( type & MESH_TYPES.UI_FPS ) { meshType.push('UiFps'); }
+
+	return meshType;
+}
+
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Debugging  
  */
 const DEBUG = {
@@ -165,14 +211,14 @@ const DEBUG = {
 	GEOMETRY: true,
 	MESH: true,
 	MESH_ALL_UVS: false,
-	RECT: true,
+	RECT: false,
 	CAMERA: false,
 
 	TEXTURE: false,
 	UVS: false,
 	
 	// Graphics
-	WEB_GL: true,
-	SHADER_INFO: true,
-	SHADERS: true,
+	WEB_GL: false,
+	SHADER_INFO: false,
+	SHADERS: false,
 };

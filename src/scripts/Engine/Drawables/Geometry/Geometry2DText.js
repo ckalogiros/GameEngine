@@ -1,12 +1,12 @@
 "use strict";
 
-import { GlAddGeometry, GlHandlerAddGeometryBuffer } from "../../../Graphics/Buffers/GlBuffers.js";
+import { GlAddGeometry } from "../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh } from "../../../Graphics/GlProgram.js";
 import { FontGetFontDimRatio } from "../../Loaders/Font/Font.js";
-import { Geometry2D } from "../Geometry.js";
+import { Geometry2D } from "./Base/Geometry.js";
 
 
-export class TextGeometry2D extends Geometry2D {
+export class Geometry2D_Text extends Geometry2D {
 
    numChars;
    text;
@@ -23,6 +23,7 @@ export class TextGeometry2D extends Geometry2D {
       super(pos, dim, scale);
       this.text = text;
       this.numChars = text.length;
+      this.type |= MESH_TYPES.TEXT_GEOMETRY2D;
    }
 
    //////////////////////////////////////////////////////////////

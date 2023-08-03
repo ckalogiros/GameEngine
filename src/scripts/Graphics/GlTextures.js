@@ -6,6 +6,7 @@ import { GlBindTexture } from "./Buffers/GlBuffers.js";
 export function GlCreateTexture(gl, texture, idx, img) {
 
     texture.texId = gl.TEXTURE0 + idx; // Advance the texture ID to the next. TODO: Should check for GL_MAX_ALLOWED_TEXTURE_UNITS.
+    texture.idx = idx; // Advance the texture ID to the next. TODO: Should check for GL_MAX_ALLOWED_TEXTURE_UNITS.
     texture.level = 0;
     texture.internalFormat = gl.RGBA;
     texture.srcFormat = gl.RGBA;
@@ -17,7 +18,7 @@ export function GlCreateTexture(gl, texture, idx, img) {
     if (!texture.tex) alert('Could not create Texture');
 
     texture.img = img; // Load the font image
-    if (!texture.img || texture.img === undefined) alert('Texture not found whith getElementById');
+    if (!texture.img || texture.img === undefined) alert('Texture not found with getElementById');
     if(DEBUG.TEXTURE) console.log('texture:', texture)
 
     LoadTexture(gl, texture);

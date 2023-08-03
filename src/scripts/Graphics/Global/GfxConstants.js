@@ -154,8 +154,8 @@ const PROGRAM = {
 const VS_CRAMBLE_TRIANGLE = 'CrambleTriangle';
 
 // TODO: Create a smaller buffer that ca resize its self
-const MAX_VERTEX_BUFFER_COUNT = 512;
-const MAX_INDEX_BUFFER_COUNT = 256;
+const MAX_VERTEX_BUFFER_COUNT = 256;
+const MAX_INDEX_BUFFER_COUNT = 64;
 const INDICES_PER_RECT = 6;
 const VERTS_PER_RECT = 6;
 const VERTS_PER_RECT_INDEXED = 4;
