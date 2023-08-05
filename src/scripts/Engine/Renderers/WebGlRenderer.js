@@ -67,7 +67,7 @@ export class WebGlRenderer {
       scene.UseCamera(camera);
 
       this.camera = camera;
-      this.camera.Set();
+      this.camera.Init();
 
       this.fpsTimer = FpsGet();
    }

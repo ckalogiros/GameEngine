@@ -19,8 +19,7 @@
 --------------------------------------------------- TODO
 
 --------------------------------------------------- CONTINUE
-. Create add event listener.
-  The checkHover callback is a method and cannot be called upon a specific mesh 
+. The button scale animation needs text.gfx.start calculation
 --------------------------------------------------- CONTINUE
 Correct the meshes dimentions to not create double the width and height
 
@@ -132,7 +131,7 @@ See if we can set all animations via Animation class
 (Current Animations are implemented as folows: 
     export function RunAnimations() {
 
-      ButtonCreateScaleAnimation();
+      Animations_create_scale_up_down();
       UiModRunAnimation();
       PowerUpRunAnimation();
       PlayerEnlargeAnimation();

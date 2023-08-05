@@ -333,6 +333,7 @@ export function GlSetColor(gfxInfo, color) {
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z
         verts--;
     }
+    vb.needsUpdate = true;
 }
 export function GlSetColorAlpha(gfxInfo, val) {
 
@@ -353,6 +354,7 @@ export function GlSetColorAlpha(gfxInfo, val) {
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z
         verts--;
     }
+    vb.needsUpdate = true;
 }
 export function GlSetDim(gfxInfo, dim) {
 
@@ -384,6 +386,7 @@ export function GlSetDim(gfxInfo, dim) {
 
         faces--;
     }
+    vb.needsUpdate = true;
 }
 export function GlSetTex(gfxInfo, uvs) {
 
@@ -435,6 +438,7 @@ export function GlMove(gfxInfo, wpos) {
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z
         verts--;
     }
+    vb.needsUpdate = true;
 }
 export function GlSetWpos(gfxInfo, pos) {
 
@@ -454,6 +458,7 @@ export function GlSetWpos(gfxInfo, pos) {
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z
         verts--;
     }
+    vb.needsUpdate = true;
 }
 export function GlSetWposXY(gfxInfo, pos) {
 
@@ -473,6 +478,7 @@ export function GlSetWposXY(gfxInfo, pos) {
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z
         verts--;
     }
+    vb.needsUpdate = true;
 }
 export function GlSetWposX(gfxInfo, posx) {
 
@@ -496,6 +502,7 @@ export function GlSetWposX(gfxInfo, posx) {
 
         faces--;
     }
+    vb.needsUpdate = true;
 }
 export function GlSetWposY(gfxInfo, posy) {
 
@@ -519,6 +526,7 @@ export function GlSetWposY(gfxInfo, posy) {
 
         faces--;
     }
+    vb.needsUpdate = true;
 }
 export function GlSetWposZ(gfxInfo, posz) {
 
@@ -542,6 +550,7 @@ export function GlSetWposZ(gfxInfo, posz) {
 
         faces--;
     }
+    vb.needsUpdate = true;
 }
 export function GlSetAttrRoundCorner(gfxInfo, val) {
 
@@ -559,6 +568,7 @@ export function GlSetAttrRoundCorner(gfxInfo, val) {
         index += stride; // Go to next vertice's borderWidth attrib.
         verts--;
     }
+    vb.needsUpdate = true;
 }
 export function GlSetAttrBorderWidth(gfxInfo, val) {
 
@@ -576,6 +586,7 @@ export function GlSetAttrBorderWidth(gfxInfo, val) {
         index += stride; // Go to next vertice's borderWidth attrib.
         verts--;
     }
+    vb.needsUpdate = true;
 }
 export function GlSetAttrBorderFeather(gfxInfo, val) {
 
@@ -593,6 +604,7 @@ export function GlSetAttrBorderFeather(gfxInfo, val) {
         index += stride; // Go to next vertice's borderWidth attrib.
         verts--;
     }
+    vb.needsUpdate = true;
 }
 export function GlSetAttrTime(gfxInfo, val) {
 
@@ -629,6 +641,7 @@ export function GlSetAttrSdfParams(gfxInfo, val) {
         index += stride; // Go to next vertice's borderWidth attrib.
         verts--;
     }
+    vb.needsUpdate = true;
 }
 export function GlSetAttrSdfParamsOuter(gfxInfo, val) {
 
@@ -647,6 +660,7 @@ export function GlSetAttrSdfParamsOuter(gfxInfo, val) {
         index += stride; // Go to next vertice's borderWidth attrib.
         verts--;
     }
+    vb.needsUpdate = true;
 }
 export function GlSetAttrTex(gfxInfo, uvs) {
 
@@ -678,6 +692,7 @@ export function GlSetAttrTex(gfxInfo, uvs) {
 
         numTimes--;
     }
+    vb.needsUpdate = true;
 }
 /**
  * 
@@ -699,6 +714,7 @@ export function GlSetAttrParams1(gfxInfo, param, paramOffset) {
         index += stride;
         verts--;
     }
+    vb.needsUpdate = true;
 }
 
 /** Set many meshes in a loop */
@@ -1123,47 +1139,39 @@ export function GlRotateZ3D(mesh, angle) {
 
     vb.needsUpdate = true;
 }
-/** */
+/** TODO: Store the new pos and dim to the mesh for collision detection */
 export function GlRotateXY3D(mesh, angle) {
 
-    const gfxInfo = mesh.gfx;
-    const dim = mesh.geom.dim;
-    const faces = mesh.geom.faces;
-    let fLen = faces.length;
+    const gfxInfo   = mesh.gfx;
+    const dim       = mesh.geom.dim;
+    const faces     = mesh.geom.faces;
+    let fLen        = faces.length;
 
     const progs = GlGetPrograms();
-    const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
+    const vb    = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
 
-    let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.pos;
-    let stride = gfxInfo.attribsPerVertex;
+    let index   = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.pos;
+    let stride  = gfxInfo.attribsPerVertex;
     let vertices = gfxInfo.numFaces * gfxInfo.vertsPerRect;
 
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
-    // ROT3D.Set(cos, sin)
+
     ROT3D.SetRX(cos, sin)
     ROT3D.SetRY(cos, sin)
     ROT3D.SetRZ(cos, sin)
 
-
-    // const mat1 = Matrix3x3_3x3Mult(ROT3D.RY, ROT3D.RZ);
-    // const mat2 = Matrix3x3_3x3Mult(mat1, ROT3D.RX);
-    // const mat1 = Matrix3x3_3x3Mult(ROT3D.RX, ROT3D.RY);
     const mat1 = Matrix3x3_3x3Mult(ROT3D.RZ, ROT3D.RY);
-    // const mat2 = Matrix3x3_3x3Mult(mat1, ROT3D.RZ);
     const mat2 = mat1;
 
     const x = 0, y = 1, z = 2;
-    let ii = 0;
-
+    let ii  = 0;
 
     vertices = 4;
     for(let i=0; i<fLen; i++){
         vb.data[index + x] = faces[ii+x] * mat2[0] * dim[x] + faces[ii+y] * mat2[3] * dim[y] + faces[ii+z] * mat2[6] * dim[z];
         vb.data[index + y] = faces[ii+x] * mat2[1] * dim[x] + faces[ii+y] * mat2[4] * dim[y] + faces[ii+z] * mat2[7] * dim[z];
         vb.data[index + z] = faces[ii+x] * mat2[2] * dim[x] + faces[ii+y] * mat2[5] * dim[y] + faces[ii+z] * mat2[8] * dim[z];
-        // vb.data[index + x] = faces[ii+x] * r[0] * dim[x] + faces[ii+y] * r[2] * dim[y];
-        // vb.data[index + y] = faces[ii+x] * r[1] * dim[x] + faces[ii+y] * r[3] * dim[y];
         ii+=3;
         index += stride;
     }

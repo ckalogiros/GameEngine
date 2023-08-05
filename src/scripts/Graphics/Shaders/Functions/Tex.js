@@ -10,6 +10,7 @@ vec4 Sdf(float inner, float outer){\n\
    // float alpha = 1. - smoothstep(.3, .7, pixelDist);\n\
    float alpha = 1. - smoothstep(inner, inner + outer, pixelDist);\n\
    return vec4(alpha);\n\
+   // return vec4(.7);\n\
 }\
 ';
 

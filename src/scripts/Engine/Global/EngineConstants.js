@@ -199,7 +199,34 @@ function GetMeshType(type){
 
 	return meshType;
 }
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Events  
+ */
+_cnt = 0x1;
+const LISTEN_EVENT_TYPES = {
+	HOVER:  		_cnt <<= 1,
+	
+	NULL:  		_cnt <<= 1,
+};
 
+function GetListenEventsType(type){
+	
+	if( type & LISTEN_EVENT_TYPES.HOVER ) { return 'HOVER'; }
+}
+
+_cnt = 0x1;
+const DISPATCH_EVENT_TYPES = {
+	SCALE_UP_DOWN:	_cnt <<= 1,
+	DIM_COLOR:		_cnt <<= 1,
+	
+	NULL:  		_cnt <<= 1,
+};
+
+function GetDispatchEventsType(type){
+	
+	if( type & DISPATCH_EVENT_TYPES.SCALE_UP_DOWN ) { return 'SCALE_UP_DOWN'; }
+	if( type & DISPATCH_EVENT_TYPES.DIM_COLOR ) { return 'DIM_COLOR'; }
+}
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

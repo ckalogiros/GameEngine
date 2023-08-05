@@ -178,6 +178,7 @@ export function OnMouseMove(e) {
    mouse.pos.ydiff = -(mouse.pos.y - mouse.pos.yprev); // Reverse the direction(negative for down dir and positive for up dir) 
 
 }
+
 export function OnMouseOut(e){
    
    e.stopPropagation();
@@ -191,6 +192,7 @@ export function OnMouseOut(e){
    mouse.pos.SetPrevPos(INT_NULL, INT_NULL);
    mouse.pos.ResetPos();
 }
+
 export function OnMouseWheel(e){
 
    e.stopPropagation();
@@ -204,6 +206,7 @@ export function OnMouseWheel(e){
 
    console.log(`MOUSE WHEEL: pos: ${e.x} ${e.y}, delta: ${e.wheelDelta}`)
 }
+
 export function OnMouseDown(e) {
 
    e.stopPropagation();

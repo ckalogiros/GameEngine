@@ -132,15 +132,14 @@ export function InterpolateToRange01(value, max) {
 
 
 export function Hash11(seed){
+
     let x = Math.sin(seed*19287.8873)*28715.715; 
     return (x-Math.floor(x));
 }
 
-// export function Clamp(val, lLimit, uLimit){
-//     return val <lLimit ? lLimit : (val > uLimit ? uLimit : val) 
-// }
 
 export function Clamp(val, min, max) {
+
     const v = val < min ? min : val;
     return v > max ? max : v;
 }
@@ -151,16 +150,34 @@ export function Clamp(val, min, max) {
 export function MapLinear( x, a1, a2, b1, b2 ) {
 
 	return b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 );
-
 }
 
-
+/** See difference of the 2 lerp functions in DESMOS @ https://www.desmos.com/calculator/h5uj3zwpks */
 // https://en.wikipedia.org/wiki/Linear_interpolation
-export function Lerp( x, y, t ) {
+export function Lerp_slow( x0, x1, t ) {
 
-	return ( 1 - t ) * x + t * y;
-
+	return (( 1 - t ) * x0) + (x1 * t);
 }
+export function Lerp( x0, x1, t ) {
+
+	return x0 + (x1 - x0) * t; // 
+}
+
+
+/**
+ * 
+ * @param {float} p0 Array of 2. [0]: x point, [1]: y point
+ * @param {float} p1 Array of 2. [0]: x point, [1]: y point
+ * @param {float} t The percenage. From t=0(0%) to t=1(100%) 
+ */
+export function Lerp2D( p0, p1, t ) {
+
+	const x = p0[0] + (p1[0] - p0[0]) * t;
+	const y = p0[1] + (p1[1] - p0[1]) * t;
+
+    return [x, y];
+}
+
 
 // http://en.wikipedia.org/wiki/Smoothstep
 export function Smoothstep( x, min, max ) {
@@ -170,8 +187,8 @@ export function Smoothstep( x, min, max ) {
 	x = ( x - min ) / ( max - min );
 
 	return x * x * ( 3 - 2 * x );
-
 }
+
 
 export function Smootherstep( x, min, max ) {
 
@@ -181,5 +198,4 @@ export function Smootherstep( x, min, max ) {
 	x = ( x - min ) / ( max - min );
 
 	return x * x * x * ( x * ( x * 6 - 15 ) + 10 );
-
 }

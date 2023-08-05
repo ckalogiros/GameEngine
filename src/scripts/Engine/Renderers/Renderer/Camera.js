@@ -137,7 +137,7 @@ export class CameraOrthographic extends Camera {
 	constructor() {
 		super();
 	}
-	Set() {
+	Init() {
 
 		const zoom = 1;
 		const dx = ( Viewport.width- 0 ) / ( 2 * zoom );

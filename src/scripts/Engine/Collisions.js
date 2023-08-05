@@ -8,7 +8,7 @@
  */
 export function Collision_PointRect(p, r){
    if(p[0] > r[0][0] && p[0] < r[0][1] && p[1] > r[1][0] && p[1] < r[1][1]){
-      console.log('Collision!')
+      // console.log('Collision!')
       return true;
    }
    return false;

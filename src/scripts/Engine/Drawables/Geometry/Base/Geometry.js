@@ -96,9 +96,12 @@ export class Geometry2D {
         glBufferOps.GlMove(this.gfxInfo, [0, y]);
     }
     //////////////////////////////////////////////////////////////
-    SetDim(dim) {
-        math.CopyArr2(this.mesh.dim, dim);
-        glBufferOps.GlSetDim(this.gfxInfo, dim);
+    SetDim(dim, gfx) {
+        math.CopyArr2(this.dim, dim);
+        glBufferOps.GlSetDim(gfx, dim);
+    }
+    UpdateDim(gfx) {
+        glBufferOps.GlSetDim(gfx, this.dim);
     }
     // Shrink(val) {
     //     this.mesh.dim[0] *= val;
@@ -126,20 +129,20 @@ export class Geometry2D {
     }
 
     //////////////////////////////////////////////////////////////
-    CheckHover(){
-        const rect = [
-            // Left  Right 
-            [ this.pos[0] - this.dim[0], this.pos[0] + this.dim[0], ],
-            // Top  Bottom
-            [ this.pos[1] - this.dim[1], this.pos[1] + this.dim[1], ],
-        ];
-        const mousePos = MouseGetMousePos();
-        const point = [
-            mousePos.x,
-            mousePos.y,
-        ];
-        return Collision_PointRect(point, rect);
-    }
+    // Listener_listen_mouse_hover(){
+    //     const rect = [
+    //         // Left  Right 
+    //         [ this.pos[0] - this.dim[0], this.pos[0] + this.dim[0], ],
+    //         // Top  Bottom
+    //         [ this.pos[1] - this.dim[1], this.pos[1] + this.dim[1], ],
+    //     ];
+    //     const mousePos = MouseGetMousePos();
+    //     const point = [
+    //         mousePos.x,
+    //         mousePos.y,
+    //     ];
+    //     return Collision_PointRect(point, rect);
+    // }
 
 }
 

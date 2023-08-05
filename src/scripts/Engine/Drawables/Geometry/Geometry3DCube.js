@@ -7,7 +7,7 @@ import { Geometry3D } from "./Base/Geometry.js";
 
 export class CubeGeometry extends Geometry3D {
     
-    faces; // TODO: Bad nam, Rename this.
+    faces; // TODO: Bad name, Rename this.
 
     constructor(pos, dim, scale) {
 

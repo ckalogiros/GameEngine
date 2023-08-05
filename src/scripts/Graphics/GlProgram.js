@@ -86,6 +86,32 @@ export class GfxInfoMesh {
 		}
 	}
 
+	Copy(gfx = {}){
+		if (gfx instanceof GfxInfoMesh) {
+
+			this.sid = gfx.sid;
+			this.sceneIdx = gfx.sceneIdx;
+			this.numFaces = gfx.numFaces;
+			this.vertsPerRect = gfx.vertsPerRect;
+			this.attribsPerVertex = gfx.attribsPerVertex;
+			this.meshIdx = gfx.meshIdx; 
+			this.vao = gfx.vao; 
+			
+			this.prog.idx = gfx.prog.idx; 
+		
+			this.vb.idx = gfx.vb.idx;
+			this.vb.start = gfx.vb.start;
+			this.vb.count = gfx.vb.count;
+
+			this.ib.idx = gfx.ib.idx;
+			this.ib.start = gfx.ib.start;
+			this.ib.count = gfx.ib.count;
+
+			this.tb.id = gfx.tb.id;
+			this.tb.idx = gfx.tb.idx;
+		}
+	}
+
 }
 
 

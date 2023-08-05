@@ -15,12 +15,15 @@ export class Geometry2D_Text extends Geometry2D {
 
       let dim = [0,0]
       dim = [fontSize, fontSize];
+      
       if(texId !== INT_NULL) {
+
          dim[1] *= FontGetFontDimRatio(texId);
          pos[0] += fontSize; // Case pos is set to 0, then we must add half text face width.
       }
       
       super(pos, dim, scale);
+      
       this.text = text;
       this.numChars = text.length;
       this.type |= MESH_TYPES.TEXT_GEOMETRY2D;
@@ -42,7 +45,7 @@ export class Geometry2D_Text extends Geometry2D {
          GlAddGeometry(sid, charPos, this.dim, this.time, gfxCopy, meshName, 1)
          gfxCopy.vb.start += gfxCopy.vb.count;
          gfxCopy.ib.start += gfxCopy.ib.count;
-         charPos[0] += this.dim[0] * 2 ;
+         charPos[0] += this.dim[0] * 2;
       }
    }
 

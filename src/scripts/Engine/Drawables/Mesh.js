@@ -2,13 +2,15 @@
 import { GlSetAttrTime } from "../../Graphics/Buffers/GlBufferOps.js";
 import { GlGetContext } from "../../Graphics/Buffers/GlBuffers.js";
 import { GlGetProgram } from "../../Graphics/GlProgram.js";
-import { M_Buffer } from "../Core/Buffers.js";
+import { Int8Buffer, M_Buffer } from "../Core/Buffers.js";
 import { FontGetFontDimRatio } from "../Loaders/Font/Font.js";
 import { TimerGetGlobalTimer } from "../Timer/Timer.js";
-import { EventListener, CheckHover } from "../Events/EventListeners.js";
+import { EventListener, ListenerCreateDispatchEvent, ListenerCreateListenEvent, Listener_listen_mouse_hover, ListenersGetListener, ListenersGetListenerType } from "../Events/EventListeners.js";
 
 
 
+const MAX_EVENT_FUNCTIONS_BUFFER_SIZE = 16; // TODO: Set max from global enum object of EVENTS_...
+const MAX_LISTENERS_BUFFER_SIZE = 16; // TODO: Set max from global enum object of EVENTS_...
 
 let _cnt = 1;
 export const MESH_ENABLE = {
@@ -27,6 +29,42 @@ export const MESH_ENABLE = {
     NONE: 0,
 }
 
+_cnt = 0;
+const LISTENER_EVENT_FUNCS_INDEXES = {
+    SCALE_ANIMATION: _cnt++,
+    DIM_COLOR_ANIMATION: _cnt++,
+};
+
+_cnt = 0x1;
+const MESH_STATE = {
+    IN_HOVER: _cnt <<= 1,
+    IN_SCALE: _cnt <<= 1,
+};
+
+class BitMask {
+
+    mask;
+
+    constructor() {
+
+        this.mask = 1 | 0;
+    }
+
+    set(channel) { this.mask = (1 << channel | 0) >>> 0; }
+    enable(channel) { this.mask |= 1 << channel | 0; }
+    enableAll() { this.mask = 0xffffffff | 0; }
+    toggle(channel) { this.mask ^= 1 << channel | 0; }
+    disable(channel) { this.mask &= ~(1 << channel | 0); }
+    disableAll() { this.mask = 0; }
+    test(layers) { return (this.mask & layers.mask) !== 0; }
+    isEnabled(channel) { return (this.mask & (1 << channel | 0)) !== 0; }
+
+}
+
+class MeshState {
+    inHover = false;
+    inScale = false;
+}
 
 let _meshId = 0;
 export class Mesh {
@@ -39,13 +77,12 @@ export class Mesh {
     gfx;
     uniforms;
     shaderParams;
-    type; // A bit masked large integer to represent all different types of a mesh. 
-    listeners;
+    type; // A bit masked large integer to 'name' all different types of a mesh. 
+    listeners; // Indexes to the EventListeners class.
     children;
+    state; // Mesh info state. TODO: An enum of bit-masks as booleans.
 
     constructor(geom = null, mat = null, time = 0, attrParams1 = [0, 0, 0, 0], name = '???') {
-
-        // super();
 
         this.geom = geom;
         this.mat = mat;
@@ -84,20 +121,51 @@ export class Mesh {
         // Add the type 'Mesh'
         this.type |= MESH_TYPES.MESH;
 
-        this.listeners = null;
+        this.listeners = {
+
+            size: MAX_LISTENERS_BUFFER_SIZE,
+            count: 0,
+            buffer: [],
+
+            Add(arr) {
+
+                if (this.count >= this.size) alert('Int8Buffer Buffer Needs To Grow. @ Buffers.js')
+
+                const idx = this.count;
+                this.buffer[idx][0] = arr[0];
+                this.buffer[idx][1] = arr[1];
+                this.count++;
+            }
+        };
+        for (let i = 0; i < this.listeners.size; i++) {
+            this.listeners.buffer[i] = [INT_NULL, INT_NULL]
+        }
 
         this.children = new M_Buffer();
         this.children.Init(1); // Needs to be at least 1 because
 
-        /** Debug properties */
+        this.state = {
+            inHover: false,
+            inScale: false,
+            inDimColor: false,
+            inBrightColor: false,
+        };
+
+
+        /** Debug  properties */
         if (DEBUG.MESH) {
             Object.defineProperty(this, 'id', { value: _meshId++ });
-            // Object.defineProperty(this, 'type', { value: 'Mesh' });
-            Object.defineProperty(this, 'name', { value: name });
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    AddChild(mesh) {
+
+        this.children.Add(mesh);
+    }
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     * GRAPHICS
+     */
     AddToGraphicsBuffer(sceneIdx) {
         this.gfx = GlGetContext(this.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
 
@@ -122,13 +190,11 @@ export class Mesh {
         this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
         return this.gfx;
     }
-    AddChild(mesh){
 
-        this.children.Add(mesh);
-    }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////
-    // SETTERS
+    /**
+     * Setters-Getters
+     */
     SetColor(col) {
         this.mat.SetColor(col, this.gfx)
     }
@@ -139,7 +205,10 @@ export class Mesh {
         this.geom.SetPos(pos, this.gfx)
     }
     SetDim(dim) {
-        this.geom.SetDim(dim)
+        this.geom.SetDim(this.dim, this.gfx)
+    }
+    UpdateDim() {
+        this.geom.UpdateDim(this.gfx)
     }
     SetAttrTime() {
         if (this.sid.attr & SID.ATTR.TIME) {
@@ -147,56 +216,14 @@ export class Mesh {
             GlSetAttrTime(this.gfx, this.geom.timer);
         }
     }
-    SetBorder(width) {
-        /**
-         * Set a #define to the border
-         */
-    }
     SetStyle(border, rCorners, feather) {
         this.mat.SetStyle(border, rCorners, feather);
     }
 
-    //////////////////////////////////////////////////////////////
-    // Position
-    // SetPos(pos) {
-    //     math.CopyArr2(this.pos, pos);
-    //     glBufferOps.GlSetWposXY(this.gfxInfo, pos);
-    // }
-    // SetPosXY(pos) {
-    //     math.CopyArr2(this.mesh.pos, pos);
-    //     glBufferOps.GlSetWposXY(this.gfxInfo, pos);
-    // }
-    // SetPosX(x) {
-    //     this.mesh.pos[0] = x;
-    //     glBufferOps.GlSetWposX(this.gfxInfo, x);
-    // }
-    // SetPosY(y) {
-    //     this.mesh.pos[1] = y;
-    //     glBufferOps.GlSetWposY(this.gfxInfo, y);
-    // }
-    // UpdatePosXY() {
-    //     glBufferOps.GlSetWposXY(this.gfxInfo, this.mesh.pos);
-    // }
-    // SetZindex(z) {
-    //     this.mesh.pos[2] = z;
-    //     glBufferOps.GlSetWposZ(this.gfxInfo, z);
-    // }
-    // Move(x, y) {
-    //     this.mesh.pos[0] += x;
-    //     this.mesh.pos[1] += y;
-    //     GlMove(this.gfxInfo, [x, y]);
-    // }
-    // MoveX(x) {
-    //     this.mesh.pos[0] += x;
-    //     glBufferOps.GlMove(this.gfxInfo, [x, 0]);
-    // }
-    // MoveY(y) {
-    //     this.mesh.pos[1] += y;
-    //     glBufferOps.GlMove(this.gfxInfo, [0, y]);
-    // }
+    /**
+     * Enable shader properties
+     */
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Enable shader properties
     Enable(which, params) {
 
         if (this.alreadyAdded === true) {
@@ -246,8 +273,9 @@ export class Mesh {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Uniforms
+    /**
+     * Uniforms
+     */
     SetTimeBufferUniform() {
         if (this.uniforms.time.idx === INT_NULL) {
             console.error('Buffer uniform time has not been created. @Mesh.SetBufferTimeUniform.');
@@ -257,28 +285,45 @@ export class Mesh {
         prog.UniformsSetBufferUniform(this.time);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Event Listeners
-    CreateListener(type){
-        if(!this.listeners){
-            this.listeners = new EventListener(10, type);
-        }
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     * Event Listeners
+     */
 
-        switch(type){
-            case 'onhover':{
-                const params = {
-                    pos: this.geom.pos,
-                    dim: this.geom.dim,
-                };
-                this.listeners.Add(CheckHover, params);
-                break;
-            }
+    CreateListenEvent(evttype) {
 
-        }
+        const params = {
+            pos: [this.geom.pos[0], this.geom.pos[1]],
+            dim: this.geom.dim,
+            state: this.state,
+            col: this.mat.col,
+        };
+        const idx = ListenerCreateListenEvent(evttype, params);
+        this.listeners.Add(idx);
     }
-    Temp_RunListeners(){
 
-        this.listeners.Call();
+    CreateDispatchEvent(listenEventType, dispatcEventType, dispatchClbk) {
+
+        // Check if the specific listen event type allready enabled for this mesh.
+        const listeneridx = this.#GetListenEventIdx(listenEventType);
+        const params = this;
+
+        /* TODO: Must store the dispatcher index??? */
+        const dispatcherIdx = ListenerCreateDispatchEvent(dispatcEventType, dispatchClbk, params, listeneridx[0], listeneridx[1]);
+    }
+
+    /** Helepers */
+    #GetListenEventIdx(listenEventType) {
+
+        for (let i = 0; i < this.listeners.count; i++) {
+
+            const type = ListenersGetListenerType(this.listeners.buffer[i][0]);
+
+            if (listenEventType === type)
+                return this.listeners.buffer[i];
+
+
+            return INT_NULL;
+        }
     }
 
 }
@@ -288,7 +333,6 @@ export class Text_Mesh extends Mesh {
 
     sdfParams;
     isFontSet;
-
 
     constructor(geom, mat) {
 
@@ -307,16 +351,6 @@ export class Text_Mesh extends Mesh {
             prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
             prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
         }
-
-        // // Set Texture
-        // if (this.mat.texId !== INT_NULL) { // texId is init with INT_NULL that means there is no texture passed to the Material constructor.
-
-        //     if (this.mat.hasFontTex) {
-        //         this.isFontSet = true;
-        //         // Correct the geometry height.
-        //         this.geom.dim[1] *= FontGetFontDimRatio(this.mat.uvIdx);
-        //     }
-        // }
 
         this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
         this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
@@ -338,13 +372,14 @@ export class Text_Mesh extends Mesh {
     // }
 }
 
-
+/**
+ * TODO: Implement Grouping meshes from indices buffer for efficient gl vertexBuffer rendering
+ */
 class MeshGroup {
     parent;
     children;
     constructor(parent = null, childrer = null) {
         this.parent = parent;
-        // this.children = children
     }
     addChild(object) {
         this.children.push(object);

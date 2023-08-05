@@ -100,7 +100,7 @@ export function ButtonRunScaleAnimation(idx, scaleFactor, maxScale) {
     buttonsArea[idx].dim[0] *= scaleFactor; // Update button's area dimentions x
     buttonsArea[idx].dim[1] *= scaleFactor; // Update button's area dimentions y
     GlSetDim(buttons.btn[idx].area.gfxInfo, buttonsArea[idx].dim);
-    ButtonTextScaleAnimation(idx, scaleFactor, maxScale);
+    // ButtonTextScaleAnimation(idx, scaleFactor, maxScale);
 
 }
 /**

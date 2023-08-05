@@ -19,10 +19,10 @@ import { Text_Mesh } from "../Mesh.js";
  */
 export class Widget_Text extends Text_Mesh {
 
-	constructor(text, pos, fontSize = 10, scale = [1, 1], color = WHITE, boldness = 4) {
+	constructor(text, pos, fontSize = 10, scale = [1, 1], color = WHITE, bold = 4) {
 
 		const sdfouter = CalculateSdfOuterFromDim(fontSize);
-		const mat = new FontMaterial(color, FONTS.SDF_CONSOLAS_LARGE, text, [boldness, sdfouter])
+		const mat = new FontMaterial(color, FONTS.SDF_CONSOLAS_LARGE, text, [bold, sdfouter])
 		const geom = new Geometry2D_Text(pos, fontSize, scale, text, FONTS.SDF_CONSOLAS_LARGE);
 		super(geom, mat);
 
@@ -41,13 +41,13 @@ export class Widget_Text_Dynamic extends Widget_Text {
 
 	/** Set the max number of characters for the dynamic text, 
 	 * by passing any text as 'maxDynamicTextChars' of length= dynamic text number of characters*/
-	constructor(text, maxDynamicTextChars, pos, fontSize, scale, color1, color2, boldness) {
+	constructor(text, maxDynamicTextChars, pos, fontSize, scale, color1, color2, bold) {
 
-		super(text, pos, fontSize, scale, color1, boldness);
+		super(text, pos, fontSize, scale, color1, bold);
 
 		// Translate the dynamic text by the width of the constant text's width
 		pos[0] += (fontSize * 2 * text.length) + fontSize;
-		const dynamicText = new Widget_Text(maxDynamicTextChars, pos, fontSize, scale, color2, boldness);
+		const dynamicText = new Widget_Text(maxDynamicTextChars, pos, fontSize, scale, color2, bold);
 		this.children.Add(dynamicText);
 
 		this.type |= MESH_TYPES.WIDGET_TEXT_DYNAMIC;
