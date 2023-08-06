@@ -1,4 +1,4 @@
-import { TimerGetGlobalTimerCycle } from "../../Timer/Timer.js";
+import { TimerGetGlobalTimerCycle } from "../../Timer/Timers.js";
 import { TempMesh } from "../MeshBuffer_OLD.js";
 
 // For readability of the attribute params1 vector

@@ -28,7 +28,7 @@ export class Scene {
         this.children.Init(32);
         this.gfxBuffer = [];
         this.buttonBuffer = new Int8Buffer(6);
-        this.buttonBuffer.Init(INT_NULL);
+        // this.buttonBuffer.Init(INT_NULL);
     }
 
     // OnUpdate should handle all meshes requirements. E.x. uniform update, etc...
@@ -59,17 +59,6 @@ export class Scene {
 
 
         // 
-    }
-
-    AddEventListener(type, clbk, meshType) {
-
-        for (let i = 0; i < this.children.count; i++) {
-
-            if (this.children.buffer[i].type & meshType) {
-
-                this.children.buffer[i].CreateListenEvent(type, clbk);
-            }
-        }
     }
 
     AddMesh(mesh) {

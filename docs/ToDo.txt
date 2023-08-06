@@ -1,6 +1,7 @@
 --------------------------------------------------- TODO
-. Implement child-parent relationship
-. Set events. Set event listener for button hover, click, etc.
+
+. Move touch screen input from MouseEvents.js to input folder
+
 . Create a division of canvas, for colission detection, 
   place meshes in 2D(like UI) and many more.
 . Implement RenderBuffers.
@@ -16,10 +17,20 @@
     will allow the re-rendering of certain groups of meshes,
     also maybe we implement an index-based solution to
     address vertices and its attributes instead of gfxInfo start????  
+
+. - More Geometry -
+  . Line
+  . BezierCurve
+  . Triangle2D
+  . Triangle3D
+  . etc
 --------------------------------------------------- TODO
 
 --------------------------------------------------- CONTINUE
-. The button scale animation needs text.gfx.start calculation
+. Create a buffer in fps timer for all avgs.
+. Implement rotation3D via EventListener onMouseHover.
+. Use click button in combination with EventListener onMouseHover
+
 --------------------------------------------------- CONTINUE
 Correct the meshes dimentions to not create double the width and height
 

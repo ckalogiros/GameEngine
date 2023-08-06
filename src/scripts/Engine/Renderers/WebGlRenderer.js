@@ -1,13 +1,11 @@
 "use strict";
 
-import { GlRotateX3D, GlRotateXY3D, GlRotateY3D, GlRotateZ3D } from "../../Graphics/Buffers/GlBufferOps.js";
 import { GlDraw } from "../../Graphics/GlDraw.js";
-import { GlCreateTexture } from "../../Graphics/GlTextures.js";
-import { PrintAttributes } from "../../Graphics/Z_Debug/GfxDebug.js";
 import { MouseResetDif, MouseResetWheel } from "../Controls/Input/Mouse.js";
-import { FpsGet, TimeIntervalsUpdateAll, TimeUpdate, TimersUpdateStepTimers } from "../Timer/Time.js";
-import { TimerUpdateGlobalTimers, TimersUpdateTimers } from "../Timer/Timer.js";
-import { Matrix4 } from "../math/Matrix4.js";
+import { FpsGet, TimeUpdate, TimersUpdateStepTimers } from "../Timer/Time.js";
+import { TimersUpdateGlobalTimer, TimersUpdateTimers } from "../Timer/Timers.js";
+import { TimeIntervalsUpdateAll } from "../Timer/TimeIntervals.js";
+import { TimeMeasureCreate, _tm1 } from "../Timer/TimeMeasure.js";
 
 /**
  * WebGl
@@ -44,9 +42,14 @@ import { Matrix4 } from "../math/Matrix4.js";
 
 
 // TODO: Make PLATFORM, Device and Viewport private to Renderer???
-// const rotx = new Matrix4();
-// const rotz = new Matrix4();
-// const tra = new Matrix4();
+
+
+/**
+ * Time Measure Variables
+ */
+
+// const tm1 = TimeMeasureCreate();
+const tm1 = _tm1;
 
 export class WebGlRenderer {
 
@@ -62,7 +65,7 @@ export class WebGlRenderer {
       this.canvas = document.getElementById("glCanvas");
       this.DeviceSetUp();
       this.Init();
-      
+
       this.scene = scene;
       scene.UseCamera(camera);
 
@@ -70,34 +73,38 @@ export class WebGlRenderer {
       this.camera.Init();
 
       this.fpsTimer = FpsGet();
+
    }
 
    Render(mesh) {
-      
+
       // const animations = AnimationsGet();
       // const particles = ParticleSystemGet();
+
+      // this.fpsTimer.Start();
+
       
       if (g_state.game.paused === false) {
          
-         this.fpsTimer.Start();
-
          TimeUpdate(); // Update the Global Timer (real time, in miliseconds)
          TimeIntervalsUpdateAll(); // Update and run callbacks for each interval timer that has been set.
          
-         TimerUpdateGlobalTimers(); // This is a globbal timer, going only forward
+         
+         TimersUpdateGlobalTimer(); // This is a globbal timer, going only forward
          TimersUpdateTimers();
+         
          TimersUpdateStepTimers();
-   
+         
          // TODO!!! Update camera uniform if camera needs update 
          this.camera.Update(this.gl)
          this.scene.OnUpdate();
          
-
+         
          // if(this.camera.needsUpdateUniform){
          //    const prog = GlGetProgram(this.scene.gfxBuffer[0].progIdx);
          //    prog.UniformsSetUpdateProjectionMatrix(this.gl, this.camera.elements);
          // }
-
+         
          //  HandleEvents();
          //  RunAnimations();
          //  animations.Run();
@@ -106,12 +113,18 @@ export class WebGlRenderer {
          //  Update();
          //  OnMouseMove();
          //  ExplosionsUpdate();
-   
+            
+            
+         tm1.Start();
          GlDraw(this.gl);
+         tm1.Stop();
          MouseResetDif(.5);
          MouseResetWheel();
+         TimeUpdate();
          this.fpsTimer.Stop();
       }
+
+
    }
    Init() {
       console.log('Initializing Graphics.')
@@ -136,7 +149,7 @@ export class WebGlRenderer {
       this.gl.enable(this.gl.DEPTH_TEST);
       this.gl.depthFunc(this.gl.LEQUAL)
       // this.gl.depthMask(true);
-      
+
       this.gl.enable(this.gl.BLEND);
       this.gl.blendFunc(this.gl.DST_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
@@ -193,7 +206,7 @@ export class WebGlRenderer {
 function DetectHostPlatform() {
 
    const wn = window.navigator;
-   console.log(wn)
+   console.debug(wn)
 
    /** Windows Smartphone
     * Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 950) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Mobile Safari/537.36 Edge/14.14263

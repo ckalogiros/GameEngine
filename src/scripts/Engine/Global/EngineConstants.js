@@ -1,18 +1,43 @@
 "use strict";
 
 
+const INT_NULL = -1; // For case like 0 index arrays, where the number 0 index cannot be used as null element for a buffer
 
+const MILISEC = 0.001;
+const NANOSEC = 0.000001;
+
+function CHECK_ERROR(obj, msg){
+	if(!obj || obj === undefined) {
+		console.error('object:', obj, msg)
+	}
+}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Loaders's Constants 
+ * Application Constants 
  */
-	const PLATFORM = {
-		WIN_NT_IMPL: false,
-		WIN_PHONE_IMPL: false,
-		ANDROID_IMPL: false,
-		I_PHONE_IMPL: false,
-		BLACK_BERRY_IMPL: false,
-	} 
+const PLATFORM = {
+	WIN_NT_IMPL: false,
+	WIN_PHONE_IMPL: false,
+	ANDROID_IMPL: false,
+	I_PHONE_IMPL: false,
+	BLACK_BERRY_IMPL: false,
+}
+
+const STATE = {
+	loop: {
+		paused: false,
+	},
+	mesh:{
+		hovered: null,
+		hoveredId: INT_NULL,
+		hoveredIdx: INT_NULL,
+
+		clicked: null,
+		clickedId: INT_NULL,
+		clickedIdx: INT_NULL,
+
+	},
+};
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -24,7 +49,6 @@ const CHAR_ARRAY_START_OFFSET = ' '.charCodeAt(0);
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Timer's Constants 
  */
-const TIMER_FPS_TIME = 1000;
 const TIME_INTERVAL_REPEAT_ALWAYS = 9999999999; // Repeat always a time interval clbk function.
 
 
@@ -135,16 +159,16 @@ const FONTS = {
 	SDF_CONSOLAS_LARGE: g_cnt++,
 	SDF_CONSOLAS_SMALL: g_cnt++,
 
-	COUNT:g_cnt,
+	COUNT: g_cnt,
 };
 //  must continue counting from FONTS, as all font textures should be at the
 const TEXTURES = {
-	
+
 	SDF_CONSOLAS_LARGE: FONTS.SDF_CONSOLAS_LARGE,
 	SDF_CONSOLAS_SMALL: FONTS.SDF_CONSOLAS_SMALL,
 	TEST: g_cnt++,
 
-	COUNT:g_cnt,
+	COUNT: g_cnt,
 };
 
 // SDF Font textures names and paths
@@ -159,73 +183,79 @@ const TEXTURE_TEST = 'msdf';
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Meshes  
  */
+
+/**
+ * MESH_TYPES: A bitmask to check if a mesh is of a specific type
+ */
 let _cnt = 0x1;
 const MESH_TYPES = {
-	GEOMETRY2D:  		_cnt <<= 1,
-	TEXT_GEOMETRY2D: 	_cnt <<= 1,
-	GEOMETRY3D:  		_cnt <<= 1,
-	CUBE_GEOMETRY:  	_cnt <<= 1,
-	
-	MATERIAL: 			_cnt <<= 1,
-	FONT_MATERIAL: 	_cnt <<= 1,
+	GEOMETRY2D: _cnt <<= 1,
+	TEXT_GEOMETRY2D: _cnt <<= 1,
+	GEOMETRY3D: _cnt <<= 1,
+	CUBE_GEOMETRY: _cnt <<= 1,
 
-	MESH:  			_cnt <<= 1,
-	TEXT_MESH:  	_cnt <<= 1,
-	
+	MATERIAL: _cnt <<= 1,
+	FONT_MATERIAL: _cnt <<= 1,
+
+	MESH: _cnt <<= 1,
+	TEXT_MESH: _cnt <<= 1,
+
 	TEXT_LABEL: _cnt <<= 1,
-	BUTTON:  	_cnt <<= 1,
-	UI_FPS: 		_cnt <<= 1,
-	WIDGET_TEXT:  	_cnt <<= 1,
-	WIDGET_TEXT_DYNAMIC:  	_cnt <<= 1,
+	BUTTON: _cnt <<= 1,
+	UI_FPS: _cnt <<= 1,
+	WIDGET_TEXT: _cnt <<= 1,
+	WIDGET_TEXT_DYNAMIC: _cnt <<= 1,
 };
 
-function GetMeshType(type){
+function GetMeshType(type) {
 
 	let meshType = []
-	
-	if( type & MESH_TYPES.GEOMETRY2D ) { meshType.push('Geometry2D'); }
-	if( type & MESH_TYPES.TEXT_GEOMETRY2D ) { meshType.push('Geometry2D_Text'); }
-	if( type & MESH_TYPES.GEOMETRY3D ) { meshType.push('Geometry3D'); }
-	if( type & MESH_TYPES.CUBE_GEOMETRY ) { meshType.push('CubeGeometry'); }
-	if( type & MESH_TYPES.MATERIAL ) { meshType.push('Material'); }
-	if( type & MESH_TYPES.FONT_MATERIAL ) { meshType.push('FontMaterial'); }
-	if( type & MESH_TYPES.MESH ) { meshType.push('Mesh'); }
-	if( type & MESH_TYPES.TEXT_MESH ) { meshType.push('Text_Mesh'); }
-	if( type & MESH_TYPES.TEXT_LABEL ) { meshType.push('Widget_Text_Label'); }
-	if( type & MESH_TYPES.WIDGET_TEXT ) { meshType.push('Widget_Text'); }
-	if( type & MESH_TYPES.WIDGET_TEXT_DYNAMIC ) { meshType.push('Widget_Text_Dynamic'); }
-	if( type & MESH_TYPES.BUTTON ) { meshType.push('Widget_Button'); }
-	if( type & MESH_TYPES.UI_FPS ) { meshType.push('UiFps'); }
+
+	if (type & MESH_TYPES.GEOMETRY2D) { meshType.push('Geometry2D'); }
+	if (type & MESH_TYPES.TEXT_GEOMETRY2D) { meshType.push('Geometry2D_Text'); }
+	if (type & MESH_TYPES.GEOMETRY3D) { meshType.push('Geometry3D'); }
+	if (type & MESH_TYPES.CUBE_GEOMETRY) { meshType.push('CubeGeometry'); }
+	if (type & MESH_TYPES.MATERIAL) { meshType.push('Material'); }
+	if (type & MESH_TYPES.FONT_MATERIAL) { meshType.push('FontMaterial'); }
+	if (type & MESH_TYPES.MESH) { meshType.push('Mesh'); }
+	if (type & MESH_TYPES.TEXT_MESH) { meshType.push('Text_Mesh'); }
+	if (type & MESH_TYPES.TEXT_LABEL) { meshType.push('Widget_Label_Text'); }
+	if (type & MESH_TYPES.WIDGET_TEXT) { meshType.push('Widget_Text'); }
+	if (type & MESH_TYPES.WIDGET_TEXT_DYNAMIC) { meshType.push('Widget_Dynamic_Text'); }
+	if (type & MESH_TYPES.BUTTON) { meshType.push('Widget_Button'); }
+	if (type & MESH_TYPES.UI_FPS) { meshType.push('UiFps'); }
 
 	return meshType;
 }
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Events  
  */
 _cnt = 0x1;
 const LISTEN_EVENT_TYPES = {
-	HOVER:  		_cnt <<= 1,
-	
-	NULL:  		_cnt <<= 1,
+	HOVER: _cnt <<= 1,
+
+	NULL: _cnt <<= 1,
 };
 
-function GetListenEventsType(type){
-	
-	if( type & LISTEN_EVENT_TYPES.HOVER ) { return 'HOVER'; }
+function GetListenEventsType(type) {
+
+	if (type & LISTEN_EVENT_TYPES.HOVER) { return 'HOVER'; }
 }
 
 _cnt = 0x1;
 const DISPATCH_EVENT_TYPES = {
-	SCALE_UP_DOWN:	_cnt <<= 1,
-	DIM_COLOR:		_cnt <<= 1,
-	
-	NULL:  		_cnt <<= 1,
+	SCALE_UP_DOWN: _cnt <<= 1,
+	DIM_COLOR: _cnt <<= 1,
+
+	NULL: _cnt <<= 1,
 };
 
-function GetDispatchEventsType(type){
-	
-	if( type & DISPATCH_EVENT_TYPES.SCALE_UP_DOWN ) { return 'SCALE_UP_DOWN'; }
-	if( type & DISPATCH_EVENT_TYPES.DIM_COLOR ) { return 'DIM_COLOR'; }
+function GetDispatchEventsType(type) {
+
+	if (type & DISPATCH_EVENT_TYPES.SCALE_UP_DOWN) { return 'SCALE_UP_DOWN'; }
+	if (type & DISPATCH_EVENT_TYPES.DIM_COLOR) { return 'DIM_COLOR'; }
 }
 
 
@@ -233,7 +263,7 @@ function GetDispatchEventsType(type){
  * Debugging  
  */
 const DEBUG = {
-	CORE:true,
+	CORE: true,
 	MATERIAL: true,
 	GEOMETRY: true,
 	MESH: true,
@@ -243,9 +273,9 @@ const DEBUG = {
 
 	TEXTURE: false,
 	UVS: false,
-	
+
 	// Graphics
 	WEB_GL: false,
 	SHADER_INFO: false,
-	SHADERS: false,
+	SHADERS: true,
 };

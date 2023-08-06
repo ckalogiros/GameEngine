@@ -221,10 +221,10 @@ class EventListeners {
 
    Run() {
 
-      for (let i0 = 0; i0 < this.count; i0++) {
+      for (let i0 = 0; i0 < this.count; i0++) { // Listen event type buffer. (E.x. buffer[0] === EVENT_TYPE:HOVER)
 
          const listenersBuffer = this.buffer[i0];
-         for (let i1 = 0; i1 < listenersBuffer.count; i1++) {
+         for (let i1 = 0; i1 < listenersBuffer.count; i1++) { // Listeners buffer. All listeners for a specific mesh.
 
             const listeners = listenersBuffer.buffer[i1];
             if (listeners.listenClbk(listeners.params)) {
@@ -232,7 +232,14 @@ class EventListeners {
                if (listeners.params.state.inHover === false) {
 
                   listeners.params.state.inHover = true;
-                  for (let j = 0; j < listeners.dispatchEventBuffer.count; j++) {
+                  STATE.mesh.hovereId = listeners.params.id;
+                  console.log(listeners.params.id)
+                  
+                  /* Dispatch buffer. All dispatch functions for the specific listener. 
+                   * (E.x. listener:HOVER for mesh: meshId=1 has 2 dispatch functions, 
+                   * 1 for scale and 2 for colorDim) 
+                   */
+                  for (let j = 0; j < listeners.dispatchEventBuffer.count; j++) { 
 
                      const dispatcher = listeners.dispatchEventBuffer.buffer[j];
                      dispatcher.clbk(dispatcher.params);
@@ -264,11 +271,11 @@ class EventListeners {
 
 
 const _listeners = new EventListeners(MAX_LISTENERS_SIZE);
-console.log(_listeners)
+console.debug('Listeners Buffer:', _listeners)
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Getters-Setters accessing local sope Listeners buffer
+ * Getters-Setters accessing local scope Listeners buffer
  */
 export function ListenersGetListenersBuffer() { return _listeners; }
 export function ListenersGetListener(idx) { return _listeners.buffer[idx]; }

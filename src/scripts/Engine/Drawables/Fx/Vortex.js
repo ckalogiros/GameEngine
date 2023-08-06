@@ -1,5 +1,5 @@
 // import { Rect2D } from "../Geometry/Rect2D.js";
-import { TimerGetGlobalTimer } from "../../Timer/Timer.js";
+import { TimerGetGlobalTimer } from "../../Timer/Timers.js";
 import { GlGetProgram } from "../../../Graphics/GlProgram.js";
 import { Geometry2D } from "../Geometry/Base/Geometry.js";
 

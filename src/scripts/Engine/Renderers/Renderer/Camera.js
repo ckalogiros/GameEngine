@@ -1,5 +1,6 @@
 import { GlProgramUpdateUniformProjectionMatrix } from '../../../Graphics/GlProgram.js';
 import { MouseGetPosDif, MouseGetWheel } from '../../Controls/Input/Mouse.js';
+import { TimerGetGlobalTimer } from '../../Timer/Timers.js';
 import { Matrix4 } from '../../math/Matrix4.js';
 
 /**
@@ -103,6 +104,10 @@ export class Camera extends Matrix4 {
 		super.Translate(x, y, z);
 	}
 	Rotate(theta){
+
+		const t = TimerGetGlobalTimer();
+		theta = t;
+
 		const c = Math.cos(theta), s = Math.sin(theta);
 		const Z1 = 0, Z2 = 1, Z3 = 4, Z4 = 5; // Z Axis
 		const Y1 = 0, Y2 = 2, Y3 = 8, Y4 = 10; // Y Axis
@@ -111,6 +116,9 @@ export class Camera extends Matrix4 {
 		this.elements[Z2] *= -s;
 		this.elements[Z3] *=  s;
 		this.elements[Z4] *=  c;
+
+		// this.controller.controls[CAMERA_CONTROLS.PAN] = true
+		// this.controller.isActive = true;
 	}
 
 	StoreProgIdx(progIdx) { // This is the way for a camera to be updated(as a uniform mat4) in all gl programs. 
@@ -161,7 +169,7 @@ export class CameraPerspective extends Camera {
 		super();
 		
 	}
-	Set() {
+	Init() {
 
 		const near = 0.1, far = 2000;
 		let top = near * Math.tan( DEG2RAD * 0.5 * 75 ) / 1;

@@ -54,9 +54,7 @@ const Viewport = {
     topMargin:0,
 };
 
-const GAME_STATE = {
 
-};
 
 /** All scenes Names. Must be 1-1 with 'SCENE' object below */
 const SCENE_NAME = [

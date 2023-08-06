@@ -7,7 +7,7 @@ let g_timer = 0;
 export function TimerUpdateGlobalTimer(){  g_timer += .01; }
 export function TimerGetGlobalTimer(){ return g_timer; }
 export function TimerResetGlobalTimer(){ g_timer = 0.0; }
-let g_timer_cycle_upper_limit = .5;
+let g_timer_cycle_upper_limit = .99;
 let g_timer_cycle_lower_limit = .1;
 let g_timer_cycle = g_timer_cycle_lower_limit;
 let g_timer_cycle_rate = 0.01;
@@ -22,7 +22,7 @@ export function TimerGetGlobalTimerCycle(){
     return g_timer_cycle;
 }
 
-export function TimerUpdateGlobalTimers(){
+export function TimersUpdateGlobalTimer(){
     TimerUpdateGlobalTimer();
     TimerUpdateGlobalTimerCycle();
 }
@@ -63,6 +63,7 @@ class Timer {
     name;
 
     constructor(start, duration, step, isActive){
+
         this.t = start;
         this.duration = duration;
         this.step = step;
@@ -74,6 +75,7 @@ class Timer {
     }
 
     SetTimer(start, duration, step, idx, name, clbk, params){
+
         this.t = start;
         this.duration = duration;
         this.step = step;
@@ -85,6 +87,7 @@ class Timer {
     }
         
     Clear(){
+
         this.t = this.duration; // The timer stays at the max duration. Up until now there are cases where the fragment shader will 'end' at 'duration' value.
         this.duration = 0;
         this.step = 0;
@@ -93,16 +96,24 @@ class Timer {
         this.clbk = null;
         this.name = '';
     }
+
     SetClbk(clbk){
+
         this.clbk = clbk;
     }
 
 };
+
+/**
+ * The buffer to store all Application's timers.
+ */
 class Timers {
 
     buffer = [];
     size = MAX_TIMERS_NUM;
     count   = 0;
+
+    constructor(){}
 
     CreateTimer(start, duration, step, name, clbk, params){
 
@@ -118,71 +129,80 @@ class Timers {
         
         return this.buffer[idx];
     }
+
     ClearTimer(idx){
+
         this.buffer[idx].Clear();
         this.count--;
     }
+
     GetFreeTimer(){
+
         for(let i=0; i<this.size; i++)
             if(this.buffer[i].isActive === false)
                 return i;
         alert('No Space for new Timer. Timer.js');
     }
+
     Init(){
+
         for(let i=0; i<this.size; i++)
             this.buffer[i] = new Timer(0., 0., 0., false);
     }
+
     OnCompleted(idx){
+
         if(this.buffer[idx].clbk) // If a callback exists, call it
             this.buffer[idx].clbk(this.buffer[idx].params);
     }
+
     SetClbk(clbk, idx){
+
         this.buffer[idx].SetClbk(clbk);
     }
 };
 
-const timers = new Timers; // This is the (local scoped) variable for all timers.
+const _timers = new Timers(); // This is the (local scoped) variable for all timers.
 // Initialize Timers buffer
-timers.Init();
+_timers.Init();
 
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-* Getters-Setters
-*/
-export function TimersGetTimers(){
-    return timers;
-}
-export function TimersGetTimer(idx){
-    return timers.buffer[idx];
-}
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Public Functions
  */
+
+/**
+* Getters-Setters
+*/
+export function TimersGetTimers(){
+    return _timers;
+}
+
+export function TimersGetTimer(idx){
+    return _timers.buffer[idx];
+}
+
 export function TimersCreateTimer(start, duration, step, name, clbk, params){
     // Catch wrong parameters(name is a valid param only for debugging)
     if(!(typeof name === 'string' || name instanceof String))
     alert('--NAME FOR TIMERS NOT PASSED--')
-    return timers.CreateTimer(start, duration, step, name, clbk, params);
+    return _timers.CreateTimer(start, duration, step, name, clbk, params);
 }
 
 /**
- * Update all timers used by the game here.
+ * Update all _timers used by the game here.
  * Must run for each render iteration(frame)
  */
 export function TimersUpdateTimers(){
 
-    for(let i=0; i<timers.size; i++){
-        const t = timers.buffer[i]; // Cash
+    for(let i=0; i<_timers.size; i++){
+        const t = _timers.buffer[i]; // Cash
         if(t.isActive){
             // Stop timer if the duration cycle has been completed
             if(t.t >= t.duration){
-                // Debug
-                // if(t.name === 'ParticlesBallTail-0')
-                //     console.log('Destroy timer ParticlesBallTail-0 at index:', i);
-                timers.OnCompleted(i)
-                timers.ClearTimer(i);
+                _timers.OnCompleted(i)
+                _timers.ClearTimer(i);
             }
             else t.t += t.step;
         }
@@ -192,10 +212,10 @@ export function TimersUpdateTimers(){
 /**
  * Debug
  */
-export function TimersPrinTimers(){
+export function TimersPrintTimers(){
 
-    for(let i=0; i<timers.size; i++){
-        const t = timers.buffer[i]; // Cash
+    for(let i=0; i<_timers.size; i++){
+        const t = _timers.buffer[i]; // Cash
         if(t.isActive){
             console.log(`${i}:t:${t.t.toFixed(2)}|d:${t.duration}|name:${t.name}`)
         }

@@ -1,13 +1,13 @@
 "use strict";
 import { GlSetDim, GlSetWposX } from '../../../Graphics/Buffers/GlBufferOps.js';
 import { GlSetAttrRoundCorner, GlSetAttrBorderWidth, GlSetAttrBorderFeather, GlSetAttrSdfParamsOuter } from '../../../Graphics/Buffers/GlBufferOps.js';
-import { Widget_Text_Label } from './WidgetTextLabel.js';
+import { Widget_Label_Text } from './WidgetLabelText.js';
 import { CalculateSdfOuterFromDim } from '../../../Helpers/Helpers.js';
 
 
 
 // Exporting is only for the class type(to compare with the instanceof operator)
-export class Button extends Widget_Text_Label{
+export class Button extends Widget_Label_Text{
     state = { // The state in which a button may be.
         inHover: false,
         inAnimation: false,

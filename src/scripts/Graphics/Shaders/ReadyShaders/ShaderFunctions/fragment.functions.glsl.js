@@ -8,22 +8,22 @@ float AA;   \n\
 vec2 length2(vec4 a) {  \n\
     return vec2(length(a.xy), length(a.zw)); \n\
 }  \n\
-vec2 rounded_rectangle(vec2 s, float r, float bw) {               \n\
-    s -= bw +.0002; // Subtract the border                        \n\
-    r = min(r, min(s.x, s.y));                                    \n\
-    s -= r; // Subtract the border-radius                         \n\
-    vec4 d = abs(pos) - s.xyxy;                                   \n\
-    vec4 dmin = min(d, 0.0);                                       \n\
-    vec4 dmax = max(d, 0.0);                                       \n\
-    vec2 df = max(dmin.xz, dmin.yw) + length2(dmax);              \n\
-    return (df - r);                                              \n\
+vec2 RoundedRectangle(vec2 dim, float r, float bw) {              \n\
+  dim -= bw +.0002; // Subtract the border                        \n\
+  r = min(r, min(dim.x, dim.y));                                  \n\
+  dim -= r; // Subtract the border-radius                         \n\
+  vec4 d = abs(pos) - dim.xyxy;                                   \n\
+  vec4 dmin = min(d, 0.0);                                        \n\
+  vec4 dmax = max(d, 0.0);                                        \n\
+  vec2 df = max(dmin.xz, dmin.yw) + length2(dmax);                \n\
+  return (df - r);                                                \n\
 }                                                                 \n\
 vec4 Stylize()                                                    \n\
 {                                                                 \n\
   float t = v_uniforms_buffer[2];                                 \n\
   // Radius(From 0.01 to 0.35 good values) for rounding corners   \n\
-  float rCorners = v_rCorners * .008;                                     \n\
-  float feather = v_border_feather;                                  \n\
+  float rCorners = v_rCorners * .008;                             \n\
+  float feather = v_border_feather;                               \n\
   \n\
 #ifdef UB_HAS_RESOLUTION\n\
   vec2 res = vec2(v_uniforms_buffer[UB_IDX0], v_uniforms_buffer[UB_IDX1]);    \n\
@@ -37,6 +37,7 @@ vec2 res = vec2(824., 893.);    \n\
   uv -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));                \n\
   pos.xy = uv;                                                    \n\
   vec2 dim = vec2(v_dim.x/res.x, v_dim.y/res.y);                  \n\
+  // dim -= vec2(v_wpos.x/res.x, 1.-(v_wpos.y/res.y));                \n\
   // vec2 dim = vec2(v_dim.x, v_dim.y);                  \n\
   \n\
   // From 0.3 to 1.2 good values                                  \n\
@@ -47,7 +48,7 @@ vec2 res = vec2(824., 893.);    \n\
   \n\
   vec2 blur = vec2(0.0, feather * .001);                          \n\
   \n\
-  vec2 d = rounded_rectangle(dim, mix(0.0, .2, rCorners), 0.);     \n\
+  vec2 d = RoundedRectangle(dim, mix(0.0, .2, rCorners), 0.);     \n\
   \n\
   vec4 src = v_col;                                               \n\
   vec3 color = vec3(0.0);                                         \n\
@@ -114,7 +115,7 @@ vec2 res = vec2(824., 893.);    \n\
 // vec2 length2(vec4 a) {  
 //     return vec2(length(a.xy), length(a.zw)); 
 // }  
-// vec2 rounded_rectangle(vec2 s, float r, float bw) {               
+// vec2 RoundedRectangle(vec2 s, float r, float bw) {               
 //     s -= bw +.0002; // Subtract the border                        
 //     r = min(r, min(s.x, s.y));                                    
 //     s -= r; // Subtract the border-radius                         
@@ -149,7 +150,7 @@ vec2 res = vec2(824., 893.);    \n\
   
 //   vec2 blur = vec2(0.0, feather * .001);                          
   
-//   vec2 d = rounded_rectangle(dim, mix(0.0, .2, rCorners), 0.);     
+//   vec2 d = RoundedRectangle(dim, mix(0.0, .2, rCorners), 0.);     
   
 //   vec4 src = v_col;                                               
 //   vec3 color = vec3(0.0);                                         

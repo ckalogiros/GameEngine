@@ -4,7 +4,7 @@ import { GlGetContext } from "../../Graphics/Buffers/GlBuffers.js";
 import { GlGetProgram } from "../../Graphics/GlProgram.js";
 import { Int8Buffer, M_Buffer } from "../Core/Buffers.js";
 import { FontGetFontDimRatio } from "../Loaders/Font/Font.js";
-import { TimerGetGlobalTimer } from "../Timer/Timer.js";
+import { TimerGetGlobalTimer } from "../Timer/Timers.js";
 import { EventListener, ListenerCreateDispatchEvent, ListenerCreateListenEvent, Listener_listen_mouse_hover, ListenersGetListener, ListenersGetListenerType } from "../Events/EventListeners.js";
 
 
@@ -81,6 +81,7 @@ export class Mesh {
     listeners; // Indexes to the EventListeners class.
     children;
     state; // Mesh info state. TODO: An enum of bit-masks as booleans.
+    timeIntervalsIdxBuffer; // This buffer stores indexes of the timeIntervals this mesh is using.
 
     constructor(geom = null, mat = null, time = 0, attrParams1 = [0, 0, 0, 0], name = '???') {
 
@@ -142,7 +143,8 @@ export class Mesh {
         }
 
         this.children = new M_Buffer();
-        this.children.Init(1); // Needs to be at least 1 because
+        this.timeIntervalsIdxBuffer = new Int8Buffer();
+        // this.children.Init(1); // Needs to be at least 1 because
 
         this.state = {
             inHover: false,
@@ -296,6 +298,7 @@ export class Mesh {
             dim: this.geom.dim,
             state: this.state,
             col: this.mat.col,
+            id: this.id,
         };
         const idx = ListenerCreateListenEvent(evttype, params);
         this.listeners.Add(idx);
@@ -360,9 +363,6 @@ export class Text_Mesh extends Mesh {
 
     MoveXY(pos) {
         this.geom.MoveXY(pos, this.gfx)
-        // for(let i=0; i<this.geom.numChars; i++){
-        //     this.geom.SetPos(pos, this.gfx)
-        // }
     }
     // UseFont(fontIdx) {
     //     // Prevent replacing an existing loaded font texture.

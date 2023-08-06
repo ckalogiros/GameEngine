@@ -1129,10 +1129,9 @@ export function GlRotateZ3D(mesh, angle) {
 
     vertices = 4;
     for(let i=0; i<fLen; i++){
+        
         vb.data[index + x] = faces[ii+x] * r1 + faces[ii+y] * r2;
         vb.data[index + y] = faces[ii+x] * r3 + faces[ii+y] * r4;
-        // vb.data[index + x] = faces[ii+x] * r[0] * dim[x] + faces[ii+y] * r[2] * dim[y];
-        // vb.data[index + y] = faces[ii+x] * r[1] * dim[x] + faces[ii+y] * r[3] * dim[y];
         ii+=3;
         index += stride;
     }

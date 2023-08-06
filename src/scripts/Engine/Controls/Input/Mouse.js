@@ -4,17 +4,17 @@ import { GetSign } from "../../../Helpers/Helpers.js";
 
 
 const mouse = {
-/**
- * Why setting prev pos to INT_NULL:
- *    If the mouse leaves the 'html-body', the mouse.pos.prev stores the mouse pos, as it ought to do.
- *    Now if the mouse enters from a different x-y coordinate, then the xdiff is calculated as pos - prevPos,
- *    which takes into account the coordinates before the mouse leaved the 'html-body'.
- *    This produces huge ammounts of difference. To avoid that, whenever the mouse leaves the 'html-body' area,
- *    we set the prevPos to INT_NULL, so that uppon OnMouseMove() callback we check if the value is NOT INT_NULL 
- *    in order to procceed and do the dif calculation. If it is INT_NULL (means that mouse left the area), then we
- *    just store the new pos in the prevPos variable. 
- */
 
+   /**
+    * Why setting prev pos to INT_NULL:
+    *    If the mouse leaves the 'html-body', the mouse.pos.prev stores the mouse pos, as it ought to do.
+    *    Now if the mouse enters from a different x-y coordinate, then the xdiff is calculated as pos - prevPos,
+    *    which takes into account the coordinates before the mouse leaved the 'html-body'.
+    *    This produces huge ammounts of difference. To avoid that, whenever the mouse leaves the 'html-body' area,
+    *    we set the prevPos to INT_NULL, so that uppon OnMouseMove() callback we check if the value is NOT INT_NULL 
+    *    in order to procceed and do the dif calculation. If it is INT_NULL (means that mouse left the area), then we
+    *    just store the new pos in the prevPos variable. 
+    */
 
    pos: {
       x: 0, y: 0,
@@ -73,14 +73,13 @@ const mouse = {
          btn: INT_NULL,   // Mouse Buttons. 0:Left, 1:Middle, 2:Right.
          x: 0, y: 0,
          xprev: 0, yprev: 0, // Mouse previous pos
-         // xdiff: 0, ydiff: 0, // Mouse click difference form previous click (in pixels)
          Set(btn){
             this.btn = btn;
-            this.xprev = mouse.pos.xprev;
-            this.yprev = mouse.pos.yprev;
+            this.xprev = this.x;
+            this.yprev = this.y;
             this.x =  mouse.pos.x;
             this.y =  mouse.pos.y;
-            // console.log(this)
+            console.log(this)
          }
       },
       up:{
@@ -89,13 +88,12 @@ const mouse = {
          xprev: 0, yprev: 0, // Mouse previous pos
          Set(btn){
             this.btn = btn;
-            this.xprev = mouse.pos.xprev;
-            this.yprev = mouse.pos.yprev;
+            this.xprev = this.x;
+            this.yprev = this.y;
             this.x =  mouse.pos.x;
             this.y =  mouse.pos.y;
             // console.log(this)
          }
-         // xdiff: 0, ydiff: 0, // Mouse click difference form previous click (in pixels)
       },
       drag: {
          x:0,
@@ -120,7 +118,8 @@ const mouse = {
 };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-* Getters-Setters */
+ * Getters-Setters 
+ */
 export function MouseGetMousePos() {
    return mouse.pos.GetPos();
 }
@@ -137,10 +136,8 @@ export function MouseGetYdir() {
    return mouse.pos.ydiff;
 }
 export function MouseResetDif(factor) {
-   // mouse.pos.ResetDif()
    mouse.pos.DampenDif(factor)
 }
-// Mouse Wheel
 export function MouseGetWheel(){
    return mouse.wheel;
 }
@@ -150,7 +147,7 @@ export function MouseResetWheel(){
 
 
 /**
- * Mouse Event Listeners
+ * Mouse Events
  */
 export function OnMouseMove(e) {
 
@@ -214,6 +211,7 @@ export function OnMouseDown(e) {
 
    mouse.click.down.Set(e.which-1);
 }
+
 export function OnMouseUp(e) {
    
    e.stopPropagation();

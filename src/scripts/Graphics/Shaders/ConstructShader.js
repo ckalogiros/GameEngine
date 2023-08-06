@@ -96,15 +96,13 @@ export function GlVertexShaderConstruct(sid){
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       'void main(void) ',
       '{',
-      // 'float x = a_wpos_time.x;',
-      // (sid.attr & SID.ATTR.SDF) ? ' if(a_col.g < 1.5) x += 100.2;' : '',
-      // (sid.unif & SID.UNIF.PROJECTION) ? '  gl_Position = u_projection * vec4(a_pos.x + x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);' : 'gl_Position = vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);',
-      (sid.unif & SID.UNIF.PROJECTION) ? '  gl_Position = u_projection * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);' : 'gl_Position = vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);',
+      (sid.unif & SID.UNIF.PROJECTION) 
+         ? '  gl_Position = u_projection * vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);' 
+         : '  gl_Position = vec4(a_pos.x + a_wpos_time.x, a_pos.y + a_wpos_time.y, a_wpos_time.z, 1.0);',
 
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       // ASSIGNMENTS
       (sid.pass & SID.PASS.COL4) ? '  v_col = a_col;' : '', 
-      // '  if(a_wpos_time.w > 0.) { float c = sin(a_wpos_time.w);\n  v_col.b *= sin(a_wpos_time.w); }',
       (sid.pass & SID.PASS.DIM2) ? '  v_dim = abs(a_pos);' : '',
       (sid.pass & SID.PASS.WPOS2) ? '  v_wpos = a_wpos_time.xy;' : '',
       (sid.attr & SID.ATTR.TEX2) ? '  v_tex_coord = a_tex;' : '',
@@ -114,7 +112,6 @@ export function GlVertexShaderConstruct(sid){
       (sid.attr & SID.ATTR.R_CORNERS) ? ' v_rCorners = a_params1.y;' : '',
       (sid.attr & SID.ATTR.FEATHER) ? '   v_border_feather = a_params1.z;' : '',
       (sid.unif & SID.UNIF.U_BUFFER) ? '  v_uniforms_buffer = uniforms_buffer;' : '',
-
       '}',
 
    ];
@@ -123,7 +120,7 @@ export function GlVertexShaderConstruct(sid){
 
    const vs = resolveIncludesVertex(vertex_shader);
 
-   if(DEBUG.SHADERS) console.log(vs)
+   if(DEBUG.SHADERS) console.info(vs)
    return vs;
 }
 
@@ -183,7 +180,7 @@ export function GlFragmentShaderConstruct(sid){
 
    const fs = resolveIncludesFragment(fragment_shader);
 
-   if(DEBUG.SHADERS) console.log(fs)
+   if(DEBUG.SHADERS) console.info(fs)
    return fs;
 }
 

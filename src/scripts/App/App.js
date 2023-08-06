@@ -8,14 +8,16 @@ import { WebGlRenderer } from '../Engine/Renderers/WebGlRenderer.js';
 import { CAMERA_CONTROLS, CameraOrthographic, CameraPerspective } from '../Engine/Renderers/Renderer/Camera.js';
 import { Geometry2D } from '../Engine/Drawables/Geometry/Base/Geometry.js';
 import { TextureInitBuffers } from '../Engine/Loaders/Textures/Texture.js';
-import { FpsGetAvg, FpsGetAvg1S } from '../Engine/Timer/Time.js';
-import { Widget_Text_Label } from '../Engine/Drawables/Widgets/WidgetTextLabel.js';
+import { FpsGetAvg, FpsGetAvg1S, FpsGetWorstFrame, FpsGetWorstFrameAvg } from '../Engine/Timer/Time.js';
+import { Widget_Label_Dynamic_Text, Widget_Label_Text } from '../Engine/Drawables/Widgets/WidgetLabelText.js';
 import { Widget_Button } from '../Engine/Drawables/Widgets/WidgetButton.js';
-import { Widget_Text, Widget_Text_Dynamic } from '../Engine/Drawables/Widgets/WidgetText.js';
+import { Widget_Text, Widget_Dynamic_Text } from '../Engine/Drawables/Widgets/WidgetText.js';
 import { GetShaderTypeId } from '../Graphics/Z_Debug/GfxDebug.js';
 import { CubeGeometry } from '../Engine/Drawables/Geometry/Geometry3DCube.js';
 import { Animations_create_dim_color_rgb, Animations_create_scale_up_down } from '../Engine/Animations/AnimationsBasic.js';
 import { SizeOfObject } from '../Helpers/Helpers.js';
+import { TimerGetGlobalTimer, TimerGetGlobalTimerCycle } from '../Engine/Timer/Timers.js';
+import { TimeMeasureCreate, _Tm1GetFps, _Tm1GetMilisec, _Tm1GetNanosec, _tm1 } from '../Engine/Timer/TimeMeasure.js';
 
 
 
@@ -27,6 +29,10 @@ function TestEventDispatc() {
 }
 
 export function AppInit() {
+
+    const tm = TimeMeasureCreate();
+
+    tm.Start();
 
     // Load font image to the browser.
     // LoadFontImage(FONT_CONSOLAS_SDF_LARGE, FONT_TEXTURE_PATH_CONSOLAS_SDF_11115w, FONT_TYPE_CONSOLAS, 'png');
@@ -47,10 +53,9 @@ export function AppInit() {
     const camera = new CameraOrthographic();
     // const camera = new CameraPerspective();
 
-    // camera.SetControls(CAMERA_CONTROLS.ZOOM);
     // camera.SetControls(CAMERA_CONTROLS.PAN);
+    // camera.SetControls(CAMERA_CONTROLS.ZOOM);
     // camera.SetControls(CAMERA_CONTROLS.ROTATE);
-    // camera.Rotate(-1)
     // camera.Translate(80, 80, 20)
 
     renderer = new WebGlRenderer(scene, camera);
@@ -62,32 +67,32 @@ export function AppInit() {
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * *
     * Create meshes
-    */
+     */
 
     { // Rect with style
-        // {
-        //     const geom = new Geometry2D([100, 50, 0], [50, 50]);
-        //     const mat = new Material(ORANGE_240_130_10);
+        {
+            const geom = new Geometry2D([100, 120, 0], [50, 50]);
+            const mat = new Material(ORANGE_240_130_10);
 
-        //     const mesh = new Mesh(geom, mat);
-        //     mesh.Enable(MESH_ENABLE.ATTR_STYLE);
-        //     mesh.SetStyle(8, 35, 3);
-        //     scene.AddMesh(mesh);
-        //     mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-        //     mesh.CreateDispatchEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-        //     mesh.CreateDispatchEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
+            const mesh = new Mesh(geom, mat);
+            mesh.Enable(MESH_ENABLE.ATTR_STYLE);
+            mesh.SetStyle(8, 35, 3);
+            scene.AddMesh(mesh);
+            mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+            // mesh.CreateDispatchEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
+            // mesh.CreateDispatchEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
 
-        // }
-        // {
-        //     const geom = new Geometry2D([204, 50, 0], [50, 50]);
-        //     const mat = new Material(PINK_240_60_160);
-        //     mat.col = PINK_240_60_160;
-        //     const mesh = new Mesh(geom, mat);
-        //     mesh.Enable(MESH_ENABLE.ATTR_STYLE);
-        //     mesh.SetStyle(20, 35, 3);
-        //     scene.AddMesh(mesh);
-
-        // }
+        }
+        {
+            const geom = new Geometry2D([204, 50, 0], [50, 50]);
+            const mat = new Material(PINK_240_60_160);
+            mat.col = PINK_240_60_160;
+            const mesh = new Mesh(geom, mat);
+            mesh.Enable(MESH_ENABLE.ATTR_STYLE);
+            mesh.SetStyle(20, 35, 3);
+            scene.AddMesh(mesh);
+            mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        }
         // {
         //     const geom = new Geometry2D([308, 50, 0], [50, 50]);
         //     const mat = new Material(ORANGE_240_130_10);
@@ -110,17 +115,20 @@ export function AppInit() {
     }
 
 
+
     { // Create ui fps text
         const fpsFontSize = 10;
-        const uiFpsAvg = new Widget_Text_Dynamic('Fps Avg::', '000000', [0, Viewport.height - 60, 0], fpsFontSize, [1, 1], WHITE, GREEN, .4);
+        const uiFpsAvg = new Widget_Dynamic_Text('Fps Avg:', '000000', [0, Viewport.height - 60, 0], fpsFontSize, [1, 1], WHITE, GREEN, .4);
         scene.AddMesh(uiFpsAvg);
-        uiFpsAvg.SetDynamicText(600, FpsGetAvg)
+        uiFpsAvg.SetDynamicText(600, FpsGetAvg, 'UI-FpsAvg');
+        uiFpsAvg.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        uiFpsAvg.CreateDispatchEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
 
         const ypos = uiFpsAvg.geom.pos[1] + uiFpsAvg.geom.dim[1] * 2;
-        const uiFpsAvg1sec = new Widget_Text_Dynamic('Fps Avg1s:', '000000', [0, ypos, 0], fpsFontSize, [1, 1], WHITE, GREEN, .4);
+        const uiFpsAvg1sec = new Widget_Dynamic_Text('Fps Avg1s:', '000000', [0, ypos, 0], fpsFontSize, [1, 1], WHITE, GREEN, .4);
         scene.AddMesh(uiFpsAvg1sec);
-        uiFpsAvg1sec.SetDynamicText(600, FpsGetAvg1S)
-
+        uiFpsAvg1sec.SetDynamicText(600, FpsGetAvg1S, 'UI-FpsAvg-1sec');
+        uiFpsAvg1sec.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
     }
 
     { // Simple text
@@ -136,84 +144,106 @@ export function AppInit() {
     }
 
     { // Text Label
-        const textLabel = new Widget_Text_Label('Text Label', [60, 270, 0], 17, [1, 1], 3, .4);
+        const textLabel = new Widget_Label_Text('Text Label', [60, 270, 0], 17, [1, 1], 3, .4);
         scene.AddMesh(textLabel);
         textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
         textLabel.CreateDispatchEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
         textLabel.CreateDispatchEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-        // RenderQueueGet().SetPriority('last', textLabel.areaMesh.children.buffer[0].gfx.prog.idx, textLabel.areaMesh.children.buffer[0].gfx.vb.idx);
-        console.log()
     }
 
     { // Dynamic Text
-        const dynamicText = new Widget_Text_Dynamic('DynamicText:', '0000', [0, 340, 0], 7, [1, 1], WHITE, GREEN, .3);
-        scene.AddMesh(dynamicText);
-        dynamicText.SetDynamicText(600, FpsGetAvg1S)
-        // RenderQueueGet().SetPriority('last', textLabel.areaMesh.children.buffer[0].gfx.prog.idx, textLabel.areaMesh.children.buffer[0].gfx.vb.idx);
+        const fontsize = 8; let ms = 200;
+
+        // const dynamicText = new Widget_Dynamic_Text('FpsAvg:', '000000', [0, 20, 0], fontsize, [1, 1], WHITE, GREEN, .4);
+        // scene.AddMesh(dynamicText);
+        // dynamicText.SetDynamicText(ms, FpsGetAvg, `DynamicText ${ms} FpsGetAvg`)
+        // let idx = dynamicText.CreateDynamicText('000000', fontsize, WHITE, YELLOW_240_220_10, 16, .4);
+        // dynamicText.SetDynamicText(10, FpsGetAvg1S, `DynamicText Inherit:${ms} FpsGetAvg1S`, idx)
+        
+        // const dynamicText2 = new Widget_Dynamic_Text('WorstFrameAvg:', '0000', [0, 60, 0], fontsize, [1, 1], WHITE, GREEN, .3);
+        // scene.AddMesh(dynamicText2);
+        
+        ms = 800;
+        const timeMeasure1 = new Widget_Dynamic_Text('GlDraw:', '000000', [0, 90, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
+        scene.AddMesh(timeMeasure1);
+        timeMeasure1.SetDynamicText(ms, _Tm1GetFps, `DynamicText ${ms} _Tm1GetFps`)
+        let idx = timeMeasure1.CreateDynamicText('000000', fontsize, null, YELLOW_240_220_10, 16, .4);
+        timeMeasure1.SetDynamicText(ms, _Tm1GetMilisec, `DynamicText ${ms} FpsGetAvg`)
+        idx = timeMeasure1.CreateDynamicText('000000', fontsize, null, ORANGE_240_200_10, 16, .4);
+        timeMeasure1.SetDynamicText(ms, _Tm1GetNanosec, `DynamicText ${ms} FpsGetAvg`)
+
+    }
+
+    { // Label Dynamic Text
+        // const dynamicText = new Widget_Label_Dynamic_Text('LabelDynamic1:', '0000', [0, 200, 0], 10, [1, 1], WHITE, GREEN, 4, .4);
+        // scene.AddMesh(dynamicText);
+        // dynamicText.SetDynamicText(2000, FpsGetAvg, 'Test-DynamicText')
+
     }
 
     { // Create cube
-        {
-            const geom = new CubeGeometry([80, 450, -1], [100, 100, 100], [1, 1, 1]);
-            const mat = new Material_TEMP_fromBufferFor3D(WHITE)
-            mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {
-                color: [
-                    0.9, 0.0, 0.0, .4,
-                    0.0, 0.9, 0.1, .4,
-                    0.0, 0.0, 0.9, .4,
-                    0.9, 0.0, 0.9, .4
-                ]
-            });
-            const cube = new Mesh(geom, mat);
-            scene.AddMesh(cube);
-            // cube.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+        // {
+        //     const geom = new CubeGeometry([80, 450, -1], [100, 100, 100], [1, 1, 1]);
+        //     const mat = new Material_TEMP_fromBufferFor3D(WHITE)
+        //     mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {
+        //         color: [
+        //             0.9, 0.0, 0.0, .4,
+        //             0.0, 0.9, 0.1, .4,
+        //             0.0, 0.0, 0.9, .4,
+        //             0.9, 0.0, 0.9, .4
+        //         ]
+        //     });
+        //     const cube = new Mesh(geom, mat);
+        //     scene.AddMesh(cube);
+        //     // cube.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
 
-            console.log('cube', GetShaderTypeId(cube.sid), cube.sid)
-            cube.type |= geom.type;
-            cube.type |= mat.type;
+        //     console.log('cube', GetShaderTypeId(cube.sid), cube.sid)
+        //     cube.type |= geom.type;
+        //     cube.type |= mat.type;
 
-        }
-        {
-            const geom = new CubeGeometry([240, 450, -1], [100, 100, 100], [1, 1, 1]);
-            const mat = new Material_TEMP_fromBufferFor3D(WHITE);
-            mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {
-                color: [
-                    1.0, 1.0, 0.0, .4,
-                    0.0, 0.7, 0.4, .4,
-                    0.0, 1.0, 0.0, .4,
-                    1.0, 0.0, 1.0, .4,
-                ]
-            });
-            const cube2 = new Mesh(geom, mat);
-            scene.AddMesh(cube2);
-            console.log('cube2:', GetShaderTypeId(cube2.sid), cube2.sid)
-            cube2.type |= geom.type;
-            cube2.type |= mat.type;
+        // }
+        // {
+        //     const geom = new CubeGeometry([240, 450, -1], [100, 100, 100], [1, 1, 1]);
+        //     const mat = new Material_TEMP_fromBufferFor3D(WHITE);
+        //     mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {
+        //         color: [
+        //             1.0, 1.0, 0.0, .4,
+        //             0.0, 0.7, 0.4, .4,
+        //             0.0, 1.0, 0.0, .4,
+        //             1.0, 0.0, 1.0, .4,
+        //         ]
+        //     });
+        //     const cube2 = new Mesh(geom, mat);
+        //     scene.AddMesh(cube2);
+        //     console.log('cube2:', GetShaderTypeId(cube2.sid), cube2.sid)
+        //     cube2.type |= geom.type;
+        //     cube2.type |= mat.type;
 
-        }
-        {
-            const geom = new CubeGeometry([400, 450, -1], [100, 100, 100], [1, 1, 1]);
-            const mat = new Material_TEMP_fromBufferFor3D(WHITE);
-            mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {
-                color: [
-                    0.9, 0.0, 0.0, .4,
-                    0.0, 0.9, 0.1, .4,
-                    0.0, 0.0, 0.9, .4,
-                    0.9, 0.0, 0.9, .4
-                ]
-            });
-            const cube3 = new Mesh(geom, mat);
-            scene.AddMesh(cube3);
-            console.log('cube3:', GetShaderTypeId(cube3.sid), cube3.sid)
-            cube3.type |= geom.type;
-            cube3.type |= mat.type;
+        // }
+        // {
+        //     const geom = new CubeGeometry([400, 450, -1], [100, 100, 100], [1, 1, 1]);
+        //     const mat = new Material_TEMP_fromBufferFor3D(WHITE);
+        //     mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {
+        //         color: [
+        //             0.9, 0.0, 0.0, .4,
+        //             0.0, 0.9, 0.1, .4,
+        //             0.0, 0.0, 0.9, .4,
+        //             0.9, 0.0, 0.9, .4
+        //         ]
+        //     });
+        //     const cube3 = new Mesh(geom, mat);
+        //     scene.AddMesh(cube3);
+        //     console.log('cube3:', GetShaderTypeId(cube3.sid), cube3.sid)
+        //     cube3.type |= geom.type;
+        //     cube3.type |= mat.type;
 
-        }
+        // }
 
     }
 
-    Test1(scene);
+    // Test1(scene);
 
+    tm.Stop();
 
     // If camera is static, update projection matrix uniform only once
     camera.UpdateProjectionUniform(renderer.gl);

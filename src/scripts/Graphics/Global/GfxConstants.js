@@ -1,6 +1,5 @@
 "use strict";
 
-const INT_NULL = -1; // For case like 0 index arrays, where the number 0 index cannot be used as null element for a buffer
 var u_projection = null;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

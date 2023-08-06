@@ -1,13 +1,12 @@
 "use strict";
 import { GlDraw } from '../../../Graphics/GlDraw.js'
-import { TimerUpdateGlobalTimers, TimersUpdateTimers } from '../../Timer/Timer.js';
+import { TimersUpdateGlobalTimer, TimersUpdateTimers } from '../../Timer/Timers.js';
 import { HandleEvents } from '../../Events/Events.js';
 import { AnimationsGet, RunAnimations } from '../../Animations/Animations.js';
 import { CheckCollisions, Update } from '../../Events/SceneEvents.js';
-import { OnMouseMove } from '../../Events/MouseEvents.js';
 import { GlGetProgram } from '../../../Graphics/GlProgram.js';
-import { FpsGet, TimeIntervalsUpdateAll, TimeUpdate, TimersUpdateStepTimers } from '../../Timer/Time.js';
-import { ExplosionsUpdate } from '../../Drawables/Fx/Explosions.js';
+import { FpsGet, TimeUpdate, TimersUpdateStepTimers } from '../../Timer/Time.js';
+import { TimeIntervalsUpdateAll } from "../../Timer/TimeIntervals.js";
 import { ParticleSystemGet } from '../../ParticlesSystem/Particles.js';
 
 
@@ -25,7 +24,7 @@ export function Render() {
     
     if (g_state.game.paused === false) {
 
-        TimerUpdateGlobalTimers(); // This is a globbal timer, going only forward
+        TimersUpdateGlobalTimer(); // This is a globbal timer, going only forward
         TimersUpdateTimers(); 
         TimersUpdateStepTimers();
 
