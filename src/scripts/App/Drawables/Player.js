@@ -4,9 +4,9 @@ import { BallInitCurveMode, BallPlayerCollision, BallSetCurveMode } from './Ball
 // import { Rect2D } from '../../Engine/Drawables/Geometry/Rect2D.js';
 // import { CoinPlayerCollision } from './Coin.js';
 import { Abs } from '../../Helpers/Math/MathOperations.js';
-import { StepTimersCreate } from '../../Engine/Timer/Time.js';
+import { StepTimersCreate } from '../../Engine/Timers/Time.js';
 // import { AnimationsGet } from '../../Engine/Animations/Animations.js';
-import { TimersCreateTimer } from '../../Engine/Timer/Timers.js';
+import { TimersCreateTimer } from '../../Engine/Timers/Timers.js';
 import { GlSetDim } from '../../Graphics/Buffers/GlBufferOps.js';
 import { Geometry2D } from '../../Engine/Drawables/Geometry/Base/Geometry.js';
 

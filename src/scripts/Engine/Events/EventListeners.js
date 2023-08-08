@@ -2,6 +2,7 @@
 
 import { Collision_PointRect } from "../Collisions.js";
 import { MouseGetMousePos } from "../Controls/Input/Mouse.js";
+import { RegisterEvent } from "./Events.js";
 
 
 
@@ -117,7 +118,6 @@ export class EventListener {
       }
    }
 
-   // CreateDispatchEvent(type, clbk, params) {
    CreateDispatchEvent(type, clbk, params, listenerIdx) {
 
       if (!this.buffer || this.count >= this.size) {
@@ -188,11 +188,11 @@ class EventListeners {
       let listenerIdx = INT_NULL;
 
 
-      if (listenEventIdx !== INT_NULL) {
+      if (listenEventIdx !== INT_NULL) { // If same type of listener has already been created...
 
          listenerIdx = this.buffer[listenEventIdx].CreateListenEvent(type, params);
       }
-      else {
+      else { // Create listener buffer of that type and add the new listener
 
          listenEventIdx = this.GetNextFree();
          if (listenEventIdx !== INT_NULL) {
@@ -220,7 +220,6 @@ class EventListeners {
    }
 
    Run() {
-
       for (let i0 = 0; i0 < this.count; i0++) { // Listen event type buffer. (E.x. buffer[0] === EVENT_TYPE:HOVER)
 
          const listenersBuffer = this.buffer[i0];
@@ -229,26 +228,44 @@ class EventListeners {
             const listeners = listenersBuffer.buffer[i1];
             if (listeners.listenClbk(listeners.params)) {
 
-               if (listeners.params.state.inHover === false) {
-
-                  listeners.params.state.inHover = true;
-                  STATE.mesh.hovereId = listeners.params.id;
-                  console.log(listeners.params.id)
+               if (STATE.mesh.hoveredId !== INT_NULL){
                   
+                  /** Skip unnecessary code execution, if the same mesh is hovered */
+                  if (STATE.mesh.hoveredId === listeners.params.id)
+                     return;
+                  // If we hovered directly after another hover, release hover from the other mesh
+                  else 
+                     STATE.mesh.hovered.state2.mask &= ~MESH_STATE.IN_HOVER;
+               }
+
+               if (!(listeners.params.state2.mask & MESH_STATE.IN_HOVER)) {
+
+                  listeners.params.state2.mask |= MESH_STATE.IN_HOVER;
+                  STATE.mesh.hoveredId = listeners.params.id;
+                  STATE.mesh.hovered = listeners.params;
+
+
                   /* Dispatch buffer. All dispatch functions for the specific listener. 
-                   * (E.x. listener:HOVER for mesh: meshId=1 has 2 dispatch functions, 
-                   * 1 for scale and 2 for colorDim) 
-                   */
-                  for (let j = 0; j < listeners.dispatchEventBuffer.count; j++) { 
+                  * (E.x. listener:HOVER for mesh: meshId=1 has 2 dispatch functions, 1 for scale and 2 for colorDim) 
+                  * 
+                  * TODO: Remove the dispatcher for loop
+                  */
+                  for (let j = 0; j < listeners.dispatchEventBuffer.count; j++) {
+
 
                      const dispatcher = listeners.dispatchEventBuffer.buffer[j];
+                     // Has the mesh. TODO: have this been set in the previous if statement
+                     RegisterEvent('hover', { mesh: dispatcher.params });
                      dispatcher.clbk(dispatcher.params);
                   }
-
+                     break;
                }
             }
-            else {
-               listeners.params.state.inHover = false;
+            else if (listeners.params.state2.mask & MESH_STATE.IN_HOVER) {
+
+               listeners.params.state2.mask &= ~MESH_STATE.IN_HOVER; // Set false
+               STATE.mesh.hoveredId = INT_NULL;
+               console.log('Set hoveredId to null:', STATE.mesh.hoveredId)
             }
          }
       }
@@ -305,9 +322,13 @@ export function Listener_listen_mouse_hover(params) {
 
    const mousePos = MouseGetMousePos();
    const point = [mousePos.x, mousePos.y,];
+   // const rect = [
+   //    [params.pos[0] - params.dim[0], params.pos[0] + params.dim[0]], // Left  Right 
+   //    [params.pos[1] - params.dim[1], params.pos[1] + params.dim[1]], // Top  Bottom
+   // ];
    const rect = [
-      [params.pos[0] - params.dim[0], params.pos[0] + params.dim[0]], // Left  Right 
-      [params.pos[1] - params.dim[1], params.pos[1] + params.dim[1]], // Top  Bottom
+      [params.geom.pos[0] - params.geom.dim[0], params.geom.pos[0] + params.geom.dim[0]], // Left  Right 
+      [params.geom.pos[1] - params.geom.dim[1], params.geom.pos[1] + params.geom.dim[1]], // Top  Bottom
    ];
 
    return Collision_PointRect(point, rect);

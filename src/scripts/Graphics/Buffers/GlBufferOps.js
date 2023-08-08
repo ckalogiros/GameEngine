@@ -744,7 +744,7 @@ export function GlSetWposXYMany(gfxInfo, pos, startsBuffer) {
         index = startsBuffer[numMeshes--];
     }
 }
-// Move all meshes from found in vertex buffer in consecutive order, 'start'ing from a specific mesh
+// Move all vertices in consecutive order. Use to move text like meshes.
 export function GlMoveXYConcecutive(gfxInfo, pos, numMeshes) {
 
     const progs = GlGetPrograms();

@@ -20,30 +20,7 @@ import { VortexUpdate } from "../Drawables/Fx/Vortex.js";
  */
 export function OnHover(scene, mouse) {
 
-//     let anyMeshHovered = false;
-//     // If the scene has buttons, check for hover
-//     for (let i = 0; i < scene.btnCount; i++) {
 
-//         const btn = scene.buttons[i].area;
-
-//         if (mouse.x > btn.mesh.pos[0] - btn.mesh.dim[0] &&
-//             mouse.x < btn.mesh.pos[0] + btn.mesh.dim[0] &&
-//             mouse.y > btn.mesh.pos[1] - btn.mesh.dim[1] &&
-//             mouse.y < btn.mesh.pos[1] + btn.mesh.dim[1]) {
-
-//             scene.buttons[i].state.inHover = true;
-//             g_state.hovered = scene.buttons[i];
-//             anyMeshHovered = true;
-//         }
-//         else {
-
-//             scene.buttons[i].state.inHover = false;
-//         }
-//     }
-
-//     // If none of the meshes are hovered, update the global state (refference to hovered mesh)
-//     if (!anyMeshHovered)
-//         g_state.hovered = null;
 }
 
 /**

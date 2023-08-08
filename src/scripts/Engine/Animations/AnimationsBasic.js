@@ -16,20 +16,24 @@ const _gfx = new GfxInfoMesh();
 export function Animations_create_scale_up_down(params) {
 
    // if (!params.state.inHover && !params.state.inScale) {
-   if (!params.state.inScale) {
+   // if (!params.state.inScale) {
+   if (!(params.state2.mask & MESH_STATE.IN_SCALE)) {
       const animations = AnimationsGet();
       animations.Create(Animations_run_scale_up_start, Animations_run_scale_up_stop, params, 'button_scale_up_animation');
       params.state.inScale = true;
+      params.state2.mask |= MESH_STATE.IN_SCALE;
    }
 }
 function Animations_run_scale_up_start(mesh) {
 
    const scaleFactor = 1.05, maxScale = 220;
 
-   if (mesh.state.inHover && mesh.geom.dim[0] > maxScale) {
+   // if (mesh.state.inHover && mesh.geom.dim[0] > maxScale) {
+   if ((mesh.state2.mask & MESH_STATE.IN_HOVER) && mesh.geom.dim[0] > maxScale) {
       return true;
    }
-   else if (!mesh.state.inHover && mesh.geom.dim[0] > maxScale) {
+   // else if (!mesh.state.inHover && mesh.geom.dim[0] > maxScale) {
+   else if (!(mesh.state2.mask & MESH_STATE.IN_HOVER ) && mesh.geom.dim[0] > maxScale) {
       return false;
    }
 
@@ -170,6 +174,7 @@ function Animations_run_scale_down_stop(mesh) {
    }
 
    mesh.state.inScale = false;
+   mesh.state2.mask &= ~MESH_STATE.IN_SCALE;
 }
 
 
@@ -192,6 +197,7 @@ export function Animations_create_dim_color_rgb(mesh) {
    const params = {
       defCol: col,
       state: mesh.state,
+      state2: mesh.state2,
       col: col,
       gfx: mesh.gfx,
       maxcolidx: mesh.mat.col[0] > mesh.mat.col[1] ? 0 : (mesh.mat.col[1] > mesh.mat.col[2] ? 1 : 2),
@@ -241,7 +247,8 @@ export function Animations_create_bright_color_rgb(params) {
 }
 function Animations_run_bright_color_rgb_start(params) {
 
-   if (params.state.inHover) return true;
+   // if (params.state.inHover) return true;
+   if (params.state2.mask & MESH_STATE.IN_HOVER) return true;
 
    const gfx = params.gfx;
    const col = params.col;
@@ -256,7 +263,6 @@ function Animations_run_bright_color_rgb_start(params) {
 
    return true;
 }
-
 function Animations_run_bright_color_rgb_stop(params) {
 
    // console.log('Animations_run_bright_color_rgb_stop')

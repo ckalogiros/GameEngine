@@ -4,9 +4,10 @@ import { TimeGet } from "./Time.js";
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Interval Timer.
+ * Interval Timers.
+
  * Runs every 'interval' time.
- * If param  @repeate is set, then the destruction of the timer will happen when it repeats x number of times.
+ * If param  @repeat is set, then the destruction of the timer will happen when it repeats x number of times.
  * 
  * @interval The time interval (in miliseconds) to which the timer will reset and start over. 
  * @clbk The callback to call every time the timer updates.
@@ -16,7 +17,11 @@ import { TimeGet } from "./Time.js";
  * @repeat How many times the timer will repeat before destruction. If set to 0, repeates forever.
  */
 
-const _time = TimeGet();
+let _time = null;
+export function TimeIntervalsInit(){
+
+   _time = TimeGet();
+}
 
 class Interval {
    t;
@@ -39,6 +44,7 @@ class Interval {
       this.isActive = false;
       this.idx = idx;
       this.name = name;
+
    }
 
    Create(interval, idx, name, repeat, clbk, params) { // Params may be null
@@ -55,22 +61,24 @@ class Interval {
 
    Update() {
 
-      this.t += _time.GetDif();
-
+      this.t += _time.delta;
+      
       if (this.repeat > 0){ // Case repeat certain number of times
+
          if (this.t >= this.interval) {
-            if (this.clbk)
-               this.clbk(this.clbkParams); // Call the callback, if exists.
+
+            if (this.clbk) this.clbk(this.clbkParams); // Call the callback, if exists.
             this.t = 0; // Reset interval timer
             this.repeat--;
             return true; // Case we only need if the interval time has passed(no callback)
          }
       }
       else{ // Destroy the interval timer
+
          this.Destroy();
+         return false;
       }
 
-      return false;
    }
 
    // Case we only want to check (if time interval has passed) and not update
@@ -113,6 +121,7 @@ class TimeIntervals {
       this.ti = [];
       this.count = 0;
       this.size = 0;
+
    }
 
    Init() {
@@ -132,6 +141,7 @@ class TimeIntervals {
       }; 
       this.ti[freeIdx].Create(interval, this.count, name, repeat, clbk, parameters);
       this.count++;
+
       return freeIdx;
    }
 
@@ -198,3 +208,131 @@ export function TimeIntervalsGetByIdx(idx) {
 export function TimeIntervalsPrintAll() {
    intervalTimers.Print();
 }
+
+
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Step Timers.
+ */
+const MAX_STEP_TIMERS_LEN = 10;
+class StepTimer {
+
+   t; // The running step timer
+   duration; // In miliseconds
+   step; // If = 0, executes indefinitely. Set a maximum number of times the callback will execute before the timer has finished  
+   clbk; // Callback to call upon time interval  
+   stopClbk; // Callback to call upon timer completion  
+   clbkParams; // The parameters for the Stop mestod callback
+   idx;
+   isActive;
+
+   constructor() {
+
+      this.t = 0;
+      this.duration = 0;
+      this.step = 0;
+      this.clbk = null;
+      this.stopClbk = null;
+      this.clbkParams = null;
+      this.idx = INT_NULL;
+      this.isActive = false;
+   }
+   Set(duration, step, idx, clbk, stopClbk, params) {
+
+      this.duration = duration;
+      this.clbk = clbk;
+      this.stopClbk = stopClbk;
+      this.clbkParams = params;
+      this.step = step;
+      this.idx = idx;
+      this.isActive = true;
+   }
+
+   Clear() {
+
+      this.t = 0;
+      this.duration = 0;
+      this.step = 0;
+      this.clbk = null;
+      this.stopClbk = null;
+      this.clbkParams = null;
+      this.idx = INT_NULL;
+      this.isActive = false;
+   }
+};
+
+// TODO: Implement like the PerformanceTimer class, that is by extending from M_Buffer class
+/** Create a class that manages all applications intervals(in an array) */
+class StepTimers {
+
+   buffer = [];
+   size;
+   count = 0;
+
+   constructor() {
+
+      this.size = MAX_STEP_TIMERS_LEN;
+      this.count = 0;
+      this.buffer = new Array(this.size);
+
+      for (let i = 0; i < this.size; i++) {
+         this.buffer[i] = new StepTimer;
+      }
+   }
+
+   Create(duration, step, clbk, stopClbk, params) {
+
+      const idx = this.GetNextFreeIdx(); // Get the first not active timer 
+      this.buffer[idx].Set(duration, step, idx, clbk, stopClbk, params);
+      this.count++;
+
+      // Catch buffer overflow
+      if (this.count >= this.size) {
+         console.log(`Max Size:${this.size}  current count:${this.count}`);
+         alert('ERROR. Buffer overflow in StepTimers');
+      }
+
+      return this.buffer[idx];
+   }
+
+   Clear(idx) {
+
+      this.buffer[idx].Clear();
+      this.count--;
+   }
+
+   GetNextFreeIdx() {
+
+      for (let i = 0; i < this.size; i++) {
+         if (this.buffer[i].isActive === false) {
+            return i;
+         }
+      }
+      alert('No Space for new Timer. Timer.js');
+   }
+};
+
+const stepTimers = new StepTimers;
+export function StepTimersUpdateAll() {
+   // stepTimers.Update();
+}
+export function StepTimersCreate(duration, step, clbk, stopClbk, params) {
+   stepTimers.Create(duration, step, clbk, stopClbk, params);
+}
+export function TimersUpdateStepTimers() {
+
+   for (let i = 0; i < stepTimers.size; i++) {
+      const t = stepTimers.buffer[i]; // Cash
+      if (t.isActive) {
+         if (t.t >= t.duration) {
+            t.stopClbk(t.clbkParams);
+            stepTimers.Clear(i);
+            return;
+         }
+         t.t += t.step;
+         t.clbk();
+      }
+   }
+}
+

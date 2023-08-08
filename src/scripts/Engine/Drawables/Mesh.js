@@ -4,7 +4,7 @@ import { GlGetContext } from "../../Graphics/Buffers/GlBuffers.js";
 import { GlGetProgram } from "../../Graphics/GlProgram.js";
 import { Int8Buffer, M_Buffer } from "../Core/Buffers.js";
 import { FontGetFontDimRatio } from "../Loaders/Font/Font.js";
-import { TimerGetGlobalTimer } from "../Timer/Timers.js";
+import { TimerGetGlobalTimer } from "../Timers/Timers.js";
 import { EventListener, ListenerCreateDispatchEvent, ListenerCreateListenEvent, Listener_listen_mouse_hover, ListenersGetListener, ListenersGetListenerType } from "../Events/EventListeners.js";
 
 
@@ -35,21 +35,12 @@ const LISTENER_EVENT_FUNCS_INDEXES = {
     DIM_COLOR_ANIMATION: _cnt++,
 };
 
-_cnt = 0x1;
-const MESH_STATE = {
-    IN_HOVER: _cnt <<= 1,
-    IN_SCALE: _cnt <<= 1,
-};
+
 
 class BitMask {
 
     mask;
-
-    constructor() {
-
-        this.mask = 1 | 0;
-    }
-
+    constructor() { this.mask = 1 | 0; }
     set(channel) { this.mask = (1 << channel | 0) >>> 0; }
     enable(channel) { this.mask |= 1 << channel | 0; }
     enableAll() { this.mask = 0xffffffff | 0; }
@@ -61,15 +52,13 @@ class BitMask {
 
 }
 
-class MeshState {
-    inHover = false;
-    inScale = false;
-}
+class Bit_Mask { mask = 0; }
 
 let _meshId = 0;
 export class Mesh {
 
     sid;
+    idx; // This is the index of the mesh in the scene's children buffer;
     geom;
     mat;
     time;
@@ -79,8 +68,10 @@ export class Mesh {
     shaderParams;
     type; // A bit masked large integer to 'name' all different types of a mesh. 
     listeners; // Indexes to the EventListeners class.
+    eventCallbacks; // A buffer to store all callback for any event enabled for the mesh.
     children;
     state; // Mesh info state. TODO: An enum of bit-masks as booleans.
+    state2;
     timeIntervalsIdxBuffer; // This buffer stores indexes of the timeIntervals this mesh is using.
 
     constructor(geom = null, mat = null, time = 0, attrParams1 = [0, 0, 0, 0], name = '???') {
@@ -153,6 +144,9 @@ export class Mesh {
             inBrightColor: false,
         };
 
+        // this.state2 = new Bit_Mask(); // Unfortunately js cannot create a pointer for inegers, so we have to wrap the mask to a class;
+        this.state2 = { mask: 0 }; // Unfortunately js cannot create a pointer for inegers, so we have to wrap the mask to a class;
+
 
         /** Debug  properties */
         if (DEBUG.MESH) {
@@ -204,7 +198,7 @@ export class Mesh {
         this.mat.SetColor(alpha)
     }
     SetPos(pos) {
-        this.geom.SetPos(pos, this.gfx)
+        this.geom.SetPos(pos, this.gfx);
     }
     SetDim(dim) {
         this.geom.SetDim(this.dim, this.gfx)
@@ -220,6 +214,22 @@ export class Mesh {
     }
     SetStyle(border, rCorners, feather) {
         this.mat.SetStyle(border, rCorners, feather);
+    }
+    Move(x, y) {
+
+        this.geom.Move(x, y, this.gfx);
+
+        // TODO: Maybe loop should be elsewhere??? For The text to be moved we need to calculate the chars offsets
+        if (this.children.count) {
+
+            const meshes = this.children;
+
+            for (let i = 0; i < meshes.count; i++) {
+
+                const gfx = meshes.buffer[i].gfx;
+                meshes.buffer[i].geom.MoveXY(x, y, gfx);
+            }
+        }
     }
 
     /**
@@ -293,15 +303,9 @@ export class Mesh {
 
     CreateListenEvent(evttype) {
 
-        const params = {
-            pos: [this.geom.pos[0], this.geom.pos[1]],
-            dim: this.geom.dim,
-            state: this.state,
-            col: this.mat.col,
-            id: this.id,
-        };
+        const params = this;
         const idx = ListenerCreateListenEvent(evttype, params);
-        this.listeners.Add(idx);
+        this.listeners.Add(idx); // Store the index of the created listener in listeners buffer
     }
 
     CreateDispatchEvent(listenEventType, dispatcEventType, dispatchClbk) {
@@ -361,9 +365,13 @@ export class Text_Mesh extends Mesh {
         return this.gfx;
     }
 
-    MoveXY(pos) {
-        this.geom.MoveXY(pos, this.gfx)
-    }
+    // MoveXY(x, y) {
+    //     this.geom.MoveXY(x, y, this.gfx)
+    // }
+    // Move(x, y) {
+    //     this.geom.MoveXY(x, y, this.gfx)
+    // }
+
     // UseFont(fontIdx) {
     //     // Prevent replacing an existing loaded font texture.
     //     // Currently onlyy one texture per vertex buffer is allowed

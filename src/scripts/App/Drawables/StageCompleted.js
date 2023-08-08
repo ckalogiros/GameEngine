@@ -5,7 +5,7 @@ import { AnimationsGet } from "../../Engine/Animations/Animations.js";
 import { Geometry2D } from "../../Engine/Drawables/Geometry/Base/Geometry.js";
 // import { Rect2D } from "../../Engine/Drawables/Geometry/Rect2D.js";
 import { Widget_Label_Text } from "../../Engine/Drawables/Widgets/WidgetLabelText.js";
-import { TimerGetGlobalTimer } from "../../Engine/Timer/Timers.js";
+import { TimerGetGlobalTimer } from "../../Engine/Timers/Timers.js";
 import { GlRotate2D } from "../../Graphics/Buffers/GlBufferOps.js";
 import { DimColor } from "../../Helpers/Helpers.js";
 

@@ -58,42 +58,42 @@ export class Geometry2D {
         math.CopyArr3(this.pos, pos);
         glBufferOps.GlSetWposXY(gfx, pos);
     }
-    MoveXYConcecutive(pos, gfx, numMeshes) {
-        math.CopyArr2(this.pos, pos);
-        glBufferOps.GlMoveXYConcecutive(gfx, pos,numMeshes);
+    MoveXYConcecutive(x, y, gfx, numMeshes) {
+        math.CopyArr2(this.pos, [x, y]);
+        glBufferOps.GlMoveXYConcecutive(gfx, [x, y], numMeshes);
     }
 
     SetPosXY(pos) {
-        math.CopyArr2(this.mesh.pos, pos);
-        glBufferOps.GlSetWposXY(this.gfxInfo, pos);
+        math.CopyArr2(this.pos, pos);
+        glBufferOps.GlSetWposXY(this.gfx, pos);
     }
     SetPosX(x) {
-        this.mesh.pos[0] = x;
-        glBufferOps.GlSetWposX(this.gfxInfo, x);
+        this.pos[0] = x;
+        glBufferOps.GlSetWposX(this.gfx, x);
     }
     SetPosY(y) {
-        this.mesh.pos[1] = y;
-        glBufferOps.GlSetWposY(this.gfxInfo, y);
+        this.pos[1] = y;
+        glBufferOps.GlSetWposY(this.gfx, y);
     }
     UpdatePosXY() {
-        glBufferOps.GlSetWposXY(this.gfxInfo, this.mesh.pos);
+        glBufferOps.GlSetWposXY(this.gfx, this.pos);
     }
     SetZindex(z) {
-        this.mesh.pos[2] = z;
-        glBufferOps.GlSetWposZ(this.gfxInfo, z);
+        this.pos[2] = z;
+        glBufferOps.GlSetWposZ(this.gfx, z);
     }
-    Move(x, y) {
-        this.mesh.pos[0] += x;
-        this.mesh.pos[1] += y;
-        GlMove(this.gfxInfo, [x, y]);
+    Move(x, y, gfx) {
+        this.pos[0] += x;
+        this.pos[1] += y;
+        glBufferOps.GlMove(gfx, [x, y]);
     }
-    MoveX(x) {
-        this.mesh.pos[0] += x;
-        glBufferOps.GlMove(this.gfxInfo, [x, 0]);
+    MoveX(x, gfx) {
+        this.pos[0] += x;
+        glBufferOps.GlMove(this.gfx, [x, 0]);
     }
-    MoveY(y) {
-        this.mesh.pos[1] += y;
-        glBufferOps.GlMove(this.gfxInfo, [0, y]);
+    MoveY(y, gfx) {
+        this.pos[1] += y;
+        glBufferOps.GlMove(this.gfx, [0, y]);
     }
     //////////////////////////////////////////////////////////////
     SetDim(dim, gfx) {
@@ -104,28 +104,28 @@ export class Geometry2D {
         glBufferOps.GlSetDim(gfx, this.dim);
     }
     // Shrink(val) {
-    //     this.mesh.dim[0] *= val;
-    //     this.mesh.dim[1] *= val;
-    //     glBufferOps.GlSetDim(this.gfxInfo, this.mesh.dim);
+    //     this.dim[0] *= val;
+    //     this.dim[1] *= val;
+    //     glBufferOps.GlSetDim(this.gfx, this.dim);
     // }
     UpdateScale() {
-        glBufferOps.GlSetScale(this.gfxInfo, this.mesh.scale);
+        glBufferOps.GlSetScale(this.gfx, this.scale);
     }
     SetScale(s) {
-        this.mesh.scale[0] *= s;
-        this.mesh.scale[1] *= s;
-        glBufferOps.GlSetScale(this.gfxInfo, this.mesh.scale);
+        this.scale[0] *= s;
+        this.scale[1] *= s;
+        glBufferOps.GlSetScale(this.gfx, this.scale);
     }
     ScaleFromVal(val) {
-        this.mesh.scale[0] *= val;
-        this.mesh.scale[1] *= val;
-        glBufferOps.GlSetScale(this.gfxInfo, this.mesh.scale);
+        this.scale[0] *= val;
+        this.scale[1] *= val;
+        glBufferOps.GlSetScale(this.gfx, this.scale);
         // Also set dim to mirror the scale
-        this.mesh.dim[0] *= val;
-        this.mesh.dim[1] *= val;
+        this.dim[0] *= val;
+        this.dim[1] *= val;
     }
     StoreDefPos(pos) {
-        math.CopyArr2(this.mesh.defPos, pos);
+        math.CopyArr2(this.defPos, pos);
     }
 
     //////////////////////////////////////////////////////////////
@@ -188,69 +188,69 @@ export class Geometry3D {
 
     //////////////////////////////////////////////////////////////
     SetPos(pos, gfx) {
-        math.CopyArr3(this.mesh.pos, pos);
+        math.CopyArr3(this.pos, pos);
         glBufferOps.GlSetWposXY(gfx, pos);
     }
     SetPosXY(pos, gfx) {
-        math.CopyArr2(this.mesh.pos, pos);
-        glBufferOps.GlSetWposXY(this.gfxInfo, pos);
+        math.CopyArr2(this.pos, pos);
+        glBufferOps.GlSetWposXY(this.gfx, pos);
     }
     SetPosX(x, gfx) {
-        this.mesh.pos[0] = x;
-        glBufferOps.GlSetWposX(this.gfxInfo, x);
+        this.pos[0] = x;
+        glBufferOps.GlSetWposX(this.gfx, x);
     }
     SetPosY(y) {
-        this.mesh.pos[1] = y;
-        glBufferOps.GlSetWposY(this.gfxInfo, y);
+        this.pos[1] = y;
+        glBufferOps.GlSetWposY(this.gfx, y);
     }
     UpdatePosXY() {
-        glBufferOps.GlSetWposXY(this.gfxInfo, this.mesh.pos);
+        glBufferOps.GlSetWposXY(this.gfx, this.pos);
     }
     SetZindex(z) {
-        this.mesh.pos[2] = z;
-        glBufferOps.GlSetWposZ(this.gfxInfo, z);
+        this.pos[2] = z;
+        glBufferOps.GlSetWposZ(this.gfx, z);
     }
     Move(x, y) {
-        this.mesh.pos[0] += x;
-        this.mesh.pos[1] += y;
-        GlMove(this.gfxInfo, [x, y]);
+        this.pos[0] += x;
+        this.pos[1] += y;
+        GlMove(this.gfx, [x, y]);
     }
     MoveX(x) {
-        this.mesh.pos[0] += x;
-        glBufferOps.GlMove(this.gfxInfo, [x, 0]);
+        this.pos[0] += x;
+        glBufferOps.GlMove(this.gfx, [x, 0]);
     }
     MoveY(y) {
-        this.mesh.pos[1] += y;
-        glBufferOps.GlMove(this.gfxInfo, [0, y]);
+        this.pos[1] += y;
+        glBufferOps.GlMove(this.gfx, [0, y]);
     }
     //////////////////////////////////////////////////////////////
     SetDim(dim) {
-        math.CopyArr2(this.mesh.dim, dim);
-        glBufferOps.GlSetDim(this.gfxInfo, dim);
+        math.CopyArr2(this.dim, dim);
+        glBufferOps.GlSetDim(this.gfx, dim);
     }
     // Shrink(val) {
-    //     this.mesh.dim[0] *= val;
-    //     this.mesh.dim[1] *= val;
-    //     glBufferOps.GlSetDim(this.gfxInfo, this.mesh.dim);
+    //     this.dim[0] *= val;
+    //     this.dim[1] *= val;
+    //     glBufferOps.GlSetDim(this.gfx, this.dim);
     // }
     UpdateScale() {
-        glBufferOps.GlSetScale(this.gfxInfo, this.mesh.scale);
+        glBufferOps.GlSetScale(this.gfx, this.scale);
     }
     SetScale(s) {
-        this.mesh.scale[0] *= s;
-        this.mesh.scale[1] *= s;
-        glBufferOps.GlSetScale(this.gfxInfo, this.mesh.scale);
+        this.scale[0] *= s;
+        this.scale[1] *= s;
+        glBufferOps.GlSetScale(this.gfx, this.scale);
     }
     ScaleFromVal(val) {
-        this.mesh.scale[0] *= val;
-        this.mesh.scale[1] *= val;
-        glBufferOps.GlSetScale(this.gfxInfo, this.mesh.scale);
+        this.scale[0] *= val;
+        this.scale[1] *= val;
+        glBufferOps.GlSetScale(this.gfx, this.scale);
         // Also set dim to mirror the scale
-        this.mesh.dim[0] *= val;
-        this.mesh.dim[1] *= val;
+        this.dim[0] *= val;
+        this.dim[1] *= val;
     }
     StoreDefPos(pos) {
-        math.CopyArr2(this.mesh.defPos, pos);
+        math.CopyArr2(this.defPos, pos);
     }
 
 v

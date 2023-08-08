@@ -1,9 +1,11 @@
 "use strict";
 import { GlRotateXY3D } from '../Graphics/Buffers/GlBufferOps.js';
 import { AnimationsGet } from './Animations/Animations.js';
+import { MouseGetPosDif } from './Controls/Input/Mouse.js';
 import { Int8Buffer, M_Buffer } from './Core/Buffers.js';
 import { ListenersGetListenersBuffer } from './Events/EventListeners.js';
-import { FpsGet } from './Timer/Time.js';
+import { HandleEvents } from './Events/Events.js';
+import { FpsGet } from './Timers/Time.js';
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *  LOGIC:
@@ -18,7 +20,7 @@ export class Scene {
     children;       // Store all meshes (by refference) that belong to the scene.
     widgetBuffer;   // Store all widgets (by index ref to children).
     gfxBuffer;      // Quick access to graphics buffers (indexes only)
-    buttonBuffer;   // Quick access to all the buttons (indexes only to the scene's children buffer)
+    // buttonBuffer;   // Quick access to all the buttons (indexes only to the scene's children buffer)
 
     constructor(elem = {}) {
 
@@ -27,8 +29,7 @@ export class Scene {
         this.children = new M_Buffer();
         this.children.Init(32);
         this.gfxBuffer = [];
-        this.buttonBuffer = new Int8Buffer(6);
-        // this.buttonBuffer.Init(INT_NULL);
+
     }
 
     // OnUpdate should handle all meshes requirements. E.x. uniform update, etc...
@@ -39,6 +40,13 @@ export class Scene {
 
         // Update attribute values for every mesh
         for (let i = 0; i < this.children.count; i++) {
+
+            const mesh = this.children.buffer[i];
+
+            if(mesh.state2.mask & MESH_STATE.IN_MOVE){
+                const dif = MouseGetPosDif();
+                mesh.Move(dif.x, -dif.y)
+            }
 
             // Rotate
             if (this.children.buffer[i].type & MESH_TYPES.CUBE_GEOMETRY) {
@@ -57,8 +65,8 @@ export class Scene {
         /** Run Animations */
         animations.Run();
 
-
-        // 
+        /** Handle Events */
+        HandleEvents();
     }
 
     AddMesh(mesh) {
@@ -79,9 +87,11 @@ export class Scene {
     StoreMesh(mesh) {
 
         const idx = this.children.Add(mesh);
-        if (mesh.type & MESH_TYPES.BUTTON) {
-            this.buttonBuffer.Add(idx)
-        }
+        mesh.idx = idx;
+
+        // if (mesh.type & MESH_TYPES.BUTTON) {
+        //     this.buttonBuffer.Add(idx)
+        // }
     }
 
     // Store meshe's graphics info (program index, vertex buffer index), 
@@ -139,6 +149,14 @@ export class Scene {
     // Store a refference to the camera object
     UseCamera(camera) {
         this.cameras.push(camera);
+    }
+
+    Temp_FindMeshById(id){
+        for (let i = 0; i < this.children.count; i++) {
+            if (this.children.buffer[i].id === id) 
+                return this.children.buffer[i];
+            return null;
+        }
     }
 
 };

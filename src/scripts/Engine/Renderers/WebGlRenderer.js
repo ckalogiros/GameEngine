@@ -2,10 +2,11 @@
 
 import { GlDraw } from "../../Graphics/GlDraw.js";
 import { MouseResetDif, MouseResetWheel } from "../Controls/Input/Mouse.js";
-import { FpsGet, TimeUpdate, TimersUpdateStepTimers } from "../Timer/Time.js";
-import { TimersUpdateGlobalTimer, TimersUpdateTimers } from "../Timer/Timers.js";
-import { TimeIntervalsUpdateAll } from "../Timer/TimeIntervals.js";
-import { TimeMeasureCreate, _tm1 } from "../Timer/TimeMeasure.js";
+// import { FpsGet, TimeUpdate, _ta1 } from "../Timer/Time.js";
+import { FpsGet, TimeSample, TimeStart, TimeStop, TimeUpdate } from "../Timers/Time.js";
+import { TimersUpdateGlobalTimer, TimersUpdateTimers } from "../Timers/Timers.js";
+import { TimeIntervalsUpdateAll, TimersUpdateStepTimers } from "../Timers/TimeIntervals.js";
+import { _tm1, _tm2, _tm3 } from "../Timers/PerformanceTimers.js";
 
 /**
  * WebGl
@@ -48,8 +49,10 @@ import { TimeMeasureCreate, _tm1 } from "../Timer/TimeMeasure.js";
  * Time Measure Variables
  */
 
-// const tm1 = TimeMeasureCreate();
-const tm1 = _tm1;
+const tm1 = _tm1; // Generic performance timer
+const tm2 = _tm2; // Generic performance timer
+const tm3 = _tm3; // Generic performance timer
+// const ta1 = _ta1; // Currently used for FPS average;
 
 export class WebGlRenderer {
 
@@ -68,6 +71,7 @@ export class WebGlRenderer {
 
       this.scene = scene;
       scene.UseCamera(camera);
+      STATE.scene.active = this.scene;
 
       this.camera = camera;
       this.camera.Init();
@@ -76,51 +80,34 @@ export class WebGlRenderer {
 
    }
 
-   Render(mesh) {
+   Render() {
 
-      // const animations = AnimationsGet();
-      // const particles = ParticleSystemGet();
-
-      // this.fpsTimer.Start();
-
-      
       if (g_state.game.paused === false) {
          
-         TimeUpdate(); // Update the Global Timer (real time, in miliseconds)
+         TimeUpdate(); 
+         
+         tm1.Start();
          TimeIntervalsUpdateAll(); // Update and run callbacks for each interval timer that has been set.
-         
-         
          TimersUpdateGlobalTimer(); // This is a globbal timer, going only forward
-         TimersUpdateTimers();
-         
-         TimersUpdateStepTimers();
+         // TimersUpdateTimers();
+         // TimersUpdateStepTimers();
+         tm1.Stop();
          
          // TODO!!! Update camera uniform if camera needs update 
          this.camera.Update(this.gl)
+         tm2.Start();
          this.scene.OnUpdate();
+         tm2.Stop();
          
-         
-         // if(this.camera.needsUpdateUniform){
-         //    const prog = GlGetProgram(this.scene.gfxBuffer[0].progIdx);
-         //    prog.UniformsSetUpdateProjectionMatrix(this.gl, this.camera.elements);
-         // }
-         
-         //  HandleEvents();
-         //  RunAnimations();
-         //  animations.Run();
-         //  particles.Update();
-         //  CheckCollisions();
-         //  Update();
-         //  OnMouseMove();
-         //  ExplosionsUpdate();
-            
-            
-         tm1.Start();
+         tm3.Start();
          GlDraw(this.gl);
-         tm1.Stop();
+         tm3.Stop();
+         
          MouseResetDif(.5);
          MouseResetWheel();
-         TimeUpdate();
+         
+         
+         TimeSample()
          this.fpsTimer.Stop();
       }
 

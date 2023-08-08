@@ -3,7 +3,7 @@
 import * as math from '../../Helpers/Math/MathOperations.js'
 import { GlSetAttrTime, GlSetWposXY, GlSetColor, GlSetColorAlpha, GlSetAttrParams1 } from "../../Graphics/Buffers/GlBufferOps.js";
 import { Mesh } from "../Drawables/Mesh.js";
-import { TimersCreateTimer } from "../Timer/Timers.js";
+import { TimersCreateTimer } from "../Timers/Timers.js";
 
 class Particle {
     isAlive = false;

@@ -5,7 +5,7 @@ import { GlGetContext } from "../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh, GlGetProgram } from "../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../Helpers/Helpers.js";
 import { FontGetUvCoords } from "../../Loaders/Font/Font.js";
-import { TimeIntervalsCreate } from "../../Timer/TimeIntervals.js";
+import { TimeIntervalsCreate } from "../../Timers/TimeIntervals.js";
 import { Geometry2D } from "../Geometry/Base/Geometry.js";
 import { Geometry2D_Text } from "../Geometry/Geometry2DText.js";
 import { FontMaterial, Material } from "../Material/Material.js";

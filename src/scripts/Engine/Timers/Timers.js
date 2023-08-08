@@ -168,13 +168,11 @@ _timers.Init();
 
 
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+/**
  * Public Functions
  */
 
-/**
-* Getters-Setters
-*/
+/** Getters-Setters */
 export function TimersGetTimers(){
     return _timers;
 }
@@ -193,6 +191,8 @@ export function TimersCreateTimer(start, duration, step, name, clbk, params){
 /**
  * Update all _timers used by the game here.
  * Must run for each render iteration(frame)
+ * 
+ * TODO !!!: Not efficient, it runs 350 elements without any being active
  */
 export function TimersUpdateTimers(){
 

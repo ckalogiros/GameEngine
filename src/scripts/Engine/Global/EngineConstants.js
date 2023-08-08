@@ -3,11 +3,15 @@
 
 const INT_NULL = -1; // For case like 0 index arrays, where the number 0 index cannot be used as null element for a buffer
 
+// const MAX_INT = 0x1000000000000000
+const MAX_INT = 10000
+
 const MILISEC = 0.001;
 const NANOSEC = 0.000001;
 
-function CHECK_ERROR(obj, msg){
-	if(!obj || obj === undefined) {
+
+function CHECK_ERROR(obj, msg) {
+	if (!obj || obj === undefined) {
 		console.error('object:', obj, msg)
 	}
 }
@@ -24,10 +28,17 @@ const PLATFORM = {
 }
 
 const STATE = {
+
+	scene:{
+		active: null,
+		idx: null,
+	},
+
 	loop: {
 		paused: false,
 	},
-	mesh:{
+	
+	mesh: {
 		hovered: null,
 		hoveredId: INT_NULL,
 		hoveredIdx: INT_NULL,
@@ -38,6 +49,23 @@ const STATE = {
 
 	},
 };
+
+
+
+let _cnt = 0x1;
+const MESH_STATE = {
+
+	IN_HOVER: _cnt <<= 1,
+	IN_SCALE: _cnt <<= 1,
+	IN_MOVE: _cnt <<= 1,
+	
+	IS_MOVABLE: _cnt <<= 1,
+
+	CLICKED_MOUSE_L: _cnt <<= 1,
+	CLICKED_MOUSE_M: _cnt <<= 1,
+	CLICKED_MOUSE_R: _cnt <<= 1,
+};
+
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -187,7 +215,7 @@ const TEXTURE_TEST = 'msdf';
 /**
  * MESH_TYPES: A bitmask to check if a mesh is of a specific type
  */
-let _cnt = 0x1;
+_cnt = 0x1;
 const MESH_TYPES = {
 	GEOMETRY2D: _cnt <<= 1,
 	TEXT_GEOMETRY2D: _cnt <<= 1,

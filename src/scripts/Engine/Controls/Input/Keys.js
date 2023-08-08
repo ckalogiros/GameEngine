@@ -2,7 +2,7 @@
 
 import { PrintAttributes, PrintIndexBufferAll, PrintVertexBufferAll, PrintVertexBufferAllPretty } from "../../../Graphics/Z_Debug/GfxDebug.js";
 import { RenderQueueGet } from "../../Renderers/Renderer/RenderQueue.js";
-import { FpsGet } from "../../Timer/Time.js";
+import { FpsGet } from "../../Timers/Time.js";
 
 
 export function OnKeyDown(e){

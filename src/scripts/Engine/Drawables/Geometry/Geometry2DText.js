@@ -49,7 +49,7 @@ export class Geometry2D_Text extends Geometry2D {
       }
    }
 
-   MoveXY(pos, gfx) {
-      this.MoveXYConcecutive(pos, gfx, this.numChars)
+   MoveXY(x, y, gfx) {
+      this.MoveXYConcecutive(x, y, gfx, this.numChars)
   }
 }

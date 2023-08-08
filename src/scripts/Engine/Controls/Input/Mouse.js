@@ -1,6 +1,7 @@
 "use strict";
 
 import { GetSign } from "../../../Helpers/Helpers.js";
+import { RegisterEvent } from "../../Events/Events.js";
 
 
 const mouse = {
@@ -79,7 +80,7 @@ const mouse = {
             this.yprev = this.y;
             this.x =  mouse.pos.x;
             this.y =  mouse.pos.y;
-            console.log(this)
+            // console.log(this)
          }
       },
       up:{
@@ -101,7 +102,7 @@ const mouse = {
          Area(){
             this.x = mouse.click.up.x - mouse.click.down.x;
             this.y = mouse.click.up.y - mouse.click.down.y;
-            console.log(this);
+            // console.log(this);
          }
       },
    },
@@ -181,11 +182,6 @@ export function OnMouseOut(e){
    e.stopPropagation();
    e.preventDefault();
 
-   // mouseout { target: img#TextureAtlas, buttons: 0, clientX: 63, clientY: 463, layerX: 5, layerY: 463 }
-   // console.log(e)
-   // if(e.mouseout.target && !mouse.out)
-   //    mouse.out = false;
-
    mouse.pos.SetPrevPos(INT_NULL, INT_NULL);
    mouse.pos.ResetPos();
 }
@@ -201,7 +197,7 @@ export function OnMouseWheel(e){
    mouse.wheel.x =  e.clientY;
    mouse.wheel.delta = GetSign(e.wheelDelta);
 
-   console.log(`MOUSE WHEEL: pos: ${e.x} ${e.y}, delta: ${e.wheelDelta}`)
+   // console.log(`MOUSE WHEEL: pos: ${e.x} ${e.y}, delta: ${e.wheelDelta}`)
 }
 
 export function OnMouseDown(e) {
@@ -210,6 +206,11 @@ export function OnMouseDown(e) {
    e.preventDefault(); 
 
    mouse.click.down.Set(e.which-1);
+
+   const params = {
+      mouseButton: e.which-1
+   };
+   RegisterEvent('mouse-click-down', params)
 }
 
 export function OnMouseUp(e) {
@@ -219,4 +220,9 @@ export function OnMouseUp(e) {
    
    mouse.click.up.Set(e.which-1)
    mouse.click.drag.Area();
+   
+   const params = {
+      mouseButton: e.which-1
+   };
+   RegisterEvent('mouse-click-up', params)
 }
