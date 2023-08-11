@@ -71,43 +71,6 @@ export function CalculateSdfParamsFromFont(fontSize){
     return sdfVal;
 }
 
-
-// export function CalculateSdfOuterFromDim(dim, maxDim){
-
-//     // let sdfOuter = (((.5)/(90))*(90-dim));
-
-//     const ratio = dim / 60;
-//     const min = SDF_PARAMS_VALS.outerMin;
-//     const max = SDF_PARAMS_VALS.outerMax;
-//     //a + (b - a) * p
-//     const sdfOuter = max - (min + (max - min) * ratio);
-
-
-//     if(sdfOuter >= SDF_PARAMS_VALS.outerMax){
-//         return SDF_PARAMS_VALS.outerMax
-//     }else if(sdfOuter <= SDF_PARAMS_VALS.outerMin){
-//         return SDF_PARAMS_VALS.outerMin
-//     }
-    
-//     // console.log('sdf:', sdfOuter, 'dim:',dim, maxDim)
-//     // console.log('Ratio:', ((.5/45)*(60-dim)))
-//     return sdfOuter;
-// }
-
-const SDF_OUTER_VAL_TABLE = [
-    .90, // dim = 0
-    .60, // dim = 10
-    .30, // dim = 20
-    .20, // dim = 30
-    .15, // dim = 40
-    .10, // dim = 50
-    .07, // dim = 60
-    .05, // dim = 70
-    .05, // dim = 80
-    .04, // dim = 90
-    .04, // dim = 100
-];
-
 export function CalculateSdfOuterFromDim(size){
     // b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 )
     const sdf = MapLinear(size, 0, 120, .5, .1);

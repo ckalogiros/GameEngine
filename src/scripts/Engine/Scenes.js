@@ -47,6 +47,11 @@ export class Scene {
                 const dif = MouseGetPosDif();
                 mesh.Move(dif.x, -dif.y)
             }
+            
+            // if (mesh.eventCallbacks.count) {
+            //     if(mesh.OnUpdate)
+            //     mesh.OnUpdate()
+            // }
 
             // Rotate
             if (this.children.buffer[i].type & MESH_TYPES.CUBE_GEOMETRY) {

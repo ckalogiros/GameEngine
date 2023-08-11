@@ -20,6 +20,8 @@ import { TimeIntervalsCreate, TimeIntervalsInit } from '../Engine/Timers/TimeInt
 import { MAT_ENABLE, Material, Material_TEMP_fromBufferFor3D } from '../Engine/Drawables/Material/Base/Material.js';
 import { MESH_ENABLE, Mesh } from '../Engine/Drawables/Meshes/Base/Mesh.js';
 import { Slider_bind_on_value_change, Widget_Slider } from '../Engine/Drawables/Meshes/Widgets/WidgetSlider.js';
+import { Bind_change_brightness, Bind_change_color_rgb } from '../Engine/BindingFunctions.js';
+import { Widget_Menu } from '../Engine/Drawables/Meshes/Widgets/WidgetMenu.js';
 
 
 
@@ -240,16 +242,15 @@ export function AppInit() {
         }
 
         { // Many text labels ald dispatcher
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     // textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // } 
+            {
+                const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
+                textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
+                scene.AddMesh(textLabel);
+                textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+                // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
+                // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
+                RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
+            } 
             // ypos += fontSize * 2 + 50;
             // {
             //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
@@ -485,6 +486,19 @@ export function AppInit() {
                
     }
 
+    { // Widget Menu
+        let posy = 480, height = 100, pad = 25;
+        posy += height*2 + pad;
+        {
+            const menu = new Widget_Menu([200, posy, 0], [80, height], BLUE_10_160_220);
+            menu.state2.mask |= MESH_STATE.IS_MOVABLE;
+            scene.AddMesh(menu);
+            menu.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+            // RegisterEvent('set-bind-on-change-value', slider.id)
+        }
+                
+    }
+
     TestBindSliderToTextLabel(scene);
     // Test1(scene);
 
@@ -706,7 +720,7 @@ function TestBindSliderToTextLabel(scene){
     posy += height*2 + pad;
     const slider = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220);
     scene.AddMesh(slider);
-    Slider_bind_on_value_change(slider, textLabel);
+    Slider_bind_on_value_change(slider, textLabel, Bind_change_brightness);
     
     posy += height*2 + pad;
     const slider2 = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220);

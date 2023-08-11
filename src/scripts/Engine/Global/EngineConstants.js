@@ -88,12 +88,27 @@ const MESH_STATE = {
 	}
 };
 
-_cnt = 0;
-const MESH_EVENT_CLBKS_INDEX_TABLE = {
+// _cnt = 0;
+// const MESH_EVENT_CLBKS_INDEX_TABLE = {
 
-	SLIDER_CHANGE_VALUE: _cnt++,
+// 	SLIDER_CHANGE_VALUE: _cnt++,
 	
-	SIZE: _cnt,
+// 	SIZE: _cnt,
+// };
+
+_cnt = 0x1;
+/**
+ * The type of binding of source-target objects,
+ * That is what function will be called based on the type or types (many functions). 
+ * Used for events like slider-target, where the slider has to call a function
+ * OF the target and ON the target.
+ */
+const BINDING_TYPE = {
+	/**
+	 * We choose a bit mask for space efficiency.
+	 */
+	CHANGE_COLOR_RGB: _cnt <<= 1,
+	
 };
 
 
@@ -370,4 +385,6 @@ const DEBUG = {
 	WEB_GL: false,
 	SHADER_INFO: false,
 	SHADERS: true,
+
+	BINDING_FUNCTIONS: true,
 };

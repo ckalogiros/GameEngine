@@ -19,6 +19,7 @@ export function RegisterEvent(eventType, params) {
         type: eventType,
         params: params,
     };
+
     console.debug('STATE.mesh.hoveredId:', STATE.mesh.hoveredId)
     if (eventType === 'mouse-click-down' && STATE.mesh.hoveredId !== INT_NULL)
         events[evtsIdx++] = {
@@ -40,6 +41,7 @@ export function HandleEvents() {
             events[i].params = {};
             evtsIdx--;
         }
+
         if (events[i].type === 'mouse-click-down') {
 
             if (events[i].params.mouseButton === 2) {
@@ -52,6 +54,7 @@ export function HandleEvents() {
             events[i].params = {};
             evtsIdx--;
         }
+
         if (events[i].type === 'mouse-click-up') {
 
             // const mesh = STATE.mesh.hovered;
@@ -65,6 +68,7 @@ export function HandleEvents() {
             events[i].params = {};
             evtsIdx--;
         }
+
         if (events[i].type === 'mouse-click-down-hover') {
 
             events[i].type = '';
@@ -84,6 +88,11 @@ export function HandleEvents() {
                 RegisterEvent('Move', mesh)
             }
 
+            if (mesh.type & MESH_TYPES.WIDGET_SLIDER_BAR && mesh.timeIntervalsIdxBuffer.count <= 0) {
+
+                Slider_create_dispatch_event(mesh);
+            }
+
 
         }
 
@@ -98,10 +107,10 @@ export function HandleEvents() {
              * We need to implement a way of checking for specific intervals 
              * in the 'timeIntervalsIdxBuffer'. by comparing the indexes??? 
             */
-            if (mesh.type & MESH_TYPES.WIDGET_SLIDER_BAR && mesh.timeIntervalsIdxBuffer.count <= 0) {
+            // if (mesh.type & MESH_TYPES.WIDGET_SLIDER_BAR && mesh.timeIntervalsIdxBuffer.count <= 0) {
 
-                Slider_create_dispatch_event(mesh);
-            }
+            //     Slider_create_dispatch_event(mesh);
+            // }
 
         }
 
@@ -131,8 +140,7 @@ export function HandleEvents() {
     // console.log(events)
 }
 
-export function HandleEventsImediate() {
-}
+
 
 function OnWindowResize() {
     console.log('WINDOW RESIZE')

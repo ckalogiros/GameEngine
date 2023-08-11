@@ -109,6 +109,12 @@ export class Widget_Label_Text_Mesh extends Mesh {
 
     }
 
+    // AddToGraphicsBuffer(sceneIdx) {
+
+	// 	/** Add the constant text */
+	// 	return super.AddToGraphicsBuffer(sceneIdx);
+	// }
+
     Listener_listen_mouse_hover() {
         this.geom.Listener_listen_mouse_hover();
     }

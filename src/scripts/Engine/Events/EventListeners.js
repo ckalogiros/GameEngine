@@ -256,6 +256,17 @@ class EventListeners {
       return INT_NULL;
    }
 
+
+   /**
+    * Current Implementation:
+    * Check for event (hover)
+    * if true then RegisterEvent, update STATE and mesh state
+    * else Update STATE and mesh state for stop hovering.
+    * 
+    * We skip register event if the mesh that listens allready has this event.
+    * But we always run the else, updating the STATE and mesh state.
+    * That means we register an event only once.
+    */
    Run() {
       for (let i0 = 0; i0 < this.count; i0++) { // Listen event type buffer. (E.x. buffer[0] === EVENT_TYPE:HOVER)
 
@@ -281,20 +292,8 @@ class EventListeners {
                   STATE.mesh.hovered = listeners.params;
                   RegisterEvent('hover', { mesh: listeners.params });
 
-
-                  /* Dispatch buffer. All dispatch functions for the specific listener. 
-                  * (E.x. listener:HOVER for mesh: meshId=1 has 2 dispatch functions, 1 for scale and 2 for colorDim) 
-                  * 
-                  * TODO: Remove the dispatcher for loop
-                  */
-                  // for (let j = 0; j < listeners.dispatchEventBuffer.count; j++) {
-
-                  //    const dispatcher = listeners.dispatchEventBuffer.buffer[j];
-                  //    dispatcher.clbk(dispatcher.params);
-                  // }
-                  
                   break; // Helps with the switchin between double hovered meshes.
-                  /** TODO: Fix hovering a mesh must put it on top
+                  /** TODO: Fix: hovering a mesh must be put on top,
                    * otherwise the first mesh in the listeners buffer will always get hovered, 
                    * even if another mesh is hovered (when meshes overlap).
                    */

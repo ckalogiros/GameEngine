@@ -147,6 +147,15 @@ export function Clamp(val, min, max) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Linear mapping from range <a1, a2> to range <b1, b2>
+/**
+ * 
+ * @param {float} x Value to interpolate
+ * @param {float} a1 from min
+ * @param {float} a2 from max
+ * @param {float} b1 to min
+ * @param {float} b2 to max
+ * @returns 
+ */
 export function MapLinear( x, a1, a2, b1, b2 ) {
 
 	return b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 );

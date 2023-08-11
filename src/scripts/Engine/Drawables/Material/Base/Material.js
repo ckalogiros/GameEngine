@@ -30,6 +30,7 @@ export class Material {
 
    sid;
    col;
+   defCol;
    uv;
    texId;
    texIdx;
@@ -48,6 +49,8 @@ export class Material {
       
       this.col = [0,0,0,0];
       math.CopyArr4(this.col, col);
+      this.defCol = [0,0,0,0];
+      math.CopyArr4(this.defCol, col);
   
       this.uv = [0, 1, 0, 1];
 
@@ -103,6 +106,10 @@ export class Material {
    GetColorAlpha() { return this.col[3]; }
    SetColor(col, gfx) {
       math.CopyArr4(this.col, col);
+      GlSetColor(gfx, this.col);
+   }
+   SetColorRGB(col, gfx) {
+      math.CopyArr3(this.col, col);
       GlSetColor(gfx, this.col);
    }
    SetColorAlpha(alpha) {

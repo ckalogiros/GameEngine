@@ -171,6 +171,12 @@ export class Mesh {
         this.children.Add(mesh);
     }
 
+    // OnUpdate() {
+
+    //     const Callback = this.eventCallbacks.buffer[0].Clbk;
+    //     Callback()
+    // }
+
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * GRAPHICS
      */
@@ -209,6 +215,9 @@ export class Mesh {
      */
     SetColor(col) {
         this.mat.SetColor(col, this.gfx)
+    }
+    SetColorRGB(col) {
+        this.mat.SetColorRGB(col, this.gfx)
     }
     SetColorAlpha(alpha) {
         this.mat.SetColor(alpha)
@@ -329,17 +338,21 @@ export class Mesh {
 
         /* TODO: Must store the dispatcher index??? */
         const dispatcherIdx = ListenerCreateDispatchEventOnListenEvent(dispatcEventType, dispatchClbk, params, listeneridx[0], listeneridx[1]);
+
     }
     /**
-     * @param {*} eventCallbacks type of function_pointer OR array [function_pointers, ...] 
-     * Store the callbacks to call  in a buffer.
+     * 
+     * @param {Func | [Funcs]} eventCallbacks type of function_pointer OR array [function_pointers, ...]  
+     * @param {Object} _params 
+     * @param {Func | [Funcs]} paramsClbks 
+     * @returns 
      */
-    CreateEvent(eventCallback = null, _params = null) {
+    CreateEvent(eventCallback = null, _params = null, paramsClbks = null) {
 
-        if(Array.isArray(eventCallback)){
+        if (Array.isArray(eventCallback)) {
 
             const len = eventCallback.length;
-            for(let i=0; i<len; i++){
+            for (let i = 0; i < len; i++) {
 
                 const params = {
                     Clbk: eventCallback[i],
@@ -349,11 +362,12 @@ export class Mesh {
                 return eventIdx;
             }
         }
-        else{
+        else {
 
             const params = {
                 Clbk: eventCallback,
                 params: _params,
+                paramsClbks: paramsClbks,
             };
             const eventIdx = this.eventCallbacks.Add(params);
             return eventIdx;
@@ -376,7 +390,7 @@ export class Mesh {
     }
 
     /** Debug */
-    SetName(){
+    SetName() {
         this.name = GetMeshNameFromType(this.type);
         this.name += ' id: ' + this.id;
     }
@@ -384,13 +398,13 @@ export class Mesh {
 }
 
 /** Helper Recursive Functions */
-function Recursive_move_mesh(mesh, x, y){
+function Recursive_move_mesh(mesh, x, y) {
 
     const meshes = mesh;
-    
+
     for (let i = 0; i < meshes.count; i++) {
 
-        if(meshes.buffer[i].children.count){
+        if (meshes.buffer[i].children.count) {
             Recursive_move_mesh(meshes.buffer[i].children, x, y)
         }
 
@@ -398,7 +412,7 @@ function Recursive_move_mesh(mesh, x, y){
         meshes.buffer[i].geom.Move(x, y, gfx);
     }
 }
-export function Geometry2D_set_posx(params){
+export function Geometry2D_set_posx(params) {
 
     const mesh = params.mesh;
     const x = params.x;
@@ -410,13 +424,13 @@ export function Geometry2D_set_posx(params){
     // mesh.SetPosX(x, gfx)
     // mesh.geom.SetPosX(x, gfx)
 }
-function Recursive_mesh_set_pos_x(mesh, x){
+function Recursive_mesh_set_pos_x(mesh, x) {
 
     const children = mesh.children;
-    
+
     for (let i = 0; i < children.count; i++) {
 
-        if(children.buffer[i].children.count){
+        if (children.buffer[i].children.count) {
             Recursive_mesh_set_pos_x(children.buffer[i].children, x)
         }
 
@@ -439,7 +453,7 @@ export class Text_Mesh extends Mesh {
     }
 
     AddToGraphicsBuffer(sceneIdx) {
-        
+
         this.gfx = GlGetContext(this.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
 
         const prog = GlGetProgram(this.gfx.prog.idx);
@@ -455,51 +469,51 @@ export class Text_Mesh extends Mesh {
         return this.gfx;
     }
 
-    UpdateText(_val){
+    UpdateText(_val) {
 
         // if (!Array.isArray(params.params.meshes)) alert('Array must be passed as param.meshes to TimeInterval instantiation.')
 
-		// const meshes = params.params.meshes;
-		// const mesheslen = meshes.length
+        // const meshes = params.params.meshes;
+        // const mesheslen = meshes.length
 
-		// for (let i = 0; i < mesheslen; i++) {
+        // for (let i = 0; i < mesheslen; i++) {
 
-			const val = _val;
+        const val = _val;
 
-			const text = `${val}`;
-			const geom = this.geom;
-			const gfx  = this.gfx;
-			const mat  = this.mat;
+        const text = `${val}`;
+        const geom = this.geom;
+        const gfx = this.gfx;
+        const mat = this.mat;
 
-			let gfxInfo = new GfxInfoMesh(gfx);
+        let gfxInfo = new GfxInfoMesh(gfx);
 
-			const textLen = text.length;
-			const len = geom.numChars > textLen ? geom.numChars : (textLen > geom.numChars ? geom.numChars : textLen);
+        const textLen = text.length;
+        const len = geom.numChars > textLen ? geom.numChars : (textLen > geom.numChars ? geom.numChars : textLen);
 
-			// Update text faces
-			for (let j = 0; j < len; j++) {
+        // Update text faces
+        for (let j = 0; j < len; j++) {
 
-				let uvs = [0, 0, 0, 0];
-				if (text[j] !== undefined) {
-					uvs = FontGetUvCoords(mat.uvIdx, text[j]);
-				}
-				GlSetTex(gfxInfo, uvs);
-				gfxInfo.vb.start += gfxInfo.vb.count
-			}
-		// }
+            let uvs = [0, 0, 0, 0];
+            if (text[j] !== undefined) {
+                uvs = FontGetUvCoords(mat.uvIdx, text[j]);
+            }
+            GlSetTex(gfxInfo, uvs);
+            gfxInfo.vb.start += gfxInfo.vb.count
+        }
+        // }
     }
 
-    SetPosX(x){
+    SetPosX(x) {
         // this.
     }
 
     CalcTextWidth() {
-		let width = this.geom.CalcTextWidth();
-		for (let i = 0; i < this.children.count; i++) {
-			width += this.children.buffer[i].geom.CalcTextWidth();
-		}
-		return width;
-	}
+        let width = this.geom.CalcTextWidth();
+        for (let i = 0; i < this.children.count; i++) {
+            width += this.children.buffer[i].geom.CalcTextWidth();
+        }
+        return width;
+    }
 }
 
 /**
