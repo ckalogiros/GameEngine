@@ -43,11 +43,14 @@ class RenderQueue {
    }
 
    Init() {
+      
       for (let i = 0; i < this.size; i++) {
          this.buffer[i] = new Queue;
       }
    }
+
    Create(){
+
       const progs = GlGetPrograms();
       const progCount = GlGetProgramsCnt();
       for (let i = 0; i < progCount; i++) {
@@ -61,6 +64,7 @@ class RenderQueue {
    }
 
    UpdateActiveQueue(){ // Recreates an array of all active vertex buffers from the draw queue on every Frame.
+
       this.activeCount = 0;
       for (let i = 0; i < this.size; i++) {
          if(this.buffer[i].isActive){
@@ -68,7 +72,9 @@ class RenderQueue {
          }
       }
    }
+
    Add(progIdx, vbIdx, isActive) {
+
       const obj = {
          progIdx: progIdx,
          vbIdx: vbIdx,
@@ -81,7 +87,9 @@ class RenderQueue {
       // DEBUG
       if(this.count > this.size) alert('ERROR - RenderQueue buffer is FULL')
    }
+
    Remove(progIdx, vbIdx) {
+
       const foundIdx = this.Find(progIdx, vbIdx);
       if (foundIdx !== INT_NULL && foundIdx < this.count-1) {
 
@@ -98,7 +106,9 @@ class RenderQueue {
          if (this.count < 0) alert('ERROR - RenderQueue count is negative')
       }
    }
+
    Find(progIdx, vbIdx) {
+
       if(!this.count) return INT_NULL; // Case RenderQueue hasn't been initialized
       for (let i = 0; i < this.size; i++) {
          if (this.buffer[i].vbIdx === vbIdx &&
@@ -110,12 +120,15 @@ class RenderQueue {
    }
 
    Swap(obj1, obj2){
+
       const temp = new Queue;
       temp.Set(obj1);
       obj1.Set(obj2);
       obj2.Set(temp);
    }
+
    SetPriority(flag, progIdx, vbIdx){
+
       const idx = this.Find(progIdx, vbIdx);
       if(idx !== INT_NULL){
 
@@ -140,7 +153,9 @@ class RenderQueue {
          }
       }
    }
+
    SetPrioritySwap(progIdx1, vbIdx1, progIdx2, vbIdx2){
+
       const idx1 = this.Find(progIdx1, vbIdx1);
       const idx2 = this.Find(progIdx2, vbIdx2);
       if(idx1 !== INT_NULL && idx2 !== INT_NULL){

@@ -11,19 +11,19 @@ export class Geometry2D_Text extends Geometry2D {
    numChars;
    text;
 
-   constructor(pos, fontSize, scale, text, texId=INT_NULL) {
+   constructor(pos, fontSize, scale, text, texId = INT_NULL) {
 
-      let dim = [0,0]
+      let dim = [0, 0]
       dim = [fontSize, fontSize];
-      
-      if(texId !== INT_NULL) {
+
+      if (texId !== INT_NULL) {
 
          dim[1] *= FontGetFontDimRatio(texId);
          pos[0] += fontSize; // Case pos is set to 0, then we must add half text face width.
       }
-      
+
       super(pos, dim, scale);
-      
+
       this.text = text;
       this.numChars = text.length;
       this.type |= MESH_TYPES.TEXT_GEOMETRY2D;
@@ -49,7 +49,11 @@ export class Geometry2D_Text extends Geometry2D {
       }
    }
 
-   MoveXY(x, y, gfx) {
+   Move(x, y, gfx) {
       this.MoveXYConcecutive(x, y, gfx, this.numChars)
-  }
+   }
+
+   CalcTextWidth(){
+      return this.numChars * this.dim[0] * 2;
+   }   
 }

@@ -1,4 +1,14 @@
+--------------------------------------------------- IMIDIATE!
+. Implement set render queue priority for meshes in a vertexBuffer.
+Remove adding all children meshes to the scene.
+--------------------------------------------------- IMIDIATE!
+
 --------------------------------------------------- TODO
+
+. Implement:
+    Widget Menu.
+    Widget Drop-Down-Menu.
+    Widget check-radio-enable button.
 
 . Move touch screen input from MouseEvents.js to input folder
 

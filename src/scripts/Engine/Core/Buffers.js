@@ -48,6 +48,23 @@ export class M_Buffer {
       console.warn('Resizing M_Buffer!')
   }
 
+  RemoveByIdx(idx){
+
+      /**
+       * TODO: Remove Only works for removing last element.
+       * Else implement a GetFreeIdx() approach.
+       */
+
+      // Guard for now, Reimplement later. SEE above explanation.
+      if(idx < this.count-1){ // If it is not the last element
+         alert('Try to remove element that is not last in buffer. @ M_Buffer.RemoveByIdx().');
+         return;
+      }
+
+      this.buffer[idx] = null;
+      this.count--;
+  }
+
   #CopyBuffer(oldData){
 
       const size = oldData.length;
@@ -112,6 +129,24 @@ export class Int8Buffer {
       if(oldData) this.#CopyBuffer(oldData)
       console.warn('Resizing Int8Buffer!')
   }
+
+  
+  RemoveByIdx(idx){
+
+   /**
+    * TODO: Remove Only works for removing last element.
+    * Else implement a GetFreeIdx() approach.
+    */
+
+   // Guard for now, Reimplement later. SEE above explanation.
+   if(idx < this.count-1){ // If it is not the last element
+      alert('Try to remove element that is not last in buffer. @ M_Buffer.RemoveByIdx().');
+      return;
+   }
+
+   this.buffer[idx] = INT_NULL;
+   this.count--;
+}
 
   #CopyBuffer(oldData){
 

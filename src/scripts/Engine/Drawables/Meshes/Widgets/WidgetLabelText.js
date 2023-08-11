@@ -1,15 +1,15 @@
 "use strict";
 
-import { GlSetTex } from "../../../Graphics/Buffers/GlBufferOps.js";
-import { GlGetContext } from "../../../Graphics/Buffers/GlBuffers.js";
-import { GfxInfoMesh, GlGetProgram } from "../../../Graphics/GlProgram.js";
-import { CalculateSdfOuterFromDim } from "../../../Helpers/Helpers.js";
-import { FontGetUvCoords } from "../../Loaders/Font/Font.js";
-import { TimeIntervalsCreate } from "../../Timers/TimeIntervals.js";
-import { Geometry2D } from "../Geometry/Base/Geometry.js";
-import { Geometry2D_Text } from "../Geometry/Geometry2DText.js";
-import { FontMaterial, Material } from "../Material/Material.js";
-import { MESH_ENABLE, Mesh, Text_Mesh } from "../Mesh.js";
+import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
+import { GlGetContext } from "../../../../Graphics/Buffers/GlBuffers.js";
+import { GfxInfoMesh, GlGetProgram } from "../../../../Graphics/GlProgram.js";
+import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
+import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
+import { TimeIntervalsCreate } from "../../../Timers/TimeIntervals.js";
+import { Geometry2D } from "../../Geometry/Base/Geometry.js";
+import { Geometry2D_Text } from "../../Geometry/Geometry2DText.js";
+import { FontMaterial, Material } from "../../Material/Base/Material.js";
+import { MESH_ENABLE, Mesh, Text_Mesh } from "../Base/Mesh.js";
 
 
 
@@ -37,7 +37,7 @@ function CalculateArea(text, _dim, pos, pad) {
 /**
  * The difference with plain text is that a label draws the text inside a rect mesh
  */
-export class Widget_Label_Text extends Mesh {
+export class Widget_Label_Text_Mesh extends Mesh {
 
     type = 0;
     pad = 0;
@@ -50,7 +50,7 @@ export class Widget_Label_Text extends Mesh {
         pos[2] -= 1; // Set z-axis, render text in front of area
 
         const areaMetrics = CalculateArea(text, textgeom.dim, pos, pad)
-        const areageom = new Geometry2D(areaMetrics.pos, areaMetrics.dim, scale, text);
+        const areageom = new Geometry2D(areaMetrics.pos, areaMetrics.dim, scale);
         const areamat = new Material(BLUE_10_160_220)
 
         super(areageom, areamat);
@@ -63,7 +63,7 @@ export class Widget_Label_Text extends Mesh {
         const textMesh = new Text_Mesh(textgeom, textmat);
         this.AddChild(textMesh);
 
-        this.type |= MESH_TYPES.TEXT_LABEL;
+        this.type |= MESH_TYPES.WIDGET_TEXT_LABEL;
         this.type |= textgeom.type;
         this.type |= textmat.type;
         this.type |= areageom.type;
@@ -116,7 +116,7 @@ export class Widget_Label_Text extends Mesh {
 }
 
 
-export class Widget_Label_Dynamic_Text extends Widget_Label_Text {
+export class Widget_Label_Dynamic_Text extends Widget_Label_Text_Mesh {
 
 	/** Set the max number of characters for the dynamic text, 
 	 * by passing any text as 'maxDynamicTextChars' of length= dynamic text number of characters*/
@@ -126,7 +126,7 @@ export class Widget_Label_Dynamic_Text extends Widget_Label_Text {
 
 		// Translate the dynamic text by the width of the constant text's width
 		pos[0] += (fontSize * 2 * text.length) + fontSize + pad;
-		const dynamicText = new Widget_Label_Text(maxDynamicTextChars, pos, fontSize, scale, pad, bold);
+		const dynamicText = new Widget_Label_Text_Mesh(maxDynamicTextChars, pos, fontSize, scale, pad, bold);
 		
         this.AddChild(dynamicText)
 

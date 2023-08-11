@@ -1,11 +1,11 @@
 "use strict";
 
-import * as math from '../../../Helpers/Math/MathOperations.js'
-import { GlSetColor, GlSetColorAlpha } from "../../../Graphics/Buffers/GlBufferOps.js";
-import { GlAddMaterial, GlHandlerAddMaterialBuffer } from '../../../Graphics/Buffers/GlBuffers.js';
-import { FontGetUvCoords } from '../../Loaders/Font/Font.js';
-import { GfxInfoMesh, GlSetTexture } from '../../../Graphics/GlProgram.js';
-import { TextureLoadTexture } from '../../Loaders/Textures/Texture.js';
+import * as math from '../../../../Helpers/Math/MathOperations.js'
+import { GlSetColor, GlSetColorAlpha } from "../../../../Graphics/Buffers/GlBufferOps.js";
+import { GlAddMaterial, GlHandlerAddMaterialBuffer } from '../../../../Graphics/Buffers/GlBuffers.js';
+import { FontGetUvCoords } from '../../../Loaders/Font/Font.js';
+import { GfxInfoMesh, GlSetTexture } from '../../../../Graphics/GlProgram.js';
+import { TextureLoadTexture } from '../../../Loaders/Textures/Texture.js';
 
 let _materialId = 0;
 

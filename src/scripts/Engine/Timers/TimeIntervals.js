@@ -75,7 +75,7 @@ class Interval {
       }
       else{ // Destroy the interval timer
 
-         this.Destroy();
+         this.#Destroy();
          return false;
       }
 
@@ -91,7 +91,7 @@ class Interval {
       return false;
    }
 
-   Destroy() {
+   #Destroy() {
 
       this.t = 0;
       this.interval = INT_NULL;
@@ -152,10 +152,22 @@ class TimeIntervals {
       }
    }
 
-   DestroyByIdx() {
+   DestroyByIdx(idx) {
 
-      this.ti[idx].Destroy();
+      this.#Destroy(idx);
       this.count--;
+   }
+
+   #Destroy(idx){
+
+      this.ti[idx].t = 0;
+      this.ti[idx].interval = INT_NULL;
+      this.ti[idx].clbk = null;
+      this.ti[idx].clbkParams = null;
+      this.ti[idx].repeat = INT_NULL;
+      this.ti[idx].isActive = false;
+      this.ti[idx].idx = INT_NULL;
+      this.ti[idx].name = '';
    }
 
    Exists(idx){
@@ -202,6 +214,9 @@ export function TimeIntervalsCreate(interval, name, repeat, clbk, params) {
 }
 export function TimeIntervalsGetByIdx(idx) {
    return intervalTimers.ti[idx];
+}
+export function TimeIntervalsDestroyByIdx(idx) {
+   intervalTimers.DestroyByIdx(idx);
 }
 
 // DEBUG

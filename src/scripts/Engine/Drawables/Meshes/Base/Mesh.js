@@ -1,11 +1,11 @@
 "use strict";
-import { GlSetAttrTime } from "../../Graphics/Buffers/GlBufferOps.js";
-import { GlGetContext } from "../../Graphics/Buffers/GlBuffers.js";
-import { GlGetProgram } from "../../Graphics/GlProgram.js";
-import { Int8Buffer, M_Buffer } from "../Core/Buffers.js";
-import { FontGetFontDimRatio } from "../Loaders/Font/Font.js";
-import { TimerGetGlobalTimer } from "../Timers/Timers.js";
-import { EventListener, ListenerCreateDispatchEvent, ListenerCreateListenEvent, Listener_listen_mouse_hover, ListenersGetListener, ListenersGetListenerType } from "../Events/EventListeners.js";
+import { GlSetAttrTime, GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
+import { GlGetContext } from "../../../../Graphics/Buffers/GlBuffers.js";
+import { GfxInfoMesh, GlGetProgram } from "../../../../Graphics/GlProgram.js";
+import { Int8Buffer, M_Buffer } from "../../../Core/Buffers.js";
+import { FontGetFontDimRatio, FontGetUvCoords } from "../../../Loaders/Font/Font.js";
+import { TimerGetGlobalTimer } from "../../../Timers/Timers.js";
+import { ListenerCreateDispatchEventOnListenEvent, ListenerCreateListenEvent, ListenersGetListenerType } from "../../../Events/EventListeners.js";
 
 
 
@@ -73,6 +73,10 @@ export class Mesh {
     state; // Mesh info state. TODO: An enum of bit-masks as booleans.
     state2;
     timeIntervalsIdxBuffer; // This buffer stores indexes of the timeIntervals this mesh is using.
+    timedEvents; // A buffer to set a one time event that is triggered by another event. E.x. When we need to set the mesh priority in the renderQueue and the mesh does not have a gfx yet. 
+    hoverMargin; // A margion to be set for hovering. TODO: Abstract to a struct.
+
+    name;
 
     constructor(geom = null, mat = null, time = 0, attrParams1 = [0, 0, 0, 0], name = '???') {
 
@@ -89,6 +93,7 @@ export class Mesh {
         this.attrParams1 = [0, 0, 0, 0];
         this.sdfParams = [0, 0];
         this.gfx = null;
+
 
         if (time) this.time = time;
 
@@ -133,6 +138,12 @@ export class Mesh {
             this.listeners.buffer[i] = [INT_NULL, INT_NULL]
         }
 
+        this.eventCallbacks = new M_Buffer();
+        this.eventCallbacks.Init(4);
+
+        this.timedEvents = new M_Buffer();
+        this.timedEvents.Init(2);
+
         this.children = new M_Buffer();
         this.timeIntervalsIdxBuffer = new Int8Buffer();
         // this.children.Init(1); // Needs to be at least 1 because
@@ -147,6 +158,7 @@ export class Mesh {
         // this.state2 = new Bit_Mask(); // Unfortunately js cannot create a pointer for inegers, so we have to wrap the mask to a class;
         this.state2 = { mask: 0 }; // Unfortunately js cannot create a pointer for inegers, so we have to wrap the mask to a class;
 
+        this.hoverMargin = 0;
 
         /** Debug  properties */
         if (DEBUG.MESH) {
@@ -163,30 +175,34 @@ export class Mesh {
      * GRAPHICS
      */
     AddToGraphicsBuffer(sceneIdx) {
-        this.gfx = GlGetContext(this.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
 
-        const prog = GlGetProgram(this.gfx.prog.idx);
-        if (this.sid.unif & SID.UNIF.BUFFER_RES) {
+        let mesh = this;
+
+        mesh.gfx = GlGetContext(mesh.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
+
+        const prog = GlGetProgram(mesh.gfx.prog.idx);
+        if (mesh.sid.unif & SID.UNIF.BUFFER_RES) {
             const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
             prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
             prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
         }
 
-        // Set Texture
-        if (this.mat.texId !== INT_NULL) { // texId is init with INT_NULL that means there is no texture passed to the Material constructor.
+        // Set Texture if this is a textured mesh.
+        if (mesh.mat.texId !== INT_NULL) { // texId is init with INT_NULL that means there is no texture passed to the Material constructor.
 
-            if (this.mat.hasFontTex) {
-                this.isFontSet = true;
-                // Correct the geometry height.
-                this.geom.dim[1] *= FontGetFontDimRatio(this.mat.uvIdx);
+            // Set font parameters if this is a text mesh.
+            if (mesh.mat.hasFontTex) {
+                mesh.isFontSet = true;
+                // Correct the text face height by calculating the ratio from the current font metrics.
+                mesh.geom.dim[1] *= FontGetFontDimRatio(mesh.mat.uvIdx);
             }
         }
 
-        this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
-        this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
-        return this.gfx;
-    }
+        mesh.geom.AddToGraphicsBuffer(mesh.sid, mesh.gfx, mesh.name);
+        mesh.mat.AddToGraphicsBuffer(mesh.sid, mesh.gfx);
 
+        return mesh.gfx;
+    }
 
     /**
      * Setters-Getters
@@ -199,6 +215,9 @@ export class Mesh {
     }
     SetPos(pos) {
         this.geom.SetPos(pos, this.gfx);
+    }
+    SetPosX(x) {
+        this.geom.SetPosX(x, this.gfx);
     }
     SetDim(dim) {
         this.geom.SetDim(this.dim, this.gfx)
@@ -222,13 +241,7 @@ export class Mesh {
         // TODO: Maybe loop should be elsewhere??? For The text to be moved we need to calculate the chars offsets
         if (this.children.count) {
 
-            const meshes = this.children;
-
-            for (let i = 0; i < meshes.count; i++) {
-
-                const gfx = meshes.buffer[i].gfx;
-                meshes.buffer[i].geom.MoveXY(x, y, gfx);
-            }
+            Recursive_move_mesh(this.children, x, y)
         }
     }
 
@@ -308,14 +321,43 @@ export class Mesh {
         this.listeners.Add(idx); // Store the index of the created listener in listeners buffer
     }
 
-    CreateDispatchEvent(listenEventType, dispatcEventType, dispatchClbk) {
+    CreateDispatchEventOnListenEvent(listenEventType, dispatcEventType, dispatchClbk) {
 
         // Check if the specific listen event type allready enabled for this mesh.
         const listeneridx = this.#GetListenEventIdx(listenEventType);
         const params = this;
 
         /* TODO: Must store the dispatcher index??? */
-        const dispatcherIdx = ListenerCreateDispatchEvent(dispatcEventType, dispatchClbk, params, listeneridx[0], listeneridx[1]);
+        const dispatcherIdx = ListenerCreateDispatchEventOnListenEvent(dispatcEventType, dispatchClbk, params, listeneridx[0], listeneridx[1]);
+    }
+    /**
+     * @param {*} eventCallbacks type of function_pointer OR array [function_pointers, ...] 
+     * Store the callbacks to call  in a buffer.
+     */
+    CreateEvent(eventCallback = null, _params = null) {
+
+        if(Array.isArray(eventCallback)){
+
+            const len = eventCallback.length;
+            for(let i=0; i<len; i++){
+
+                const params = {
+                    Clbk: eventCallback[i],
+                    params: _params,
+                };
+                const eventIdx = this.eventCallbacks.Add(params);
+                return eventIdx;
+            }
+        }
+        else{
+
+            const params = {
+                Clbk: eventCallback,
+                params: _params,
+            };
+            const eventIdx = this.eventCallbacks.Add(params);
+            return eventIdx;
+        }
     }
 
     /** Helepers */
@@ -333,8 +375,55 @@ export class Mesh {
         }
     }
 
+    /** Debug */
+    SetName(){
+        this.name = GetMeshNameFromType(this.type);
+        this.name += ' id: ' + this.id;
+    }
+
 }
 
+/** Helper Recursive Functions */
+function Recursive_move_mesh(mesh, x, y){
+
+    const meshes = mesh;
+    
+    for (let i = 0; i < meshes.count; i++) {
+
+        if(meshes.buffer[i].children.count){
+            Recursive_move_mesh(meshes.buffer[i].children, x, y)
+        }
+
+        const gfx = meshes.buffer[i].gfx;
+        meshes.buffer[i].geom.Move(x, y, gfx);
+    }
+}
+export function Geometry2D_set_posx(params){
+
+    const mesh = params.mesh;
+    const x = params.x;
+    const gfx = mesh.gfx;
+
+    mesh.Move(x, 0)
+
+    // Recursive_mesh_set_pos_x(mesh);
+    // mesh.SetPosX(x, gfx)
+    // mesh.geom.SetPosX(x, gfx)
+}
+function Recursive_mesh_set_pos_x(mesh, x){
+
+    const children = mesh.children;
+    
+    for (let i = 0; i < children.count; i++) {
+
+        if(children.buffer[i].children.count){
+            Recursive_mesh_set_pos_x(children.buffer[i].children, x)
+        }
+
+        const gfx = children.buffer[i].gfx;
+        children.buffer[i].geom.SetPosX(x, gfx);
+    }
+}
 
 export class Text_Mesh extends Mesh {
 
@@ -350,6 +439,7 @@ export class Text_Mesh extends Mesh {
     }
 
     AddToGraphicsBuffer(sceneIdx) {
+        
         this.gfx = GlGetContext(this.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
 
         const prog = GlGetProgram(this.gfx.prog.idx);
@@ -365,19 +455,51 @@ export class Text_Mesh extends Mesh {
         return this.gfx;
     }
 
-    // MoveXY(x, y) {
-    //     this.geom.MoveXY(x, y, this.gfx)
-    // }
-    // Move(x, y) {
-    //     this.geom.MoveXY(x, y, this.gfx)
-    // }
+    UpdateText(_val){
 
-    // UseFont(fontIdx) {
-    //     // Prevent replacing an existing loaded font texture.
-    //     // Currently onlyy one texture per vertex buffer is allowed
-    //     // TODO: Later implement multi texture for a vertexBuffer
-    //     if (this.fontIdx === INT_NULL) this.fontIdx = fontIdx;
-    // }
+        // if (!Array.isArray(params.params.meshes)) alert('Array must be passed as param.meshes to TimeInterval instantiation.')
+
+		// const meshes = params.params.meshes;
+		// const mesheslen = meshes.length
+
+		// for (let i = 0; i < mesheslen; i++) {
+
+			const val = _val;
+
+			const text = `${val}`;
+			const geom = this.geom;
+			const gfx  = this.gfx;
+			const mat  = this.mat;
+
+			let gfxInfo = new GfxInfoMesh(gfx);
+
+			const textLen = text.length;
+			const len = geom.numChars > textLen ? geom.numChars : (textLen > geom.numChars ? geom.numChars : textLen);
+
+			// Update text faces
+			for (let j = 0; j < len; j++) {
+
+				let uvs = [0, 0, 0, 0];
+				if (text[j] !== undefined) {
+					uvs = FontGetUvCoords(mat.uvIdx, text[j]);
+				}
+				GlSetTex(gfxInfo, uvs);
+				gfxInfo.vb.start += gfxInfo.vb.count
+			}
+		// }
+    }
+
+    SetPosX(x){
+        // this.
+    }
+
+    CalcTextWidth() {
+		let width = this.geom.CalcTextWidth();
+		for (let i = 0; i < this.children.count; i++) {
+			width += this.children.buffer[i].geom.CalcTextWidth();
+		}
+		return width;
+	}
 }
 
 /**

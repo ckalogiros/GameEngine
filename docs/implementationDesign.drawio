@@ -1106,7 +1106,7 @@
                 <mxCell id="452" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fillColor=#d80073;strokeColor=#A50040;" edge="1" source="454" target="451" parent="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="453" value="CreateDispatchEvent" style="edgeLabel;html=1;align=left;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="452">
+                <mxCell id="453" value="CreateDispatchEventOnListenEvent" style="edgeLabel;html=1;align=left;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="452">
                     <mxGeometry x="-0.3636" y="1" relative="1" as="geometry">
                         <mxPoint as="offset"/>
                     </mxGeometry>

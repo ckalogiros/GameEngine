@@ -1,4 +1,4 @@
-// Widget_Dynamic_Text
+// Widget_Dynamic_Text_Mesh
 
 // How to add more meshes of type 'dynamic text'
 
@@ -8,7 +8,7 @@
 // Just grab the idx from the new dynamicText creation and pass it to the SetDynamicText().
 
 // Example Code:
-const dynamicText = new Widget_Dynamic_Text('WorstFrameAvg:', '0000', [0, 60, 0], 7, [1, 1], WHITE, GREEN, .3);
+const dynamicText = new Widget_Dynamic_Text_Mesh('WorstFrameAvg:', '0000', [0, 60, 0], 7, [1, 1], WHITE, GREEN, .3);
 scene.AddMesh(dynamicText);
 // Set a timeInterval to call an Update() method, with a CallBack function that will update the dynamic text 
 dynamicText.SetDynamicText(200, SetTextCallBack, 'Test-DynamicText1')
@@ -29,7 +29,7 @@ dynamicText.SetDynamicText(2000, SetTextCallBack2, 'Test-DynamicText2', idx)
 // Just dont pass any idx to the  SetDynamicText() OR pass INT_NULL as the idx param
 
 // Example Code:
-const dynamicText = new Widget_Dynamic_Text('WorstFrameAvg:', '0000', [0, 60, 0], 7, [1, 1], WHITE, GREEN, .3);
+const dynamicText = new Widget_Dynamic_Text_Mesh('WorstFrameAvg:', '0000', [0, 60, 0], 7, [1, 1], WHITE, GREEN, .3);
 scene.AddMesh(dynamicText);
 dynamicText.SetDynamicText(200, SetTextCallBack, 'Test-DynamicText1')
 const idx = dynamicText.CreateDynamicText('0000', 7, WHITE, GREEN, .3);

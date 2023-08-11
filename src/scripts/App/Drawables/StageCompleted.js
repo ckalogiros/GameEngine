@@ -4,7 +4,7 @@ import { AnimationsGet } from "../../Engine/Animations/Animations.js";
 // import { GlowCreate, GlowGetGlow } from "../../Engine/Drawables/Fx/Glow.js";
 import { Geometry2D } from "../../Engine/Drawables/Geometry/Base/Geometry.js";
 // import { Rect2D } from "../../Engine/Drawables/Geometry/Rect2D.js";
-import { Widget_Label_Text } from "../../Engine/Drawables/Widgets/WidgetLabelText.js";
+import { Widget_Label_Text_Mesh } from "../../Engine/Drawables/Meshes/Widgets/WidgetLabelText.js";
 import { TimerGetGlobalTimer } from "../../Engine/Timers/Timers.js";
 import { GlRotate2D } from "../../Graphics/Buffers/GlBufferOps.js";
 import { DimColor } from "../../Helpers/Helpers.js";
@@ -139,7 +139,7 @@ export function StageCompletedCreate() {
 export function StageCompletedCreateTotalScore(){
     const score = 'Total Score: XXXXXXXXX';
     const style = { pad: 10, roundCorner: 6, border: 0, feather: 30 };
-    const showTotalScore = new Widget_Label_Text(SCENE.finishStage, 'showTotalScore', score, WHITE,
+    const showTotalScore = new Widget_Label_Text_Mesh(SCENE.finishStage, 'showTotalScore', score, WHITE,
         TRANSPARENT, [0, 0], [0, 150, 30], style, 8, true, 0.4, ALIGN.CENTER_HOR | ALIGN.TOP);
     return showTotalScore;
 }

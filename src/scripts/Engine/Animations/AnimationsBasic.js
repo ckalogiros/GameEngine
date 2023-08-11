@@ -33,7 +33,7 @@ function Animations_run_scale_up_start(mesh) {
       return true;
    }
    // else if (!mesh.state.inHover && mesh.geom.dim[0] > maxScale) {
-   else if (!(mesh.state2.mask & MESH_STATE.IN_HOVER ) && mesh.geom.dim[0] > maxScale) {
+   else if (!(mesh.state2.mask & MESH_STATE.IN_HOVER) && mesh.geom.dim[0] > maxScale) {
       return false;
    }
 
@@ -46,32 +46,42 @@ function Animations_run_scale_up_start(mesh) {
 
    if (mesh.children.count) {
 
-      /** Scale button's text meshes */
-      let accumTextWidth = 0;
-      const textMesh = mesh.children.buffer[0];
-      const text = textMesh.mat.text;
-      const textLen = text.length;
-
-      const faceHalfWidth = textMesh.geom.dim[0];
-      textMesh.geom.dim[0] *= scaleFactor; // Update button's text dimentions x
-      textMesh.geom.dim[1] *= scaleFactor; // Update button's text dimentions y
-
-      const extraWidth = (mesh.pad * 2) + faceHalfWidth;
-      const advance = textMesh.geom.dim[0] * 2;
-
-      _gfx.Copy(textMesh.gfx);
-      for (let i = 0; i < textLen; i++) {
-
-         posx = (mesh.geom.pos[0] - mesh.geom.dim[0]) + extraWidth + accumTextWidth;
-         GlSetWposX(_gfx, posx);
-         accumTextWidth += advance;
-         GlSetDim(_gfx, textMesh.geom.dim)
-
-         const sdfOuter = CalculateSdfOuterFromDim(textMesh.geom.dim[0]);
-         GlSetAttrSdfParamsOuter(_gfx, sdfOuter);
-
-         _gfx.vb.start += _gfx.vb.count; // Update gfx info to point to the next text's face
+      if(mesh.children.buffer[0].type & MESH_TYPES.TEXT_MESH){
+         
+         Helper_scale_text(mesh, scaleFactor, 0);
       }
+      else{
+         
+         Helper_scale_rect(mesh, scaleFactor);
+      }
+
+      // /** Scale button's text meshes */
+      // let accumTextWidth = 0;
+      // const textMesh = mesh.children.buffer[0];
+      // const text = textMesh.mat.text;
+      // const textLen = text.length;
+
+      // const faceHalfWidth = textMesh.geom.dim[0];
+      // textMesh.geom.dim[0] *= scaleFactor; // Update button's text dimentions x
+      // textMesh.geom.dim[1] *= scaleFactor; // Update button's text dimentions y
+
+      // const extraWidth = (mesh.pad * 2) + faceHalfWidth;
+      // const advance = textMesh.geom.dim[0] * 2;
+
+      // _gfx.Copy(textMesh.gfx);
+      // for (let i = 0; i < textLen; i++) {
+
+      //    posx = (mesh.geom.pos[0] - mesh.geom.dim[0]) + extraWidth + accumTextWidth;
+      //    GlSetWposX(_gfx, posx);
+      //    accumTextWidth += advance;
+      //    GlSetDim(_gfx, textMesh.geom.dim)
+
+      //    const sdfOuter = CalculateSdfOuterFromDim(textMesh.geom.dim[0]);
+      //    GlSetAttrSdfParamsOuter(_gfx, sdfOuter);
+
+      //    _gfx.vb.start += _gfx.vb.count; // Update gfx info to point to the next text's face
+      // }
+
    }
 
    return true;
@@ -102,33 +112,41 @@ function Animations_run_scale_down_start(mesh) {
    mesh.UpdateDim();
 
    if (mesh.children.count) {
-
-      /** Scale button's text meshes */
-      let accumTextWidth = 0;
-      const textMesh = mesh.children.buffer[0];
-      const text = textMesh.mat.text;
-      const textLen = text.length;
-
-      textMesh.geom.dim[0] *= scaleFactor; // Update button's text dimentions x
-      textMesh.geom.dim[1] *= scaleFactor; // Update button's text dimentions y
-
-      const faceHalfWidth = textMesh.geom.dim[0];
-      const extraWidth = (mesh.pad * 2) + faceHalfWidth;
-      const advance = textMesh.geom.dim[0] * 2;
-
-      _gfx.Copy(textMesh.gfx);
-      for (let i = 0; i < textLen; i++) {
-
-         posx = (mesh.geom.pos[0] - mesh.geom.dim[0]) + extraWidth + accumTextWidth;
-         GlSetWposX(_gfx, posx);
-         accumTextWidth += advance;
-         GlSetDim(_gfx, textMesh.geom.dim)
-
-         const sdfOuter = CalculateSdfOuterFromDim(textMesh.geom.dim[0]);
-         GlSetAttrSdfParamsOuter(_gfx, sdfOuter);
-
-         _gfx.vb.start += _gfx.vb.count; // Update gfx info to point to the next text's face
+      
+      if(mesh.children.buffer[0].type & MESH_TYPES.TEXT_MESH){
+         
+         Helper_scale_text(mesh, scaleFactor, 1);
       }
+      else{
+         
+         Helper_scale_rect(mesh, scaleFactor);
+      }
+      // /** Scale button's text meshes */                                          
+      // let accumTextWidth = 0;                                                 
+      // const textMesh = mesh.children.buffer[0];                                     
+      // const text = textMesh.mat.text;                                      
+      // const textLen = text.length;                                      
+
+      // textMesh.geom.dim[0] *= scaleFactor; // Update button's text dimentionsx                                                                        
+      // textMesh.geom.dim[1] *= scaleFactor; // Update button's text dimentions y                                                                       
+
+      // const faceHalfWidth = textMesh.geom.dim[0];                                                                       
+      // const extraWidth = (mesh.pad * 2) + faceHalfWidth;                                                                      
+      // const advance = textMesh.geom.dim[0] * 2;                                                                      
+
+      // _gfx.Copy(textMesh.gfx);                                                                        
+      // for (let i = 0; i < textLen; i++) {                                                                      
+
+      //    posx = (mesh.geom.pos[0] - mesh.geom.dim[0]) + extraWidth + accumTextWidth;
+      //    GlSetWposX(_gfx, posx);                                                                      
+      //    accumTextWidth += advance;                                                                      
+      //    GlSetDim(_gfx, textMesh.geom.dim)                                                                        
+
+      //    const sdfOuter = CalculateSdfOuterFromDim(textMesh.geom.dim[0]);                                                                       
+      //    GlSetAttrSdfParamsOuter(_gfx, sdfOuter);                                                                                                           
+
+      //    _gfx.vb.start += _gfx.vb.count; // Update gfx info to point to the next text's face 
+      // }
 
    }
 
@@ -145,36 +163,114 @@ function Animations_run_scale_down_stop(mesh) {
 
    if (mesh.children.count) {
 
-      /** Set button's text meshes to default scale */
-      let accumTextWidth = 0;
-      let posx = mesh.geom.pos[0];
-      const textMesh = mesh.children.buffer[0];
-      const text = textMesh.mat.text;
-      const textLen = text.length;
-      const faceHalfWidth = textMesh.geom.defDim[0];
-      const extraWidth = (mesh.pad * 2) + faceHalfWidth;
-      const advance = textMesh.geom.defDim[0] * 2;
+      const scaleFactor = 1; // Must pass param scaleFactor
 
-      textMesh.geom.dim[0] = textMesh.geom.defDim[0]; // Update button's text dimentions x
-      textMesh.geom.dim[1] = textMesh.geom.defDim[1]; // Update button's text dimentions y
+      // console.log('MESH TYPE: ', GetMeshType(mesh.children.buffer[0].type))
+      if(mesh.children.buffer[0].type & MESH_TYPES.TEXT_MESH){
 
-      _gfx.Copy(textMesh.gfx);
-      for (let i = 0; i < textLen; i++) {
-
-         posx = (mesh.geom.pos[0] - mesh.geom.dim[0]) + extraWidth + accumTextWidth;
-         GlSetWposX(_gfx, posx);
-         accumTextWidth += advance;
-         GlSetDim(_gfx, textMesh.geom.dim)
-
-         const sdfOuter = CalculateSdfOuterFromDim(textMesh.geom.dim[0]);
-         GlSetAttrSdfParamsOuter(_gfx, sdfOuter);
-
-         _gfx.vb.start += _gfx.vb.count; // Update gfx info to point to the next text's face
+         Helper_scale_text(mesh, scaleFactor, 2);
       }
+      else{
+         
+         Helper_scale_rect(mesh, scaleFactor);
+      }
+
+      // /** Set button's text meshes to default scale */
+      // let accumTextWidth = 0;
+      // let posx = mesh.geom.pos[0];
+      // const textMesh = mesh.children.buffer[0];
+      // const text = textMesh.mat.text;
+      // const textLen = text.length;
+      // const faceHalfWidth = textMesh.geom.defDim[0];
+      // const extraWidth = (mesh.pad * 2) + faceHalfWidth;
+      // const advance = textMesh.geom.defDim[0] * 2;
+
+      // textMesh.geom.dim[0] = textMesh.geom.defDim[0]; // Update button's text dimentions x
+      // textMesh.geom.dim[1] = textMesh.geom.defDim[1]; // Update button's text dimentions y
+
+      // _gfx.Copy(textMesh.gfx);
+      // for (let i = 0; i < textLen; i++) {
+
+      //    posx = (mesh.geom.pos[0] - mesh.geom.dim[0]) + extraWidth + accumTextWidth;
+      //    GlSetWposX(_gfx, posx);
+      //    accumTextWidth += advance;
+      //    GlSetDim(_gfx, textMesh.geom.dim)
+
+      //    const sdfOuter = CalculateSdfOuterFromDim(textMesh.geom.dim[0]);
+      //    GlSetAttrSdfParamsOuter(_gfx, sdfOuter);
+
+      //    _gfx.vb.start += _gfx.vb.count; // Update gfx info to point to the next text's face
+      // }
    }
 
    mesh.state.inScale = false;
    mesh.state2.mask &= ~MESH_STATE.IN_SCALE;
+}
+/**
+ * Helper Functions for scale animation
+ * 
+ * TODO: Abtruct better in another file???
+ */
+
+function Helper_scale_rect(_mesh, scaleFactor) {
+
+   const children = _mesh.children;
+   const count = children.count;
+
+   for (let i = 0; i < count; i++) {
+      
+      const mesh = children.buffer[i];
+
+      if(mesh.children.count){ // Recursive
+         Helper_scale_rect(mesh, scaleFactor);
+      }
+
+      _gfx.Copy(mesh.gfx);
+
+      mesh.geom.dim[0] *= scaleFactor; 
+      mesh.geom.dim[1] *= scaleFactor; 
+
+      GlSetDim(mesh.gfx, mesh.geom.dim)
+   }
+}
+function Helper_scale_text(mesh, scaleFactor, flag) {
+
+   /** Scale button's text meshes */
+   let accumTextWidth = 0;
+   let posx = mesh.geom.pos[0];
+   const textMesh = mesh.children.buffer[0];
+   const text = textMesh.mat.text;
+   const textLen = text.length;
+   let faceHalfWidth = textMesh.geom.dim[0];
+
+   if(flag !== 2){ // HACK: For scale down stop mesh gets the default dimentions.
+      textMesh.geom.dim[0] *= scaleFactor; // Update button's text dimentions x
+      textMesh.geom.dim[1] *= scaleFactor; // Update button's text dimentions y
+   }
+   else{
+      textMesh.geom.dim[0] = textMesh.geom.defDim[0]; // Update button's text dimentions x
+      textMesh.geom.dim[1] = textMesh.geom.defDim[1]; // Update button's text dimentions y
+   }
+   
+   if(flag === 1) // HACK: For scale down faceHalfWidth must be set after scaling down.
+      faceHalfWidth = textMesh.geom.dim[0];
+
+   const extraWidth = (mesh.pad * 2) + faceHalfWidth;
+   const advance = textMesh.geom.dim[0] * 2;
+
+   _gfx.Copy(textMesh.gfx);
+   for (let i = 0; i < textLen; i++) {
+
+      posx = (mesh.geom.pos[0] - mesh.geom.dim[0]) + extraWidth + accumTextWidth;
+      GlSetWposX(_gfx, posx);
+      accumTextWidth += advance;
+      GlSetDim(_gfx, textMesh.geom.dim)
+
+      const sdfOuter = CalculateSdfOuterFromDim(textMesh.geom.dim[0]);
+      GlSetAttrSdfParamsOuter(_gfx, sdfOuter);
+
+      _gfx.vb.start += _gfx.vb.count; // Update gfx info to point to the next text's face
+   }
 }
 
 

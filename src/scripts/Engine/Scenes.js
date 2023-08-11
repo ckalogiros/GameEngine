@@ -4,7 +4,7 @@ import { AnimationsGet } from './Animations/Animations.js';
 import { MouseGetPosDif } from './Controls/Input/Mouse.js';
 import { Int8Buffer, M_Buffer } from './Core/Buffers.js';
 import { ListenersGetListenersBuffer } from './Events/EventListeners.js';
-import { HandleEvents } from './Events/Events.js';
+import { HandleEvents, RegisterEvent } from './Events/Events.js';
 import { FpsGet } from './Timers/Time.js';
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -43,7 +43,7 @@ export class Scene {
 
             const mesh = this.children.buffer[i];
 
-            if(mesh.state2.mask & MESH_STATE.IN_MOVE){
+            if (mesh.state2.mask & MESH_STATE.IN_MOVE) {
                 const dif = MouseGetPosDif();
                 mesh.Move(dif.x, -dif.y)
             }
@@ -82,16 +82,18 @@ export class Scene {
 
         this.StoreMesh(mesh);
 
+        /**
+         * Run any timed events after a meshe is added to the graphics pipeline.
+         */
+        if (mesh.timedEvents.count)
+            RegisterEvent('mesh-created', mesh)
+
     }
 
     StoreMesh(mesh) {
 
         const idx = this.children.Add(mesh);
         mesh.idx = idx;
-
-        // if (mesh.type & MESH_TYPES.BUTTON) {
-        //     this.buttonBuffer.Add(idx)
-        // }
     }
 
     // Store meshe's graphics info (program index, vertex buffer index), 
@@ -105,7 +107,29 @@ export class Scene {
         if (Array.isArray(gfxInfo)) {
 
             const gfxlen = gfxInfo.length;
+// let toBreak = false;
             for (let numGfx = 0; numGfx < gfxlen; numGfx++) {
+// if (gfxInfo[numGfx].prog === undefined) {
+//     for (let j = 0; j < gfxInfo[numGfx].length; j++) {
+//         // Check if the glVertexBuffer index of the current Mesh is already stored
+//         let found = false;
+//         const len = this.gfxBuffer.length;
+
+//         for (let i = 0; i < len; i++) {
+//             if (this.gfxBuffer[i].progIdx === gfxInfo[numGfx][j].prog.idx && this.gfxBuffer[i].vbIdx === gfxInfo[numGfx][j].vb.idx) {
+//                 found = true;
+//                 break;
+//             }
+//         }
+//         // Store it, if not stored.
+//         if (!found) {
+//             this.gfxBuffer.push({ progIdx: gfxInfo[numGfx][j].prog.idx, vbIdx: gfxInfo[numGfx][j].vb.idx, active: false });
+//         }
+//         toBreak = true;
+//     }
+//     // console.log()
+// }
+// if (toBreak) break;
                 // Check if the glVertexBuffer index of the current Mesh is already stored
                 let found = false;
                 const len = this.gfxBuffer.length;
@@ -151,14 +175,39 @@ export class Scene {
         this.cameras.push(camera);
     }
 
-    Temp_FindMeshById(id){
+    Temp_FindMeshById(id) {
         for (let i = 0; i < this.children.count; i++) {
-            if (this.children.buffer[i].id === id) 
+            if (this.children.buffer[i].id === id)
                 return this.children.buffer[i];
             return null;
         }
     }
 
+    /**
+     * Debug
+     */
+    Print() {
+        ScenesPrintAllMeshes(this.children)
+    }
+
 };
 
-function SceneGetButtons(sceneIdx) { return }
+
+
+/**
+ * Debug
+ */
+export function ScenesPrintAllMeshes(_children) {
+
+    for (let i = 0; i < _children.count; i++) {
+
+        const children = _children.buffer[i];
+        console.log(children.id, GetMeshType(children.type))
+        // console.log(children.id)
+
+        if (children.children.count) {
+            ScenesPrintAllMeshes(children.children)
+        }
+
+    }
+}

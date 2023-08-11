@@ -121,7 +121,7 @@ const mouse = {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Getters-Setters 
  */
-export function MouseGetMousePos() {
+export function MouseGetPos() {
    return mouse.pos.GetPos();
 }
 export function MouseGetPosDif() {
@@ -201,16 +201,18 @@ export function OnMouseWheel(e){
 }
 
 export function OnMouseDown(e) {
-
+   
    e.stopPropagation();
    e.preventDefault(); 
-
+   
    mouse.click.down.Set(e.which-1);
-
+   
    const params = {
       mouseButton: e.which-1
    };
+   
    RegisterEvent('mouse-click-down', params)
+   // console.log(`MOUSE pos: ${e.x} ${e.y}`)
 }
 
 export function OnMouseUp(e) {

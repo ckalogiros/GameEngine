@@ -1,7 +1,7 @@
 "use strict";
 
 import { Collision_PointRect } from "../Collisions.js";
-import { MouseGetMousePos } from "../Controls/Input/Mouse.js";
+import { MouseGetPos } from "../Controls/Input/Mouse.js";
 import { RegisterEvent } from "./Events.js";
 
 
@@ -68,7 +68,6 @@ class Listener {
       this.listenClbk = clbk;
       this.params = params;
       this.dispatchEventBuffer = new Dispatchers(MAX_DISPATCH_EVENTS_BUFFER_SIZE);
-
    }
 
    CreateListenEvent(clbk, params) {
@@ -97,28 +96,24 @@ export class EventListener {
       this.buffer = [];
 
       for (let i = 0; i < this.size; i++)
-         this.buffer[i] = new Listener();
+         this.buffer[i] = null;
    }
 
    CreateListenEvent(type, params) {
 
-      const idx = this.count++;
+      // if(this.count >= this.size) this.#Realloc(); 
+      
+      const idx = this.#GetNextFree();
+      this.buffer[idx] = new Listener()
+      
+      this.buffer[idx].CreateListenEvent(Listener_listen_mouse_hover, params);
+      this.has = true;
+      this.type = type;
 
-      /** Set the correct function to run in the main App loop to listen for events. */
-      switch (type) {
-
-         case LISTEN_EVENT_TYPES.HOVER: {
-
-            this.buffer[idx].CreateListenEvent(Listener_listen_mouse_hover, params);
-            this.has = true;
-            this.type = type;
-
-            return idx;
-         }
-      }
+      return idx;
    }
 
-   CreateDispatchEvent(type, clbk, params, listenerIdx) {
+   CreateDispatchEventOnListenEvent(type, clbk, params, listenerIdx) {
 
       if (!this.buffer || this.count >= this.size) {
          // TODO: Implement Realloc
@@ -130,8 +125,11 @@ export class EventListener {
       return this.buffer[listenerIdx].dispatchEventBuffer.CreateEvent(type, clbk, params);
    }
 
-
-
+   /**
+    * TODO: Currently the params are the whole mesh as a pointer.
+    * Make it better by passing only the necessary parameters for the listen callback function.
+    * See ##ListenCallback
+    */
    Listen() {
       if (this.buffer[0].listenClbk)
          return this.buffer[0].listenClbk(this.buffer[0].params);
@@ -142,27 +140,66 @@ export class EventListener {
          return this.buffer[0].dispatchClbk(this.buffer[0].dispatchClbkParams);
    }
 
-   Realloc() {
+   RemoveElement(idx){
 
-      this.size *= 2;
-      const oldData = this.data;
-      this.data = new Array(this.size);
-      this.CopyBuffer(oldData)
-      console.warn('Resizing M_Buffer!')
+      if(this.buffer[idx]){
+
+         this.buffer[idx] = null;
+
+         /**
+          * In this implementation of buffer, we run 
+          * the loops until count and not until size. 
+          * For this to work, we can only decrement count
+          * if all next elements are not used.
+          * What we are doing in the for loop below is 
+          * to have the count at the last used element of the buffer.
+          */
+         this.count = this.size-1;
+         for( let i=this.size-1; i>0; i--){
+
+            if(this.buffer[i]) break;
+            else count--;
+         }
+      }
    }
 
-   #CopyBuffer(oldData) {
+   #Realloc() {
 
-      const size = oldData.length;
-      for (let i = 0; i < size; i++) {
-         this.data[i] = oldData[i];
+      this.size *= 2;
+      const oldData = this.buffer;
+      this.buffer = new Array(this.size);
+      this.#CopyBuffer(oldData)
+      console.warn('Resizing Events Listener buffer')
+   }
+
+   #GetNextFree() {
+
+      for (let i = 0; i < this.size; i++) {
+         if (!this.buffer[i]) {
+            if(i > this.count) this.count++;
+            return i;
+         }
+      }
+
+      // Else buffer is full.
+      this.#Realloc();
+      this.count++;
+      return this.count;
+      // alert('No space in Events Listener buffer. @EventListeners.js');
+   }
+   #CopyBuffer(oldBuffer) {
+
+      const oldsize = oldBuffer.length;
+      for (let i = 0; i < this.size; i++) {
+         if(i<oldsize) this.buffer[i] = oldBuffer[i];
+         else this.buffer[i] = null;
       }
    }
 
 }
 
 
-const MAX_LISTENERS_SIZE = 16;
+
 
 class EventListeners {
 
@@ -205,9 +242,9 @@ class EventListeners {
 
    }
 
-   CreateDispatchEvent(type, clbk, params, listenEvevtIdx, listenerIdx) {
+   CreateDispatchEventOnListenEvent(type, clbk, params, listenEvevtIdx, listenerIdx) {
 
-      return this.buffer[listenEvevtIdx].CreateDispatchEvent(type, clbk, params, listenerIdx);
+      return this.buffer[listenEvevtIdx].CreateDispatchEventOnListenEvent(type, clbk, params, listenerIdx);
    }
 
    GetNextFree() {
@@ -226,16 +263,15 @@ class EventListeners {
          for (let i1 = 0; i1 < listenersBuffer.count; i1++) { // Listeners buffer. All listeners for a specific mesh.
 
             const listeners = listenersBuffer.buffer[i1];
+            // ##ListenCallback. Pass only necessary parameters.
             if (listeners.listenClbk(listeners.params)) {
 
                if (STATE.mesh.hoveredId !== INT_NULL){
                   
                   /** Skip unnecessary code execution, if the same mesh is hovered */
-                  if (STATE.mesh.hoveredId === listeners.params.id)
-                     return;
+                  if (STATE.mesh.hoveredId === listeners.params.id) return;
                   // If we hovered directly after another hover, release hover from the other mesh
-                  else 
-                     STATE.mesh.hovered.state2.mask &= ~MESH_STATE.IN_HOVER;
+                  else STATE.mesh.hovered.state2.mask &= ~MESH_STATE.IN_HOVER;
                }
 
                if (!(listeners.params.state2.mask & MESH_STATE.IN_HOVER)) {
@@ -243,6 +279,7 @@ class EventListeners {
                   listeners.params.state2.mask |= MESH_STATE.IN_HOVER;
                   STATE.mesh.hoveredId = listeners.params.id;
                   STATE.mesh.hovered = listeners.params;
+                  RegisterEvent('hover', { mesh: listeners.params });
 
 
                   /* Dispatch buffer. All dispatch functions for the specific listener. 
@@ -250,22 +287,25 @@ class EventListeners {
                   * 
                   * TODO: Remove the dispatcher for loop
                   */
-                  for (let j = 0; j < listeners.dispatchEventBuffer.count; j++) {
+                  // for (let j = 0; j < listeners.dispatchEventBuffer.count; j++) {
 
+                  //    const dispatcher = listeners.dispatchEventBuffer.buffer[j];
+                  //    dispatcher.clbk(dispatcher.params);
+                  // }
+                  
+                  break; // Helps with the switchin between double hovered meshes.
+                  /** TODO: Fix hovering a mesh must put it on top
+                   * otherwise the first mesh in the listeners buffer will always get hovered, 
+                   * even if another mesh is hovered (when meshes overlap).
+                   */
 
-                     const dispatcher = listeners.dispatchEventBuffer.buffer[j];
-                     // Has the mesh. TODO: have this been set in the previous if statement
-                     RegisterEvent('hover', { mesh: dispatcher.params });
-                     dispatcher.clbk(dispatcher.params);
-                  }
-                     break;
                }
             }
             else if (listeners.params.state2.mask & MESH_STATE.IN_HOVER) {
 
                listeners.params.state2.mask &= ~MESH_STATE.IN_HOVER; // Set false
                STATE.mesh.hoveredId = INT_NULL;
-               console.log('Set hoveredId to null:', STATE.mesh.hoveredId)
+               console.debug('Set hoveredId to null:', STATE.mesh.hoveredId)
             }
          }
       }
@@ -284,11 +324,17 @@ class EventListeners {
       }
       return INT_NULL;
    }
+
+   
+   /** Debug */
+   PrintAll(){
+      console.log('Listeners Buffer:\n', this.buffer)
+   }
+
 }
 
-
-const _listeners = new EventListeners(MAX_LISTENERS_SIZE);
-console.debug('Listeners Buffer:', _listeners)
+const MAX_LISTENERS_TYPES_SIZE = 1;
+const _listeners = new EventListeners(MAX_LISTENERS_TYPES_SIZE);
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -308,8 +354,8 @@ export function ListenersGetListenerType(idx) {
  */
 export function ListenerCreateListenEvent(type, params) { return _listeners.CreateListenEvent(type, params); }
 
-export function ListenerCreateDispatchEvent(listenEventType, listenEventClbk, listenEventParams, listenEvevtIdx, listenerIdx) {
-   return _listeners.CreateDispatchEvent(listenEventType, listenEventClbk, listenEventParams, listenEvevtIdx, listenerIdx);
+export function ListenerCreateDispatchEventOnListenEvent(listenEventType, listenEventClbk, listenEventParams, listenEvevtIdx, listenerIdx) {
+   return _listeners.CreateDispatchEventOnListenEvent(listenEventType, listenEventClbk, listenEventParams, listenEvevtIdx, listenerIdx);
 }
 
 export function ListenersGetListenEventIdx(listenEvent) { return _listeners.GetListenEventIdx(listenEvent); }
@@ -320,129 +366,18 @@ export function ListenersGetListenEventIdx(listenEvent) { return _listeners.GetL
 
 export function Listener_listen_mouse_hover(params) {
 
-   const mousePos = MouseGetMousePos();
+   const mousePos = MouseGetPos();
    const point = [mousePos.x, mousePos.y,];
-   // const rect = [
-   //    [params.pos[0] - params.dim[0], params.pos[0] + params.dim[0]], // Left  Right 
-   //    [params.pos[1] - params.dim[1], params.pos[1] + params.dim[1]], // Top  Bottom
-   // ];
+
+   const verticalMargin = params.hoverMargin;
+   
    const rect = [
       [params.geom.pos[0] - params.geom.dim[0], params.geom.pos[0] + params.geom.dim[0]], // Left  Right 
-      [params.geom.pos[1] - params.geom.dim[1], params.geom.pos[1] + params.geom.dim[1]], // Top  Bottom
+      [(params.geom.pos[1] - params.geom.dim[1]) - verticalMargin, (params.geom.pos[1] + params.geom.dim[1]) + verticalMargin], // Top  Bottom
    ];
+   // console.log('verticalMargin:', rect[1])
 
    return Collision_PointRect(point, rect);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/** Old */
-// export class EventListener {
-
-//    has;
-//    type;
-//    buffer;
-//    count;
-//    size;
-
-//    constructor() {
-
-//       this.size = MAX_LISTEN_EVENTS_BUFFER_SIZE;
-//       this.count = 0;
-//       this.type = INT_NULL;
-//       this.has = false;
-//       this.buffer = [];
-
-//       for (let i = 0; i < this.size; i++)
-//          this.buffer[i] = new Listener(null, {}, null);
-//    }
-
-//    CreateListenEvent(type) {
-
-//       const idx = this.count++;
-
-//       /** Set the correct function to run in the main App loop to listen for events. */
-//       switch (type) {
-
-//          case LISTEN_EVENT_TYPES.HOVER: {
-
-//             this.buffer[idx].listenClbk = Listener_listen_mouse_hover;
-//             this.has = true;
-//          }
-//       }
-//    }
-
-//    CreateDispatchEvent(type, clbk, params) {
-
-//       if (!this.buffer || this.count >= this.size) {
-//          // TODO: Implement Realloc
-//          console.error('EventListener\'s buffer is uninitialized Or buffer overflow');
-//          return;
-//       }
-
-//       // Returns the index of the dispatchEventBuffer
-//       return this.buffer[idx].dispatchEventBuffer.AddEvent(type, clbk, params);
-//    }
-
-//    // Create(listenClbk, params){
-//    //    const idx = this.count++;
-//    //    this.buffer[idx].listenClbk = listenClbk;
-//    //    this.buffer[idx].params = params;
-//    //    this.has = true;
-//    // }
-
-//    // CreateDispatchEvent(evttype dispatchClbk, dispatchClbkParams) {
-
-//    //    if (!this.buffer || this.count >= this.size) {
-//    //       // TODO: Implement Realloc
-//    //       console.error('EventListener\'s buffer is uninitialized Or buffer overflow');
-//    //       return;
-//    //    }
-//    //    this.buffer[idx].dispatchClbk = dispatchClbk;
-//    //    this.buffer[idx].dispatchClbkParams = dispatchClbkParams;
-//    // }
-
-//    // Add(listenClbk, params, dispatchClbk, dispatchClbkParams) {
-
-//    //    if (!this.buffer || this.count >= this.size) {
-//    //       // TODO: Implement Realloc
-//    //       console.error('EventListener\'s buffer is uninitialized Or buffer overflow');
-//    //       return;
-//    //    }
-//    //    const idx = this.count++;
-//    //    this.buffer[idx].listenClbk = listenClbk;
-//    //    this.buffer[idx].params = params;
-//    //    this.buffer[idx].dispatchClbk = dispatchClbk;
-//    //    this.buffer[idx].dispatchClbkParams = dispatchClbkParams;
-//    //    this.has = true;
-//    //    return idx;
-//    // }
-
-//    Listen() {
-//       if (this.buffer[0].listenClbk)
-//          return this.buffer[0].listenClbk(this.buffer[0].params);
-//    }
-
-//    Dispatch() {
-//       if (this.buffer[0].dispatchClbk)
-//          return this.buffer[0].dispatchClbk(this.buffer[0].dispatchClbkParams);
-//    }
-
-//    Realloc() {
-
-//       this.size *= 2;
-//       const oldData = this.data;
-//       this.data = new Array(this.size);
-//       this.CopyBuffer(oldData)
-//       console.warn('Resizing M_Buffer!')
-//    }
-
-//    #CopyBuffer(oldData) {
-
-//       const size = oldData.length;
-//       for (let i = 0; i < size; i++) {
-//          this.data[i] = oldData[i];
-//       }
-//    }
-
-// }
