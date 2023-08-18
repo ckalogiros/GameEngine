@@ -1,7 +1,7 @@
 "use strict";
 
 import { TimersCreateTimer } from "../../Timers/Timers.js";
-import { GlMove, GlSetAttrTime, GlSetColor, GlSetWposXY } from "../../../Graphics/Buffers/GlBufferOps.js";
+import { GlMoveXY, GlSetAttrTime, GlSetColor, GlSetWposXY } from "../../../Graphics/Buffers/GlBufferOps.js";
 import { MeshBuffer } from "../MeshBuffer_OLD.js";
 import { CopyArr2, CopyArr4 } from "../../../Helpers/Math/MathOperations.js";
 
@@ -28,7 +28,7 @@ class Explosion {
         GlSetAttrTime(this.gfxInfo, this.timer.t);
     }
     Move(){
-        GlMove(this.gfxInfo, [0, this.translation.yAdvance]);
+        GlMoveXY(this.gfxInfo, [0, this.translation.yAdvance]);
     }
     Clear(){
         this.isActive = false;

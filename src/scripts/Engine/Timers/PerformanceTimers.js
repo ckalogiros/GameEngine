@@ -17,13 +17,17 @@ class PerformanceTimer {
    delta;
    cnt;
 
-   constructor() {
+   /** Debug */
+   name;
+
+   constructor(name) {
 
       this.cur = 0;
       this.prev = 0;
       this.accum = 0;
       this.delta = 0;
       this.cnt = 0;
+      this.name = name;
    }
    
    Start() { this.prev = performance.now(); }
@@ -37,15 +41,29 @@ class PerformanceTimer {
    }
 
    GetFps(){ return Math.floor( 1 / (this.accum * MILISEC / this.cnt)); }
-   GetMilisec(){ return (this.accum / this.cnt); }
-   GetNanosec(){ return Math.floor(this.accum / NANOSEC / this.cnt); } // * MILISEC cause the accum is allready in milisecond
+   GetMilisec(){ 
+      const ret = (this.accum / this.cnt); 
+      return ret.toFixed(4);
+   }
+   GetNanosec(){ return (this.accum / NANOSEC / this.cnt).toFixed(1); } // * MILISEC cause the accum is allready in milisecond
 
+   Reset(){
+      this.cur = 0;
+      this.prev = 0;
+      this.accum = 0;
+      this.delta = 0;
+      this.cnt = 0;
+   }
+
+   Print(){
+      console.log(`Perf timer ${this.name}: fps:${this.GetFps()}, ms:${this.GetMilisec()}, ns:${this.GetNanosec()}, TotalTime:${this.accum.toFixed(1)}`)
+   }
 }
 
 class PerformanceTimers extends M_Buffer {
 
    constructor() { super(); }
-   Create() { return this.Add(new PerformanceTimer); }
+   Create(name) { return this.Add(new PerformanceTimer(name)); }
 }
 
 const _timeMeasures = new PerformanceTimers();
@@ -55,9 +73,9 @@ _timeMeasures.Init(32);
  * Global Functions
  */
 
-export function PerformanceTimerCreate() {
+export function PerformanceTimerCreate(name = '') {
 
-   const idx = _timeMeasures.Create();
+   const idx = _timeMeasures.Create(name);
    return _timeMeasures.buffer[idx];
 }
 
@@ -68,17 +86,22 @@ export function PerformanceTimerCreate() {
  * so we need some global declaration to access them. 
  * Also its better for callbacks to be functions rather than class methods.
  */
-export const _tm1 = PerformanceTimerCreate();
-export function _Tm1GetFps(){ return _tm1.GetFps(); }
-export function _Tm1GetMilisec(){ return _tm1.GetMilisec(); }
-export function _Tm1GetNanosec(){ return _tm1.GetNanosec(); }
+export const __pt1 = PerformanceTimerCreate('_pt1');
+export function _Tm1GetFps(){ return __pt1.GetFps(); }
+export function _Tm1GetMilisec(){ return __pt1.GetMilisec(); }
+export function _Tm1GetNanosec(){ return __pt1.GetNanosec(); }
 
-export const _tm2 = PerformanceTimerCreate();
-export function _Tm2GetFps(){ return _tm2.GetFps(); }
-export function _Tm2GetMilisec(){ return _tm2.GetMilisec(); }
-export function _Tm2GetNanosec(){ return _tm2.GetNanosec(); }
+export const __pt2 = PerformanceTimerCreate('_pt2');
+export function _Tm2GetFps(){ return __pt2.GetFps(); }
+export function _Tm2GetMilisec(){ return __pt2.GetMilisec(); }
+export function _Tm2GetNanosec(){ return __pt2.GetNanosec(); }
 
-export const _tm3 = PerformanceTimerCreate();
-export function _Tm3GetFps(){ return _tm3.GetFps(); }
-export function _Tm3GetMilisec(){ return _tm3.GetMilisec(); }
-export function _Tm3GetNanosec(){ return _tm3.GetNanosec(); }
+export const _pt3 = PerformanceTimerCreate();
+export function _Tm3GetFps(){ return _pt3.GetFps('_pt3'); }
+export function _Tm3GetMilisec(){ return _pt3.GetMilisec(); }
+export function _Tm3GetNanosec(){ return _pt3.GetNanosec(); }
+
+export const _pt4 = PerformanceTimerCreate();
+export function _Tm4GetFps(){ return _pt4.GetFps('_pt4'); }
+export function _Tm4GetMilisec(){ return _pt4.GetMilisec(); }
+export function _Tm4GetNanosec(){ return _pt4.GetNanosec(); }

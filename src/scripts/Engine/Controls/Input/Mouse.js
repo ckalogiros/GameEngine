@@ -23,10 +23,10 @@ const mouse = {
       xdiff: 0, ydiff: 0, // Mouse pos difference form previous pos (in pixels)
 
       GetPos(){
-         return {
-            x:this.x,
-            y:this.y,
-         };
+         return [
+            this.x,
+            this.y,
+         ];
       },
       GetDif(){
          return {
@@ -120,6 +120,11 @@ const mouse = {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Getters-Setters 
+ */
+
+/**
+ * 
+ * @returns {Obj:{x,y}} 
  */
 export function MouseGetPos() {
    return mouse.pos.GetPos();

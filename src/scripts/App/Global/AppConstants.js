@@ -99,9 +99,11 @@ const STAGE = {
     },
 };
 
-const FONT = {
-    SIZE_RATIO: 1,
-};
+// // This is the default font for the app. 
+// const FONT = {
+//     SIZE_RATIO: 1,
+//     TEXT_ID: FONTS.SDF_CONSOLAS_LARGE
+// };
 
 /**
  * This is used to create structured indexes for all meshes of the application,

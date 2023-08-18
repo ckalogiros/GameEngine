@@ -2,11 +2,13 @@
 import { OnMouseMove_Android, OnTouchStart, OnTouchEnd, OnTouchCancel, OnTouchMove } from "./MouseEvents.js";
 import { OnMouseMove, OnMouseDown, OnMouseUp, OnMouseOut, OnMouseWheel } from "../Controls/Input/Mouse.js";
 import { OnKeyDown, OnKeyUp } from "../Controls/Input/Keys.js";
-import { Slider_create_dispatch_event } from "../Drawables/Meshes/Widgets/WidgetSlider.js";
+import { Widget_popup_handler_onclick_event } from "../Drawables/Meshes/Widgets/WidgetPopup.js";
+
 
 
 const events = []; // Aplication's events array
 let evtsIdx = 0; // Index for events array
+
 
 /**
  * 
@@ -19,131 +21,226 @@ export function RegisterEvent(eventType, params) {
         type: eventType,
         params: params,
     };
-
-    console.debug('STATE.mesh.hoveredId:', STATE.mesh.hoveredId)
-    if (eventType === 'mouse-click-down' && STATE.mesh.hoveredId !== INT_NULL)
-        events[evtsIdx++] = {
-            type: 'mouse-click-down-hover',
-            params: {
-                mouseButton: params.mouseButton,
-                meshHoverId: STATE.mesh.hoveredId,
-            },
-        };
+    if(params.mesh)
+    // console.log(evtsIdx, eventType, params.mesh.name)
+    console.log(evtsIdx, eventType, params.mesh.id)
+    // console.log(evtsIdx, params.mesh.name)
 }
 
 export function HandleEvents() {
 
-    for (let i = evtsIdx - 1; i >= 0; i--) {
+    let i = 0;
+    while (i < evtsIdx) {
 
-        if (events[i].type === 'hover') {
+        // evtsIdx--;
+        const e = events[i];
 
-            events[i].type = '';
-            events[i].params = {};
-            evtsIdx--;
+        if (e.type === 'hover') {
+            // console.debug('hover: ', e.params.mesh.id, ' | prev hover:', STATE.mesh.hoveredId);
+
+            // // Unhover any previous hovered
+            //     STATE.mesh.hovered.SetDefaultZindex();
+
+            if (e.params.mesh.StateCheck(MESH_STATE.HAS_HOVER_COLOR)){
+                e.params.mesh.SetColor(GREY6);
+                e.params.mesh.StateEnable(MESH_STATE.IN_HOVER_COLOR);
+            }
+            /**
+             * TODO: Set the hovered mesh to be darwn on top(last in vertexBuffer or in render queue)
+             * 0. Check to see if overlap (2)
+             * 1. If the hovered mesh is in different vertexBuffer than the previous hovered mesh,
+             *      change the order of the render queue, if it is drawn before. 
+             * 2. Else if the hovered mesh is in the same vertexBuffer than the previous hovered mesh, 
+             *      change the order inside the vertexBuuffer, if is drawn before. 
+             */
+
+            // e.params.mesh.BringToFront(10);
+            // if(e.params.mesh.StateCheck(MESH_STATE.IS_FAKE_HOVER)) return;
+            STATE.mesh.SetHovered(e.params.mesh);
+            e.params.mesh.StateEnable(MESH_STATE.IN_HOVER); // Set mesh state hovered to true
         }
 
-        if (events[i].type === 'mouse-click-down') {
+        else if (e.type === 'unhover') {
+            // console.debug('unhover: ', e.params.mesh.id)
 
-            if (events[i].params.mouseButton === 2) {
-                // console.log('right click')
+            if (e.params.mesh.StateCheck(MESH_STATE.IN_HOVER_COLOR)){
+                e.params.mesh.SetDefaultColor();
+                e.params.mesh.StateDisable(MESH_STATE.IN_HOVER_COLOR);
+            }
+            
+            e.params.mesh.StateDisable(MESH_STATE.IN_HOVER); // Set false
+            STATE.mesh.SetHovered(null);
+        }
 
-                STATE.mesh.selected = STATE.mesh.hovered;
+        else if (e.type === 'mouse-click-down') {
+            // console.debug('mouse-click-down')
+
+            STATE.mouse.activeClickedButtonId = e.params.mouseButton;
+
+            // Handle the popup menu for left mouse click
+            Widget_popup_handler_onclick_event(STATE.mesh.hovered, e.params.mouseButton);
+            // TODO: Should be STATE.mesh.hovered.OnClick() for every mesh clicked.
+
+            if (STATE.mesh.hoveredId !== INT_NULL) {
+                console.debug('clicked: ', STATE.mesh.hoveredId)
+
+                RegisterEvent('mouse-click-down-hover', STATE.mesh.hoveredId)
             }
 
-            events[i].type = '';
-            events[i].params = {};
-            evtsIdx--;
         }
 
-        if (events[i].type === 'mouse-click-up') {
+        else if (e.type === 'mouse-click-up') {
 
-            // const mesh = STATE.mesh.hovered;
-            const mesh = STATE.mesh.grabed;
+            STATE.mouse.activeClickedButtonId = INT_NULL;
+            const mesh = STATE.mesh.hovered;
 
-            if (mesh && mesh.state2.mask & MESH_STATE.IN_MOVE) {
-                mesh.state2.mask &= ~MESH_STATE.IN_MOVE;
+            if (STATE.mesh.hovered) {
+                if (mesh.StateCheck(MESH_STATE.IN_MOVE)) {
+                    mesh.StateDisable(MESH_STATE.IN_MOVE);
+                }
+            }
+            if (STATE.mesh.grabed) {
+                if (STATE.mesh.grabed.StateCheck(MESH_STATE.IN_GRAB)) {
+                    console.log('mouse-click-up mesh Ungrabed: ', STATE.mesh.grabed.name)
+                    STATE.mesh.grabed.StateDisable(MESH_STATE.IN_GRAB);
+                    STATE.mesh.SetGrabed(null)
+                }
             }
 
-            events[i].type = '';
-            events[i].params = {};
-            evtsIdx--;
+            e.type += ' HANDLED'; e.params = {}; evtsIdx--;
+
         }
 
-        if (events[i].type === 'mouse-click-down-hover') {
-
-            events[i].type = '';
-            events[i].params = {};
-            evtsIdx--;
+        else if (e.type === 'mouse-click-down-hover') {
+            // console.debug('mouse-click-down-hover')
 
             const mesh = STATE.mesh.hovered;
 
-            // const e = mesh.state2.mask & MESH_STATE.IN_MOVE
-            // console.log(e)
-            console.log('meshId', mesh.id)
+            console.debug('meshId', mesh.id)
 
-            if (mesh.state2.mask & MESH_STATE.IS_MOVABLE && ((mesh.state2.mask & MESH_STATE.IN_MOVE) === 0)) {
-                mesh.state2.mask |= MESH_STATE.IN_MOVE;
-                STATE.mesh.grabed = mesh;
-                // console.log('grabed:', mesh.id)
+            if (mesh.StateCheck(MESH_STATE.IS_MOVABLE) && mesh.StateCheck(MESH_STATE.IN_MOVE) === 0) {
+                mesh.StateEnable(MESH_STATE.IN_MOVE);
                 RegisterEvent('Move', mesh)
             }
-
-            if (mesh.type & MESH_TYPES.WIDGET_SLIDER_BAR && mesh.timeIntervalsIdxBuffer.count <= 0) {
-
-                Slider_create_dispatch_event(mesh);
+            
+            if (mesh.StateCheck(MESH_STATE.IS_GRABABLE)) {
+                
+                console.log('mouse-click-down-hover mesh grabed: ', mesh.name)
+                STATE.mesh.grabed = mesh;
+                STATE.mesh.SetGrabed(mesh);
+                mesh.StateEnable(MESH_STATE.IN_GRAB);
             }
 
+            // if (mesh.eventCallbacks.count) {
 
-        }
-
-        if (events[i].type === 'Move') {
-            // console.log('Move');
-
-            const mesh = events[i].params;
-
-            // Check if mesh allready has a timeInterval for move, so we don't create infinite intervals 
-            /**
-             * TODO: What if the mesh needs intervals from another event? 
-             * We need to implement a way of checking for specific intervals 
-             * in the 'timeIntervalsIdxBuffer'. by comparing the indexes??? 
-            */
-            // if (mesh.type & MESH_TYPES.WIDGET_SLIDER_BAR && mesh.timeIntervalsIdxBuffer.count <= 0) {
-
-            //     Slider_create_dispatch_event(mesh);
+            //     const target = mesh.eventCallbacks.buffer[0].target;
+            //     const targetClbks = mesh.eventCallbacks.buffer[0].targetClbks;
+            //     mesh.eventCallbacks.buffer[0].Clbk(target, targetClbks);
+            //     /**
+            //      * One implementation is to have an Enum of fixed indexes: 'ON_CLICK = 0'
+            //      * so we call: 'mesh.eventCallbacks.buffer[ON_CLICK].Clbk(target, targetClbks);'
+            //      * That way the on click callback is only one, but it calls different functions 
+            //      * for different meshes.
+            //      * Ofcourse we could have ON_CLICK_LEFT_MOUSE_BTN etc.
+            //      */
             // }
 
+            if (mesh.eventCallbacks.count) {
+
+                const params = mesh.eventCallbacks.buffer[0];
+                mesh.eventCallbacks.buffer[0].params.Clbk(params);
+                /**
+                 * One implementation is to have an Enum of fixed indexes: 'ON_CLICK = 0'
+                 * so we call: 'mesh.eventCallbacks.buffer[ON_CLICK].Clbk(target, targetClbks);'
+                 * That way the on click callback is only one, but it calls different functions 
+                 * for different meshes.
+                 * Ofcourse we could have ON_CLICK_LEFT_MOUSE_BTN etc.
+                 */
+            }
+
+            // e.type += ' HANDLED'; e.params = {}; evtsIdx--;
+
         }
 
-        /**
-         * Timed Events.
-         * One time events triggered by another event.
-         * 
-         * Example: If we need to set the priority of a mesh. 
-         * The mesh must be added to the grapfics pipeline first, in
-         * order to obtain the gfx attribute, that is needed for the RenderQueue.SetPriority().
-         * So a timed event is created to do that.
-        */
-        if (events[i].type === 'mesh-created') {
+        else if (e.type === 'Move') {
+            console.debug('move', e.params)
 
-            const mesh = events[i].params;
+        }
+
+        else if (e.type === 'mesh-created') {
+            /**
+             * Timed Events.
+             * One time events triggered by another event.
+             * 
+             * Example: If we need to set the priority of a mesh. 
+             * The mesh must be added to the grapfics pipeline first, in
+             * order to obtain the gfx attribute, that is needed for the RenderQueue.SetPriority().
+             * So a timed event is created to do that.
+            */
+
+            const mesh = e.params;
             const count = mesh.timedEvents.count;
             if (count)
                 for (let i = 0; i < count; i++)
-                    // console.log(mesh.timedEvents.buffer[i])
                     mesh.timedEvents.buffer[i].Clbk(mesh.timedEvents.buffer[i].params)
 
-            events[i].type = '';
-            events[i].params = {};
-            evtsIdx--;
+            e.type += ' HANDLED'; e.params = {}; evtsIdx--;
         }
+
+        i++;
+    } // End of events for loop
+    evtsIdx = 0;
+}
+
+export function Events_handle_immidiate(e){
+
+    if (e.type === 'hover') {
+        console.debug('hover: ', e.params.mesh.id);
+        // console.debug('hover: ', e.params.mesh.id, ' | prev hover:', STATE.mesh.hoveredId);
+
+        // // Unhover any previous hovered
+        //     STATE.mesh.hovered.SetDefaultZindex();
+
+        if (e.params.mesh.StateCheck(MESH_STATE.HAS_HOVER_COLOR)){
+            e.params.mesh.SetColor(BLUE_10_120_220);
+            e.params.mesh.StateEnable(MESH_STATE.IN_HOVER_COLOR);
+        }
+        /**
+         * TODO: Set the hovered mesh to be darwn on top(last in vertexBuffer or in render queue)
+         * 0. Check to see if overlap (2)
+         * 1. If the hovered mesh is in different vertexBuffer than the previous hovered mesh,
+         *      change the order of the render queue, if it is drawn before. 
+         * 2. Else if the hovered mesh is in the same vertexBuffer than the previous hovered mesh, 
+         *      change the order inside the vertexBuuffer, if is drawn before. 
+         */
+
+        // e.params.mesh.BringToFront(10);
+        // if(e.params.mesh.StateCheck(MESH_STATE.IS_FAKE_HOVER)) return;
+        STATE.mesh.SetHovered(e.params.mesh);
+        e.params.mesh.StateEnable(MESH_STATE.IN_HOVER); // Set mesh state hovered to true
     }
-    // console.log(events)
+
+    else if (e.type === 'unhover') {
+        // console.debug('unhover: ', e.params.mesh.id)
+
+        if (e.params.mesh.StateCheck(MESH_STATE.IN_HOVER_COLOR)){
+            e.params.mesh.SetDefaultColor();
+            e.params.mesh.StateDisable(MESH_STATE.IN_HOVER_COLOR);
+        }
+
+        // if(e.params.mesh.type & MESH_TYPES_DBG.WIDGET_POP_UP){
+        //     Widget_popup_handler_deactivate_secondary_popups(e.params.mesh);
+        // }
+        
+        e.params.mesh.StateDisable(MESH_STATE.IN_HOVER); // Set false
+        STATE.mesh.SetHovered(null);
+    }
+
 }
 
 
-
 function OnWindowResize() {
-    console.log('WINDOW RESIZE')
+    console.debug('WINDOW RESIZE')
 }
 
 export function EventsAddListeners() {

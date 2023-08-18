@@ -22,9 +22,10 @@ export class Scene {
     gfxBuffer;      // Quick access to graphics buffers (indexes only)
     // buttonBuffer;   // Quick access to all the buttons (indexes only to the scene's children buffer)
 
-    constructor(elem = {}) {
+    constructor(idx) {
 
-        this.sceneIdx++;
+        // this.sceneIdx++;
+        this.sceneIdx = idx;
         this.cameras = [];
         this.children = new M_Buffer();
         this.children.Init(32);
@@ -38,23 +39,25 @@ export class Scene {
         const animations = AnimationsGet();
         const listeners = ListenersGetListenersBuffer();
 
+        // Move mesh if it's movable   
+        if (STATE.mesh.grabed && STATE.mesh.grabed.StateCheck(MESH_STATE.IS_MOVABLE)) {
+            const mesh = STATE.mesh.grabed;
+            const dif = MouseGetPosDif();
+            mesh.Move(dif.x, -dif.y)
+        }
+
         // Update attribute values for every mesh
         for (let i = 0; i < this.children.count; i++) {
 
             const mesh = this.children.buffer[i];
 
-            if (mesh.state2.mask & MESH_STATE.IN_MOVE) {
-                const dif = MouseGetPosDif();
-                mesh.Move(dif.x, -dif.y)
-            }
-            
-            // if (mesh.eventCallbacks.count) {
-            //     if(mesh.OnUpdate)
-            //     mesh.OnUpdate()
+            // if (mesh.state.mask & MESH_STATE.IN_MOVE) {
+            //     const dif = MouseGetPosDif();
+            //     mesh.Move(dif.x, -dif.y)
             // }
 
             // Rotate
-            if (this.children.buffer[i].type & MESH_TYPES.CUBE_GEOMETRY) {
+            if (this.children.buffer[i].type & MESH_TYPES_DBG.CUBE_GEOMETRY) {
 
                 const fpsTimer = FpsGet();
                 GlRotateXY3D(this.children.buffer[i], fpsTimer.cnt * .02)
@@ -104,37 +107,12 @@ export class Scene {
     // Store meshe's graphics info (program index, vertex buffer index), 
     // as an easy and light-weight way of dealing with all Graphics buffers of the scene.
     StoreGfxInfo(gfxInfo) {
-        if (gfxInfo === undefined) {
-            console.error('GfxInfo is undefined. @ Scenes.js');
-            return;
-        }
 
         if (Array.isArray(gfxInfo)) {
 
             const gfxlen = gfxInfo.length;
-// let toBreak = false;
             for (let numGfx = 0; numGfx < gfxlen; numGfx++) {
-// if (gfxInfo[numGfx].prog === undefined) {
-//     for (let j = 0; j < gfxInfo[numGfx].length; j++) {
-//         // Check if the glVertexBuffer index of the current Mesh is already stored
-//         let found = false;
-//         const len = this.gfxBuffer.length;
 
-//         for (let i = 0; i < len; i++) {
-//             if (this.gfxBuffer[i].progIdx === gfxInfo[numGfx][j].prog.idx && this.gfxBuffer[i].vbIdx === gfxInfo[numGfx][j].vb.idx) {
-//                 found = true;
-//                 break;
-//             }
-//         }
-//         // Store it, if not stored.
-//         if (!found) {
-//             this.gfxBuffer.push({ progIdx: gfxInfo[numGfx][j].prog.idx, vbIdx: gfxInfo[numGfx][j].vb.idx, active: false });
-//         }
-//         toBreak = true;
-//     }
-//     // console.log()
-// }
-// if (toBreak) break;
                 // Check if the glVertexBuffer index of the current Mesh is already stored
                 let found = false;
                 const len = this.gfxBuffer.length;
@@ -152,6 +130,8 @@ export class Scene {
 
                 this.cameras[0].StoreProgIdx(gfxInfo[0].prog.idx);
             }
+
+            return;
         }
         else {
 
@@ -171,7 +151,11 @@ export class Scene {
             }
 
             this.cameras[0].StoreProgIdx(gfxInfo.prog.idx);
+
+            return;
         }
+
+        console.error('GfxInfo is undefined. @ Scenes.js');
 
     }
 
@@ -188,30 +172,92 @@ export class Scene {
         }
     }
 
+    GetChildren(){
+        return this.children.buffer;
+    }
+
     /**
      * Debug
      */
     Print() {
-        ScenesPrintAllMeshes(this.children)
+        ScenesPrintSceneMeshes(this.children, 0)
     }
 
 };
+
+
+class Scenes extends M_Buffer {
+
+    constructor() {
+
+        super();
+    }
+
+    Create() {
+
+        const scene = new Scene(this.count);
+        this.Add(scene);
+        return scene;
+    }
+
+    GetChildren(idx){
+        return this.buffer[idx].GetChildren();
+    }
+}
+
+const _scenes = new Scenes();
+_scenes.Init(1);
+
+export function Scenes_get_scene_by_idx(idx) {
+
+    return _scenes.buffer[idx];
+}
+export function Scenes_create_scene() {
+
+    return _scenes.Create();
+}
+export function Scenes_get_children(idx) {
+
+    return _scenes.GetChildren(idx);
+}
 
 
 
 /**
  * Debug
  */
-export function ScenesPrintAllMeshes(_children) {
+export function ScenesPrintSceneMeshes(_children, count) {
 
     for (let i = 0; i < _children.count; i++) {
 
         const children = _children.buffer[i];
-        console.log(children.id, GetMeshType(children.type))
-        // console.log(children.id)
+        let r = ' ';
+        for (let j = 0; j < count; j++) r += '->';
+            console.log(r, children.id, GetMeshHighOrderNameFromType(children.type))
 
         if (children.children.count) {
-            ScenesPrintAllMeshes(children.children)
+            count++
+            ScenesPrintSceneMeshes(children.children, count);
+            count--;
+        }
+
+    }
+}
+
+export function ScenesPrintAllMeshes(_children, count) {
+
+    for (let i = 0; i < _children.count; i++) {
+
+        const child = _children.buffer[i];
+        let r = ' ';
+        
+        for (let j = 0; j < count; j++) r += '->';
+            console.log(r, child.id, GetMeshHighOrderNameFromType(child.type))
+
+        if (child.children.count) {
+            count++
+            ScenesPrintAllMeshes(child.children, count);
+            count--;
         }
 
     }

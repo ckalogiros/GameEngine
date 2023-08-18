@@ -55,6 +55,51 @@ const STATE = {
 		selectedId: INT_NULL,
 		selectedIdx: INT_NULL,
 
+		SetHovered(mesh){
+			this.hovered = mesh;
+			if(!mesh){
+				this.hoveredId = INT_NULL;
+				this.hoveredIdx = INT_NULL;
+			}else{
+				this.hoveredId = mesh.id;
+				this.hoveredIdx = mesh.idx;
+			}
+		},
+		SetGrabed(mesh){
+			this.grabed = mesh;
+			if(!mesh){
+				this.grabedId = INT_NULL;
+				this.grabedIdx = INT_NULL;
+			}else{
+				this.grabedId = mesh.id;
+				this.grabedIdx = mesh.idx;
+			}
+		},
+		SetClickedNull(){
+			this.clicked = mesh;
+			if(!mesh){
+				this.clickedId = INT_NULL;
+				this.clickedIdx = INT_NULL;
+			}else{
+				this.clickedId = mesh.id;
+				this.clickedIdx = mesh.idx;
+			}
+		},
+		SetSelectedNull(mesh){
+			this.selected = mesh;
+			if(!mesh){
+				this.selectedId = INT_NULL;
+				this.selectedIdx = INT_NULL;
+			}else{
+				this.selectedId = mesh.id;
+				this.selectedIdx = mesh.idx;
+			}
+		},
+	},
+
+	mouse: {
+
+		activeClickedButtonId: INT_NULL,
 	},
 };
 
@@ -63,30 +108,61 @@ const STATE = {
 let _cnt = 0x1;
 const MESH_STATE = {
 
+	IN_FOCUS: _cnt <<= 1,
 	IN_HOVER: _cnt <<= 1,
 	IN_SCALE: _cnt <<= 1,
 	IN_MOVE: _cnt <<= 1,
+	IN_GRAB: _cnt <<= 1,
+	IN_HOVER_COLOR: _cnt <<= 1,
 	
 	IS_MOVABLE: _cnt <<= 1,
-
+	IS_GRABABLE: _cnt <<= 1,
+	IS_FAKE_HOVER: _cnt <<= 1,
+	
 	CLICKED_MOUSE_L: _cnt <<= 1,
 	CLICKED_MOUSE_M: _cnt <<= 1,
 	CLICKED_MOUSE_R: _cnt <<= 1,
+	
+	HAS_HOVER: _cnt <<= 1,
+	HAS_POPUP: _cnt <<= 1,
+	HAS_HOVER_COLOR: _cnt <<= 1,
 
 
 	Print(mask){
 
 		let str = '';
+		if(mask & this.IN_FOCUS) str+='IN_FOCUS,' 
 		if(mask & this.IN_HOVER) str+='IN_HOVER,' 
 		if(mask & this.IN_SCALE) str+='IN_SCALE,' 
 		if(mask & this.IN_MOVE) str+='IN_MOVE,' 
+		if(mask & this.IN_GRAB) str+='IN_GRAB,' 
+		if(mask & this.IN_HOVER_COLOR) str+='IN_HOVER_COLOR,' 
+
 		if(mask & this.IS_MOVABLE) str+='IS_MOVABLE,' 
+		if(mask & this.IS_GRABABLE) str+='IS_GRABABLE,' 
+
 		if(mask & this.CLICKED_MOUSE_L) str+='CLICKED_MOUSE_L,' 
 		if(mask & this.CLICKED_MOUSE_M) str+='CLICKED_MOUSE_M,' 
 		if(mask & this.CLICKED_MOUSE_R) str+='CLICKED_MOUSE_R,' 
+
+		if(mask & this.HAS_HOVER) str+='HAS_HOVER,' 
+		if(mask & this.HAS_POPUP) str+='HAS_POPUP,' 
+		if(mask & this.HAS_HOVER_COLOR) str+='HAS_HOVER_COLOR,' 
 		// console.info(str)
 	}
 };
+
+
+const MOUSE = {
+
+	BTN_ID:{
+
+		LEFT: 	0,
+		MIDDLE: 	1,
+		RIGHT: 	2,
+	},
+};
+
 
 // _cnt = 0;
 // const MESH_EVENT_CLBKS_INDEX_TABLE = {
@@ -252,84 +328,120 @@ const COMIC_FONT_METRICS_PATH = '../../../../consolas_sdf/metrics/consolas_sdf.t
 // Textures names and paths
 const TEXTURE_TEST = 'msdf';
 
+
+
+
+
+const MENU_FONT_IDX = TEXTURES.SDF_CONSOLAS_LARGE;
+const MENU_FONT_SIZE = 5;
+
+
+
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Meshes  
  */
 
 /**
- * MESH_TYPES: A bitmask to check if a mesh is of a specific type
+ * MESH_TYPES_DBG: A bitmask to check if a mesh is of a specific type
  */
 _cnt = 0x1;
-const MESH_TYPES = {
-	GEOMETRY2D: _cnt <<= 1,
-	TEXT_GEOMETRY2D: _cnt <<= 1,
-	GEOMETRY3D: _cnt <<= 1,
-	CUBE_GEOMETRY: _cnt <<= 1,
+const MESH_TYPES_DBG = {
+	GEOMETRY2D: 		_cnt <<= 1,
+	TEXT_GEOMETRY2D:	_cnt <<= 1,
+	GEOMETRY3D: 		_cnt <<= 1,
+	CUBE_GEOMETRY: 	_cnt <<= 1,
 
-	MATERIAL: _cnt <<= 1,
-	FONT_MATERIAL: _cnt <<= 1,
+	MATERIAL:		_cnt <<= 1,
+	FONT_MATERIAL:	_cnt <<= 1,
 
-	MESH: _cnt <<= 1,
-	TEXT_MESH: _cnt <<= 1,
+	MESH: 			_cnt <<= 1,
+	TEXT_MESH: 		_cnt <<= 1,
 
-	WIDGET_TEXT_LABEL: _cnt <<= 1,
-	WIDGET_BUTTON: _cnt <<= 1,
-	WIDGET_TEXT: _cnt <<= 1,
-	WIDGET_TEXT_DYNAMIC: _cnt <<= 1,
-	WIDGET_SLIDER: _cnt <<= 1,
-	WIDGET_SLIDER_BAR: _cnt <<= 1,
-	WIDGET_SLIDER_HANDLE: _cnt <<= 1,
+	WIDGET_TEXT_LABEL: 		_cnt <<= 1,
+	WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS: 		_cnt <<= 1,
+	WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS: 		_cnt <<= 1,
+	WIDGET_BUTTON: 			_cnt <<= 1,
+	WIDGET_TEXT: 				_cnt <<= 1,
+	WIDGET_TEXT_DYNAMIC: 	_cnt <<= 1,
+	WIDGET_SLIDER: 			_cnt <<= 1,
+	WIDGET_SLIDER_BAR: 		_cnt <<= 1,
+	WIDGET_SLIDER_HANDLE: 	_cnt <<= 1,
+	WIDGET_POP_UP: 			_cnt <<= 1,
 };
 
-function GetMeshType(type) {
-
-	let meshType = []
-
-	if (type & MESH_TYPES.GEOMETRY2D) { meshType.push('Geometry2D'); }
-	if (type & MESH_TYPES.TEXT_GEOMETRY2D) { meshType.push('Geometry2D_Text'); }
-	if (type & MESH_TYPES.GEOMETRY3D) { meshType.push('Geometry3D'); }
-	if (type & MESH_TYPES.CUBE_GEOMETRY) { meshType.push('CubeGeometry'); }
-
-	if (type & MESH_TYPES.MATERIAL) { meshType.push('Material'); }
-	if (type & MESH_TYPES.FONT_MATERIAL) { meshType.push('FontMaterial'); }
-	
-	if (type & MESH_TYPES.MESH) { meshType.push('Mesh'); }
-	if (type & MESH_TYPES.TEXT_MESH) { meshType.push('Text_Mesh'); }
-	
-	if (type & MESH_TYPES.WIDGET_TEXT_LABEL) { meshType.push('Widget_Label_Text_Mesh'); }
-	if (type & MESH_TYPES.WIDGET_BUTTON) { meshType.push('Widget_Button_Mesh'); }
-	if (type & MESH_TYPES.WIDGET_TEXT) { meshType.push('Widget_Text_Mesh'); }
-	if (type & MESH_TYPES.WIDGET_TEXT_DYNAMIC) { meshType.push('Widget_Dynamic_Text_Mesh'); }
-	if (type & MESH_TYPES.WIDGET_SLIDER) { meshType.push('WIDGET_SLIDER'); }
-	if (type & MESH_TYPES.WIDGET_SLIDER_BAR) { meshType.push('WIDGET_SLIDER_BAR'); }
-	if (type & MESH_TYPES.WIDGET_SLIDER_HANDLE) { meshType.push('WIDGET_SLIDER_HANDLE'); }
-
-	return meshType;
-}
+// console.log(MESH_TYPES_DBG.GEOMETRY2D);
+// console.log(MESH_TYPES_DBG.TEXT_GEOMETRY2D);
+// console.log(MESH_TYPES_DBG.GEOMETRY3D);
+// console.log(MESH_TYPES_DBG.CUBE_GEOMETRY);
+// console.log(MESH_TYPES_DBG.MATERIAL);
+// console.log(MESH_TYPES_DBG.FONT_MATERIAL);
+// console.log(MESH_TYPES_DBG.MESH);
+// console.log(MESH_TYPES_DBG.TEXT_MESH);
+// console.log(MESH_TYPES_DBG.WIDGET_TEXT_LABEL)
+// console.log(MESH_TYPES_DBG.WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS);
+// console.log(MESH_TYPES_DBG.WIDGET_BUTTON);
+// console.log(MESH_TYPES_DBG.WIDGET_TEXT);
+// console.log(MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC);
+console.log(MESH_TYPES_DBG.WIDGET_SLIDER);
+// console.log(MESH_TYPES_DBG.WIDGET_SLIDER_BAR);
+// console.log(MESH_TYPES_DBG.WIDGET_SLIDER_HANDLE);
+// console.log(MESH_TYPES_DBG.WIDGET_POP_UP);
 
 function GetMeshNameFromType(type) {
 
+	let meshType = []
+
+	if (type & MESH_TYPES_DBG.GEOMETRY2D) { meshType.push('Geometry2D'); }
+	if (type & MESH_TYPES_DBG.TEXT_GEOMETRY2D) { meshType.push('Geometry2D_Text'); }
+	if (type & MESH_TYPES_DBG.GEOMETRY3D) { meshType.push('Geometry3D'); }
+	if (type & MESH_TYPES_DBG.CUBE_GEOMETRY) { meshType.push('CubeGeometry'); }
+
+	if (type & MESH_TYPES_DBG.MATERIAL) { meshType.push('Material'); }
+	if (type & MESH_TYPES_DBG.FONT_MATERIAL) { meshType.push('FontMaterial'); }
+	
+	if (type & MESH_TYPES_DBG.MESH) { meshType.push('Mesh'); }
+	if (type & MESH_TYPES_DBG.TEXT_MESH) { meshType.push('Text_Mesh'); }
+	
+	if (type & MESH_TYPES_DBG.WIDGET_TEXT_LABEL) { meshType.push('Widget_Label_Text_Mesh'); }
+	if (type & MESH_TYPES_DBG.Widget_Label_Text_Mesh_Menu_Options) { meshType = 'Widget_Label_Text_Mesh_Menu_Options'; }
+	if (type & MESH_TYPES_DBG.WIDGET_BUTTON) { meshType.push('Widget_Button_Mesh'); }
+	if (type & MESH_TYPES_DBG.WIDGET_TEXT) { meshType.push('Widget_Text_Mesh'); }
+	if (type & MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC) { meshType.push('Widget_Dynamic_Text_Mesh'); }
+	if (type & MESH_TYPES_DBG.WIDGET_SLIDER) { meshType.push('WIDGET_SLIDER'); }
+	if (type & MESH_TYPES_DBG.WIDGET_SLIDER_BAR) { meshType.push('WIDGET_SLIDER_BAR'); }
+	if (type & MESH_TYPES_DBG.WIDGET_SLIDER_HANDLE) { meshType.push('WIDGET_SLIDER_HANDLE'); }
+	if (type & MESH_TYPES_DBG.WIDGET_POP_UP) { meshType.push('WIDGET_POP_UP'); }
+	
+	return meshType;
+}
+
+function GetMeshHighOrderNameFromType(type) {
+	
 	let meshType = ''
-
-	if (type & MESH_TYPES.GEOMETRY2D) { meshType = 'Geometry2D'; }
-	if (type & MESH_TYPES.TEXT_GEOMETRY2D) { meshType = 'Geometry2D_Text'; }
-	if (type & MESH_TYPES.GEOMETRY3D) { meshType = 'Geometry3D'; }
-	if (type & MESH_TYPES.CUBE_GEOMETRY) { meshType = 'CubeGeometry'; }
-
-	if (type & MESH_TYPES.MATERIAL) { meshType = 'Material'; }
-	if (type & MESH_TYPES.FONT_MATERIAL) { meshType = 'FontMaterial'; }
 	
-	if (type & MESH_TYPES.MESH) { meshType = 'Mesh'; }
-	if (type & MESH_TYPES.TEXT_MESH) { meshType = 'Text_Mesh'; }
+	if (type & MESH_TYPES_DBG.GEOMETRY2D) { meshType = 'GEOMETRY2D'; }
+	if (type & MESH_TYPES_DBG.TEXT_GEOMETRY2D) { meshType = 'TEXT_GEOMETRY2D'; }
+	if (type & MESH_TYPES_DBG.GEOMETRY3D) { meshType = 'GEOMETRY3D'; }
+	if (type & MESH_TYPES_DBG.CUBE_GEOMETRY) { meshType = 'CUBE_GEOMETRY'; }
 	
-	if (type & MESH_TYPES.WIDGET_TEXT_LABEL) { meshType = 'Widget_Label_Text_Mesh'; }
-	if (type & MESH_TYPES.WIDGET_BUTTON) { meshType = 'Widget_Button_Mesh'; }
-	if (type & MESH_TYPES.WIDGET_TEXT) { meshType = 'Widget_Text_Mesh'; }
-	if (type & MESH_TYPES.WIDGET_TEXT_DYNAMIC) { meshType = 'Widget_Dynamic_Text_Mesh'; }
-	if (type & MESH_TYPES.WIDGET_SLIDER) { meshType = 'WIDGET_SLIDER'; }
-	if (type & MESH_TYPES.WIDGET_SLIDER_BAR) { meshType = 'WIDGET_SLIDER_BAR'; }
-	if (type & MESH_TYPES.WIDGET_SLIDER_HANDLE) { meshType = 'WIDGET_SLIDER_HANDLE'; }
-
+	if (type & MESH_TYPES_DBG.MATERIAL) { meshType = 'MATERIAL'; }
+	if (type & MESH_TYPES_DBG.FONT_MATERIAL) { meshType = 'FONT_MATERIAL'; }
+	
+	if (type & MESH_TYPES_DBG.MESH) { meshType = 'MESH'; }
+	if (type & MESH_TYPES_DBG.TEXT_MESH) { meshType = 'TEXT_MESH'; }
+	
+	if (type & MESH_TYPES_DBG.WIDGET_TEXT_LABEL) { meshType = 'WIDGET_TEXT_LABEL'; }
+	if (type & MESH_TYPES_DBG.WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS) { meshType = 'WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS'; }
+	if (type & MESH_TYPES_DBG.WIDGET_BUTTON) { meshType = 'WIDGET_BUTTON'; }
+	if (type & MESH_TYPES_DBG.WIDGET_TEXT) { meshType = 'WIDGET_TEXT'; }
+	if (type & MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC) { meshType = 'WIDGET_TEXT_DYNAMIC'; }
+	if (type & MESH_TYPES_DBG.WIDGET_SLIDER) { meshType = 'WIDGET_SLIDER'; }
+	if (type & MESH_TYPES_DBG.WIDGET_SLIDER_BAR) { meshType = 'WIDGET_SLIDER_BAR'; }
+	if (type & MESH_TYPES_DBG.WIDGET_SLIDER_HANDLE) { meshType = 'WIDGET_SLIDER_HANDLE'; }
+	if (type & MESH_TYPES_DBG.WIDGET_POP_UP) { meshType = 'WIDGET_POP_UP'; }
+	// console.log(MESH_TYPES_DBG.WIDGET_SLIDER);
 	return meshType;
 }
 
@@ -342,6 +454,12 @@ const LISTEN_EVENT_TYPES = {
 	HOVER: _cnt <<= 1,
 
 	NULL: _cnt <<= 1,
+};
+
+_cnt = 0;
+const LISTEN_EVENT_TYPES_INDEX = {
+	HOVER: _cnt++,
+	SIZE: _cnt,
 };
 
 function GetListenEventsType(type) {

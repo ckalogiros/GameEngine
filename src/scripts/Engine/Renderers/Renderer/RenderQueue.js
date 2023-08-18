@@ -188,7 +188,7 @@ export function RenderQueueSetPriority(flag, progIdx, vbIdx) { renderQueue.SetPr
 
 /**
  * Enable and Disable programs and vertex buffers from the draw queue.
- * It is called from the GfxVbShow function. If a vertex buffer has 
+ * It is called from the GfxVbRender function. If a vertex buffer has 
  * changed(enabled or disabled for drawing), we must add or remove
  * these programs-vertex buffers from the draw queue.
  */

@@ -6,7 +6,7 @@ import { MouseResetDif, MouseResetWheel } from "../Controls/Input/Mouse.js";
 import { FpsGet, TimeSample, TimeStart, TimeStop, TimeUpdate } from "../Timers/Time.js";
 import { TimersUpdateGlobalTimer, TimersUpdateTimers } from "../Timers/Timers.js";
 import { TimeIntervalsUpdateAll, TimersUpdateStepTimers } from "../Timers/TimeIntervals.js";
-import { _tm1, _tm2, _tm3 } from "../Timers/PerformanceTimers.js";
+import { __pt1, __pt2, _pt3 } from "../Timers/PerformanceTimers.js";
 
 /**
  * WebGl
@@ -49,9 +49,9 @@ import { _tm1, _tm2, _tm3 } from "../Timers/PerformanceTimers.js";
  * Time Measure Variables
  */
 
-const tm1 = _tm1; // Generic performance timer
-const tm2 = _tm2; // Generic performance timer
-const tm3 = _tm3; // Generic performance timer
+const _pt1 = __pt1; // Generic performance timer
+const _pt2 = __pt2; // Generic performance timer
+const tm3 = _pt3; // Generic performance timer
 // const ta1 = _ta1; // Currently used for FPS average;
 
 export class WebGlRenderer {
@@ -86,18 +86,18 @@ export class WebGlRenderer {
          
          TimeUpdate(); 
          
-         tm1.Start();
+         _pt1.Start();
          TimeIntervalsUpdateAll(); // Update and run callbacks for each interval timer that has been set.
          TimersUpdateGlobalTimer(); // This is a globbal timer, going only forward
          // TimersUpdateTimers();
          // TimersUpdateStepTimers();
-         tm1.Stop();
+         _pt1.Stop();
          
          // TODO!!! Update camera uniform if camera needs update 
          this.camera.Update(this.gl)
-         tm2.Start();
+         _pt2.Start();
          this.scene.OnUpdate();
-         tm2.Stop();
+         _pt2.Stop();
          
          tm3.Start();
          GlDraw(this.gl);

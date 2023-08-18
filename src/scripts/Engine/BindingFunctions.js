@@ -26,3 +26,13 @@ export function Bind_change_brightness(target, val, maxval){
 
    target.SetColorRGB([r, g, b]);
 }
+
+export function Bind_change_pos_x(target, val, maxval){
+
+   if(target === undefined) alert('Target should not be undefined. @ BindingFunctions.js Bind_change_color_rgb().');
+
+   const x = MapLinear( val, 0, maxval, 0, Viewport.right );
+   // console.log(x)
+
+   target.SetPosX(x);
+}

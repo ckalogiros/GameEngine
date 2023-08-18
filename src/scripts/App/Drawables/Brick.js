@@ -1,7 +1,7 @@
 "use strict";
 import * as math from '../../Helpers/Math/MathOperations.js'
 import { BallBrickCollision, BallSetIsReady } from './Ball.js';
-import { GlMove } from '../../Graphics/Buffers/GlBufferOps.js';
+import { GlMoveXY } from '../../Graphics/Buffers/GlBufferOps.js';
 import { GlSetAttrRoundCorner, GlSetAttrBorderWidth, GlSetAttrBorderFeather } from '../../Graphics/Buffers/GlBufferOps.js';
 import { ExplosionsCreateCircleExplosion } from '../../Engine/Drawables/Fx/Explosions.js';
 import { ParticlesCreateSystem } from '../../Engine/ParticlesSystem/Particles.js';
@@ -98,7 +98,7 @@ class Brick extends TempMesh {
                 this.mesh.pos[1] += this.animation.push.moveAmt[1];
             }
         }
-        GlMove(this.gfxInfo, this.animation.push.moveAmt);
+        GlMoveXY(this.gfxInfo, this.animation.push.moveAmt);
     }
     MovePull() {
         if(this.animation.pull.x.active){
@@ -119,7 +119,7 @@ class Brick extends TempMesh {
                 this.mesh.pos[1] += this.animation.pull.moveAmt[1];
             }
         }
-        GlMove(this.gfxInfo, this.animation.pull.moveAmt);
+        GlMoveXY(this.gfxInfo, this.animation.pull.moveAmt);
         // this.Move(this.animation.push.moveAmt, this.animation.push.moveAmt);
     }
 

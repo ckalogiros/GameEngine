@@ -1,6 +1,6 @@
 "use=strict";
 
-import { GfxSetVbShow, GlBindTexture, GlBindVAO, GlUpdateIndexBufferData, GlUpdateVertexBufferData, GlUseProgram } from "./GlBuffers.js";
+import { GfxSetVbRender, GlBindTexture, GlBindVAO, GlUpdateIndexBufferData, GlUpdateVertexBufferData, GlUseProgram } from "./GlBuffers.js";
 import { GlGetPrograms, GlGetVB } from "../GlProgram.js";
 import { GlCreateTexture } from "../GlTextures.js";
 import { AnimationsGet } from "../../Engine/Animations/Animations.js";
@@ -269,7 +269,7 @@ export function FramebufferRenderToFramebuffer(drawQueue, drawQueueCount) {
    gl.enable(gl.DEPTH_TEST);
    gl.depthMask(false);
 
-   GfxSetVbShow(fb.gfxInfo.prog.idx, fb.gfxInfo.vb.idx, false); // Disable rendering the rect that the texture of the frameBuffer will be rendered to 
+   GfxSetVbRender(fb.gfxInfo.prog.idx, fb.gfxInfo.vb.idx, false); // Disable rendering the rect that the texture of the frameBuffer will be rendered to 
 
    for (let i = 0; i < drawQueueCount; i++) {
 
@@ -303,7 +303,7 @@ export function FramebufferRenderToFramebuffer(drawQueue, drawQueueCount) {
           gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
        }
    }
-   GfxSetVbShow(fb.gfxInfo.prog.idx, fb.gfxInfo.vb.idx, true); // Enable rendering FrameBuffer's rect
+   GfxSetVbRender(fb.gfxInfo.prog.idx, fb.gfxInfo.vb.idx, true); // Enable rendering FrameBuffer's rect
 
    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
    gl.bindTexture(gl.TEXTURE_2D, null);

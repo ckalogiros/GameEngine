@@ -17,11 +17,11 @@ export function Animations_create_scale_up_down(params) {
 
    // if (!params.state.inHover && !params.state.inScale) {
    // if (!params.state.inScale) {
-   if (!(params.state2.mask & MESH_STATE.IN_SCALE)) {
+   if (!(params.state.mask & MESH_STATE.IN_SCALE)) {
       const animations = AnimationsGet();
       animations.Create(Animations_run_scale_up_start, Animations_run_scale_up_stop, params, 'button_scale_up_animation');
       params.state.inScale = true;
-      params.state2.mask |= MESH_STATE.IN_SCALE;
+      params.StateEnable(MESH_STATE.IN_SCALE);
    }
 }
 function Animations_run_scale_up_start(mesh) {
@@ -29,11 +29,11 @@ function Animations_run_scale_up_start(mesh) {
    const scaleFactor = 1.05, maxScale = 220;
 
    // if (mesh.state.inHover && mesh.geom.dim[0] > maxScale) {
-   if ((mesh.state2.mask & MESH_STATE.IN_HOVER) && mesh.geom.dim[0] > maxScale) {
+   if (mesh.StateCheck(MESH_STATE.IN_HOVER) && mesh.geom.dim[0] > maxScale) {
       return true;
    }
    // else if (!mesh.state.inHover && mesh.geom.dim[0] > maxScale) {
-   else if (!(mesh.state2.mask & MESH_STATE.IN_HOVER) && mesh.geom.dim[0] > maxScale) {
+   else if (mesh.StateCheck(MESH_STATE.IN_HOVER) === 0 && mesh.geom.dim[0] > maxScale) {
       return false;
    }
 
@@ -46,7 +46,7 @@ function Animations_run_scale_up_start(mesh) {
 
    if (mesh.children.count) {
 
-      if(mesh.children.buffer[0].type & MESH_TYPES.TEXT_MESH){
+      if(mesh.children.buffer[0].type & MESH_TYPES_DBG.TEXT_MESH){
          
          Helper_scale_text(mesh, scaleFactor, 0);
       }
@@ -113,7 +113,7 @@ function Animations_run_scale_down_start(mesh) {
 
    if (mesh.children.count) {
       
-      if(mesh.children.buffer[0].type & MESH_TYPES.TEXT_MESH){
+      if(mesh.children.buffer[0].type & MESH_TYPES_DBG.TEXT_MESH){
          
          Helper_scale_text(mesh, scaleFactor, 1);
       }
@@ -165,8 +165,8 @@ function Animations_run_scale_down_stop(mesh) {
 
       const scaleFactor = 1; // Must pass param scaleFactor
 
-      // console.log('MESH TYPE: ', GetMeshType(mesh.children.buffer[0].type))
-      if(mesh.children.buffer[0].type & MESH_TYPES.TEXT_MESH){
+      // console.log('MESH TYPE: ', GetMeshNameFromType(mesh.children.buffer[0].type))
+      if(mesh.children.buffer[0].type & MESH_TYPES_DBG.TEXT_MESH){
 
          Helper_scale_text(mesh, scaleFactor, 2);
       }
@@ -204,7 +204,7 @@ function Animations_run_scale_down_stop(mesh) {
    }
 
    mesh.state.inScale = false;
-   mesh.state2.mask &= ~MESH_STATE.IN_SCALE;
+   mesh.StateDisable(MESH_STATE.IN_SCALE);
 }
 /**
  * Helper Functions for scale animation
@@ -344,7 +344,7 @@ export function Animations_create_bright_color_rgb(params) {
 function Animations_run_bright_color_rgb_start(params) {
 
    // if (params.state.inHover) return true;
-   if (params.state2.mask & MESH_STATE.IN_HOVER) return true;
+   if (params.state.mask & MESH_STATE.IN_HOVER) return true;
 
    const gfx = params.gfx;
    const col = params.col;

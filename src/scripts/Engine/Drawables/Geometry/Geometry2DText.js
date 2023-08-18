@@ -26,7 +26,7 @@ export class Geometry2D_Text extends Geometry2D {
 
       this.text = text;
       this.numChars = text.length;
-      this.type |= MESH_TYPES.TEXT_GEOMETRY2D;
+      this.type |= MESH_TYPES_DBG.TEXT_GEOMETRY2D;
    }
 
    //////////////////////////////////////////////////////////////

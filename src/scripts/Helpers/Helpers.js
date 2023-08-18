@@ -73,8 +73,7 @@ export function CalculateSdfParamsFromFont(fontSize){
 
 export function CalculateSdfOuterFromDim(size){
     // b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 )
-    const sdf = MapLinear(size, 0, 120, .5, .1);
-    // console.log(size, sdf)
+    const sdf = MapLinear(size, 0, 30, .75, .1);
     return sdf;
     // return MapLinear(size, 10, 90, .5, .1);
 
@@ -97,6 +96,35 @@ export function CalculateSdfOuterFromDim(size){
 export function GetSign(val){
     if(val === 0) return 0;
     return (2 * (val >> 31) + 1);
+}
+
+export function Helpers_calc_top_left_pos(pos, dim){
+
+    return[
+        pos[0] - dim[0],
+        pos[1] - dim[1],
+    ];
+}
+export function Helpers_calc_top_right_pos(pos, dim){
+
+    return[
+        pos[0] + dim[0],
+        pos[1] - dim[1],
+    ];
+}
+export function Helpers_calc_bottom_left_pos(pos, dim){
+
+    return[
+        pos[0] - dim[0],
+        pos[1] + dim[1],
+    ];
+}
+export function Helpers_calc_bottom_right_pos(pos, dim){
+
+    return[
+        pos[0] + dim[0],
+        pos[1] + dim[1],
+    ];
 }
 
 /**

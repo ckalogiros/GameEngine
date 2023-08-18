@@ -158,7 +158,7 @@ export class CameraOrthographic extends Camera {
 		let top = cy + dy;
 		let bottom = cy - dy;
 
-		const near = 0, far = 100;
+		const near = 0, far = 1000;
 
 		this.makeOrthographic( left, right, top, bottom, near, far );
 		this.isSet = true;

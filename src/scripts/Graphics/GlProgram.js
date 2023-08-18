@@ -190,6 +190,11 @@ export class GlProgram {
 		this.#PrivateCreateAttribsOffsets();
 	}
 
+	// Check id sid matches with the program's sid.
+	CheckSidMatch(sid){
+		return SID.CheckSidMatch(sid, this.sid);
+	}
+
 	#PrivateCalculateAttributesSize(sid) {
 		return {
 			col: (sid.attr & SID.ATTR.COL4) ? 4 : (0),
@@ -437,8 +442,12 @@ export function GlProgramUpdateUniformProjectionMatrix(gl, progIdx, mat4) {
 	prog.UniformsSetUpdateProjectionMatrix(gl, mat4);
 }
 
-export function GlUseFont(fintIdx){
+export function GlCheckSid(sid, progidx){
+
+	const prog = GlGetProgram(progidx);
 	
+	if (SID.CheckSidMatch(sid, prog.sid)) return true;
+	return false;
 }
 
 

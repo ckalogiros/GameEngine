@@ -2,9 +2,7 @@
 
 import * as math from '../../../../Helpers/Math/MathOperations.js'
 import * as glBufferOps from '../../../../Graphics/Buffers/GlBufferOps.js'
-import { GlAddGeometry} from '../../../../Graphics/Buffers/GlBuffers.js';
-import { Collision_PointRect } from '../../../Collisions.js';
-import { MouseGetPos } from '../../../Controls/Input/Mouse.js';
+import { GlAddGeometry, Gl_remove_geometry_fast} from '../../../../Graphics/Buffers/GlBuffers.js';
 
 let _geometryId = 0;
 
@@ -17,6 +15,7 @@ export class Geometry2D {
     defPos = [0, 0, 0];
     defDim = [0, 0];
     defScale = [0, 0];
+    zIndex = 0;
     time = 0;
     type = 0;
 
@@ -37,8 +36,9 @@ export class Geometry2D {
         math.CopyArr2(this.defDim, dim);
         math.CopyArr2(this.defScale, scale);
         math.CopyArr3(this.defPos, pos);
+        this.zIndex = this.pos[2];  // Store default z index value. 
 
-        this.type |= MESH_TYPES.GEOMETRY2D;
+        this.type |= MESH_TYPES_DBG.GEOMETRY2D;
 
         /** Debug properties */
         if (DEBUG.GEOMETRY) {
@@ -51,6 +51,9 @@ export class Geometry2D {
     AddToGraphicsBuffer(sid, gfx, meshName) {
         GlAddGeometry(sid, this.pos, this.dim, this.time, gfx, meshName, 1)
     }
+    // Remove_from_graphics_buffer_fast(gfx, numFaces) {
+    //     Gl_remove_geometry_fast(gfx, numFaces)
+    // }
 
     //////////////////////////////////////////////////////////////
     SetPos(pos, gfx) {
@@ -58,11 +61,12 @@ export class Geometry2D {
         glBufferOps.GlSetWposXY(gfx, pos);
     }
     MoveXYConcecutive(x, y, gfx, numMeshes) {
-        math.CopyArr2(this.pos, [x, y]);
-        glBufferOps.GlMoveXYConcecutive(gfx, [x, y], numMeshes);
+        this.pos[0] += x;
+        this.pos[1] += y;
+        glBufferOps.GlMoveXY(gfx, [x, y], numMeshes); // TODO: We do not need separate functions for 'consecutive', we just implement the numFaces to all gl operations
     }
 
-    SetPosXY(pos) {
+    SetPosXY(pos, gfx) {
         math.CopyArr2(this.pos, pos);
         glBufferOps.GlSetWposXY(gfx, pos);
     }
@@ -74,25 +78,25 @@ export class Geometry2D {
         this.pos[1] = y;
         glBufferOps.GlSetWposY(gfx, y);
     }
-    UpdatePosXY() {
+    UpdatePosXY(gfx) {
         glBufferOps.GlSetWposXY(gfx, this.pos);
     }
-    SetZindex(z) {
+    SetZindex(z, gfx, numFaces) {
         this.pos[2] = z;
-        glBufferOps.GlSetWposZ(gfx, z);
+        glBufferOps.GlSetWposZ(gfx, z, numFaces);
     }
     Move(x, y, gfx) {
         this.pos[0] += x;
         this.pos[1] += y;
-        glBufferOps.GlMove(gfx, [x, y]);
+        glBufferOps.GlMoveXY(gfx, [x, y]);
     }
     MoveX(x, gfx) {
         this.pos[0] += x;
-        glBufferOps.GlMove(gfx, [x, 0]);
+        glBufferOps.GlMoveXY(gfx, [x, 0]);
     }
     MoveY(y, gfx) {
         this.pos[1] += y;
-        glBufferOps.GlMove(gfx, [0, y]);
+        glBufferOps.GlMoveXY(gfx, [0, y]);
     }
     //////////////////////////////////////////////////////////////
     SetDim(dim, gfx) {
@@ -102,11 +106,6 @@ export class Geometry2D {
     UpdateDim(gfx) {
         glBufferOps.GlSetDim(gfx, this.dim);
     }
-    // Shrink(val) {
-    //     this.dim[0] *= val;
-    //     this.dim[1] *= val;
-    //     glBufferOps.GlSetDim(gfx, this.dim);
-    // }
     UpdateScale() {
         glBufferOps.GlSetScale(gfx, this.scale);
     }
@@ -126,25 +125,7 @@ export class Geometry2D {
     StoreDefPos(pos) {
         math.CopyArr2(this.defPos, pos);
     }
-
-    //////////////////////////////////////////////////////////////
-    // Listener_listen_mouse_hover(){
-    //     const rect = [
-    //         // Left  Right 
-    //         [ this.pos[0] - this.dim[0], this.pos[0] + this.dim[0], ],
-    //         // Top  Bottom
-    //         [ this.pos[1] - this.dim[1], this.pos[1] + this.dim[1], ],
-    //     ];
-    //     const mousePos = MouseGetPos();
-    //     const point = [
-    //         mousePos.x,
-    //         mousePos.y,
-    //     ];
-    //     return Collision_PointRect(point, rect);
-    // }
-
 }
-
 
 
 export class Geometry3D {
@@ -155,6 +136,7 @@ export class Geometry3D {
     dim   = [0, 0, 0];
     scale = [0, 0, 0];
     time  = 0;
+    zIndex = 0;
     type;
 
     constructor(pos = [0, 0, 0], dim = [0, 0, 0], scale = [1, 1, 1]) {
@@ -170,13 +152,13 @@ export class Geometry3D {
         math.CopyArr3(this.pos, pos);
         math.CopyArr3(this.dim, dim);
         math.CopyArr3(this.scale, scale);
+        this.zIndex = this.pos[2]; // Store default z index value. 
 
-        this.type |= MESH_TYPES.GEOMETRY3D;
+        this.type |= MESH_TYPES_DBG.GEOMETRY3D;
 
         /** Debug properties */
         if (DEBUG.GEOMETRY) {
             Object.defineProperty(this, 'id', { value: _geometryId++ });
-            // Object.defineProperty(this, 'type', { value: 'Geometry' });
         }
     }
 
@@ -213,15 +195,15 @@ export class Geometry3D {
     Move(x, y) {
         this.pos[0] += x;
         this.pos[1] += y;
-        GlMove(gfx, [x, y]);
+        GlMoveXY(gfx, [x, y]);
     }
     MoveX(x) {
         this.pos[0] += x;
-        glBufferOps.GlMove(gfx, [x, 0]);
+        glBufferOps.GlMoveXY(gfx, [x, 0]);
     }
     MoveY(y) {
         this.pos[1] += y;
-        glBufferOps.GlMove(gfx, [0, y]);
+        glBufferOps.GlMoveXY(gfx, [0, y]);
     }
     //////////////////////////////////////////////////////////////
     SetDim(dim) {
@@ -252,8 +234,5 @@ export class Geometry3D {
     StoreDefPos(pos) {
         math.CopyArr2(this.defPos, pos);
     }
-
-v
-
 }
 

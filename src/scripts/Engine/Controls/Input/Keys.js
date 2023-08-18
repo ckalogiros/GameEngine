@@ -47,22 +47,32 @@ export function OnKeyDown(e){
          RenderQueueGet().PrintActive();
          break;
       }
-      case ('f' || 'F'):{
+      case ('f'):{
          const fps = FpsGet();
          console.log(`Avg:${fps.GetAvg()}, Avg 1s: ${fps.GetAvg_1S()}`)
          break;
       }
-      case ('i' || 'I'):{
+      case ('i'):{
          TimeIntervalsPrintAll()
          break;
       }
-      case ('e' || 'E'):{
+      case ('e'):{
          const listeners = ListenersGetListenersBuffer();
          listeners.PrintAll();
          break;
       }
-      case ('s' || 'S'):{
-         ScenesPrintAllMeshes(STATE.scene.active.children)
+      case ('E'):{
+         const listeners = ListenersGetListenersBuffer();
+         console.log('---------- All meshes with hover listeners ----------')
+         listeners.PrintAllListenersMeshes();
+         break;
+      }
+      case ('s'):{
+         ScenesPrintAllMeshes(STATE.scene.active.children, 0)
+         break;
+      }
+      case ('S'):{
+         console.log('STATE.mesh:', STATE.mesh)
          break;
       }
    }

@@ -20,16 +20,20 @@ import { Text_Mesh } from "../Base/Mesh.js";
  */
 export class Widget_Text_Mesh extends Text_Mesh {
 
-	constructor(text, pos, fontSize = 10, scale = [1, 1], color = WHITE, bold = 4) {
+	constructor(text, pos, fontSize = 10, scale = [1, 1], color = WHITE, bold = 4, font = TEXTURES.SDF_CONSOLAS_LARGE) {
 
 		const sdfouter = CalculateSdfOuterFromDim(fontSize);
-		const mat = new FontMaterial(color, FONTS.SDF_CONSOLAS_LARGE, text, [bold, sdfouter])
-		const geom = new Geometry2D_Text(pos, fontSize, scale, text, FONTS.SDF_CONSOLAS_LARGE);
+		if(sdfouter + bold > 1) bold =  1-sdfouter;
+		// console.log(sdfouter)
+		const mat = new FontMaterial(color, font, text, [bold, sdfouter])
+		const geom = new Geometry2D_Text(pos, fontSize, scale, text, font);
 		super(geom, mat);
 
-		this.type |= MESH_TYPES.WIDGET_TEXT;
-		this.type |= geom.type;
-		this.type |= mat.type;
+		this.type |= MESH_TYPES_DBG.WIDGET_TEXT | geom.type | mat.type;
+	}
+
+	GetOptions(){
+		return 'Widget_Text_Mesh Options'
 	}
 
 }
@@ -43,9 +47,7 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 
 		super(maxDynamicTextChars, pos, fontSize, scale, color1, bold);
 
-		this.type |= MESH_TYPES.WIDGET_TEXT_DYNAMIC;
-		this.type |= this.geom.type;
-		this.type |= this.mat.type;
+		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | this.geom.type | this.mat.type;
 	}
 
 	AddToGraphicsBuffer(sceneIdx) {
@@ -96,12 +98,7 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 		dynamicText.geom.AddToGraphicsBuffer(dynamicText.sid, dynamicText.gfx, dynamicText.name);
 		dynamicText.mat.AddToGraphicsBuffer(dynamicText.sid, dynamicText.gfx);
 
-		// console.log('start 0:', this.children.buffer[0].gfx.vb.start);
-		// console.log('start 1:', this.children.buffer[1].gfx.vb.start);
-
-		this.type |= MESH_TYPES.WIDGET_TEXT_DYNAMIC;
-		this.type |= dynamicText.geom.type;
-		this.type |= dynamicText.mat.type;
+		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | dynamicText.geom.type | dynamicText.mat.type;
 
 		return dynamicTextIdx;
 	}
@@ -262,7 +259,6 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
  * A widget of rendering static text 
  * in combination with dynamic text.
  */
-// export class Widget_Dynamic_Text_Mesh extends Widget_Text_Mesh {
 export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 
 	/** Set the max number of characters for the dynamic text, 
@@ -278,9 +274,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 		this.children.Init(text.length);
 		this.children.Add(dynamicText);
 
-		// this.type |= MESH_TYPES.WIDGET_TEXT_DYNAMIC;
-		// this.type |= dynamicText.geom.type;
-		// this.type |= dynamicText.mat.type;
+		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | dynamicText.geom.type | dynamicText.mat.type;
 	}
 
 	AddToGraphicsBuffer(sceneIdx) {

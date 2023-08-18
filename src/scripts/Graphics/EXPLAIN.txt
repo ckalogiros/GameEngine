@@ -1,0 +1,13 @@
+
+
+    /**
+     * ## PRIVATE_BUFFERS
+     * 
+     * The application may need some drawables to be stored in private vertex buffers.
+     * That means the drawables must explicitly be stored in the vertex buffer by the user,
+     * and automatic selection to add to a private buffer, by 'GlGetContext()', is prohibited.
+     * The core reason of private buffers is to have control over the vertexBuffer rendering (Render: On/Off).
+     * By setting the vb to be private, the only way to add to that buffer is by 
+     * passing "useSpecificVertexBuffer = GL_VB.SPECIFIC, vertexBufferIdx = 'the private buffer index'" 
+     * upon drawable's 'AddToGraphicsBuffer()' function.
+     */

@@ -1,9 +1,38 @@
+--------------------------------------------------- ALGORITHMS!
+Set an efficient hover checking.
+Implement an algorithm that will recontruct the hover 
+listening of all application's meshes.
+The algo will execute upon creation of all meshes.
+The core idea is to build an efficient hover checking,
+based upon the children mesh count and their siblings
+in conjunction as to what meshes must have a hover listen event,
+since it really plays the most significant role for efficiency.
+
+SEE: dock/ScemeDraws/HoverListenEvents.drawio
+--------------------------------------------------- ALGORITHMS!
+
+--------------------------------------------------- TESTING!
+. Create a performance test for accesing arrays with 'key' 
+  instead of ordinary int counter. Make it complex so the 
+  interpeter does not optimize.
+--------------------------------------------------- TESTING!
+
 --------------------------------------------------- IMIDIATE!
 . Implement set render queue priority for meshes in a vertexBuffer.
-Remove adding all children meshes to the scene.
 --------------------------------------------------- IMIDIATE!
 
 --------------------------------------------------- TODO
+
+. Maybe implement Generic Global gl buffers, that will store progidx and vbidx of a 
+  multiuse on the fly gl program. Mainly for popups, but it can be used for any mesh
+  that wants to be displayed for a little while and the removed. Also the global state will
+  help to implement most of the gl code in the Graphics .js files and not in any specific
+  class as with the popup widget.
+   
+. Implement second popup menu(from the main popup menu)
+
+. Maybe we should implement timeIntervals for the GlDraw function. 
+. Or have static meshes in specific programs and buffers. 
 
 . Implement:
     Widget Menu.
@@ -37,9 +66,8 @@ Remove adding all children meshes to the scene.
 --------------------------------------------------- TODO
 
 --------------------------------------------------- CONTINUE
-. Create a buffer in fps timer for all avgs.
-. Implement rotation3D via EventListener onMouseHover.
-. Use click button in combination with EventListener onMouseHover
+. If children of popup are created, do not create again
+. On widget_Menu add destroy menu.
 
 --------------------------------------------------- CONTINUE
 Correct the meshes dimentions to not create double the width and height

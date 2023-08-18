@@ -20,7 +20,7 @@ export function GlDraw(gl) {
     //     gl.viewport(0, 0, fb.fb.texture.width, fb.fb.texture.height);
     // }
     
-    // GfxSetVbShow(fb.fb.gfxInfo.prog.idx, fb.fb.gfxInfo.vb.idx, false);
+    // GfxSetVbRender(fb.fb.gfxInfo.prog.idx, fb.fb.gfxInfo.vb.idx, false);
     // const drQ = RenderQueueGet();
     // drQ.Update();
 
@@ -53,7 +53,8 @@ export function GlDraw(gl) {
         }
 
         if (ib.needsUpdate) GlUpdateIndexBufferData(gl, ib)
-        if (vb.needsUpdate) GlUpdateVertexBufferData(gl, vb)
+        if (vb.needsUpdate) 
+            GlUpdateVertexBufferData(gl, vb)
 
         gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
         // gl.drawElements(gl.TRIANGLES, 8024, gl.UNSIGNED_SHORT, 0);

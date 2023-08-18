@@ -6,6 +6,7 @@ import * as dbg from '../Z_Debug/GfxDebug.js'
 import { GlCreateProgram } from '../GlProgram.js'
 import { GlGetIB, GlGetProgram, GlGetPrograms, GlGetVB } from '../GlProgram.js';
 import { RenderQueueGet, RenderQueueUpdate } from '../../Engine/Renderers/Renderer/RenderQueue.js';
+import { M_Buffer } from '../../Engine/Core/Buffers.js';
 
 
 class VertexBuffer {
@@ -23,18 +24,20 @@ class VertexBuffer {
     vCount = 0;			// Number of vertices
 
     vao = null;		    // Vertex Array 
-    vboId = INT_NULL;	// Vertex Buffer Gl-Id
-    iboId = INT_NULL;	// Index Buffer Gl-Id
-    tboId = INT_NULL;	// Texture Buffer Gl-Id
+    vboId  = INT_NULL;	// Vertex Buffer Gl-Id
+    iboId  = INT_NULL;	// Index Buffer Gl-Id
+    tboId  = INT_NULL;	// Texture Buffer Gl-Id
     texIdx = INT_NULL;	// Stores the index of the texture's location in the texture array
 
 
     scissorBox = [];
+    free_vertex_buffer;
 
     show = true;
     needsUpdate = false;
     hasChanged = false;
     hasScissorBox = false;
+    isPrivate = false; // SEE ## PRIVATE_BUFFERS
 
     // Debug
     debug = { meshesNames: [], sidName: '' };
@@ -48,13 +51,11 @@ class VertexBuffer {
         this.vao = gl.createVertexArray();
         gl.bindVertexArray(this.vao);
         this.webgl_buffer = gl.createBuffer();
-        // gl.bindBuffer(gl.ARRAY_BUFFER, this.webgl_buffer);
-        /**
-         * Hack for large enough buffer
-         */
         this.size = MAX_VERTEX_BUFFER_COUNT;
         this.data = new Float32Array(this.size);
 
+        this.free_vertex_buffer = new M_Buffer();
+        
     }
 
     AddGeometry(sid, pos, dim, time, shaderInfo, numFaces, start, count) 
@@ -83,6 +84,34 @@ class VertexBuffer {
         }
         this.needsUpdate = true;
         this.vCount += shaderInfo.verticesPerRect * numFaces
+    }
+
+    /** 
+     * Remove geometry fast version. 
+     * We just set the alpha color value to 0.
+     * And we keep the dimention of the mesh in the vertex buffer
+     * in a separate buffer, so we can reuse when possible
+     */
+    Remove_geometry_fast(gfx, numFaces){
+
+        // GlOps.GlSetColorAlpha(gfx, 0);
+        GlOps.GlSetColor(gfx, [0,0,0, 1], numFaces);
+
+        if(!this.free_vertex_buffer.count) this.free_vertex_buffer.Init(1);
+        const removedVerticesInfo = {
+            progIdx: gfx.prog.idx,
+            vbIdx: gfx.vb.idx,
+            vbStart: gfx.vb.start,
+            vbCount: gfx.vb.count,
+            ibIdx: gfx.vb.idx,
+            ibStart: gfx.ib.start,
+            ibCount: gfx.ib.count,
+        };
+
+        GlRemoveFromEndOfVertexBuffer(gfx, numFaces);
+        this.free_vertex_buffer.Add(removedVerticesInfo);
+        console.log(this.free_vertex_buffer)
+
     }
 
     AddMaterial(sid, shaderInfo, numFaces, start, count, col, tex, style = null, sdf = null) 
@@ -162,6 +191,22 @@ class VertexBuffer {
         }
     }
 
+    SetPrivate(){ this.isPrivate = true;}
+
+    // Resets (set to 0) the start and counts of the buffer 
+    Reset(){ 
+        this.count  = 0;
+        this.vCount = 0;
+        this.needsUpdate = true;
+    }
+    // Removing count num from the end of the vertexBuffer
+    RemoveFromEnd(count, vCount){ 
+        this.count  -= count;
+        this.vCount -= vCount;
+        this.needsUpdate = true;
+    }
+    
+
 };
 
 class IndexBuffer {
@@ -229,6 +274,11 @@ class IndexBuffer {
            this.data[i] = oldData[i];
         }
     }
+    Reset(){ 
+        this.count  = 0;
+        this.vCount = 0;
+        this.needsUpdate = true;
+    }
 };
 
 
@@ -265,19 +315,31 @@ export function GlGetContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer) {
 
     let vbIdx = INT_NULL;
     let ibIdx = INT_NULL;
-
-    if (GL_BUFFER == GL_VB.SPECIFIC) {
+    
+    if (GL_BUFFER == GL_VB.NEW) {
+        vbIdx = INT_NULL;
+    }
+    else if (GL_BUFFER == GL_VB.SPECIFIC) { // Case caller accidentally 'specific buffer' flag but the vbIdx is either null or does not exist. 
         if (addToSpecificGlBuffer === INT_NULL) {
             vbIdx = VertexBufferExists(sceneIdx, progs[progIdx]);
         }
-        else vbIdx = addToSpecificGlBuffer;
-    }
-    else if (GL_BUFFER == GL_VB.NEW) {
-        vbIdx = INT_NULL;
+        else { //  Check id the vbIdx passed by the caller exists and it is valid for adding the mesh.
+
+            vbIdx = addToSpecificGlBuffer;
+
+            // If the passsed vbIdx does not exist or comply with the program, set to create new vertex buffer.
+            if (!(progs[progIdx].vertexBuffer[vbIdx] && 
+                  SID.CheckSidMatch(sid, progs[progIdx].sid)) ) 
+                vbIdx = INT_NULL;
+        } 
     }
     else if (GL_BUFFER == GL_VB.ANY) {
         vbIdx = VertexBufferExists(sceneIdx, progs[progIdx]);
     }
+
+    // If the chosen vertexBuffer is used as private by another drawable, then it should not be used if addToSpecificGlBuffer is not passed.
+    // SEE ## PRIVATE_BUFFERS
+    if(vbIdx > INT_NULL && vbIdx !== addToSpecificGlBuffer && progs[progIdx].vertexBuffer[vbIdx].isPrivate) vbIdx = INT_NULL;
 
     let vb = null; // Cash for convinience
     let ib = null; // Cash for convinience
@@ -321,9 +383,10 @@ export function GlGetContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer) {
         gfxCtx.gl.bindVertexArray(vb.vao)
         gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer)
 
-        // Index buffer
-        ibIdx = IndexBufferExists(sceneIdx, progs[progIdx]);
+        // Index buffer. TODO: we bound the ibIdx with the vbIdx. What if later we want to use arbitary index buffers??? We must implement another way of finding the correct ib(Most probable is to pass the ibIdx to this function)
+        ibIdx = IndexBufferExists(vbIdx, sceneIdx, progs[progIdx]);
         ib = progs[progIdx].indexBuffer[ibIdx];
+
     }
 
     // Cash values
@@ -345,7 +408,9 @@ export function GlGetContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer) {
     gfxInfo.vb.start = start;
     gfxInfo.vb.count = count;
     gfxInfo.ib.idx = ibIdx;
+
     gfxInfo.ib.count = ib.count;
+
 
     const index = progs[progIdx].vertexBuffer[vbIdx].meshes.length;
     gfxInfo.meshIdx = index; // Store the current meshe's index so the mesh know in what index can find it's self in the vertexBuffer's meshes array.
@@ -404,6 +469,46 @@ export function GlAddGeometry(sid, pos, dim, time, gfx, meshName, numFaces) {
         ib.Add(numFaces)
         gfx.ib.count = ib.count;
     }
+}
+export function Gl_remove_geometry_fast(gfx, numFaces) {
+
+    const progIdx = gfx.prog.idx;
+    const vbIdx = gfx.vb.idx;
+    const ibIdx = gfx.ib.idx;
+    const prog = GlGetProgram(progIdx);
+    const vb = GlGetVB(progIdx, vbIdx);
+    const ib = GlGetIB(progIdx, ibIdx);
+
+    if(GL.BOUND_PROG_IDX !== progIdx){
+        GlUseProgram(prog.webgl_program, progIdx);
+        GL.BOUND_PROG_IDX = progIdx;
+        gfxCtx.gl.bindVertexArray(vb.vao)
+        gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
+        GL.BOUND_VBO_IDX = vbIdx;
+    }
+    if(GL.BOUND_VBO_IDX !== vbIdx){
+        gfxCtx.gl.bindVertexArray(vb.vao)
+        gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
+        GL.BOUND_VBO_IDX = vbIdx;
+    }
+
+
+    vb.Remove_geometry_fast(gfx, numFaces);
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     * Remove Mesh to Index Buffer
+     */
+    // if (gfx.sid.shad & SID.SHAD.INDEXED) {
+
+    //     // Check for buffer realloc
+    //     if(ib.count + numFaces*INDICES_PER_RECT > ib.size){
+    //         ib.Realloc();
+    //     }
+
+    //     gfx.ib.start = ib.count;
+    //     ib.Add(numFaces)
+    //     gfx.ib.count = ib.count;
+    // }
 }
 
 export function GlHandlerAddGeometryBuffer(sid, gfx, meshName, posBuffer, dimBuffer) {
@@ -586,16 +691,9 @@ export function GlUpdateIndexBufferData(gl, buffer) {
  */
 function ProgramExists(sid, progs) {
 
-    for (let i = 0; i < progs.length; i++) {
-        if (sid.shad === progs[i].sid.shad &&
-            sid.attr === progs[i].sid.attr &&
-            sid.unif === progs[i].sid.unif &&
-            sid.pass === progs[i].sid.pass
-        )
-            return i;
-
-    }
-    return -1;
+    for (let i = 0; i < progs.length; i++)
+        if (SID.CheckSidMatch(sid, progs[i].sid)) return i;
+    return INT_NULL;
 }
 
 /**
@@ -613,18 +711,23 @@ function VertexBufferExists(sceneIdx, prog) {
     }
     return -1;
 }
-function IndexBufferExists(sceneIdx, prog) {
-
+function IndexBufferExists(ibIdx, sceneIdx, prog) {
+    if(sceneIdx === undefined)
+        console.log()
+    // alert('scene index is missing. @ GlBuffers.js, IndexBufferExists().')
     for (let i = 0; i < prog.indexBufferCount; i++) {
-        if (sceneIdx === prog.indexBuffer[i].sceneIdx)
+        if (ibIdx === prog.indexBuffer[i].idx && sceneIdx === prog.indexBuffer[i].sceneIdx){
+            if(i < 0)
+            console.log
             return i;
+        }
 
     }
     return -1;
 }
 
 // TODO: the scene id must be a unique hex for bit masking, so we can & it with programs many scene ids.
-export function GfxSetVbShowFromSceneId(sceneIdx, flag) {
+export function GfxSetVbRenderFromSceneId(sceneIdx, flag) {
 
     const progs = GlGetPrograms();
 
@@ -638,7 +741,7 @@ export function GfxSetVbShowFromSceneId(sceneIdx, flag) {
     }
 }
 
-export function GfxSetVbShow(progIdx, vbIdx, flag) {
+export function GfxSetVbRender(progIdx, vbIdx, flag) {
 
     const progs = GlGetPrograms();
     progs[progIdx].vertexBuffer[vbIdx].show = flag;
@@ -668,6 +771,26 @@ function CreateIndices(ib, numFaces) {
     ib.needsUpdate = true; // Make sure that we update GL bufferData 
 }
 
+export function GlSetVertexBufferPrivate(progIdx, vbIdx){
+    const vb = GlGetVB(progIdx, vbIdx);
+    vb.SetPrivate();
+}
+
+export function GlRemoveFromEndOfVertexBuffer(gfx, numFaces){
+    const vb = GlGetVB(gfx.prog.idx, gfx.vb.idx);
+    const meshTotalAttrCount = gfx.vb.count * numFaces;
+    const count = vb.count - (vb.count - meshTotalAttrCount);
+    const vCount = meshTotalAttrCount/gfx.attribsPerVertex;
+    vb.RemoveFromEnd(count, vCount); 
+}
+export function GlResetVertexBuffer(gfx){
+    const vb = GlGetVB(gfx.prog.idx, gfx.vb.idx);
+    vb.Reset(); 
+}
+export function GlResetIndexBuffer(gfx){
+    const ib = GlGetVB(gfx.prog.idx, gfx.ib.idx);
+    ib.Reset(); 
+}
 
 
 

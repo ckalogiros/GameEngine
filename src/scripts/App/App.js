@@ -1,5 +1,5 @@
 "use strict";
-import { Scene } from '../Engine/Scenes.js'
+import { Scene, Scenes_create_scene } from '../Engine/Scenes.js'
 import { EventsAddListeners, RegisterEvent, } from '../Engine/Events/Events.js';
 import { RenderQueueGet, RenderQueueInit } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { WebGlRenderer } from '../Engine/Renderers/WebGlRenderer.js';
@@ -15,15 +15,16 @@ import { CubeGeometry } from '../Engine/Drawables/Geometry/Geometry3DCube.js';
 import { Animations_create_bright_color_rgb, Animations_create_dim_color_rgb, Animations_create_scale_up_down } from '../Engine/Animations/AnimationsBasic.js';
 import { SizeOfObject } from '../Helpers/Helpers.js';
 import { TimerGetGlobalTimer, TimerGetGlobalTimerCycle } from '../Engine/Timers/Timers.js';
-import { PerformanceTimerCreate, PerformanceTimerInit, _Tm1GetFps, _Tm1GetMilisec, _Tm1GetNanosec, _Tm2GetFps, _Tm2GetMilisec, _Tm3GetFps, _Tm3GetMilisec, _tm1 } from '../Engine/Timers/PerformanceTimers.js';
+import { PerformanceTimerCreate, PerformanceTimerInit, _Tm1GetFps, _Tm1GetMilisec, _Tm1GetNanosec, _Tm2GetFps, _Tm2GetMilisec, _Tm3GetFps, _Tm3GetMilisec, __pt1 } from '../Engine/Timers/PerformanceTimers.js';
 import { TimeIntervalsCreate, TimeIntervalsInit } from '../Engine/Timers/TimeIntervals.js';
 import { MAT_ENABLE, Material, Material_TEMP_fromBufferFor3D } from '../Engine/Drawables/Material/Base/Material.js';
 import { MESH_ENABLE, Mesh } from '../Engine/Drawables/Meshes/Base/Mesh.js';
-import { Slider_bind_on_value_change, Widget_Slider } from '../Engine/Drawables/Meshes/Widgets/WidgetSlider.js';
-import { Bind_change_brightness, Bind_change_color_rgb } from '../Engine/BindingFunctions.js';
-import { Widget_Menu } from '../Engine/Drawables/Meshes/Widgets/WidgetMenu.js';
+import { Slider_create_on_click_event, Slider_bind_on_value_change, Widget_Slider, Slider_connect } from '../Engine/Drawables/Meshes/Widgets/WidgetSlider.js';
+import { Bind_change_brightness, Bind_change_color_rgb, Bind_change_pos_x } from '../Engine/BindingFunctions.js';
 
-
+/** Performance Timers */
+import { _pt4 } from '../Engine/Timers/PerformanceTimers.js';
+import { TestArraysPerformance } from '../../Tests/Arrays.js';
 
 let renderer = null;
 
@@ -54,7 +55,8 @@ export function AppInit() {
     /* * * * * * * * * * * * * * * * * * * * * * * * * * *
     * Create Renderer and Scene
     */
-    const scene = new Scene();
+    // const scene = new Scene();
+    const scene = Scenes_create_scene();
     const camera = new CameraOrthographic();
     // const camera = new CameraPerspective();
 
@@ -63,6 +65,7 @@ export function AppInit() {
     // camera.SetControls(CAMERA_CONTROLS.ROTATE);
     // camera.Translate(80, 80, 20)
     STATE.scene.active = scene;
+    STATE.scene.idx = scene.sceneIdx;
 
     renderer = new WebGlRenderer(scene, camera);
 
@@ -81,7 +84,7 @@ export function AppInit() {
         //     const mat = new Material(ORANGE_240_130_10);
 
         //     const mesh = new Mesh(geom, mat);
-        //     mesh.Enable(MESH_ENABLE.ATTR_STYLE);
+        //     mesh.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
         //     mesh.SetStyle(8, 35, 3);
         //     scene.AddMesh(mesh);
         //     mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
@@ -91,7 +94,7 @@ export function AppInit() {
         //     const mat = new Material(PINK_240_60_160);
         //     mat.col = PINK_240_60_160;
         //     const mesh = new Mesh(geom, mat);
-        //     mesh.Enable(MESH_ENABLE.ATTR_STYLE);
+        //     mesh.EnableGfxAttributes(MESH_ENABLE.ATTR_STYLE);
         //     mesh.SetStyle(20, 35, 3);
         //     scene.AddMesh(mesh);
         //     mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
@@ -100,7 +103,7 @@ export function AppInit() {
         //     const geom = new Geometry2D([308, 420, 0], [50, 50]);
         //     const mat = new Material(ORANGE_240_130_10);
         //     const mesh = new Mesh(geom, mat);
-        //     mesh.Enable(MESH_ENABLE.ATTR_STYLE);
+        //     mesh.EnableGfxAttributes(MESH_ENABLE.ATTR_STYLE);
         //     mesh.SetStyle(10, 15, 3);
         //     scene.AddMesh(mesh);
         //     mesh.SetColor(WHITE);
@@ -110,7 +113,7 @@ export function AppInit() {
         //     const geom = new Geometry2D([412, 420, 0], [50, 50]);
         //     const mat = new Material(ORANGE_240_130_10);
         //     const mesh = new Mesh(geom, mat);
-        //     mesh.Enable(MESH_ENABLE.ATTR_STYLE);
+        //     mesh.EnableGfxAttributes(MESH_ENABLE.ATTR_STYLE);
         //     mesh.SetStyle(25, 15, 3);
         //     scene.AddMesh(mesh);
         //     mesh.SetColor(BLUE_10_120_220);
@@ -152,238 +155,89 @@ export function AppInit() {
 
         let ypos = 150;
         const fontSize = 12;
-        { // Many text labels
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     textLabel.BindCallback('change-color', Slider_bind_on_value_change);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // }
-            // ypos += fontSize * 2 + 50;
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // }
-            // ypos += fontSize * 2 + 50;
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // }
-            // ypos += fontSize * 2 + 50;
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // }
-            // ypos += fontSize * 2 + 50;
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // }
-            // ypos += fontSize * 2 + 50;
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // }
-            // ypos += fontSize * 2 + 50;
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // }
-            // ypos += fontSize * 2 + 50;
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // }
-        }
 
-        { // Many text labels ald dispatcher
+        { // Many text labels 
             {
-                const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-                textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-                scene.AddMesh(textLabel);
+                const textLabel = new Widget_Label_Text_Mesh('Text Label 1', [60, ypos, 0], fontSize, BLUE_10_120_220, WHITE, [1, 1], 3, .4);
+                textLabel.StateEnable(MESH_STATE.IS_MOVABLE);
+                textLabel.StateEnable(MESH_STATE.IS_GRABABLE);
+                textLabel.StateEnable(MESH_STATE.HAS_POPUP);
+                textLabel.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
                 textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-                // textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
+                // Slider_connect(slider, target, targetClbk);
+                // textLabel.TempClbk = Slider_connect;
+                scene.AddMesh(textLabel);
+                
                 RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
             } 
-            // ypos += fontSize * 2 + 50;
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     // textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // } 
-            // ypos += fontSize * 2 + 50;
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     // textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // } 
-            // ypos += fontSize * 2 + 50;
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     // textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // } 
-            // ypos += fontSize * 2 + 50;
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     // textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // } 
-            // ypos += fontSize * 2 + 50;
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     // textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // } 
-            // ypos += fontSize * 2 + 50;
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     // textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // } 
-            // ypos += fontSize * 2 + 50;
-            // {
-            //     const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, ypos, 0], fontSize, [1, 1], 3, .4);
-            //     textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
-            //     scene.AddMesh(textLabel);
-            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            //     // textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-            //     textLabel.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.DIM_COLOR, Animations_create_dim_color_rgb);
-            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            // } 
+            ypos += 55
+            {
+                const textLabel = new Widget_Label_Text_Mesh('Text Label 1', [60, ypos, 0], fontSize, BLUE_10_120_220, WHITE, [1, 1], 3, .4);
+                textLabel.StateEnable(MESH_STATE.IS_MOVABLE);
+                textLabel.StateEnable(MESH_STATE.IS_GRABABLE);
+                textLabel.StateEnable(MESH_STATE.HAS_POPUP);
+                textLabel.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
+                textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+                scene.AddMesh(textLabel);
+                
+                RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
+            } 
         }
 
     }
-
+    
     { // Dynamic Text
-        const fontsize = 6; let ms = 200;
-
+        const fontsize = 4, pad = 6; let ypos = fontsize*2, ms = 200;
+        
+        const pt = PerformanceTimerCreate('Widget menu construct.');
+        pt.Start();
         ms = 10;
-        const timer = new Widget_Dynamic_Text_Mesh('Timer:', '000000', [0, 20, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
+        const timer = new Widget_Dynamic_Text_Mesh('Timer:', '000000', [0, ypos, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .5);
         scene.AddMesh(timer);
         timer.SetDynamicText(ms, TimeGetFps, `DynamicText ${ms} Timer TimeGetFps`)
-        let idx = timer.CreateDynamicText('00000', fontsize, null, YELLOW_240_220_10, 16, .4);
+        let idx = timer.CreateDynamicText('00000', fontsize, null, YELLOW_240_220_10, 16, .9);
         timer.SetDynamicText(ms, TimeGetDeltaAvg, `DynamicText ${ms} Timer TimeGetDeltaAvg`)
-        idx = timer.CreateDynamicText('000000', fontsize, null, YELLOW_240_220_10, 16, .4);
+        idx = timer.CreateDynamicText('000000', fontsize, null, YELLOW_240_220_10, 16, .5);
         timer.SetDynamicText(ms, TimeGetTimer, `DynamicText ${ms} Timer TimeGetTimer`)
+        pt.Stop();
+        pt.Print()
 
         // Performance Time Measure 1
-        ms = 500;
-        const timeMeasure1 = new Widget_Dynamic_Text_Mesh('All Timers Update:', '000000', [0, 45, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
+        ms = 500; ypos += fontsize*2 + pad;
+        const timeMeasure1 = new Widget_Dynamic_Text_Mesh('All Timers Update:', '000000', [0, ypos, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
         scene.AddMesh(timeMeasure1);
         timeMeasure1.SetDynamicText(ms, _Tm1GetFps, `DynamicText ${ms} All Timers Update _Tm1GetFps`)
         idx = timeMeasure1.CreateDynamicText('000000', fontsize, null, YELLOW_240_220_10, 16, .4);
         timeMeasure1.SetDynamicText(ms, _Tm1GetMilisec, `DynamicText ${ms} All Timers Update _Tm1GetMilisec`)
-        // idx = timeMeasure1.CreateDynamicText('000000', fontsize, null, ORANGE_240_200_10, 16, .4);
-        // timeMeasure1.SetDynamicText(ms, _Tm1GetNanosec, `DynamicText ${ms} FpsGetAvg`)
 
         // Performance Time Measure 2
-        ms = 500;
-        const timeMeasure2 = new Widget_Dynamic_Text_Mesh('Scene Update:', '000000', [0, 70, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
+        ms = 500; ypos += fontsize*2 + pad;
+        const timeMeasure2 = new Widget_Dynamic_Text_Mesh('Scene Update:', '000000', [0, ypos, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
         scene.AddMesh(timeMeasure2);
         timeMeasure2.SetDynamicText(ms, _Tm2GetFps, `DynamicText ${ms} Scene Update _Tm2GetFps`)
         idx = timeMeasure2.CreateDynamicText('000000', fontsize, null, YELLOW_240_220_10, 16, .4);
         timeMeasure2.SetDynamicText(ms, _Tm2GetMilisec, `DynamicText ${ms} Scene Update _Tm2GetMilisec`)
 
         // Performance Time Measure 3
-        ms = 500;
-        const timeMeasure3 = new Widget_Dynamic_Text_Mesh('GlDraw:', '000000', [0, 95, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
+        ms = 500; ypos += fontsize*2 + pad;
+        const timeMeasure3 = new Widget_Dynamic_Text_Mesh('GlDraw:', '000000', [0, ypos, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
         timeMeasure3.SetDynamicText(ms, _Tm3GetFps, `DynamicText ${ms} GlDraw _Tm3GetFps`)
         idx = timeMeasure3.CreateDynamicText('000000', fontsize, null, YELLOW_240_220_10, 16, .4);
         timeMeasure3.SetDynamicText(ms, _Tm3GetMilisec, `DynamicText ${ms} GlDraw _Tm3GetMilisec`)
         scene.AddMesh(timeMeasure3);
-
     }
 
     { // Label Dynamic Text
         // const dynamicText = new Widget_Label_Dynamic_Text('LabelDynamic1:', '0000', [0, 200, 0], 10, [1, 1], WHITE, GREEN, 4, .4);
         // scene.AddMesh(dynamicText);
         // dynamicText.SetDynamicText(2000, FpsGetAvg, 'Test-DynamicText')
-
     }
 
     { // Create cube
         // {
         //     const geom = new CubeGeometry([80, 450, -1], [100, 100, 100], [1, 1, 1]);
         //     const mat = new Material_TEMP_fromBufferFor3D(WHITE)
-        //     mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {
+        //     mat.EnableGfxAttributes(MAT_ENABLE.ATTR_VERTEX_COLOR, {
         //         color: [
         //             0.9, 0.0, 0.0, .4,
         //             0.0, 0.9, 0.1, .4,
@@ -401,7 +255,7 @@ export function AppInit() {
         // {
         //     const geom = new CubeGeometry([240, 450, -1], [100, 100, 100], [1, 1, 1]);
         //     const mat = new Material_TEMP_fromBufferFor3D(WHITE);
-        //     mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {
+        //     mat.EnableGfxAttributes(MAT_ENABLE.ATTR_VERTEX_COLOR, {
         //         color: [
         //             1.0, 1.0, 0.0, .4,
         //             0.0, 0.7, 0.4, .4,
@@ -418,7 +272,7 @@ export function AppInit() {
         // {
         //     const geom = new CubeGeometry([400, 450, -1], [100, 100, 100], [1, 1, 1]);
         //     const mat = new Material_TEMP_fromBufferFor3D(WHITE);
-        //     mat.Enable(MAT_ENABLE.ATTR_VERTEX_COLOR, {
+        //     mat.EnableGfxAttributes(MAT_ENABLE.ATTR_VERTEX_COLOR, {
         //         color: [
         //             0.9, 0.0, 0.0, .4,
         //             0.0, 0.9, 0.1, .4,
@@ -486,18 +340,14 @@ export function AppInit() {
                
     }
 
+    
     { // Widget Menu
-        let posy = 480, height = 100, pad = 25;
-        posy += height*2 + pad;
-        {
-            const menu = new Widget_Menu([200, posy, 0], [80, height], BLUE_10_160_220);
-            menu.state2.mask |= MESH_STATE.IS_MOVABLE;
-            scene.AddMesh(menu);
-            menu.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            // RegisterEvent('set-bind-on-change-value', slider.id)
-        }
-                
+
     }
+
+    // const txt = '=';
+    // const text = new Widget_Text_Mesh(txt, [-100, 120, 0], 10, [1, 1], WHITE, .5);
+    // scene.AddMesh(text);
 
     TestBindSliderToTextLabel(scene);
     // Test1(scene);
@@ -507,6 +357,8 @@ export function AppInit() {
     // If camera is static, update projection matrix uniform only once
     camera.UpdateProjectionUniform(renderer.gl);
     RenderQueueGet().UpdateActiveQueue(); // Update active queue buffer with the vertex buffers set to be drawn
+
+    // TestArraysPerformance();
 
     {
         // OLD
@@ -707,11 +559,14 @@ export function AppRender() {
 function TestBindSliderToTextLabel(scene){
 
     // Text Label
-    const textLabel = new Widget_Label_Text_Mesh('Text Label', [60, 200, 0], 10, [1, 1], 3, .4);
-    textLabel.state2.mask |= MESH_STATE.IS_MOVABLE;
+    const textLabel = new Widget_Label_Text_Mesh('Text Label 2', [60, 255, 0], 10, BLUE_10_120_220, WHITE, [1, 1], 3, .4);
     scene.AddMesh(textLabel);
+    textLabel.StateEnable(MESH_STATE.IS_MOVABLE);
+    textLabel.StateEnable(MESH_STATE.IS_GRABABLE);
+    textLabel.StateEnable(MESH_STATE.HAS_POPUP);
+    textLabel.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
+    // textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
 
 
@@ -720,12 +575,13 @@ function TestBindSliderToTextLabel(scene){
     posy += height*2 + pad;
     const slider = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220);
     scene.AddMesh(slider);
-    Slider_bind_on_value_change(slider, textLabel, Bind_change_brightness);
+    Slider_create_on_click_event(slider, null, null);
+    Slider_bind_on_value_change(slider.children.buffer[0], textLabel, [Bind_change_brightness, Bind_change_pos_x]);
     
     posy += height*2 + pad;
     const slider2 = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220);
     scene.AddMesh(slider2);
-    // slider2.CreateEvent(Slider_on_value_change, textLabel)
+    Slider_create_on_click_event(slider2, null, null);
 }
 
 function Test1(scene) {

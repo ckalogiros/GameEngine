@@ -51,7 +51,7 @@ export class CubeGeometry extends Geometry3D {
              .5, -.5, -.5, // v4
         ];
 
-        this.type |= MESH_TYPES.CUBE_GEOMETRY;
+        this.type |= MESH_TYPES_DBG.CUBE_GEOMETRY;
     }
 
     AddToGraphicsBuffer(sid, gfx, meshName) {

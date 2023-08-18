@@ -81,7 +81,7 @@ export class Material {
       
       this.alreadyAdded = false; // To check if the shaders have been created
 
-      this.type |= MESH_TYPES.MATERIAL;
+      this.type |= MESH_TYPES_DBG.MATERIAL;
 
       /** Debug properties */
       if (DEBUG.MATERIAL) {
@@ -108,6 +108,10 @@ export class Material {
       math.CopyArr4(this.col, col);
       GlSetColor(gfx, this.col);
    }
+   SetDefaultColor(gfx) {
+      math.CopyArr4(this.col, this.defCol);
+      GlSetColor(gfx, this.col);
+   }
    SetColorRGB(col, gfx) {
       math.CopyArr3(this.col, col);
       GlSetColor(gfx, this.col);
@@ -119,7 +123,7 @@ export class Material {
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////
    // Enable shader properties 
-   Enable(which, params = {}) {
+   EnableGfxAttributes(which, params = {}) {
 
       if (this.alreadyAdded === true) {
          console.error(`You are trying to enable ${which} but the shaders have been already created. Try Enable() before inserting the mesh to a Scene().`);
@@ -152,13 +156,12 @@ export class Material {
          default: console.error('Enable material\'s shader param failed. @ Material.js');
       }
    }
-   SetStyle(border = 0, rCorners = 10, feather = 4) {
+   SetStyle(border = 3, rCorners = 0, feather = 4) {
       this.style = {
          border: border,
          rCorners: rCorners,
          feather: feather,
       }
-      // this.sid.attr |= (SID.ATTR.BORDER | SID.ATTR.R_CORNERS | SID.ATTR.FEATHER) | SID.ATTR.PARAMS1 | SID.ATTR.EMPTY; 
    }
    SetNewAttribute(attribName = null,) { }
    SetNewUniform() { }
@@ -186,7 +189,7 @@ export class FontMaterial extends Material {
       this.uvIdx = indexes.uvIdx;
       if(this.texIdx === INT_NULL) console.error('2222222 Texture Index is NULL')
 
-      this.type |= MESH_TYPES.FONT_MATERIAL;
+      this.type |= MESH_TYPES_DBG.FONT_MATERIAL;
    }
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////

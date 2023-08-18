@@ -89,6 +89,23 @@ const SID = {
         PARAMS1: BIT4 <<= 1,
     },
 
+    CheckSidMatch(sid1, sid2){
+
+        // if( !(
+        //     sid1.shad & sid2.shad && 
+        //     sid1.attr & sid2.attr && 
+        //     sid1.unif & sid2.unif && 
+        //     sid1.pass & sid2.pass )
+        // )
+        if( 
+            sid1.shad === sid2.shad && 
+            sid1.attr === sid2.attr && 
+            sid1.unif === sid2.unif && 
+            sid1.pass === sid2.pass 
+        )
+            return true;
+        return false;
+    }
 };
 
 
@@ -179,9 +196,10 @@ const V_BORDER_FEATHER_STRIDE = 2;
 // 
 const NO_SPECIFIC_GL_BUFFER = INT_NULL;
 const GL_VB = {
-    NEW: 0,
-    SPECIFIC: 1,
-    ANY: 2,
+    NEW: 0, // Create a new vertexBuffer.
+    SPECIFIC: 1, // Use specific index of a vertex buffer.
+    ANY: 2, /* Let the application decide. 
+        If a vertex buffer with the same SID exists, it wiill use it, else it will create a new one. */
 };
 
 const MAX_RESERVED_BUFFERS = 10;

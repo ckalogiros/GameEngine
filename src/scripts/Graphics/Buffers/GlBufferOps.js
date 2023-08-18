@@ -1,12 +1,12 @@
 "use strict";
 
-import { GetSign } from "../../Helpers/Helpers.js";
 import { RotateZ, Matrix3x3_3x3Mult } from "../../Helpers/Math/Matrix.js";
 import { GlGetPrograms, GlGetVB } from "../GlProgram.js";
 
 
 
 export function GlSetPriority(progIdx, vbIdx, meshIdx, meshCount) {
+
     const vb = GlGetVB(progIdx, vbIdx);
 
     const meshStart = vb.meshes[meshIdx].vb.start;
@@ -314,13 +314,13 @@ export function VbSetAttribBuffer(vb, start, count, stride, buffer, attribSize) 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * 
  */
-export function GlSetColor(gfxInfo, color) {
+export function GlSetColor(gfxInfo, color, numFaces = 1) {
 
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.col;
-    let verts = gfxInfo.numFaces * gfxInfo.vertsPerRect;
+    let verts = gfxInfo.numFaces * gfxInfo.vertsPerRect * numFaces;
     let stride = gfxInfo.attribsPerVertex - V_COL_COUNT;
 
     while (verts) {
@@ -420,13 +420,13 @@ export function GlSetTex(gfxInfo, uvs) {
 
     vb.needsUpdate = true;
 }
-export function GlMove(gfxInfo, wpos) {
+export function GlMoveXY(gfxInfo, wpos, numFaces = 1) {
 
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.wposTime;
-    let verts = gfxInfo.numFaces * gfxInfo.vertsPerRect;
+    let verts = gfxInfo.numFaces * gfxInfo.vertsPerRect * numFaces;
     let stride = gfxInfo.attribsPerVertex - V_WPOS_COUNT;
 
     while (verts) {
@@ -440,6 +440,7 @@ export function GlMove(gfxInfo, wpos) {
     }
     vb.needsUpdate = true;
 }
+
 export function GlSetWpos(gfxInfo, pos) {
 
     const progs = GlGetPrograms();
@@ -528,13 +529,13 @@ export function GlSetWposY(gfxInfo, posy) {
     }
     vb.needsUpdate = true;
 }
-export function GlSetWposZ(gfxInfo, posz) {
+export function GlSetWposZ(gfxInfo, posz, numFaces = 1) {
 
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.wposTime + 2;
-    let faces = gfxInfo.numFaces; // Number of vertices
+    let faces = gfxInfo.numFaces * numFaces; // Number of vertices
     let stride = gfxInfo.attribsPerVertex; // Offset to next scale[0] attribute
 
     while (faces) {
@@ -744,29 +745,31 @@ export function GlSetWposXYMany(gfxInfo, pos, startsBuffer) {
         index = startsBuffer[numMeshes--];
     }
 }
-// Move all vertices in consecutive order. Use to move text like meshes.
-export function GlMoveXYConcecutive(gfxInfo, pos, numMeshes) {
+// // Move all vertices in consecutive order. Use to move text like meshes.
+// export function GlMoveXYConcecutive(gfxInfo, pos, numMeshes) {
 
-    const progs = GlGetPrograms();
-    const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
+//     const progs = GlGetPrograms();
+//     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
 
-    let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.wposTime;
-    let stride = gfxInfo.attribsPerVertex - V_WPOS_COUNT;
+//     let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.wposTime;
+//     let stride = gfxInfo.attribsPerVertex - V_WPOS_COUNT;
 
-    while (numMeshes) {
-        let verts = gfxInfo.numFaces * gfxInfo.vertsPerRect;
-        while (verts) {
+//     while (numMeshes) {
+//         let verts = gfxInfo.numFaces * gfxInfo.vertsPerRect;
+//         while (verts) {
 
-            vb.data[index++] += pos[0];
-            vb.data[index++] += pos[1];
-            index++
+//             vb.data[index++] += pos[0];
+//             vb.data[index++] += pos[1];
+//             index++
 
-            index += stride; // Go to next vertice's pos. +1 for skipping pos.z
-            verts--;
-        }
-        numMeshes--;
-    }
-}
+//             index += stride; // Go to next vertice's pos. +1 for skipping pos.z
+//             verts--;
+//         }
+//         numMeshes--;
+//     }
+
+//     vb.needsUpdate = true;
+// }
 
 export function GlRotate2D(gfxInfo, dim, angle) {
 
