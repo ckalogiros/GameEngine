@@ -43,7 +43,7 @@ export function HandleEvents() {
 
             if (e.params.mesh.StateCheck(MESH_STATE.HAS_HOVER_COLOR)){
                 e.params.mesh.SetColor(GREY6);
-                e.params.mesh.StateEnable(MESH_STATE.IN_HOVER_COLOR);
+                e.params.mesh.StateEnable(MESH_STATE.HOVER_COLOR_ENABLED);
             }
             /**
              * TODO: Set the hovered mesh to be darwn on top(last in vertexBuffer or in render queue)
@@ -63,9 +63,9 @@ export function HandleEvents() {
         else if (e.type === 'unhover') {
             // console.debug('unhover: ', e.params.mesh.id)
 
-            if (e.params.mesh.StateCheck(MESH_STATE.IN_HOVER_COLOR)){
+            if (e.params.mesh.StateCheck(MESH_STATE.HOVER_COLOR_ENABLED)){
                 e.params.mesh.SetDefaultColor();
-                e.params.mesh.StateDisable(MESH_STATE.IN_HOVER_COLOR);
+                e.params.mesh.StateDisable(MESH_STATE.HOVER_COLOR_ENABLED);
             }
             
             e.params.mesh.StateDisable(MESH_STATE.IN_HOVER); // Set false
@@ -184,12 +184,10 @@ export function Events_handle_immidiate(e){
         console.debug('hover: ', e.params.mesh.id);
         // console.debug('hover: ', e.params.mesh.id, ' | prev hover:', STATE.mesh.hoveredId);
 
-        // // Unhover any previous hovered
-        //     STATE.mesh.hovered.SetDefaultZindex();
-
+        // Apply Hover Color
         if (e.params.mesh.StateCheck(MESH_STATE.HAS_HOVER_COLOR)){
             e.params.mesh.SetColor(WHITE);
-            e.params.mesh.StateEnable(MESH_STATE.IN_HOVER_COLOR);
+            e.params.mesh.StateEnable(MESH_STATE.HOVER_COLOR_ENABLED);
         }
         /**
          * TODO: Set the hovered mesh to be darwn on top(last in vertexBuffer or in render queue)
@@ -209,9 +207,9 @@ export function Events_handle_immidiate(e){
     else if (e.type === 'unhover') {
         // console.debug('unhover: ', e.params.mesh.id)
 
-        if (e.params.mesh.StateCheck(MESH_STATE.IN_HOVER_COLOR)){
+        if (e.params.mesh.StateCheck(MESH_STATE.HOVER_COLOR_ENABLED)){
             e.params.mesh.SetDefaultColor();
-            e.params.mesh.StateDisable(MESH_STATE.IN_HOVER_COLOR);
+            e.params.mesh.StateDisable(MESH_STATE.HOVER_COLOR_ENABLED);
         }
 
         // if(e.params.mesh.type & MESH_TYPES_DBG.WIDGET_POP_UP){
@@ -223,6 +221,48 @@ export function Events_handle_immidiate(e){
     }
 
 }
+
+
+    // function EventHandler(event_type){
+
+    //     const listeners = GetListeners();
+
+    //     for(i in listeners.buffer[event_type]){
+            
+    //         listeners.buffer[event_type].events[i].Clbk();
+    //     }
+    // }
+
+    // // App
+    // mesh = new Mesh();
+    // mesh.CreateListenEvent('TYPE', Clbk);
+    // Clbk(){
+
+    //     do{
+    //         stuff
+    //     }
+    // }
+
+    // // Mesh
+    // CreateListenEvent('TYPE', Clbk){
+
+    //     Listeners_add_event('TYPE', Clbk);
+    // }
+
+    // Listeners
+    // Listeners_add_event('TYPE', Clbk){
+
+    //     this.buffer['TYPE'].Add(Clbk);
+    // }
+
+    // function HandleClickEvent(clickPos){
+
+    //     if(Collision_PointRect(clickPos, this.pos)){
+    //         do {
+    //             // do stuff for click
+    //         }
+    //     }
+    // }
 
 /**
     // Event sceme of a mesh
@@ -247,28 +287,39 @@ export function Events_handle_immidiate(e){
         ]
     }
 
+
     // An approach that the created events are categorized by ther event type. 
     // The benefit is we can loop all events of a specific type, 
     // and not loop through all events checking their type if matches the triggered event.
-    
+
     events = {
 
-        buffer: [
-            
-            type: onclick, onhover, ...,
+        buffer: [ // type: onclick, onhover, ...,
+
+            buffer: [
+
+                Callback: function(), the function to be called in case of the event
+                    
+                // What ever, because the responsibility of managing the params
+                // has nothing to do with the events system or any other intermidiary.
+                params:{ 
+                    EventClbk: _Slider_create_on_click_event,
+                    target:  bar,
+                    targetClbks: null,
+                },
+            ],
     
-            callback: function(), the function to be called in case of the event
-                
-            // What ever, because the responsibility of managing the params
-            // has nothing to do with the events system or any other intermidiary.
-            params:{ 
-                EventClbk: _Slider_create_on_click_event,
-                target:  bar,
-                targetClbks: null,
-            },
             
             ...
         ]
+    }
+    
+    run as:
+    mesh.Dispatcher('onclick');
+    and in:
+    Dispatcher(TYPE){
+        for(i in events)
+            this.events.buffer[TYPE].buffer[i].Callback()
     }
 
 

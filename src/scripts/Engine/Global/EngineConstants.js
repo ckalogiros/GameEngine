@@ -115,7 +115,7 @@ const MESH_STATE = {
 	IN_SCALE: _cnt <<= 1,
 	IN_MOVE: _cnt <<= 1,
 	IN_GRAB: _cnt <<= 1,
-	IN_HOVER_COLOR: _cnt <<= 1,
+	HOVER_COLOR_ENABLED: _cnt <<= 1,
 	
 	IS_MOVABLE: _cnt <<= 1,
 	IS_GRABABLE: _cnt <<= 1,
@@ -138,7 +138,7 @@ const MESH_STATE = {
 		if(mask & this.IN_SCALE) str+='IN_SCALE,' 
 		if(mask & this.IN_MOVE) str+='IN_MOVE,' 
 		if(mask & this.IN_GRAB) str+='IN_GRAB,' 
-		if(mask & this.IN_HOVER_COLOR) str+='IN_HOVER_COLOR,' 
+		if(mask & this.HOVER_COLOR_ENABLED) str+='HOVER_COLOR_ENABLED,' 
 
 		if(mask & this.IS_MOVABLE) str+='IS_MOVABLE,' 
 		if(mask & this.IS_GRABABLE) str+='IS_GRABABLE,' 
