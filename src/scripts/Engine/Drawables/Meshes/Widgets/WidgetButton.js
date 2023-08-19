@@ -10,10 +10,10 @@ export class Widget_Button_Mesh extends Widget_Label_Text_Mesh {
       this.SetName();
    }
 
-   
-   GetOptions(){
+
+   GetOptions() {
       return 'Widget_Button_Mesh Options'
-  }
+   }
 
 }
 

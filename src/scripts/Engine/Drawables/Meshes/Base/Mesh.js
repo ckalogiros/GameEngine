@@ -62,6 +62,11 @@ class Bit_Mask { mask = 0; }
 let _meshId = 0;
 export class Mesh {
 
+    /**
+     * TODO: Organize all function callbacks to an object
+     * TODO: Organize all buffers to an object
+     */
+
     sid; // Shader Identifier
     idx; // This is the index of the mesh in the scene's children buffer;
     geom;
@@ -80,6 +85,7 @@ export class Mesh {
     timeIntervalsIdxBuffer; // This buffer stores indexes of the timeIntervals this mesh is using.
     timedEvents; // A buffer to set a one time event that is triggered by another event. E.x. When we need to set the mesh priority in the renderQueue and the mesh does not have a gfx yet. 
     hoverMargin; // A margion to be set for hovering. TODO: Abstract to a struct.
+    MenuOptionsClbk; // A callback 
 
     name;
 
@@ -142,6 +148,7 @@ export class Mesh {
 
         this.hoverMargin = 0;
         
+        this.MenuOptionsClbk = null;
         // this.TempClbk = null;
 
         /** Debug  properties */
@@ -152,8 +159,9 @@ export class Mesh {
 
     AddChild(mesh) {
 
-        mesh.idx = this.children.Add(mesh);
         mesh.parent = this;
+        mesh.idx = this.children.Add(mesh);
+        return mesh.idx;
     }
 
     RemoveChildren() {
@@ -207,30 +215,6 @@ export class Mesh {
         // Enable 'IS_FAKE_HOVER' to denote that this mesh may have a listener, but it is actually it's children to be listened to.
         this.StateEnable(MESH_STATE.IS_FAKE_HOVER);
     }
-
-
-    // Destroy(){
-
-    //     this.sid                    = INT_NULL;
-    //     this.idx                    = INT_NULL; 
-    //     this.geom                   = null;
-    //     this.mat                    = null;
-    //     this.time                   = 0;
-    //     this.attrParams1            = null;
-    //     this.gfx                    = null;
-    //     this.uniforms               = null;
-    //     this.sceneIdx               = null;
-    //     this.type                   = INT_NULL;
-    //     this.listeners              = null;
-    //     this.eventCallbacks         = null;
-    //     this.children               = null;
-    //     this.state                  = null;
-    //     this.state2                 = INT_NULL;
-    //     this.timeIntervalsIdxBuffer = null; 
-    //     this.timedEvents            = null; 
-    //     this.hoverMargin            = 0; 
-    //     this.name                   = '';
-    // }
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * GRAPHICS
@@ -422,32 +406,12 @@ export class Mesh {
     // CreateEvent(eventCallback = null, target = null, targetClbks = null) {
     CreateEvent(params = {}) {
 
-        // if (Array.isArray(eventCallback)) {
-
-        //     const len = eventCallback.length;
-        //     for (let i = 0; i < len; i++) {
-
-        //         // const params = {
-        //         //     Clbk: eventCallback[i],
-        //         //     target: target,
-        //         //     targetClbks: targetClbks,
-        //         // };
-        //         const eventIdx = this.eventCallbacks.Add(params);
-        //         return eventIdx;
-        //     }
-        // }
-        // else {
-
-        //     // const params = {
-        //     //     Clbk: eventCallback,
-        //     //     target: target,
-        //     //     targetClbks: targetClbks,
-        //     // };
-        //     const eventIdx = this.eventCallbacks.Add(params);
-        //     return eventIdx;
-        // }
         const eventIdx = this.eventCallbacks.Add(params);
         return eventIdx;
+    }
+
+    SetMenuOptionsClbk(ClbkFunction){
+        this.MenuOptionsClbk = ClbkFunction;
     }
 
     /**

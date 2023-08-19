@@ -243,8 +243,7 @@ class EventListeners {
                const mesh = listeners.params;
                // SEE ##ListenCallback. Pass only necessary parameters.
                if (mesh.StateCheck(MESH_STATE.HAS_HOVER) && listeners.listenClbk(mesh)) { // Checking for mouse hover over mesh
-// if(mesh.name === "WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS id: 29")
-// console.log()
+
                   if ( STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
                      Events_handle_immidiate({ type:'unhover', params:{mesh: STATE.mesh.hovered} }); // Unhover previous mesh.
                   }
@@ -281,9 +280,13 @@ class EventListeners {
                else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (
                   !mesh.StateCheck(MESH_STATE.IN_MOVE) ||
                   !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
-
+                     console.log('i:', i1, ' meshId:', STATE.mesh.hoveredId)
                      Events_handle_immidiate({ type:'unhover', params:{mesh: mesh} });
                }
+               // else if(STATE.mesh.hoveredId !== INT_NULL){
+               //    // console.log('i:', i1, ' meshId:', STATE.mesh.hoveredId)
+               //    Events_handle_immidiate({ type:'unhover', params:{mesh: STATE.mesh.hovered} }); // Unhover any previous mesh.
+               // }
             }
          }
       }

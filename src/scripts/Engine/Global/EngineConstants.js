@@ -9,6 +9,8 @@ const MAX_INT = 10000
 const MILISEC = 0.001;
 const NANOSEC = 0.000001;
 
+const Rename_evtClbk_elem0 = 0; // The first element in the eventCallbacks buffer of every Mesh.
+const Rename_evtClbk_elem1 = 1; // The first element in the eventCallbacks buffer of every Mesh.
 
 function CHECK_ERROR(obj, msg) {
 	if (!obj || obj === undefined) {
@@ -452,6 +454,7 @@ function GetMeshHighOrderNameFromType(type) {
 _cnt = 0x1;
 const LISTEN_EVENT_TYPES = {
 	HOVER: _cnt <<= 1,
+	TEMP: _cnt <<= 1,
 
 	NULL: _cnt <<= 1,
 };

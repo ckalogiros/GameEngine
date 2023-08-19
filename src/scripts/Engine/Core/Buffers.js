@@ -29,7 +29,7 @@ export class M_Buffer {
 
    RemoveByIdx(idx) {
 
-      if (this.buffer[idx]) {
+      if (this.buffer[idx] !== null) {
 
          /**
           * In this implementation of buffer, we run 

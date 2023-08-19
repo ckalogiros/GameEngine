@@ -88,9 +88,9 @@ function Animations_run_scale_up_start(mesh) {
 }
 function Animations_run_scale_up_stop(mesh) {
 
-   Animations_create_scal_down_start(mesh);
+   Animations_create_scale_down_start(mesh);
 }
-function Animations_create_scal_down_start(params) {
+function Animations_create_scale_down_start(params) {
 
    const animations = AnimationsGet();
    animations.Create(Animations_run_scale_down_start, Animations_run_scale_down_stop, params, 'button_scale_down_animation');

@@ -131,24 +131,10 @@ export function HandleEvents() {
                 mesh.StateEnable(MESH_STATE.IN_GRAB);
             }
 
-            // if (mesh.eventCallbacks.count) {
-
-            //     const target = mesh.eventCallbacks.buffer[0].target;
-            //     const targetClbks = mesh.eventCallbacks.buffer[0].targetClbks;
-            //     mesh.eventCallbacks.buffer[0].Clbk(target, targetClbks);
-            //     /**
-            //      * One implementation is to have an Enum of fixed indexes: 'ON_CLICK = 0'
-            //      * so we call: 'mesh.eventCallbacks.buffer[ON_CLICK].Clbk(target, targetClbks);'
-            //      * That way the on click callback is only one, but it calls different functions 
-            //      * for different meshes.
-            //      * Ofcourse we could have ON_CLICK_LEFT_MOUSE_BTN etc.
-            //      */
-            // }
-
             if (mesh.eventCallbacks.count) {
 
                 const params = mesh.eventCallbacks.buffer[0];
-                mesh.eventCallbacks.buffer[0].params.Clbk(params);
+                mesh.eventCallbacks.buffer[Rename_evtClbk_elem0].params.EventClbk(params);
                 /**
                  * One implementation is to have an Enum of fixed indexes: 'ON_CLICK = 0'
                  * so we call: 'mesh.eventCallbacks.buffer[ON_CLICK].Clbk(target, targetClbks);'
@@ -202,7 +188,7 @@ export function Events_handle_immidiate(e){
         //     STATE.mesh.hovered.SetDefaultZindex();
 
         if (e.params.mesh.StateCheck(MESH_STATE.HAS_HOVER_COLOR)){
-            e.params.mesh.SetColor(BLUE_10_120_220);
+            e.params.mesh.SetColor(WHITE);
             e.params.mesh.StateEnable(MESH_STATE.IN_HOVER_COLOR);
         }
         /**
@@ -229,7 +215,7 @@ export function Events_handle_immidiate(e){
         }
 
         // if(e.params.mesh.type & MESH_TYPES_DBG.WIDGET_POP_UP){
-        //     Widget_popup_handler_deactivate_secondary_popups(e.params.mesh);
+        //     e.params.mesh.DeactivateSecondaryPopups();
         // }
         
         e.params.mesh.StateDisable(MESH_STATE.IN_HOVER); // Set false
@@ -238,6 +224,55 @@ export function Events_handle_immidiate(e){
 
 }
 
+/**
+    // Event sceme of a mesh
+
+    events = {
+
+        buffer: [
+            
+            type: onclick, onhover, ...,
+    
+            callback: function(), the function to be called in case of the event
+                
+            // What ever, because the responsibility of managing the params
+            // has nothing to do with the events system or any other intermidiary.
+            params:{ 
+                EventClbk: _Slider_create_on_click_event,
+                target:  bar,
+                targetClbks: null,
+            },
+            
+            ...
+        ]
+    }
+
+    // An approach that the created events are categorized by ther event type. 
+    // The benefit is we can loop all events of a specific type, 
+    // and not loop through all events checking their type if matches the triggered event.
+    
+    events = {
+
+        buffer: [
+            
+            type: onclick, onhover, ...,
+    
+            callback: function(), the function to be called in case of the event
+                
+            // What ever, because the responsibility of managing the params
+            // has nothing to do with the events system or any other intermidiary.
+            params:{ 
+                EventClbk: _Slider_create_on_click_event,
+                target:  bar,
+                targetClbks: null,
+            },
+            
+            ...
+        ]
+    }
+
+
+ */
 
 function OnWindowResize() {
     console.debug('WINDOW RESIZE')
