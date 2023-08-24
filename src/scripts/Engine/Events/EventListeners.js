@@ -1,75 +1,265 @@
 "use strict";
 
-import { Collision_PointRect } from "../Collisions.js";
+import { Intersection_point_rect } from "../Collisions.js";
 import { MouseGetPos } from "../Controls/Input/Mouse.js";
 import { M_Buffer } from "../Core/Buffers.js";
-import { Recursive_gfx_operations } from "../Drawables/Meshes/Base/Mesh.js";
-import { Events_handle_immidiate, RegisterEvent } from "./Events.js";
+import { Events_handle_immidiate } from "./Events.js";
 
+let _cnt3 = 0;
+export const EVENT_TYPES = {
+
+   HOVER: _cnt3++,
+   CLICK: _cnt3++,
+
+   SIZE: _cnt3,
+}
+
+/**
+ * listener.buffer[TYPE].events[i]
+ */
+
+export class Event_Listener {
+
+   event_type;
+
+   constructor() {
+
+      this.event_type = new Array(EVENT_TYPES.SIZE);
+   }
+
+   AddEvent(TYPE_IDX, Clbk = null, self_params = null, target = null) {
+
+      if (this.event_type[TYPE_IDX] === undefined) {
+
+         console.log('Creating new event type events buffer')
+
+         this.event_type[TYPE_IDX] = new M_Buffer();
+         this.event_type[TYPE_IDX].Init(1);
+      }
+      //TODO: implenet as: self:{params: , }
+      const params = {
+         type: TYPE_IDX,
+         Clbk: Clbk,
+         self: self_params,
+         target: target,
+      }
+
+      return this.event_type[TYPE_IDX].Add(params);
+   }
+
+   DispatchEvents(TYPE_IDX, trigger_params) {
+
+      if (this.event_type[TYPE_IDX] === undefined) return;
+      if (TYPE_IDX < 0 || TYPE_IDX >= EVENT_TYPES.SIZE) alert('Event type index does not exist.');
+
+      for (let i = 0; i < this.event_type[TYPE_IDX].count; i++) {
+
+         if(this.event_type[TYPE_IDX].buffer[i]){
+
+            const params = {
+               self_params: this.event_type[TYPE_IDX].buffer[i].self,
+               target_params: this.event_type[TYPE_IDX].buffer[i].target,
+               trigger_params: trigger_params,
+               event_type: TYPE_IDX,
+            }
+            this.event_type[TYPE_IDX].buffer[i].Clbk(params);
+         }
+      }
+   }
+
+   /** Debug */
+   PrintAll() {
+      for (let i = 0; i < EVENT_TYPES.SIZE; i++) {
+         if (this.event_type[i]) {
+            for (let j = 0; j < this.event_type[i].count; j++) {
+               console.log(this.event_type[i].buffer[j].self.name,
+                  'Clbk:', this.event_type[i].buffer[j].Clbk.name);
+               // if (this.event_type[i].buffer[j].target)
+               //    console.log(this.event_type[i].buffer[j].target)
+            }
+         }
+
+      }
+   }
+}
+
+const _listener = new Event_Listener();
+
+export function Listener_create_event(TYPE_IDX, Clbk, params, target) {
+
+   return _listener.AddEvent(TYPE_IDX, Clbk, params, target);
+}
+export function Listener_dispatch_event(TYPE_IDX, trigger_params) {
+
+   _listener.DispatchEvents(TYPE_IDX, trigger_params);
+}
+export function Listener_remove_event(TYPE_IDX, idx) {
+
+   _listener.event_type[TYPE_IDX].RemoveByIdx(idx);
+}
+// export function Listener_remove_events_all(TYPE_IDX, buffer) {
+export function Listener_remove_events_all(TYPE_IDX, mesh_listeners) {
+
+   const row = mesh_listeners.GetRow(TYPE_IDX)
+
+   const count = row.length;
+   for(let i=0; i<count; i++){
+
+      _listener.event_type[TYPE_IDX].RemoveByIdx(row[i]);
+      // row[i] = INT_NULL;
+      mesh_listeners.RemoveByIdx(TYPE_IDX, i); // TYPE_IDX is 1 to 1 with the event listeners TYPE_IDX
+   }
+   // const count = buffer.length;
+   // for(let i=0; i<count; i++){
+
+   //    _listener.event_type[TYPE_IDX].RemoveByIdx(buffer[i]);
+   // }
+}
+export function Listener_get_event(TYPE_IDX, event_idx) {
+
+   return _listener.event_type[TYPE_IDX].buffer[event_idx];
+}
+export function Listener_debug_print_all(TYPE_IDX, event_idx) {
+
+   _listener.PrintAll();
+}
+
+/**
+ * TODO!!! The click events continue to check for all its buffer elements,
+ * even if a clicked was found. 
+ * That is inefficient. Either we break on clicked, or implement a click algorithm
+ * that includes a system checking divided in all root parent meshes 
+ * of the scene and traverses down to children.
+ */
+
+
+
+
+// export class Listener_Hover {
+
+//    constructor(){
+
+//       this.hover = new M_Buffer();
+//       this.hover.Init(1);
+//    }
+
+//    Listen(idx, pos, dim){
+
+//       const params = {
+//          idx: idx,
+//          pos:pos,
+//          dim:dim,
+//       }
+//       this.hover.Add(params);
+//    }
+
+//    Run(){
+
+//       const point = MouseGetPos();
+
+//       for(let i=0; i < this.hover.count; i++){
+
+//          const m = this.hover.buffer[i];
+//          const rect = [
+//             [m.pos[0] - m.dim[0], m.pos[0] + m.dim[0]],     // Left  Right 
+//             [(m.pos[1] - m.dim[1]), (m.pos[1] + m.dim[1])], // Top  Bottom
+//          ];
+
+//          if(Intersection_point_rect(point, rect)){
+
+//             Events_handle_immidiate({ 
+//                type:'hover', 
+//                params:{idx: m.idx} 
+//             });
+
+//             // TESTING NEW LISTENER
+//             const params = { meshIdx: m.idx };
+//             Listener_dispatch_event(EVENT_TYPES.HOVER, params);
+//          }
+//       }
+//    }
+// } 
+
+export class Listener_Hover {
+
+   hover_buffer;
+
+   constructor() {
+
+      this.hover_buffer = new M_Buffer();
+   }
+
+   Listen(mesh) {
+
+      const params = {
+         mesh: mesh
+      }
+      mesh.listen_hover_idx = this.hover_buffer.Add(params);
+      mesh.StateEnable(MESH_STATE.HAS_HOVER)
+   }
+
+   Run() {
+
+      const point = MouseGetPos();
+
+      for (let i = 0; i < this.hover_buffer.count; i++) {
+
+         const m = this.hover_buffer.buffer[i].mesh.geom;
+         const rect = [
+            [m.pos[0] - m.dim[0], m.pos[0] + m.dim[0]],     // Left  Right 
+            [(m.pos[1] - m.dim[1]), (m.pos[1] + m.dim[1])], // Top  Bottom
+         ];
+
+         const mesh = this.hover_buffer.buffer[i].mesh;
+         if (Intersection_point_rect(point, rect)) {
+
+            if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
+               Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
+            }
+
+            if (mesh.StateCheck(MESH_STATE.IN_HOVER) === 0) // Skip hover event, if mesh is already in hover
+               Events_handle_immidiate({ type: 'hover', params: { mesh: mesh } });
+
+         }
+         else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (
+            !mesh.StateCheck(MESH_STATE.IN_MOVE) ||
+            !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
+            Events_handle_immidiate({ type: 'unhover', params: { mesh: mesh } });
+         }
+      }
+   }
+
+   Print() {
+      // this.hover_buffer.Print()
+      this.hover_buffer.PrintMeshInfo()
+   }
+}
+
+const _listener_hover = new Listener_Hover();
+
+export function Listener_hover_get() { return _listener_hover; }
+export function Listener_hover_enable(mesh) { _listener_hover.Listen(mesh); }
+export function Listener_hover_remove_by_idx(idx) { 
+
+   _listener_hover.hover_buffer.buffer[idx].listen_hover_idx = INT_NULL; // We ste the meshe's 'listen_hover_idx' to null HERE.
+   _listener_hover.hover_buffer.RemoveByIdx(idx); 
+}
+export function Listener_hover_Print() { _listener_hover.Print(); }
 
 
 const MAX_DISPATCH_EVENTS_BUFFER_SIZE = 8; // TODO: Get the max size depending on an global enum for all different kinds of dispatch events
 const MAX_LISTEN_EVENTS_BUFFER_SIZE = 8; // TODO: Get the max size depending on an global enum for all different kinds of dispatch events
-
-// class Dispatcher {
-
-//    type;
-//    clbk;
-//    params;
-
-//    constructor(type = INT_NULL, clbk = null, params = null) {
-
-//       this.type = type;
-//       this.clbk = clbk;
-//       this.params = params;
-//    }
-
-//    AddEvent(type, clbk, params) {
-
-//       this.type = type;
-//       this.clbk = clbk;
-//       this.params = params;
-//    }
-// }
-
-// class Dispatchers {
-
-//    buffer;
-//    count;
-//    size;
-
-//    constructor(size) {
-
-//       this.size = size;
-//       this.count = 0;
-//       this.buffer = new Array(size);
-
-//       for (let i = 0; i < size; i++) {
-//          this.buffer[i] = new Dispatcher();
-//       }
-//    }
-
-//    CreateEvent(type, clbk, params) {
-
-//       const idx = this.count++;
-//       this.buffer[idx].AddEvent(type, clbk, params);
-
-//       return idx;
-//    }
-// }
 
 
 class Listener {
 
    listenClbk;
    params;
-   // dispatchEventBuffer;
 
    constructor(clbk = null, params = null) {
 
       this.listenClbk = clbk;
       this.params = params;
-      // this.dispatchEventBuffer = new Dispatchers(MAX_DISPATCH_EVENTS_BUFFER_SIZE);
    }
 
    CreateListenEvent(clbk, params) {
@@ -79,7 +269,6 @@ class Listener {
    }
 
 }
-
 
 export class EventListener extends M_Buffer {
 
@@ -107,18 +296,6 @@ export class EventListener extends M_Buffer {
       return idx;
    }
 
-   // CreateDispatchEventOnListenEvent(type, clbk, params, listenerIdx) {
-
-   //    if (!this.buffer || this.count >= this.size) {
-   //       // TODO: Implement Realloc
-   //       console.error('EventListener\'s buffer is uninitialized Or buffer overflow');
-   //       return;
-   //    }
-
-   //    // Returns the index of the dispatchEventBuffer
-   //    return this.buffer[listenerIdx].dispatchEventBuffer.CreateEvent(type, clbk, params);
-   // }
-
    /**
     * TODO: Currently the params are the whole mesh as a pointer.
     * Make it better by passing only the necessary parameters for the listen callback function.
@@ -129,14 +306,6 @@ export class EventListener extends M_Buffer {
          return this.buffer[0].listenClbk(this.buffer[0].params);
    }
 
-   // Dispatch() {
-   //    if (this.buffer[0].dispatchClbk)
-   //       return this.buffer[0].dispatchClbk(this.buffer[0].dispatchClbkParams);
-   // }
-
-   // RemoveListener(idx) {
-   //    this.RemoveByIdx(idx)
-   // }
    RemoveListener(idx) {
 
       if (this.buffer[idx]) {
@@ -171,8 +340,6 @@ export class EventListener extends M_Buffer {
    }
 }
 
-
-
 class EventListeners {
 
    buffer = [];
@@ -203,21 +370,6 @@ class EventListeners {
       this.buffer[idx[0]].RemoveListener(idx[1]);
    }
 
-   CreateDispatchEventOnListenEvent(type, clbk, params, listenEvevtIdx, listenerIdx) {
-
-      return this.buffer[listenEvevtIdx].CreateDispatchEventOnListenEvent(type, clbk, params, listenerIdx);
-   }
-
-   #GetNextFree() {
-      for (let i = 0; i < this.size; i++) {
-         if (!this.buffer[i].has) {
-            return i;
-         }
-      }
-      return INT_NULL;
-   }
-
-
    /**
     * Current Implementation:
     * Check for event (hover)
@@ -242,49 +394,45 @@ class EventListeners {
                // SEE ##ListenCallback. Pass only necessary parameters.
                if (mesh.StateCheck(MESH_STATE.HAS_HOVER) && listeners.listenClbk(mesh)) { // Checking for mouse hover over mesh
 
-                  if ( STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
-                     Events_handle_immidiate({ type:'unhover', params:{mesh: STATE.mesh.hovered} }); // Unhover previous mesh.
+                  if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
+                     Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
                   }
 
                   if (mesh.StateCheck(MESH_STATE.IN_HOVER) === 0) // Skip hover event, if mesh is already in hover
-                     Events_handle_immidiate({ type:'hover', params:{mesh: mesh} });
+                     Events_handle_immidiate({ type: 'hover', params: { mesh: mesh } });
 
                   // TODO: check for children, must be recursive among all children???
                   const children = mesh.children;
                   // If 'IS_FAKE_HOVER' is active, means that there are children with 'HAS_HOVER', so no need for further 'children exist' checking
-                  if (mesh.StateCheck(MESH_STATE.IS_FAKE_HOVER) && children.count) {
+                  // if (mesh.StateCheck(MESH_STATE.IS_FAKE_HOVER) && children.count) {
 
-                     // console.log('############################')
-                     for (let i = 0; i < children.count; i++) {
+                  //    console.log('############################')
+                  //    for (let i = 0; i < children.count; i++) {
 
-                        const child = children.buffer[i];
+                  //       const child = children.buffer[i];
 
-                        if (listeners.listenClbk(child)) { // Checking for mouse hover over mesh
-                           if ( STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== child.id) { // Case of doublehover
-                              Events_handle_immidiate({ type:'unhover', params:{mesh: STATE.mesh.hovered} }); // Unhover previous mesh.
-                           }
-                           if (child.id !== STATE.mesh.hoveredId && child.StateCheck(MESH_STATE.IN_HOVER) === 0) {
-                              Events_handle_immidiate({ type:'hover', params:{mesh: child} });
-                           }
-                        }
-                        else if (child.StateCheck(MESH_STATE.IN_HOVER) && (
-                           !child.StateCheck(MESH_STATE.IN_MOVE) ||
-                           !child.StateCheck(MESH_STATE.IN_GRAB))) {
-                              Events_handle_immidiate({ type:'unhover', params:{mesh: child} });
-                        }
-                     }
-                  }
+                  //       if (listeners.listenClbk(child)) { // Checking for mouse hover over mesh
+                  //          if ( STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== child.id) { // Case of doublehover
+                  //             Events_handle_immidiate({ type:'unhover', params:{mesh: STATE.mesh.hovered} }); // Unhover previous mesh.
+                  //          }
+                  //          if (child.id !== STATE.mesh.hoveredId && child.StateCheck(MESH_STATE.IN_HOVER) === 0) {
+                  //             Events_handle_immidiate({ type:'hover', params:{mesh: child} });
+                  //          }
+                  //       }
+                  //       else if (child.StateCheck(MESH_STATE.IN_HOVER) && (
+                  //          !child.StateCheck(MESH_STATE.IN_MOVE) ||
+                  //          !child.StateCheck(MESH_STATE.IN_GRAB))) {
+                  //             Events_handle_immidiate({ type:'unhover', params:{mesh: child} });
+                  //       }
+                  //    }
+                  // }
                }
                else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (
                   !mesh.StateCheck(MESH_STATE.IN_MOVE) ||
                   !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
-                     console.log('i:', i1, ' meshId:', STATE.mesh.hoveredId)
-                     Events_handle_immidiate({ type:'unhover', params:{mesh: mesh} });
+                  // console.log('i:', i1, ' meshId:', STATE.mesh.hoveredId)
+                  Events_handle_immidiate({ type: 'unhover', params: { mesh: mesh } });
                }
-               // else if(STATE.mesh.hoveredId !== INT_NULL){
-               //    // console.log('i:', i1, ' meshId:', STATE.mesh.hoveredId)
-               //    Events_handle_immidiate({ type:'unhover', params:{mesh: STATE.mesh.hovered} }); // Unhover any previous mesh.
-               // }
             }
          }
       }
@@ -296,18 +444,8 @@ class EventListeners {
          case LISTEN_EVENT_TYPES.HOVER: return LISTEN_EVENT_TYPES_INDEX.HOVER;
 
          default: alert('ERROR in findining listen event index. @ EventListeners.js, #GetListenEventIdx(listenEventType)');
-         // default: return INT_NULL;
       }
    }
-   // #GetListenEventIdx(listenEventType) {
-   //    for (let i = 0; i < this.count; i++) {
-   //       const type = this.buffer[i].type;
-   //       if (listenEventType === type) {
-   //          return i;
-   //       }
-   //    }
-   //    return INT_NULL;
-   // }
 
 
    /** Debug */
@@ -370,7 +508,7 @@ export function Listener_listen_mouse_hover(params) {
    ];
    // console.log('verticalMargin:', rect[1])
 
-   return Collision_PointRect(point, rect);
+   return Intersection_point_rect(point, rect);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////

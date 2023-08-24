@@ -54,34 +54,6 @@ function Animations_run_scale_up_start(mesh) {
          
          Helper_scale_rect(mesh, scaleFactor);
       }
-
-      // /** Scale button's text meshes */
-      // let accumTextWidth = 0;
-      // const textMesh = mesh.children.buffer[0];
-      // const text = textMesh.mat.text;
-      // const textLen = text.length;
-
-      // const faceHalfWidth = textMesh.geom.dim[0];
-      // textMesh.geom.dim[0] *= scaleFactor; // Update button's text dimentions x
-      // textMesh.geom.dim[1] *= scaleFactor; // Update button's text dimentions y
-
-      // const extraWidth = (mesh.pad * 2) + faceHalfWidth;
-      // const advance = textMesh.geom.dim[0] * 2;
-
-      // _gfx.Copy(textMesh.gfx);
-      // for (let i = 0; i < textLen; i++) {
-
-      //    posx = (mesh.geom.pos[0] - mesh.geom.dim[0]) + extraWidth + accumTextWidth;
-      //    GlSetWposX(_gfx, posx);
-      //    accumTextWidth += advance;
-      //    GlSetDim(_gfx, textMesh.geom.dim)
-
-      //    const sdfOuter = CalculateSdfOuterFromDim(textMesh.geom.dim[0]);
-      //    GlSetAttrSdfParamsOuter(_gfx, sdfOuter);
-
-      //    _gfx.vb.start += _gfx.vb.count; // Update gfx info to point to the next text's face
-      // }
-
    }
 
    return true;
@@ -255,7 +227,7 @@ function Helper_scale_text(mesh, scaleFactor, flag) {
    if(flag === 1) // HACK: For scale down faceHalfWidth must be set after scaling down.
       faceHalfWidth = textMesh.geom.dim[0];
 
-   const extraWidth = (mesh.pad * 2) + faceHalfWidth;
+   const extraWidth = (mesh.pad[0] * 2) + faceHalfWidth;
    const advance = textMesh.geom.dim[0] * 2;
 
    _gfx.Copy(textMesh.gfx);

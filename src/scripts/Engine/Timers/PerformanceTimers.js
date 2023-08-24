@@ -105,3 +105,13 @@ export const _pt4 = PerformanceTimerCreate();
 export function _Tm4GetFps(){ return _pt4.GetFps('_pt4'); }
 export function _Tm4GetMilisec(){ return _pt4.GetMilisec(); }
 export function _Tm4GetNanosec(){ return _pt4.GetNanosec(); }
+
+export const __pt5 = PerformanceTimerCreate();
+export function _Tm5GetFps(){ return __pt5.GetFps('_pt5'); }
+export function _Tm5GetMilisec(){ return __pt5.GetMilisec(); }
+export function _Tm5GetNanosec(){ return __pt5.GetNanosec(); }
+
+export const __pt6 = PerformanceTimerCreate();
+export function _Tm6GetFps(){ return __pt6.GetFps('_pt6'); }
+export function _Tm6GetMilisec(){ return __pt6.GetMilisec(); }
+export function _Tm6GetNanosec(){ return __pt6.GetNanosec(); }

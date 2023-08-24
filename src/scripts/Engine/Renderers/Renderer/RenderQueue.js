@@ -193,8 +193,10 @@ export function RenderQueueSetPriority(flag, progIdx, vbIdx) { renderQueue.SetPr
  * these programs-vertex buffers from the draw queue.
  */
 export function RenderQueueUpdate(progIdx, vbIdx, flag){ 
+
    const idx = renderQueue.Find(progIdx, vbIdx);
    if(idx !== INT_NULL){
+
       renderQueue.buffer[idx].isActive = flag;
       renderQueue.UpdateActiveQueue(); // Create a new active buffer from the updated queue
    }
@@ -218,7 +220,7 @@ export function RenderQueueCreate() {
         *  1. First draw the mesh with the less z-index
         *  2. Then draw the on top mesh with greater z-index 
        */
-   //    scenes.SetPriority(APP_MESHES_IDX.bricks, 'first');
+       //    scenes.SetPriority(APP_MESHES_IDX.bricks, 'first');
 
        // Ui. All ui are in one buffer, so setting any one ui is enough 
        // scenes.SetPriority(APP_MESHES_IDX.ui.animText, 'first');

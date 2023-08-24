@@ -34,7 +34,7 @@ export function Popup_menu_options_text_label(clickedMesh, _pos){
    totalHeight += height+topPad+pad+textlabelpad;
    
    const options1 = new Widget_Label_Text_Mesh_Menu_Options('Option 1', pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-   options1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+   // options1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
    options1.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
    
    options1.SetName();
@@ -46,7 +46,7 @@ export function Popup_menu_options_text_label(clickedMesh, _pos){
    pos[1] = options1.geom.pos[1]+pad+textlabelpad + height*2 +2;
    pos[2] += 1;
    const options2 = new Widget_Label_Text_Mesh_Menu_Options('Option 2', pos, fontSize, GREY3, GREY6, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-   options2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+   // options2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
    options2.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
    options2.SetName();
    i++;
@@ -79,7 +79,7 @@ export function Popup_menu_options_level2_of_text_label(_pos){
    totalHeight += height+topPad+pad+textlabelpad;
    
    const options1 = new Widget_Label_Text_Mesh_Menu_Options('level2 Option 1', pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-   options1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+   // options1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
    options1.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
    
    options1.SetName();
@@ -91,7 +91,7 @@ export function Popup_menu_options_level2_of_text_label(_pos){
    pos[1] = options1.geom.pos[1]+pad+textlabelpad + height*2 +2;
    pos[2] += 1;
    const options2 = new Widget_Label_Text_Mesh_Menu_Options('level2 Option 2', pos, fontSize, GREY3, GREY6, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-   options2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+   // options2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
    options2.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
    options2.SetName();
    i++;
@@ -128,7 +128,7 @@ export function Popup_menu_options_all_scene_meshes(_pos){
    
 
    const options1 = new Widget_Label_Text_Mesh_Menu_Options('Option 1', pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-   options1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+   // options1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
    options1.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
    
    options1.SetName();
@@ -140,7 +140,7 @@ export function Popup_menu_options_all_scene_meshes(_pos){
    pos[1] = options1.geom.pos[1]+pad+textlabelpad + height*2 +2;
    pos[2] += 1;
    const options2 = new Widget_Label_Text_Mesh_Menu_Options('Option 2', pos, fontSize, GREY3, GREY6, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-   options2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+   // options2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
    options2.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
    options2.SetName();
    i++;

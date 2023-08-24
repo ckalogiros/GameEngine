@@ -2,14 +2,18 @@
 
 import { CopyArr3 } from '../../../../Helpers/Math/MathOperations.js';
 import { Bind_change_brightness, Bind_change_color_rgb } from '../../../BindingFunctions.js';
+import { Check_intersection_point_rect } from '../../../Collisions.js';
 import { MouseGetPos, MouseGetPosDif } from '../../../Controls/Input/Mouse.js';
+import { EVENT_TYPES, Listener_create_event, Listener_get_event, Listener_hover_enable, Listener_remove_event } from '../../../Events/EventListeners.js';
 import { FontGetFontDimRatio } from '../../../Loaders/Font/Font.js';
 import { Scenes_get_children } from '../../../Scenes.js';
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from '../../../Timers/TimeIntervals.js';
 import { Geometry2D } from '../../Geometry/Base/Geometry.js';
 import { Material } from '../../Material/Base/Material.js';
 import { MESH_ENABLE, Mesh } from '../Base/Mesh.js';
+import { Widget_Button_Mesh, Widget_Switch_Mesh } from './WidgetButton.js';
 import { Widget_Label_Text_Mesh_Menu_Options } from './WidgetLabelText.js';
+import { Widget_popup_handler_onclick_event } from './WidgetPopup.js';
 import { Widget_Text_Mesh } from './WidgetText.js';
 
 /**
@@ -46,8 +50,7 @@ export class Widget_Slider extends Mesh {
       this.SetStyle(1, 8, 3);
 
       /**
-       * Slider Bar
-       * Bar is child of the slider mesh
+       * Slider Bar: Bar is child of the slider mesh
        */
       // Calculate the bar's and handle's horizontal pading.
       const ratio = dim[0] / dim[1];
@@ -67,17 +70,15 @@ export class Widget_Slider extends Mesh {
       bar.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       bar.SetStyle(0, 3, 2);
       bar.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.HAS_HOVER_COLOR | MESH_STATE.HAS_POPUP);
-      // bar.StateEnable(MESH_STATE.IS_GRABABLE);
-      // bar.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
-      bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-      
+      bar.CreateListenEvent(EVENT_TYPES.CLICK, this.OnClick, bar)
+      Listener_hover_enable(bar);
+
       bar.SetName();
       BAR_IDX = this.AddChild(bar);
 
       /**
-       * Slider Handle
-       * Handle is a child of the bar mesh
-      */
+       * Slider Handle: Handle is a child of the bar mesh
+       */
       pad[1] = dim[1] / 10;
       const handleMetrics = this.#CalculateHandleArea(bargeom.pos, this.geom.dim, pad)
 
@@ -87,10 +88,10 @@ export class Widget_Slider extends Mesh {
       const handle = new Mesh(handlegeom, handlemat);
 
       handle.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
-      handle.StateEnable(MESH_STATE.IS_MOVABLE);
       handle.SetStyle(5, 35, 3);
-      handle.type |= MESH_TYPES_DBG.WIDGET_SLIDER_HANDLE | handlegeom | handlemat;
+      handle.StateEnable(MESH_STATE.IS_MOVABLE);
       handle.SetName();
+      handle.type |= MESH_TYPES_DBG.WIDGET_SLIDER_HANDLE | handlegeom | handlemat;
 
       bar.AddChild(handle); // The handle is added as a child to the bar mesh.
 
@@ -123,7 +124,9 @@ export class Widget_Slider extends Mesh {
 
 
       /** Timed Events */
-      // Reposition slider's value_text to the left by half it's width.
+      // Reposition slider's value_text to the left by half it's width. 
+      // Run this event after the slider's have a gfx info, 
+      // that is after the mesh as added to the graphics pipeline.
       const w = slider_value_text.CalcTextWidth()
       const width = w + slider_value_text.geom.dim[0] * 2;
       const params = {
@@ -163,13 +166,10 @@ export class Widget_Slider extends Mesh {
 
    }
 
-   SetMenuOptionsClbk(ClbkFunction){
+   SetMenuOptionsClbk(ClbkFunction) {
 
       const bar = this.children.buffer[BAR_IDX];
-      bar.MenuOptionsClbk = ClbkFunction;
-  }
-   GetOptions() {
-      return 'Widget_Slider Options'
+      bar.menu_options.Clbk = ClbkFunction;
    }
 
    /** Private Methods */
@@ -196,69 +196,107 @@ export class Widget_Slider extends Mesh {
       };
    }
 
-}
 
-export function Slider_create_on_click_event(slidermesh, targetToBind, targetClbks) {
-
-   // We need slider's bar, not slider widget.
-   const bar = slidermesh.children.buffer[BAR_IDX];
-   // bar.CreateEvent(_Slider_create_on_click_event, bar, null);
-   bar.CreateEvent({
-      params:{
-         EventClbk: _Slider_create_on_click_event,
-         target:  bar,
-         targetClbks: null,
-      }
-   });
-   
-}
-
-function _Slider_create_on_click_event(params) {
-
-   const sliderBar = params.params.target;
-   if (sliderBar.timeIntervalsIdxBuffer.count <= 0) {
-
-      const idx = TimeIntervalsCreate(10, 'Move Mesh', TIME_INTERVAL_REPEAT_ALWAYS, Slider_on_update_handle, sliderBar);
-      sliderBar.timeIntervalsIdxBuffer.Add(idx);
+   OnHover(params) {
+      console.log('Slider Hover!!!')
    }
+
+   OnClick(params) {
+
+      const mesh = params.self_params;
+      const point = MouseGetPos();
+      const m = mesh.geom;
+
+      if (Check_intersection_point_rect(m.pos, m.dim, point, [0, 8])) {
+
+         STATE.mesh.SetClicked(params.self_params);
+
+         if (mesh.timeIntervalsIdxBuffer.count <= 0) {
+
+            /**
+             * Create the handle move event.
+             * The handle move event runs only when the handle is GRABED.
+             * That means that the timeInterval is created and destroyed upon 
+             * onClickDown and onClickUp respectively.
+             */
+            const idx = TimeIntervalsCreate(10, 'Move Mesh', TIME_INTERVAL_REPEAT_ALWAYS, Slider_on_update_handle, mesh);
+            mesh.timeIntervalsIdxBuffer.Add(idx);
+
+            if (mesh.StateCheck(MESH_STATE.IS_GRABABLE)) {
+
+               STATE.mesh.SetGrabed(mesh);
+               mesh.StateEnable(MESH_STATE.IN_GRAB);
+            }
+
+            // Handle any menu of the slider (on leftClick only)
+            if (mesh.StateCheck(MESH_STATE.HAS_POPUP)) {
+
+               const btnId = params.trigger_params;
+               Widget_popup_handler_onclick_event(mesh, btnId)
+            }
+         }
+      }
+   }
+
 }
 
-export function Slider_connect(params){
+export function Slider_connect(_params) {
 
-   const sliderBar = params.params.target1;
-   const target = params.params.target2;
-   const Binding_function = params.params.targetBindingFunctions;
+   const sliderBar = _params.self_mesh;
+   const target = _params.target_mesh;
+   const Binding_function = _params.targetBindingFunctions;
 
+   /*FOR DEBUG*/const clicked_mesh = _params.clicked_mesh
+
+   /**
+    * TODO!!!:  The 'sliderBar.eventCallbacks.count' is not counting corectly. I had count = 2 and the buffer had only 1 element not null
+    */
    // Check if the connection already exists
-   for(let i=Rename_evtClbk_elem1; i<sliderBar.eventCallbacks.count; i++){
-      
-      const newTargetId = params.params.target2.id;
-      const existingTargetId = sliderBar.eventCallbacks.buffer[i].params.target.id;
-      
-      // The connection already exists
-      if(newTargetId === existingTargetId){
-         console.log('connection already exists');
+   for (let i = 0; i < sliderBar.eventCallbacks.count; i++) {
 
-         // Disconnect
-         sliderBar.eventCallbacks.RemoveByIdx(i);
+      if (sliderBar.eventCallbacks.buffer[i] !== null) {
 
-         return;
+         var newTargetId = _params.target_mesh.id;
+         var existingTargetId = sliderBar.eventCallbacks.buffer[i].target.id;
+
+         // The connection already exists
+         if (newTargetId === existingTargetId) {
+            console.log('Disconnecting. STATE.mesh.clicked:', STATE.mesh.clickedId);
+
+            clicked_mesh.SetColor(RED)
+
+            // Disconnect
+            sliderBar.eventCallbacks.RemoveByIdx(i);
+            // console.log(sliderBar.eventCallbacks)
+
+            return;
+         }
       }
+
    }
 
-   Slider_bind_on_value_change(sliderBar, target, Binding_function);
+   console.log('Connecting. STATE.mesh.clicked:', STATE.mesh.clickedId);
+   clicked_mesh.SetColor(GREEN)
+
+   const params = {
+      target: target,
+      Clbk: Binding_function,
+   }
+   // sliderBar.eventCallbacks.Add(params);
+   // sliderBar.CreateEvent(params);
+   sliderBar.eventCallbacks.Add(params);
+   // console.log(sliderBar.eventCallbacks)
+
 }
 
-export function Slider_bind_on_value_change(sliderBar, targetToBind, targetClbks) {
+export function Slider_bind_on_value_change(sliderBar, target, Clbk) {
 
-   sliderBar.CreateEvent({
-      params:{
-         EventClbk: Slider_on_value_change,
-         target:  targetToBind,
-         targetClbks: targetClbks,
-      }
-   });
-   
+   const params = {
+      target: target,
+      Clbk: Binding_function,
+   }
+   sliderBar.eventCallbacks.Add(params);
+
 }
 
 export function Slider_on_update_handle(_params) {
@@ -267,7 +305,7 @@ export function Slider_on_update_handle(_params) {
     * The function is called by the timeInterval.
     * The timeInterval has been set by the 'Slider_create_on_click_event',
     * that is called from 'HandleEvents()' 
-    * as 'mesh.eventCallbacks.buffer[i].Clbk(target, targetClbks);'
+    * as 'mesh.eventCallbacks.buffer[i].Clbk(target, Clbk);'
     * The 'HandleEvents()' passes the param '_params' to this function.
     */
 
@@ -292,57 +330,23 @@ export function Slider_on_update_handle(_params) {
 
    slider_val.UpdateText(val); // Change the text mesh to the current slider's value
 
-   // Run the callback for the sliders target mesh.
-   const len = bar.eventCallbacks.count;
-   if (len) {
-
-      for (let i = Rename_evtClbk_elem1; i < len; i++) {
-         /**
-          * Dispatch all callbacks for all different targets, that is
-          * found on every eventCallbacks[] buffer. The [0] element is 
-          * not included, since it holds the eventCallback set up of the 
-          * current slider's 'onclick' callback, that is called from the
-          * 'HandleEvents()' function.
-          * 
-          * TODO: We can abolish the 'Callback()' which is the call to 'Slider_on_value_change()',
-          * and instead call directly the 'targetClbks'.
-          */
-         console.log(bar.eventCallbacks.count)
-         const Callback    = bar.eventCallbacks.buffer[i].params.EventClbk;
-         const target      = bar.eventCallbacks.buffer[i].params.target;
-         const targetClbks = bar.eventCallbacks.buffer[i].params.targetClbks;
-         Callback(target, targetClbks, val)
-      }
-   }
-
-}
-
-export function Slider_on_value_change(params, paramsClbks, sliderVal) {
-
-   /** Set by 'Slider_bind_on_value_change()', called when the slider's bar 'eventCallbacks' buffer will run.
-    * Here we set the callbacks that the slider value will be implemented to.
-    * 
-    * TODO: The literal int 100 represents the slider's
-    * value 'width', that is the max value the slider can have all way to the right.
-    * We must find a way of passing the max val from the event system, when the 'eventCallbacks' run.
+   /**
+    * Dispatch all callbacks for all targets, that is
+    * found on every eventCallbacks[] buffer.  
     */
+   if (bar.eventCallbacks.count) {
+      for (let i = 0; i < bar.eventCallbacks.count; i++) {
 
-   if (Array.isArray(paramsClbks)) {
+         if (bar.eventCallbacks.buffer[i] !== null) {
 
-      const len = paramsClbks.length;
-      for (let i = 0; i < len; i++) {
-
-         paramsClbks[i](params, sliderVal, 100);
+            const target = bar.eventCallbacks.buffer[i].target;
+            const TargetClbk = bar.eventCallbacks.buffer[i].Clbk;
+            TargetClbk(target, val, 100);
+         }
       }
    }
-   else {
 
-      // params.targetClbks(params, sliderVal, 100);
-      paramsClbks(params, sliderVal, 100);
-   }
 }
-
-
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -392,84 +396,116 @@ function Geometry2D_set_posx(params) {
     * to set the slider's value_text mesh position alligned with the 
     * right side of the slider.
     */
-   const mesh = params.mesh;
-   const x = params.x;
-   mesh.Move(x, 0)
+   params.mesh.MoveRecursive(params.x, 0)
 }
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Slider Specific Menu Options Constructor Functions 
+ * Slider Specific Menu Options - Constructor Functions 
  */
-export function Slider_menu_create_options(clickedMesh, _pos){
 
-   let i = 0;
-   let totalHeight = 0;
+_cnt = 0;
 
-   const meshes = Scenes_get_children(STATE.scene.idx);
+const SLIDER_MENU_OPTIONS = {
+   OPTION_1: _cnt++,
+
+   SIZE: _cnt,
+};
+
+const _slider_options = [];
+
+export function Slider_menu_create_options(clickedMesh, _pos) {
 
    /** Main Options */
-   // 1. 
    const font = MENU_FONT_IDX;
    const fontSize = MENU_FONT_SIZE;
    const topPad = 12, pad = 5;
    const height = fontSize * FontGetFontDimRatio(font);
-   const textlabelpad = 2;
-   const pos = [0,0,0];
-   CopyArr3(pos, _pos); 
-   pos[0] += pad+textlabelpad; 
-   pos[1] += height+topPad+pad+textlabelpad;
-   pos[2] += 1;
-   
-   totalHeight += height+topPad+pad+textlabelpad;
+   const textlabelpad = [2, 2];
+   let maxWidth = 0;
+   const options = [];
+   const pos = [0, 0, 0];
 
-   const options1 = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${meshes[0].id}`, pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-   options1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-   options1.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
-   options1.SetName();
-   
-   i++;
-   totalHeight += options1.geom.dim[1];
-   
-   CopyArr3(pos, _pos); 
-   pos[0] += pad+textlabelpad; 
-   pos[1] = options1.geom.pos[1]+pad+textlabelpad + height*2 +2;
-   pos[2] += 1;
-   const options2 = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${meshes[1].id}`, pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-   options2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-   options2.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
-   options2.SetName();
-   
-   i++;
-   totalHeight += options2.geom.dim[1];
 
-   CopyArr3(pos, _pos); 
-   pos[0] += pad+textlabelpad; 
-   pos[1] = options2.geom.pos[1]+pad+textlabelpad + height*2 +2;
+   let totalHeight = 0;
+
+   CopyArr3(pos, _pos);
+   pos[0] += pad + textlabelpad[0];
+   pos[1] += height + topPad + pad + textlabelpad[1];
    pos[2] += 1;
-   const options3 = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${meshes[3].id}`, pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-   options3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-   options3.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
-   options3.SetName();
-   
-   i++;
-   totalHeight += options3.geom.dim[1];
+
+   totalHeight += height + topPad + pad + textlabelpad[1];
+
+
+   if (clickedMesh.menu_options.idx > INT_NULL) {
+
+      const saved = _slider_options[clickedMesh.menu_options.idx];
+      const count = saved.count;
+      for (let i = 0; i < count; i++) {
+
+         
+         CopyArr3(pos, _pos);
+         pos[0] += pad + textlabelpad[0] + saved.buffer[i].geom.dim[0];
+         pos[1] = saved.buffer[i].geom.pos[1];
+         
+         saved.buffer[i].SetPosRecursive(pos);
+         // // const dif = [pos[0] - old_pos[0], pos[1] - old_pos[1]]; 
+         // saved.buffer[i].MoveRecursive(dif[0], dif[1]);
+         
+      }
+
+      return _slider_options[clickedMesh.menu_options.idx]
+   }
+
+
+   const meshes = Scenes_get_children(STATE.scene.idx);
+
+
+
+
+   for (let i = 0; i < 10; i++) {
+
+      if (i === 0)
+         var option = new Widget_Switch_Mesh(pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
+      else
+         var option = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${meshes[i].id}`, pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
+
+      option.SetName();
+
+      if (maxWidth < option.geom.dim[0])
+         maxWidth = option.geom.dim[0];
+
+      CopyArr3(pos, _pos);
+      pos[0] += pad + textlabelpad[0];
+      pos[1] = option.geom.pos[1] + pad + textlabelpad[1] + height * 2 + 2;
+      pos[2] += 1;
+
+      totalHeight += option.geom.dim[1];
+
+      options[i] = option;
+   }
+
+
 
    const menu = {
 
-      buffer: [options1, options2, options3],
-      targets: [meshes[0], meshes[1], meshes[2]],
-      maxWidth: options1.geom.dim[0],
-      count: i,
+      buffer: options,
+      targets: meshes.slice(0, options.length),
+      maxWidth: maxWidth,
+      count: options.length,
       totalHeight: totalHeight,
-      params:{
+      params: {
 
          targetBindingFunctions: Bind_change_brightness,
          EventClbk: Slider_connect,
-         target1: clickedMesh,
-         target2: null,
+         self_mesh: clickedMesh,
+         target_mesh: null,
       },
    }
+
+   const idx = _slider_options.push(menu);
+   clickedMesh.menu_options.idx = idx - 1; // Store the index of the menu options in the owner mesh.
+
    return menu;
-} 
+}
 

@@ -114,6 +114,7 @@ function ShowTotalScoreStart(params){
     // Get the mesh Widget_Label_Text_Mesh with the total score
     const scoreLabel = ScenesGetMesh(APP_MESHES_IDX.text.totalScore);
     if(scoreLabel !== null || scoreLabel !== undefined){
+        
         scoreLabel.ChangeText('Total Score: ' + params.totalScore);
         UiSetTotalScore(params.totalScore);
     }

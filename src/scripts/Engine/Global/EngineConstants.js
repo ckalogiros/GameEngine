@@ -12,11 +12,28 @@ const NANOSEC = 0.000001;
 const Rename_evtClbk_elem0 = 0; // The first element in the eventCallbacks buffer of every Mesh.
 const Rename_evtClbk_elem1 = 1; // The first element in the eventCallbacks buffer of every Mesh.
 
-function CHECK_ERROR(obj, msg) {
-	if (!obj || obj === undefined) {
-		console.error('object:', obj, msg)
+function ERROR_NULL(obj, msg) {
+	if (obj === null || obj === undefined || obj === INT_NULL) {
+		console.error('Null ERROR. object:', obj, msg)
+		return true;
 	}
 }
+
+function ERROR_TYPE(obj, type, msg) {
+	if ((obj.type & type) === 0) {
+		console.error(`Type ERROR. type: ${GetMeshNameFromType(type)}, objectType: ${GetMeshNameFromType(obj.type)}`, msg)
+		return true;
+	}
+}
+
+// function ERROR_CLASS_TYPE(obj, type, msg) {
+// 	if (!(obj.type instanceof type)) {
+// 		console.error(`Class type ERROR. type: ${typeof type}, objectType: ${typeof obj}`, msg)
+// 		return true;
+// 	}
+// }
+
+let _cnt = 0x1;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Application Constants 
@@ -77,7 +94,7 @@ const STATE = {
 				this.grabedIdx = mesh.idx;
 			}
 		},
-		SetClickedNull(){
+		SetClicked(mesh){
 			this.clicked = mesh;
 			if(!mesh){
 				this.clickedId = INT_NULL;
@@ -87,7 +104,7 @@ const STATE = {
 				this.clickedIdx = mesh.idx;
 			}
 		},
-		SetSelectedNull(mesh){
+		SetSelected(mesh){
 			this.selected = mesh;
 			if(!mesh){
 				this.selectedId = INT_NULL;
@@ -105,9 +122,21 @@ const STATE = {
 	},
 };
 
+_cnt = 0x1;
+const SECTION = {
 
+   VERTICAL: _cnt<<=0x1,
+   HORIZONTAL: _cnt<<=0x1,
+	EXPAND: _cnt<<=0x1,
+	FIT: _cnt<<=0x1,
+	FOLLOW: _cnt<<=0x1,
+	
+	ITEM_FIT: _cnt<<=0x1,
+	ITEM_RESTRICT: _cnt<<=0x1,
 
-let _cnt = 0x1;
+};
+
+_cnt = 0x1;
 const MESH_STATE = {
 
 	IN_FOCUS: _cnt <<= 1,
@@ -154,7 +183,6 @@ const MESH_STATE = {
 	}
 };
 
-
 const MOUSE = {
 
 	BTN_ID:{
@@ -165,14 +193,26 @@ const MOUSE = {
 	},
 };
 
+_cnt = 0x1;
+const ALIGN = {
+   LEFT: _cnt <<= 0x1,
+   RIGHT: _cnt <<= 0x1,
+   TOP: _cnt <<= 0x1,
+   BOTTOM: _cnt <<= 0x1,
+   VERT_CENTER: _cnt <<= 0x1,
+   HOR_CENTER: _cnt <<= 0x1,
 
-// _cnt = 0;
-// const MESH_EVENT_CLBKS_INDEX_TABLE = {
+   VERTICAL: _cnt <<= 0x1,
+   HORIZONTAL: _cnt <<= 0x1,
+}
 
-// 	SLIDER_CHANGE_VALUE: _cnt++,
-	
-// 	SIZE: _cnt,
-// };
+_cnt = 0x1;
+const SIZER = {
+   RESTRICT: _cnt <<= 0x1,
+}
+
+const POSITION_CENTER = [0,0,0]
+
 
 _cnt = 0x1;
 /**
@@ -227,10 +267,14 @@ const EVENTS = {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Style Constants  
  */
-
+function TRANSPARENCY(col, transparency){
+	return [col[0],col[1],col[2],transparency]
+}
 const TRANSPARENT = [0.0, 0.0, 0.0, 0.0];
 const WHITE = [1.0, 1.0, 1.0, 1.0];
+const BLACK_TRANS = [0.0, 0.0, 0.0, .3];
 const BLACK = [0.0, 0.0, 0.0, 1.0];
+const GREY0 = [0.05, 0.05, 0.05, 1.0];
 const GREY1 = [0.1, 0.1, 0.1, 1.0];
 const GREY2 = [0.2, 0.2, 0.2, 1.0];
 const GREY3 = [0.3, 0.3, 0.3, 1.0];
@@ -238,16 +282,21 @@ const GREY4 = [0.4, 0.4, 0.4, 1.0];
 const GREY5 = [0.5, 0.5, 0.5, 1.0];
 const GREY6 = [0.6, 0.6, 0.6, 1.0];
 const GREY7 = [0.7, 0.7, 0.7, 1.0];
+const GREY8 = [0.8, 0.8, 0.8, 1.0];
+const GREY9 = [0.9, 0.9, 0.9, 1.0];
 const GREEN = [0.0, 1.0, 0.0, 1.0];
 const GREENL1 = [0.07, 0.9, 0.0, 1.0];
 const GREENL2 = [0.1, 0.8, 0.0, 1.0];
 const GREENL3 = [0.1, 0.6, 0.0, 1.0];
 const GREENL4 = [0.08, 0.2, 0.0, 1.0];
 const BLUE = [0.0, 0.0, 1.0, 1.0];
+	const BLUE_TRANS = [0.0, 0.0, 1.0, .3];
 const BLUER1 = [0.0, 0.2, 88.0, 1.0];
 const BLUER2 = [0.0, 0.2, 75.0, 1.0];
 const BLUER3 = [0.0, 0.2, 6.0, 1.0];
 const RED = [1.0, 0.0, 0.0, 1.0];
+const RED_TRANS = [1.0, 0.0, 0.0, .3];
+const PURPLE = [0.5, 0.0, 1.0, 1.0];
 const YELLOW = [1.0, 1.0, 0.0, 1.0];
 const MAGENTA_BLUE = [0.5, 0.0, 1.0, 1.0];
 const MAGENTA_RED = [1.0, 0.0, 0.6, 1.0];
@@ -330,10 +379,6 @@ const COMIC_FONT_METRICS_PATH = '../../../../consolas_sdf/metrics/consolas_sdf.t
 // Textures names and paths
 const TEXTURE_TEST = 'msdf';
 
-
-
-
-
 const MENU_FONT_IDX = TEXTURES.SDF_CONSOLAS_LARGE;
 const MENU_FONT_SIZE = 5;
 
@@ -360,11 +405,17 @@ const MESH_TYPES_DBG = {
 
 	MESH: 			_cnt <<= 1,
 	TEXT_MESH: 		_cnt <<= 1,
+	RECT_MESH: 		_cnt <<= 1,
+	PANEL_MESH: 		_cnt <<= 1,
+	
+	SECTION_MESH: 		_cnt <<= 1,
 
+	WIDGET_GENERIC: 		_cnt <<= 1,
 	WIDGET_TEXT_LABEL: 		_cnt <<= 1,
 	WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS: 		_cnt <<= 1,
 	WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS: 		_cnt <<= 1,
 	WIDGET_BUTTON: 			_cnt <<= 1,
+	WIDGET_SWITCH: 			_cnt <<= 1,
 	WIDGET_TEXT: 				_cnt <<= 1,
 	WIDGET_TEXT_DYNAMIC: 	_cnt <<= 1,
 	WIDGET_SLIDER: 			_cnt <<= 1,
@@ -372,24 +423,6 @@ const MESH_TYPES_DBG = {
 	WIDGET_SLIDER_HANDLE: 	_cnt <<= 1,
 	WIDGET_POP_UP: 			_cnt <<= 1,
 };
-
-// console.log(MESH_TYPES_DBG.GEOMETRY2D);
-// console.log(MESH_TYPES_DBG.TEXT_GEOMETRY2D);
-// console.log(MESH_TYPES_DBG.GEOMETRY3D);
-// console.log(MESH_TYPES_DBG.CUBE_GEOMETRY);
-// console.log(MESH_TYPES_DBG.MATERIAL);
-// console.log(MESH_TYPES_DBG.FONT_MATERIAL);
-// console.log(MESH_TYPES_DBG.MESH);
-// console.log(MESH_TYPES_DBG.TEXT_MESH);
-// console.log(MESH_TYPES_DBG.WIDGET_TEXT_LABEL)
-// console.log(MESH_TYPES_DBG.WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS);
-// console.log(MESH_TYPES_DBG.WIDGET_BUTTON);
-// console.log(MESH_TYPES_DBG.WIDGET_TEXT);
-// console.log(MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC);
-console.log(MESH_TYPES_DBG.WIDGET_SLIDER);
-// console.log(MESH_TYPES_DBG.WIDGET_SLIDER_BAR);
-// console.log(MESH_TYPES_DBG.WIDGET_SLIDER_HANDLE);
-// console.log(MESH_TYPES_DBG.WIDGET_POP_UP);
 
 function GetMeshNameFromType(type) {
 
@@ -405,10 +438,15 @@ function GetMeshNameFromType(type) {
 	
 	if (type & MESH_TYPES_DBG.MESH) { meshType.push('Mesh'); }
 	if (type & MESH_TYPES_DBG.TEXT_MESH) { meshType.push('Text_Mesh'); }
+	if (type & MESH_TYPES_DBG.RECT_MESH) { meshType.push('RECT_MESH'); }
 	
+	if (type & MESH_TYPES_DBG.SECTION_MESH) { meshType.push('SECTION_MESH'); }
+	
+	if (type & MESH_TYPES_DBG.WIDGET_GENERIC) { meshType.push('WIDGET_GENERIC'); }
 	if (type & MESH_TYPES_DBG.WIDGET_TEXT_LABEL) { meshType.push('Widget_Label_Text_Mesh'); }
 	if (type & MESH_TYPES_DBG.Widget_Label_Text_Mesh_Menu_Options) { meshType = 'Widget_Label_Text_Mesh_Menu_Options'; }
 	if (type & MESH_TYPES_DBG.WIDGET_BUTTON) { meshType.push('Widget_Button_Mesh'); }
+	if (type & MESH_TYPES_DBG.WIDGET_SWITCH) { meshType.push('Widget_Switch_Mesh'); }
 	if (type & MESH_TYPES_DBG.WIDGET_TEXT) { meshType.push('Widget_Text_Mesh'); }
 	if (type & MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC) { meshType.push('Widget_Dynamic_Text_Mesh'); }
 	if (type & MESH_TYPES_DBG.WIDGET_SLIDER) { meshType.push('WIDGET_SLIDER'); }
@@ -433,7 +471,11 @@ function GetMeshHighOrderNameFromType(type) {
 	
 	if (type & MESH_TYPES_DBG.MESH) { meshType = 'MESH'; }
 	if (type & MESH_TYPES_DBG.TEXT_MESH) { meshType = 'TEXT_MESH'; }
+	if (type & MESH_TYPES_DBG.RECT_MESH) { meshType = 'RECT_MESH'; }
 	
+	if (type & MESH_TYPES_DBG.SECTION_MESH) { meshType = 'SECTION_MESH'; }
+	
+	if (type & MESH_TYPES_DBG.WIDGET_GENERIC) { meshType = 'WIDGET_GENERIC'; }
 	if (type & MESH_TYPES_DBG.WIDGET_TEXT_LABEL) { meshType = 'WIDGET_TEXT_LABEL'; }
 	if (type & MESH_TYPES_DBG.WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS) { meshType = 'WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS'; }
 	if (type & MESH_TYPES_DBG.WIDGET_BUTTON) { meshType = 'WIDGET_BUTTON'; }
@@ -508,4 +550,6 @@ const DEBUG = {
 	SHADERS: true,
 
 	BINDING_FUNCTIONS: true,
+
+	OLD_HOVER_LISTENER_IS_ENABLED: false,
 };

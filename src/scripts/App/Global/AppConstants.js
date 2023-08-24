@@ -21,17 +21,6 @@ const g_state = {
     },
 };
 
-const ALIGN = {
-
-    NONE:0x0,
-    LEFT: 0x1,
-    RIGHT: 0x2,
-    TOP: 0x4,
-    BOTTOM: 0x8,
-    CENTER_HOR: 0x10,
-    CENTER_VERT: 0x20,
-};
-
 const MENU_BAR_HEIGHT = 0;
 const GAME_AREA_TOP = MENU_BAR_HEIGHT * 2;
 

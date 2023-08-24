@@ -2,6 +2,7 @@
 
 import { GlAddGeometry } from "../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh } from "../../../Graphics/GlProgram.js";
+import { CopyArr2 } from "../../../Helpers/Math/MathOperations.js";
 import { FontGetFontDimRatio } from "../../Loaders/Font/Font.js";
 import { Geometry2D } from "./Base/Geometry.js";
 
@@ -56,4 +57,9 @@ export class Geometry2D_Text extends Geometry2D {
    CalcTextWidth(){
       return this.numChars * this.dim[0] * 2;
    }   
+
+   Reposition_pre(pos){
+      CopyArr2(this.pos, pos)
+      CopyArr2(this.defPos, pos)
+   }
 }

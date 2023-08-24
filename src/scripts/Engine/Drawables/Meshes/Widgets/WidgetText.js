@@ -32,10 +32,6 @@ export class Widget_Text_Mesh extends Text_Mesh {
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT | geom.type | mat.type;
 	}
 
-	GetOptions(){
-		return 'Widget_Text_Mesh Options'
-	}
-
 }
 
 
@@ -63,13 +59,13 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 		if (this.children.buffer !== null) {
 
 			const lastChild = (this.children.buffer[this.children.count - 1]);
-			CHECK_ERROR(lastChild, ' @ Widget_Dynamic_Text_Mesh.CreateDynamicText(). WidgetText.js');
+			ERROR_NULL(lastChild, ' @ Widget_Dynamic_Text_Mesh.CreateDynamicText(). WidgetText.js');
 
 			// Translate to right after the previous dynamicText.
 			pos = [0, 0, 0];
 			CopyArr3(pos, lastChild.geom.pos); // Copy the dynamic's text mesh pos
 			const prevXdim = ((lastChild.geom.dim[0] * 2 * lastChild.mat.text.length) - lastChild.geom.dim[0]);
-			pos[0] += prevXdim + pad;
+			pos[0] += prevXdim + [0];
 		}
 		else {
 

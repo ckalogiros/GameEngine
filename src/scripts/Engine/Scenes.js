@@ -3,8 +3,9 @@ import { GlRotateXY3D } from '../Graphics/Buffers/GlBufferOps.js';
 import { AnimationsGet } from './Animations/Animations.js';
 import { MouseGetPosDif } from './Controls/Input/Mouse.js';
 import { Int8Buffer, M_Buffer } from './Core/Buffers.js';
-import { ListenersGetListenersBuffer } from './Events/EventListeners.js';
+import { Listener_hover_get, ListenersGetListenersBuffer } from './Events/EventListeners.js';
 import { HandleEvents, RegisterEvent } from './Events/Events.js';
+import { __pt5, __pt6 } from './Timers/PerformanceTimers.js';
 import { FpsGet } from './Timers/Time.js';
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -12,6 +13,8 @@ import { FpsGet } from './Timers/Time.js';
  * TODO
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+const _pt5 = __pt5; // Generic performance timer
+const _pt6 = __pt6; // Generic performance timer
 
 export class Scene {
 
@@ -38,6 +41,7 @@ export class Scene {
 
         const animations = AnimationsGet();
         const listeners = ListenersGetListenersBuffer();
+        const listener_hover = Listener_hover_get();
 
         // Move mesh if it's movable   
         if (STATE.mesh.grabed && STATE.mesh.grabed.StateCheck(MESH_STATE.IS_MOVABLE)) {
@@ -50,17 +54,23 @@ export class Scene {
         for (let i = 0; i < this.children.count; i++) {
 
             const mesh = this.children.buffer[i];
+            if(mesh) {
+    
+                // if (mesh.state.mask & MESH_STATE.IN_MOVE) {
+                //     const dif = MouseGetPosDif();
+                //     mesh.Move(dif.x, -dif.y)
+                // }
+    
+                if(this.children.buffer[i] === null)
+                console.log()
+    
+                // Rotate
+                if (mesh.type & MESH_TYPES_DBG.CUBE_GEOMETRY) {
+    
+                    const fpsTimer = FpsGet();
+                    GlRotateXY3D(mesh, fpsTimer.cnt * .02)
+                }
 
-            // if (mesh.state.mask & MESH_STATE.IN_MOVE) {
-            //     const dif = MouseGetPosDif();
-            //     mesh.Move(dif.x, -dif.y)
-            // }
-
-            // Rotate
-            if (this.children.buffer[i].type & MESH_TYPES_DBG.CUBE_GEOMETRY) {
-
-                const fpsTimer = FpsGet();
-                GlRotateXY3D(this.children.buffer[i], fpsTimer.cnt * .02)
             }
         }
 
@@ -68,7 +78,10 @@ export class Scene {
 
 
         /** Run Listeners */
-        listeners.Run();
+        _pt6.Start(); listener_hover.Run(); _pt6.Stop();
+        if(DEBUG.OLD_HOVER_LISTENER_IS_ENABLED){
+            _pt5.Start(); listeners.Run(); _pt5.Stop();
+        }
 
         /** Run Animations */
         animations.Run();
@@ -94,8 +107,16 @@ export class Scene {
          * Run any timed events after a meshe is added to the graphics pipeline.
          */
         if (mesh.timedEvents.count)
-            RegisterEvent('mesh-created', mesh)
+            RegisterEvent('mesh-created', mesh);
 
+        return gfx;
+
+    }
+
+    RemoveMesh(mesh){
+
+        ERROR_NULL(mesh.idx)
+        this.children.RemoveByIdx(mesh.idx);
     }
 
     StoreMesh(mesh) {
@@ -166,7 +187,7 @@ export class Scene {
 
     Temp_FindMeshById(id) {
         for (let i = 0; i < this.children.count; i++) {
-            if (this.children.buffer[i].id === id)
+            if (this.children.buffer && this.children.buffer[i].id === id)
                 return this.children.buffer[i];
             return null;
         }
@@ -233,32 +254,39 @@ export function ScenesPrintSceneMeshes(_children, count) {
         const children = _children.buffer[i];
         let r = ' ';
         for (let j = 0; j < count; j++) r += '->';
-            console.log(r, children.id, GetMeshHighOrderNameFromType(children.type))
+        console.log(i, r, children.id, GetMeshHighOrderNameFromType(children.type))
 
         if (children.children.count) {
             count++
             ScenesPrintSceneMeshes(children.children, count);
             count--;
         }
-
     }
+
 }
 
 export function ScenesPrintAllMeshes(_children, count) {
+
+    let total_count = 0;
 
     for (let i = 0; i < _children.count; i++) {
 
         const child = _children.buffer[i];
         let r = ' ';
         
-        for (let j = 0; j < count; j++) r += '->';
-            console.log(r, child.id, GetMeshHighOrderNameFromType(child.type))
-
+        for (let j = 0; j < count; j++){
+            r += '->';
+        }
+        console.log(i, r, child.id, GetMeshHighOrderNameFromType(child.type))
+        total_count++;
+        
         if (child.children.count) {
-            count++
-            ScenesPrintAllMeshes(child.children, count);
+            count++; 
+            total_count += ScenesPrintAllMeshes(child.children, count);
             count--;
         }
-
     }
+
+    return total_count;
+
 }

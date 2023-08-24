@@ -34,3 +34,12 @@
  *    Attributes on the other hand, may be enabled from any mesh belonging to the 
  *    shader program,   
  */
+
+/**
+ * Position-Size Controler and grid sections
+ * 
+ * A section should be responsible for:
+ *    position: all its children
+ *    size: resize all its children, if they are sections
+ *          resize its self, tha means repositioning its children
+ */

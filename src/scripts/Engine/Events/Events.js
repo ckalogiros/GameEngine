@@ -2,7 +2,8 @@
 import { OnMouseMove_Android, OnTouchStart, OnTouchEnd, OnTouchCancel, OnTouchMove } from "./MouseEvents.js";
 import { OnMouseMove, OnMouseDown, OnMouseUp, OnMouseOut, OnMouseWheel } from "../Controls/Input/Mouse.js";
 import { OnKeyDown, OnKeyUp } from "../Controls/Input/Keys.js";
-import { Widget_popup_handler_onclick_event } from "../Drawables/Meshes/Widgets/WidgetPopup.js";
+import { Widget_popup_deactivate, Widget_popup_handler_onclick_event } from "../Drawables/Meshes/Widgets/WidgetPopup.js";
+import { EVENT_TYPES, Listener_dispatch_event } from "./EventListeners.js";
 
 
 
@@ -73,20 +74,14 @@ export function HandleEvents() {
         }
 
         else if (e.type === 'mouse-click-down') {
-            // console.debug('mouse-click-down')
 
             STATE.mouse.activeClickedButtonId = e.params.mouseButton;
 
-            // Handle the popup menu for left mouse click
-            Widget_popup_handler_onclick_event(STATE.mesh.hovered, e.params.mouseButton);
-            // TODO: Should be STATE.mesh.hovered.OnClick() for every mesh clicked.
+            // if(e.params.mesh.StateCheck(MESH_STATE.HAS_POPUP)){
 
-            if (STATE.mesh.hoveredId !== INT_NULL) {
-                console.debug('clicked: ', STATE.mesh.hoveredId)
-
-                RegisterEvent('mouse-click-down-hover', STATE.mesh.hoveredId)
-            }
-
+                // Widget_popup_deactivate();
+            // }
+            Listener_dispatch_event(EVENT_TYPES.CLICK, e.params.mouseButton);
         }
 
         else if (e.type === 'mouse-click-up') {
@@ -112,44 +107,10 @@ export function HandleEvents() {
         }
 
         else if (e.type === 'mouse-click-down-hover') {
-            // console.debug('mouse-click-down-hover')
-
-            const mesh = STATE.mesh.hovered;
-
-            console.debug('meshId', mesh.id)
-
-            if (mesh.StateCheck(MESH_STATE.IS_MOVABLE) && mesh.StateCheck(MESH_STATE.IN_MOVE) === 0) {
-                mesh.StateEnable(MESH_STATE.IN_MOVE);
-                RegisterEvent('Move', mesh)
-            }
             
-            if (mesh.StateCheck(MESH_STATE.IS_GRABABLE)) {
-                
-                console.log('mouse-click-down-hover mesh grabed: ', mesh.name)
-                STATE.mesh.grabed = mesh;
-                STATE.mesh.SetGrabed(mesh);
-                mesh.StateEnable(MESH_STATE.IN_GRAB);
-            }
-
-            if (mesh.eventCallbacks.count) {
-
-                const params = mesh.eventCallbacks.buffer[0];
-                mesh.eventCallbacks.buffer[Rename_evtClbk_elem0].params.EventClbk(params);
-                /**
-                 * One implementation is to have an Enum of fixed indexes: 'ON_CLICK = 0'
-                 * so we call: 'mesh.eventCallbacks.buffer[ON_CLICK].Clbk(target, targetClbks);'
-                 * That way the on click callback is only one, but it calls different functions 
-                 * for different meshes.
-                 * Ofcourse we could have ON_CLICK_LEFT_MOUSE_BTN etc.
-                 */
-            }
-
-            // e.type += ' HANDLED'; e.params = {}; evtsIdx--;
-
         }
 
         else if (e.type === 'Move') {
-            console.debug('move', e.params)
 
         }
 
@@ -181,7 +142,7 @@ export function HandleEvents() {
 export function Events_handle_immidiate(e){
 
     if (e.type === 'hover') {
-        console.debug('hover: ', e.params.mesh.id);
+        console.debug('hover: ', e.params.mesh.name);
         // console.debug('hover: ', e.params.mesh.id, ' | prev hover:', STATE.mesh.hoveredId);
 
         // Apply Hover Color
@@ -202,6 +163,8 @@ export function Events_handle_immidiate(e){
         // if(e.params.mesh.StateCheck(MESH_STATE.IS_FAKE_HOVER)) return;
         STATE.mesh.SetHovered(e.params.mesh);
         e.params.mesh.StateEnable(MESH_STATE.IN_HOVER); // Set mesh state hovered to true
+
+        Listener_dispatch_event(EVENT_TYPES.HOVER, e.params.mesh);
     }
 
     else if (e.type === 'unhover') {
@@ -257,7 +220,7 @@ export function Events_handle_immidiate(e){
 
     // function HandleClickEvent(clickPos){
 
-    //     if(Collision_PointRect(clickPos, this.pos)){
+    //     if(Intersection_point_rect(clickPos, this.pos)){
     //         do {
     //             // do stuff for click
     //         }
@@ -280,7 +243,7 @@ export function Events_handle_immidiate(e){
             params:{ 
                 EventClbk: _Slider_create_on_click_event,
                 target:  bar,
-                targetClbks: null,
+                Clbk: null,
             },
             
             ...
@@ -305,7 +268,7 @@ export function Events_handle_immidiate(e){
                 params:{ 
                     EventClbk: _Slider_create_on_click_event,
                     target:  bar,
-                    targetClbks: null,
+                    Clbk: null,
                 },
             ],
     

@@ -64,15 +64,17 @@ vec2 res = vec2(824., 893.);    \n\
   \n\
   // BORDER                                                       \n\
   // Border Width. It is 0.001 for every pixel                    \n\
-   float borderWidth = v_border_width * 0.001;                      \n\
+  float borderWidth = v_border_width * 0.001;                      \n\
   float bd = (abs(d.x)-borderWidth) - blur.x;                     \n\
   wa = clamp(-bd * AA, 0.0, 1.0);                                 \n\
   wb = clamp(-bd / (blur.x+blur.y), 0.0, 1.0);                    \n\
-  color += color * vec3(abs(wa * wb) - borderWidth);              \n\
+  color += color * vec3(abs(wa * wb));              \n\
+  // color += vec3(.1,.4,.8) * vec3(abs(wa * wb));              \n\
+  // color *= 2.*vec3(abs(wa * wb));              \n\
   \n\
   // Bevel. TODO: Control @colorIntensity for the pow() and @darkness for the mult of the pow() \n\
   // float r = min(rCorners*.17, min(dim.x, dim.y)); \n\
-  // float r = min(.023, min(dim.x, dim.y)); \n\
+  // // float r = min(.023, min(dim.x, dim.y)); \n\
   // float f = smoothstep(r, .0, abs(d.x)-borderWidth); \n\
   // color = mix(color, pow(color, vec3(1.5))*.85, f); \n\
   \n\

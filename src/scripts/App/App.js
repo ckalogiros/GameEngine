@@ -1,30 +1,30 @@
 "use strict";
-import { Scene, Scenes_create_scene } from '../Engine/Scenes.js'
-import { EventsAddListeners, RegisterEvent, } from '../Engine/Events/Events.js';
+import { Scenes_create_scene } from '../Engine/Scenes.js'
+import { EventsAddListeners } from '../Engine/Events/Events.js';
 import { RenderQueueGet, RenderQueueInit } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { WebGlRenderer } from '../Engine/Renderers/WebGlRenderer.js';
 import { CAMERA_CONTROLS, CameraOrthographic, CameraPerspective } from '../Engine/Renderers/Renderer/Camera.js';
-import { Geometry2D } from '../Engine/Drawables/Geometry/Base/Geometry.js';
 import { TextureInitBuffers } from '../Engine/Loaders/Textures/Texture.js';
-import { FpsGetAvg, FpsGetAvg1S, FpsGetWorstFrame, FpsGetWorstFrameAvg, TimeGetDelta, TimeGetDeltaAvg, TimeGetFps, TimeGetTimer } from '../Engine/Timers/Time.js';
+import { TimeGetDeltaAvg, TimeGetFps, TimeGetTimer } from '../Engine/Timers/Time.js';
 import { Widget_Label_Dynamic_Text, Widget_Label_Text_Mesh } from '../Engine/Drawables/Meshes/Widgets/WidgetLabelText.js';
-import { Widget_Button_Mesh } from '../Engine/Drawables/Meshes/Widgets/WidgetButton.js';
+import { Widget_Button_Mesh, Widget_Switch_Mesh } from '../Engine/Drawables/Meshes/Widgets/WidgetButton.js';
 import { Widget_Text_Mesh, Widget_Dynamic_Text_Mesh } from '../Engine/Drawables/Meshes/Widgets/WidgetText.js';
-import { GetShaderTypeId } from '../Graphics/Z_Debug/GfxDebug.js';
 import { CubeGeometry } from '../Engine/Drawables/Geometry/Geometry3DCube.js';
-import { Animations_create_bright_color_rgb, Animations_create_dim_color_rgb, Animations_create_scale_up_down } from '../Engine/Animations/AnimationsBasic.js';
 import { SizeOfObject } from '../Helpers/Helpers.js';
-import { TimerGetGlobalTimer, TimerGetGlobalTimerCycle } from '../Engine/Timers/Timers.js';
-import { PerformanceTimerCreate, PerformanceTimerInit, _Tm1GetFps, _Tm1GetMilisec, _Tm1GetNanosec, _Tm2GetFps, _Tm2GetMilisec, _Tm3GetFps, _Tm3GetMilisec, __pt1 } from '../Engine/Timers/PerformanceTimers.js';
-import { TimeIntervalsCreate, TimeIntervalsInit } from '../Engine/Timers/TimeIntervals.js';
+import { PerformanceTimerCreate, PerformanceTimerInit, _Tm1GetFps, _Tm1GetMilisec, _Tm1GetNanosec, _Tm2GetFps, _Tm2GetMilisec, _Tm3GetFps, _Tm3GetMilisec, _Tm5GetFps, _Tm5GetMilisec, _Tm6GetFps, _Tm6GetMilisec } from '../Engine/Timers/PerformanceTimers.js';
+import { TimeIntervalsInit } from '../Engine/Timers/TimeIntervals.js';
 import { MAT_ENABLE, Material, Material_TEMP_fromBufferFor3D } from '../Engine/Drawables/Material/Base/Material.js';
 import { MESH_ENABLE, Mesh } from '../Engine/Drawables/Meshes/Base/Mesh.js';
-import { Slider_create_on_click_event, Slider_bind_on_value_change, Widget_Slider, Slider_menu_create_options } from '../Engine/Drawables/Meshes/Widgets/WidgetSlider.js';
+import { Widget_Slider, Slider_menu_create_options } from '../Engine/Drawables/Meshes/Widgets/WidgetSlider.js';
 import { Bind_change_brightness, Bind_change_color_rgb, Bind_change_pos_x } from '../Engine/BindingFunctions.js';
 
 /** Performance Timers */
-import { _pt4 } from '../Engine/Timers/PerformanceTimers.js';
 import { TestArraysPerformance } from '../../Tests/Arrays.js';
+import { EVENT_TYPES, Event_Listener, Listener_create_event, Listener_hover_enable } from '../Engine/Events/EventListeners.js';
+import { Test_Old_vs_new_hover_listener } from '../../Tests/Performane.js';
+import { Widget_Menu_Bar } from '../Engine/Drawables/Meshes/Widgets/Menu/WidgetMenu.js';
+import { Widget_Generic } from '../Engine/Drawables/Meshes/Widgets/WidgetGeneric.js';
+import { Panel,  Section } from '../Engine/Drawables/Meshes/Panel.js';
 
 let renderer = null;
 
@@ -73,7 +73,6 @@ export function AppInit() {
     RenderQueueInit();
     // MeshConstantsSetUp();
 
-
     /* * * * * * * * * * * * * * * * * * * * * * * * * * *
     * Create meshes
      */
@@ -120,79 +119,39 @@ export function AppInit() {
         // }
     }
 
-    { // Simple text
-        // const txt = 'HelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHello';
-        // const text = new Widget_Text_Mesh(txt, [-100, 120, 0], 10, [1, 1], WHITE, .5);
-        // scene.AddMesh(text);
-        // text.geom.pos[1] += 30;
-        // scene.AddMesh(text);
-        // text.geom.pos[1] += 30;
-        // scene.AddMesh(text);
-        // text.geom.pos[1] += 30;
-        // scene.AddMesh(text);
-    }
-
     { // Text Label
-
-        /**
-         * TODO:
-         * 
-         * Right click menu Implementation.
-         * Have a mesh enable the Right click menu:
-         *      mesh.EnableXXX(
-         *              MESH_XXX.ENABLE_ON_RIGHT_MOUSE_CLICK_MENU, 
-         *              callback to run on mouse right click
-         *      )
-         * 
-         * OnMouseClick event handler, 
-         * check:
-         *      if any mesh is hovered
-         *      if mesh has r click menu enabled
-         *      and run the callback
-         * 
-         * The callback must create a new mesh with all the menus (text, buttons, etc)
-         */
-
-        let ypos = 150;
+        let ypos = 150, id = 1;
         const fontSize = 12;
 
         { // Many text labels 
-            {
-                const textLabel = new Widget_Label_Text_Mesh('Text Label 1', [60, ypos, 0], fontSize, BLUE_10_120_220, WHITE, [1, 1], 3, .4);
-                textLabel.StateEnable(MESH_STATE.IS_MOVABLE);
-                textLabel.StateEnable(MESH_STATE.IS_GRABABLE);
-                textLabel.StateEnable(MESH_STATE.HAS_POPUP);
-                textLabel.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
-                textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+            // {
+            //     const textLabel = new Widget_Label_Text_Mesh('Text Label '+id, [60, ypos, 0], fontSize, BLUE_10_120_220, WHITE, [1, 1], [3, 3], .4);
+            //     textLabel.StateEnable(MESH_STATE.IS_MOVABLE);
+            //     textLabel.StateEnable(MESH_STATE.IS_GRABABLE);
+            //     // textLabel.StateEnable(MESH_STATE.HAS_POPUP);
+            //     textLabel.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
+            //     // textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+            //     Listener_hover_enable(textLabel)
+
+            //     scene.AddMesh(textLabel);
                 
-                scene.AddMesh(textLabel);
-                
-                RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            } 
-            ypos += 55
-            {
-                const textLabel = new Widget_Label_Text_Mesh('Text Label 1', [60, ypos, 0], fontSize, BLUE_10_120_220, WHITE, [1, 1], 3, .4);
-                textLabel.StateEnable(MESH_STATE.IS_MOVABLE);
-                textLabel.StateEnable(MESH_STATE.IS_GRABABLE);
-                textLabel.StateEnable(MESH_STATE.HAS_POPUP);
-                textLabel.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
-                textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                // textLabel.SetMenuOptionsClbk(Slider_menu_create_options);
-                scene.AddMesh(textLabel);
-                
-                RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-            } 
+            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
+            // } 
+            // ypos += 55; id++;
+            // {
+            //     const textLabel = new Widget_Label_Text_Mesh('Text Label '+id, [60, ypos, 0], fontSize, BLUE_10_120_220, WHITE, [1, 1], [3, 3], .4);
+            //     textLabel.StateEnable(MESH_STATE.IS_MOVABLE);
+            //     textLabel.StateEnable(MESH_STATE.IS_GRABABLE);
+            //     textLabel.StateEnable(MESH_STATE.HAS_POPUP);
+            //     textLabel.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
+            //     textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+            //     // textLabel.SetMenuOptionsClbk(Slider_menu_create_options);
+            //     scene.AddMesh(textLabel);
+            //     Listener_hover_enable(textLabel)
+            //     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
+            // } 
+                       
         }
-    }
-    
-    { // Dynamic Text
-
-    }
-
-    { // Label Dynamic Text
-        // const dynamicText = new Widget_Label_Dynamic_Text('LabelDynamic1:', '0000', [0, 200, 0], 10, [1, 1], WHITE, GREEN, 4, .4);
-        // scene.AddMesh(dynamicText);
-        // dynamicText.SetDynamicText(2000, FpsGetAvg, 'Test-DynamicText')
     }
 
     { // Create cube
@@ -250,269 +209,25 @@ export function AppInit() {
         // }
     }
 
-    { // Widget Slider
-        // let posy = 380, height = 14, pad = 25;
-        // posy += height*2 + pad;
-        // {
-        //     const slider = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220);
-        //     scene.AddMesh(slider);
-        //     // RegisterEvent('set-bind-on-change-value', slider.id)
-        // }
-        // posy += height*2 +pad;
-        // {
-        //     const slider = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220);
-        //     scene.AddMesh(slider);
-        // }
-        // posy += height*2 +pad;
-        // {
-        //     const slider = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220);
-        //     scene.AddMesh(slider);
-        // }
-        // posy += height*2 +pad;
-        // {
-        //     const slider = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220);
-        //     scene.AddMesh(slider);
-        // }
-        // posy += height*2 +pad;
-        // {
-        //     const slider = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220);
-        //     scene.AddMesh(slider);
-        // }
-        // posy += height*2 +pad;
-        // {
-        //     const slider = new Widget_Slider([200, posy, 0], [150, height], GREEN_33_208_40);
-        //     scene.AddMesh(slider);
-        // }
-        // posy += height*2 +pad;
-        // {
-        //     const slider = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220);
-        //     scene.AddMesh(slider);
-        // }
-        // posy += height*2 +pad;
-        // {
-        //     const slider = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220);
-        //     scene.AddMesh(slider);
-        // }
-        // posy += height*2 +pad;
-        // {
-        //     const slider = new Widget_Slider([200, posy, 0], [150, height], GREEN_33_208_40);
-        //     scene.AddMesh(slider);
-        // }
 
-               
-    }
-
-    
-    { // Widget Menu
-
-    }
-
-    // const txt = '=';
-    // const text = new Widget_Text_Mesh(txt, [-100, 120, 0], 10, [1, 1], WHITE, .5);
-    // scene.AddMesh(text);
-
-    TestBindSliderToTextLabel(scene);
     CreateUiTimers(scene)
-    TestButtons(scene)
+    CreateButtons(scene)
+    // CreateSwitches(scene)
+    // BindSliderToTextLabel(scene)
+    // CreateMenuBar(scene)
 
-    // Test1(scene);
+    // CreateGenericWidget(scene)
+    CreateSection(scene)
+
+    // Test_Old_vs_new_hover_listener(scene)
+
+    // TestArraysPerformance();
 
     tm.Stop();
 
     // If camera is static, update projection matrix uniform only once
     camera.UpdateProjectionUniform(renderer.gl);
     RenderQueueGet().UpdateActiveQueue(); // Update active queue buffer with the vertex buffers set to be drawn
-
-    // TestArraysPerformance();
-
-    {
-        // OLD
-        // ScenesLoadScene(SCENE.startMenu); // Load the first Scene
-        // FramebuffersSetActive(true);
-        // ScenesSetFramebufferQueue();
-        // renderer.camera.Update(gfxCtx.gl, u_projection);
-
-        { // backgrounds
-            // const startMenuBk = RectCreateRect('startMenuBk', SID_DEFAULT | SID.FX.FS_GRADIENT, DarkenColor(GREENL2, 0.5), dim, [1, 1], null, pos, style, null, null);
-            // startMenuBk.gfxInfo = GlAddMesh(startMenuBk.sid, startMenuBk.mesh, 1, SCENE.startMenu, 'Background StartMenu', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
-            // scenes.AddMesh(startMenuBk, APP_MESHES_IDX.background.startMenu);
-
-            // const startStageBk = RectCreateRect('startStageBk', SID_DEFAULT | SID.FX.FS_GRADIENT, DarkenColor(GREY2, 0.1), dim, [1, 1], null, pos, style, null, null);
-            // startStageBk.gfxInfo = GlAddMesh(startStageBk.sid, startStageBk.mesh, 1, SCENE.startStage, 'Background StartStage', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
-            // scenes.AddMesh(startStageBk, APP_MESHES_IDX.background.startStage);
-
-            // // Create 'finish stage' background
-            // const finishStageBk = RectCreateRect('finishStageBk', SID_DEFAULT | SID.FX.FS_GRADIENT, DarkenColor(BLUE_10_120_220, 0.3), dim, [1, 1], null, pos, style, null, null);
-            // finishStageBk.gfxInfo = GlAddMesh(finishStageBk.sid, finishStageBk.mesh, 1, SCENE.finishStage, 'Background FinishStage', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
-            // scenes.AddMesh(finishStageBk, APP_MESHES_IDX.background.finishStage);
-
-            // // Create 'stage' background
-            // pos = [Viewport.width / 2, Viewport.height / 2, -1];
-            // const stageBk = RectCreateRect('stageBk', SID_DEFAULT | SID.FX.FS_GRADIENT, DarkenColor(BLUE_10_160_220, 0.1), dim, [1, 1], null, pos, style, null, null);
-            // stageBk.gfxInfo = GlAddMesh(stageBk.sid, stageBk.mesh, 1, SCENE.stage, 'Background Stage', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
-            // scenes.AddMesh(stageBk, APP_MESHES_IDX.background.stage);
-
-            // // Create stage menu background
-            // dim = [Viewport.width / 2, STAGE.MENU.HEIGHT];
-            // pos = [Viewport.width / 2, STAGE.MENU.HEIGHT, 1];
-            // style = { pad: 10, roundCorner: 1, border: 5, feather: 10 };
-            // const stageMenuBk = RectCreateRect('stageMenuBk', SID_DEFAULT | SID.FX.FS_V2DGFX, DarkenColor(ORANGE_240_130_10, 0.1), dim, [1, 1], null, pos, style, null, null);
-            // stageMenuBk.gfxInfo = GlAddMesh(stageMenuBk.sid, stageMenuBk.mesh, 1, SCENE.stage, 'Background Stage Menu', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
-            // scenes.AddMesh(stageMenuBk, APP_MESHES_IDX.background.stageMenu);
-        }
-
-        { // Buttons
-            // let btnDim = [200, 20];
-            // let btnPos = [0, 100, 0];
-            // style = { pad: 13, roundCorner: 15, border: 5, feather: 3 };
-            // let fontSize = 20;
-            // const sdfInner = 0.39;
-            // // Create play button
-            // const playBtn = CreateButton(SCENE.startMenu, 'PlayBtn', 'Play',
-            //     WHITE, DarkenColor(YELLOW_240_240_10, 0.1), btnDim, btnPos,
-            //     style, fontSize, true, sdfInner, ALIGN.CENTER_HOR | ALIGN.TOP);
-            // // Add play button to scenes mesh to buffer
-            // scenes.AddMesh(playBtn, APP_MESHES_IDX.buttons.play);
-
-
-            // // Options (in main start menu) button
-            // btnPos[1] += playBtn.area.mesh.dim[1] * 2 + style.pad + style.border + style.feather; // Set next button's y pos (just bellow the prev button)
-            // const optionsBtn = CreateButton(SCENE.startMenu, 'OptionsBtn', 'Options',
-            //     WHITE, DarkenColor(PINK_240_60_200, 0.1), btnDim, btnPos,
-            //     style, fontSize, true, sdfInner, ALIGN.CENTER_HOR | ALIGN.TOP);
-            // scenes.AddMesh(optionsBtn, APP_MESHES_IDX.buttons.options);
-
-            // // Start Stage (in main start stage) button
-            // btnPos[0] = 0;
-            // const startStageBtn = CreateButton(SCENE.startStage, 'startStageBtn', 'Start',
-            //     WHITE, DarkenColor(GREENL1, 0.1), btnDim, btnPos,
-            //     style, fontSize, true, sdfInner, ALIGN.CENTER_HOR | ALIGN.CENTER_VERT);
-            // scenes.AddMesh(startStageBtn, APP_MESHES_IDX.buttons.start);
-
-            // fontSize = 10;
-
-            // // Continue (after completing a stage) button
-            // btnDim[0] = CalcTextWidth('CONTINUE', fontSize);
-            // btnPos = [0, -150, btnPos[2]];
-            // const continueBtn = CreateButton(SCENE.finishStage, 'ContinueBtn', 'CONTINUE', WHITE, BLUE_10_120_220,
-            //     btnDim, btnPos, style, fontSize, true, sdfInner, ALIGN.CENTER_HOR | ALIGN.BOTTOM);
-            // scenes.AddMesh(continueBtn, APP_MESHES_IDX.buttons.continue);
-        }
-
-        { // FX
-            // Must be Initialized before Ui that uses effects
-            // ExplosionsInit(); // Initialize explosions
-            // scenes.AddMesh(ExplosionsGetCircle(), APP_MESHES_IDX.fx.explosions.circle);
-            // scenes.AddMesh(ExplosionsGetSimple(), APP_MESHES_IDX.fx.explosions.simple);
-            // scenes.AddMesh(ExplosionsGetVolumetricExplosions(), APP_MESHES_IDX.fx.explosions.volumetric);
-
-            // ExplosionsCreateVolumetricExplosion([280,80,4], GREEN_140_240_10, 1000, 0.01);
-            // meshIdx = APP_MESHES_IDX.fx.explosions.volumetric; scenes.scene[idx].AddMesh(scenes.allMeshes[meshIdx], meshIdx);
-
-            // GlowInit();
-            // scenes.AddMesh(GlowGet(), APP_MESHES_IDX.fx.glow);
-
-            // TwistInit();
-            // scenes.AddMesh(TwistGet(), APP_MESHES_IDX.fx.twist);
-
-            // VortexInit();
-            // VortexCreate(WHITE, [306, 74], [130, 130]);
-            // scenes.AddMesh(VortexGet(), APP_MESHES_IDX.fx.vortex);
-        }
-
-        { // Ui
-            //     const ui_score = UiCreateScore(SCENE.stage);
-            //     scenes.AddMesh(ui_score, APP_MESHES_IDX.ui.score);
-            //     const ui_totalScore = UiCreateTotalScore(SCENE.stage);
-            //     scenes.AddMesh(ui_totalScore, APP_MESHES_IDX.ui.totalScore);
-            //     const ui_mod = UiCreateScoreModifier(SCENE.stage);
-            //     scenes.AddMesh(ui_mod, APP_MESHES_IDX.ui.mod);
-            //     const ui_lives = UiCreateLives(SCENE.stage);
-            //     scenes.AddMesh(ui_lives, APP_MESHES_IDX.ui.lives);
-            //     const ui_combo = UiCreateCombo(SCENE.stage);
-            //     scenes.AddMesh(ui_combo, APP_MESHES_IDX.ui.combo);
-            //     const ui_m = AnimTextsInit(SCENE.stage);
-            //     scenes.AddMesh(ui_m, APP_MESHES_IDX.ui.animText);
-            //     const ui_fps = UiCreateFps(SCENE.stage);
-            //     scenes.AddMesh(ui_fps[0], APP_MESHES_IDX.ui.fps.avg);
-            //     scenes.AddMesh(ui_fps[1], APP_MESHES_IDX.ui.fps.avg1s);
-        }
-
-        { // Game Meshes
-
-            // /* Player */
-            // const player = CreatePlayer(SCENE.stage);
-            // scenes.AddMesh(player, APP_MESHES_IDX.player);
-            // /* Bricks */
-            // const bricks = BrickInit(SCENE.stage, BRICK.MAX_COUNT);
-            // scenes.AddMesh(bricks, APP_MESHES_IDX.bricks);
-            // /* Ball */
-            // const balls = BallsInit(SCENE.stage); // Initialize Ball's buffer
-            // BallCreate([Viewport.width / 2, PLAYER.YPOS - 100], WHITE);
-            // scenes.AddMesh(balls, APP_MESHES_IDX.balls);
-            // /* Power Ups */
-            // const powUps = PowerUpGet();
-            // scenes.AddMesh(powUps, APP_MESHES_IDX.powUps);
-            // /* Power Ups - Bullet Gun */
-            // GunInit();
-            // const gun = GunGet();
-            // scenes.AddMesh(gun, APP_MESHES_IDX.gun);
-            // /* Power Ups - Bullet */
-            // const bullets = BulletGet();
-            // bullets.Init();
-            // scenes.AddMesh(gun, APP_MESHES_IDX.bullet);
-            // /* Coin */
-            // const coins = CoinGet();
-            // scenes.AddMesh(coins, APP_MESHES_IDX.coins);
-
-            // /* ParticleSystem */
-            // const particleBallTail = ParticleSystemFindByName('BallTail-0');
-            // scenes.AddMesh(particleBallTail, APP_MESHES_IDX.fx.particleSystem.ballTail);
-        }
-
-        { // Stage Comleted Meshes
-
-            // Mechanical Rings
-            // const stageCompleteMech = StageCompletedCreate();
-            // scenes.AddMesh(stageCompleteMech.buffer[0], APP_MESHES_IDX.StageCompleted.text);
-            // scenes.AddMesh(stageCompleteMech.buffer[1], APP_MESHES_IDX.StageCompleted.outer);
-            // scenes.AddMesh(stageCompleteMech.buffer[2], APP_MESHES_IDX.StageCompleted.middle);
-            // scenes.AddMesh(stageCompleteMech.buffer[3], APP_MESHES_IDX.StageCompleted.inner);
-
-
-            // const showTotalScore = StageCompletedCreateTotalScore();
-            // scenes.AddMesh(showTotalScore, APP_MESHES_IDX.text.totalScore);
-        }
-
-        { // Test Shaders
-            { // CPU_AWSOME
-                // const awsomeShader = RectCreateRect('awsomeShader', 
-                // SID_DEFAULT | SID.AWSOME, 
-                // WHITE, 
-                // [500, 800], [1,1], null, [250, 400, 20], null, null, null);
-                // GlAddMesh(SID_DEFAULT | SID.AWSOME, awsomeShader.mesh,1, SCENE.all, 'AwsomeShader', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
-            }
-            { // VORTEX
-                // const testShader = RectCreateRect('vortexShader', 
-                // SID_MIN | SID.TEST_SHADER, 
-                // WHITE, 
-                // [60, 60], [1,1], null, [306, 74, 30], null, null, null);
-                // // [250, 400], [1,1], null, [250, 400, 29], null, null, null);
-                // const testShaderGfx = GlAddMesh(SID_MIN | SID.TEST_SHADER, testShader.mesh,1, SCENE.all, 'vortexShader', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
-                // TEST_SHADERS_PROG_IDX = testShaderGfx.prog.idx; 
-            }
-            { // NOISE
-                // const testShader = RectCreateRect('NOISE', 
-                // SID_DEFAULT | SID.FX.FS_NOISE, 
-                // WHITE, 
-                // [BULLET.WIDTH, BULLET.HEIGHT], [1,1], null, [250, 200, 30], null, null, null);
-                // // [250, 400], [1,1], null, [250, 400, 29], null, null, null);
-                // const testShaderGfx = GlAddMesh(SID_DEFAULT | SID.FX.FS_NOISE, testShader.mesh,1, SCENE.all, 'NOISE', GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
-                // TEST_SHADERS_PROG_IDX = testShaderGfx.prog.idx; 
-            }
-
-        }
-    }
 
 }
 
@@ -522,6 +237,20 @@ export function AppRender() {
 }
 
 
+function CreateSwitches(scene){
+
+    const switch1 = new Widget_Switch_Mesh([400, 100, 0]);
+    scene.AddMesh(switch1)
+    switch1.StateEnable(MESH_STATE.HAS_HOVER_COLOR);
+      
+    const btn1 = new Widget_Button_Mesh('x', [400, 150, 0], 6, GREY1, WHITE, [1, 1], [8,4], .8, undefined, [1,4,2]);
+    scene.AddMesh(btn1);
+    // btn1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    btn1.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
+    Listener_hover_enable(btn1)
+
+}
+
 function CreateUiTimers(scene){
 
     const fontsize = 4, pad = 6; let ypos = fontsize*2, ms = 200;
@@ -530,14 +259,16 @@ function CreateUiTimers(scene){
     pt.Start();
     ms = 10;
     const timer = new Widget_Dynamic_Text_Mesh('Timer:', '000000', [0, ypos, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .5);
-    scene.AddMesh(timer);
+    scene.AddMesh(timer, GL_VB.NEW);
     timer.SetDynamicText(ms, TimeGetFps, `DynamicText ${ms} Timer TimeGetFps`)
-    let idx = timer.CreateDynamicText('00000', fontsize, null, YELLOW_240_220_10, 16, .9);
+    let idx = timer.CreateDynamicText('00000', fontsize, undefined, YELLOW_240_220_10, 16, .9);
     timer.SetDynamicText(ms, TimeGetDeltaAvg, `DynamicText ${ms} Timer TimeGetDeltaAvg`)
-    idx = timer.CreateDynamicText('000000', fontsize, null, YELLOW_240_220_10, 16, .5);
+    idx = timer.CreateDynamicText('000000', fontsize, undefined, YELLOW_240_220_10, 16, .5);
     timer.SetDynamicText(ms, TimeGetTimer, `DynamicText ${ms} Timer TimeGetTimer`)
     pt.Stop();
     pt.Print()
+
+    // const vbidx = [gfx[0].vb.idx, gfx[1].vb.idx]
 
     // Performance Time Measure 1
     ms = 500; ypos += fontsize*2 + pad;
@@ -546,80 +277,306 @@ function CreateUiTimers(scene){
     timeMeasure1.SetDynamicText(ms, _Tm1GetFps, `DynamicText ${ms} All Timers Update _Tm1GetFps`)
     idx = timeMeasure1.CreateDynamicText('000000', fontsize, null, YELLOW_240_220_10, 16, .4);
     timeMeasure1.SetDynamicText(ms, _Tm1GetMilisec, `DynamicText ${ms} All Timers Update _Tm1GetMilisec`)
+    
+    // Performance Time Measure 3
+    ms = 500; ypos += fontsize*2 + pad;
+    const timeMeasure2 = new Widget_Dynamic_Text_Mesh('GlDraw:', '000000', [0, ypos, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
+    timeMeasure2.SetDynamicText(ms, _Tm3GetFps, `DynamicText ${ms} GlDraw _Tm3GetFps`)
+    idx = timeMeasure2.CreateDynamicText('000000', fontsize, null, YELLOW_240_220_10, 16, .4);
+    timeMeasure2.SetDynamicText(ms, _Tm3GetMilisec, `DynamicText ${ms} GlDraw _Tm3GetMilisec`)
+    scene.AddMesh(timeMeasure2);
 
     // Performance Time Measure 2
     ms = 500; ypos += fontsize*2 + pad;
-    const timeMeasure2 = new Widget_Dynamic_Text_Mesh('Scene Update:', '000000', [0, ypos, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
-    scene.AddMesh(timeMeasure2);
-    timeMeasure2.SetDynamicText(ms, _Tm2GetFps, `DynamicText ${ms} Scene Update _Tm2GetFps`)
-    idx = timeMeasure2.CreateDynamicText('000000', fontsize, null, YELLOW_240_220_10, 16, .4);
-    timeMeasure2.SetDynamicText(ms, _Tm2GetMilisec, `DynamicText ${ms} Scene Update _Tm2GetMilisec`)
-
-    // Performance Time Measure 3
-    ms = 500; ypos += fontsize*2 + pad;
-    const timeMeasure3 = new Widget_Dynamic_Text_Mesh('GlDraw:', '000000', [0, ypos, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
-    timeMeasure3.SetDynamicText(ms, _Tm3GetFps, `DynamicText ${ms} GlDraw _Tm3GetFps`)
-    idx = timeMeasure3.CreateDynamicText('000000', fontsize, null, YELLOW_240_220_10, 16, .4);
-    timeMeasure3.SetDynamicText(ms, _Tm3GetMilisec, `DynamicText ${ms} GlDraw _Tm3GetMilisec`)
+    const timeMeasure3 = new Widget_Dynamic_Text_Mesh('Scene Update:', '000000', [0, ypos, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
     scene.AddMesh(timeMeasure3);
+    timeMeasure3.SetDynamicText(ms, _Tm2GetFps, `DynamicText ${ms} Scene Update _Tm2GetFps`)
+    idx = timeMeasure3.CreateDynamicText('000000', fontsize, null, YELLOW_240_220_10, 16, .4);
+    timeMeasure3.SetDynamicText(ms, _Tm2GetMilisec, `DynamicText ${ms} Scene Update _Tm2GetMilisec`)
+
+    // Performance Time Measure 2
+    ms = 500; ypos += fontsize*2 + pad;
+    const timeMeasure4 = new Widget_Dynamic_Text_Mesh('Old hover listen:', '000000', [0, ypos, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
+    scene.AddMesh(timeMeasure4);
+    timeMeasure4.SetDynamicText(ms, _Tm5GetFps, `DynamicText ${ms} Scene Update _Tm5GetFps`)
+    idx = timeMeasure4.CreateDynamicText('000000', fontsize, null, YELLOW_240_220_10, 16, .4);
+    timeMeasure4.SetDynamicText(ms, _Tm5GetMilisec, `DynamicText ${ms} Scene Update _Tm5GetMilisec`)
+
+    // Performance Time Measure 2
+    ms = 500; ypos += fontsize*2 + pad;
+    const timeMeasure5 = new Widget_Dynamic_Text_Mesh('New hover listen:', '000000', [0, ypos, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
+    scene.AddMesh(timeMeasure5);
+    timeMeasure5.SetDynamicText(ms, _Tm6GetFps, `DynamicText ${ms} Scene Update _Tm6GetFps`)
+    idx = timeMeasure5.CreateDynamicText('000000', fontsize, null, YELLOW_240_220_10, 16, .4);
+    timeMeasure5.SetDynamicText(ms, _Tm6GetMilisec, `DynamicText ${ms} Scene Update _Tm6GetMilisec`)
 }
 
 
-function TestBindSliderToTextLabel(scene){
+function BindSliderToTextLabel(scene){
 
     // Text Label
-    const textLabel = new Widget_Label_Text_Mesh('Text Label 2', [60, 255, 0], 10, BLUE_10_120_220, WHITE, [1, 1], 3, .4);
+    const textLabel = new Widget_Label_Text_Mesh('Text Label 2', [60, 255, 0], 10, BLUE_10_120_220, WHITE, [1, 1], [3,3], .4);
     scene.AddMesh(textLabel);
     textLabel.StateEnable(MESH_STATE.IS_MOVABLE);
     textLabel.StateEnable(MESH_STATE.IS_GRABABLE);
     textLabel.StateEnable(MESH_STATE.HAS_POPUP);
     textLabel.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
-    textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    // textLabel.CreateEvent([Animations_create_scale_up_down, Animations_create_dim_color_rgb]);
+    // textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    Listener_hover_enable(textLabel)
     RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
-
-
+    
+    
     // Slider
     let posy = 380, height = 14, pad = 25;
     posy += height*2 + pad;
     const slider = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220);
     scene.AddMesh(slider);
-    Slider_create_on_click_event(slider, null, null);
-    Slider_bind_on_value_change(slider.children.buffer[0], textLabel, [Bind_change_brightness, Bind_change_pos_x]);
+    slider.SetMenuOptionsClbk(Slider_menu_create_options);
     
     posy += height*2 + pad;
     const slider2 = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220);
     scene.AddMesh(slider2);
-    Slider_create_on_click_event(slider2, null, null);
     slider2.SetMenuOptionsClbk(Slider_menu_create_options);
 }
 
-function TestButtons(scene) {
+function CreateButtons(scene) {
 
-    let posy = 550, fontSize = 10; 
+    let posy = Viewport.bottom-30, fontSize = 10; 
 
-    const btn1 = new Widget_Button_Mesh('BTutton_g|{', [40, posy, 0], 10, [1, 1], PINK_240_60_160, 3, .3);
+    const btn1 = new Widget_Button_Mesh('BUTTON 1', [40, posy, 0], 10, GREY5, WHITE, [1, 1], [3, 3], .3);
     scene.AddMesh(btn1);
+    btn1.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
+    Listener_hover_enable(btn1)
 
-    posy += btn1.geom.dim[1] + 40;
-    
-    const btn2 = new Widget_Button_Mesh('Button_2', [40, posy, 0], 16, [1, 1], PINK_240_60_160, 3, .3);
-    scene.AddMesh(btn2);
-    btn2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    // btn2.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-    // btn2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER, Animations_create_scale_up_down);
-    // btn2.CreateListenEvent(LISTEN_EVENT_TYPES.TEMP, Animations_create_scale_up_down);
-    
-    posy += btn1.geom.dim[1] + 40;
-    
-    const btn3 = new Widget_Button_Mesh('Button_3', [40, 700, 0], 20, [1, 1], PINK_240_60_160, 3, .3);
-    scene.AddMesh(btn3);
-    btn3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    // btn3.CreateDispatchEventOnListenEvent(LISTEN_EVENT_TYPES.HOVER, DISPATCH_EVENT_TYPES.SCALE_UP_DOWN, Animations_create_scale_up_down);
-    // btn3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER, Animations_create_scale_up_down);
 
     RenderQueueGet().SetPriority('last', btn1.children.buffer[0].gfx.prog.idx, btn1.gfx.vb.idx);
 }
+
+function CreateMenuBar(scene) {
+
+    let posy = Viewport.bottom-100, fontSize = 10; 
+
+    const menu_bar = new Widget_Menu_Bar('BUTTON 1', [120, posy, 0], [100, 20], GREY5, WHITE, [1, 1], [3, 3], .3);
+    menu_bar.AddCloseButton('x', [400, 150, 0], 6, GREY1, WHITE, [1, 1], [8,4], .8, undefined, [1,4,2]);
+    scene.AddMesh(menu_bar);
+}
+
+function CreateGenericWidget(scene){
+
+    const w = new Widget_Generic([200, 650, 0], [100, 100]);
+    w.AddSection();
+
+    scene.AddMesh(w);
+}
+
+// const fontSize = 5.517241379311;
+// const b  = new Widget_Button_Mesh('btn1_1',[200, 300, 0], fontSize, TRANSPARENCY(ORANGE_240_130_10, .1), WHITE, [1,1], [6,4], .5);
+// const b1 = new Widget_Button_Mesh('btn1_2',[200, 650, 0], 8, TRANSPARENCY(GREEN_140_240_10, .2), WHITE, [1,1], [6,4], .5);
+// const b2 = new Widget_Button_Mesh('btn1_3',[280, 650, 0], fontSize, TRANSPARENCY(PINK_240_60_200, .2), WHITE, [1,1], [6,4], .5);
+// const b3 = new Widget_Button_Mesh('btn1_4',[200, 650, 0], fontSize, TRANSPARENCY(YELLOW_240_220_10, .2), WHITE, [1,1], [6,4], .5);
+// const b4 = new Widget_Button_Mesh('btn1_5',[200, 650, 0], fontSize, TRANSPARENCY(BLUE_10_160_220, .2), WHITE, [1,1], [6,4], .5);
+
+function CreateSection(scene){
+
+    const flags = SECTION.ITEM_FIT;
+    // const flags = SECTION.FIT;
+
+    const blu = new Section(SECTION.HORIZONTAL, [5,5], [100, 400, 0], [20,20], TRANSPARENCY(BLUE,    .1));
+    
+    const red   = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .1));
+    const gre   = new Section(SECTION.HORIZONTAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .2));
+    const yel   = new Section(SECTION.HORIZONTAL, [5,5], [200, 400, 0], [20,20], TRANSPARENCY(YELLOW, .2));
+    const ora   = new Section(SECTION.HORIZONTAL, [5,5], [200, 400, 0], [20,20], TRANSPARENCY(ORANGE, .2));
+    const cie   = new Section(SECTION.HORIZONTAL, [5,5], [200, 400, 0], [20,20], TRANSPARENCY(BLUE_LIGHT, .2));
+    const bla   = new Section(SECTION.VERTICAL, [5,5], [200, 400, 0], [20,20], TRANSPARENCY(BLACK, .2));
+
+    const pin_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(PINK_240_60_160,    .4));
+    const blu_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(BLUE,    .4));
+    const pur_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(PURPLE,    .4));
+    const red_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .4));
+    const yel_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .4));
+    const gre_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .4));
+    const ora_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .4));
+    const red_2 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .4));
+    const gre_2 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .4));
+    const ora_2 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .4));
+    const yel_2 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .4));
+    const red_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .4));
+    const yel_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .4));
+    const gre_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .4));
+    const ora_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .4));
+    const red_4 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .4));
+    const yel_4 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .4));
+    const gre_4 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .4));
+    const ora_4 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .4));
+    const gry_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREY3, .9));
+    const gry_2 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREY5, .9));
+    const gry_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREY7, .9));
+
+    red.AddItem(pin_1, flags);
+    red.AddItem(blu_1, flags);
+    red.AddItem(yel, flags);
+    red.AddItem(ora, flags);
+    red.AddItem(cie, flags);
+    
+    yel.AddItem(gre_4, flags);
+    yel.AddItem(pur_1, flags);
+    yel.AddItem(red_3, flags);
+    
+    ora.AddItem(yel_4, flags);
+    ora.AddItem(red_4, flags);
+    ora.AddItem(yel_2, flags);
+    ora.AddItem(ora_4, flags);
+    
+    cie.AddItem(gre_3, flags);
+    cie.AddItem(yel_3, flags);
+    cie.AddItem(bla, flags);
+    
+    bla.AddItem(gry_1, flags)
+    bla.AddItem(gry_2, flags)
+    bla.AddItem(gry_3, flags)
+    
+    gre.AddItem(yel_1, flags);
+    gre.AddItem(red_1, flags);
+    
+    blu.AddItem(gre, flags);
+    blu.AddItem(red, flags);
+
+
+    // red.AddItem(yel_1, flags);
+    // // red.AddItem(gre, flags);
+    // red.AddItem(gre_1, flags);
+    // red.AddItem(ora_1, flags);
+    
+    // // gre.AddItem(yel_2, flags);
+    // // gre.AddItem(red_2, flags);
+    // // gre.AddItem(ora_2, flags);
+    
+    // // yel.AddItem(yel_3, flags);
+    // // yel.AddItem(ora_3, flags);
+    // // yel.AddItem(red_3, flags);
+    
+    // // blu.AddItem(yel, flags);
+    // // blu.AddItem(gre, flags);
+    // blu.AddItem(red, flags);
+    console.log(blu)
+
+{
+    // Listener_hover_enable(blu)
+    // Listener_hover_enable(red);  
+    // Listener_hover_enable(gre);  
+    // Listener_hover_enable(yel);  
+    // Listener_hover_enable(ora);  
+    // Listener_hover_enable(red_1);
+    // Listener_hover_enable(yel_1);
+    // Listener_hover_enable(gre_1);
+    // Listener_hover_enable(ora_1);
+    // Listener_hover_enable(red_2);
+    // Listener_hover_enable(yel_2);
+    // Listener_hover_enable(gre_2);
+    // Listener_hover_enable(ora_2);
+    // Listener_hover_enable(red_3);
+    // Listener_hover_enable(yel_3);
+    // Listener_hover_enable(gre_3);
+    // Listener_hover_enable(ora_3);
+    // Listener_hover_enable(red_4);
+    // Listener_hover_enable(yel_4);
+    // Listener_hover_enable(gre_4);
+    // Listener_hover_enable(ora_4);
+
+    blu.SetName('blu')
+    red.SetName('red');  
+    gre.SetName('gre');  
+    yel.SetName('yel');  
+    ora.SetName('ora');  
+    cie.SetName('cie');  
+    pur_1.SetName('pur_1');  
+    pin_1.SetName('pin_1');  
+    blu_1.SetName('blu_1')
+    red_1.SetName('red_1');
+    yel_1.SetName('yel_1');
+    gre_1.SetName('gre_1');
+    ora_1.SetName('ora_1');
+    red_2.SetName('red_2');
+    yel_2.SetName('yel_2');
+    gre_2.SetName('gre_2');
+    ora_2.SetName('ora_2');
+    red_3.SetName('red_3');
+    yel_3.SetName('yel_3');
+    gre_3.SetName('gre_3');
+    ora_3.SetName('ora_3');
+    red_4.SetName('red_4');
+    yel_4.SetName('yel_4');
+    gre_4.SetName('gre_4');
+    ora_4.SetName('ora_4');
+
+}
+    blu.Calc2();
+    // blu.Calc();
+
+    scene.AddMesh(blu);
+}
+
+/** SAVE: DO Not Delete. Combine with: SEE ###SectionWorking_1 */
+// function CreateSectionWorkingWithTwoLevelsOfSections(scene){
+
+//     const flags = SECTION.ITEM_FIT;
+//     // const flags = SECTION.FIT;
+
+//     const blu = new Section(SECTION.HORIZONTAL, [5,5], [200, 400, 0], [80,80]);
+    
+//     const red = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .6));
+//     const gre = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .6));
+//     const yel = new Section(SECTION.VERTICAL, [5,5], [200, 400, 0], [20,20], TRANSPARENCY(YELLOW, .6));
+//     const ora = new Section(SECTION.VERTICAL, [5,5], [200, 400, 0], [20,20], TRANSPARENCY(ORANGE, .6));
+    
+//     const red_1 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .6));
+//     const yel_1 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .6));
+//     const gre_1 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .6));
+//     const ora_1 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .6));
+    
+//     const red_2 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .6));
+//     const yel_2 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .6));
+//     const gre_2 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .6));
+//     const ora_2 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .6));
+    
+//     const red_3 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .6));
+//     const yel_3 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .6));
+//     const gre_3 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .6));
+//     const ora_3 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .6));
+    
+//     const red_4 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .6));
+//     const yel_4 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .6));
+//     const gre_4 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .6));
+//     const ora_4 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .6));
+
+    
+//     red.AddItem(yel_1, flags);
+//     red.AddItem(gre_1, flags);
+//     red.AddItem(ora_1, flags);
+    
+//     gre.AddItem(yel_2, flags);
+//     gre.AddItem(red_2, flags);
+//     gre.AddItem(ora_2, flags);
+    
+//     yel.AddItem(yel_3, flags);
+//     yel.AddItem(ora_3, flags);
+//     yel.AddItem(red_3, flags);
+    
+//     blu.AddItem(gre, flags);
+//     blu.AddItem(yel, flags);
+//     blu.AddItem(red, flags);
+    
+
+
+//     blu.SetName('blue');red.SetName('red');yel.SetName('yellow');gre.SetName('green');
+//     yel.SetName('blue_2');red_2.SetName('red_2');yel_2.SetName('yellow_2');gre.SetName('green_2');
+
+//     blu.Calc();
+
+//     scene.AddMesh(blu);
+// }
+
 
 
 
@@ -631,7 +588,7 @@ function MeshConstantsSetUp() {
     STAGE.MENU.HEIGHT = 20 + STAGE.MENU.PAD * 2;
     STAGE.TOP = Viewport.height / 5;
 
-    // Calculate left and right padd of the start and end of brick's grid.
+    // Calculate left and right padd of the start and end of brick's1 grid.
     const mod = (Viewport.width % ((BRICK.WIDTH * 2) + (BRICK.PAD * 2))) - (BRICK.PAD * 2);
     // STAGE.PADD.LEFT  = (BRICK.WIDTH*2) + (mod / 2);
     STAGE.PADD.LEFT = (60) + (mod / 2);
@@ -702,7 +659,7 @@ function MeshConstantsSetUp() {
 //     const borderRatio = 0.15;
 //     const featherRatio = 0.2;
 
-//     // Button's Sliders
+//     // Button's1 Sliders
 //     const buttonRoundCornerSlider = document.getElementById('button-round-corner');
 //     const buttonRoundCornerOut = document.getElementById("button-round-corner-val");
 //     buttonRoundCornerOut.innerHTML = buttonRoundCornerSlider.value;
@@ -728,7 +685,7 @@ function MeshConstantsSetUp() {
 //     }
 
 
-//     // Brick's Sliders
+//     // Brick's1 Sliders
 //     const brickRoundCornerSlider = document.getElementById('brick-round-corner');
 //     const brickRoundCornerOut = document.getElementById("brick-round-corner-val");
 //     brickRoundCornerOut.innerHTML = brickRoundCornerSlider.value;

@@ -2,7 +2,7 @@
 
 import * as math from '../../../../Helpers/Math/MathOperations.js'
 import * as glBufferOps from '../../../../Graphics/Buffers/GlBufferOps.js'
-import { GlAddGeometry, Gl_remove_geometry_fast} from '../../../../Graphics/Buffers/GlBuffers.js';
+import { GlAddGeometry } from '../../../../Graphics/Buffers/GlBuffers.js';
 
 let _geometryId = 0;
 
@@ -43,7 +43,6 @@ export class Geometry2D {
         /** Debug properties */
         if (DEBUG.GEOMETRY) {
             Object.defineProperty(this, 'id', { value: _geometryId++ });
-            // Object.defineProperty(this, 'type', { value: 'Geometry' });
         }
     }
 
@@ -51,9 +50,6 @@ export class Geometry2D {
     AddToGraphicsBuffer(sid, gfx, meshName) {
         GlAddGeometry(sid, this.pos, this.dim, this.time, gfx, meshName, 1)
     }
-    // Remove_from_graphics_buffer_fast(gfx, numFaces) {
-    //     Gl_remove_geometry_fast(gfx, numFaces)
-    // }
 
     //////////////////////////////////////////////////////////////
     SetPos(pos, gfx) {

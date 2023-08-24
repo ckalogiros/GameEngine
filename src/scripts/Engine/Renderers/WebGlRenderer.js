@@ -187,6 +187,9 @@ export class WebGlRenderer {
       Viewport.leftMargin = (window.innerWidth - Viewport.width) / 2;
       Viewport.topMargin = (window.innerHeight - Viewport.height) / 2
 
+      POSITION_CENTER[0] = Viewport.width/2;
+      POSITION_CENTER[1] = Viewport.height/2;
+
    }
 }
 

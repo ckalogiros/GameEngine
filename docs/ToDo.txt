@@ -1,3 +1,10 @@
+--------------------------------------------------- REMOVE!
+. Old listener
+. BringToFront
+. Check for remove:
+  . SetDefaultZindex
+--------------------------------------------------- REMOVE!
+
 --------------------------------------------------- ALGORITHMS!
 Set an efficient hover checking.
 Implement an algorithm that will recontruct the hover 
@@ -19,9 +26,27 @@ SEE: dock/ScemeDraws/HoverListenEvents.drawio
 
 --------------------------------------------------- IMIDIATE!
 . Implement set render queue priority for meshes in a vertexBuffer.
+
+. Definetly we need an implementation of removing vertices from the gfx buffers.
+  . One way would be to keep track of all the free attributes of a vertex buffer
+    and add to that free space when it is fit. Also we need a kind of combining
+    overlaping free space implementation
+
+  . Implement destruction of gfx buffers and gl program.
+    (Also make sure all suposed private buffers are set private).
 --------------------------------------------------- IMIDIATE!
 
 --------------------------------------------------- TODO
+
+. Event listener: 
+  Lets say we have 2 buttons, These belong to a section.
+  We set the buttons to have a click event.
+  The event listener will run the check all click events.
+  If we create the listener to the parent, then the listener will check once
+  the parent for any click events inside it. Then and only if there is
+  a click in the parent the listener will check the 2 buttons.
+  This way we kind of slicing the space into categories, meshes rooted to the 
+  scene, and other meshes inside those root parent meshes.
 
 . Maybe implement Generic Global gl buffers, that will store progidx and vbidx of a 
   multiuse on the fly gl program. Mainly for popups, but it can be used for any mesh

@@ -2,14 +2,13 @@
 
 import { GlResetVertexBuffer, GlSetVertexBufferPrivate } from '../../../../Graphics/Buffers/GlBuffers.js';
 import { GlCheckSid } from '../../../../Graphics/GlProgram.js';
-import { Helpers_calc_bottom_right_pos, Helpers_calc_top_left_pos, Helpers_calc_top_right_pos } from '../../../../Helpers/Helpers.js';
+import { Helpers_calc_bottom_right_pos, Helpers_calc_top_left_pos } from '../../../../Helpers/Helpers.js';
 import { MouseGetPos } from '../../../Controls/Input/Mouse.js';
 import { RenderQueueGet } from '../../../Renderers/Renderer/RenderQueue.js';
-import { Popup_menu_options_all_scene_meshes, Popup_menu_options_level2_of_text_label, Popup_menu_options_text_label } from '../../../MeshesPopupMenuFunctions/MeshesPopupMenuFunctions.js';
 import { Geometry2D } from '../../Geometry/Base/Geometry.js';
 import { Material } from '../../Material/Base/Material.js';
 import { MESH_ENABLE, Mesh } from '../Base/Mesh.js';
-import { Slider_menu_create_options } from './WidgetSlider.js';
+import { EVENT_TYPES, Listener_create_event, Listener_hover_enable, Listener_hover_remove_by_idx, Listener_remove_event, Listener_remove_events_all } from '../../../Events/EventListeners.js';
 
 
 /**
@@ -25,16 +24,18 @@ import { Slider_menu_create_options } from './WidgetSlider.js';
 // the popup and it's children 'menus' are gonna be using the spesific gl buffers(private to the popup) 
 const _popUpGfx = {
 
-   progIdx: INT_NULL,
-   vbIdx: INT_NULL,
-   ibIdx: INT_NULL,
+   // progIdx: INT_NULL,
+   // vbIdx: INT_NULL,
+   // ibIdx: INT_NULL,
    isSet: false,
+   isActive: false,
    
    secondary_popups: {
       count: 0,
       buffer: [],
 
       Add(obj) {
+         /** TODO!: Add only vertex buffers with different indexes (but the same program). We do not need duplicates */
          const idx = this.count++;
          this.buffer[idx] = obj;
       },
@@ -62,6 +63,7 @@ const _popUpGfx = {
 
 class Widget_PopUp extends Mesh {
 
+   isActive;
 
    constructor(pos = [0, 0, 0], dim = [0, 0], color = TRANSPARENT) {
 
@@ -82,6 +84,8 @@ class Widget_PopUp extends Mesh {
       this.SetStyle(6, 4, 3);
       this.SetName();
 
+      this.isActive = false;
+
    }
 
    AddToGraphicsBuffer(sceneIdx) {
@@ -91,11 +95,16 @@ class Widget_PopUp extends Mesh {
 
          this.gfx = super.AddToGraphicsBuffer(sceneIdx, GL_VB.NEW); // Create new vertex buffer for the popup menu, to manipulate seperately from other meshes.
 
-         _popUpGfx.progIdx = this.gfx.prog.idx;
-         _popUpGfx.vbIdx = this.gfx.vb.idx;
-         _popUpGfx.ibIdx = this.gfx.ib.idx;
-         _popUpGfx.isSet = true;
+         _popUpGfx.isSet    = true;
          _popUpGfx.isActive = true;
+
+
+         _popUpGfx.secondary_popups.Add({ // Add the text vertex buffer
+            isActive: true,
+            progidx: this.gfx.prog.idx,
+            vbidx: this.gfx.vb.idx,
+         });
+
 
          /**
           * TODO: Use the duplicated code once
@@ -112,11 +121,17 @@ class Widget_PopUp extends Mesh {
             for (let i = 0; i < count; i++) {
 
                const children = this.children.buffer[i];
-               children.AddToGraphicsBuffer(this.sceneIdx, vbUse, vbidx);
-
+               const gfx = children.AddToGraphicsBuffer(this.sceneIdx, vbUse, vbidx);
+               
                if (flag) { // for fisrt time create new vertex buffer for the text, after for any other option, use the same text vertex buffer.
                   vbUse[1] = GL_VB.SPECIFIC;
                   vbidx[1] = children.gfx.vb.idx;
+                  
+                  _popUpGfx.secondary_popups.Add({ // Add the text vertex buffer
+                     isActive: true,
+                     progidx: gfx[1].prog.idx,
+                     vbidx: gfx[1].vb.idx,
+                  });
 
                   GlSetVertexBufferPrivate(children.gfx.prog.idx, children.gfx.vb.idx);
 
@@ -136,8 +151,8 @@ class Widget_PopUp extends Mesh {
 
          if (popUpGfx === null) { // Create new vertex buffer for the new secondary popup
 
-            this.sceneIdx = sceneIdx;
             this.gfx = super.AddToGraphicsBuffer(this.sceneIdx, GL_VB.NEW);
+
             _popUpGfx.secondary_popups.Add({
                isActive: true,
                progidx: this.gfx.prog.idx,
@@ -182,7 +197,7 @@ class Widget_PopUp extends Mesh {
          }
          else { // Use an inactive vertex buffer
 
-            this.gfx = super.AddToGraphicsBuffer(0, GL_VB.SPECIFIC, popUpGfx.vbidx);
+            this.gfx = super.AddToGraphicsBuffer(this.sceneIdx, GL_VB.SPECIFIC, popUpGfx.vbidx);
             popUpGfx.isActive = true;
 
             if (this.children.count) {
@@ -210,180 +225,62 @@ class Widget_PopUp extends Mesh {
          }
       }
 
-
-
    }
 
+   DeactivatePopup() {
+      
+      this.DeactivateSecondaryPopups(); // First deactivate any other popups rooted to the this popup (which is the root).
+
+      for (let i = 0; i < this.children.count; i++) { // Then 
+
+         const mesh = this.children.buffer[i];
+
+         if(mesh){
+
+            Listener_remove_events_all(EVENT_TYPES.CLICK, mesh.listeners);
+            Listener_hover_remove_by_idx(mesh.listen_hover_idx);
+            
+            GlResetVertexBuffer(mesh.gfx, 1);
+            mesh.Set_graphics_vertex_buffer_render(false);
+         }
+         
+      }
+
+      Recursive_deactivate_secondary_popups(this);
+
+      GlResetVertexBuffer(this.gfx, 1);
+      this.Set_graphics_vertex_buffer_render(false);
+
+      this.RemoveChildren(); // Remove from the childrens buffer.
+
+      this.isActive = false;
+   }
+   
+   /**
+    * Runs from a popup menu of type WIDGET_POP_UP,
+    * and deactivates only the next popups that are roted to the 'this' popup.
+    * If this popuup does not have any popups opened,
+    * it will do nothing! 
+    */
    DeactivateSecondaryPopups() {
 
       for (let i = 0; i < this.children.count; i++) {
          
          const mesh = this.children.buffer[i];
-         
-         // Deactivate all meshes of type 'WIDGET_POP_UP' with all its options(recursively), from the curent popup level.
-         if (mesh.type & MESH_TYPES_DBG.WIDGET_POP_UP) {
-
-            Recursive_deactivate_secondary_popups(mesh);
-
-            // mesh.RemoveChildren(); // TODO: Do we need to strip down all meshes??? Only if they are shared pointers to some mesh of the appliction
-            mesh.Set_graphics_vertex_buffer_render(false);
-            mesh.RemoveAllListenEvents(); // Only 'WIDGET_POP_UP' types suppose to have hover listener, so this is the place to remove any hover listeners.
-            this.RemoveChildByIdx(i); // Remove from the childrens buffer.
-         }
-      }
-   }
-
-}
-
-let _popup = null;
-
-
-/**
- * TODO: SEE ## Widget_popup_handler_onclick_event. 
- */
-export function Widget_popup_handler_onclick_event(clickedMesh, clickedButtonId) {
-
-   /**
-    * TODO: Implement the function in a better way.
-    * 1. Distinction of what is clicked
-    *       1. popup mesh || popup options
-    *       2. any other mesh 
-    *       3. epmty space
-    * 2. Button type
-    *       1. right btn
-    *       2. Left-middle btn
-    */
-
-   if (clickedButtonId === MOUSE.BTN_ID.RIGHT) {
-
-      if (!clickedMesh) { // Case of a right mouse click outside any mesh
-
-      }
-      else { // If left mouse clicked on a mesh, activate specific popup for that mesh.
-
-         if (clickedMesh.StateCheck(MESH_STATE.HAS_POPUP)) {
-
-            const clickpos = MouseGetPos();
-            let pos = [clickpos[0], clickpos[1], 10]
-
-            /** If popup menu exists but deactivated, activate and
-             *  change it's position according to the mouse click
-             */
-            if (_popup) {
-
-               _popup.DeactivateSecondaryPopups();
-
-               const popuppos = Helpers_calc_bottom_right_pos(clickpos, _popup.geom.dim);
-               const xdif = popuppos[0] - _popup.geom.pos[0];
-               const ydif = popuppos[1] - _popup.geom.pos[1];
-               _popup.SetPosXY(popuppos);
-               
-               _popup.Set_graphics_vertex_buffer_render(true);
-               _popup.isActive = true;
-
-               // Set the position of all popup menu options
-               for (let i = 0; i < _popup.children.count; i++) {
-
-                  const children = _popup.children.buffer[i];
-                  children.Move(xdif, ydif); // We dont want to recalculate the relative to the popup option's position, so we have to use 'Move'. 
-               }
-
-               _popup.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-
-               return;
+         if(mesh){
+            
+            // Deactivate all meshes of type 'WIDGET_POP_UP' with all its options(recursively), from the curent popup level.
+            if (mesh.type & MESH_TYPES_DBG.WIDGET_POP_UP) {
+   
+               Recursive_deactivate_secondary_popups(mesh);
+               mesh.RemoveChildren(); // TODO: Do we need to strip down all meshes??? Only if they are shared pointers to some mesh of the appliction
+               mesh.Set_graphics_vertex_buffer_render(false);
+               this.RemoveChildByIdx(i); // Remove from the childrens buffer.
+               _popUpGfx.secondary_popups.Deactivate(mesh.gfx.prog.idx, mesh.gfx.vb.idx);
             }
-
-            /** 
-             * If popup menu does not exist and 
-             * if the clicked mesh has menu options
-             * create popup menu.
-             */
-
-            else if(clickedMesh.MenuOptionsClbk){
-
-               // const optionsMenu = Slider_menu_create_options(clickedMesh, pos);
-               const optionsMenu = clickedMesh.MenuOptionsClbk(clickedMesh, pos);
-               const dim = [optionsMenu.maxWidth + 20, optionsMenu.totalHeight];
-   
-               // Create the main popup mesh
-               _popup = new Widget_PopUp([200, 100, 0], dim, GREY2);
-   
-               const p = Helpers_calc_top_left_pos(_popup.geom.pos, _popup.geom.dim);
-               pos = [p[0] + _popup.mat.style.feather, p[1] + _popup.mat.style.feather, _popup.geom.pos[2]];
-   
-               for (let i = 0; i < optionsMenu.count; i++){
-                  _popup.AddChild(optionsMenu.buffer[i]);
-               }
-   
-               // Add to the scene
-               const scene = STATE.scene.active;
-               scene.AddMesh(_popup);
-   
-               const popuppos = Helpers_calc_bottom_right_pos(clickpos, _popup.geom.dim);
-               _popup.SetPosXY(popuppos);
-               // _popup.StateEnable(MESH_STATE.HAS_HOVER_COLOR);
-               _popup.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-   
-               // Menu options onclick event callbacks
-               for (let i = 0; i < optionsMenu.count; i++){
-                  if(optionsMenu.targets){
-   
-                     // TODO: Make a class out of the params.
-                     const params = {
-                        params:{
-   
-                           targetBindingFunctions: optionsMenu.params.targetBindingFunctions,
-                           EventClbk: optionsMenu.params.EventClbk,
-                           target1: optionsMenu.params.target1,
-                           target2: optionsMenu.targets[i],
-                        },
-                     }
-                     // optionsMenu.params.target2 = optionsMenu.targets[i];
-                     _popup.children.buffer[i].CreateEvent(params);
-                  }
-                  else{
-   
-                     // optionsMenu.params.target2 = optionsMenu.targets[i];
-                     _popup.children.buffer[i].CreateEvent({params: optionsMenu.params});
-                  }
-               }
-               console.log('###### ', _popup.children.buffer)
-   
-   
-               _popup.ListenersReconstruct();
-            }
-
          }
       }
    }
-   else if (_popup) {
-
-      if (clickedMesh) { // Case clicked mesh does not belong to popup or its options
-
-         if(clickedMesh.type & MESH_TYPES_DBG.WIDGET_POP_UP) return; // Do nothing onclick on a popup menu area
-
-         const parent = clickedMesh.parent;
-         if (parent && // Not null
-            (clickedMesh.type & MESH_TYPES_DBG.WIDGET_POP_UP || // Is popup menu area
-            (clickedMesh.type & MESH_TYPES_DBG.WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS && // Or a popup options button
-               parent.FindIdInChildren(clickedMesh.id)))) {
-                  parent.DeactivateSecondaryPopups(); // If options have been clicked, then deactivate and re-construct the secondary options
-         }
-         else{
-            _popup.Set_graphics_vertex_buffer_render(false)
-            _popup.DeactivateSecondaryPopups(); // Else left-middle mouse button on any other mesh(exept popup menu or options)
-            _popup.RemoveAllListenEvents();
-         }
-      }
-      
-      else if (!clickedMesh) { // Any other click( exept the right mouse button) outside any apps mesh, deactivate popup 
-         
-         _popup.Set_graphics_vertex_buffer_render(false)
-         _popup.DeactivateSecondaryPopups();
-         _popup.RemoveAllListenEvents();
-      }
-   }
-
 }
 
 function Recursive_deactivate_secondary_popups(_mesh) {
@@ -401,57 +298,242 @@ function Recursive_deactivate_secondary_popups(_mesh) {
          GlResetVertexBuffer(mesh.gfx, 1);
          _popUpGfx.secondary_popups.Deactivate(mesh.gfx.prog.idx, mesh.gfx.vb.idx);
 
-         if(mesh.type & MESH_TYPES_DBG.WIDGET_POP_UP && mesh.listeners.count)
-            mesh.RemoveAllListenEvents();
-
          // console.log('Reseting. progidx: ', mesh.gfx.prog.idx, ' vbidx', mesh.gfx.vb.idx)
       }
    }
 }
 
-function Widget_popup_handler_options_onclick_event(params) {
+let _popup = null;
 
-   const parent = params.btnMesh.parent;
-   const dim = [60, 90];
-   const p1 = [parent.geom.pos[0], btnMesh.geom.pos[1]];
-   const d = [parent.geom.dim[0], btnMesh.geom.dim[1]];
-   const p = Helpers_calc_top_right_pos(p1, d);
-   const pos = [p[0] + dim[0], p[1] + dim[1], btnMesh.geom.pos[2]];
-   const popup = new Widget_PopUp(pos, dim, GREY3);
-   popup.StateEnable(MESH_STATE.HAS_HOVER | MESH_STATE.HAS_HOVER_COLOR);
-   popup.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-   
-   const optionsMenu = Popup_menu_options_level2_of_text_label(pos);
-   // const dim = [optionsMenu.maxWidth + 20, optionsMenu.totalHeight];
 
-   parent.AddChild(popup)
-   for (let i = 0; i < optionsMenu.count; i++) {
-
-      popup.AddChild(optionsMenu.buffer[i]);
-   }
-   // Widget Popup 'AddToGraphicsBuffer()' function handles the insertion of the children too. 
-   popup.AddToGraphicsBuffer(_popup.sceneIdx);
+/**
+ * TODO: SEE ## Widget_popup_handler_onclick_event. 
+ */
+export function Widget_popup_handler_onclick_event(clickedMesh, clickedButtonId) {
 
    /**
-    * Slider_create_on_click_event(slider, null, null);
-    * Slider_bind_on_value_change(slider, textLabel, [Bind_change_brightness, Bind_change_pos_x]);
-    * 
-    * bar is the clicked mesh, we need the parent to create the connection.
-    * 
-    * the textLabel is going to be selected from a popup menu that shows all the scene meshes
+    * TODO: Implement the function in a better way.
+    * 1. Distinction of what is clicked
+    *       1. popup mesh
+    *       2. any other mesh 
+    *       3. epmty space
+    * 2. Button type
+    *       1. right btn
+    *       2. Left-middle btn
     */
-   // Menu options onclick event callbacks
-   optionsMenu.buffer[0].CreateEvent({params:{
-      Clbk: Widget_popup_handler_options_onclick_event, 
-      btnMesh: optionsMenu.buffer[0],
-   },});
-   optionsMenu.buffer[1].CreateEvent({params:{
-      Clbk: Widget_popup_handler_options_onclick_event, 
-      btnMesh: optionsMenu.buffer[1],
-   },});
 
+   // TODO!: Does not need the check, if it is better to check on Caller site. 
+   // Here we only set a debugging that alerts if we forgot to set the check in the Caller site
+   // if (clickedButtonId === MOUSE.BTN_ID.RIGHT && clickedMesh.StateCheck(MESH_STATE.HAS_POPUP)) {
+   if (clickedButtonId === MOUSE.BTN_ID.RIGHT) {
 
-   popup.ListenersReconstruct();
+      const clickpos = MouseGetPos();
+      let pos = [clickpos[0], clickpos[1], 10]
 
+      /** If popup menu exists but deactivated, activate and
+       *  change it's position according to the mouse click,
+       */
+      // if (_popup) {
+      let flag = false;            
+      if (_popup)  flag = true;
+
+         
+      if(clickedMesh.menu_options.Clbk){
+         
+         // Get the options menu from the clicked mesh
+         const optionsMenu = clickedMesh.menu_options.Clbk(clickedMesh, pos);
+         console.log(optionsMenu)
+         const dim = [optionsMenu.maxWidth + 20, optionsMenu.totalHeight];
+         
+         if(flag){
+
+            _popup.DeactivatePopup();
+         }
+         else{
+
+            // Create the main popup mesh
+            _popup = new Widget_PopUp([200, 100, 0], dim, GREY2);
+         }
+
+         const p = Helpers_calc_top_left_pos(_popup.geom.pos, _popup.geom.dim);
+         pos = [p[0] + _popup.mat.style.feather, p[1] + _popup.mat.style.feather, _popup.geom.pos[2]];
+
+         for (let i = 0; i < optionsMenu.count; i++){
+
+            const options_mesh = optionsMenu.buffer[i];
+
+            Listener_hover_enable(options_mesh);
+            // options_mesh.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
+            _popup.AddChild(options_mesh);
+
+            if(optionsMenu.targets){ // Create clisk event, if the option has a target
+               
+               /** Event: Menu options OnClick.
+                * Create click events for all the options of the menu.
+                */
+               const params = {
+                  EventClbk: optionsMenu.params.EventClbk,
+                  targetBindingFunctions: optionsMenu.params.targetBindingFunctions,
+                  self_mesh: optionsMenu.params.self_mesh,
+                  target_mesh: optionsMenu.targets[i],
+               }
+               // const listen_idx = Listener_create_event(EVENT_TYPES.CLICK, options_mesh.OnClick, options_mesh, params)
+               // options_mesh.listeners.Add(EVENT_TYPES.CLICK, listen_idx)
+               options_mesh.CreateListenEvent(EVENT_TYPES.CLICK, options_mesh.OnClick, options_mesh, params)
+            }
+         }
+
+         // Reposition to the click coordinates
+         const popuppos = Helpers_calc_bottom_right_pos(clickpos, _popup.geom.dim);
+         
+         
+         if(flag){
+            _popup.AddToGraphicsBuffer(_popup.sceneIdx)
+            _popup.SetPosXY(popuppos);
+         }
+         else{
+            
+            // Add to the scene
+            const scene = STATE.scene.active;
+            scene.AddMesh(_popup);
+            _popup.SetPosXY(popuppos);
+         }
+
+         _popup.isActive = true;
+      }
+
+      return;
+
+   }// END of if (LEFT CLICK)
+   else if (_popup) {
+
+      if (clickedMesh) { // Case clicked mesh does not belong to popup or its options
+
+         if(clickedMesh.type & MESH_TYPES_DBG.WIDGET_POP_UP) return; // Do nothing onclick on a popup menu area
+
+         const parent = clickedMesh.parent;
+         if (parent && // Not null
+            (clickedMesh.type & MESH_TYPES_DBG.WIDGET_POP_UP || // Is popup menu area
+            (clickedMesh.type & MESH_TYPES_DBG.WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS && // Or a popup options button
+               parent.FindIdInChildren(clickedMesh.id)))) {
+                  parent.DeactivateSecondaryPopups(); // If options have been clicked, then deactivate and re-construct the secondary options
+         }
+         else{ // If it does not have
+            _popup.DeactivatePopup(); // Else left-middle mouse button on any other mesh(exept popup menu or options)
+         }
+      }
+   }
 
 }
+
+export function Widget_popup_deactivate(){
+
+   if(_popup && _popup.isActive) _popup.DeactivatePopup();
+}
+
+
+
+
+/** Test menu options creation */
+// function Widget_popup_handler_options_onclick_event(params) {
+
+//    const parent = params.btnMesh.parent;
+//    const dim = [60, 90];
+//    const p1 = [parent.geom.pos[0], btnMesh.geom.pos[1]];
+//    const d = [parent.geom.dim[0], btnMesh.geom.dim[1]];
+//    const p = Helpers_calc_top_right_pos(p1, d);
+//    const pos = [p[0] + dim[0], p[1] + dim[1], btnMesh.geom.pos[2]];
+//    const popup = new Widget_PopUp(pos, dim, GREY3);
+//    popup.StateEnable(MESH_STATE.HAS_HOVER | MESH_STATE.HAS_HOVER_COLOR);
+//    popup.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+   
+//    const optionsMenu = Popup_menu_options_level2_of_text_label(pos);
+//    // const dim = [optionsMenu.maxWidth + 20, optionsMenu.totalHeight];
+
+//    parent.AddChild(popup)
+//    for (let i = 0; i < optionsMenu.count; i++) {
+
+//       popup.AddChild(optionsMenu.buffer[i]);
+//    }
+//    // Widget Popup 'AddToGraphicsBuffer()' function handles the insertion of the children too. 
+//    popup.AddToGraphicsBuffer(_popup.sceneIdx);
+
+//    /**
+//     * Slider_create_on_click_event(slider, null, null);
+//     * Slider_bind_on_value_change(slider, textLabel, [Bind_change_brightness, Bind_change_pos_x]);
+//     * 
+//     * bar is the clicked mesh, we need the parent to create the connection.
+//     * 
+//     * the textLabel is going to be selected from a popup menu that shows all the scene meshes
+//     */
+//    // Menu options onclick event callbacks
+//    optionsMenu.buffer[0].CreateEvent({params:{
+//       Clbk: Widget_popup_handler_options_onclick_event, 
+//       btnMesh: optionsMenu.buffer[0],
+//    },});
+//    optionsMenu.buffer[1].CreateEvent({params:{
+//       Clbk: Widget_popup_handler_options_onclick_event, 
+//       btnMesh: optionsMenu.buffer[1],
+//    },});
+
+
+//    popup.ListenersReconstruct();
+
+// }
+
+/** OLD */
+            // }
+
+            // /** 
+            //  * If popup menu does not exist and if the 
+            //  * clicked mesh has menu options create popup menu.
+            //  */
+
+            // if(clickedMesh.menu_options){
+
+            //    // Get the options menu from the clicked mesh
+            //    const optionsMenu = clickedMesh.menu_options(clickedMesh, pos);
+            //    const dim = [optionsMenu.maxWidth + 20, optionsMenu.totalHeight];
+   
+            //    // Create the main popup mesh
+            //    _popup = new Widget_PopUp([200, 100, 0], dim, GREY2);
+   
+            //    const p = Helpers_calc_top_left_pos(_popup.geom.pos, _popup.geom.dim);
+            //    pos = [p[0] + _popup.mat.style.feather, p[1] + _popup.mat.style.feather, _popup.geom.pos[2]];
+   
+            //    for (let i = 0; i < optionsMenu.count; i++){
+
+            //       const options_mesh = optionsMenu.buffer[i];
+
+            //       Listener_hover_enable(options_mesh);
+            //       options_mesh.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
+            //       _popup.AddChild(options_mesh);
+
+            //       /**
+            //        * Event: Menu options OnClick.
+            //        * Create click events for all the options of the menu.
+            //        */
+            //       if(optionsMenu.targets){ // Create clisk event, if the option has a target
+
+            //          const params = {
+            //             EventClbk: optionsMenu.params.EventClbk,
+            //             targetBindingFunctions: optionsMenu.params.targetBindingFunctions,
+            //             self_mesh: optionsMenu.params.self_mesh,
+            //             target_mesh: optionsMenu.targets[i],
+            //          }
+            //          const listen_idx = Listener_create_event(EVENT_TYPES.CLICK, options_mesh.OnClick, options_mesh, params)
+            //          options_mesh.listeners.Add(EVENT_TYPES.CLICK, listen_idx)
+            //       }
+            //    }
+   
+            //    // Add to the scene
+            //    const scene = STATE.scene.active;
+            //    scene.AddMesh(_popup);
+   
+            //    // Reposition to the click coordinates
+            //    const popuppos = Helpers_calc_bottom_right_pos(clickpos, _popup.geom.dim);
+            //    _popup.SetPosXY(popuppos);
+
+            //    _popup.isActive = true;
+               
+            // }

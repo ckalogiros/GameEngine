@@ -199,17 +199,24 @@ export class FontMaterial extends Material {
       // At the end, there is only one gfx variable, for the first text-face. So we must calculate in
       // order to address anyy other face of a text mesh.
       let gfxCopy = new GfxInfoMesh(gfx);
+      // this.numChars = this.text.length;
+
       for (let i = 0; i < this.numChars; i++) {
 
-         const uv = FontGetUvCoords(this.uvIdx, this.text[i]);
+         let uv = FontGetUvCoords(this.uvIdx, ' ');
+         if(this.text[i])
+            uv = FontGetUvCoords(this.uvIdx, this.text[i]);
+            
+            GlAddMaterial(sid, gfxCopy, this.col, uv, this.style, this.sdfParams);
+            gfxCopy.vb.start += gfxCopy.vb.count;
+            
+            // If texture exists, store texture index, else if font texture exists, store font texture index, else store null
+            gfx.tb.idx = this.texIdx !== INT_NULL ? this.texIdx : (this.uvIdx !== INT_NULL ? this.uvIdx : INT_NULL);
+            
+            if(this.texIdx === INT_NULL) 
+               console.error('Texture Index is NULL')
+
          if(DEBUG.MESH_ALL_UVS) console.log('uv:', uv)
-         GlAddMaterial(sid, gfxCopy, this.col, uv, this.style, this.sdfParams);
-         gfxCopy.vb.start += gfxCopy.vb.count;
-         
-         // If texture is exists, store texture index, else if font texture exists, store font texture index, else store null
-         gfx.tb.idx = this.texIdx !== INT_NULL ? this.texIdx : (this.uvIdx !== INT_NULL ? this.uvIdx : INT_NULL);
-         if(this.texIdx === INT_NULL) 
-            console.error('Texture Index is NULL')
             
       }
       GlSetTexture(gfx.prog.idx, gfx.vb.idx, gfx.tb.idx); // Update the vertex buffer to store the texture index

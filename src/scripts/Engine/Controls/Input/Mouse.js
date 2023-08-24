@@ -102,7 +102,7 @@ const mouse = {
          Area(){
             this.x = mouse.click.up.x - mouse.click.down.x;
             this.y = mouse.click.up.y - mouse.click.down.y;
-            // console.log(this);
+            console.log(this);
          }
       },
    },

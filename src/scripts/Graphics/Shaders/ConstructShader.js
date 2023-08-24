@@ -107,7 +107,7 @@ export function GlVertexShaderConstruct(sid){
       (sid.pass & SID.PASS.WPOS2) ? '  v_wpos = a_wpos_time.xy;' : '',
       (sid.attr & SID.ATTR.TEX2) ? '  v_tex_coord = a_tex;' : '',
       (sid.attr & SID.ATTR.SDF) ? ' v_sdf = a_sdf;' : '',
-      (sid.pass & SID.PASS.RES2) ? '   v_res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]' : '', // TODO!!!: What happens if rex.xy is passed to other than 0 and 1 indexes???
+      (sid.pass & SID.PASS.RES2) ? '   v_res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]' : '', // TODO!!!: What happens if res.xy is passed to other than 0 and 1 indexes???
       (sid.attr & SID.ATTR.BORDER) ? ' v_border_width = a_params1.x;' : '',
       (sid.attr & SID.ATTR.R_CORNERS) ? ' v_rCorners = a_params1.y;' : '',
       (sid.attr & SID.ATTR.FEATHER) ? '   v_border_feather = a_params1.z;' : '',
