@@ -9,12 +9,11 @@ export class Widget_Button_Mesh extends Widget_Label_Text_Mesh {
    constructor(text, pos, fontSize = 10, color = GREY3, colorText = WHITE, scale = [1, 1], pad, bold, font, style=[0,0,0]) {
 
       super(text, pos, fontSize, color, colorText, scale, pad, bold, font, style)
-      
+
       this.type |= MESH_TYPES_DBG.WIDGET_BUTTON;
       this.SetName();
 
    }
-
 
    OnClick(params){
 
@@ -37,9 +36,11 @@ export class Widget_Button_Mesh extends Widget_Label_Text_Mesh {
             }
          }
       }
-
    }
 
+   SetZindex(params){
+      params.mesh.children.buffer[0].SetZindex(params.z)
+   }
 }
 
 

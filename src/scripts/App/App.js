@@ -213,7 +213,7 @@ export function AppInit() {
     CreateUiTimers(scene)
     CreateButtons(scene)
     // CreateSwitches(scene)
-    // BindSliderToTextLabel(scene)
+    BindSliderToTextLabel(scene)
     // CreateMenuBar(scene)
 
     // CreateGenericWidget(scene)
@@ -314,20 +314,20 @@ function CreateUiTimers(scene){
 
 function BindSliderToTextLabel(scene){
 
-    // Text Label
-    const textLabel = new Widget_Label_Text_Mesh('Text Label 2', [60, 255, 0], 10, BLUE_10_120_220, WHITE, [1, 1], [3,3], .4);
-    scene.AddMesh(textLabel);
-    textLabel.StateEnable(MESH_STATE.IS_MOVABLE);
-    textLabel.StateEnable(MESH_STATE.IS_GRABABLE);
-    textLabel.StateEnable(MESH_STATE.HAS_POPUP);
-    textLabel.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
-    // textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    Listener_hover_enable(textLabel)
-    RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
+    // // Text Label
+    // const textLabel = new Widget_Label_Text_Mesh('Text Label 2', [60, 255, 0], 10, BLUE_10_120_220, WHITE, [1, 1], [3,3], .4);
+    // scene.AddMesh(textLabel);
+    // textLabel.StateEnable(MESH_STATE.IS_MOVABLE);
+    // textLabel.StateEnable(MESH_STATE.IS_GRABABLE);
+    // textLabel.StateEnable(MESH_STATE.HAS_POPUP);
+    // textLabel.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
+    // // textLabel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    // Listener_hover_enable(textLabel)
+    // RenderQueueGet().SetPriority('last', textLabel.children.buffer[0].gfx.prog.idx, textLabel.gfx.vb.idx);
     
     
     // Slider
-    let posy = 380, height = 14, pad = 25;
+    let posy = 80, height = 14, pad = 25;
     posy += height*2 + pad;
     const slider = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220);
     scene.AddMesh(slider);
@@ -341,7 +341,7 @@ function BindSliderToTextLabel(scene){
 
 function CreateButtons(scene) {
 
-    let posy = Viewport.bottom-30, fontSize = 10; 
+    let posy = Viewport.bottom-50, fontSize = 10; 
 
     const btn1 = new Widget_Button_Mesh('BUTTON 1', [40, posy, 0], 10, GREY5, WHITE, [1, 1], [3, 3], .3);
     scene.AddMesh(btn1);
@@ -378,40 +378,114 @@ function CreateGenericWidget(scene){
 
 function CreateSection(scene){
 
-    const flags = SECTION.ITEM_FIT;
+    const flags = (SECTION.ITEM_FIT | SECTION.EXPAND);
     // const flags = SECTION.FIT;
 
-    const blu = new Section(SECTION.HORIZONTAL, [5,5], [100, 400, 0], [20,20], TRANSPARENCY(BLUE,    .1));
+    const blu = new Section(SECTION.HORIZONTAL, [5,5], [220, 400, 0], [1110,0], TRANSPARENCY(BLUE,    .2));
     
-    const red   = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .1));
-    const gre   = new Section(SECTION.HORIZONTAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .2));
-    const yel   = new Section(SECTION.HORIZONTAL, [5,5], [200, 400, 0], [20,20], TRANSPARENCY(YELLOW, .2));
-    const ora   = new Section(SECTION.HORIZONTAL, [5,5], [200, 400, 0], [20,20], TRANSPARENCY(ORANGE, .2));
-    const cie   = new Section(SECTION.HORIZONTAL, [5,5], [200, 400, 0], [20,20], TRANSPARENCY(BLUE_LIGHT, .2));
-    const bla   = new Section(SECTION.VERTICAL, [5,5], [200, 400, 0], [20,20], TRANSPARENCY(BLACK, .2));
+    const red   = new Section(SECTION.VERTICAL, [15,15], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .2));
+    const gre   = new Section(SECTION.HORIZONTAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .4));
+    const yel   = new Section(SECTION.HORIZONTAL, [5,5], [200, 400, 0], [20,20], TRANSPARENCY(YELLOW, .4));
+    const ora   = new Section(SECTION.HORIZONTAL, [8,8], [200, 400, 0], [20,20], TRANSPARENCY(ORANGE, .4));
+    const cie   = new Section(SECTION.HORIZONTAL, [5,5], [200, 400, 0], [20,20], TRANSPARENCY(BLUE_LIGHT, .4));
+    const bla   = new Section(SECTION.VERTICAL, [15,15], [200, 400, 0], [20,20], TRANSPARENCY(BLACK, .4));
+    
+    const bla_1   = new Section(SECTION.HORIZONTAL, [10,10], [200, 400, 0], [20,20], TRANSPARENCY(BLACK, .4));
+    const pin_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(PINK_240_60_160,    .6));
+    const blu_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(BLUE,    .6));
+    const pur_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(PURPLE,    .6));
+    const red_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .7));
+    const yel_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .7));
+    const gre_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .7));
+    const ora_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .7));
+    const red_2 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .7));
+    const gre_2 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .7));
+    const ora_2 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .7));
+    const yel_2 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .7));
+    const red_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .7));
+    const yel_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .7));
+    const gre_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .7));
+    const ora_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .7));
+    const red_4 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .7));
+    const yel_4 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .7));
+    const gre_4 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .7));
+    const ora_4 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .7));
+    const gry1_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREY3, .9));
+    const gry1_2 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREY5, .9));
+    const gry1_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREY7, .9));
+    const gry2_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREY3, .9));
+    const gry2_2 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREY5, .9));
+    const gry2_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREY7, .9));
+    const vert_0 = new Section(SECTION.VERTICAL, [20,20], [100, 100, 0], [20,20], TRANSPARENCY(GREY2, .4));
+    
+    const btn = new Widget_Button_Mesh('btn1',[200, 100, 0], 7, TRANSPARENCY(YELLOW, .4), WHITE, [1,1], [2,2], .5);
+    btn.CreateListenEvent(EVENT_TYPES.CLICK, btn.OnClick, btn)
 
-    const pin_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(PINK_240_60_160,    .4));
-    const blu_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(BLUE,    .4));
-    const pur_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(PURPLE,    .4));
-    const red_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .4));
-    const yel_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .4));
-    const gre_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .4));
-    const ora_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .4));
-    const red_2 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .4));
-    const gre_2 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .4));
-    const ora_2 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .4));
-    const yel_2 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .4));
-    const red_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .4));
-    const yel_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .4));
-    const gre_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .4));
-    const ora_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .4));
-    const red_4 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .4));
-    const yel_4 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .4));
-    const gre_4 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .4));
-    const ora_4 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .4));
-    const gry_1 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREY3, .9));
-    const gry_2 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREY5, .9));
-    const gry_3 = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREY7, .9));
+    {
+        // Listener_hover_enable(blu)
+        // Listener_hover_enable(red);  
+        // Listener_hover_enable(gre);  
+        // Listener_hover_enable(yel);  
+        // Listener_hover_enable(ora);  
+        // Listener_hover_enable(red_1);
+        // Listener_hover_enable(yel_1);
+        // Listener_hover_enable(gre_1);
+        // Listener_hover_enable(ora_1);
+        // Listener_hover_enable(red_2);
+        // Listener_hover_enable(yel_2);
+        // Listener_hover_enable(gre_2);
+        // Listener_hover_enable(ora_2);
+        // Listener_hover_enable(red_3);
+        // Listener_hover_enable(yel_3);
+        // Listener_hover_enable(gre_3);
+        // Listener_hover_enable(ora_3);
+        // Listener_hover_enable(red_4);
+        // Listener_hover_enable(yel_4);
+        // Listener_hover_enable(gre_4);
+        // Listener_hover_enable(ora_4);
+        
+        Listener_hover_enable(vert_0);
+        Listener_hover_enable(bla_1);
+        Listener_hover_enable(gry2_1);
+        Listener_hover_enable(gry2_2);
+        Listener_hover_enable(gry2_3);
+    
+
+        red.SetName('red');  
+        gre.SetName('gre');  
+        yel.SetName('yel');  
+        ora.SetName('ora');  
+        cie.SetName('cie');  
+        bla.SetName('bla');  
+        bla_1.SetName('bla_1');  
+        pin_1.SetName('pin_1');
+        blu_1.SetName('blu_1');
+        pur_1.SetName('pur_1');
+        red_1.SetName('red_1');
+        yel_1.SetName('yel_1');
+        gre_1.SetName('gre_1');
+        ora_1.SetName('ora_1');
+        red_2.SetName('red_2');
+        gre_2.SetName('gre_2');
+        ora_2.SetName('ora_2');
+        yel_2.SetName('yel_2');
+        red_3.SetName('red_3');
+        yel_3.SetName('yel_3');
+        gre_3.SetName('gre_3');
+        ora_3.SetName('ora_3');
+        red_4.SetName('red_4');
+        yel_4.SetName('yel_4');
+        gre_4.SetName('gre_4');
+        ora_4.SetName('ora_4');
+        gry1_1.SetName('gry1_1');
+        gry1_2.SetName('gry1_2');
+        gry1_3.SetName('gry1_3');
+        gry2_1.SetName('gry2_1');
+        gry2_2.SetName('gry2_2');
+        gry2_3.SetName('gry2_3');
+        vert_0.SetName('vert_0');
+    
+    }
 
     red.AddItem(pin_1, flags);
     red.AddItem(blu_1, flags);
@@ -431,155 +505,42 @@ function CreateSection(scene){
     cie.AddItem(gre_3, flags);
     cie.AddItem(yel_3, flags);
     cie.AddItem(bla, flags);
+    red.AddItem(btn, flags);
     
-    bla.AddItem(gry_1, flags)
-    bla.AddItem(gry_2, flags)
-    bla.AddItem(gry_3, flags)
+    bla.AddItem(gry1_1, flags)
+    bla.AddItem(gry1_2, flags)
+    bla.AddItem(gry1_3, flags)
     
     gre.AddItem(yel_1, flags);
     gre.AddItem(red_1, flags);
     
-    blu.AddItem(gre, flags);
+    // blu.AddItem(gre, flags);
     blu.AddItem(red, flags);
 
-
-    // red.AddItem(yel_1, flags);
-    // // red.AddItem(gre, flags);
-    // red.AddItem(gre_1, flags);
-    // red.AddItem(ora_1, flags);
-    
-    // // gre.AddItem(yel_2, flags);
-    // // gre.AddItem(red_2, flags);
-    // // gre.AddItem(ora_2, flags);
-    
-    // // yel.AddItem(yel_3, flags);
-    // // yel.AddItem(ora_3, flags);
-    // // yel.AddItem(red_3, flags);
-    
-    // // blu.AddItem(yel, flags);
-    // // blu.AddItem(gre, flags);
-    // blu.AddItem(red, flags);
-    console.log(blu)
-
-{
-    // Listener_hover_enable(blu)
-    // Listener_hover_enable(red);  
-    // Listener_hover_enable(gre);  
-    // Listener_hover_enable(yel);  
-    // Listener_hover_enable(ora);  
-    // Listener_hover_enable(red_1);
-    // Listener_hover_enable(yel_1);
-    // Listener_hover_enable(gre_1);
-    // Listener_hover_enable(ora_1);
-    // Listener_hover_enable(red_2);
-    // Listener_hover_enable(yel_2);
-    // Listener_hover_enable(gre_2);
-    // Listener_hover_enable(ora_2);
-    // Listener_hover_enable(red_3);
-    // Listener_hover_enable(yel_3);
-    // Listener_hover_enable(gre_3);
-    // Listener_hover_enable(ora_3);
-    // Listener_hover_enable(red_4);
-    // Listener_hover_enable(yel_4);
-    // Listener_hover_enable(gre_4);
-    // Listener_hover_enable(ora_4);
-
-    blu.SetName('blu')
-    red.SetName('red');  
-    gre.SetName('gre');  
-    yel.SetName('yel');  
-    ora.SetName('ora');  
-    cie.SetName('cie');  
-    pur_1.SetName('pur_1');  
-    pin_1.SetName('pin_1');  
-    blu_1.SetName('blu_1')
-    red_1.SetName('red_1');
-    yel_1.SetName('yel_1');
-    gre_1.SetName('gre_1');
-    ora_1.SetName('ora_1');
-    red_2.SetName('red_2');
-    yel_2.SetName('yel_2');
-    gre_2.SetName('gre_2');
-    ora_2.SetName('ora_2');
-    red_3.SetName('red_3');
-    yel_3.SetName('yel_3');
-    gre_3.SetName('gre_3');
-    ora_3.SetName('ora_3');
-    red_4.SetName('red_4');
-    yel_4.SetName('yel_4');
-    gre_4.SetName('gre_4');
-    ora_4.SetName('ora_4');
-
-}
-    blu.Calc2();
-    // blu.Calc();
-
+    blu.Calc();
     scene.AddMesh(blu);
+
+
+    /** Testing: Add an item to a section that is allready send to gfx pipeline */
+    
+    bla_1.AddItem(gry2_1, flags);
+    bla_1.AddItem(gry2_2, flags);
+    bla_1.AddItem(gry2_3, flags);
+    vert_0.AddItem(bla_1, flags);
+    vert_0.AddItem(gre, flags);
+    blu.AddItem(vert_0, flags);
+    blu.Recalc();
+    blu.UpdateGfx(blu, scene.sceneIdx);
+
+    
+    // blu.AddItem(vert_0, flags);
+    // blu.AddItem(gre, flags);
+    // blu.Recalc();
+    // blu.Recalc();
+    // vert_0.Recalc();
+    // blu.UpdateGfx(vert_0, scene.sceneIdx);
+    blu.UpdateGfx(blu, scene.sceneIdx);
 }
-
-/** SAVE: DO Not Delete. Combine with: SEE ###SectionWorking_1 */
-// function CreateSectionWorkingWithTwoLevelsOfSections(scene){
-
-//     const flags = SECTION.ITEM_FIT;
-//     // const flags = SECTION.FIT;
-
-//     const blu = new Section(SECTION.HORIZONTAL, [5,5], [200, 400, 0], [80,80]);
-    
-//     const red = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .6));
-//     const gre = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .6));
-//     const yel = new Section(SECTION.VERTICAL, [5,5], [200, 400, 0], [20,20], TRANSPARENCY(YELLOW, .6));
-//     const ora = new Section(SECTION.VERTICAL, [5,5], [200, 400, 0], [20,20], TRANSPARENCY(ORANGE, .6));
-    
-//     const red_1 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .6));
-//     const yel_1 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .6));
-//     const gre_1 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .6));
-//     const ora_1 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .6));
-    
-//     const red_2 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .6));
-//     const yel_2 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .6));
-//     const gre_2 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .6));
-//     const ora_2 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .6));
-    
-//     const red_3 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .6));
-//     const yel_3 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .6));
-//     const gre_3 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .6));
-//     const ora_3 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .6));
-    
-//     const red_4 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(RED,    .6));
-//     const yel_4 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(YELLOW, .6));
-//     const gre_4 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(GREEN,  .6));
-//     const ora_4 = new Section(SECTION.VERTICAL, [5,5], [100, 100, 0], [20,20], TRANSPARENCY(ORANGE, .6));
-
-    
-//     red.AddItem(yel_1, flags);
-//     red.AddItem(gre_1, flags);
-//     red.AddItem(ora_1, flags);
-    
-//     gre.AddItem(yel_2, flags);
-//     gre.AddItem(red_2, flags);
-//     gre.AddItem(ora_2, flags);
-    
-//     yel.AddItem(yel_3, flags);
-//     yel.AddItem(ora_3, flags);
-//     yel.AddItem(red_3, flags);
-    
-//     blu.AddItem(gre, flags);
-//     blu.AddItem(yel, flags);
-//     blu.AddItem(red, flags);
-    
-
-
-//     blu.SetName('blue');red.SetName('red');yel.SetName('yellow');gre.SetName('green');
-//     yel.SetName('blue_2');red_2.SetName('red_2');yel_2.SetName('yellow_2');gre.SetName('green_2');
-
-//     blu.Calc();
-
-//     scene.AddMesh(blu);
-// }
-
-
-
-
 
 function MeshConstantsSetUp() {
 

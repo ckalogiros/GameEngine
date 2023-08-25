@@ -88,6 +88,7 @@ export class Mesh {
     timedEvents; // A buffer to set a one time event that is triggered by another event. E.x. When we need to set the mesh priority in the renderQueue and the mesh does not have a gfx yet. 
     hoverMargin; // A margion to be set for hovering. TODO: Abstract to a struct.
     menu_options; // A callback and an index. Constructs the options popup menu for the mesh
+    // menu_options_idx; // An index to the menu options handler's buffer
 
     name;
 
@@ -256,6 +257,8 @@ export class Mesh {
         this.sceneIdx = sceneIdx;
         let mesh = this;
 
+        ERROR_NULL(sceneIdx)
+
         mesh.gfx = GlGetContext(mesh.sid, sceneIdx, useSpecificVertexBuffer, vertexBufferIdx);
 
         const prog = GlGetProgram(mesh.gfx.prog.idx);
@@ -390,7 +393,9 @@ export class Mesh {
 
         if(ERROR_NULL(Clbk) | ERROR_NULL(params)) alert('Passing null parmeters. @  CreateListenEvent(), Mesh.js')
 
+        // TODO: If the params is used only to pass the this object, the params is not needed for creating listen events
         const idx = Listener_create_event(event_type, Clbk, params, target);
+        // const idx = Listener_create_event(event_type, Clbk, this, target);
         this.listeners.Add(event_type, idx);
     }
     RemoveAllListenEvents() {
@@ -434,8 +439,10 @@ export class Mesh {
     }
     SetPosXY(pos) { this.geom.SetPosXY(pos, this.gfx); }
     SetPosX(x) { this.geom.SetPosX(x, this.gfx); }
-    SetDim(dim) { this.geom.SetDim(this.dim, this.gfx) }
+    UpdatePosXY() { this.geom.UpdatePosXY(this.gfx) }
     UpdateDim() { this.geom.UpdateDim(this.gfx) }
+    UpdateZindex(z) { 
+        this.geom.SetZindex(z, this.gfx) }
     SetAttrTime() {
         if (this.sid.attr & SID.ATTR.TIME) {
             this.geom.timer = TimerGetGlobalTimer();
@@ -449,9 +456,6 @@ export class Mesh {
 
         if (this.children.count)
             Recursive_mesh_move(this.children, x, y)
-
-        
-
     }
 
     FindIdInChildren(id) {
@@ -517,7 +521,7 @@ export class Text_Mesh extends Mesh {
         const gfx = this.gfx;
         const mat = this.mat;
 
-        let gfxInfo = new GfxInfoMesh(gfx);
+        let gfxInfoCopy = new GfxInfoMesh(gfx);
 
         const textLen = text.length;
         const len = geom.numChars > textLen ? geom.numChars : (textLen > geom.numChars ? geom.numChars : textLen);
@@ -529,10 +533,15 @@ export class Text_Mesh extends Mesh {
             if (text[j] !== undefined) {
                 uvs = FontGetUvCoords(mat.uvIdx, text[j]);
             }
-            GlSetTex(gfxInfo, uvs);
-            gfxInfo.vb.start += gfxInfo.vb.count
+            GlSetTex(gfxInfoCopy, uvs);
+            gfxInfoCopy.vb.start += gfxInfoCopy.vb.count
         }
     }
+
+    // UpdateZindex(z) { this.geom.UpdateZindex(z, this.gfx) }
+    SetZindex(z){
+        this.geom.SetZindex(z, this.gfx, this.mat.numChars)
+     }
 
     CalcTextWidth() {
         let width = this.geom.CalcTextWidth();

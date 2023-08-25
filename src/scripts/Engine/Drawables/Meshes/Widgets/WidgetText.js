@@ -231,7 +231,7 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 			const gfx = meshes[i].gfx;
 			const mat = meshes[i].mat;
 
-			let gfxInfo = new GfxInfoMesh(gfx);
+			let gfxInfoCopy = new GfxInfoMesh(gfx);
 
 			const textLen = text.length;
 			const len = geom.numChars > textLen ? geom.numChars : (textLen > geom.numChars ? geom.numChars : textLen);
@@ -243,8 +243,8 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 				if (text[j] !== undefined) {
 					uvs = FontGetUvCoords(mat.uvIdx, text[j]);
 				}
-				GlSetTex(gfxInfo, uvs);
-				gfxInfo.vb.start += gfxInfo.vb.count
+				GlSetTex(gfxInfoCopy, uvs);
+				gfxInfoCopy.vb.start += gfxInfoCopy.vb.count
 			}
 		}
 	}

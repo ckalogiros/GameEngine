@@ -412,7 +412,7 @@ const SLIDER_MENU_OPTIONS = {
    SIZE: _cnt,
 };
 
-const _slider_options = [];
+const _slider_options = []; // Stores the state of the options for the popup menu or any other menu for that matter.
 
 export function Slider_menu_create_options(clickedMesh, _pos) {
 
@@ -443,32 +443,27 @@ export function Slider_menu_create_options(clickedMesh, _pos) {
       const count = saved.count;
       for (let i = 0; i < count; i++) {
 
-         
          CopyArr3(pos, _pos);
          pos[0] += pad + textlabelpad[0] + saved.buffer[i].geom.dim[0];
          pos[1] = saved.buffer[i].geom.pos[1];
          
          saved.buffer[i].SetPosRecursive(pos);
-         // // const dif = [pos[0] - old_pos[0], pos[1] - old_pos[1]]; 
-         // saved.buffer[i].MoveRecursive(dif[0], dif[1]);
-         
       }
 
       return _slider_options[clickedMesh.menu_options.idx]
    }
 
-
    const meshes = Scenes_get_children(STATE.scene.idx);
 
+   for (let i = 0; i < meshes.count; i++) {
 
-
-
-   for (let i = 0; i < 10; i++) {
+      const mesh = meshes.buffer[i];
+      ERROR_NULL(mesh)
 
       if (i === 0)
          var option = new Widget_Switch_Mesh(pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
       else
-         var option = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${meshes[i].id}`, pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
+         var option = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${mesh.id}`, pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
 
       option.SetName();
 
@@ -485,12 +480,10 @@ export function Slider_menu_create_options(clickedMesh, _pos) {
       options[i] = option;
    }
 
-
-
    const menu = {
 
       buffer: options,
-      targets: meshes.slice(0, options.length),
+      targets: meshes.buffer.slice(0, options.length),
       maxWidth: maxWidth,
       count: options.length,
       totalHeight: totalHeight,

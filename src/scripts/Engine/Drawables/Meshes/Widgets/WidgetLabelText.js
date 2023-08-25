@@ -80,8 +80,9 @@ export class Widget_Label_Text_Mesh extends Mesh {
         super(areageom, areamat);
 
         textgeom.pos[0] += pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
+        textgeom.pos[1] += pad[1]; // In essence we set as the left (start of text label) the label area and not the left of text.
 
-        // this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
+        this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
         this.SetStyle(style[0], style[1], style[2]);
 
         const textMesh = new Text_Mesh(textgeom, textmat);
@@ -92,8 +93,8 @@ export class Widget_Label_Text_Mesh extends Mesh {
         this.pad = pad;
         this.AddChild(textMesh);
 
-        // textgeom.dim[0] += pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
-        // textgeom.dim[1] += pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
+        // textMesh.dim[0] += pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
+        // textMesh.dim[1] += pad[1] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
         
 
         // console.debug('WidgetLabelText type:', GetMeshNameFromType(this.type))

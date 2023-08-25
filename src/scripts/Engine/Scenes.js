@@ -194,7 +194,7 @@ export class Scene {
     }
 
     GetChildren(){
-        return this.children.buffer;
+        return this.children;
     }
 
     /**

@@ -128,8 +128,11 @@ export function HandleEvents() {
             const mesh = e.params;
             const count = mesh.timedEvents.count;
             if (count)
-                for (let i = 0; i < count; i++)
+                for (let i = 0; i < count; i++){
+                    if(!ERROR_NULL(mesh.timedEvents.buffer))
                     mesh.timedEvents.buffer[i].Clbk(mesh.timedEvents.buffer[i].params)
+                    mesh.timedEvents.RemoveByIdx(i);
+                }
 
             e.type += ' HANDLED'; e.params = {}; evtsIdx--;
         }

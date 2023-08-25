@@ -9,6 +9,9 @@ import { Geometry2D } from '../../Geometry/Base/Geometry.js';
 import { Material } from '../../Material/Base/Material.js';
 import { MESH_ENABLE, Mesh } from '../Base/Mesh.js';
 import { EVENT_TYPES, Listener_create_event, Listener_hover_enable, Listener_hover_remove_by_idx, Listener_remove_event, Listener_remove_events_all } from '../../../Events/EventListeners.js';
+import { Section } from '../Panel.js';
+import { Widget_Switch_Mesh } from './WidgetButton.js';
+import { CopyArr2 } from '../../../../Helpers/Math/MathOperations.js';
 
 
 /**
@@ -24,9 +27,6 @@ import { EVENT_TYPES, Listener_create_event, Listener_hover_enable, Listener_hov
 // the popup and it's children 'menus' are gonna be using the spesific gl buffers(private to the popup) 
 const _popUpGfx = {
 
-   // progIdx: INT_NULL,
-   // vbIdx: INT_NULL,
-   // ibIdx: INT_NULL,
    isSet: false,
    isActive: false,
    
@@ -46,7 +46,7 @@ const _popUpGfx = {
                return true;
             }
          }
-         alert('No such gl program found. @ WidgetPopup.js Deactivate()');
+         console.error('No such gl program found. @ WidgetPopup.js Deactivate()');
       },
       GetInactive(sid) {
 
@@ -61,24 +61,49 @@ const _popUpGfx = {
 };
 
 
-class Widget_PopUp extends Mesh {
+// class Widget_PopUp extends Mesh {
+class Widget_PopUp extends Section {
 
    isActive;
+   menu_options_idx; // An index to the menu options handler's buffer.
 
+   // constructor(pos = [0, 0, 0], dim = [0, 0], color = TRANSPARENT) {
+
+   //    pos[2] += 10;
+   //    const geom = new Geometry2D(pos, dim);
+   //    const mat = new Material(color)
+
+   //    const fontSize = 8;
+   //    pos[0] -= geom.dim[0] - 6;
+   //    pos[1] -= geom.dim[1] - fontSize * 2 - 8;
+   //    pos[2] += 1;
+
+   //    super(geom, mat);
+
+   //    this.type |= MESH_TYPES_DBG.WIDGET_POP_UP | geom.type | mat.type;
+
+   //    this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
+   //    this.SetStyle(6, 4, 3);
+   //    this.SetName();
+
+   //    this.isActive = false;
+
+   // }
    constructor(pos = [0, 0, 0], dim = [0, 0], color = TRANSPARENT) {
 
       pos[2] += 10;
-      const geom = new Geometry2D(pos, dim);
-      const mat = new Material(color)
+      // const geom = new Geometry2D(pos, dim);
+      // const mat = new Material(color)
 
+      super(SECTION.VERTICAL, [10,10], [100, 100, 0], [20,20], TRANSPARENCY(GREY7, .9));
       const fontSize = 8;
-      pos[0] -= geom.dim[0] - 6;
-      pos[1] -= geom.dim[1] - fontSize * 2 - 8;
+      pos[0] -= this.geom.dim[0] - 6;
+      pos[1] -= this.geom.dim[1] - fontSize * 2 - 8;
       pos[2] += 1;
+      
+      // super(geom, mat);
 
-      super(geom, mat);
-
-      this.type |= MESH_TYPES_DBG.WIDGET_POP_UP | geom.type | mat.type;
+      this.type |= MESH_TYPES_DBG.WIDGET_POP_UP | this.geom.type | this.mat.type;
 
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       this.SetStyle(6, 4, 3);
@@ -129,8 +154,8 @@ class Widget_PopUp extends Mesh {
                   
                   _popUpGfx.secondary_popups.Add({ // Add the text vertex buffer
                      isActive: true,
-                     progidx: gfx[1].prog.idx,
-                     vbidx: gfx[1].vb.idx,
+                     progidx: (Array.isArray(gfx)) ? gfx[1].prog.idx : gfx.prog.idx,
+                     vbidx:  (Array.isArray(gfx)) ? gfx[0].vb.idx : gfx.vb.idx,
                   });
 
                   GlSetVertexBufferPrivate(children.gfx.prog.idx, children.gfx.vb.idx);
@@ -341,6 +366,12 @@ export function Widget_popup_handler_onclick_event(clickedMesh, clickedButtonId)
       if(clickedMesh.menu_options.Clbk){
          
          // Get the options menu from the clicked mesh
+         /**
+          * NEW implementation of recalling-creating options menus
+          * 
+          * const optionsMenu = Options_menu_create(clickedMesh.menu_options_idx, pos);
+          */
+
          const optionsMenu = clickedMesh.menu_options.Clbk(clickedMesh, pos);
          console.log(optionsMenu)
          const dim = [optionsMenu.maxWidth + 20, optionsMenu.totalHeight];
@@ -348,6 +379,8 @@ export function Widget_popup_handler_onclick_event(clickedMesh, clickedButtonId)
          if(flag){
 
             _popup.DeactivatePopup();
+            _popup.max_size[0] = 0;
+            _popup.max_size[1] = 0;
          }
          else{
 
@@ -355,8 +388,16 @@ export function Widget_popup_handler_onclick_event(clickedMesh, clickedButtonId)
             _popup = new Widget_PopUp([200, 100, 0], dim, GREY2);
          }
 
-         const p = Helpers_calc_top_left_pos(_popup.geom.pos, _popup.geom.dim);
-         pos = [p[0] + _popup.mat.style.feather, p[1] + _popup.mat.style.feather, _popup.geom.pos[2]];
+         // const section = new Section(SECTION.VERTICAL, [1,1], [100, 100, 0], [20,20], TRANSPARENCY(GREY7, .9));
+
+
+         // const p = Helpers_calc_top_left_pos(_popup.geom.pos, _popup.geom.dim);
+         // pos = [p[0] + _popup.mat.style.feather, p[1] + _popup.mat.style.feather, _popup.geom.pos[2]];
+         
+         const popuppos = Helpers_calc_bottom_right_pos(clickpos, _popup.geom.dim);
+         CopyArr2(_popup.geom.pos, pos);
+         
+         
 
          for (let i = 0; i < optionsMenu.count; i++){
 
@@ -364,7 +405,21 @@ export function Widget_popup_handler_onclick_event(clickedMesh, clickedButtonId)
 
             Listener_hover_enable(options_mesh);
             // options_mesh.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
-            _popup.AddChild(options_mesh);
+            
+            const section = new Section(SECTION.HORIZONTAL, [5,5], [220, 400, 0], [0,0], TRANSPARENCY(BLUE,    .2));
+
+
+            // _popup.AddChild(options_mesh);
+            _popup.AddItem(options_mesh, SECTION.ITEM_FIT);
+            // section.AddItem(options_mesh, SECTION.ITEM_FIT);
+            // section.AddItem(options_mesh);
+            
+            // const switch1 = new Widget_Switch_Mesh([400, 100, 0], 4, GREENL1, WHITE);
+            // switch1.StateEnable(MESH_STATE.HAS_HOVER_COLOR);
+            // _popup.AddItem(switch1, SECTION.ITEM_FIT);
+            // section.AddItem(switch1, SECTION.ITEM_FIT);
+            // _popup.AddItem(section, SECTION.ITEM_FIT);
+            
 
             if(optionsMenu.targets){ // Create clisk event, if the option has a target
                
@@ -383,20 +438,25 @@ export function Widget_popup_handler_onclick_event(clickedMesh, clickedButtonId)
             }
          }
 
+         _popup.Recalc(SECTION.ITEM_FIT);
+         // section.Calc();
+         // _popup.AddChild(section)
+         // _popup = section
+
          // Reposition to the click coordinates
-         const popuppos = Helpers_calc_bottom_right_pos(clickpos, _popup.geom.dim);
+         // const popuppos = Helpers_calc_bottom_right_pos(clickpos, _popup.geom.dim);
          
          
          if(flag){
             _popup.AddToGraphicsBuffer(_popup.sceneIdx)
-            _popup.SetPosXY(popuppos);
+            // _popup.SetPosXY(popuppos);
          }
          else{
             
             // Add to the scene
             const scene = STATE.scene.active;
             scene.AddMesh(_popup);
-            _popup.SetPosXY(popuppos);
+            // _popup.SetPosXY(popuppos);
          }
 
          _popup.isActive = true;
@@ -430,110 +490,3 @@ export function Widget_popup_deactivate(){
 
    if(_popup && _popup.isActive) _popup.DeactivatePopup();
 }
-
-
-
-
-/** Test menu options creation */
-// function Widget_popup_handler_options_onclick_event(params) {
-
-//    const parent = params.btnMesh.parent;
-//    const dim = [60, 90];
-//    const p1 = [parent.geom.pos[0], btnMesh.geom.pos[1]];
-//    const d = [parent.geom.dim[0], btnMesh.geom.dim[1]];
-//    const p = Helpers_calc_top_right_pos(p1, d);
-//    const pos = [p[0] + dim[0], p[1] + dim[1], btnMesh.geom.pos[2]];
-//    const popup = new Widget_PopUp(pos, dim, GREY3);
-//    popup.StateEnable(MESH_STATE.HAS_HOVER | MESH_STATE.HAS_HOVER_COLOR);
-//    popup.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-   
-//    const optionsMenu = Popup_menu_options_level2_of_text_label(pos);
-//    // const dim = [optionsMenu.maxWidth + 20, optionsMenu.totalHeight];
-
-//    parent.AddChild(popup)
-//    for (let i = 0; i < optionsMenu.count; i++) {
-
-//       popup.AddChild(optionsMenu.buffer[i]);
-//    }
-//    // Widget Popup 'AddToGraphicsBuffer()' function handles the insertion of the children too. 
-//    popup.AddToGraphicsBuffer(_popup.sceneIdx);
-
-//    /**
-//     * Slider_create_on_click_event(slider, null, null);
-//     * Slider_bind_on_value_change(slider, textLabel, [Bind_change_brightness, Bind_change_pos_x]);
-//     * 
-//     * bar is the clicked mesh, we need the parent to create the connection.
-//     * 
-//     * the textLabel is going to be selected from a popup menu that shows all the scene meshes
-//     */
-//    // Menu options onclick event callbacks
-//    optionsMenu.buffer[0].CreateEvent({params:{
-//       Clbk: Widget_popup_handler_options_onclick_event, 
-//       btnMesh: optionsMenu.buffer[0],
-//    },});
-//    optionsMenu.buffer[1].CreateEvent({params:{
-//       Clbk: Widget_popup_handler_options_onclick_event, 
-//       btnMesh: optionsMenu.buffer[1],
-//    },});
-
-
-//    popup.ListenersReconstruct();
-
-// }
-
-/** OLD */
-            // }
-
-            // /** 
-            //  * If popup menu does not exist and if the 
-            //  * clicked mesh has menu options create popup menu.
-            //  */
-
-            // if(clickedMesh.menu_options){
-
-            //    // Get the options menu from the clicked mesh
-            //    const optionsMenu = clickedMesh.menu_options(clickedMesh, pos);
-            //    const dim = [optionsMenu.maxWidth + 20, optionsMenu.totalHeight];
-   
-            //    // Create the main popup mesh
-            //    _popup = new Widget_PopUp([200, 100, 0], dim, GREY2);
-   
-            //    const p = Helpers_calc_top_left_pos(_popup.geom.pos, _popup.geom.dim);
-            //    pos = [p[0] + _popup.mat.style.feather, p[1] + _popup.mat.style.feather, _popup.geom.pos[2]];
-   
-            //    for (let i = 0; i < optionsMenu.count; i++){
-
-            //       const options_mesh = optionsMenu.buffer[i];
-
-            //       Listener_hover_enable(options_mesh);
-            //       options_mesh.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
-            //       _popup.AddChild(options_mesh);
-
-            //       /**
-            //        * Event: Menu options OnClick.
-            //        * Create click events for all the options of the menu.
-            //        */
-            //       if(optionsMenu.targets){ // Create clisk event, if the option has a target
-
-            //          const params = {
-            //             EventClbk: optionsMenu.params.EventClbk,
-            //             targetBindingFunctions: optionsMenu.params.targetBindingFunctions,
-            //             self_mesh: optionsMenu.params.self_mesh,
-            //             target_mesh: optionsMenu.targets[i],
-            //          }
-            //          const listen_idx = Listener_create_event(EVENT_TYPES.CLICK, options_mesh.OnClick, options_mesh, params)
-            //          options_mesh.listeners.Add(EVENT_TYPES.CLICK, listen_idx)
-            //       }
-            //    }
-   
-            //    // Add to the scene
-            //    const scene = STATE.scene.active;
-            //    scene.AddMesh(_popup);
-   
-            //    // Reposition to the click coordinates
-            //    const popuppos = Helpers_calc_bottom_right_pos(clickpos, _popup.geom.dim);
-            //    _popup.SetPosXY(popuppos);
-
-            //    _popup.isActive = true;
-               
-            // }

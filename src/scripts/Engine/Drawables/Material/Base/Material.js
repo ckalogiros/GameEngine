@@ -4,7 +4,7 @@ import * as math from '../../../../Helpers/Math/MathOperations.js'
 import { GlSetColor, GlSetColorAlpha } from "../../../../Graphics/Buffers/GlBufferOps.js";
 import { GlAddMaterial, GlHandlerAddMaterialBuffer } from '../../../../Graphics/Buffers/GlBuffers.js';
 import { FontGetUvCoords } from '../../../Loaders/Font/Font.js';
-import { GfxInfoMesh, GlSetTexture } from '../../../../Graphics/GlProgram.js';
+import { GfxInfoMesh, GlSetTextureIdx } from '../../../../Graphics/GlProgram.js';
 import { TextureLoadTexture } from '../../../Loaders/Textures/Texture.js';
 
 let _materialId = 0;
@@ -219,7 +219,7 @@ export class FontMaterial extends Material {
          if(DEBUG.MESH_ALL_UVS) console.log('uv:', uv)
             
       }
-      GlSetTexture(gfx.prog.idx, gfx.vb.idx, gfx.tb.idx); // Update the vertex buffer to store the texture index
+      GlSetTextureIdx(gfx.prog.idx, gfx.vb.idx, gfx.tb.idx); // Update the vertex buffer to store the texture index
    }
 
 }

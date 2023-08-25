@@ -301,6 +301,9 @@ export let GlFrameBuffer = {
 
 export function GlGetContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer) {
 
+    if(ERROR_NULL(sceneIdx)) console.error('Scene index is null. @ GlGetContext()')
+    if(Array.isArray(GL_BUFFER) || Array.isArray(addToSpecificGlBuffer)) console.error('Array of indexes instead of vbIdx is passed. @ GlGetContext()')
+
     const numFaces = 1;
     const progs = GlGetPrograms();
     // ProgramExists returns 0 index based program or -1 for not found
@@ -396,7 +399,7 @@ export function GlGetContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer) {
     const count = numFaces * vertsPerRect * attribsPerVertex; // Total attributes of the mesh
 
     // Set meshes gfx info
-    const gfxInfo = new GfxInfoMesh;
+    const gfxInfo = new GfxInfoMesh; // NOTE: This is the only construction of a new GfxInfoMesh object(as for now), all other calls are for creating a copy of an existing GfxInfoMesh. 
     gfxInfo.sid = sid;
     gfxInfo.sceneIdx = sceneIdx;
     gfxInfo.vao = vb.vao;
