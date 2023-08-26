@@ -4,7 +4,7 @@ const MAX_BALLS_COUNT = 10;
 
 
 // Counter to increment some member variables(instaed of harcoding incrimental values)
-let _cnt2 = 0;
+_cnt2 = 0;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Application's Constants */

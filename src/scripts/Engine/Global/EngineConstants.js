@@ -123,6 +123,7 @@ const STATE = {
 };
 
 _cnt = 0x1;
+let _cnt2 = 0x1;
 const SECTION = {
 
    VERTICAL: _cnt<<=0x1,
@@ -133,6 +134,10 @@ const SECTION = {
 	
 	ITEM_FIT: _cnt<<=0x1,
 	ITEM_RESTRICT: _cnt<<=0x1,
+
+	OPTIONS:{
+		WITH_NEW_SECTION: _cnt2<<=0x1,
+	},
 
 };
 
@@ -496,14 +501,17 @@ function GetMeshHighOrderNameFromType(type) {
 _cnt = 0x1;
 const LISTEN_EVENT_TYPES = {
 	HOVER: _cnt <<= 1,
-	TEMP: _cnt <<= 1,
-
+	CLICK: _cnt <<= 1,
+	MOVE: _cnt <<= 1, // MOVE event registers with the CLICK event, no need to create new event in the ListeEvents buffer
+	
 	NULL: _cnt <<= 1,
 };
 
 _cnt = 0;
 const LISTEN_EVENT_TYPES_INDEX = {
 	HOVER: _cnt++,
+	CLICK: _cnt++,
+	// MOVE event registers with the CLICK event, no need to create new event in the ListeEvents buffer
 	SIZE: _cnt,
 };
 
@@ -513,7 +521,7 @@ function GetListenEventsType(type) {
 }
 
 _cnt = 0x1;
-const DISPATCH_EVENT_TYPES = {
+const DISPATCH_LISTEN_EVENT_TYPES = {
 	SCALE_UP_DOWN: _cnt <<= 1,
 	DIM_COLOR: _cnt <<= 1,
 
@@ -524,8 +532,8 @@ const DISPATCH_EVENT_TYPES = {
 
 function GetDispatchEventsType(type) {
 
-	if (type & DISPATCH_EVENT_TYPES.SCALE_UP_DOWN) { return 'SCALE_UP_DOWN'; }
-	if (type & DISPATCH_EVENT_TYPES.DIM_COLOR) { return 'DIM_COLOR'; }
+	if (type & DISPATCH_LISTEN_EVENT_TYPES.SCALE_UP_DOWN) { return 'SCALE_UP_DOWN'; }
+	if (type & DISPATCH_LISTEN_EVENT_TYPES.DIM_COLOR) { return 'DIM_COLOR'; }
 }
 
 

@@ -95,6 +95,7 @@ export class Material {
 
       GlAddMaterial(sid, gfx, this.col, this.uv, this.style);
       this.alreadyAdded = true;
+      
    }
 
 
@@ -171,16 +172,15 @@ export class FontMaterial extends Material {
 
    text;
    numChars;
-   sdfParams;
+   sdf_params;
 
-
-   constructor(col = [1,1,1,1], texId, text, sdfParams = [.5,.5]) {
+   constructor(col = [1,1,1,1], texId, text, sdf_params = [.5,.5]) {
 
       super(col, texId);
       this.text = text;
       this.numChars = text.length;
-      this.sdfParams = [0, 0];
-      math.CopyArr2(this.sdfParams, sdfParams);
+      this.sdf_params = [0, 0];
+      math.CopyArr2(this.sdf_params, sdf_params);
 
       // Create texture
       const indexes = TextureLoadTexture(this.texId);
@@ -207,7 +207,7 @@ export class FontMaterial extends Material {
          if(this.text[i])
             uv = FontGetUvCoords(this.uvIdx, this.text[i]);
             
-            GlAddMaterial(sid, gfxCopy, this.col, uv, this.style, this.sdfParams);
+            GlAddMaterial(sid, gfxCopy, this.col, uv, this.style, this.sdf_params);
             gfxCopy.vb.start += gfxCopy.vb.count;
             
             // If texture exists, store texture index, else if font texture exists, store font texture index, else store null
@@ -220,6 +220,8 @@ export class FontMaterial extends Material {
             
       }
       GlSetTextureIdx(gfx.prog.idx, gfx.vb.idx, gfx.tb.idx); // Update the vertex buffer to store the texture index
+      
+      return gfxCopy.vb.start;
    }
 
 }

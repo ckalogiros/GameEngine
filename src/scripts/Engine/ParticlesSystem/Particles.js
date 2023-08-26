@@ -12,8 +12,8 @@ class Particle {
     timer   = null;
     dir = { x:1, y:1 };
 
-    constructor(name, sid, scene, col, dim, scale, tex, pos, style, time, sdfParams, attrParams1){
-        this.mesh = new Mesh(col, dim, scale, tex, pos, style, time, attrParams1, sdfParams);
+    constructor(name, sid, scene, col, dim, scale, tex, pos, style, time, sdf_params, attrParams1){
+        this.mesh = new Mesh(col, dim, scale, tex, pos, style, time, attrParams1, sdf_params);
         this.isAlive = false;
         this.gfxInfo = GlAddMesh(sid, this.mesh, 
             1, scene, `Particle:${name}`, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);

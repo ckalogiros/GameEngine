@@ -5,14 +5,14 @@ import { MouseGetPos } from "../Controls/Input/Mouse.js";
 import { M_Buffer } from "../Core/Buffers.js";
 import { Events_handle_immidiate } from "./Events.js";
 
-let _cnt3 = 0;
-export const EVENT_TYPES = {
+// let _cnt3 = 0x1;
+// export const LISTEN_EVENT_TYPES = {
 
-   HOVER: _cnt3++,
-   CLICK: _cnt3++,
+//    HOVER: _cnt3++,
+//    CLICK: _cnt3++,
 
-   SIZE: _cnt3,
-}
+//    SIZE: _cnt3,
+// }
 
 /**
  * listener.buffer[TYPE].events[i]
@@ -24,7 +24,7 @@ export class Event_Listener {
 
    constructor() {
 
-      this.event_type = new Array(EVENT_TYPES.SIZE);
+      this.event_type = new Array(LISTEN_EVENT_TYPES.SIZE);
    }
 
    AddEvent(TYPE_IDX, Clbk = null, self_params = null, target = null) {
@@ -50,8 +50,10 @@ export class Event_Listener {
    DispatchEvents(TYPE_IDX, trigger_params) {
 
       if (this.event_type[TYPE_IDX] === undefined) return;
-      if (TYPE_IDX < 0 || TYPE_IDX >= EVENT_TYPES.SIZE) alert('Event type index does not exist.');
-
+      if (TYPE_IDX < 0 || TYPE_IDX >= LISTEN_EVENT_TYPES.SIZE) alert('Event type index does not exist.');
+/**
+ * TODO: we do not need to run for .HOVER events here
+ */
       for (let i = 0; i < this.event_type[TYPE_IDX].count; i++) {
 
          if(this.event_type[TYPE_IDX].buffer[i]){
@@ -69,7 +71,7 @@ export class Event_Listener {
 
    /** Debug */
    PrintAll() {
-      for (let i = 0; i < EVENT_TYPES.SIZE; i++) {
+      for (let i = 0; i < LISTEN_EVENT_TYPES.SIZE; i++) {
          if (this.event_type[i]) {
             for (let j = 0; j < this.event_type[i].count; j++) {
                console.log(this.event_type[i].buffer[j].self.name,
@@ -89,15 +91,17 @@ export function Listener_create_event(TYPE_IDX, Clbk, params, target) {
 
    return _listener.AddEvent(TYPE_IDX, Clbk, params, target);
 }
+
 export function Listener_dispatch_event(TYPE_IDX, trigger_params) {
 
    _listener.DispatchEvents(TYPE_IDX, trigger_params);
 }
+
 export function Listener_remove_event(TYPE_IDX, idx) {
 
    _listener.event_type[TYPE_IDX].RemoveByIdx(idx);
 }
-// export function Listener_remove_events_all(TYPE_IDX, buffer) {
+
 export function Listener_remove_events_all(TYPE_IDX, mesh_listeners) {
 
    const row = mesh_listeners.GetRow(TYPE_IDX)
@@ -106,19 +110,15 @@ export function Listener_remove_events_all(TYPE_IDX, mesh_listeners) {
    for(let i=0; i<count; i++){
 
       _listener.event_type[TYPE_IDX].RemoveByIdx(row[i]);
-      // row[i] = INT_NULL;
       mesh_listeners.RemoveByIdx(TYPE_IDX, i); // TYPE_IDX is 1 to 1 with the event listeners TYPE_IDX
    }
-   // const count = buffer.length;
-   // for(let i=0; i<count; i++){
-
-   //    _listener.event_type[TYPE_IDX].RemoveByIdx(buffer[i]);
-   // }
 }
+
 export function Listener_get_event(TYPE_IDX, event_idx) {
 
    return _listener.event_type[TYPE_IDX].buffer[event_idx];
 }
+
 export function Listener_debug_print_all(TYPE_IDX, event_idx) {
 
    _listener.PrintAll();
@@ -131,54 +131,6 @@ export function Listener_debug_print_all(TYPE_IDX, event_idx) {
  * that includes a system checking divided in all root parent meshes 
  * of the scene and traverses down to children.
  */
-
-
-
-
-// export class Listener_Hover {
-
-//    constructor(){
-
-//       this.hover = new M_Buffer();
-//       this.hover.Init(1);
-//    }
-
-//    Listen(idx, pos, dim){
-
-//       const params = {
-//          idx: idx,
-//          pos:pos,
-//          dim:dim,
-//       }
-//       this.hover.Add(params);
-//    }
-
-//    Run(){
-
-//       const point = MouseGetPos();
-
-//       for(let i=0; i < this.hover.count; i++){
-
-//          const m = this.hover.buffer[i];
-//          const rect = [
-//             [m.pos[0] - m.dim[0], m.pos[0] + m.dim[0]],     // Left  Right 
-//             [(m.pos[1] - m.dim[1]), (m.pos[1] + m.dim[1])], // Top  Bottom
-//          ];
-
-//          if(Intersection_point_rect(point, rect)){
-
-//             Events_handle_immidiate({ 
-//                type:'hover', 
-//                params:{idx: m.idx} 
-//             });
-
-//             // TESTING NEW LISTENER
-//             const params = { meshIdx: m.idx };
-//             Listener_dispatch_event(EVENT_TYPES.HOVER, params);
-//          }
-//       }
-//    }
-// } 
 
 export class Listener_Hover {
 
@@ -241,7 +193,7 @@ export function Listener_hover_get() { return _listener_hover; }
 export function Listener_hover_enable(mesh) { _listener_hover.Listen(mesh); }
 export function Listener_hover_remove_by_idx(idx) { 
 
-   _listener_hover.hover_buffer.buffer[idx].listen_hover_idx = INT_NULL; // We ste the meshe's 'listen_hover_idx' to null HERE.
+   // _listener_hover.hover_buffer.buffer[idx].listen_hover_idx = INT_NULL; // We ste the meshe's 'listen_hover_idx' to null HERE.
    _listener_hover.hover_buffer.RemoveByIdx(idx); 
 }
 export function Listener_hover_Print() { _listener_hover.Print(); }
@@ -480,7 +432,7 @@ export function ListenersGetListenerType(idx) {
 
 
 /**
- * @param {*} type typeOf EVENT_TYPES.
+ * @param {*} type typeOf LISTEN_EVENT_TYPES.
  * @returns index to the created listen event
  */
 export function ListenerCreateListenEvent(type, params) { return _listeners.CreateListenEvent(type, params); }

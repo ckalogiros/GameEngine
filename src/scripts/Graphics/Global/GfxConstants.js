@@ -26,7 +26,7 @@ const GL = {
 // different vertex and fragment shaders bbbased uppon the input attribbutes, input uniforms and other properties.
 // Shader creation flags 
 
-let BIT1 = 1, BIT2 = 1, BIT3 = 1, BIT4 = 1;
+let BIT1 = 0x1, BIT2 = 0x1, BIT3 = 0x1, BIT4 = 0x1;
 const SID = {
     SHAD: {
         INDEXED: BIT1 <<= 1,
@@ -48,7 +48,7 @@ const SID = {
         POS3:       BIT2 <<= 1,
         SCALE3:     BIT2 <<= 1,
         COL4_PER_VERTEX: BIT2 <<= 1,
-        EMPTY: 0x10000000,
+        // EMPTY: 0x10000000,
     },
 
     UNIF: {
@@ -105,7 +105,14 @@ const SID = {
         )
             return true;
         return false;
-    }
+    },
+
+    Copy(sid){
+        this.shad = sid.shad; 
+        this.attr = sid.attr; 
+        this.unif = sid.unif; 
+        this.pass = sid.pass;   
+    },
 };
 
 

@@ -226,7 +226,7 @@ export class Widget_Generic extends Mesh{
       // _position_controller.FitAll(this, ALIGN.HORIZONTAL, SIZER.RESTRICT, [.5,1], 1);
    }
 
-   AddToGraphicsBuffer(sceneIdx){
+   CreateGfxCtx(sceneIdx){
 
       
       // for(let i=0; i<this.children.count; i++){
@@ -234,10 +234,10 @@ export class Widget_Generic extends Mesh{
          
          const child = this.children.buffer[i];
          Recursive_add_to_gfx_buffers(child)
-         child.AddToGraphicsBuffer(sceneIdx);
+         child.CreateGfxCtx(sceneIdx);
       }
 
-      const gfx = super.AddToGraphicsBuffer(sceneIdx)
+      const gfx = super.CreateGfxCtx(sceneIdx)
 
       return gfx;
    }
@@ -253,195 +253,6 @@ function Recursive_add_to_gfx_buffers(_mesh, sceneIdx){
          // if (mesh.children.count)
          //    Recursive_add_to_gfx_buffers(mesh, sceneIdx)
 
-            mesh.AddToGraphicsBuffer(sceneIdx);
+            mesh.CreateGfxCtx(sceneIdx);
    }
 }
-
-/**
- * Test code. Saved for display purposes
- */
-
-/** The exapmle below sets a grid type sizer in which the elements can be positioned on a specific row
- * if VERTICAL alignment is set or specific column if HORIZONTAL alignment is set
- */
-// class Position_Controller {
-
-//    // Pass param values: Restrict, row-column positioning
-//    FitAll(parent, align_flags, size_flags, restrict_val = 0, grid_pos = 0){
-      
-//       const pad = 4;
-
-//       const a = this.#CreateActiveMeshes(parent.children);
-
-//       const pos = [0,0]
-//       pos[0] = parent.geom.pos[0];
-//       pos[1] = parent.geom.pos[1];
-//       const dim = [0,0]
-//       dim[0] = parent.geom.dim[0];
-//       dim[1] = parent.geom.dim[1];
-
-
-//       const avg_width  = ((dim[0] - (pad/2) * (a.count+1)) /a.count);
-//       const avg_height = ((dim[1] - (pad/2) * (a.count+1)) /a.count);
-
-//       if(grid_pos > a.count) grid_pos = a.count
-
-      
-//       const left = pos[0] - dim[0];
-//       const top = pos[1] - dim[1];
-//       pos[0] = left + avg_width + pad;
-//       pos[1] = top + avg_height + pad;
-
-//       const restrict = size_flags & SIZER.RESTRICT ? restrict_val : avg_width;
-
-//       if(align_flags & ALIGN.LEFT){ pos[0] = left + restrict + pad }
-//       else if(align_flags & ALIGN.RIGHT){ pos[0] = right - restrict - pad }
-
-//       for( let i=0; i< a.count; i++){
-         
-//          const child = a.buffer[i];
-
-//          if(align_flags & ALIGN.VERTICAL){
-            
-//             child.geom.dim[1] = avg_height;            
-//             child.geom.pos[1] = pos[1];            
-//             pos[1] += (avg_height)*2+pad;            
-            
-//             child.geom.pos[0] = (left+avg_width+pad) + (((avg_width*2)+pad) * (grid_pos-1));             
-//             child.geom.dim[0] = restrict;            
-//          }
-//          else if(align_flags & ALIGN.HORIZONTAL){
-            
-//             child.geom.dim[0] = avg_width;            
-//             child.geom.pos[0] = pos[0];            
-//             pos[0] += (avg_width)*2+pad;   
-            
-//             child.geom.pos[1] = (top+avg_height+pad) + (((avg_height*2)+pad) * (grid_pos-1));             
-//             // child.geom.pos[1] = pos[1] + (avg_height*grid_pos);            
-//             child.geom.dim[1] = restrict;   
-//          }
-//          // this.FitAll(child, align_flags, size_flags, restrict_val, grid_pos)
-//       }
-//    }
-
-//    #CreateActiveMeshes(children){
-
-//       const active = {
-//          buffer: [],
-//          count: 0,
-//          sum: { width: 0, height:0, }
-//       }
-      
-//       for(let i=0; i< children.count; i++){
-
-//          const child = children.buffer[i];
-//          if(child){
-
-//             active.buffer[i] = child;
-//             active.sum.width += child.geom.dim[0]
-//             active.sum.height += child.geom.dim[1]
-//             active.count++;
-//          }
-//       }
-//       return active;
-//    }
-
-//    #CalcTotalTotals(children){
-      
-//       const sum = {
-//          width: 0, height:0,
-//       }
-      
-//       for(let i=0; i< children.count; i++){
-
-//          const child = parent.children.buffer[i];
-//          if(child){
-
-//             sum.width += child.geo.dim[0]
-//             sum.height += child.geo.dim[1]
-//          }
-//       }
-//       return sum;
-//    }
-
-//    #GetPos(mesh){ return mesh.geom.pos; }
-//    #GetDim(mesh){ return mesh.geom.dim; }
-//    #GetLeft(mesh){ return mesh.geom.pos[0] - mesh.geom.dim[0]; }
-//    #GetRight(mesh){ return mesh.geom.pos[0] + mesh.geom.dim[0]; }
-//    #GetTop(mesh){ return mesh.geom.pos[1] - mesh.geom.dim[1]; }
-//    #GetBottom(mesh){ return mesh.geom.pos[1] + mesh.geom.dim[1]; }
-// }
-
-// const _position_controller = new Position_Controller;
-
-// export class Widget_Generic extends Mesh{
-
-//    constructor(pos = [Viewport.width/2, Viewport.height/2, 0], dim = [20, 20], col = GREY1){
-
-//       const geom = new Geometry2D(pos, dim);
-//       const mat = new Material(ORANGE_240_130_10);
-
-//       super(geom, mat);
-
-//       this.type |= MESH_TYPES_DBG.WIDGET_GENERIC;
-//    }
-
-//    AddSection(_dim=null){
-
-//       const pos = [0,0,0];
-//       const dim = [0,0];
-//       const pad = 5;
-
-//       CopyArr3(pos, this.geom.pos);
-//       pos[2] += 1;
-
-//       if(!_dim){
-//          dim[0] = this.geom.dim[0] - pad;
-//          dim[1] = this.geom.dim[1] - pad;
-//       }
-//       else CopyArr2(dim, _dim);
-
-//       {
-//          const section = new Rect(pos, dim, GREY1);
-//          this.AddChild(section);
-//       }
-//       {
-//          const section = new Rect(pos, dim, WHITE);
-//          this.AddChild(section);
-//       }
-//       {
-//          const section = new Rect(pos, dim, GREY1);
-//          this.AddChild(section);
-//       }
-//       {
-//          const section = new Rect(pos, dim, WHITE);
-//          this.AddChild(section);
-//       }
-//       {
-//          const section = new Rect(pos, dim, GREY1);
-//          this.AddChild(section);
-//       }
-//       {
-//          const section = new Rect(pos, dim, WHITE);
-//          this.AddChild(section);
-//       }
-
-//       // _position_controller.FitAll(this, ALIGN.VERTICAL, null, 0, 10);
-//       _position_controller.FitAll(this, ALIGN.HORIZONTAL, null, 0, 10);
-//       // _position_controller.FitAll(ALIGN.VERTICAL|ALIGN.LEFT, SIZER.RESTRICT, this);
-//    }
-
-//    AddToGraphicsBuffer(sceneIdx){
-
-//       const gfx = super.AddToGraphicsBuffer(sceneIdx)
-
-//       for(let i=0; i<this.children.count; i++){
-
-//          const child = this.children.buffer[i];
-//          child.AddToGraphicsBuffer(sceneIdx);
-//       }
-
-//       return gfx;
-//    }
-
-// } 

@@ -1,7 +1,7 @@
 "use strict";
 
 import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
-import { GlGetContext } from "../../../../Graphics/Buffers/GlBuffers.js";
+import { GlGenerateContext } from "../../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh, GlGetProgram } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
@@ -60,18 +60,19 @@ function CalculateArea(text, _dim, pos, pad = [0, 0]) {
  * The difference with plain text is that a label draws the text inside a rect mesh
  */
 export class Widget_Label_Text_Mesh extends Mesh {
+// export class Widget_Label_Text_Mesh extends Text_Mesh {
 
     type = 0;
     pad = [0, 0];
 
-    constructor(text, pos, fontSize, col = GREY3, textCol = WHITE, scale = [1, 1], pad = [0, 0], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [6, 5, 3]) {
+    constructor(text, pos=[200, 300], fontSize, col = GREY3, textCol = WHITE, scale = [1, 1], pad = [0, 0], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [6, 5, 3]) {
 
         const sdfouter = CalculateSdfOuterFromDim(fontSize);
         if (sdfouter + bold > 1) bold = 1 - sdfouter;
-        // console.log(sdfouter)
         const textmat = new FontMaterial(textCol, font, text, [bold, sdfouter])
         const textgeom = new Geometry2D_Text(pos, fontSize, scale, text, font);
-        pos[2] -= 1; // Set z-axis, render text in front of area
+
+        // pad[1] *= textmat.numChars/2;
 
         const areaMetrics = CalculateArea(text, textgeom.dim, pos, pad)
         const areageom = new Geometry2D(areaMetrics.pos, areaMetrics.dim, scale);
@@ -80,8 +81,9 @@ export class Widget_Label_Text_Mesh extends Mesh {
         super(areageom, areamat);
 
         textgeom.pos[0] += pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
-        textgeom.pos[1] += pad[1]; // In essence we set as the left (start of text label) the label area and not the left of text.
-
+        // textgeom.pos[1] += pad[1]; // In essence we set as the left (start of text label) the label area and not the left of text.
+        textgeom.pos[2] += 1; // In essence we set as the left (start of text label) the label area and not the left of text.
+        
         this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
         this.SetStyle(style[0], style[1], style[2]);
 
@@ -92,13 +94,6 @@ export class Widget_Label_Text_Mesh extends Mesh {
         this.SetName();
         this.pad = pad;
         this.AddChild(textMesh);
-
-        // textMesh.dim[0] += pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
-        // textMesh.dim[1] += pad[1] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
-        
-
-        // console.debug('WidgetLabelText type:', GetMeshNameFromType(this.type))
-
     }
 
     UpdateText(text) {
@@ -144,13 +139,18 @@ export class Widget_Label_Text_Mesh extends Mesh {
                 areaMetrics.pos[0] -= this.geom.dim[0];
                 CopyArr2(child.geom.pos, areaMetrics.pos);
             }
-
          }
+    }
+
+    UpdatePosXYZ(){
+
+        super.UpdatePosXYZ();
+        this.children.buffer[0].UpdatePosXYZ()
     }
 
     //////////////////////////////////////////////////////////////
 
-    AddToGraphicsBuffer(sceneIdx, useSpecificVertexBuffer = GL_VB.ANY, vertexBufferIdx = NO_SPECIFIC_GL_BUFFER) {
+    CreateGfxCtx(sceneIdx, useSpecificVertexBuffer = GL_VB.ANY, vertexBufferIdx = NO_SPECIFIC_GL_BUFFER) {
 
         let vbidx1 = null, vbidx2 = null;
         let vbUse1 = null, vbUse2 = null;
@@ -168,15 +168,31 @@ export class Widget_Label_Text_Mesh extends Mesh {
         }
 
         const gfx = []
-        gfx[0] = super.AddToGraphicsBuffer(sceneIdx, vbUse1, vbidx1);
+        gfx[0] = super.CreateGfxCtx(sceneIdx, vbUse1, vbidx1);
         for (let i = 0; i < this.children.count; i++) {
             if(this.children.buffer[i])
-                gfx[i + 1] = this.children.buffer[i].AddToGraphicsBuffer(sceneIdx, vbUse2, vbidx2);
+                gfx[i + 1] = this.children.buffer[i].CreateGfxCtx(sceneIdx, vbUse2, vbidx2);
         }
 
         return gfx;
 
     }
+	
+	AddToGfx(){
+
+        
+        super.AddToGfx()
+        for(let i=0; i<this.children.active_count; i++){
+            
+            const child = this.children.buffer[i];
+			const gfxCopy = new GfxInfoMesh(this.children.buffer[0].gfx);
+            
+			child.geom.AddToGraphicsBuffer(child.sid, gfxCopy, child.name);
+			gfxCopy.vb.start = child.mat.AddToGraphicsBuffer(child.sid, gfxCopy);
+            
+		}
+
+	}
 
     Listener_listen_mouse_hover() {
         this.geom.Listener_listen_mouse_hover();
@@ -259,28 +275,38 @@ export class Widget_Label_Dynamic_Text extends Widget_Label_Text_Mesh {
         this.SetName();
     }
 
-    AddToGraphicsBuffer(sceneIdx) {
+    CreateGfxCtx(sceneIdx) {
 
         /** Add the constant text */
-        super.AddToGraphicsBuffer(sceneIdx);
+        super.CreateGfxCtx(sceneIdx);
 
         /** Add the dynamic text to the graphics buffer */
         const dynamicText = this.children.buffer[0];
-        dynamicText.gfx = GlGetContext(dynamicText.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
+        dynamicText.gfx = GlGenerateContext(dynamicText.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
         const prog = GlGetProgram(dynamicText.gfx.prog.idx);
+
         if (dynamicText.sid.unif & SID.UNIF.BUFFER_RES) {
             const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
             prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
             prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
         }
 
+        // dynamicText.geom.AddToGraphicsBuffer(dynamicText.sid, dynamicText.gfx, dynamicText.name);
+        // dynamicText.mat.AddToGraphicsBuffer(dynamicText.sid, dynamicText.gfx);
+
+        return this.gfx;
+        // return [
+        //     this.gfx,
+        //     dynamicText.gfx,
+        // ];
+    }
+
+    AddToGfx(){
+
+        super.AddToGfx();
+        const dynamicText = this.children.buffer[0];
         dynamicText.geom.AddToGraphicsBuffer(dynamicText.sid, dynamicText.gfx, dynamicText.name);
         dynamicText.mat.AddToGraphicsBuffer(dynamicText.sid, dynamicText.gfx);
-
-        return [
-            this.gfx,
-            dynamicText.gfx,
-        ];
     }
 
     /**

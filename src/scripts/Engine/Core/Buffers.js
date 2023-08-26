@@ -179,7 +179,7 @@ export class Int8Buffer extends Buffer_Interface {
 export class Int8_2DBuffer {
 
    buffer;
-   count; // CAUTION! Do not rely on the count variable.It is use is arbitary and only for counting how many alements are in use(1 count for both rows and columns).
+   count; // CAUTION! Do not rely on the count variable.Its use is only for counting how many alements are in use(1 count for both rows and columns).
    size;
    numcols;
 
@@ -191,7 +191,6 @@ export class Int8_2DBuffer {
 
       this.buffer = new Int8Array(this.size);
       this.count = 0;
-      // this.cols_count = 0;
 
       this.Init(INT_NULL);
    }
@@ -201,8 +200,6 @@ export class Int8_2DBuffer {
          this.buffer[i] = val;
       }
    }
-
-   // arr[column + row * numcols]
 
    Add(rowidx, val){
 
@@ -216,6 +213,7 @@ export class Int8_2DBuffer {
    GetElem(rowidx, colidx){
       return this.buffer[this.numcols * rowidx + colidx];
    }
+
    GetRow(rowidx){
       const row = [];
       for(let i=0; i<this.numcols; i++){
@@ -248,6 +246,13 @@ export class Int8_2DBuffer {
          this.buffer[idx] = INT_NULL;
          this.count--;
       }
+   }
+
+   RemoveAll(){
+
+      for (let i = 0; i <= this.size; i++)
+         this.buffer[i] = INT_NULL
+      this.count = 0;
    }
    // RemoveByIdx(idx) {
 
@@ -286,9 +291,6 @@ export class Int8_2DBuffer {
    //          alert('M_Buffer count = -1')
    //    }
    // }
-
-
-
    /** Debug */
    Print(){
       console.log('Count: ', this.count)

@@ -52,11 +52,13 @@ export function GlDraw(gl) {
             }
         }
 
-        if (ib.needsUpdate) GlUpdateIndexBufferData(gl, ib)
+        if (ib.needsUpdate) 
+            GlUpdateIndexBufferData(gl, ib)
         if (vb.needsUpdate) 
             GlUpdateVertexBufferData(gl, vb)
 
         gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
+        // gl.drawElements(gl.TRIANGLES, 120, gl.UNSIGNED_SHORT, 0);
     }
     
     // const fb = FramebuffersGet(FRAMEBUFFERS_IDX.buffer0);

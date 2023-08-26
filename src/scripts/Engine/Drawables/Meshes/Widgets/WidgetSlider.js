@@ -1,17 +1,16 @@
 "use strict";
 
 import { CopyArr3 } from '../../../../Helpers/Math/MathOperations.js';
-import { Bind_change_brightness, Bind_change_color_rgb } from '../../../BindingFunctions.js';
+import { Bind_change_brightness } from '../../../BindingFunctions.js';
 import { Check_intersection_point_rect } from '../../../Collisions.js';
-import { MouseGetPos, MouseGetPosDif } from '../../../Controls/Input/Mouse.js';
-import { EVENT_TYPES, Listener_create_event, Listener_get_event, Listener_hover_enable, Listener_remove_event } from '../../../Events/EventListeners.js';
+import { MouseGetPos } from '../../../Controls/Input/Mouse.js';
 import { FontGetFontDimRatio } from '../../../Loaders/Font/Font.js';
 import { Scenes_get_children } from '../../../Scenes.js';
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from '../../../Timers/TimeIntervals.js';
 import { Geometry2D } from '../../Geometry/Base/Geometry.js';
 import { Material } from '../../Material/Base/Material.js';
 import { MESH_ENABLE, Mesh } from '../Base/Mesh.js';
-import { Widget_Button_Mesh, Widget_Switch_Mesh } from './WidgetButton.js';
+import { Widget_Switch_Mesh } from './WidgetButton.js';
 import { Widget_Label_Text_Mesh_Menu_Options } from './WidgetLabelText.js';
 import { Widget_popup_handler_onclick_event } from './WidgetPopup.js';
 import { Widget_Text_Mesh } from './WidgetText.js';
@@ -48,6 +47,7 @@ export class Widget_Slider extends Mesh {
       this.type |= MESH_TYPES_DBG.WIDGET_SLIDER | geom.type | mat.type;
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       this.SetStyle(1, 8, 3);
+      this.SetName('Widget_Slider');
 
       /**
        * Slider Bar: Bar is child of the slider mesh
@@ -70,8 +70,9 @@ export class Widget_Slider extends Mesh {
       bar.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       bar.SetStyle(0, 3, 2);
       bar.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.HAS_HOVER_COLOR | MESH_STATE.HAS_POPUP);
-      bar.CreateListenEvent(EVENT_TYPES.CLICK, this.OnClick, bar)
-      Listener_hover_enable(bar);
+      bar.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK, this.OnClick, bar)
+      bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+      // Listener_hover_enable(bar);
 
       bar.SetName();
       BAR_IDX = this.AddChild(bar);
@@ -142,28 +143,45 @@ export class Widget_Slider extends Mesh {
       // this.ListenersReconstruct();
    }
 
-   AddToGraphicsBuffer(sceneIdx) {
+   CreateGfxCtx(sceneIdx) {
 
       /**
        * TODO: Implement an automatic adding to the graphics pipeline.
        */
       const gfx = []
-      gfx[0] = super.AddToGraphicsBuffer(sceneIdx);
+      gfx[0] = super.CreateGfxCtx(sceneIdx);
 
       const bar = this.children.buffer[BAR_IDX];
       const handle = bar.children.buffer[0];
-      gfx[1] = bar.AddToGraphicsBuffer(sceneIdx);
-      gfx[2] = handle.AddToGraphicsBuffer(sceneIdx);
+      gfx[1] = bar.CreateGfxCtx(sceneIdx);
+      gfx[2] = handle.CreateGfxCtx(sceneIdx);
 
       const slider_name_text = this.children.buffer[1];
-      gfx[3] = slider_name_text.AddToGraphicsBuffer(sceneIdx);
+      gfx[3] = slider_name_text.CreateGfxCtx(sceneIdx);
 
       // const slider_value_text = this.children.buffer[2];
       const slider_value_text = bar.children.buffer[1];
-      gfx[4] = slider_value_text.AddToGraphicsBuffer(sceneIdx);
+      gfx[4] = slider_value_text.CreateGfxCtx(sceneIdx);
 
       return gfx;
 
+   }
+
+   AddToGfx(){
+
+      super.AddToGfx();
+
+      const bar = this.children.buffer[BAR_IDX];
+      const handle = bar.children.buffer[0];
+      bar.AddToGfx();
+      handle.AddToGfx();
+
+      const slider_name_text = this.children.buffer[1];
+      slider_name_text.AddToGfx();
+
+      // const slider_value_text = this.children.buffer[2];
+      const slider_value_text = bar.children.buffer[1];
+      slider_value_text.AddToGfx();
    }
 
    SetMenuOptionsClbk(ClbkFunction) {
@@ -214,8 +232,8 @@ export class Widget_Slider extends Mesh {
          if (mesh.timeIntervalsIdxBuffer.count <= 0) {
 
             /**
-             * Create the handle move event.
-             * The handle move event runs only when the handle is GRABED.
+             * Create move event.
+             * The move event runs only when the mesh is GRABED.
              * That means that the timeInterval is created and destroyed upon 
              * onClickDown and onClickUp respectively.
              */
@@ -228,7 +246,7 @@ export class Widget_Slider extends Mesh {
                mesh.StateEnable(MESH_STATE.IN_GRAB);
             }
 
-            // Handle any menu of the slider (on leftClick only)
+            // Handle any menu (on leftClick only)
             if (mesh.StateCheck(MESH_STATE.HAS_POPUP)) {
 
                const btnId = params.trigger_params;

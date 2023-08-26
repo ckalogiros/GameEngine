@@ -19,12 +19,18 @@ SEE: dock/ScemeDraws/HoverListenEvents.drawio
 --------------------------------------------------- ALGORITHMS!
 
 --------------------------------------------------- TESTING!
+. Implement a smooth fps timer, by addding
+  on each frame the new delta time but
+  subtracting the 'oldest' one, with a constant counter.
+  The 'oldest' value is up to dicision. For example
+  we could set 100 samples, so the oldest will be the -100 delta. 
 . Create a performance test for accesing arrays with 'key' 
   instead of ordinary int counter. Make it complex so the 
   interpeter does not optimize.
 --------------------------------------------------- TESTING!
 
 --------------------------------------------------- IMIDIATE!
+. Extend from root classes as Mesh and Text_Mesh wher possible
 . Implement set render queue priority for meshes in a vertexBuffer.
 
 . Definetly we need an implementation of removing vertices from the gfx buffers.

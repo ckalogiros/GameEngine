@@ -41,6 +41,11 @@ export class Widget_Button_Mesh extends Widget_Label_Text_Mesh {
    SetZindex(params){
       params.mesh.children.buffer[0].SetZindex(params.z)
    }
+
+//    UpdatePosXYZ(){
+
+//       super.UpdatePosXYZ();
+//   }
 }
 
 
@@ -49,14 +54,19 @@ export class Widget_Switch_Mesh extends Widget_Button_Mesh {
    isOn;
    state_text;
 
-   constructor(pos, fontSize = 5, color = GREY1, colorText = WHITE, scale, pad=[5,7], bold, font, style = [3,6,2]) {
+   constructor(pos, fontSize = 5, color = GREY1, colorText = WHITE, scale, pad=[fontSize,fontSize], bold, font, style = [3,6,2]) {
 
+      
       super('off', pos, fontSize, color, colorText, scale, pad, bold, font, style)
+      // pd[1] *= 
       
       this.isOn = 0x0;
       this.state_text = ['off', 'on'];
 
       this.type |= MESH_TYPES_DBG.WIDGET_BUTTON;
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK, this.OnClick, this, null);
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+      // this.StateEnable(MESH_STATE.HAS_HOVER_COLOR);
 
       this.SetName();
    }

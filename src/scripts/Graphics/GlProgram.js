@@ -28,6 +28,7 @@ export class GfxInfoMesh {
 
 	sid = INT_NULL;
 	sceneIdx = INT_NULL;
+	isPrivate = false;
 	numFaces = 0;
 	vertsPerRect = 0;
 	attribsPerVertex = 0;
@@ -86,7 +87,7 @@ export class GfxInfoMesh {
 
 		if (gfx instanceof GfxInfoMesh) {
 
-			this.sid = gfx.sid;
+			this.sid.Copy(gfx.sid);
 			this.sceneIdx = gfx.sceneIdx;
 			this.numFaces = gfx.numFaces;
 			this.vertsPerRect = gfx.vertsPerRect;
@@ -370,6 +371,8 @@ export class GlProgram {
  */
 export function GlCreateProgram(sid) {
 	const prog = new GlProgram(gfxCtx.gl, sid);
+	// // Initialize attribute locations of the shader for every newly created program
+	// GlEnableAttribsLocations(gfxCtx.gl,prog);
 	return prog.idx;
 }
 
@@ -386,48 +389,43 @@ export function GlCreateProgram(sid) {
 export function GlEnableAttribsLocations(gl, prog) {
 
 	const attribsPerVertex = prog.shaderInfo.attribsPerVertex;
+	const loc = prog.shaderInfo.attributes.loc;
+	const size = prog.shaderInfo.attributes.size;
+	const offset = prog.shaderInfo.attributes.offset;
+
 
 	// For Uniforms
-	if (prog.shaderInfo.attributes.loc.col >= 0) {
-		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.col);
-		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.col,
-			prog.shaderInfo.attributes.size.col, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.col * FLOAT);
-			// V_COL_COUNT, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.col * FLOAT);
+	if (loc.col >= 0) {
+		gl.enableVertexAttribArray(loc.col);
+		gl.vertexAttribPointer(loc.col, size.col, gl.FLOAT, false, attribsPerVertex * FLOAT, offset.col * FLOAT);
 	}
-	if (prog.shaderInfo.attributes.loc.pos >= 0) {
-		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.pos);
-		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.pos,
-			prog.shaderInfo.attributes.size.pos, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.pos * FLOAT);
+	if (loc.pos >= 0) {
+		gl.enableVertexAttribArray(loc.pos);
+		gl.vertexAttribPointer(loc.pos, size.pos, gl.FLOAT, false, attribsPerVertex * FLOAT, offset.pos * FLOAT);
 	}
-	if (prog.shaderInfo.attributes.loc.tex >= 0) {
-		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.tex);
-		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.tex,
-			prog.shaderInfo.attributes.size.tex, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.tex * FLOAT);
+	if (loc.tex >= 0) {
+		gl.enableVertexAttribArray(loc.tex);
+		gl.vertexAttribPointer(loc.tex, size.tex, gl.FLOAT, false, attribsPerVertex * FLOAT, offset.tex * FLOAT);
 	}
-	if (prog.shaderInfo.attributes.loc.wposTime >= 0) {
-		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.wposTime);
-		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.wposTime,
-			prog.shaderInfo.attributes.size.wposTime, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.wposTime * FLOAT);
+	if (loc.wposTime >= 0) {
+		gl.enableVertexAttribArray(loc.wposTime);
+		gl.vertexAttribPointer(loc.wposTime, size.wposTime, gl.FLOAT, false, attribsPerVertex * FLOAT, offset.wposTime * FLOAT);
 	}
-	if (prog.shaderInfo.attributes.loc.params1 >= 0) {
-		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.params1);
-		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.params1,
-			prog.shaderInfo.attributes.size.params1, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.params1 * FLOAT);
+	if (loc.params1 >= 0) {
+		gl.enableVertexAttribArray(loc.params1);
+		gl.vertexAttribPointer(loc.params1, size.params1, gl.FLOAT, false, attribsPerVertex * FLOAT, offset.params1 * FLOAT);
 	}
-	if (prog.shaderInfo.attributes.loc.style >= 0) {
-		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.style);
-		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.style,
-			prog.shaderInfo.attributes.size.style, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.style * FLOAT);
+	if (loc.style >= 0) {
+		gl.enableVertexAttribArray(loc.style);
+		gl.vertexAttribPointer(loc.style, size.style, gl.FLOAT, false, attribsPerVertex * FLOAT, offset.style * FLOAT);
 	}
-	if (prog.shaderInfo.attributes.loc.time >= 0) {
-		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.time);
-		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.time,
-			prog.shaderInfo.attributes.size.time, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.time * FLOAT);
+	if (loc.time >= 0) {
+		gl.enableVertexAttribArray(loc.time);
+		gl.vertexAttribPointer(loc.time, size.time, gl.FLOAT, false, attribsPerVertex * FLOAT, offset.time * FLOAT);
 	}
-	if (prog.shaderInfo.attributes.loc.sdf >= 0) {
-		gl.enableVertexAttribArray(prog.shaderInfo.attributes.loc.sdf);
-		gl.vertexAttribPointer(prog.shaderInfo.attributes.loc.sdf,
-			prog.shaderInfo.attributes.size.sdf, gl.FLOAT, false, attribsPerVertex * FLOAT, prog.shaderInfo.attributes.offset.sdf * FLOAT);
+	if (loc.sdf >= 0) {
+		gl.enableVertexAttribArray(loc.sdf);
+		gl.vertexAttribPointer(loc.sdf, size.sdf, gl.FLOAT, false, attribsPerVertex * FLOAT, offset.sdf * FLOAT);
 	}
 }
 

@@ -2,8 +2,7 @@
 import { OnMouseMove_Android, OnTouchStart, OnTouchEnd, OnTouchCancel, OnTouchMove } from "./MouseEvents.js";
 import { OnMouseMove, OnMouseDown, OnMouseUp, OnMouseOut, OnMouseWheel } from "../Controls/Input/Mouse.js";
 import { OnKeyDown, OnKeyUp } from "../Controls/Input/Keys.js";
-import { Widget_popup_deactivate, Widget_popup_handler_onclick_event } from "../Drawables/Meshes/Widgets/WidgetPopup.js";
-import { EVENT_TYPES, Listener_dispatch_event } from "./EventListeners.js";
+import { Listener_dispatch_event } from "./EventListeners.js";
 
 
 
@@ -81,7 +80,7 @@ export function HandleEvents() {
 
                 // Widget_popup_deactivate();
             // }
-            Listener_dispatch_event(EVENT_TYPES.CLICK, e.params.mouseButton);
+            Listener_dispatch_event(LISTEN_EVENT_TYPES.CLICK, e.params.mouseButton);
         }
 
         else if (e.type === 'mouse-click-up') {
@@ -167,7 +166,7 @@ export function Events_handle_immidiate(e){
         STATE.mesh.SetHovered(e.params.mesh);
         e.params.mesh.StateEnable(MESH_STATE.IN_HOVER); // Set mesh state hovered to true
 
-        Listener_dispatch_event(EVENT_TYPES.HOVER, e.params.mesh);
+        Listener_dispatch_event(LISTEN_EVENT_TYPES.HOVER, e.params.mesh);
     }
 
     else if (e.type === 'unhover') {

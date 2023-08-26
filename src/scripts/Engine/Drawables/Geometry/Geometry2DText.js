@@ -11,6 +11,7 @@ export class Geometry2D_Text extends Geometry2D {
 
    numChars;
    text;
+   char_ratio;
 
    constructor(pos, fontSize, scale, text, texId = INT_NULL) {
 
@@ -19,12 +20,14 @@ export class Geometry2D_Text extends Geometry2D {
 
       if (texId !== INT_NULL) {
 
-         dim[1] *= FontGetFontDimRatio(texId);
+         var char_ratio = FontGetFontDimRatio(texId);
+         dim[1] *= char_ratio;
          pos[0] += fontSize; // Case pos is set to 0, then we must add half text face width.
       }
-
+      
       super(pos, dim, scale);
-
+      
+      this.char_ratio = char_ratio;
       this.text = text;
       this.numChars = text.length;
       this.type |= MESH_TYPES_DBG.TEXT_GEOMETRY2D;
@@ -45,12 +48,13 @@ export class Geometry2D_Text extends Geometry2D {
 
          GlAddGeometry(sid, charPos, this.dim, this.time, gfxCopy, meshName, 1)
          gfxCopy.vb.start += gfxCopy.vb.count;
-         gfxCopy.ib.start += gfxCopy.ib.count;
+         gfxCopy.ib.start += gfxCopy.ib.count; // TODO!!!: should we count the index buffer??? should we re-implement the index buffers also??? IMPORTANT!!!
          charPos[0] += this.dim[0] * 2;
       }
    }
 
-   Move(x, y, gfx) {
+
+   MoveXY(x, y, gfx) {
       this.MoveXYConcecutive(x, y, gfx, this.numChars)
    }
 

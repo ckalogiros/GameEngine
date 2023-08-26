@@ -174,15 +174,15 @@ export function VbSetAttribWpos(vb, start, count, stride, pos, numFaces) {
         vb.count += V_WPOS_TIME_COUNT;
     }
 }
-export function VbSetAttrSdf(vb, start, count, stride, sdfParams) {
+export function VbSetAttrSdf(vb, start, count, stride, sdf_params) {
 
     let index = start;
     const end = start + count;
 
     while (index < end) {
 
-        vb.data[index++] = sdfParams[0];
-        vb.data[index++] = sdfParams[1];
+        vb.data[index++] = sdf_params[0];
+        vb.data[index++] = sdf_params[1];
 
         index += stride;
         vb.count += V_SDF_COUNT;

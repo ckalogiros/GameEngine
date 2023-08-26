@@ -7,90 +7,269 @@ import { ScenesPrintAllMeshes } from "../../Scenes.js";
 import { FpsGet } from "../../Timers/Time.js";
 import { TimeIntervalsPrintAll } from "../../Timers/TimeIntervals.js";
 
+export const DEBUG_PRINT_KEYS = [
 
+   {
+      key: 'p',
+      discr: 'PAUSE APP',
+      func: (e)=>{
+         console.log(e.key);
+         if(g_state.game.paused) g_state.game.paused = false
+         else g_state.game.paused = true
+      },
+   },
+   {
+      key: 'x',
+      discr: 'PrintVertexBufferAll()',
+      func: (e)=>{
+         console.log(e.key);
+         PrintVertexBufferAll();
+      },
+   },
+   {
+      key: 'c',
+      discr: 'PrintIndexBufferAll()',
+      func: (e)=>{
+         console.log(e.key);
+         PrintIndexBufferAll();
+      },
+   },
+   {
+      key: 'z',
+      discr: 'PrintAttributes()',
+      func: (e)=>{
+         console.log(e.key);
+         PrintAttributes();
+      },
+   },
+   {
+      key: 'r',
+      discr: 'RenderQueue PrintAll()',
+      func: (e)=>{
+         console.log(e.key);
+         RenderQueueGet().PrintAll();
+      },
+   },
+   {
+      key: 'R',
+      discr: 'RenderQueue PrintActive()',
+      func: (e)=>{
+         console.log(e.key);
+         RenderQueueGet().PrintActive();
+      },
+   },
+   {
+      key: 'f',
+      discr: 'NULL',
+      func: (e)=>{
+         const fps = FpsGet();
+         console.log(`Avg:${fps.GetAvg()}, Avg 1s: ${fps.GetAvg_1S()}`)
+      },
+   },
+   {
+      key: 'i',
+      discr: 'TimeIntervalsPrintAll',
+      func: (e)=>{
+         TimeIntervalsPrintAll()
+      },
+   },
+   {
+      key: 'e',
+      discr: 'ListenersGetListenersBuffer',
+      func: (e)=>{
+         const listeners = ListenersGetListenersBuffer();
+         listeners.PrintAll();
+      },
+   },
+   {
+      key: 'E',
+      discr: 'Listener_debug_print_all',
+      func: (e)=>{
+         Listener_debug_print_all();
+      },
+   },
+   {
+      key: 's',
+      discr: 'ScenesPrintAllMeshes',
+      func: (e)=>{
+         let cnt = 0;
+         const count = ScenesPrintAllMeshes(STATE.scene.active.children, 0, cnt);
+         // const scene = STATE.scene.active;
+         console.log('Count: ', count)
+      },
+   },
+   {
+      key: 'S',
+      discr: 'STATE',
+      func: (e)=>{
+         console.log('STATE.mesh:', STATE.mesh)
+      },
+   },
+   {
+      key: 'L',
+      discr: 'Listener_hover_Print',
+      func: (e)=>{
+         Listener_hover_Print();
+      },
+   },
+
+];
+
+// export const DEBUG_PRINT_KEYS = {
+
+//    p: {
+//       key: 'p',
+//       discr: 'PAUSE APP',
+//       func: (e)=>{
+//          console.log(e.key);
+//          if(g_state.game.paused) g_state.game.paused = false
+//          else g_state.game.paused = true
+//       },
+//    },
+//    x: {
+//       key: 'x',
+//       discr: 'PrintVertexBufferAll()',
+//       func: (e)=>{
+//          console.log(e.key);
+//          PrintVertexBufferAll();
+//       },
+//    },
+//    c: {
+//       key: 'c',
+//       discr: 'PrintIndexBufferAll()',
+//       func: (e)=>{
+//          console.log(e.key);
+//          PrintIndexBufferAll();
+//       },
+//    },
+//    z: {
+//       key: 'z',
+//       discr: 'PrintAttributes()',
+//       func: (e)=>{
+//          console.log(e.key);
+//          PrintAttributes();
+//       },
+//    },
+//    r: {
+//       key: 'r',
+//       discr: 'RenderQueue PrintAll()',
+//       func: (e)=>{
+//          console.log(e.key);
+//          RenderQueueGet().PrintAll();
+//       },
+//    },
+//    R: {
+//       key: 'R',
+//       discr: 'RenderQueue PrintActive()',
+//       func: (e)=>{
+//          console.log(e.key);
+//          RenderQueueGet().PrintActive();
+//       },
+//    },
+//    f: {
+//       key: 'f',
+//       discr: 'NULL',
+//       func: (e)=>{
+//          const fps = FpsGet();
+//          console.log(`Avg:${fps.GetAvg()}, Avg 1s: ${fps.GetAvg_1S()}`)
+//       },
+//    },
+//    i: {
+//       key: 'i',
+//       discr: 'TimeIntervalsPrintAll',
+//       func: (e)=>{
+//          TimeIntervalsPrintAll()
+//       },
+//    },
+//    e: {
+//       key: 'e',
+//       discr: 'ListenersGetListenersBuffer',
+//       func: (e)=>{
+//          const listeners = ListenersGetListenersBuffer();
+//          listeners.PrintAll();
+//       },
+//    },
+//    E: {
+//       key: 'E',
+//       discr: 'Listener_debug_print_all',
+//       func: (e)=>{
+//          Listener_debug_print_all();
+//       },
+//    },
+//    s: {
+//       key: 's',
+//       discr: 'ScenesPrintAllMeshes',
+//       func: (e)=>{
+//          let cnt = 0;
+//          const count = ScenesPrintAllMeshes(STATE.scene.active.children, 0, cnt);
+//          // const scene = STATE.scene.active;
+//          console.log('Count: ', count)
+//       },
+//    },
+//    S: {
+//       key: 'S',
+//       discr: 'STATE',
+//       func: (e)=>{
+//          console.log('STATE.mesh:', STATE.mesh)
+//       },
+//    },
+//    L: {
+//       key: 'L',
+//       discr: 'Listener_hover_Print',
+//       func: (e)=>{
+//          Listener_hover_Print();
+//       },
+//    },
+// }
+
+
+
+console.log(DEBUG_PRINT_KEYS)
 export function OnKeyDown(e){
 
    e.stopPropagation();
    // e.preventDefault();
 
    // console.log(e.key)
+   // console.log('---------- Print Render Queue ----------')
+   // console.log('---------- Print Active Render Queue ----------')
+   // console.log('---------- Print FPS ----------')
+   // console.log('---------- Print All Old Listeners Buffer ----------')
+   // console.log('---------- Print All Event Listeners ----------')
+   // console.log('---------- Scenes Print All Meshes ----------')
+   // console.log('---------- Print Global STATE ----------')
+   // console.log('---------- Print Hover Event Listeners ----------')
 
+   let i=0;
    switch(e.key){
-      case ('p'):{
-         console.log(e.key);
-         if(g_state.game.paused) g_state.game.paused = false
-         else g_state.game.paused = true
-         break;
-      }
-      case ('x'):{
-         console.log(e.key);
-         PrintVertexBufferAll();
-         break;
-      }
-      case ('c'):{
-         console.log(e.key);
-         PrintIndexBufferAll();
-         break;
-      }
-      case ('z'):{
-         console.log(e.key);
-         PrintAttributes();
-         break;
-      }
-      case ('r'):{
-         console.log('---------- Print Render Queue ----------')
-         console.log(e.key);
-         RenderQueueGet().PrintAll();
-         break;
-      }
-      case ('R'):{
-         console.log('---------- Print Active Render Queue ----------')
-         console.log(e.key);
-         RenderQueueGet().PrintActive();
-         break;
-      }
-      case ('f'):{
-         console.log('---------- Print FPS ----------')
-         const fps = FpsGet();
-         console.log(`Avg:${fps.GetAvg()}, Avg 1s: ${fps.GetAvg_1S()}`)
-         break;
-      }
-      case ('i'):{
-         TimeIntervalsPrintAll()
-         break;
-      }
-      case ('e'):{
-         console.log('---------- Print All Old Listeners Buffer ----------')
-         const listeners = ListenersGetListenersBuffer();
-         listeners.PrintAll();
-         break;
-      }
-      case ('E'):{
-         console.log('---------- Print All Event Listeners ----------')
-         // const listeners = ListenersGetListenersBuffer();
-         // listeners.PrintAllListenersMeshes();
-         
-         Listener_debug_print_all();
-         break;
-      }
-      case ('s'):{
-         console.log('---------- Scenes Print All Meshes ----------')
-         let cnt = 0;
-         const count = ScenesPrintAllMeshes(STATE.scene.active.children, 0, cnt);
-         // const scene = STATE.scene.active;
-         console.log('Count: ', count)
-         break;
-      }
-      case ('S'):{
-         console.log('---------- Print Global STATE ----------')
-         console.log('STATE.mesh:', STATE.mesh)
-         break;
-      }
-      case ('L'):{
-         console.log('---------- Print Hover Event Listeners ----------')
-         Listener_hover_Print();
-         break;
-      }
+
+      case ('p'):{ DEBUG_PRINT_KEYS[0].func(e); break; }
+      case ('x'):{ DEBUG_PRINT_KEYS[1].func(e); break; }
+      case ('c'):{ DEBUG_PRINT_KEYS[2].func(e); break; }
+      case ('z'):{ DEBUG_PRINT_KEYS[3].func(e); break; }
+      case ('r'):{ DEBUG_PRINT_KEYS[4].func(e); break; }
+      case ('R'):{ DEBUG_PRINT_KEYS[5].func(e); break; }
+      case ('f'):{ DEBUG_PRINT_KEYS[6].func(e); break; }
+      case ('i'):{ DEBUG_PRINT_KEYS[7].func(e); break; }
+      case ('e'):{ DEBUG_PRINT_KEYS[8].func(e); break; }
+      case ('E'):{ DEBUG_PRINT_KEYS[9].func(e); break; }
+      case ('s'):{ DEBUG_PRINT_KEYS[10].func(e); break; }
+      case ('S'):{ DEBUG_PRINT_KEYS[11].func(e); break; }
+      case ('L'):{ DEBUG_PRINT_KEYS[12].func(e); break; }
+
+      // case (DEBUG_PRINT_KEYS.p.key):{ DEBUG_PRINT_KEYS.p.func(e); break; }
+      // case (DEBUG_PRINT_KEYS.x.key):{ DEBUG_PRINT_KEYS.x.func(e); break; }
+      // case (DEBUG_PRINT_KEYS.c.key):{ DEBUG_PRINT_KEYS.c.func(e); break; }
+      // case (DEBUG_PRINT_KEYS.z.key):{ DEBUG_PRINT_KEYS.z.func(e); break; }
+      // case (DEBUG_PRINT_KEYS.r.key):{ DEBUG_PRINT_KEYS.r.func(e); break; }
+      // case (DEBUG_PRINT_KEYS.R.key):{ DEBUG_PRINT_KEYS.R.func(e); break; }
+      // case (DEBUG_PRINT_KEYS.f.key):{ DEBUG_PRINT_KEYS.f.func(e); break; }
+      // case (DEBUG_PRINT_KEYS.i.key):{ DEBUG_PRINT_KEYS.i.func(e); break; }
+      // case (DEBUG_PRINT_KEYS.e.key):{ DEBUG_PRINT_KEYS.e.func(e); break; }
+      // case (DEBUG_PRINT_KEYS.E.key):{ DEBUG_PRINT_KEYS.E.func(e); break; }
+      // case (DEBUG_PRINT_KEYS.s.key):{ DEBUG_PRINT_KEYS.s.func(e); break; }
+      // case (DEBUG_PRINT_KEYS.S.key):{ DEBUG_PRINT_KEYS.S.func(e); break; }
+      // case (DEBUG_PRINT_KEYS.L.key):{ DEBUG_PRINT_KEYS.L.func(e); break; }
    }
 }
 export function OnKeyUp(e){

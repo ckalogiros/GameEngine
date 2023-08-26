@@ -43,12 +43,12 @@ export class Scene {
         const listeners = ListenersGetListenersBuffer();
         const listener_hover = Listener_hover_get();
 
-        // Move mesh if it's movable   
-        if (STATE.mesh.grabed && STATE.mesh.grabed.StateCheck(MESH_STATE.IS_MOVABLE)) {
-            const mesh = STATE.mesh.grabed;
-            const dif = MouseGetPosDif();
-            mesh.Move(dif.x, -dif.y)
-        }
+        // // Move mesh if it's movable   
+        // if (STATE.mesh.grabed && STATE.mesh.grabed.StateCheck(MESH_STATE.IS_MOVABLE)) {
+        //     const mesh = STATE.mesh.grabed;
+        //     const dif = MouseGetPosDif();
+        //     mesh.Move(dif.x, -dif.y)
+        // }
 
         // Update attribute values for every mesh
         for (let i = 0; i < this.children.count; i++) {
@@ -56,10 +56,10 @@ export class Scene {
             const mesh = this.children.buffer[i];
             if(mesh) {
     
-                // if (mesh.state.mask & MESH_STATE.IN_MOVE) {
-                //     const dif = MouseGetPosDif();
-                //     mesh.Move(dif.x, -dif.y)
-                // }
+                if (mesh.state.mask & MESH_STATE.IN_MOVE) {
+                    const dif = MouseGetPosDif();
+                    mesh.MoveXY(dif.x, -dif.y)
+                }
     
                 if(this.children.buffer[i] === null)
                 console.log()
@@ -93,15 +93,17 @@ export class Scene {
     AddMesh(mesh) {
 
         if (!mesh || mesh === undefined) {
-            console.log('Mesh shouldn\'t be undefined. @ class Scene.AddMesh().');
+            console.error('Mesh shouldn\'t be undefined. @ class Scene.AddMesh().');
             return;
         }
 
         // Here we add the mesh into the graphics buffers
-        const gfx = mesh.AddToGraphicsBuffer(this.sceneIdx);
+        const gfx = mesh.CreateGfxCtx(this.sceneIdx);
         this.StoreGfxInfo(gfx);
 
         this.StoreMesh(mesh);
+
+        mesh.AddToGfx();
 
         /**
          * Run any timed events after a meshe is added to the graphics pipeline.

@@ -48,13 +48,13 @@ export class Geometry2D {
 
     //////////////////////////////////////////////////////////////
     AddToGraphicsBuffer(sid, gfx, meshName) {
-        GlAddGeometry(sid, this.pos, this.dim, this.time, gfx, meshName, 1)
+        GlAddGeometry(sid, this.pos, this.dim, this.time, gfx, meshName, 1);
     }
 
     //////////////////////////////////////////////////////////////
     SetPos(pos, gfx) {
         math.CopyArr3(this.pos, pos);
-        glBufferOps.GlSetWposXY(gfx, pos);
+        glBufferOps.GlSetWpos(gfx, pos);
     }
     MoveXYConcecutive(x, y, gfx, numMeshes) {
         this.pos[0] += x;
@@ -74,6 +74,9 @@ export class Geometry2D {
         this.pos[1] = y;
         glBufferOps.GlSetWposY(gfx, y);
     }
+    UpdatePosXYZ(gfx) {
+        glBufferOps.GlSetWpos(gfx, this.pos);
+    }
     UpdatePosXY(gfx) {
         glBufferOps.GlSetWposXY(gfx, this.pos);
     }
@@ -81,7 +84,7 @@ export class Geometry2D {
         this.pos[2] = z;
         glBufferOps.GlSetWposZ(gfx, z, numFaces);
     }
-    Move(x, y, gfx) {
+    MoveXY(x, y, gfx) {
         this.pos[0] += x;
         this.pos[1] += y;
         glBufferOps.GlMoveXY(gfx, [x, y]);
@@ -159,12 +162,6 @@ export class Geometry3D {
     }
 
     //////////////////////////////////////////////////////////////
-    // AddToGraphicsBuffer(sid, gfx, meshName) {
-    //     // GlAddGeometry(sid, this.pos, this.dim, this.time, gfx, meshName, 1)
-
-    // }
-
-    //////////////////////////////////////////////////////////////
     SetPos(pos, gfx) {
         math.CopyArr3(this.pos, pos);
         glBufferOps.GlSetWposXY(gfx, pos);
@@ -188,7 +185,7 @@ export class Geometry3D {
         this.pos[2] = z;
         glBufferOps.GlSetWposZ(gfx, z);
     }
-    Move(x, y) {
+    MoveXY(x, y) {
         this.pos[0] += x;
         this.pos[1] += y;
         GlMoveXY(gfx, [x, y]);
@@ -206,11 +203,6 @@ export class Geometry3D {
         math.CopyArr2(this.dim, dim);
         glBufferOps.GlSetDim(gfx, dim);
     }
-    // Shrink(val) {
-    //     this.dim[0] *= val;
-    //     this.dim[1] *= val;
-    //     glBufferOps.GlSetDim(gfx, this.dim);
-    // }
     UpdateScale() {
         glBufferOps.GlSetScale(gfx, this.scale);
     }
