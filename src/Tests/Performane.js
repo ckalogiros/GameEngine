@@ -1,7 +1,6 @@
 "use strict";
 
 import { Widget_Button_Mesh } from "../scripts/Engine/Drawables/Meshes/Widgets/WidgetButton.js";
-import { Listener_hover_enable } from "../scripts/Engine/Events/EventListeners.js";
 
 export function Test_Old_vs_new_hover_listener(scene){
 
@@ -19,8 +18,6 @@ function Create_buttons(scene, num){
       const btn = new Widget_Button_Mesh('button'+i, [20, posy, 1], 6, BLUE_10_160_220, WHITE, [1,1], [6, 5]);
       btn.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
       scene.AddMesh(btn)
-      // btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-      Listener_hover_enable(btn);
       posy += btn.geom.dim[1]*2;
    }
 }

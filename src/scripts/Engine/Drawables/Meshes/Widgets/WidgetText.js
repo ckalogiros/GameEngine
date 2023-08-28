@@ -1,13 +1,13 @@
 "use strict";
 
 import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
-import { GlGenerateContext } from "../../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh, GlGetProgram } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr2, CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../../Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
+import { Gfx_generate_context } from "../../../MenuOptions/MenuOptionsBuilder.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx, TimeIntervalsGetByIdx } from "../../../Timers/TimeIntervals.js";
 import { Geometry2D_Text } from "../../Geometry/Geometry2DText.js";
 import { FontMaterial } from "../../Material/Base/Material.js";
@@ -86,12 +86,6 @@ export class Widget_Text_Mesh extends Text_Mesh {
 					mesh.StateEnable(MESH_STATE.IN_GRAB);
 				}
 
-				// // Handle any menu (on leftClick only)
-				// if (mesh.StateCheck(MESH_STATE.HAS_POPUP)) {
-
-				//    const btnId = params.trigger_params;
-				//    Widget_popup_handler_onclick_event(mesh, btnId)
-				// }
 			}
 			return true;
 		}
@@ -122,12 +116,6 @@ export class Widget_Text_Mesh extends Text_Mesh {
 		const mouse_pos = MouseGetPosDif();
 		mesh.MoveRecursive(mouse_pos.x, -mouse_pos.y);
 
-		// const mouse_pos = MouseGetPos();
-		// // mouse_pos[0] -= section.geom.pos[0];
-		// // mouse_pos[1] -= section.geom.pos[1];
-		// section.SetPosXYRecursiveMove(mouse_pos);
-		// // section.SetPos(mouse_pos);
-
 	}
 
 }
@@ -150,13 +138,14 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 
 	}
 
-	SelectGfxCtx(sceneIdx) {
+	GenGfx() {
 
 		let total_char_count = this.mat.num_faces;
 		for (let i = 0; i < this.children.active_count; i++)
 			total_char_count += this.children.buffer[i].mat.num_faces;
 
-		this.gfx = GlGenerateContext(this.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER, false, total_char_count);
+		// this.gfx = GlGenerateContext(this.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER, total_char_count);
+		this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, GL_VB.ANY, total_char_count);
 
 		const prog = GlGetProgram(this.gfx.prog.idx);
 		if (this.sid.unif & SID.UNIF.BUFFER_RES) {
@@ -397,9 +386,9 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 
 	}
 
-	SelectGfxCtx(sceneIdx) {
+	GenGfx() {
 
-		super.SelectGfxCtx(sceneIdx);
+		super.GenGfx();
 		return this.gfx;
 	}
 
@@ -527,8 +516,6 @@ function Widget_text_mesh_add_to_gfx_recursive(mesh, gfx) {
 
 		this.geom.AddToGraphicsBuffer(child.sid, gfx, child.name);
 		this.mat.AddToGraphicsBuffer(child.sid, gfx);
-		// child.AddToGfx();
-
 	}
 }
 

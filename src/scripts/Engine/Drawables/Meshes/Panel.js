@@ -6,7 +6,7 @@ import { MouseGetPos, MouseGetPosDif } from "../../Controls/Input/Mouse.js";
 import { M_Buffer } from "../../Core/Buffers.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../Timers/TimeIntervals.js";
 import { Geometry2D } from "../Geometry/Base/Geometry.js";
-import { MAT_ENABLE, Material } from "../Material/Base/Material.js";
+import { Material } from "../Material/Base/Material.js";
 import { MESH_ENABLE, Mesh } from "./Base/Mesh.js";
 
 
@@ -40,9 +40,9 @@ export class Panel extends Mesh {
       }
    }
 
-   SelectGfxCtx(sceneIdx) {
+   GenGfx() {
 
-      const gfx = super.SelectGfxCtx(sceneIdx);
+      const gfx = super.GenGfx();
 
       for (let i = 0; i < this.sections.count; i++) {
 
@@ -54,11 +54,11 @@ export class Panel extends Mesh {
 
                const s = section.sections.buffer[i];
 
-               s.SelectGfxCtx(sceneIdx);
+               s.GenGfx();
             }
          }
 
-         section.SelectGfxCtx(sceneIdx);
+         section.GenGfx();
       }
 
       return gfx;
@@ -187,22 +187,22 @@ export class Section extends Mesh {
 
    }
 
-   UpdateGfx(section, sceneIdx) {
-      this.UpdateGfxRecursive(section, sceneIdx);
+   UpdateGfx(section) {
+      this.UpdateGfxRecursive(section);
 
-      if (!section.gfx) section.SelectGfxCtx(sceneIdx); // Add any un-added meshes.
+      if (!section.gfx) section.GenGfx(); // Add any un-added meshes.
       section.UpdatePosXY(); // Update for the root
       section.UpdateDim(); // Update for the root
    }
 
-   UpdateGfxRecursive(section, sceneIdx) {
+   UpdateGfxRecursive(section) {
 
       for (let i = 0; i < section.children.active_count; i++) {
 
          const mesh = section.children.buffer[i];
          // if (mesh.children.active_count) 
          if (mesh.children.active_count && mesh.type & MESH_TYPES_DBG.SECTION_MESH) 
-            this.UpdateGfxRecursive(mesh, sceneIdx);
+            this.UpdateGfxRecursive(mesh);
 
          if (mesh.gfx !== null) {
             
@@ -212,21 +212,21 @@ export class Section extends Mesh {
                mesh.UpdatePosXYZ();
          }
          else
-            mesh.SelectGfxCtx(sceneIdx); // Add any none-added meshes.
+            mesh.GenGfx(); // Add any none-added meshes.
       }
 
    }
 
 
-   SelectGfxCtx(sceneIdx, useSpecificVertexBuffer = GL_VB.ANY, vertexBufferIdx = INT_NULL) {
+   GenGfx(useSpecificVertexBuffer = GL_VB.ANY) {
 
-      const gfx = super.SelectGfxCtx(sceneIdx, useSpecificVertexBuffer, vertexBufferIdx);
+      const gfx = super.GenGfx(useSpecificVertexBuffer);
       super.AddToGfx();
       // for (let i = this.children.count - 1; i >= 0; i--) {
 
       //    const child = this.children.buffer[i];
       //    if (child)
-      //       var ggg = child.SelectGfxCtx(sceneIdx, useSpecificVertexBuffer, vertexBufferIdx);
+      //       var ggg = child.GenGfx(sceneIdx, useSpecificVertexBuffer, vertexBufferIdx);
       // }
 
       return gfx;

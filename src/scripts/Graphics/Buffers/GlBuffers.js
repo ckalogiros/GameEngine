@@ -319,7 +319,7 @@ export function GlCheckContext(sid, sceneIdx) {
     return[INT_NULL, INT_NULL];
 }
 
-export function GlGenerateContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer, isPrivate=false, mesh_count=1) {
+export function GlGenerateContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer, mesh_count=1) {
 
     if(ERROR_NULL(sceneIdx)) console.error('Scene index is null. @ GlGenerateContext()')
     if(Array.isArray(GL_BUFFER) || Array.isArray(addToSpecificGlBuffer)) console.error('Array of indexes instead of vbIdx is passed. @ GlGenerateContext()')
@@ -415,7 +415,7 @@ export function GlGenerateContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffe
 
     }
 
-    if(isPrivate) vb.SetPrivate();
+    // if(isPrivate) vb.SetPrivate();
 
     // Cash values
     const vertsPerRect = progs[progIdx].shaderInfo.verticesPerRect;
@@ -428,7 +428,7 @@ export function GlGenerateContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffe
     const gfxInfo = new GfxInfoMesh; // NOTE: This is the only construction of a new GfxInfoMesh object(as for now), all other calls are for creating a copy of an existing GfxInfoMesh. 
     gfxInfo.sid = sid;
     gfxInfo.sceneIdx = sceneIdx;
-    gfxInfo.isPrivate = isPrivate;
+    // gfxInfo.isPrivate = isPrivate;
     gfxInfo.vao = vb.vao;
     gfxInfo.numFaces = numFaces;
     gfxInfo.vertsPerRect = vertsPerRect;

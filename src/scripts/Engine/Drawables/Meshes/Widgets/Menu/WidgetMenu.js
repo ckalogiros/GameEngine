@@ -1,56 +1,11 @@
 "use strict";
 
-import { Listener_hover_enable } from "../../../../Events/EventListeners.js";
 import { Geometry2D } from "../../../Geometry/Base/Geometry.js";
 import { Material } from "../../../Material/Base/Material.js";
 import { MESH_ENABLE, Mesh } from "../../Base/Mesh.js";
 import { Widget_Button_Mesh } from "../WidgetButton.js";
 
 
-
-// function Aligner_mesh_geom(mesh1, pos2, dim2, flags){
-
-//    const pos1 = mesh1.geom.pos;
-//    const dim1 = mesh1.geom.dim;
-
-//    if(flags & (ALIGN.VERT_CENTER | ALIGN.RIGHT)){
-
-//       const pos = [0,0];
-//       CopyArr2(pos, pos2); 
-
-//       // Vertical allignment
-//       pos[1] = pos1[1];
-      
-//       // Horizontal allignment
-//       pos[0] = pos1[0] + dim1[0] - dim2[0];
-
-//       CopyArr2(pos2, pos);
-//    }
-
-//    pos1[1] += 5;
-// }
-
-// function Aligner_mesh_mesh(mesh1, mesh2, flags){
-
-//    const pos1 = mesh1.geom.pos;
-//    const dim1 = mesh1.geom.dim;
-//    const pos2 = mesh2.geom.pos;
-//    const dim2 = mesh2.geom.dim;
-
-//    if(flags & (ALIGN.VERT_CENTER | ALIGN.RIGHT)){
-
-//       const pos = [0,0];
-//       CopyArr2(pos, pos2); 
-
-//       // Vertical allignment
-//       pos[1] = pos1[1];
-      
-//       // Horizontal allignment
-//       pos[0] = pos1[0] + dim1[0] - dim2[0];
-
-//       CopyArr2(pos2, pos);
-//    }
-// }
 
 export class Widget_Menu_Bar extends Mesh{
 
@@ -63,8 +18,6 @@ export class Widget_Menu_Bar extends Mesh{
 
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       this.SetStyle(style[0], style[1], style[2]);
-
-      Listener_hover_enable(this);
 
    }
 
@@ -91,15 +44,15 @@ export class Widget_Menu_Bar extends Mesh{
       console.log('DESTROY!!!')
    }
 
-   SelectGfxCtx(sceneIdx) {
+   GenGfx() {
 
       const gfx = []
-      gfx[0] = super.SelectGfxCtx(sceneIdx);
+      gfx[0] = super.GenGfx();
 
       for(let i=0; i<this.children.count; i++){
 
          const child = this.children.buffer[i];
-         child.SelectGfxCtx(this.sceneIdx);
+         child.GenGfx();
       }
 
       return gfx;

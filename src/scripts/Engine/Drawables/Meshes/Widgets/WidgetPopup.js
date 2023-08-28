@@ -86,13 +86,13 @@ class Widget_PopUp extends Section {
 
    }
 
-   SelectGfxCtx(sceneIdx) {
+   GenGfx() {
 
       // Must guarantee that the options menu first mesh is of type: Section,
       // so that we can steal its vbidx and simply add the popup to tha same vertex buffer. 
       // const vbidx = this.children.buffer[0].gfx.vb.idx;
       // ERROR_NULL(vbidx, 'Popup cannot be added to NON existant vertex buffer. @  Widget_PopUp.AddToGraphics().')
-      const gfx = super.SelectGfxCtx(sceneIdx, GL_VB.NEW);
+      const gfx = super.GenGfx(GL_VB.NEW);
       // GlSetVertexBufferPrivate(gfx.prog.idx, gfx.vb.idx)
       return gfx;
    }

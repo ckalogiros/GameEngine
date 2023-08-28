@@ -1,7 +1,7 @@
 "use strict";
 
 import { PrintAttributes, PrintIndexBufferAll, PrintVertexBufferDataAndNames, PrintVertexDataAll } from "../../../Graphics/Z_Debug/GfxDebug.js";
-import { Listener_debug_print_all, Listener_hover_Print } from "../../Events/EventListeners.js";
+import { Listener_debug_print_all } from "../../Events/EventListeners.js";
 import { Gfx_pool_print } from "../../MenuOptions/MenuOptionsBuilder.js";
 import { RenderQueueGet } from "../../Renderers/Renderer/RenderQueue.js";
 import { ScenesPrintAllMeshes } from "../../Scenes.js";
@@ -115,9 +115,9 @@ export const DEBUG_PRINT_KEYS = [
    },
    {
       key: 'L',
-      discr: 'Listener_hover_Print',
+      discr: 'NULL',
       func: (e)=>{
-         Listener_hover_Print();
+         // Listener_hover_Print();
       },
    },
    {

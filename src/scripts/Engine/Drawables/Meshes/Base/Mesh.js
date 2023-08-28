@@ -259,33 +259,30 @@ export class Mesh {
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * GRAPHICS
      */
-    SelectGfxCtx(sceneIdx, useSpecificVertexBuffer = GL_VB.ANY, vertexBufferIdx = INT_NULL) {
+    GenGfx(useSpecificVertexBuffer = GL_VB.ANY) {
 
-        let mesh = this;
 
-        ERROR_NULL(sceneIdx)
+        this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, useSpecificVertexBuffer, this.mat.num_faces);
 
-        mesh.gfx = Gfx_generate_context(mesh.sid, sceneIdx, useSpecificVertexBuffer, vertexBufferIdx);
-
-        const prog = GlGetProgram(mesh.gfx.prog.idx);
-        if (mesh.sid.unif & SID.UNIF.BUFFER_RES) {
+        const prog = GlGetProgram(this.gfx.prog.idx);
+        if (this.sid.unif & SID.UNIF.BUFFER_RES) {
             const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
             prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
             prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
         }
 
-        // Set Texture if this is a textured mesh.
-        if (mesh.mat.texId !== INT_NULL) { // texId is init with INT_NULL that means there is no texture passed to the Material constructor.
+        // Set Texture if this is a textured this.
+        if (this.mat.texId !== INT_NULL) { // texId is init with INT_NULL that means there is no texture passed to the Material constructor.
 
-            // Set font parameters if this is a text mesh.
-            if (mesh.mat.hasFontTex) {
-                mesh.isFontSet = true;
+            // Set font parameters if this is a text this.
+            if (this.mat.hasFontTex) {
+                this.isFontSet = true;
                 // Correct the text face height by calculating the ratio from the current font metrics.
-                mesh.geom.dim[1] *= FontGetFontDimRatio(mesh.mat.uvIdx);
+                this.geom.dim[1] *= FontGetFontDimRatio(this.mat.uvIdx);
             }
         }
 
-        return mesh.gfx;
+        return this.gfx;
     }
 
     AddToGfx() {
@@ -319,69 +316,13 @@ export class Mesh {
      * Mesh States.
      * Enable, disable, etc, mesh states.
      * E.x. enable mesh to be movable or to have a popup menu when right clicked...
-     * Also enables booleans such inHover, 
      */
     StateEnable(bit) { this.state.mask |= bit; }
     StateDisable(bit) { this.state.mask &= ~bit; }
     StateToggle(bit) { this.state.mask ^= bit; }
     StateCheck(bit) { return this.state.mask & bit; }
 
-    /**
-     * Enable shader properties.
-     * In order for a mesh to be draw in a certain way, 
-     * specific shaders must be build.
-     * This is how the shader constructor
-     * decides what shader chunks to use
-     * when constructing the shader for the mesh. 
-     */
-    EnableGfxAttributes(which, params) {
 
-        if (this.alreadyAdded === true) {
-            console.error(`You are trying to enable ${which} but the shaders have been already created. Try Enable() before inserting the mesh to a Scene().`);
-        }
-
-        if (Array.isArray(which)) {
-            const count = which.length;
-            for (let i = 0; i < count; i++) {
-                this.CheckCase(which[i], params);
-            }
-
-        }
-        else {
-            this.CheckCase(which, params);
-        }
-    }
-    CheckCase(which, params) {
-        switch (which) {
-            case MESH_ENABLE.GFX.UNIF_RESOLUTION: {
-                this.sid.unif |= SID.UNIF.BUFFER_RES | SID.UNIF.U_BUFFER; // Enable the screen resolution to be contructed as a uniform in the vertex shader, to be used in the fragment shader.
-                break;
-            }
-            case MESH_ENABLE.GFX.ATTR_STYLE: {
-                this.sid.attr |= (SID.ATTR.BORDER | SID.ATTR.R_CORNERS | SID.ATTR.FEATHER) | SID.ATTR.PARAMS1 | SID.ATTR.EMPTY;
-                this.sid.unif |= SID.UNIF.U_BUFFER;
-                this.sid.pass |= SID.PASS.WPOS2 | SID.PASS.DIM2;
-                if (!(params === null || params === undefined)) {
-                    this.mat.style = params.style;
-                }
-
-                this.sid.unif |= SID.UNIF.BUFFER_RES | SID.UNIF.U_BUFFER;
-                break;
-            }
-            case MESH_ENABLE.GFX.ATTR_TIME: {
-                this.sid.attr |= SID.ATTR.TIME;
-                break;
-            }
-
-            case MESH_ENABLE.GFX.PASS_COL4: { this.sid.pass |= SID.PASS.COL4; break; }
-            case MESH_ENABLE.GFX.PASS_WPOS2: { this.sid.pass |= SID.PASS.WPOS2; break; }
-            case MESH_ENABLE.GFX.PASS_DIM2: { this.sid.pass |= SID.PASS.DIM2; break; }
-            case MESH_ENABLE.GFX.PASS_RES2: { this.sid.pass |= SID.PASS.RES2; break; }
-            case MESH_ENABLE.GFX.PASS_TIME1: { this.sid.pass |= SID.PASS.TIME1; break; }
-
-            default: console.error('Enable material\'s shader param failed. @ Material.js');
-        }
-    }
 
     /**
      * Uniforms
@@ -525,6 +466,64 @@ export class Mesh {
         return false;
     }
 
+
+    /**
+     * Enable shader properties.
+     * In order for a mesh to be drawn in a certain way, 
+     * specific shaders must be build.
+     * Allow the shader constructor
+     * to combine different shader by enabling
+     * meshes 'sid' bit field. 
+     */
+    EnableGfxAttributes(which, params) {
+
+        if (this.alreadyAdded === true) {
+            console.error(`You are trying to enable ${which} but the shaders have been already created. Try Enable() before inserting the mesh to a Scene().`);
+        }
+
+        if (Array.isArray(which)) {
+            const count = which.length;
+            for (let i = 0; i < count; i++) {
+                this.CheckCase(which[i], params);
+            }
+        }
+        else {
+            this.CheckCase(which, params);
+        }
+    }
+    CheckCase(which, params) {
+        switch (which) {
+            case MESH_ENABLE.GFX.UNIF_RESOLUTION: {
+                this.sid.unif |= SID.UNIF.BUFFER_RES | SID.UNIF.U_BUFFER; // Enable the screen resolution to be contructed as a uniform in the vertex shader, to be used in the fragment shader.
+                break;
+            }
+            case MESH_ENABLE.GFX.ATTR_STYLE: {
+                this.sid.attr |= (SID.ATTR.BORDER | SID.ATTR.R_CORNERS | SID.ATTR.FEATHER) | SID.ATTR.PARAMS1 | SID.ATTR.EMPTY;
+                this.sid.unif |= SID.UNIF.U_BUFFER;
+                this.sid.pass |= SID.PASS.WPOS2 | SID.PASS.DIM2;
+                if (!(params === null || params === undefined)) {
+                    this.mat.style = params.style;
+                }
+
+                this.sid.unif |= SID.UNIF.BUFFER_RES | SID.UNIF.U_BUFFER;
+                break;
+            }
+            case MESH_ENABLE.GFX.ATTR_TIME: {
+                this.sid.attr |= SID.ATTR.TIME;
+                break;
+            }
+
+            case MESH_ENABLE.GFX.PASS_COL4: { this.sid.pass |= SID.PASS.COL4; break; }
+            case MESH_ENABLE.GFX.PASS_WPOS2: { this.sid.pass |= SID.PASS.WPOS2; break; }
+            case MESH_ENABLE.GFX.PASS_DIM2: { this.sid.pass |= SID.PASS.DIM2; break; }
+            case MESH_ENABLE.GFX.PASS_RES2: { this.sid.pass |= SID.PASS.RES2; break; }
+            case MESH_ENABLE.GFX.PASS_TIME1: { this.sid.pass |= SID.PASS.TIME1; break; }
+
+            default: console.error('Enable material\'s shader param failed. @ Material.js');
+        }
+    }
+
+
     /** Debug */
     SetName(name = null) {
 
@@ -536,13 +535,15 @@ export class Mesh {
         }
     }
 
+
+
 }
 
 
 export class Text_Mesh extends Mesh {
 
     isFontSet;
-    num_faces;
+    // num_faces;
 
     constructor(geom, mat) {
 
@@ -550,14 +551,14 @@ export class Text_Mesh extends Mesh {
         this.isFontSet = false;
 
         this.sceneIdx = STATE.scene.active_idx;
-        this.num_faces = 0;
+        // this.num_faces = 0;
 
         this.type |= MESH_TYPES_DBG.TEXT_MESH;
     }
 
-    SelectGfxCtx(sceneIdx, useSpecificVertexBuffer = GL_VB.ANY, vertexBufferIdx = INT_NULL) {
+    GenGfx(useSpecificVertexBuffer = GL_VB.ANY) {
 
-        this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, useSpecificVertexBuffer, vertexBufferIdx, false, this.mat.num_faces);
+        this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, useSpecificVertexBuffer, this.mat.num_faces);
 
         const prog = GlGetProgram(this.gfx.prog.idx);
         if (this.sid.unif & SID.UNIF.BUFFER_RES) {
@@ -573,7 +574,7 @@ export class Text_Mesh extends Mesh {
 
         this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
         const start = this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
-        this.num_faces = this.mat.num_faces;
+        // this.num_faces = this.mat.num_faces;
         return start;
     }
 

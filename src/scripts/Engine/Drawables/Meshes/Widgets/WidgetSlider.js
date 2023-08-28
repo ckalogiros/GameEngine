@@ -72,7 +72,6 @@ export class Widget_Slider extends Mesh {
       bar.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_HOVER_COLORABLE | MESH_STATE.HAS_POPUP);
       bar.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick, bar)
       bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-      // Listener_hover_enable(bar);
 
       bar.SetName();
       BAR_IDX = this.AddChild(bar);
@@ -143,25 +142,25 @@ export class Widget_Slider extends Mesh {
       // this.ListenersReconstruct();
    }
 
-   SelectGfxCtx(sceneIdx) {
+   GenGfx() {
 
       /**
        * TODO: Implement an automatic adding to the graphics pipeline.
        */
       const gfx = []
-      gfx[0] = super.SelectGfxCtx(sceneIdx);
+      gfx[0] = super.GenGfx();
 
       const bar = this.children.buffer[BAR_IDX];
       const handle = bar.children.buffer[0];
-      gfx[1] = bar.SelectGfxCtx(sceneIdx);
-      gfx[2] = handle.SelectGfxCtx(sceneIdx);
+      gfx[1] = bar.GenGfx();
+      gfx[2] = handle.GenGfx();
 
       const slider_name_text = this.children.buffer[1];
-      gfx[3] = slider_name_text.SelectGfxCtx(sceneIdx);
+      gfx[3] = slider_name_text.GenGfx();
 
       // const slider_value_text = this.children.buffer[2];
       const slider_value_text = bar.children.buffer[1];
-      gfx[4] = slider_value_text.SelectGfxCtx(sceneIdx);
+      gfx[4] = slider_value_text.GenGfx();
 
       return gfx;
 

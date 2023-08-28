@@ -8,6 +8,7 @@ import { CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../../Collisions.js";
 import { MouseGetPos } from "../../../Controls/Input/Mouse.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
+import { Gfx_generate_context } from "../../../MenuOptions/MenuOptionsBuilder.js";
 import { TimeIntervalsCreate } from "../../../Timers/TimeIntervals.js";
 import { Geometry2D } from "../../Geometry/Base/Geometry.js";
 import { Geometry2D_Text } from "../../Geometry/Geometry2DText.js";
@@ -151,28 +152,36 @@ export class Widget_Label_Text_Mesh extends Mesh {
 
     //////////////////////////////////////////////////////////////
 
-    SelectGfxCtx(sceneIdx, useSpecificVertexBuffer = GL_VB.ANY, vertexBufferIdx = NO_SPECIFIC_GL_BUFFER) {
+    // GenGfx(sceneIdx, useSpecificVertexBuffer = GL_VB.ANY, vertexBufferIdx = NO_SPECIFIC_GL_BUFFER) {
+    GenGfx(useSpecificVertexBuffer = GL_VB.ANY) {
 
-        let vbidx1 = null, vbidx2 = null;
-        let vbUse1 = null, vbUse2 = null;
-        if (Array.isArray(vertexBufferIdx)) {
-            vbidx1 = vertexBufferIdx[0];
-            vbidx2 = vertexBufferIdx[1];
-            vbUse1 = useSpecificVertexBuffer[0];
-            vbUse2 = useSpecificVertexBuffer[1];
-        }
-        else {
-            vbidx1 = useSpecificVertexBuffer;
-            vbidx2 = useSpecificVertexBuffer;
-            vbUse1 = useSpecificVertexBuffer;
-            vbUse2 = useSpecificVertexBuffer;
-        }
+        // let vbidx1 = null, vbidx2 = null;
+        // let vbUse1 = null, vbUse2 = null;
+        // if (Array.isArray(vertexBufferIdx)) {
+        //     vbidx1 = vertexBufferIdx[0];
+        //     vbidx2 = vertexBufferIdx[1];
+        //     vbUse1 = useSpecificVertexBuffer[0];
+        //     vbUse2 = useSpecificVertexBuffer[1];
+        // }
+        // else {
+        //     vbidx1 = useSpecificVertexBuffer;
+        //     vbidx2 = useSpecificVertexBuffer;
+        //     vbUse1 = useSpecificVertexBuffer;
+        //     vbUse2 = useSpecificVertexBuffer;
+        // }
+
+        // const gfx = []
+        // gfx[0] = super.GenGfx(sceneIdx, vbUse1, vbidx1);
+        // for (let i = 0; i < this.children.count; i++) {
+        //     if(this.children.buffer[i])
+        //         gfx[i + 1] = this.children.buffer[i].GenGfx(sceneIdx, vbUse2, vbidx2);
+        // }
 
         const gfx = []
-        gfx[0] = super.SelectGfxCtx(sceneIdx, vbUse1, vbidx1);
+        gfx[0] = super.GenGfx();
         for (let i = 0; i < this.children.count; i++) {
             if(this.children.buffer[i])
-                gfx[i + 1] = this.children.buffer[i].SelectGfxCtx(sceneIdx, vbUse2, vbidx2);
+                gfx[i + 1] = this.children.buffer[i].GenGfx();
         }
 
         return gfx;
@@ -275,14 +284,15 @@ export class Widget_Label_Dynamic_Text extends Widget_Label_Text_Mesh {
         this.SetName();
     }
 
-    SelectGfxCtx(sceneIdx) {
+    GenGfx() {
 
         /** Add the constant text */
-        super.SelectGfxCtx(sceneIdx);
+        super.GenGfx();
 
         /** Add the dynamic text to the graphics buffer */
         const dynamicText = this.children.buffer[0];
-        dynamicText.gfx = GlGenerateContext(dynamicText.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
+        // dynamicText.gfx = GlGenerateContext(dynamicText.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
+        dynamicText.gfx = Gfx_generate_context(dynamicText.sid, dynamicText.sceneIdx, GL_VB.ANY, dynamicText.mat,num_faces);
         const prog = GlGetProgram(dynamicText.gfx.prog.idx);
 
         if (dynamicText.sid.unif & SID.UNIF.BUFFER_RES) {

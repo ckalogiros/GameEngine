@@ -21,10 +21,6 @@ export function RegisterEvent(eventType, params) {
         type: eventType,
         params: params,
     };
-    // if(params.mesh)
-    // console.log(evtsIdx, eventType, params.mesh.id)
-    // console.log(evtsIdx, eventType, params.mesh.name)
-    // console.log(evtsIdx, params.mesh.name)
 }
 
 export function HandleEvents() {
@@ -35,10 +31,9 @@ export function HandleEvents() {
         const e = events[i];
 
         if (e.type === 'mouse-move') {
-            // console.debug('hover: ', e.params.mesh.id, ' | prev hover:', STATE.mesh.hoveredId);
-            // console.debug('hover: ', STATE.mesh.hoveredId);
 
-            Listener_dispatch_check_hover_event();e
+            if(LISTENERS_ACTIVE[LISTEN_EVENT_TYPES_INDEX.HOVER] === true) // ..if no events, skip dispatching
+                Listener_dispatch_check_hover_event();
 
         }
 
@@ -57,7 +52,9 @@ export function HandleEvents() {
         else if (e.type === 'mouse-click-down') {
 
             STATE.mouse.activeClickedButtonId = e.params.mouseButton;
-            Listener_dispatch_event(LISTEN_EVENT_TYPES_INDEX.CLICK, e.params.mouseButton);
+
+            if(LISTENERS_ACTIVE[LISTEN_EVENT_TYPES_INDEX.CLICK] === true) // ..if no events, skip dispatching
+                Listener_dispatch_event(LISTEN_EVENT_TYPES_INDEX.CLICK, e.params.mouseButton);
         }
 
         else if (e.type === 'mouse-click-up') {
@@ -154,108 +151,6 @@ export function Events_handle_immidiate(e){
 
 }
 
-
-    // function EventHandler(event_type){
-
-    //     const listeners = GetListeners();
-
-    //     for(i in listeners.buffer[event_type]){
-            
-    //         listeners.buffer[event_type].events[i].Clbk();
-    //     }
-    // }
-
-    // // App
-    // mesh = new Mesh();
-    // mesh.CreateListenEvent('TYPE', Clbk);
-    // Clbk(){
-
-    //     do{
-    //         stuff
-    //     }
-    // }
-
-    // // Mesh
-    // CreateListenEvent('TYPE', Clbk){
-
-    //     Listeners_add_event('TYPE', Clbk);
-    // }
-
-    // Listeners
-    // Listeners_add_event('TYPE', Clbk){
-
-    //     this.buffer['TYPE'].Add(Clbk);
-    // }
-
-    // function HandleClickEvent(clickPos){
-
-    //     if(Intersection_point_rect(clickPos, this.pos)){
-    //         do {
-    //             // do stuff for click
-    //         }
-    //     }
-    // }
-
-/**
-    // Event sceme of a mesh
-
-    events = {
-
-        buffer: [
-            
-            type: onclick, onhover, ...,
-    
-            callback: function(), the function to be called in case of the event
-                
-            // What ever, because the responsibility of managing the params
-            // has nothing to do with the events system or any other intermidiary.
-            params:{ 
-                EventClbk: _Slider_create_on_click_event,
-                target:  bar,
-                Clbk: null,
-            },
-            
-            ...
-        ]
-    }
-
-
-    // An approach that the created events are categorized by ther event type. 
-    // The benefit is we can loop all events of a specific type, 
-    // and not loop through all events checking their type if matches the triggered event.
-
-    events = {
-
-        buffer: [ // type: onclick, onhover, ...,
-
-            buffer: [
-
-                Callback: function(), the function to be called in case of the event
-                    
-                // What ever, because the responsibility of managing the params
-                // has nothing to do with the events system or any other intermidiary.
-                params:{ 
-                    EventClbk: _Slider_create_on_click_event,
-                    target:  bar,
-                    Clbk: null,
-                },
-            ],
-    
-            
-            ...
-        ]
-    }
-    
-    run as:
-    mesh.Dispatcher('onclick');
-    and in:
-    Dispatcher(TYPE){
-        for(i in events)
-            this.events.buffer[TYPE].buffer[i].Callback()
-    }
-
-
- */
 
 function OnWindowResize() {
     console.debug('WINDOW RESIZE')

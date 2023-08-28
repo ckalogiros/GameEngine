@@ -13,17 +13,14 @@ import { CubeGeometry } from '../Engine/Drawables/Geometry/Geometry3DCube.js';
 import { SizeOfObject } from '../Helpers/Helpers.js';
 import { PerformanceTimerCreate, PerformanceTimerInit, _Tm1GetFps, _Tm1GetMilisec, _Tm1GetNanosec, _Tm2GetFps, _Tm2GetMilisec, _Tm3GetFps, _Tm3GetMilisec, _Tm5GetFps, _Tm5GetMilisec, _Tm6GetFps, _Tm6GetMilisec } from '../Engine/Timers/PerformanceTimers.js';
 import { TimeIntervalsCreate, TimeIntervalsInit } from '../Engine/Timers/TimeIntervals.js';
-import { MAT_ENABLE, Material, Material_TEMP_fromBufferFor3D } from '../Engine/Drawables/Material/Base/Material.js';
-import { MESH_ENABLE, Mesh } from '../Engine/Drawables/Meshes/Base/Mesh.js';
+import { MESH_ENABLE } from '../Engine/Drawables/Meshes/Base/Mesh.js';
 import { Widget_Slider, Slider_menu_create_options } from '../Engine/Drawables/Meshes/Widgets/WidgetSlider.js';
-import { Bind_change_brightness, Bind_change_color_rgb, Bind_change_pos_x } from '../Engine/BindingFunctions.js';
 
 /** Performance Timers */
 import { TestArraysPerformance } from '../../Tests/Arrays.js';
-import { Event_Listener, Listener_create_event, Listener_hover_enable } from '../Engine/Events/EventListeners.js';
+import { Event_Listener, Listener_create_event } from '../Engine/Events/EventListeners.js';
 import { Test_Old_vs_new_hover_listener } from '../../Tests/Performane.js';
 import { Widget_Menu_Bar } from '../Engine/Drawables/Meshes/Widgets/Menu/WidgetMenu.js';
-import { Widget_Generic } from '../Engine/Drawables/Meshes/Widgets/WidgetGeneric.js';
 import { Panel, Section } from '../Engine/Drawables/Meshes/Panel.js';
 import { Initializer_popup_initialization } from '../Engine/Drawables/Meshes/Widgets/WidgetPopup.js';
 import { Geometry2D } from '../Engine/Drawables/Geometry/Base/Geometry.js';
@@ -292,7 +289,6 @@ function CreateSwitches(scene) {
     const btn1 = new Widget_Button_Mesh('x', [400, 150, 0], 6, GREY1, WHITE, [1, 1], [8, 4], .8, undefined, [1, 4, 2]);
     btn1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
     btn1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
-    Listener_hover_enable(btn1)
     scene.AddMesh(btn1);
 
 }
@@ -436,14 +432,6 @@ function CreateMenuBar(scene) {
     scene.AddMesh(menu_bar);
 }
 
-function CreateGenericWidget(scene) {
-
-    const w = new Widget_Generic([200, 650, 0], [100, 100]);
-    w.AddSection();
-
-    scene.AddMesh(w);
-}
-
 function CreateSection(scene) {
 
     const flags = (SECTION.ITEM_FIT | SECTION.EXPAND);
@@ -494,29 +482,6 @@ function CreateSection(scene) {
     blu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, blu.OnClick, blu, null);
 
     {
-        // Listener_hover_enable(blu)
-        // Listener_hover_enable(red);  
-        // Listener_hover_enable(gre);  
-        // Listener_hover_enable(yel);  
-        // Listener_hover_enable(ora);  
-        // Listener_hover_enable(red_1);
-        // Listener_hover_enable(yel_1);
-        // Listener_hover_enable(gre_1);
-        // Listener_hover_enable(ora_1);
-        // Listener_hover_enable(red_2);
-        // Listener_hover_enable(yel_2);
-        // Listener_hover_enable(gre_2);
-        // Listener_hover_enable(ora_2);
-        // Listener_hover_enable(red_3);
-        // Listener_hover_enable(yel_3);
-        // Listener_hover_enable(gre_3);
-        // Listener_hover_enable(ora_3);
-        // Listener_hover_enable(red_4);
-        // Listener_hover_enable(yel_4);
-        // Listener_hover_enable(gre_4);
-        // Listener_hover_enable(ora_4);
-
-        Listener_hover_enable(bla);
 
         red.SetName('red');
         gre.SetName('gre');
@@ -587,7 +552,8 @@ function CreateSection(scene) {
 
     blu.Calc();
     scene.AddMesh(blu);
-    blu.UpdateGfxRecursive(blu, scene.sceneIdx);
+    blu.UpdateGfx(blu, scene.sceneIdx);
+    // blu.UpdateGfxRecursive(blu, scene.sceneIdx);
 
 }
 
@@ -616,82 +582,32 @@ function Help(scene) {
 
     scene.AddMesh(section);
 
-    section.UpdateGfxRecursive(section, scene.sceneIdx);
+    section.UpdateGfx(section, scene.sceneIdx);
 }
 
-// function MeshInfo(scene) {
-
-
-//     const flags = (SECTION.ITEM_FIT);
-
-//     const section = new Section(SECTION.HORIZONTAL, [10, 10], [250, 300, 0], [0, 0], TRANSPARENCY(GREY1, .2));
-//     section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick, section, null);
-//     // const s1 = new Section(SECTION.VERTICAL, [15,10], [220, 400, 0], [0,0], TRANSPARENCY(GREY1, .2));
-
-//     const mesh = STATE.hovered;
-
-//     // for(let i=0; i<msgs.length; i++){
-//     for (let i = 0; i < 1; i++) {
-
-//         let msg = 'mesh info: HI!asdsdasdsdsdsdsdd\nsdasdasdsadasdsad';
-//         const label = new Widget_Label_Text_Mesh(msg, [250, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [1, 1], [7, 6], .5, undefined, [0, 4, 3])
-//         scene.AddMesh(label);
-//         // s1.AddItem(label)
-
-//         section.AddItem(label, flags)
-//         section.Calc(flags)
-
-//         scene.AddMesh(section);
-
-//         section.UpdateGfxRecursive(section, scene.sceneIdx);
-
-//         return section;
-//     }
-// }
 function MeshInfo(scene) {
 
-
-    const flags = (SECTION.ITEM_FIT);
-
-    // const section = new Section(SECTION.HORIZONTAL, [10, 10], [250, 300, 0], [0, 0], TRANSPARENCY(GREY1, .2));
-    // section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick, section, null);
-    
     const fontsize = 5;
     
-    // for(let i=0; i<msgs.length; i++){
-        for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 1; i++) {
             
-            // const label = new Widget_Label_Text_Mesh(msg, [250, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [1, 1], [7, 6], .5, undefined, [0, 4, 3])
-            const infomesh = new Widget_Dynamic_Text_Mesh('Mesh:', 'id:00', [100, 400, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
-            infomesh.CreateNewText('pos: 000,000,0', fontsize, undefined, GREEN_140_240_10, [fontsize * 3, 0], .9);
-            infomesh.CreateNewText('dim: 000,000', fontsize, undefined, GREEN_140_240_10, [fontsize * 3, 0], .9);
-            infomesh.CreateNewText('gfx: prog:0, vb:0', fontsize, undefined, GREEN_140_240_10, [fontsize * 3, 0], .9);
-            
-            infomesh.Align(ALIGN.VERTICAL)
-            scene.AddMesh(infomesh);
-            infomesh.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, infomesh.OnClick, infomesh, null);
-
-
-        // section.AddItem(infomesh, flags)
-        // section.Calc(flags)
-
-        // scene.AddMesh(section);
-
-        // section.UpdateGfxRecursive(section, scene.sceneIdx);
+        const infomesh = new Widget_Dynamic_Text_Mesh('Mesh:', 'id:00', [100, 400, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
+        infomesh.CreateNewText('pos: 000,000,0', fontsize, undefined, GREEN_140_240_10, [fontsize * 3, 0], .9);
+        infomesh.CreateNewText('dim: 000,000', fontsize, undefined, GREEN_140_240_10, [fontsize * 3, 0], .9);
+        infomesh.CreateNewText('gfx: prog:0, vb:0', fontsize, undefined, GREEN_140_240_10, [fontsize * 3, 0], .9);
+        
+        infomesh.Align(ALIGN.VERTICAL)
+        scene.AddMesh(infomesh);
+        infomesh.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, infomesh.OnClick, infomesh, null);
 
         return infomesh;
     }
 }
 function MeshInfoUpdate(params) {
 
-    // const textMesh = params.params.mesh.children.buffer[0];
     const textMesh = params.params.mesh;
-
     const infoMesh = STATE.mesh.hovered;
 
-
-    
-    
     if (infoMesh)  {
         
         const children = infoMesh.children.buffer[0];
@@ -711,7 +627,6 @@ function MeshInfoUpdate(params) {
                 childText.UpdateTextFromVal(msgs[i])
             }
         }
-
 
         // if (!infoMesh) {
         //     // textMesh.UpdateTextFromVal(0);
@@ -780,7 +695,8 @@ function Menu_labels_switches(scene) {
     scene.AddMesh(switch3);
     scene.AddMesh(switch4);
 
-    section.UpdateGfxRecursive(section, scene.sceneIdx);
+    section.UpdateGfx(section, scene.sceneIdx);
+    // section.UpdateGfxRecursive(section, scene.sceneIdx);
     console.log();
 }
 

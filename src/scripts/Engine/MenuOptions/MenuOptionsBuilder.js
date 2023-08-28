@@ -1,15 +1,13 @@
 "use strict";
 
-import { GfxSetVbRender, GlCheckContext, GlGenerateContext, GlResetIndexBuffer, GlResetVertexBuffer, GlSetVertexBufferPrivate } from "../../Graphics/Buffers/GlBuffers.js";
+import { GfxSetVbRender, GlGenerateContext, GlResetIndexBuffer, GlResetVertexBuffer, GlSetVertexBufferPrivate } from "../../Graphics/Buffers/GlBuffers.js";
 import { GlCheckSid } from "../../Graphics/GlProgram.js";
-import { CopyArr3 } from "../../Helpers/Math/MathOperations.js";
 import { Bind_change_brightness } from "../BindingFunctions.js";
 import { M_Buffer } from "../Core/Buffers.js";
 import { Section } from "../Drawables/Meshes/Panel.js";
 import { Widget_Switch_Mesh } from "../Drawables/Meshes/Widgets/WidgetButton.js";
 import { Widget_Label_Text_Mesh_Menu_Options } from "../Drawables/Meshes/Widgets/WidgetLabelText.js";
 import { Slider_connect } from "../Drawables/Meshes/Widgets/WidgetSlider.js";
-import { FontGetFontDimRatio } from "../Loaders/Font/Font.js";
 import { Scenes_get_children } from "../Scenes.js";
 
 
@@ -23,12 +21,12 @@ class Gfx_Pool extends M_Buffer {
    }
 
 
-   GenerateGfxCtx(sid, sceneIdx, useSpecificVertexBuffer, vertexBufferIdx, isPrivate, mesh_count) {
+   GenerateGfxCtx(sid, sceneIdx, useSpecificVertexBuffer, mesh_count) {
 
 
       if (useSpecificVertexBuffer === GL_VB.NEW) {
 
-         const gfx = GlGenerateContext(sid, sceneIdx, useSpecificVertexBuffer, vertexBufferIdx, isPrivate, mesh_count);
+         const gfx = GlGenerateContext(sid, sceneIdx, useSpecificVertexBuffer, NO_SPECIFIC_GL_BUFFER, mesh_count);
          this.#StoreGfx(gfx);
          return gfx;
       }
@@ -40,12 +38,12 @@ class Gfx_Pool extends M_Buffer {
             const found = this.#GetNotPrivateBySid(sid);
             if (found) {
 
-               const gfx = GlGenerateContext(sid, sceneIdx, GL_VB.SPECIFIC, found.vbidx, isPrivate, mesh_count);
+               const gfx = GlGenerateContext(sid, sceneIdx, GL_VB.SPECIFIC, found.vbidx, mesh_count);
                return gfx;
             }
             else { // ... else if pool didn't find any buffer, create a new one ...
 
-               const gfx = GlGenerateContext(sid, sceneIdx, GL_VB.NEW, NO_SPECIFIC_GL_BUFFER, isPrivate, mesh_count);
+               const gfx = GlGenerateContext(sid, sceneIdx, GL_VB.NEW, NO_SPECIFIC_GL_BUFFER, mesh_count);
                this.#StoreGfx(gfx);
                return gfx;
             }
@@ -67,25 +65,8 @@ class Gfx_Pool extends M_Buffer {
 
       this.#ActDeactFromPool(progidx, vbidx, true);
       GfxSetVbRender(progidx, vbidx, true);
-      // console.log('Activate:', progidx, vbidx)
 
    }
-   // ActivateRecursive(mesh) {
-
-   //    for (let i = 0; i < mesh.children.active_count; i++) {
-
-   //       const child = mesh.children.buffer[i];
-   //       if (child.children.active_count) 
-   //          this.ActivateRecursive(child);
-
-   //       const progidx = mesh.gfx.prog.idx;
-   //       const vbidx = mesh.gfx.prog.idx;
-   
-   //       this.#ActDeactFromPool(progidx, vbidx, true);
-   //       GfxSetVbRender(progidx, vbidx, true);
-   //       console.log('Activate:', progidx, vbidx)
-   //    }
-   // }
 
    DeactivateRecursive(mesh) {
 
@@ -102,7 +83,6 @@ class Gfx_Pool extends M_Buffer {
       GlResetVertexBuffer(mesh.gfx);
       GlResetIndexBuffer(mesh.gfx);
       GfxSetVbRender(progidx, vbidx, false);
-      // console.log('Deactivate:', progidx, vbidx)
 
       mesh.RemoveAllListenEvents();
 
@@ -110,12 +90,10 @@ class Gfx_Pool extends M_Buffer {
 
    RequestPrivateGfxCtx(mesh, flags, handler_progidx = INT_NULL, handler_vbidx = INT_NULL) {
 
-      // const isPrivate = (flags & GFX_CTX_FLAGS.PRIVATE) ? true : false;
-
       this.#ResolveGfxCtxRecursive(mesh, flags, handler_progidx, handler_vbidx);
    }
 
-   SessionEnd() {
+   SessionEnd(setPrivate) {
 
       const count = this.session.length;
       for (let i = 0; i < count; i++) {
@@ -123,10 +101,11 @@ class Gfx_Pool extends M_Buffer {
          const idx = this.session[i];
 
          this.buffer[idx].isActive = true;
-         this.buffer[idx].isPrivate = true;
+         this.buffer[idx].isPrivate = setPrivate;
 
          const progidx = this.buffer[i].progidx, vbidx = this.buffer[i].vbidx;
-         GlSetVertexBufferPrivate(progidx, vbidx);
+         if(setPrivate)
+            GlSetVertexBufferPrivate(progidx, vbidx);
       }
 
       this.session = [];
@@ -197,21 +176,21 @@ class Gfx_Pool extends M_Buffer {
 
             if (gfx) { // ... If we have, use it...
                // use specific gfx context
-               mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GL_VB.SPECIFIC, gfx.vbidx, undefined, mesh.mat.num_faces);
+               mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GL_VB.SPECIFIC, gfx.vbidx, mesh.mat.num_faces);
                console.log(mesh.name, mesh.mat.num_faces)
                // gfx.isActive = true;
             }
             else { // ... else create a new buffer and register it to the pool...
 
                // Create new buffers
-               mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GL_VB.NEW, NO_SPECIFIC_GL_BUFFER, undefined, mesh.mat.num_faces)
+               mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GL_VB.NEW, NO_SPECIFIC_GL_BUFFER, mesh.mat.num_faces)
                this.#Store(mesh.gfx.prog.idx, mesh.gfx.vb.idx, true, false)
             }
          }
          // ... case the mesh is a root mesh, a popup menu as an example, that already has a gfx.
          else if (mesh.gfx.prog.idx === progidx, mesh.gfx.vb.idx === vbidx) {
 
-            mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GL_VB.SPECIFIC, vbidx, undefined, mesh.mat.num_faces); // we pass the roots vbidx
+            mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GL_VB.SPECIFIC, vbidx, mesh.mat.num_faces); // we pass the roots vbidx
             const gfx = this.#FindGfx(progidx, vbidx)
             // gfx.isActive = true;
          }
@@ -302,11 +281,12 @@ const _menu_options = [];
 
 export function Gfx_get_pool() { return _gfx_pool; }
 
-export function Gfx_end_session() { return _gfx_pool.SessionEnd(); }
+/** Finish the session by setting all the assigned gfx buffers to active. Also sets private all the gfx buffers  */
+export function Gfx_end_session(setPrivate) { return _gfx_pool.SessionEnd(setPrivate); }
 
 // mesh_count is nesessary for calculating vertex buffer attribute offset for Text Meshes
-export function Gfx_generate_context(sid, sceneIdx, useSpecificVertexBuffer, vertexBufferIdx, isPrivate, mesh_count) {
-   return _gfx_pool.GenerateGfxCtx(sid, sceneIdx, useSpecificVertexBuffer, vertexBufferIdx, isPrivate, mesh_count);
+export function Gfx_generate_context(sid, sceneIdx, useSpecificVertexBuffer, mesh_count) {
+   return _gfx_pool.GenerateGfxCtx(sid, sceneIdx, useSpecificVertexBuffer, mesh_count);
 }
 export function Request_private_gfx_ctx(mesh, glags, progidx, vbidx) {
    return _gfx_pool.RequestPrivateGfxCtx(mesh, glags, progidx, vbidx);
@@ -402,9 +382,8 @@ export function Menu_options_create(clicked_mesh, pos, progidx, vbidx) {
          mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
          mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
       }
-      // menu_section.Recalc()
-      // menu_section.UpdateGfxRecursive(menu_section, 0)
-      Gfx_end_session();
+
+      Gfx_end_session(true); 
       return options_menu;
    }
 
@@ -412,7 +391,7 @@ export function Menu_options_create(clicked_mesh, pos, progidx, vbidx) {
    if (clicked_mesh.type & MESH_TYPES_DBG.WIDGET_SLIDER_BAR) {
 
       const options_menu = Menu_options_create_slider_popup_menu_options(clicked_mesh, pos, progidx, vbidx);
-      Gfx_end_session();
+      Gfx_end_session(true);
       return options_menu;
    }
 }
@@ -435,8 +414,8 @@ function Menu_options_create_slider_popup_menu_options(clickedMesh, _pos, progid
    /** Main Options */
    const font = MENU_FONT_IDX;
    const fontSize = MENU_FONT_SIZE;
-   const topPad = 112, pad = 5;
-   const height = fontSize * FontGetFontDimRatio(font);
+   // const topPad = 112, pad = 5;
+   // const height = fontSize * FontGetFontDimRatio(font);
    const textlabelpad = [0, 0];
    let maxWidth = 0;
    const pos = [0, 0, 0];
@@ -500,22 +479,13 @@ function Menu_options_create_slider_popup_menu_options(clickedMesh, _pos, progid
          target_mesh: mesh,
       }
 
-
-          
-
       // RenderQueueGet().UpdateActiveQueue();
       if (GlCheckSid(option.sid, progidx)) same_progidx_found = true;
-
         
-      // console.log(i, ' pos:', option.geom.pos)
       section.AddItem(option);
       
    }
-   // section.Calc()
-   // section.Recalc()
-   // section.UpdateGfxRecursive(section, 0)
 
-   Gfx_end_session();
 
    if (!same_progidx_found) alert('prog idx do not match(popup mesh and slider options section mesh). @ Menu_options_create().');
 

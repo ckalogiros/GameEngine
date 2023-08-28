@@ -23,7 +23,6 @@ export class Widget_Button_Mesh extends Widget_Label_Text_Mesh {
       if(Check_intersection_point_rect(m.pos, m.dim, point)){
           
          console.log('CLICKED!!! Btn:', params.self_params.name);
-         // console.log('CLICKED!!! Btn:', params.self_params.name, ' params:', params);
          STATE.mesh.SetClicked(params.self_params);
 
          if(params.self_params.eventCallbacks.count){
@@ -32,7 +31,6 @@ export class Widget_Button_Mesh extends Widget_Label_Text_Mesh {
                const Func = params.self_params.eventCallbacks.buffer[i].Clbk;
                const parameters = params.self_params.eventCallbacks.buffer[i].target;
                Func(parameters);            
-               // console.log(params.self_params.eventCallbacks.buffer[i])            
             }
          }
          
@@ -46,10 +44,6 @@ export class Widget_Button_Mesh extends Widget_Label_Text_Mesh {
       params.mesh.children.buffer[0].SetZindex(params.z)
    }
 
-//    UpdatePosXYZ(){
-
-//       super.UpdatePosXYZ();
-//   }
 }
 
 
@@ -59,18 +53,12 @@ export class Widget_Switch_Mesh extends Widget_Button_Mesh {
    state_text;
 
    constructor(pos, fontSize = 5, color = GREY1, colorText = WHITE, scale, pad=[fontSize,fontSize], bold, font, style = [3,6,2]) {
-
       
       super('off', pos, fontSize, color, colorText, scale, pad, bold, font, style)
       
       this.isOn = 0x0;
       this.state_text = ['off', 'on'];
-
       this.type |= MESH_TYPES_DBG.WIDGET_BUTTON;
-      // this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick, this, null);
-      // this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-      // this.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-
       this.SetName('Switch');
 
    }
