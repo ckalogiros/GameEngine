@@ -50,7 +50,7 @@ const STATE = {
 
 	scene:{
 		active: null,
-		idx: null,
+		active_idx: null,
 	},
 
 	loop: {
@@ -149,19 +149,20 @@ const MESH_STATE = {
 	IN_SCALE: _cnt <<= 1,
 	IN_MOVE: _cnt <<= 1,
 	IN_GRAB: _cnt <<= 1,
-	HOVER_COLOR_ENABLED: _cnt <<= 1,
+	IN_HOVER_COLOR: _cnt <<= 1,
 	
+	IS_HOVERABLE: _cnt <<= 1,
+	IS_CLICKABLE: _cnt <<= 1,
 	IS_MOVABLE: _cnt <<= 1,
 	IS_GRABABLE: _cnt <<= 1,
 	IS_FAKE_HOVER: _cnt <<= 1,
+	IS_HOVER_COLORABLE: _cnt <<= 1,
 	
 	CLICKED_MOUSE_L: _cnt <<= 1,
 	CLICKED_MOUSE_M: _cnt <<= 1,
 	CLICKED_MOUSE_R: _cnt <<= 1,
 	
-	HAS_HOVER: _cnt <<= 1,
 	HAS_POPUP: _cnt <<= 1,
-	HAS_HOVER_COLOR: _cnt <<= 1,
 
 
 	Print(mask){
@@ -172,7 +173,7 @@ const MESH_STATE = {
 		if(mask & this.IN_SCALE) str+='IN_SCALE,' 
 		if(mask & this.IN_MOVE) str+='IN_MOVE,' 
 		if(mask & this.IN_GRAB) str+='IN_GRAB,' 
-		if(mask & this.HOVER_COLOR_ENABLED) str+='HOVER_COLOR_ENABLED,' 
+		if(mask & this.IN_HOVER_COLOR) str+='IN_HOVER_COLOR,' 
 
 		if(mask & this.IS_MOVABLE) str+='IS_MOVABLE,' 
 		if(mask & this.IS_GRABABLE) str+='IS_GRABABLE,' 
@@ -181,9 +182,9 @@ const MESH_STATE = {
 		if(mask & this.CLICKED_MOUSE_M) str+='CLICKED_MOUSE_M,' 
 		if(mask & this.CLICKED_MOUSE_R) str+='CLICKED_MOUSE_R,' 
 
-		if(mask & this.HAS_HOVER) str+='HAS_HOVER,' 
+		if(mask & this.IS_HOVERABLE) str+='IS_HOVERABLE,' 
 		if(mask & this.HAS_POPUP) str+='HAS_POPUP,' 
-		if(mask & this.HAS_HOVER_COLOR) str+='HAS_HOVER_COLOR,' 
+		if(mask & this.IS_HOVER_COLORABLE) str+='IS_HOVER_COLORABLE,' 
 		// console.info(str)
 	}
 };
@@ -498,27 +499,36 @@ function GetMeshHighOrderNameFromType(type) {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Events  
  */
+
+const LISTENERS_ACTIVE = {
+	ANY_HOVER: false,
+	ANY_CLICK: false,
+
+	ANY: false,
+};
+
 _cnt = 0x1;
 const LISTEN_EVENT_TYPES = {
 	HOVER: _cnt <<= 1,
-	CLICK: _cnt <<= 1,
-	MOVE: _cnt <<= 1, // MOVE event registers with the CLICK event, no need to create new event in the ListeEvents buffer
+	CLICK_DOWN: _cnt <<= 1,
+	MOVE: _cnt <<= 1, // MOVE event registers with the CLICK event, no need to create new event in the ListenEvents buffer
 	
 	NULL: _cnt <<= 1,
 };
 
 _cnt = 0;
+/** CAUTION: This is an enum for indexing the Listen_Events class buffer NOT the  Listener_Hover class buffer which is a separate class*/
 const LISTEN_EVENT_TYPES_INDEX = {
-	HOVER: _cnt++,
+	HOVER: _cnt++, // HOVER event belongs to another class, that is the Listener_Hover class
 	CLICK: _cnt++,
 	// MOVE event registers with the CLICK event, no need to create new event in the ListeEvents buffer
 	SIZE: _cnt,
 };
 
-function GetListenEventsType(type) {
+// function GetListenEventsType(type) {
 
-	if (type & LISTEN_EVENT_TYPES.HOVER) { return 'HOVER'; }
-}
+// 	if (type & LISTEN_EVENT_TYPES.HOVER) { return 'HOVER'; }
+// }
 
 _cnt = 0x1;
 const DISPATCH_LISTEN_EVENT_TYPES = {

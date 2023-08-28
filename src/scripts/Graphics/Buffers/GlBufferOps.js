@@ -456,6 +456,7 @@ export function GlSetWpos(gfxInfo, pos) {
         vb.data[index++] = pos[1];
         vb.data[index++] = pos[2];
 
+
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z
         verts--;
     }

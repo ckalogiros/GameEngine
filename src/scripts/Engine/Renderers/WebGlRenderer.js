@@ -72,6 +72,7 @@ export class WebGlRenderer {
       this.scene = scene;
       scene.UseCamera(camera);
       STATE.scene.active = this.scene;
+      STATE.scene.active_idx = this.scene.sceneIdx;
 
       this.camera = camera;
       this.camera.Init();
@@ -127,6 +128,7 @@ export class WebGlRenderer {
       if (!this.gl) alert('Unable to initialize WebGL.');
 
       console.log('WebGl version: ', this.gl.getParameter(this.gl.SHADING_LANGUAGE_VERSION));
+      console.log('WebGl renderer info: ', this.gl.getParameter(this.gl.RENDERER));
 
 
       this.extensions = this.gl.getSupportedExtensions();
@@ -150,7 +152,6 @@ export class WebGlRenderer {
 
 
       // Debug some gl info
-      console.log("gl.RENDERER: " + this.gl.getParameter(this.gl.RENDERER));
       var maxTextureSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
       console.log("Maximum Texture Size: " + maxTextureSize);
    }

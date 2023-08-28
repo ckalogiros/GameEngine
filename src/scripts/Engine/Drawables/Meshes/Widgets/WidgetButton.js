@@ -6,7 +6,7 @@ import { Widget_Label_Text_Mesh } from './WidgetLabelText.js';
 
 export class Widget_Button_Mesh extends Widget_Label_Text_Mesh {
 
-   constructor(text, pos, fontSize = 10, color = GREY3, colorText = WHITE, scale = [1, 1], pad, bold, font, style=[0,0,0]) {
+   constructor(text, pos, fontSize = 10, color = GREY3, colorText = WHITE, scale = [1, 1], pad, bold, font, style) {
 
       super(text, pos, fontSize, color, colorText, scale, pad, bold, font, style)
 
@@ -35,7 +35,11 @@ export class Widget_Button_Mesh extends Widget_Label_Text_Mesh {
                // console.log(params.self_params.eventCallbacks.buffer[i])            
             }
          }
+         
+         return true;
       }
+      
+      return false;
    }
 
    SetZindex(params){
@@ -58,17 +62,17 @@ export class Widget_Switch_Mesh extends Widget_Button_Mesh {
 
       
       super('off', pos, fontSize, color, colorText, scale, pad, bold, font, style)
-      // pd[1] *= 
       
       this.isOn = 0x0;
       this.state_text = ['off', 'on'];
 
       this.type |= MESH_TYPES_DBG.WIDGET_BUTTON;
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK, this.OnClick, this, null);
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-      // this.StateEnable(MESH_STATE.HAS_HOVER_COLOR);
+      // this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick, this, null);
+      // this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+      // this.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
-      this.SetName();
+      this.SetName('Switch');
+
    }
 
    OnClick(params){
@@ -84,8 +88,13 @@ export class Widget_Switch_Mesh extends Widget_Button_Mesh {
 
          STATE.mesh.SetClicked(params.self_params);
          console.log('CLICKED!!! Switch:', theThis.isOn)
+         
+         return true;
       }
+      
+      return false;
    }
+   
 }
 
 

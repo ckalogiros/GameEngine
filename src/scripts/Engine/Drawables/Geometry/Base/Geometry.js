@@ -52,7 +52,7 @@ export class Geometry2D {
     }
 
     //////////////////////////////////////////////////////////////
-    SetPos(pos, gfx) {
+    SetPosXYZ(pos, gfx) {
         math.CopyArr3(this.pos, pos);
         glBufferOps.GlSetWpos(gfx, pos);
     }
@@ -130,7 +130,6 @@ export class Geometry2D {
 export class Geometry3D {
 
     sid;
-
     pos   = [0, 0, 0];
     dim   = [0, 0, 0];
     scale = [0, 0, 0];

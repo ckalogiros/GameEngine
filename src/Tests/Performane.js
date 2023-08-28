@@ -17,7 +17,7 @@ function Create_buttons(scene, num){
    for (let i=0; i<num; i++){
       
       const btn = new Widget_Button_Mesh('button'+i, [20, posy, 1], 6, BLUE_10_160_220, WHITE, [1,1], [6, 5]);
-      btn.StateEnable(MESH_STATE.HAS_HOVER_COLOR)
+      btn.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
       scene.AddMesh(btn)
       // btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
       Listener_hover_enable(btn);

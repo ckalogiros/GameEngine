@@ -9,7 +9,7 @@ import { Geometry2D } from "./Base/Geometry.js";
 
 export class Geometry2D_Text extends Geometry2D {
 
-   numChars;
+   num_faces;
    text;
    char_ratio;
 
@@ -29,7 +29,7 @@ export class Geometry2D_Text extends Geometry2D {
       
       this.char_ratio = char_ratio;
       this.text = text;
-      this.numChars = text.length;
+      this.num_faces = text.length;
       this.type |= MESH_TYPES_DBG.TEXT_GEOMETRY2D;
    }
 
@@ -44,7 +44,7 @@ export class Geometry2D_Text extends Geometry2D {
       // Copy gfx, to pass new start for each character
       let gfxCopy = new GfxInfoMesh(gfx);
 
-      for (let i = 0; i < this.numChars; i++) {
+      for (let i = 0; i < this.num_faces; i++) {
 
          GlAddGeometry(sid, charPos, this.dim, this.time, gfxCopy, meshName, 1)
          gfxCopy.vb.start += gfxCopy.vb.count;
@@ -55,11 +55,11 @@ export class Geometry2D_Text extends Geometry2D {
 
 
    MoveXY(x, y, gfx) {
-      this.MoveXYConcecutive(x, y, gfx, this.numChars)
+      this.MoveXYConcecutive(x, y, gfx, this.num_faces)
    }
 
    CalcTextWidth(){
-      return this.numChars * this.dim[0] * 2;
+      return this.num_faces * this.dim[0] * 2;
    }   
 
    Reposition_pre(pos){

@@ -157,14 +157,57 @@ export function PrintVertexBuffer(vb){
     if(!GL_DEBUG_VERTEX_BUFFER) return;
     console.log('-[Gl Vertex Buffer]-\n', vb)
 }
-export function PrintVertexBufferAll(){
+export function PrintVertexBufferDataAndNames(){
     if(!GL_DEBUG_VERTEX_BUFFER) return;
     
     const progs = GlGetPrograms();
+    console.log('-[Gl Vertex Buffer]')
     for(let i=0; i<progs.length; i++){
-        console.log('-[Gl Vertex Buffer]-')
-        console.log( i, ': ', progs[i].vertexBuffer)
+        console.log('prog:', i)
+        for(let j=0; j<progs[i].vertexBuffer.length; j++){
+            console.log(
+                'vbidx: ', j,
+                'meshes: ', progs[i].vertexBuffer[j].debug.meshesNames,
+                'data: ', progs[i].vertexBuffer[j].data,
+            );
+        }
     }
+}
+export function PrintVertexDataAll(){
+    if(!GL_DEBUG_VERTEX_BUFFER) return;
+    
+    const progs = GlGetPrograms();
+    console.log('-[Gl Vertex Buffer]-')
+    for(let i=0; i<progs.length; i++){
+        console.log(' progidx:', i)
+        console.log('vb:', progs[i].vertexBuffer);
+        
+        // console.log('prog:', i);
+        // for(let j=0; j<progs[i].vertexBuffer.length; j++){
+
+        //     console.log(progs[i].vertexBuffer[j]);
+        // }
+    }
+
+    // for(let i=0; i<progs.length; i++){
+        
+    //     console.log('prog:', i);
+    //     for(let j=0; j<progs[i].vertexBuffer.length; j++){
+    //         const a = {
+
+    //             'idx: ': progs[i].vertexBuffer[j].idx,
+    //             'needs Update: ': progs[i].vertexBuffer[j].needsUpdate,
+    //             'show: ': progs[i].vertexBuffer[j].show,
+    //             'vCount: ': progs[i].vertexBuffer[j].vCount,
+    //             'size: ': progs[i].vertexBuffer[j].size,
+    //         }
+    //         console.log(
+    //             'vbidx: ', j,
+    //             'count: ', progs[i].vertexBuffer[j].count,
+    //         );
+    //         console.log(a);
+    //     }
+    // }
 }
 export function PrintVertexBufferAllPretty(){
     if(!GL_DEBUG_VERTEX_BUFFER) return;
@@ -202,8 +245,19 @@ export function PrintIndexBufferAll(){
     if(!GL_DEBUG_INDEX_BUFFER) return;
     
     const progs = GlGetPrograms();
+    console.log('-[Gl Index Buffer]')
     for(let i=0; i<progs.length; i++){
-        console.log('-[Gl Index Buffer]-\n ', i, ': ', progs[i].indexBuffer)
+        console.log('prog:', i)
+        for(let j=0; j<progs[i].indexBuffer.length; j++){
+            console.log(
+                'ibidx: ', j,
+                'count: ', progs[i].indexBuffer[j].count,
+                'idx: ', progs[i].indexBuffer[j].idx,
+                'needs Update: ', progs[i].indexBuffer[j].needsUpdate,
+                'show: ', progs[i].indexBuffer[j].show,
+                'vCount: ', progs[i].indexBuffer[j].vCount,
+            );
+        }
     }
 }
 export function PrintBuffersAll(){

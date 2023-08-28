@@ -99,6 +99,12 @@ export function AddArr2(arr1, arr2){
 }
 
 
+export function FloorArr2(arr){
+    return [~~arr[0], ~~arr[1]]
+}
+export function FloorArr3(arr){
+    return [~~arr[0], ~~arr[1], ~~arr[2]]
+}
 export function Abs(a){
     return a > 0 ? a : -a;
 }

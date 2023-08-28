@@ -37,6 +37,7 @@ export class Material {
    uvIdx;
    hasFontTex;
    type = 0;
+   num_faces;
 
    constructor(col = [1,1,1,1], texId = INT_NULL) {
 
@@ -171,14 +172,14 @@ export class Material {
 export class FontMaterial extends Material {
 
    text;
-   numChars;
+   // numChars;
    sdf_params;
 
    constructor(col = [1,1,1,1], texId, text, sdf_params = [.5,.5]) {
 
       super(col, texId);
       this.text = text;
-      this.numChars = text.length;
+      this.num_faces = text.length;
       this.sdf_params = [0, 0];
       math.CopyArr2(this.sdf_params, sdf_params);
 
@@ -199,9 +200,9 @@ export class FontMaterial extends Material {
       // At the end, there is only one gfx variable, for the first text-face. So we must calculate in
       // order to address anyy other face of a text mesh.
       let gfxCopy = new GfxInfoMesh(gfx);
-      // this.numChars = this.text.length;
+      // this.num_faces = this.text.length;
 
-      for (let i = 0; i < this.numChars; i++) {
+      for (let i = 0; i < this.num_faces; i++) {
 
          let uv = FontGetUvCoords(this.uvIdx, ' ');
          if(this.text[i])

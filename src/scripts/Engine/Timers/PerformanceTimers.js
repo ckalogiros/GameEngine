@@ -84,7 +84,8 @@ export function PerformanceTimerCreate(name = '') {
  * Global Variables for mesuring code.
  * Must be declared somewhere globally because they are gonna be used mainly in Render loop
  * so we need some global declaration to access them. 
- * Also its better for callbacks to be functions rather than class methods.
+ * Also its better for callbacks to be functions rather than class methods,
+ * which they dont have any object state through the callback.
  */
 export const __pt1 = PerformanceTimerCreate('_pt1');
 export function _Tm1GetFps(){ return __pt1.GetFps(); }

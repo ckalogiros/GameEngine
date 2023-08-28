@@ -69,8 +69,8 @@ export class Widget_Slider extends Mesh {
       bar.type |= MESH_TYPES_DBG.WIDGET_SLIDER_BAR | bargeom | barmat;
       bar.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       bar.SetStyle(0, 3, 2);
-      bar.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.HAS_HOVER_COLOR | MESH_STATE.HAS_POPUP);
-      bar.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK, this.OnClick, bar)
+      bar.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_HOVER_COLORABLE | MESH_STATE.HAS_POPUP);
+      bar.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick, bar)
       bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
       // Listener_hover_enable(bar);
 
@@ -143,25 +143,25 @@ export class Widget_Slider extends Mesh {
       // this.ListenersReconstruct();
    }
 
-   CreateGfxCtx(sceneIdx) {
+   SelectGfxCtx(sceneIdx) {
 
       /**
        * TODO: Implement an automatic adding to the graphics pipeline.
        */
       const gfx = []
-      gfx[0] = super.CreateGfxCtx(sceneIdx);
+      gfx[0] = super.SelectGfxCtx(sceneIdx);
 
       const bar = this.children.buffer[BAR_IDX];
       const handle = bar.children.buffer[0];
-      gfx[1] = bar.CreateGfxCtx(sceneIdx);
-      gfx[2] = handle.CreateGfxCtx(sceneIdx);
+      gfx[1] = bar.SelectGfxCtx(sceneIdx);
+      gfx[2] = handle.SelectGfxCtx(sceneIdx);
 
       const slider_name_text = this.children.buffer[1];
-      gfx[3] = slider_name_text.CreateGfxCtx(sceneIdx);
+      gfx[3] = slider_name_text.SelectGfxCtx(sceneIdx);
 
       // const slider_value_text = this.children.buffer[2];
       const slider_value_text = bar.children.buffer[1];
-      gfx[4] = slider_value_text.CreateGfxCtx(sceneIdx);
+      gfx[4] = slider_value_text.SelectGfxCtx(sceneIdx);
 
       return gfx;
 
@@ -346,7 +346,7 @@ export function Slider_on_update_handle(_params) {
 
    const val = Slider_calculate_value(bar, handle); // Calculate slider's value based on the handles position.
 
-   slider_val.UpdateText(val); // Change the text mesh to the current slider's value
+   slider_val.UpdateTextFromVal(val); // Change the text mesh to the current slider's value
 
    /**
     * Dispatch all callbacks for all targets, that is
@@ -471,7 +471,7 @@ export function Slider_menu_create_options(clickedMesh, _pos) {
       return _slider_options[clickedMesh.menu_options.idx]
    }
 
-   const meshes = Scenes_get_children(STATE.scene.idx);
+   const meshes = Scenes_get_children(STATE.scene.active_idx);
 
    for (let i = 0; i < meshes.count; i++) {
 

@@ -226,7 +226,7 @@ export class Widget_Generic extends Mesh{
       // _position_controller.FitAll(this, ALIGN.HORIZONTAL, SIZER.RESTRICT, [.5,1], 1);
    }
 
-   CreateGfxCtx(sceneIdx){
+   SelectGfxCtx(sceneIdx){
 
       
       // for(let i=0; i<this.children.count; i++){
@@ -234,10 +234,10 @@ export class Widget_Generic extends Mesh{
          
          const child = this.children.buffer[i];
          Recursive_add_to_gfx_buffers(child)
-         child.CreateGfxCtx(sceneIdx);
+         child.SelectGfxCtx(sceneIdx);
       }
 
-      const gfx = super.CreateGfxCtx(sceneIdx)
+      const gfx = super.SelectGfxCtx(sceneIdx)
 
       return gfx;
    }
@@ -253,6 +253,6 @@ function Recursive_add_to_gfx_buffers(_mesh, sceneIdx){
          // if (mesh.children.count)
          //    Recursive_add_to_gfx_buffers(mesh, sceneIdx)
 
-            mesh.CreateGfxCtx(sceneIdx);
+            mesh.SelectGfxCtx(sceneIdx);
    }
 }

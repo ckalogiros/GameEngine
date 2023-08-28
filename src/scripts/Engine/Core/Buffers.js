@@ -7,12 +7,12 @@ class Buffer_Interface {
    active_count; // Counts how many elements are not null
    size;
 
-   constructor() {
+   constructor(size=INT_NULL) {
 
       this.buffer = null;
       this.count = 0;
       this.active_count = 0;
-      this.size = INT_NULL;
+      this.size = size;
    }
 
    Add(elem) {
@@ -22,6 +22,7 @@ class Buffer_Interface {
       this.active_count++;
       return idx;
    }
+
 
    Reset() {
 
@@ -148,16 +149,26 @@ export class M_Buffer extends Buffer_Interface{
 
 export class Int8Buffer extends Buffer_Interface {
 
-   constructor() {
+   constructor(size) {
 
-      super();
+      super(size);
    }
 
-   Init(size, val) {
+   Init(val) {
 
-      if(!this.buffer) this.buffer = new Int8Buffer(size)
+      if(!this.buffer) this.buffer = new Int8Array(this.size)
       for (let i = 0; i < this.size; i++)
          this.buffer[i] = val;
+   }
+
+   AddAtIndex(idx, elem) {
+      if(idx <0 || idx > this.size) console.error('WRONG Index. Adding item at: ', idx, ' with size:', this.size)
+      // if(!this.buffer) this.Init(this.size, INT_NULL)
+
+      this.buffer[idx] = elem;
+      this.active_count++;
+      if(this.count < idx) this.count = idx+1;
+      return idx;
    }
 
    Realloc() {
@@ -183,7 +194,7 @@ export class Int8_2DBuffer {
    size;
    numcols;
 
-   constructor(numrows, numcols) {
+   constructor(numrows=0, numcols=0) {
 
       this.size = numcols * numrows;    
       this.numcols = numcols;    

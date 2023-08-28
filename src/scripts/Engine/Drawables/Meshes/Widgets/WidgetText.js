@@ -4,7 +4,9 @@ import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
 import { GlGenerateContext } from "../../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh, GlGetProgram } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
-import { CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
+import { CopyArr2, CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
+import { Check_intersection_point_rect } from "../../../Collisions.js";
+import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx, TimeIntervalsGetByIdx } from "../../../Timers/TimeIntervals.js";
 import { Geometry2D_Text } from "../../Geometry/Geometry2DText.js";
@@ -20,16 +22,111 @@ import { Text_Mesh } from "../Base/Mesh.js";
  */
 export class Widget_Text_Mesh extends Text_Mesh {
 
+	pad = [0, 0];
+
 	constructor(text, pos, fontSize = 10, scale = [1, 1], color = WHITE, bold = 4, font = TEXTURES.SDF_CONSOLAS_LARGE) {
 
 		const sdfouter = CalculateSdfOuterFromDim(fontSize);
-		if(sdfouter + bold > 1) bold =  1-sdfouter;
+		if (sdfouter + bold > 1) bold = 1 - sdfouter;
 		const mat = new FontMaterial(color, font, text, [bold, sdfouter])
 		const geom = new Geometry2D_Text(pos, fontSize, scale, text, font);
 		super(geom, mat);
 
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT | geom.type | mat.type;
 
+	}
+
+	Align(flags) { // Align pre-added to the vertexBuffers
+
+		const pos = [0, 0];
+		const dim = this.geom.dim;
+		CopyArr2(pos, this.geom.pos);
+		let ypos = pos[1] + dim[1] * 2;
+
+		pos[0] -= dim[0] * this.mat.num_faces / 2 - this.pad[0] / 2;
+
+		if (flags & ALIGN.VERTICAL) {
+
+			for (let i = 0; i < this.children.active_count; i++) {
+
+				const child = this.children.buffer[i];
+				pos[1] = ypos;
+
+				child.geom.Reposition_pre(pos);
+				ypos += child.geom.dim[1] * 2;
+			}
+
+		}
+	}
+
+	OnClick(params) {
+
+		const mesh = params.self_params;
+		const point = MouseGetPos();
+		const m = mesh.geom;
+
+		if (Check_intersection_point_rect(m.pos, m.dim, point, [0, 8])) {
+
+			STATE.mesh.SetClicked(params.self_params);
+
+			if (mesh.timeIntervalsIdxBuffer.count <= 0) {
+
+				/**
+				 * Create move event.
+				 * The move event runs only when the mesh is GRABED.
+				 * That means that the timeInterval is created and destroyed upon 
+				 * onClickDown and onClickUp respectively.
+				 */
+				const idx = TimeIntervalsCreate(10, 'Move Widget_Text_Mesh', TIME_INTERVAL_REPEAT_ALWAYS, mesh.OnMove, mesh);
+				mesh.timeIntervalsIdxBuffer.Add(idx);
+
+				if (mesh.StateCheck(MESH_STATE.IS_GRABABLE)) {
+
+					STATE.mesh.SetGrabed(mesh);
+					mesh.StateEnable(MESH_STATE.IN_GRAB);
+				}
+
+				// // Handle any menu (on leftClick only)
+				// if (mesh.StateCheck(MESH_STATE.HAS_POPUP)) {
+
+				//    const btnId = params.trigger_params;
+				//    Widget_popup_handler_onclick_event(mesh, btnId)
+				// }
+			}
+			return true;
+		}
+		return false;
+	}
+
+	OnMove(_params) {
+
+		/**
+		 * The function is called by the timeInterval.
+		 * The timeInterval has been set by the 'OnClick' event.
+		 */
+
+		const mesh = _params.params;
+
+		// Destroy the time interval calling this function if the mesh is not grabed.
+		if (mesh.StateCheck(MESH_STATE.IN_GRAB) === 0) {
+
+			const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
+			TimeIntervalsDestroyByIdx(intervalIdx);
+			mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+
+			return;
+		}
+
+		// Move the mesh
+		console.log('MOVING Widget Text')
+		const mouse_pos = MouseGetPosDif();
+		mesh.MoveRecursive(mouse_pos.x, -mouse_pos.y);
+
+		// const mouse_pos = MouseGetPos();
+		// // mouse_pos[0] -= section.geom.pos[0];
+		// // mouse_pos[1] -= section.geom.pos[1];
+		// section.SetPosXYRecursiveMove(mouse_pos);
+		// // section.SetPos(mouse_pos);
 
 	}
 
@@ -47,36 +144,38 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 		super(maxDynamicTextChars, pos, fontSize, scale, color1, bold);
 
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | this.geom.type | this.mat.type;
-		
+
 		this.SetName(this.mat.text);
+
+
 	}
 
-	CreateGfxCtx(sceneIdx) {
+	SelectGfxCtx(sceneIdx) {
 
-		let total_char_count = this.mat.numChars;
-		for(let i=0; i<this.children.active_count; i++)
-			total_char_count += this.children.buffer[i].mat.numChars;
+		let total_char_count = this.mat.num_faces;
+		for (let i = 0; i < this.children.active_count; i++)
+			total_char_count += this.children.buffer[i].mat.num_faces;
 
 		this.gfx = GlGenerateContext(this.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER, false, total_char_count);
 
 		const prog = GlGetProgram(this.gfx.prog.idx);
 		if (this.sid.unif & SID.UNIF.BUFFER_RES) {
-			 const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
-			 prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
-			 prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
+			const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
+			prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
+			prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
 		}
 
 		return this.gfx;
 	}
-	
-	AddToGfx(){
+
+	AddToGfx() {
 
 		const start = super.AddToGfx()
 		let gfxCopy = new GfxInfoMesh(this.gfx);
 		gfxCopy.vb.start = start;
 
-		for(let i=0; i<this.children.active_count; i++){
-			
+		for (let i = 0; i < this.children.active_count; i++) {
+
 			const child = this.children.buffer[i];
 			child.gfx = new GfxInfoMesh(gfxCopy);
 
@@ -88,6 +187,8 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 	}
 
 	CreateNewText(maxDynamicTextChars, fontSize, color1, color2, pad, bold) {
+
+		this.pad = pad;
 
 		let pos = [0, 0, 0];
 		// Get the last child mesh (suppose to be dynamicText)
@@ -209,12 +310,12 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 
 			// Copy all callback functions found in the timeInterval to pass them to the new timeInterval.
 			for (i = 0; i < oldFuncs.length; i++) {
-				
+
 				// Copy all callback functions found in the timeInterval to pass them to the new timeInterval.
 				params.func[i] = oldFuncs[i];
 
 				// Copy all callback's_params.
-				if(oldFuncsParams)  params.func_params[i] = oldFuncsParams[i];
+				if (oldFuncsParams) params.func_params[i] = oldFuncsParams[i];
 				else params.func_params[i] = null;
 
 				// Copy all meshes.
@@ -255,8 +356,8 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 			let gfxInfoCopy = new GfxInfoMesh(gfx);
 
 			const textLen = text.length;
-			const len = geom.numChars > textLen ? geom.numChars : 
-								(textLen > geom.numChars ? geom.numChars : textLen);
+			const len = geom.num_faces > textLen ? geom.num_faces :
+				(textLen > geom.num_faces ? geom.num_faces : textLen);
 
 			// Update text faces
 			for (let j = 0; j < len; j++) {
@@ -296,13 +397,13 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 
 	}
 
-	CreateGfxCtx(sceneIdx) {
+	SelectGfxCtx(sceneIdx) {
 
-		super.CreateGfxCtx(sceneIdx);
+		super.SelectGfxCtx(sceneIdx);
 		return this.gfx;
 	}
 
-	AddToGfx(){
+	AddToGfx() {
 
 		super.AddToGfx();
 	}
@@ -380,12 +481,12 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 			let i = 0;
 
 			for (i = 0; i < prevFuncs.length; i++) {
-				
+
 				// Copy all previous callback functions found in the timeInterval to pass them to the new timeInterval.
 				params.func[i] = prevFuncs[i];
 
 				// Copy previous callback's_params.
-				if(prevFuncsParams)  params.func_params[i] = prevFuncsParams[i];
+				if (prevFuncsParams) params.func_params[i] = prevFuncsParams[i];
 				else params.func_params[i] = null;
 
 				// Copy previous meshes.
@@ -411,19 +512,19 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 	}
 }
 
-function Widget_text_mesh_add_to_gfx_recursive(mesh, gfx){
+function Widget_text_mesh_add_to_gfx_recursive(mesh, gfx) {
 
 
-	for(let i=0; i<mesh.children.active_count; i++){
+	for (let i = 0; i < mesh.children.active_count; i++) {
 
 		const child = mesh.children.buffer[i];
 
-		if(child.children.active_count){
+		if (child.children.active_count) {
 			Widget_text_mesh_add_to_gfx_recursive(child, gfx);
 		}
 
 		gfx.vb.start += gfx.vb.count;
-		
+
 		this.geom.AddToGraphicsBuffer(child.sid, gfx, child.name);
 		this.mat.AddToGraphicsBuffer(child.sid, gfx);
 		// child.AddToGfx();

@@ -1,13 +1,12 @@
 "use strict";
 
-import { GlResetVertexBuffer, GlSetVertexBufferPrivate } from '../../../../Graphics/Buffers/GlBuffers.js';
 import { GlCheckSid } from '../../../../Graphics/GlProgram.js';
 import { Helpers_calc_bottom_right_pos } from '../../../../Helpers/Helpers.js';
 import { MouseGetPos } from '../../../Controls/Input/Mouse.js';
 import { MESH_ENABLE } from '../Base/Mesh.js';
 import { Section } from '../Panel.js';
 import { CopyArr2 } from '../../../../Helpers/Math/MathOperations.js';
-import { Menu_options_create } from '../../../MenuOptionsHandler/MenuOptionsHandler.js';
+import { Gfx_activate, Gfx_deactivate, Gfx_get_pool, Menu_options_create, Request_private_gfx_ctx } from '../../../MenuOptions/MenuOptionsBuilder.js';
 
 
 /**
@@ -61,206 +60,48 @@ const _popUpGfx = {
 class Widget_PopUp extends Section {
 
    isActive;
-   menu_options_idx; // An index to the menu options handler's buffer.
+   menu_options_idx; // An index to the menu options buffer(MenuOptionsBuilder).
 
-   // constructor(pos = [0, 0, 0], dim = [0, 0], color = TRANSPARENT) {
+   constructor(pos = [0, 0, 0], dim = [0, 0], col = TRANSPARENT) {
 
-   //    pos[2] += 10;
-   //    const geom = new Geometry2D(pos, dim);
-   //    const mat = new Material(color)
+      pos[2] += 1;
 
-   //    const fontSize = 8;
-   //    pos[0] -= geom.dim[0] - 6;
-   //    pos[1] -= geom.dim[1] - fontSize * 2 - 8;
-   //    pos[2] += 1;
-
-   //    super(geom, mat);
-
-   //    this.type |= MESH_TYPES_DBG.WIDGET_POP_UP | geom.type | mat.type;
-
-   //    this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
-   //    this.SetStyle(6, 4, 3);
-   //    this.SetName();
-
-   //    this.isActive = false;
-
-   // }
-   constructor(pos = [0, 0, 0], dim = [0, 0], color = TRANSPARENT) {
-
-      pos[2] += 10;
-      // const geom = new Geometry2D(pos, dim);
-      // const mat = new Material(color)
-
-      super(SECTION.VERTICAL, [10,10], pos, dim, TRANSPARENCY(GREY7, .9));
+      super(SECTION.VERTICAL, [10,10], pos, dim, col);
       const fontSize = 8;
       pos[0] -= this.geom.dim[0] - 6;
       pos[1] -= this.geom.dim[1] - fontSize * 2 - 8;
       pos[2] += 1;
-      
-      // super(geom, mat);
 
       this.type |= MESH_TYPES_DBG.WIDGET_POP_UP | this.geom.type | this.mat.type;
 
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       this.SetStyle(6, 4, 3);
-      this.SetName();
+      this.SetName('Root popup');
+
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick, this, null)
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+      this.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
       this.isActive = false;
 
    }
 
-   CreateGfxCtx(sceneIdx) {
+   SelectGfxCtx(sceneIdx) {
 
       // Must guarantee that the options menu first mesh is of type: Section,
       // so that we can steal its vbidx and simply add the popup to tha same vertex buffer. 
       // const vbidx = this.children.buffer[0].gfx.vb.idx;
       // ERROR_NULL(vbidx, 'Popup cannot be added to NON existant vertex buffer. @  Widget_PopUp.AddToGraphics().')
-      const gfx = super.CreateGfxCtx(sceneIdx, GL_VB.NEW);
-      GlSetVertexBufferPrivate(gfx.prog.idx, gfx.vb.idx)
+      const gfx = super.SelectGfxCtx(sceneIdx, GL_VB.NEW);
+      // GlSetVertexBufferPrivate(gfx.prog.idx, gfx.vb.idx)
       return gfx;
    }
-   // AddToGraphicsBuffer(sceneIdx) {
-
-   //    // First time initialization
-   //    if (!_popUpGfx.isSet) {
-
-   //       this.gfx = super.AddToGraphicsBuffer(sceneIdx, GL_VB.NEW); // Create new vertex buffer for the popup menu, to manipulate seperately from other meshes.
-
-   //       _popUpGfx.isSet    = true;
-   //       _popUpGfx.isActive = true;
-
-
-   //       _popUpGfx.secondary_popups.Add({ // Add the text vertex buffer
-   //          isActive: true,
-   //          progidx: this.gfx.prog.idx,
-   //          vbidx: this.gfx.vb.idx,
-   //       });
-
-
-   //       /**
-   //        * TODO: Use the duplicated code once
-   //        */
-   //       GlSetVertexBufferPrivate(this.gfx.prog.idx, this.gfx.vb.idx);
-
-   //       const count = this.children.count;
-   //       if (count) {
-
-   //          const vbUse = [GL_VB.SPECIFIC, GL_VB.NEW]; // [0]: For the rect area of the 'Widget_Label_Text_Mesh_Menu_Options', [1]: for the text
-   //          const vbidx = [this.gfx.vb.idx, NO_SPECIFIC_GL_BUFFER] // [0]: Use the same vb for the textLabel area and the popup, since their sid's match and they wiil be deactivated together as a group. 
-
-   //          let flag = true;
-   //          for (let i = 0; i < count; i++) {
-
-   //             const children = this.children.buffer[i];
-   //             const gfx = children.AddToGraphicsBuffer(this.sceneIdx, vbUse, vbidx);
-               
-   //             if (flag) { // for fisrt time create new vertex buffer for the text, after for any other option, use the same text vertex buffer.
-   //                vbUse[1] = GL_VB.SPECIFIC;
-   //                vbidx[1] = children.gfx.vb.idx;
-                  
-   //                _popUpGfx.secondary_popups.Add({ // Add the text vertex buffer
-   //                   isActive: true,
-   //                   progidx: (Array.isArray(gfx)) ? gfx[1].prog.idx : gfx.prog.idx,
-   //                   vbidx:  (Array.isArray(gfx)) ? gfx[0].vb.idx : gfx.vb.idx,
-   //                });
-
-   //                GlSetVertexBufferPrivate(children.gfx.prog.idx, children.gfx.vb.idx);
-
-   //                flag = false;
-   //             }
-   //          }
-   //       }
-
-   //       RenderQueueGet().UpdateActiveQueue();
-
-   //       return this.gfx;
-
-   //    }
-   //    else { // Secondary popup creation.
-
-   //       let popUpGfx = _popUpGfx.secondary_popups.GetInactive(this.sid);
-
-   //       if (popUpGfx === null) { // Create new vertex buffer for the new secondary popup
-
-   //          this.gfx = super.AddToGraphicsBuffer(this.sceneIdx, GL_VB.NEW);
-
-   //          _popUpGfx.secondary_popups.Add({
-   //             isActive: true,
-   //             progidx: this.gfx.prog.idx,
-   //             vbidx: this.gfx.vb.idx,
-   //          });
-
-   //          GlSetVertexBufferPrivate(this.gfx.prog.idx, this.gfx.vb.idx);
-
-   //          if (this.children.count) {
-
-   //             // On a new secondary popup, we allready have the new vertex buffer for the rect area, but we want a new vertex buffer for it's text
-   //             const vbUse = [GL_VB.SPECIFIC, GL_VB.NEW]; // [0]: For the rect area of the 'Widget_Label_Text_Mesh_Menu_Options', [1]: for the text
-   //             const vbidx = [this.gfx.vb.idx, NO_SPECIFIC_GL_BUFFER] // [0]: Use the same vb with popup since their sid's match. 
-
-   //             let flag = true;
-   //             const count = this.children.count;
-   //             for (let i = 0; i < count; i++) {
-
-   //                const children = this.children.buffer[i];
-   //                const gfx = children.AddToGraphicsBuffer(this.sceneIdx, vbUse, vbidx);
-
-   //                if (flag) { // for fisrt time create new vertex buffer for the text, after for any other option, use the same text vertex buffer.
-   //                   vbUse[1] = GL_VB.SPECIFIC;
-   //                   vbidx[1] = gfx[1].vb.idx;
-
-   //                   _popUpGfx.secondary_popups.Add({ // Add the text vertex buffer
-   //                      isActive: true,
-   //                      progidx: gfx[1].prog.idx,
-   //                      vbidx: gfx[1].vb.idx,
-   //                   });
-
-   //                   GlSetVertexBufferPrivate(gfx[1].prog.idx, gfx[1].vb.idx);
-
-   //                   flag = false;
-   //                }
-   //             }
-   //          }
-
-   //          RenderQueueGet().UpdateActiveQueue();
-
-   //          return this.gfx;
-   //       }
-   //       else { // Use an inactive vertex buffer
-
-   //          this.gfx = super.AddToGraphicsBuffer(this.sceneIdx, GL_VB.SPECIFIC, popUpGfx.vbidx);
-   //          popUpGfx.isActive = true;
-
-   //          if (this.children.count) {
-
-   //             const textMesh = this.children.buffer[0].children.buffer[0];
-   //             const optionsGfx = _popUpGfx.secondary_popups.GetInactive(textMesh.sid);
-   //             optionsGfx.isActive = true;
-
-   //             // On a new secondary popup, we allready have the new vertex buffer for the rect area, but we want a new vertex buffer for it's text
-   //             const vbUse = [GL_VB.SPECIFIC, GL_VB.SPECIFIC]; // [0]: For the rect area of the 'Widget_Label_Text_Mesh_Menu_Options', [1]: for the text
-   //             const vbidx = [this.gfx.vb.idx, optionsGfx.vbidx] // [0]: Use the same vb with popup since their sid's match. 
-
-   //             const count = this.children.count;
-   //             for (let i = 0; i < count; i++) {
-
-   //                const children = this.children.buffer[i];
-   //                children.AddToGraphicsBuffer(this.sceneIdx, vbUse, vbidx);
-   //             }
-   //          }
-
-   //          this.Set_graphics_vertex_buffer_render(true);
-   //          RenderQueueGet().UpdateActiveQueue();
-
-   //          return this.gfx;
-   //       }
-   //    }
-
-   // }
 
    ActivatePopup() {
 
-      this.Set_graphics_vertex_buffer_render(true);
+      // this.AddToGfx();
+      Gfx_activate(this);
+
       this.isActive = true;
    }
 
@@ -274,7 +115,7 @@ class Widget_PopUp extends Section {
 
       //    if(mesh){
 
-      //       Listener_remove_events_all(LISTEN_EVENT_TYPES.CLICK, mesh.listeners);
+      //       Listener_remove_events_all(LISTEN_EVENT_TYPES.CLICK_DOWN, mesh.listeners);
       //       Listener_hover_remove_by_idx(mesh.listen_hover_idx);
             
       //       GlResetVertexBuffer(mesh.gfx, 1);
@@ -285,8 +126,7 @@ class Widget_PopUp extends Section {
 
       // Recursive_deactivate_secondary_popups(this);
 
-      GlResetVertexBuffer(this.gfx, 1);
-      this.Set_graphics_vertex_buffer_render(false);
+      Gfx_deactivate(this); // Recursively deactivates the private buffers of popup and all its options 
 
       this.RemoveChildren(); // Remove from the childrens buffer.
 
@@ -321,61 +161,74 @@ class Widget_PopUp extends Section {
 }
 
 let _popup = null;
-// Initialize
-export function Initializer_popup_initialization(scene){
 
-   _popup = new Widget_PopUp([200, 300, 0], [100,100], GREY2);
-   scene.AddMesh(_popup);
+// Initialize
+export function Initializer_popup_initialization(){
+
+   _popup = new Widget_PopUp([200, 300, 0], [35,50], TRANSPARENCY(GREY2, .6));
+
+   const gfx_pool = Gfx_get_pool();
+   gfx_pool.RequestPrivateGfxCtx(_popup, GFX_CTX_FLAGS.INACTIVE | GFX_CTX_FLAGS.PRIVATE);
+
    _popup.DeactivatePopup();
 }
 
-function Recursive_deactivate_secondary_popups(_mesh) {
+/** DO NOT DELETE */
+// function Recursive_deactivate_secondary_popups(_mesh) {
 
-   const children = _mesh.children;
+//    const children = _mesh.children;
    
-   for (let i = 0; i < children.count; i++) {
+//    for (let i = 0; i < children.count; i++) {
       
-      const mesh = children.buffer[i];
-      if (mesh){
+//       const mesh = children.buffer[i];
+//       if (mesh){
 
-         if (mesh.children.count)
-            Recursive_deactivate_secondary_popups(mesh)
+//          if (mesh.children.count)
+//             Recursive_deactivate_secondary_popups(mesh)
    
-         GlResetVertexBuffer(mesh.gfx, 1);
-         _popUpGfx.secondary_popups.Deactivate(mesh.gfx.prog.idx, mesh.gfx.vb.idx);
+//          GlResetVertexBuffer(mesh.gfx);
+//          _popUpGfx.secondary_popups.Deactivate(mesh.gfx.prog.idx, mesh.gfx.vb.idx);
 
-         // console.log('Reseting. progidx: ', mesh.gfx.prog.idx, ' vbidx', mesh.gfx.vb.idx)
-      }
-   }
-}
+//       }
+//    }
+// }
 
 /**
  * TODO: SEE ## Widget_popup_handler_onclick_event. 
  */
 export function Widget_popup_handler_onclick_event(clicked_mesh, clickedButtonId) {
 
+   const popup = _popup;
+
    if (clickedButtonId === MOUSE.BTN_ID.RIGHT) {
 
-      _popup.ActivatePopup();
-
+      if(popup.isActive) popup.DeactivatePopup()
+      
       const clickpos = MouseGetPos();
-      const popuppos = Helpers_calc_bottom_right_pos(clickpos, _popup.geom.dim);
-      CopyArr2(_popup.geom.pos, popuppos);
+      const popuppos = Helpers_calc_bottom_right_pos(clickpos, popup.geom.dim);
+      CopyArr2(popup.geom.pos, popuppos);
 
-      // const optionsMenu = clicked_mesh.menu_options.Clbk(clicked_mesh, pos);
-      const optionsMenu = Menu_options_create(clicked_mesh, _popup.geom.pos, _popup.gfx.prog.idx, _popup.gfx.vb.idx);
-      _popup.menu_options_idx = clicked_mesh.menu_options_idx;
-      console.log(optionsMenu)
+      
+      const optionsMenu = Menu_options_create(clicked_mesh, popup.geom.pos, popup.gfx.prog.idx, popup.gfx.vb.idx);
+      const menu_section = optionsMenu.section;
+      popup.menu_options_idx = clicked_mesh.menu_options_idx;
+      
+      Request_private_gfx_ctx(popup, GFX_CTX_FLAGS.PRIVATE | GFX_CTX_FLAGS.INACTIVE, 0, 0)
+      popup.UpdatePosXY()
+      popup.AddItem(menu_section);
+      
+      popup.ActivatePopup();
+      // popup.Calc(SECTION.ITEM_FIT);
+      popup.Recalc(SECTION.ITEM_FIT);
+      popup.UpdateGfx(popup, popup.sceneIdx);
+      // popup.UpdateGfxRecursive(popup, popup.sceneIdx);
 
-      _popup.AddItem(optionsMenu.section);
-      _popup.Recalc(SECTION.ITEM_FIT);
-
-      _popup.isActive = true;
+      
 
       return;
 
-   }// END of if (LEFT CLICK)
-   else if (_popup) {
+   }// IF (LEFT CLICK || MIDDLE CLICK)
+   else if (popup) {
 
       if (clicked_mesh) { // Case clicked mesh does not belong to popup or its options
 
@@ -389,7 +242,7 @@ export function Widget_popup_handler_onclick_event(clicked_mesh, clickedButtonId
                   parent.DeactivateSecondaryPopups(); // If options have been clicked, then deactivate and re-construct the secondary options
          }
          else{ // If it does not have
-            _popup.DeactivatePopup(); // Else left-middle mouse button on any other mesh(exept popup menu or options)
+            popup.DeactivatePopup(); // Else left-middle mouse button on any other mesh(exept popup menu or options)
          }
       }
    }

@@ -83,7 +83,7 @@ export class Widget_Menu_Bar extends Mesh{
 
       this.AddChild(btn);
       
-      btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK, btn.OnClick, btn);
+      btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, btn.OnClick, btn);
    }
 
    Destroy(target){
@@ -91,15 +91,15 @@ export class Widget_Menu_Bar extends Mesh{
       console.log('DESTROY!!!')
    }
 
-   CreateGfxCtx(sceneIdx) {
+   SelectGfxCtx(sceneIdx) {
 
       const gfx = []
-      gfx[0] = super.CreateGfxCtx(sceneIdx);
+      gfx[0] = super.SelectGfxCtx(sceneIdx);
 
       for(let i=0; i<this.children.count; i++){
 
          const child = this.children.buffer[i];
-         child.CreateGfxCtx(this.sceneIdx);
+         child.SelectGfxCtx(this.sceneIdx);
       }
 
       return gfx;

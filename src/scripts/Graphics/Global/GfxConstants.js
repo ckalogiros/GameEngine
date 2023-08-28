@@ -22,6 +22,17 @@ const GL = {
     // ACTIVE_TEXTURE_ID: INT_NULL, // The current bound texture index 
 };
 
+
+_cnt = 0x1;
+const GFX_CTX_FLAGS = {
+
+   PRIVATE: _cnt<<=0x1,
+   ACTIVE: _cnt<<=0x1,
+   INACTIVE: _cnt<<=0x1,
+} 
+
+
+
 // SID: Shader Type ID, for creating different _glPrograms with 
 // different vertex and fragment shaders bbbased uppon the input attribbutes, input uniforms and other properties.
 // Shader creation flags 

@@ -2,7 +2,7 @@
 import { OnMouseMove_Android, OnTouchStart, OnTouchEnd, OnTouchCancel, OnTouchMove } from "./MouseEvents.js";
 import { OnMouseMove, OnMouseDown, OnMouseUp, OnMouseOut, OnMouseWheel } from "../Controls/Input/Mouse.js";
 import { OnKeyDown, OnKeyUp } from "../Controls/Input/Keys.js";
-import { Listener_dispatch_event } from "./EventListeners.js";
+import { Listener_dispatch_check_hover_event, Listener_dispatch_event } from "./EventListeners.js";
 
 
 
@@ -21,9 +21,9 @@ export function RegisterEvent(eventType, params) {
         type: eventType,
         params: params,
     };
-    if(params.mesh)
+    // if(params.mesh)
+    // console.log(evtsIdx, eventType, params.mesh.id)
     // console.log(evtsIdx, eventType, params.mesh.name)
-    console.log(evtsIdx, eventType, params.mesh.id)
     // console.log(evtsIdx, params.mesh.name)
 }
 
@@ -32,40 +32,22 @@ export function HandleEvents() {
     let i = 0;
     while (i < evtsIdx) {
 
-        // evtsIdx--;
         const e = events[i];
 
-        if (e.type === 'hover') {
+        if (e.type === 'mouse-move') {
             // console.debug('hover: ', e.params.mesh.id, ' | prev hover:', STATE.mesh.hoveredId);
+            // console.debug('hover: ', STATE.mesh.hoveredId);
 
-            // // Unhover any previous hovered
-            //     STATE.mesh.hovered.SetDefaultZindex();
+            Listener_dispatch_check_hover_event();e
 
-            if (e.params.mesh.StateCheck(MESH_STATE.HAS_HOVER_COLOR)){
-                e.params.mesh.SetColor(GREY6);
-                e.params.mesh.StateEnable(MESH_STATE.HOVER_COLOR_ENABLED);
-            }
-            /**
-             * TODO: Set the hovered mesh to be darwn on top(last in vertexBuffer or in render queue)
-             * 0. Check to see if overlap (2)
-             * 1. If the hovered mesh is in different vertexBuffer than the previous hovered mesh,
-             *      change the order of the render queue, if it is drawn before. 
-             * 2. Else if the hovered mesh is in the same vertexBuffer than the previous hovered mesh, 
-             *      change the order inside the vertexBuuffer, if is drawn before. 
-             */
-
-            // e.params.mesh.BringToFront(10);
-            // if(e.params.mesh.StateCheck(MESH_STATE.IS_FAKE_HOVER)) return;
-            STATE.mesh.SetHovered(e.params.mesh);
-            e.params.mesh.StateEnable(MESH_STATE.IN_HOVER); // Set mesh state hovered to true
         }
 
         else if (e.type === 'unhover') {
             // console.debug('unhover: ', e.params.mesh.id)
 
-            if (e.params.mesh.StateCheck(MESH_STATE.HOVER_COLOR_ENABLED)){
+            if (e.params.mesh.StateCheck(MESH_STATE.IN_HOVER_COLOR)){
                 e.params.mesh.SetDefaultColor();
-                e.params.mesh.StateDisable(MESH_STATE.HOVER_COLOR_ENABLED);
+                e.params.mesh.StateDisable(MESH_STATE.IN_HOVER_COLOR);
             }
             
             e.params.mesh.StateDisable(MESH_STATE.IN_HOVER); // Set false
@@ -75,12 +57,7 @@ export function HandleEvents() {
         else if (e.type === 'mouse-click-down') {
 
             STATE.mouse.activeClickedButtonId = e.params.mouseButton;
-
-            // if(e.params.mesh.StateCheck(MESH_STATE.HAS_POPUP)){
-
-                // Widget_popup_deactivate();
-            // }
-            Listener_dispatch_event(LISTEN_EVENT_TYPES.CLICK, e.params.mouseButton);
+            Listener_dispatch_event(LISTEN_EVENT_TYPES_INDEX.CLICK, e.params.mouseButton);
         }
 
         else if (e.type === 'mouse-click-up') {
@@ -95,7 +72,6 @@ export function HandleEvents() {
             }
             if (STATE.mesh.grabed) {
                 if (STATE.mesh.grabed.StateCheck(MESH_STATE.IN_GRAB)) {
-                    console.log('mouse-click-up mesh Ungrabed: ', STATE.mesh.grabed.name)
                     STATE.mesh.grabed.StateDisable(MESH_STATE.IN_GRAB);
                     STATE.mesh.SetGrabed(null)
                 }
@@ -143,43 +119,34 @@ export function HandleEvents() {
 
 export function Events_handle_immidiate(e){
 
+    /**
+     * TODO: Set the hovered mesh to be darwn on top(last in vertexBuffer or in render queue)
+     * 0. Check to see if overlap (2)
+     * 1. If the hovered mesh is in different vertexBuffer than the previous hovered mesh,
+     *      change the order of the render queue, if it is drawn before. 
+     * 2. Else if the hovered mesh is in the same vertexBuffer than the previous hovered mesh, 
+     *      change the order inside the vertexBuuffer, if is drawn before. 
+     */
     if (e.type === 'hover') {
-        console.debug('hover: ', e.params.mesh.name);
-        // console.debug('hover: ', e.params.mesh.id, ' | prev hover:', STATE.mesh.hoveredId);
+        // console.debug('hover: ', e.params.mesh.name);
 
         // Apply Hover Color
-        if (e.params.mesh.StateCheck(MESH_STATE.HAS_HOVER_COLOR)){
+        if (e.params.mesh.StateCheck(MESH_STATE.IS_HOVER_COLORABLE)){
             e.params.mesh.SetColor(WHITE);
-            e.params.mesh.StateEnable(MESH_STATE.HOVER_COLOR_ENABLED);
+            e.params.mesh.StateEnable(MESH_STATE.IN_HOVER_COLOR);
         }
-        /**
-         * TODO: Set the hovered mesh to be darwn on top(last in vertexBuffer or in render queue)
-         * 0. Check to see if overlap (2)
-         * 1. If the hovered mesh is in different vertexBuffer than the previous hovered mesh,
-         *      change the order of the render queue, if it is drawn before. 
-         * 2. Else if the hovered mesh is in the same vertexBuffer than the previous hovered mesh, 
-         *      change the order inside the vertexBuuffer, if is drawn before. 
-         */
 
-        // e.params.mesh.BringToFront(10);
-        // if(e.params.mesh.StateCheck(MESH_STATE.IS_FAKE_HOVER)) return;
         STATE.mesh.SetHovered(e.params.mesh);
         e.params.mesh.StateEnable(MESH_STATE.IN_HOVER); // Set mesh state hovered to true
-
-        Listener_dispatch_event(LISTEN_EVENT_TYPES.HOVER, e.params.mesh);
     }
 
     else if (e.type === 'unhover') {
         // console.debug('unhover: ', e.params.mesh.id)
 
-        if (e.params.mesh.StateCheck(MESH_STATE.HOVER_COLOR_ENABLED)){
+        if (e.params.mesh.StateCheck(MESH_STATE.IN_HOVER_COLOR)){
             e.params.mesh.SetDefaultColor();
-            e.params.mesh.StateDisable(MESH_STATE.HOVER_COLOR_ENABLED);
+            e.params.mesh.StateDisable(MESH_STATE.IN_HOVER_COLOR);
         }
-
-        // if(e.params.mesh.type & MESH_TYPES_DBG.WIDGET_POP_UP){
-        //     e.params.mesh.DeactivateSecondaryPopups();
-        // }
         
         e.params.mesh.StateDisable(MESH_STATE.IN_HOVER); // Set false
         STATE.mesh.SetHovered(null);

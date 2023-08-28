@@ -1,7 +1,8 @@
 "use strict";
 
-import { PrintAttributes, PrintIndexBufferAll, PrintVertexBufferAll, PrintVertexBufferAllPretty } from "../../../Graphics/Z_Debug/GfxDebug.js";
-import { Listener_debug_print_all, Listener_hover_Print, ListenersGetListenersBuffer } from "../../Events/EventListeners.js";
+import { PrintAttributes, PrintIndexBufferAll, PrintVertexBufferDataAndNames, PrintVertexDataAll } from "../../../Graphics/Z_Debug/GfxDebug.js";
+import { Listener_debug_print_all, Listener_hover_Print } from "../../Events/EventListeners.js";
+import { Gfx_pool_print } from "../../MenuOptions/MenuOptionsBuilder.js";
 import { RenderQueueGet } from "../../Renderers/Renderer/RenderQueue.js";
 import { ScenesPrintAllMeshes } from "../../Scenes.js";
 import { FpsGet } from "../../Timers/Time.js";
@@ -23,7 +24,15 @@ export const DEBUG_PRINT_KEYS = [
       discr: 'PrintVertexBufferAll()',
       func: (e)=>{
          console.log(e.key);
-         PrintVertexBufferAll();
+         PrintVertexDataAll();
+      },
+   },
+   {
+      key: 'X',
+      discr: 'PrintVertexBufferDataAndNames()',
+      func: (e)=>{
+         console.log(e.key);
+         PrintVertexBufferDataAndNames();
       },
    },
    {
@@ -75,10 +84,9 @@ export const DEBUG_PRINT_KEYS = [
    },
    {
       key: 'e',
-      discr: 'ListenersGetListenersBuffer',
+      discr: 'Listener_debug_print_all',
       func: (e)=>{
-         const listeners = ListenersGetListenersBuffer();
-         listeners.PrintAll();
+         Listener_debug_print_all()
       },
    },
    {
@@ -110,6 +118,13 @@ export const DEBUG_PRINT_KEYS = [
       discr: 'Listener_hover_Print',
       func: (e)=>{
          Listener_hover_Print();
+      },
+   },
+   {
+      key: 'g',
+      discr: 'Gfx_pool_print',
+      func: (e)=>{
+         Gfx_pool_print();
       },
    },
 
@@ -230,7 +245,7 @@ export function OnKeyDown(e){
    e.stopPropagation();
    // e.preventDefault();
 
-   // console.log(e.key)
+   console.log(e.key)
    // console.log('---------- Print Render Queue ----------')
    // console.log('---------- Print Active Render Queue ----------')
    // console.log('---------- Print FPS ----------')
@@ -245,17 +260,19 @@ export function OnKeyDown(e){
 
       case ('p'):{ DEBUG_PRINT_KEYS[0].func(e); break; }
       case ('x'):{ DEBUG_PRINT_KEYS[1].func(e); break; }
-      case ('c'):{ DEBUG_PRINT_KEYS[2].func(e); break; }
-      case ('z'):{ DEBUG_PRINT_KEYS[3].func(e); break; }
-      case ('r'):{ DEBUG_PRINT_KEYS[4].func(e); break; }
-      case ('R'):{ DEBUG_PRINT_KEYS[5].func(e); break; }
-      case ('f'):{ DEBUG_PRINT_KEYS[6].func(e); break; }
-      case ('i'):{ DEBUG_PRINT_KEYS[7].func(e); break; }
-      case ('e'):{ DEBUG_PRINT_KEYS[8].func(e); break; }
-      case ('E'):{ DEBUG_PRINT_KEYS[9].func(e); break; }
-      case ('s'):{ DEBUG_PRINT_KEYS[10].func(e); break; }
-      case ('S'):{ DEBUG_PRINT_KEYS[11].func(e); break; }
-      case ('L'):{ DEBUG_PRINT_KEYS[12].func(e); break; }
+      case ('X'):{ DEBUG_PRINT_KEYS[2].func(e); break; }
+      case ('c'):{ DEBUG_PRINT_KEYS[3].func(e); break; }
+      case ('z'):{ DEBUG_PRINT_KEYS[4].func(e); break; }
+      case ('r'):{ DEBUG_PRINT_KEYS[5].func(e); break; }
+      case ('R'):{ DEBUG_PRINT_KEYS[6].func(e); break; }
+      case ('f'):{ DEBUG_PRINT_KEYS[7].func(e); break; }
+      case ('i'):{ DEBUG_PRINT_KEYS[8].func(e); break; }
+      case ('e'):{ DEBUG_PRINT_KEYS[9].func(e); break; }
+      case ('E'):{ DEBUG_PRINT_KEYS[10].func(e); break; }
+      case ('s'):{ DEBUG_PRINT_KEYS[11].func(e); break; }
+      case ('S'):{ DEBUG_PRINT_KEYS[12].func(e); break; }
+      case ('L'):{ DEBUG_PRINT_KEYS[13].func(e); break; }
+      case ('g'):{ DEBUG_PRINT_KEYS[14].func(e); break; }
 
       // case (DEBUG_PRINT_KEYS.p.key):{ DEBUG_PRINT_KEYS.p.func(e); break; }
       // case (DEBUG_PRINT_KEYS.x.key):{ DEBUG_PRINT_KEYS.x.func(e); break; }

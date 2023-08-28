@@ -81,7 +81,7 @@ export class Widget_Label_Text_Mesh extends Mesh {
         super(areageom, areamat);
 
         textgeom.pos[0] += pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
-        // textgeom.pos[1] += pad[1]; // In essence we set as the left (start of text label) the label area and not the left of text.
+        textgeom.pos[1] += pad[1]; // In essence we set as the left (start of text label) the label area and not the left of text.
         textgeom.pos[2] += 1; // In essence we set as the left (start of text label) the label area and not the left of text.
         
         this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
@@ -89,6 +89,7 @@ export class Widget_Label_Text_Mesh extends Mesh {
 
         const textMesh = new Text_Mesh(textgeom, textmat);
         textMesh.SetName();
+        textMesh.SetSceneIdx(this.sceneIdx);
 
         this.type |= MESH_TYPES_DBG.WIDGET_TEXT_LABEL | textgeom.type | textmat.type | areageom.type | areamat.type;
         this.SetName();
@@ -99,11 +100,11 @@ export class Widget_Label_Text_Mesh extends Mesh {
     UpdateText(text) {
 
         const textMesh = this.children.buffer[0];
-        textMesh.mat.text = text; /** CAUTION!: Be sure to initialize the 'textMesh.mat.numChars' 
+        textMesh.mat.text = text; /** CAUTION!: Be sure to initialize the 'textMesh.mat.num_faces' 
                                         with the longest text so the vertexBuffers have enough 
                                         space to store the longest text */
 
-        if ((textMesh.type & MESH_TYPES_DBG.TEXT_MESH) === 0) return;
+        if ((textMesh.type & MESH_TYPES_DBG.TEXT_MESH) === 0) return; // Guard against none text meshes
 
         const geom = textMesh.geom;
         const gfx = textMesh.gfx;
@@ -112,7 +113,7 @@ export class Widget_Label_Text_Mesh extends Mesh {
         let gfxInfo = new GfxInfoMesh(gfx);
 
         const textLen = text.length;
-        const len = geom.numChars > textLen ? geom.numChars : (textLen > geom.numChars ? geom.numChars : textLen);
+        const len = geom.num_faces > textLen ? geom.num_faces : (textLen > geom.num_faces ? geom.num_faces : textLen);
 
         // const len = textLen;
         for (let i = 0; i < len; i++) {
@@ -150,7 +151,7 @@ export class Widget_Label_Text_Mesh extends Mesh {
 
     //////////////////////////////////////////////////////////////
 
-    CreateGfxCtx(sceneIdx, useSpecificVertexBuffer = GL_VB.ANY, vertexBufferIdx = NO_SPECIFIC_GL_BUFFER) {
+    SelectGfxCtx(sceneIdx, useSpecificVertexBuffer = GL_VB.ANY, vertexBufferIdx = NO_SPECIFIC_GL_BUFFER) {
 
         let vbidx1 = null, vbidx2 = null;
         let vbUse1 = null, vbUse2 = null;
@@ -168,10 +169,10 @@ export class Widget_Label_Text_Mesh extends Mesh {
         }
 
         const gfx = []
-        gfx[0] = super.CreateGfxCtx(sceneIdx, vbUse1, vbidx1);
+        gfx[0] = super.SelectGfxCtx(sceneIdx, vbUse1, vbidx1);
         for (let i = 0; i < this.children.count; i++) {
             if(this.children.buffer[i])
-                gfx[i + 1] = this.children.buffer[i].CreateGfxCtx(sceneIdx, vbUse2, vbidx2);
+                gfx[i + 1] = this.children.buffer[i].SelectGfxCtx(sceneIdx, vbUse2, vbidx2);
         }
 
         return gfx;
@@ -179,7 +180,6 @@ export class Widget_Label_Text_Mesh extends Mesh {
     }
 	
 	AddToGfx(){
-
         
         super.AddToGfx()
         for(let i=0; i<this.children.active_count; i++){
@@ -205,7 +205,7 @@ export class Widget_Label_Text_Mesh extends Mesh {
         if (this.children.count) {
             const params = {
                 z: z + 1, // +1: more close than the label area.
-                numFaces: this.children.buffer[0].geom.numChars, // A Label_Text class guarantees the first child (buffer[0]) to be the first character.
+                numFaces: this.children.buffer[0].geom.num_faces, // A Label_Text class guarantees the first child (buffer[0]) to be the first character.
             }
             Recursive_gfx_operations(this, Bring_to_front, params)
         }
@@ -217,7 +217,7 @@ export class Widget_Label_Text_Mesh extends Mesh {
 
         if (this.children.count) {
             const params = {
-                numFaces: this.children.buffer[0].geom.numChars, // A Label_Text class guarantees the first child (buffer[0]) to be the first character.
+                numFaces: this.children.buffer[0].geom.num_faces, // A Label_Text class guarantees the first child (buffer[0]) to be the first character.
             }
             Recursive_gfx_operations(this, Set_default_zindex, params)
         }
@@ -275,10 +275,10 @@ export class Widget_Label_Dynamic_Text extends Widget_Label_Text_Mesh {
         this.SetName();
     }
 
-    CreateGfxCtx(sceneIdx) {
+    SelectGfxCtx(sceneIdx) {
 
         /** Add the constant text */
-        super.CreateGfxCtx(sceneIdx);
+        super.SelectGfxCtx(sceneIdx);
 
         /** Add the dynamic text to the graphics buffer */
         const dynamicText = this.children.buffer[0];
@@ -291,14 +291,7 @@ export class Widget_Label_Dynamic_Text extends Widget_Label_Text_Mesh {
             prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
         }
 
-        // dynamicText.geom.AddToGraphicsBuffer(dynamicText.sid, dynamicText.gfx, dynamicText.name);
-        // dynamicText.mat.AddToGraphicsBuffer(dynamicText.sid, dynamicText.gfx);
-
         return this.gfx;
-        // return [
-        //     this.gfx,
-        //     dynamicText.gfx,
-        // ];
     }
 
     AddToGfx(){
@@ -338,7 +331,7 @@ export class Widget_Label_Dynamic_Text extends Widget_Label_Text_Mesh {
         let gfxInfo = new GfxInfoMesh(gfx);
 
         const textLen = textFpsAvg.length;
-        const len = geom.numChars > textLen ? geom.numChars : (textLen > geom.numChars ? geom.numChars : textLen);
+        const len = geom.num_faces > textLen ? geom.num_faces : (textLen > geom.num_faces ? geom.num_faces : textLen);
 
         // const len = textLen;
         for (let i = 0; i < len; i++) {
@@ -401,8 +394,13 @@ export class Widget_Label_Text_Mesh_Menu_Options extends Widget_Label_Text_Mesh 
                 EventClbk(target_params);
                 console.log('OnClick callback OUT. meshId ', mesh.id)
             }
+           
+            return true;
         }
+        
+        return false;
     }
+    
 
 }
 

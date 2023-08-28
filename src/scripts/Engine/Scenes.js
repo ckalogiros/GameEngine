@@ -2,8 +2,8 @@
 import { GlRotateXY3D } from '../Graphics/Buffers/GlBufferOps.js';
 import { AnimationsGet } from './Animations/Animations.js';
 import { MouseGetPosDif } from './Controls/Input/Mouse.js';
-import { Int8Buffer, M_Buffer } from './Core/Buffers.js';
-import { Listener_hover_get, ListenersGetListenersBuffer } from './Events/EventListeners.js';
+import { M_Buffer } from './Core/Buffers.js';
+import { Listener_hover_get } from './Events/EventListeners.js';
 import { HandleEvents, RegisterEvent } from './Events/Events.js';
 import { __pt5, __pt6 } from './Timers/PerformanceTimers.js';
 import { FpsGet } from './Timers/Time.js';
@@ -40,7 +40,7 @@ export class Scene {
     OnUpdate() {
 
         const animations = AnimationsGet();
-        const listeners = ListenersGetListenersBuffer();
+        // const listeners = ListenersGetListenersBuffer();
         const listener_hover = Listener_hover_get();
 
         // // Move mesh if it's movable   
@@ -78,10 +78,7 @@ export class Scene {
 
 
         /** Run Listeners */
-        _pt6.Start(); listener_hover.Run(); _pt6.Stop();
-        if(DEBUG.OLD_HOVER_LISTENER_IS_ENABLED){
-            _pt5.Start(); listeners.Run(); _pt5.Stop();
-        }
+        // _pt6.Start(); listener_hover.Run(); _pt6.Stop();
 
         /** Run Animations */
         animations.Run();
@@ -98,7 +95,7 @@ export class Scene {
         }
 
         // Here we add the mesh into the graphics buffers
-        const gfx = mesh.CreateGfxCtx(this.sceneIdx);
+        const gfx = mesh.SelectGfxCtx(this.sceneIdx);
         this.StoreGfxInfo(gfx);
 
         this.StoreMesh(mesh);
@@ -243,7 +240,7 @@ export function Scenes_get_children(idx) {
 
     return _scenes.GetChildren(idx);
 }
-
+export function Scenes_get_count(){ return _scenes.active_count; }
 
 
 /**

@@ -61,6 +61,7 @@ class VertexBuffer {
 
     AddGeometry(sid, pos, dim, time, shaderInfo, numFaces, start, count) 
     {
+
         // const start = this.count
         if (sid.attr & SID.ATTR.POS2) { // Add Position, if the program has such an attribute 
             GlOps.VbSetAttribPos(this, start + shaderInfo.attributes.offset.pos,
@@ -199,6 +200,7 @@ class VertexBuffer {
     Reset(){ 
         this.count  = 0;
         this.vCount = 0;
+        this.mesh_count = 0;
         this.needsUpdate = true;
     }
     // Removing count num from the end of the vertexBuffer
@@ -399,6 +401,7 @@ export function GlGenerateContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffe
         
         // Add the new vertexBuffer to render queue
         RenderQueueGet().Add(progIdx, vbIdx, vb.show);
+        
     }
     else {
 
@@ -417,7 +420,6 @@ export function GlGenerateContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffe
     // Cash values
     const vertsPerRect = progs[progIdx].shaderInfo.verticesPerRect;
     const attribsPerVertex = progs[progIdx].shaderInfo.attribsPerVertex;
-    // const start = vb.count; // Add meshes to the vb continuously
     const start = numFaces * vb.mesh_count * vertsPerRect * attribsPerVertex; // Add meshes to the vb continuously
     vb.mesh_count += mesh_count;
     const count = numFaces * vertsPerRect * attribsPerVertex; // Total attributes of the mesh
@@ -476,6 +478,10 @@ export function GlAddGeometry(sid, pos, dim, time, gfx, meshName, numFaces) {
     // Reallocate vertex buffer if it has no more space
     const meshSize = gfx.attribsPerVertex * gfx.vertsPerRect * numFaces;
     if(vb.vCount*gfx.attribsPerVertex + meshSize >= vb.size) vb.Realloc();
+
+    // if(gfx.prog.idx===0 && gfx.vb.idx===0)
+    // if(gfx.prog.idx===1 && gfx.vb.idx===2)
+    // console.log(gfx.prog.idx, gfx.vb.idx, gfx.vb.start,gfx.vb.count, meshName)
 
     vb.AddGeometry(sid, pos, dim, time, prog.shaderInfo, numFaces, gfx.vb.start, gfx.vb.count);
     prog.isActive = true; // Sets a program to 'active', only if there are meshes in the program's vb
@@ -817,7 +823,7 @@ export function GlResetVertexBuffer(gfx){
     vb.Reset(); 
 }
 export function GlResetIndexBuffer(gfx){
-    const ib = GlGetVB(gfx.prog.idx, gfx.ib.idx);
+    const ib = GlGetIB(gfx.prog.idx, gfx.ib.idx);
     ib.Reset(); 
 }
 

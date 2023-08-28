@@ -102,7 +102,7 @@ const mouse = {
          Area(){
             this.x = mouse.click.up.x - mouse.click.down.x;
             this.y = mouse.click.up.y - mouse.click.down.y;
-            console.log(this);
+            // console.log(this);
          }
       },
    },
@@ -180,6 +180,10 @@ export function OnMouseMove(e) {
    mouse.pos.xdiff = mouse.pos.x - mouse.pos.xprev;
    mouse.pos.ydiff = -(mouse.pos.y - mouse.pos.yprev); // Reverse the direction(negative for down dir and positive for up dir) 
 
+   // const params = {
+   //    mouseButton: e.which-1
+   // };
+   RegisterEvent('mouse-move', null);
 }
 
 export function OnMouseOut(e){
@@ -216,7 +220,7 @@ export function OnMouseDown(e) {
       mouseButton: e.which-1
    };
    
-   RegisterEvent('mouse-click-down', params)
+   RegisterEvent('mouse-click-down', params);
    // console.log(`MOUSE pos: ${e.x} ${e.y}`)
 }
 
