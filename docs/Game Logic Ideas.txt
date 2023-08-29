@@ -1,3 +1,35 @@
+
+
+Recursive functions
+/*
+
+  1. Below the functionality takes place before the childrens loop.
+    That means the traversion happens from inside out 
+    (bottom to top in terms of tree structure)
+
+  /* FUNCTIONALITY IMPLEMENTATION */
+  
+  function Check_hover_recursive(mesh) {
+
+   for (let i = 0; i < mesh.children.count; i++) {
+
+      if (mesh.children.active_count) {
+
+         const child = mesh.children.buffer[i];
+
+         if (child)
+            Check_hover_recursive(child);
+      }
+    }
+
+  }
+  
+*/
+
+
+
+
+
 Convert to Android App
 https://stackoverflow.com/questions/59389573/how-can-i-convert-my-javascript-web-application-into-android-application
 

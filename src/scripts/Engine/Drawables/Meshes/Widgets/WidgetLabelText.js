@@ -73,8 +73,6 @@ export class Widget_Label_Text_Mesh extends Mesh {
         const textmat = new FontMaterial(textCol, font, text, [bold, sdfouter])
         const textgeom = new Geometry2D_Text(pos, fontSize, scale, text, font);
 
-        // pad[1] *= textmat.numChars/2;
-
         const areaMetrics = CalculateArea(text, textgeom.dim, pos, pad)
         const areageom = new Geometry2D(areaMetrics.pos, areaMetrics.dim, scale);
         const areamat = new Material(col)
@@ -86,7 +84,7 @@ export class Widget_Label_Text_Mesh extends Mesh {
         textgeom.pos[2] += 1; // In essence we set as the left (start of text label) the label area and not the left of text.
         
         this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
-        this.SetStyle(style[0], style[1], style[2]);
+        this.SetStyle(style);
 
         const textMesh = new Text_Mesh(textgeom, textmat);
         textMesh.SetName();
@@ -152,30 +150,7 @@ export class Widget_Label_Text_Mesh extends Mesh {
 
     //////////////////////////////////////////////////////////////
 
-    // GenGfx(sceneIdx, useSpecificVertexBuffer = GL_VB.ANY, vertexBufferIdx = NO_SPECIFIC_GL_BUFFER) {
     GenGfx(useSpecificVertexBuffer = GL_VB.ANY) {
-
-        // let vbidx1 = null, vbidx2 = null;
-        // let vbUse1 = null, vbUse2 = null;
-        // if (Array.isArray(vertexBufferIdx)) {
-        //     vbidx1 = vertexBufferIdx[0];
-        //     vbidx2 = vertexBufferIdx[1];
-        //     vbUse1 = useSpecificVertexBuffer[0];
-        //     vbUse2 = useSpecificVertexBuffer[1];
-        // }
-        // else {
-        //     vbidx1 = useSpecificVertexBuffer;
-        //     vbidx2 = useSpecificVertexBuffer;
-        //     vbUse1 = useSpecificVertexBuffer;
-        //     vbUse2 = useSpecificVertexBuffer;
-        // }
-
-        // const gfx = []
-        // gfx[0] = super.GenGfx(sceneIdx, vbUse1, vbidx1);
-        // for (let i = 0; i < this.children.count; i++) {
-        //     if(this.children.buffer[i])
-        //         gfx[i + 1] = this.children.buffer[i].GenGfx(sceneIdx, vbUse2, vbidx2);
-        // }
 
         const gfx = []
         gfx[0] = super.GenGfx();
@@ -191,7 +166,7 @@ export class Widget_Label_Text_Mesh extends Mesh {
 	AddToGfx(){
         
         super.AddToGfx()
-        for(let i=0; i<this.children.active_count; i++){
+        for(let i=0; i<this.children.count; i++){
             
             const child = this.children.buffer[i];
 			const gfxCopy = new GfxInfoMesh(this.children.buffer[0].gfx);
@@ -258,7 +233,7 @@ export class Widget_Label_Text_Mesh extends Mesh {
         }
     }
 
-    Align_post(){ // TODO
+    Align_post(){ // Align and update gfx buffers
 
     }
 

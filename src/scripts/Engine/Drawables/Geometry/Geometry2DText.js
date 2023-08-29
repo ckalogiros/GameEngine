@@ -48,7 +48,7 @@ export class Geometry2D_Text extends Geometry2D {
 
          GlAddGeometry(sid, charPos, this.dim, this.time, gfxCopy, meshName, 1)
          gfxCopy.vb.start += gfxCopy.vb.count;
-         gfxCopy.ib.start += gfxCopy.ib.count; // TODO!!!: should we count the index buffer??? should we re-implement the index buffers also??? IMPORTANT!!!
+         gfxCopy.ib.start += gfxCopy.ib.count; 
          charPos[0] += this.dim[0] * 2;
       }
    }

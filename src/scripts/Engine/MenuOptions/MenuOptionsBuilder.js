@@ -8,6 +8,7 @@ import { Section } from "../Drawables/Meshes/Panel.js";
 import { Widget_Switch_Mesh } from "../Drawables/Meshes/Widgets/WidgetButton.js";
 import { Widget_Label_Text_Mesh_Menu_Options } from "../Drawables/Meshes/Widgets/WidgetLabelText.js";
 import { Slider_connect } from "../Drawables/Meshes/Widgets/WidgetSlider.js";
+import { RenderQueueGet } from "../Renderers/Renderer/RenderQueue.js";
 import { Scenes_get_children } from "../Scenes.js";
 
 
@@ -65,7 +66,7 @@ class Gfx_Pool extends M_Buffer {
 
       this.#ActDeactFromPool(progidx, vbidx, true);
       GfxSetVbRender(progidx, vbidx, true);
-
+      
    }
 
    DeactivateRecursive(mesh) {
@@ -103,7 +104,8 @@ class Gfx_Pool extends M_Buffer {
          this.buffer[idx].isActive = true;
          this.buffer[idx].isPrivate = setPrivate;
 
-         const progidx = this.buffer[i].progidx, vbidx = this.buffer[i].vbidx;
+         const progidx = this.buffer[idx].progidx, 
+               vbidx = this.buffer[idx].vbidx;
          if(setPrivate)
             GlSetVertexBufferPrivate(progidx, vbidx);
       }
@@ -113,29 +115,28 @@ class Gfx_Pool extends M_Buffer {
 
    #StoreGfx(gfx) { //Does not store duplicates
 
-      if (Array.isArray(gfx)) {
+      // if (Array.isArray(gfx)) {
 
-         const gfxlen = gfx.length;
-         for (let i = 0; i < gfxlen; i++) {
+      //    const gfxlen = gfx.length;
+      //    for (let i = 0; i < gfxlen; i++) {
 
-            if (this.#FindGfx(gfx.prog.idx, gfx.vb.idx) === INT_NULL) {
-               const idx = this.#Store(gfx.prog.idx, gfx.vb.idx, gfx.sceneIdx, true, false)
-               return idx;
-            }
-         }
-      }
-      else {
+      //       if (this.#FindGfx(gfx.prog.idx, gfx.vb.idx) === INT_NULL) {
+      //          const idx = this.#Store(gfx.prog.idx, gfx.vb.idx, gfx.sceneIdx, true, false)
+      //          return idx;
+      //       }
+      //    }
+      // }
+      // else {
 
          // this.#Store it, if not stored.
          if (this.#FindGfxNotPrivate(gfx.prog.idx, gfx.vb.idx) === INT_NULL) {
             const idx = this.#Store(gfx.prog.idx, gfx.vb.idx, gfx.sceneIdx, true, false)
             return idx;
          }
-      }
+      // }
    }
 
    #Store(progidx, vbidx, isPrivate, isActive = true) {
-      /** TODO!: Add only vertex buffers with different indexes (but the same program). We do not need duplicates */
 
       const idx = this.Add({
          progidx: progidx,
@@ -288,20 +289,14 @@ export function Gfx_end_session(setPrivate) { return _gfx_pool.SessionEnd(setPri
 export function Gfx_generate_context(sid, sceneIdx, useSpecificVertexBuffer, mesh_count) {
    return _gfx_pool.GenerateGfxCtx(sid, sceneIdx, useSpecificVertexBuffer, mesh_count);
 }
-export function Request_private_gfx_ctx(mesh, glags, progidx, vbidx) {
-   return _gfx_pool.RequestPrivateGfxCtx(mesh, glags, progidx, vbidx);
+export function Request_private_gfx_ctx(mesh, flags, progidx, vbidx) {
+   return _gfx_pool.RequestPrivateGfxCtx(mesh, flags, progidx, vbidx);
 }
 
 /** Activates the gfx buffers recursively for all the children meshes. */
-export function Gfx_activate(mesh) {
-   // console.log('----- Activate -----')
-   _gfx_pool.ActivateRecursive(mesh);
-}
-export function Gfx_deactivate(mesh) {
-   // console.log('----- Deactivate -----')
+export function Gfx_activate(mesh) { _gfx_pool.ActivateRecursive(mesh); }
+export function Gfx_deactivate(mesh) { _gfx_pool.DeactivateRecursive(mesh); }
 
-   _gfx_pool.DeactivateRecursive(mesh);
-}
 
 // export function Gfx_store(gfx) {
 //    _gfx_pool.StoreGfx(gfx);
@@ -364,8 +359,9 @@ export function Menu_options_create(clicked_mesh, pos, progidx, vbidx) {
       const options_menu = _menu_options[clicked_mesh.menu_options_idx];
       const menu_section = options_menu.section;
       // menu_section.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, menu_section.OnClick, menu_section, options_menu.params)
-      // menu_section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-      // menu_section.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+      menu_section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+      menu_section.StateEnable(MESH_STATE.IS_FAKE_HOVER);
+      menu_section.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
       menu_section.SetName('optionsMenu ' + clicked_mesh.menu_options_idx)
 
       _gfx_pool.RequestPrivateGfxCtx(menu_section, GFX_CTX_FLAGS.PRIVATE | GFX_CTX_FLAGS.INACTIVE, progidx, vbidx)
@@ -373,13 +369,13 @@ export function Menu_options_create(clicked_mesh, pos, progidx, vbidx) {
       if (ERROR_NULL(menu_section, 'Mesh\'s index of menu options is invalid. Creating new options menu. Check why the index is invalid '))
          return null; // TODO: Maybe create new options menu
 
-      for (let i = 0; i < menu_section.children.active_count; i++) {
+      for (let i = 0; i < menu_section.children.count; i++) {
 
          const mesh = menu_section.children.buffer[i];
          // Re-Create listeners
          mesh.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, mesh.OnClick, mesh, options_menu.params)
          console.log('Set click event id:', mesh.id)
-         mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+         // mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
          mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
       }
 
@@ -457,7 +453,7 @@ function Menu_options_create_slider_popup_menu_options(clickedMesh, _pos, progid
       }
       else {
          
-         var option = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${mesh.id}`, pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
+         var option = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${mesh.id}`, pos, fontSize, GREY5, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
          ERROR_NULL(option.OnClick); // Make sure the option mesh has an OnClick method
          option.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, option.OnClick, option, null);
          option.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
@@ -514,7 +510,7 @@ function Menu_options_create_slider_popup_menu_options(clickedMesh, _pos, progid
 
    // const idx = _menu_options.push(section)
    const idx = _menu_options.push(menu)
-   clickedMesh.menu_options_idx = idx - 1; // this.#Store the index of the menu options in the owner mesh.
+   clickedMesh.menu_options_idx = idx - 1; // Store the index of the menu options in the owner mesh.
 
    return _menu_options[idx - 1];
 }

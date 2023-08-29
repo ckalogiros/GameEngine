@@ -44,10 +44,11 @@ export class Widget_Text_Mesh extends Text_Mesh {
 		let ypos = pos[1] + dim[1] * 2;
 
 		pos[0] -= dim[0] * this.mat.num_faces / 2 - this.pad[0] / 2;
+		this.geom.pos[0] = pos[0]
 
 		if (flags & ALIGN.VERTICAL) {
 
-			for (let i = 0; i < this.children.active_count; i++) {
+			for (let i = 0; i < this.children.count; i++) {
 
 				const child = this.children.buffer[i];
 				pos[1] = ypos;
@@ -141,7 +142,7 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 	GenGfx() {
 
 		let total_char_count = this.mat.num_faces;
-		for (let i = 0; i < this.children.active_count; i++)
+		for (let i = 0; i < this.children.count; i++)
 			total_char_count += this.children.buffer[i].mat.num_faces;
 
 		// this.gfx = GlGenerateContext(this.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER, total_char_count);
@@ -163,7 +164,7 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 		let gfxCopy = new GfxInfoMesh(this.gfx);
 		gfxCopy.vb.start = start;
 
-		for (let i = 0; i < this.children.active_count; i++) {
+		for (let i = 0; i < this.children.count; i++) {
 
 			const child = this.children.buffer[i];
 			child.gfx = new GfxInfoMesh(gfxCopy);
@@ -175,22 +176,23 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 
 	}
 
-	CreateNewText(maxDynamicTextChars, fontSize, color1, color2, pad, bold) {
+	CreateNewText(maxDynamicTextChars, fontSize, color2, pad, bold) {
 
+		if(!Array.isArray(pad)) console.error; /** DEBUG */
 		this.pad = pad;
 
 		let pos = [0, 0, 0];
 		// Get the last child mesh (suppose to be dynamicText)
 		if (this.children.buffer !== null) {
 
-			const lastChild = (this.children.buffer[this.children.count - 1]);
+			const lastChild = this.children.buffer[this.children.count - 1];
 			ERROR_NULL(lastChild, ' @ Widget_Dynamic_Text_Mesh.CreateNewText(). WidgetText.js');
-
+			console.log(lastChild.geom.pos)
 			// Translate to right after the previous dynamicText.
 			pos = [0, 0, 0];
 			CopyArr3(pos, lastChild.geom.pos); // Copy the dynamic's text mesh pos
 			const prevXdim = ((lastChild.geom.dim[0] * 2 * lastChild.mat.text.length) - lastChild.geom.dim[0]);
-			pos[0] += prevXdim + this.geom.dim[0] + pad;
+			pos[0] += prevXdim + this.geom.dim[0] + pad[0];
 		}
 		else {
 
@@ -504,7 +506,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 function Widget_text_mesh_add_to_gfx_recursive(mesh, gfx) {
 
 
-	for (let i = 0; i < mesh.children.active_count; i++) {
+	for (let i = 0; i < mesh.children.count; i++) {
 
 		const child = mesh.children.buffer[i];
 

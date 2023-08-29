@@ -17,7 +17,7 @@ export class Widget_Menu_Bar extends Mesh{
       super(areageom, areamat);
 
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
-      this.SetStyle(style[0], style[1], style[2]);
+      this.SetStyle(style);
 
    }
 

@@ -2,10 +2,9 @@
 
 import { GlDraw } from "../../Graphics/GlDraw.js";
 import { MouseResetDif, MouseResetWheel } from "../Controls/Input/Mouse.js";
-// import { FpsGet, TimeUpdate, _ta1 } from "../Timer/Time.js";
-import { FpsGet, TimeSample, TimeStart, TimeStop, TimeUpdate } from "../Timers/Time.js";
-import { TimersUpdateGlobalTimer, TimersUpdateTimers } from "../Timers/Timers.js";
-import { TimeIntervalsUpdateAll, TimersUpdateStepTimers } from "../Timers/TimeIntervals.js";
+import { FpsGet, TimeSample, TimeUpdate } from "../Timers/Time.js";
+import { TimersUpdateGlobalTimer } from "../Timers/Timers.js";
+import { TimeIntervalsUpdateAll } from "../Timers/TimeIntervals.js";
 import { __pt1, __pt2, _pt3 } from "../Timers/PerformanceTimers.js";
 
 /**
@@ -95,14 +94,11 @@ export class WebGlRenderer {
          _pt1.Stop();
          
          // TODO!!! Update camera uniform if camera needs update 
-         this.camera.Update(this.gl)
-         _pt2.Start();
-         this.scene.OnUpdate();
-         _pt2.Stop();
+         // this.camera.Update(this.gl)
          
-         tm3.Start();
-         GlDraw(this.gl);
-         tm3.Stop();
+         _pt2.Start(); this.scene.OnUpdate(); _pt2.Stop();
+         
+         tm3.Start(); GlDraw(this.gl); tm3.Stop();
          
          MouseResetDif(.5);
          MouseResetWheel();

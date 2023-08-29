@@ -129,7 +129,8 @@ export function Events_handle_immidiate(e){
 
         // Apply Hover Color
         if (e.params.mesh.StateCheck(MESH_STATE.IS_HOVER_COLORABLE)){
-            e.params.mesh.SetColor(WHITE);
+            e.params.mesh.SetColor(TRANSPARENCY(WHITE, .8));
+            // e.params.mesh.SetColorAlpha(1-e.params.mesh.mat.col[3]+.4);
             e.params.mesh.StateEnable(MESH_STATE.IN_HOVER_COLOR);
         }
 

@@ -1,9 +1,8 @@
 "use strict";
 import { GlRotateXY3D } from '../Graphics/Buffers/GlBufferOps.js';
 import { AnimationsGet } from './Animations/Animations.js';
-import { MouseGetPosDif } from './Controls/Input/Mouse.js';
 import { M_Buffer } from './Core/Buffers.js';
-import { HandleEvents, RegisterEvent } from './Events/Events.js';
+import { HandleEvents } from './Events/Events.js';
 import { __pt5, __pt6 } from './Timers/PerformanceTimers.js';
 import { FpsGet } from './Timers/Time.js';
 
@@ -44,19 +43,16 @@ export class Scene {
         //     mesh.Move(dif.x, -dif.y)
         // }
 
-        /* Update attribute values for every mesh */
+        // /* Update attribute values for every mesh */
         // for (let i = 0; i < this.children.count; i++) {
 
         //     const mesh = this.children.buffer[i];
         //     if(mesh) {
     
-        //         if (mesh.state.mask & MESH_STATE.IN_MOVE) {
-        //             const dif = MouseGetPosDif();
-        //             mesh.MoveXY(dif.x, -dif.y)
-        //         }
-    
-        //         if(this.children.buffer[i] === null)
-        //         console.log()
+        //         // if (mesh.state.mask & MESH_STATE.IN_MOVE) {
+        //         //     const dif = MouseGetPosDif();
+        //         //     mesh.MoveXY(dif.x, -dif.y)
+        //         // }
     
         //         // Rotate
         //         if (mesh.type & MESH_TYPES_DBG.CUBE_GEOMETRY) {
@@ -70,7 +66,7 @@ export class Scene {
         // Update uniform values for gl Program
 
         /** Run Animations */
-        animations.Run();
+        // animations.Run();
 
         /** Handle Events */
         HandleEvents();
@@ -218,22 +214,19 @@ export function Scenes_get_count(){ return _scenes.active_count; }
 /**
  * Debug
  */
-export function ScenesPrintSceneMeshes(_children, count) {
+export function ScenesPrintSceneMeshes(array) {
 
-    for (let i = 0; i < _children.count; i++) {
+    let total_count = 0;
 
-        const children = _children.buffer[i];
-        let r = ' ';
-        for (let j = 0; j < count; j++) r += '->';
-        console.log(i, r, children.id, GetMeshHighOrderNameFromType(children.type))
+    for (let i = 0; i < array.count; i++) {
 
-        if (children.children.count) {
-            count++
-            ScenesPrintSceneMeshes(children.children, count);
-            count--;
-        }
+        const mesh = array.buffer[i];
+        console.log(i, GetMeshHighOrderNameFromType(mesh.type))
+
+        total_count++;
     }
 
+    return total_count;
 }
 
 export function ScenesPrintAllMeshes(_children, count) {

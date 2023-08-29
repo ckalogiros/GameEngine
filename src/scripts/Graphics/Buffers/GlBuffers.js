@@ -151,7 +151,7 @@ class VertexBuffer {
             if (!style && DEBUG.WEB_GL) console.error('Style.border hasn\'t being set. @AddMaterial(), GlBuffers.js')
             else {
                 GlOps.VbSetAttrBorderWidth(this, start + shaderInfo.attributes.offset.params1 + params1Index,
-                    count, shaderInfo.attribsPerVertex - V_BORDER_WIDTH, style.border, numFaces)
+                    count, shaderInfo.attribsPerVertex - V_BORDER_WIDTH, style[STYLE.BORDER], numFaces)
                 params1Index++;
             }
         }
@@ -159,7 +159,7 @@ class VertexBuffer {
             if (!style && DEBUG.WEB_GL) console.error('Style.rCorners hasn\'t being set. @AddMaterial(), GlBuffers.js')
             else {
                 GlOps.VbSetAttrRoundCorner(this, start + shaderInfo.attributes.offset.params1 + params1Index,
-                    count, shaderInfo.attribsPerVertex - V_ROUND_CORNERS, style.rCorners, numFaces)
+                    count, shaderInfo.attribsPerVertex - V_ROUND_CORNERS, style[STYLE.R_CORNERS], numFaces)
                 params1Index++;
             }
         }
@@ -167,7 +167,7 @@ class VertexBuffer {
             if (!style && DEBUG.WEB_GL) console.error('Style.feather hasn\'t being set. @AddMaterial(), GlBuffers.js')
             else {
                 GlOps.VbSetAttrBorderFeather(this, start + shaderInfo.attributes.offset.params1 + params1Index,
-                    count, shaderInfo.attribsPerVertex - V_BORDER_FEATHER, style.feather, numFaces)
+                    count, shaderInfo.attribsPerVertex - V_BORDER_FEATHER, style[STYLE.FEATHER], numFaces)
                 params1Index++;
             }
         }
@@ -320,7 +320,8 @@ export function GlCheckContext(sid, sceneIdx) {
 }
 
 export function GlGenerateContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer, mesh_count=1) {
-
+if(mesh_count === undefined)
+console.log()
     if(ERROR_NULL(sceneIdx)) console.error('Scene index is null. @ GlGenerateContext()')
     if(Array.isArray(GL_BUFFER) || Array.isArray(addToSpecificGlBuffer)) console.error('Array of indexes instead of vbIdx is passed. @ GlGenerateContext()')
 
@@ -479,9 +480,13 @@ export function GlAddGeometry(sid, pos, dim, time, gfx, meshName, numFaces) {
     const meshSize = gfx.attribsPerVertex * gfx.vertsPerRect * numFaces;
     if(vb.vCount*gfx.attribsPerVertex + meshSize >= vb.size) vb.Realloc();
 
-    // if(gfx.prog.idx===0 && gfx.vb.idx===0)
+    // if(gfx.prog.idx===0 && gfx.vb.idx===1)
     // if(gfx.prog.idx===1 && gfx.vb.idx===2)
+    // if(gfx.prog.idx===1 && gfx.vb.idx===0)
     // console.log(gfx.prog.idx, gfx.vb.idx, gfx.vb.start,gfx.vb.count, meshName)
+    if(typeof pos[0] !== 'number')
+    console.log(pos, dim, meshName)
+
 
     vb.AddGeometry(sid, pos, dim, time, prog.shaderInfo, numFaces, gfx.vb.start, gfx.vb.count);
     prog.isActive = true; // Sets a program to 'active', only if there are meshes in the program's vb

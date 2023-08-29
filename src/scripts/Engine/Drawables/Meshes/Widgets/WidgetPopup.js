@@ -6,57 +6,10 @@ import { MouseGetPos } from '../../../Controls/Input/Mouse.js';
 import { MESH_ENABLE } from '../Base/Mesh.js';
 import { Section } from '../Panel.js';
 import { CopyArr2 } from '../../../../Helpers/Math/MathOperations.js';
-import { Gfx_activate, Gfx_deactivate, Gfx_get_pool, Menu_options_create, Request_private_gfx_ctx } from '../../../MenuOptions/MenuOptionsBuilder.js';
+import { Gfx_activate, Gfx_deactivate, Gfx_end_session, Gfx_get_pool, Menu_options_create, Request_private_gfx_ctx } from '../../../MenuOptions/MenuOptionsBuilder.js';
 
 
-/**
- * TODO:
- * 
- * Update the render queue after stop rendering the popup menu
- * Check the recostruct listeners for any secondary popup 
- * 
- * Possibly unused variables:
- */
 
-// The gfx of the main popup. Once gfx buffers for the popup are initialised
-// the popup and it's children 'menus' are gonna be using the spesific gl buffers(private to the popup) 
-const _popUpGfx = {
-
-   isSet: false,
-   isActive: false,
-   
-   secondary_popups: {
-      count: 0,
-      buffer: [],
-
-      Add(obj) {
-         /** TODO!: Add only vertex buffers with different indexes (but the same program). We do not need duplicates */
-         const idx = this.count++;
-         this.buffer[idx] = obj;
-      },
-      Deactivate(progidx, vbidx) {
-         for (let i = 0; i < this.count; i++) {
-            if (this.buffer[i].progidx === progidx && this.buffer[i].vbidx === vbidx) {
-               this.buffer[i].isActive = false;
-               return true;
-            }
-         }
-         console.error('No such gl program found. @ WidgetPopup.js Deactivate()');
-      },
-      GetInactive(sid) {
-
-         for (let i = 0; i < this.count; i++) {
-            if (!this.buffer[i].isActive && GlCheckSid(sid, this.buffer[i].progidx))
-                  return this.buffer[i];
-         }
-         console.error('No inactive index found. @ WidgetPopup.js GetInactive(). Buffer:', this.buffer, ' looking for sid:', sid);
-         return null;
-      }
-   },
-};
-
-
-// class Widget_PopUp extends Mesh {
 class Widget_PopUp extends Section {
 
    isActive;
@@ -75,7 +28,7 @@ class Widget_PopUp extends Section {
       this.type |= MESH_TYPES_DBG.WIDGET_POP_UP | this.geom.type | this.mat.type;
 
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
-      this.SetStyle(6, 4, 3);
+      this.SetStyle([6, 4, 3]);
       this.SetName('Root popup');
 
       this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick, this, null)
@@ -91,7 +44,6 @@ class Widget_PopUp extends Section {
       // Must guarantee that the options menu first mesh is of type: Section,
       // so that we can steal its vbidx and simply add the popup to tha same vertex buffer. 
       // const vbidx = this.children.buffer[0].gfx.vb.idx;
-      // ERROR_NULL(vbidx, 'Popup cannot be added to NON existant vertex buffer. @  Widget_PopUp.AddToGraphics().')
       const gfx = super.GenGfx(GL_VB.NEW);
       // GlSetVertexBufferPrivate(gfx.prog.idx, gfx.vb.idx)
       return gfx;
@@ -169,7 +121,7 @@ export function Initializer_popup_initialization(){
 
    const gfx_pool = Gfx_get_pool();
    gfx_pool.RequestPrivateGfxCtx(_popup, GFX_CTX_FLAGS.INACTIVE | GFX_CTX_FLAGS.PRIVATE);
-
+   Gfx_end_session(true)
    _popup.DeactivatePopup();
 }
 

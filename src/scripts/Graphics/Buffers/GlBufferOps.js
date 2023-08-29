@@ -108,7 +108,8 @@ export function VbSetAttribCol(vb, start, count, stride, col, numFaces) {
     }
 }
 export function VbSetAttribPos(vb, start, count, stride, dim, numFaces) {
-
+    if(dim[0] === NaN || dim[1] === NaN)
+    console.log('NaN value')
     let index = start;
     const end = start + (count * numFaces);
 
@@ -160,7 +161,8 @@ export function VbSetAttribTex(vb, start, count, stride, tex, numFaces) {
     }
 }
 export function VbSetAttribWpos(vb, start, count, stride, pos, numFaces) {
-
+if(pos[0] === NaN || pos[1] === NaN || pos[2] === NaN)
+console.log('NaN value')
     let index = start;
     const end = start + (count * numFaces);
 
@@ -342,14 +344,19 @@ export function GlSetColorAlpha(gfxInfo, val) {
 
     let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.col;
     let verts = gfxInfo.numFaces * gfxInfo.vertsPerRect;
-    let stride = gfxInfo.attribsPerVertex - V_COL_COUNT;
+    let stride = gfxInfo.attribsPerVertex - progs[gfxInfo.prog.idx].shaderInfo.attributes.size.col;
+    // let stride = gfxInfo.attribsPerVertex - 1;
 
     while (verts) {
 
+        index++; // Move mesh's x pos by amt
+        index++; // Move mesh's x pos by amt
+        index++; // Move mesh's x pos by amt
         vb.data[index++] = val; // Move mesh's x pos by amt
-        vb.data[index++] = val; // Move mesh's x pos by amt
-        vb.data[index++] = val; // Move mesh's x pos by amt
-        vb.data[index++] = val; // Move mesh's x pos by amt
+        // vb.data[index++] = val; // Move mesh's x pos by amt
+        // vb.data[index++] = val; // Move mesh's x pos by amt
+        // vb.data[index++] = val; // Move mesh's x pos by amt
+        // vb.data[index++] = val; // Move mesh's x pos by amt
 
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z
         verts--;

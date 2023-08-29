@@ -78,14 +78,13 @@ export class Mesh {
     sceneIdx; // A refference to the scene that the mesh belongs to(index only).
     type; // A bit masked large integer to 'name' all different types of a mesh. 
     listeners; // Indexes to the EventListeners class.
-    // listen_hover_idx; // The index of the hover buffer that the mesh is stored to.
     eventCallbacks; // A buffer to store all callback for any event enabled for the mesh.
     parent; // Pointer to the parent mesh.
     children; // buffer of pointers to children mesh.
     state;  // Bitfield integer. Stores enebled-dissabled mesh state. 
     timeIntervalsIdxBuffer; // This buffer stores indexes of the timeIntervals this mesh is using.
     timedEvents; // A buffer to set a one time event that is triggered by another event. E.x. When we need to set the mesh priority in the renderQueue and the mesh does not have a gfx yet. 
-    hoverMargin; // A margion to be set for hovering. TODO: Abstract to a struct.
+    hover_margin; // A margin to be set for hovering. TODO: Abstract to a struct.
     menu_options; // A callback and an index. Constructs the options popup menu for the mesh
     menu_options_idx; // An index to the menu options handler's buffer
 
@@ -126,11 +125,6 @@ export class Mesh {
         // Add the type 'Mesh'
         this.type |= MESH_TYPES_DBG.MESH;
 
-        /** TODO: Make one listen events buffer, but destroy calling the 2 different events functions */
-        // this.listeners = Array.from(Array(2), () => new Array(4));
-        // console.log(this.listeners)
-        // this.listeners = new Int8_2DBuffer(LISTEN_EVENT_TYPES_INDEX.SIZE, 2);
-        // this.listen_hover_idx = INT_NULL;
         this.listeners = new Int8Buffer(LISTEN_EVENT_TYPES_INDEX.SIZE);
         this.listeners.Init(INT_NULL);
 
@@ -151,7 +145,7 @@ export class Mesh {
 
         this.state = { mask: 0 }; // Unfortunately js cannot create a pointer for integers, so we have to wrap the mask to a class;
 
-        this.hoverMargin = 0;
+        this.hover_margin = [0, 0];
 
         this.menu_options_idx = INT_NULL;
         this.menu_options = {
@@ -206,8 +200,8 @@ export class Mesh {
          *      and add to that free space when it is fit. Also we need a kind of combining
          *      overlaping free space implementation
          */
-        Mesh_recursive_destroy(this);
 
+        Mesh_recursive_destroy(this);
 
         // Remove all listen events
         this.RemoveAllListenEvents();
@@ -218,43 +212,18 @@ export class Mesh {
         scene.RemoveMesh(this);
     }
 
-    /**
-     * Optimize mesh hover checking. 
-     * Remove any unecessary listen events from the EventListeners buffer.
-     * 
-     * IMPORTANT! MUST BE CALLED AFTER ALL CHILDREN MESHES HAVE BEEN ADDED T
-     * 
-     * The core idea is to set the ListenEvent in the parent of the listened meshes and
-     * have the EventListener check the event for all children meshes if the parent is hovered at all.
-     * That way we skip all other meshes with different parent.
-     * The worst case scenario is the <number of parent meshes + number of meshes to be listened (for that parent)>
-     * On the other hand, that is having all meshes (to be listened for an event) in the EventListeners buffer,
-     * the worst case scenario is <number of meshes to be listened(all meshes of all parents).
-     * E.x: 10 parents with 10 meshes each.
-     *      1. 10 + 10 = 20 event checks.
-     *      2. 10 * 10 = 100 event checks.
-     * SEE: ##HoverListenEvents.darwio file at docs/ScemeDraws/ folder
-     */
-    // ListenersReconstruct() {
+    ReconstructListenersRecursive(){
 
-    //     const count = this.children.count
-    //     // if(count<=1) return; // If there is only one child mesh, is more eficient to leave the event to the child. Otherwise would be 2 checks, 1 for parent + 1 for child. 
+        if(this.children.active_count)
+            ReconstructListenersRecursive(this);
 
-    //     for(let i=0; i<count; i++){
+        if(this.StateCheck(MESH_STATE.IS_HOVERABLE) === 0){
+            this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+            this.StateEnable(MESH_STATE.IS_HOVERABLE);
+            this.StateEnable(MESH_STATE.IS_FAKE_HOVER);
+        }
+    }
 
-    //         const mesh = this.children.buffer[i];
-    //         const idx = LISTEN_EVENT_TYPES_INDEX.HOVER;
-    //         if(mesh.StateCheck(MESH_STATE.IS_HOVERABLE) && mesh.listeners.buffer[idx] !== null){
-
-    //             // Remove the EventListener from all the children.
-    //             mesh.RemoveListenEvent(idx);
-    //             // console.log('________________________REMOVING_LISTENER________________________\n', mesh.name)
-    //         }
-    //     }
-
-    //     // Enable 'IS_FAKE_HOVER' to denote that this mesh may have a listener, but it is actually it's children to be listened to.
-    //     this.StateEnable(MESH_STATE.IS_FAKE_HOVER);
-    // }
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * GRAPHICS
@@ -388,14 +357,14 @@ export class Mesh {
             const idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
             if (this.listeners.buffer[idx])
                 Listener_remove_event(idx, this.listeners.buffer[idx]);
-            this.listeners.buffer[i] = INT_NULL;
+            this.listeners.buffer[idx] = INT_NULL;
         }
         else if (event_type & LISTEN_EVENT_TYPES.HOVER) {
 
-            const idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
+            const idx = LISTEN_EVENT_TYPES_INDEX.HOVER;
             if (this.listeners.buffer[idx])
                 Listener_remove_event(idx, this.listeners.buffer[idx]);
-            this.listeners.buffer[i] = INT_NULL;
+            this.listeners.buffer[idx] = INT_NULL;
         }
     }
 
@@ -420,7 +389,7 @@ export class Mesh {
     SetColor(col) { this.mat.SetColor(col, this.gfx) }
     SetDefaultColor() { this.mat.SetDefaultColor(this.gfx) }
     SetColorRGB(col) { this.mat.SetColorRGB(col, this.gfx) }
-    SetColorAlpha(alpha) { this.mat.SetColor(alpha) }
+    SetColorAlpha(alpha) { this.mat.SetColorAlpha(alpha, this.gfx) }
     SetPos(pos) { this.geom.SetPos(pos, this.gfx); }
     SetPosRecursive(pos) {
         this.geom.SetPos(pos, this.gfx);
@@ -446,7 +415,7 @@ export class Mesh {
             GlSetAttrTime(this.gfx, this.geom.timer);
         }
     }
-    SetStyle(border, rCorners, feather) { this.mat.SetStyle(border, rCorners, feather); }
+    SetStyle(style) { this.mat.SetStyle(style); }
     MoveRecursive(x, y) {
 
         this.geom.MoveXY(x, y, this.gfx);
@@ -537,6 +506,34 @@ export class Mesh {
 
 
 
+}
+
+function ReconstructListenersRecursive(mesh){
+
+    for(let i=0; i< mesh.children.count; i++){
+
+        const child = mesh.children.buffer[i];
+        if(child)
+            ReconstructListenersRecursive(child);
+        // If current mesh has a hover listener, remove it and the hover will be checked if the parent is hovered.
+        const event_type = LISTEN_EVENT_TYPES.HOVER;
+        if(child.StateCheck(MESH_STATE.IS_HOVERABLE)){
+                // console.log(mesh.listeners.buffer)
+                // Listener_remove_event(event_type, mesh.listeners.buffer[event_type]);
+                child.RemoveListenEvent(event_type);
+                console.log(child.name, child.listeners.buffer)
+                // console.log('--------------------------')
+        }
+    }
+
+    // if(mesh.StateCheck(MESH_STATE.IS_HOVERABLE) && 
+    //     mesh.listeners.buffer[event_type] !== INT_NULL){
+    //         console.log(mesh.listeners.buffer[event_type])
+    //         // Listener_remove_event(event_type, mesh.listeners.buffer[event_type]);
+    //         mesh.RemoveListenEvent(event_type);
+    //         console.log(mesh.listeners.buffer[event_type])
+    //         console.log('--------------------------')
+    // }
 }
 
 

@@ -258,10 +258,10 @@ export class GlProgram {
 						this.shaderInfo.attributes.offset.params1 = attribsOffset;
 						attribsOffset += this.shaderInfo.attributes.size.params1;
 					}
-					else if (prop === 'style') {
-						this.shaderInfo.attributes.offset.style = attribsOffset;
-						attribsOffset += this.shaderInfo.attributes.size.style;
-					}
+					// else if (prop === 'style') {
+					// 	this.shaderInfo.attributes.offset.style = attribsOffset;
+					// 	attribsOffset += this.shaderInfo.attributes.size.style;
+					// }
 					else if (prop === 'sdf') {
 						this.shaderInfo.attributes.offset.sdf = attribsOffset;
 						attribsOffset += this.shaderInfo.attributes.size.sdf;
@@ -433,7 +433,7 @@ export function GlEnableAttribsLocations(gl, prog) {
 
 export function GlProgramUpdateUniformProjectionMatrix(gl, progIdx, mat4) {
 	const prog = _glPrograms[progIdx];
-	GlUseProgram(prog.webgl_program); //TODO!!!. Unresonable UseProgram Call. Make it so we do everyything by progarm???
+	GlUseProgram(prog.webgl_program); 
 	prog.UniformsSetUpdateProjectionMatrix(gl, mat4);
 }
 

@@ -22,12 +22,14 @@ class Queue {
       this.queueIdx = elem.queueIdx;
       this.isActive = elem.isActive;
    }
+
    Reset(){
       this.progIdx  = INT_NULL;
       this.vbIdx    = INT_NULL;
       this.queueIdx = INT_NULL;
       this.isActive = false;
    }
+
 }
 
 class RenderQueue {
@@ -63,9 +65,19 @@ class RenderQueue {
       }
    }
 
+   Deactivate(progidx, vbidx){
+
+      const foundIdx = this.Find(progidx, vbidx);
+      if (foundIdx !== INT_NULL && foundIdx < this.count-1) {
+         this.buffer[foundIdx].isActive = false;
+         this.UpdateActiveQueue()
+      }
+   }
+
    UpdateActiveQueue(){ // Recreates an array of all active vertex buffers from the draw queue on every Frame.
 
       this.activeCount = 0;
+      this.active = [];
       for (let i = 0; i < this.size; i++) {
          if(this.buffer[i].isActive){
             this.active[this.activeCount++] = this.buffer[i];

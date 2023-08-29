@@ -37,6 +37,7 @@ export class Material {
    uvIdx;
    hasFontTex;
    type = 0;
+   style;
    num_faces;
 
    constructor(col = [1,1,1,1], texId = INT_NULL) {
@@ -59,6 +60,7 @@ export class Material {
       this.uvIdx  = INT_NULL;
 
       this.hasFontTex = false;
+      this.num_faces = 1;
 
       if(texId !== INT_NULL) {
 
@@ -74,11 +76,7 @@ export class Material {
       }
 
       // Initialize style attribute
-      this.style = {
-         border: 0,
-         rCorners: 0,
-         feather: 0,
-      }
+      this.style = [0, 0, 0] 
       
       this.alreadyAdded = false; // To check if the shaders have been created
 
@@ -118,9 +116,9 @@ export class Material {
       math.CopyArr3(this.col, col);
       GlSetColor(gfx, this.col);
    }
-   SetColorAlpha(alpha) {
-      this.col[3], alpha;
-      GlSetColorAlpha(this.col[3]);
+   SetColorAlpha(alpha, gfx) {
+      this.col[3] = alpha;
+      GlSetColorAlpha(gfx, this.col[3]);
    }
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,12 +156,9 @@ export class Material {
          default: console.error('Enable material\'s shader param failed. @ Material.js');
       }
    }
-   SetStyle(border = 3, rCorners = 0, feather = 4) {
-      this.style = {
-         border: border,
-         rCorners: rCorners,
-         feather: feather,
-      }
+   SetStyle(style) {
+      if(!Array.isArray(style)) console.error
+      math.CopyArr3(this.style, style); 
    }
    SetNewAttribute(attribName = null,) { }
    SetNewUniform() { }
@@ -172,7 +167,6 @@ export class Material {
 export class FontMaterial extends Material {
 
    text;
-   // numChars;
    sdf_params;
 
    constructor(col = [1,1,1,1], texId, text, sdf_params = [.5,.5]) {
@@ -200,7 +194,6 @@ export class FontMaterial extends Material {
       // At the end, there is only one gfx variable, for the first text-face. So we must calculate in
       // order to address anyy other face of a text mesh.
       let gfxCopy = new GfxInfoMesh(gfx);
-      // this.num_faces = this.text.length;
 
       for (let i = 0; i < this.num_faces; i++) {
 

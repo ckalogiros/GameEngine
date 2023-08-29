@@ -273,6 +273,14 @@ const EVENTS = {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Style Constants  
  */
+
+const STYLE = {
+
+	BORDER: 0,
+	R_CORNERS:1,
+	FEATHER:2,
+}
+
 function TRANSPARENCY(col, transparency){
 	return [col[0],col[1],col[2],transparency]
 }
@@ -570,4 +578,6 @@ const DEBUG = {
 	BINDING_FUNCTIONS: true,
 
 	OLD_HOVER_LISTENER_IS_ENABLED: false,
+
+	SET_HOVER_TO_ALL_MESHES: false,
 };

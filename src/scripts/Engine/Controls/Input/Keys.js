@@ -4,7 +4,7 @@ import { PrintAttributes, PrintIndexBufferAll, PrintVertexBufferDataAndNames, Pr
 import { Listener_debug_print_all } from "../../Events/EventListeners.js";
 import { Gfx_pool_print } from "../../MenuOptions/MenuOptionsBuilder.js";
 import { RenderQueueGet } from "../../Renderers/Renderer/RenderQueue.js";
-import { ScenesPrintAllMeshes } from "../../Scenes.js";
+import { ScenesPrintAllMeshes, ScenesPrintSceneMeshes } from "../../Scenes.js";
 import { FpsGet } from "../../Timers/Time.js";
 import { TimeIntervalsPrintAll } from "../../Timers/TimeIntervals.js";
 
@@ -97,12 +97,19 @@ export const DEBUG_PRINT_KEYS = [
       },
    },
    {
-      key: 's',
+      key: 'm',
       discr: 'ScenesPrintAllMeshes',
       func: (e)=>{
          let cnt = 0;
-         const count = ScenesPrintAllMeshes(STATE.scene.active.children, 0, cnt);
-         // const scene = STATE.scene.active;
+         const count = ScenesPrintAllMeshes(STATE.scene.active.children, cnt);
+         console.log('Count: ', count)
+      },
+   },
+   {
+      key: 'M',
+      discr: 'ScenesPrintSceneMeshes',
+      func: (e)=>{
+         const count = console.log(ScenesPrintSceneMeshes(STATE.scene.active.children))
          console.log('Count: ', count)
       },
    },
@@ -269,10 +276,11 @@ export function OnKeyDown(e){
       case ('i'):{ DEBUG_PRINT_KEYS[8].func(e); break; }
       case ('e'):{ DEBUG_PRINT_KEYS[9].func(e); break; }
       case ('E'):{ DEBUG_PRINT_KEYS[10].func(e); break; }
-      case ('s'):{ DEBUG_PRINT_KEYS[11].func(e); break; }
-      case ('S'):{ DEBUG_PRINT_KEYS[12].func(e); break; }
-      case ('L'):{ DEBUG_PRINT_KEYS[13].func(e); break; }
-      case ('g'):{ DEBUG_PRINT_KEYS[14].func(e); break; }
+      case ('m'):{ DEBUG_PRINT_KEYS[11].func(e); break; }
+      case ('M'):{ DEBUG_PRINT_KEYS[12].func(e); break; }
+      case ('S'):{ DEBUG_PRINT_KEYS[13].func(e); break; }
+      case ('L'):{ DEBUG_PRINT_KEYS[14].func(e); break; }
+      case ('g'):{ DEBUG_PRINT_KEYS[15].func(e); break; }
 
       // case (DEBUG_PRINT_KEYS.p.key):{ DEBUG_PRINT_KEYS.p.func(e); break; }
       // case (DEBUG_PRINT_KEYS.x.key):{ DEBUG_PRINT_KEYS.x.func(e); break; }
