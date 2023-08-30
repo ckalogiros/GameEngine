@@ -308,13 +308,13 @@ export class Mesh {
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * Event Listeners
      */
-    CreateListenEvent(event_type, Clbk = null, params = null, target = null) {
+    CreateListenEvent(event_type, Clbk = null, target = null) {
 
         if (event_type & LISTEN_EVENT_TYPES.CLICK_DOWN) {
-            if (ERROR_NULL(Clbk) | ERROR_NULL(params)) console.error('Passing null parmeters. @  CreateListenEvent(), Mesh.js')
+            if (ERROR_NULL(Clbk)) console.error('Passing null parmeters. @  CreateListenEvent(), Mesh.js')
 
             // TODO: If the params is used only to pass the this object, the params is not needed for creating listen events
-            const idx = Listener_create_event(LISTEN_EVENT_TYPES_INDEX.CLICK, Clbk, params, target);
+            const idx = Listener_create_event(LISTEN_EVENT_TYPES_INDEX.CLICK, Clbk, this, target);
             this.listeners.AddAtIndex(LISTEN_EVENT_TYPES_INDEX.CLICK, idx);
             this.StateEnable(MESH_STATE.IS_HOVERABLE);
         }
@@ -329,25 +329,27 @@ export class Mesh {
             // Necessary to activate in order for the mesh to be able to move by a 'Click' event
             this.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_MOVABLE);
             // We use a click event because the operation its base on the mouse click and hold
-            const idx = Listener_create_event(LISTEN_EVENT_TYPES_INDEX.CLICK, Clbk, params, target);
+            const idx = Listener_create_event(LISTEN_EVENT_TYPES_INDEX.CLICK, Clbk, this, target);
             this.listeners.AddAtIndex(LISTEN_EVENT_TYPES_INDEX.CLICK, idx);
         }
     }
 
     RemoveAllListenEvents() {
 
-        // console.log('1:', this.listeners.count, this.listeners.active_count, this.listeners.buffer)
         if (this.listeners.active_count) {
-
-            for (let i = 0; i < this.listeners.count; i++) {
+            if(DEBUG.LISTENERS)console.log('--- Removing Events from mesh: ', this.name)
+            const count = this.listeners.count;
+            for (let i = 0; i < count; i++) {
 
                 if (this.listeners.buffer[i] !== INT_NULL) { // If this type of listen event is enabled 
                     Listener_remove_event(i, this.listeners.buffer[i]);
-                    this.listeners.buffer[i] = INT_NULL;
+                    // this.listeners.buffer[i] = INT_NULL;
+                    this.listeners.RemoveByIdx(i);
+
+                    if(DEBUG.LISTENERS)console.log('type:', i, ' this.listeners', this.listeners.buffer[i])
                 }
             }
         }
-        // console.log('2:', this.listeners.count, this.listeners.active_count, this.listeners.buffer)
     }
 
     RemoveListenEvent(event_type) {

@@ -84,6 +84,7 @@ export class Section extends Mesh {
       const mat = new Material(col);
 
       super(geom, mat);
+      this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
 
       this.options = options;
       this.margin = margin;
@@ -92,7 +93,6 @@ export class Section extends Mesh {
       this.type |= MESH_TYPES_DBG.SECTION_MESH;
       this.SetName();
 
-      this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       this.SetStyle([0, 3.5, 2.]);
    }
 
@@ -110,7 +110,7 @@ export class Section extends Mesh {
          else if (options & SECTION.ITEM_FIT) {
 
             CopyArr3(mesh.geom.pos, this.geom.pos);
-            mesh.geom.pos[2] += 1;
+            // mesh.geom.pos[2] += 1;
          }
       }
       else { // Handle Items 
@@ -270,7 +270,7 @@ export class Section extends Mesh {
 
    OnClick(params) {
 
-      const section = params.self_params;
+      const section = params.source_params;
       const point = MouseGetPos();
       const m = section.geom;
 
@@ -370,8 +370,6 @@ function Expand(section, options) {
 function Calculate_positions_recursive(parent, options) {
 
    const padding = [0, 0]
-   let ret = { size: [0, 0], margin: [0, 0] }
-
    const cur_pos = [parent.geom.pos[0], parent.geom.pos[1]]
 
    for (let i = 0; i < parent.children.count; i++) {
@@ -382,6 +380,8 @@ function Calculate_positions_recursive(parent, options) {
 
          mesh.geom.pos[0] = cur_pos[0] - parent.geom.dim[0] + mesh.geom.dim[0] + parent.margin[0];
          mesh.geom.pos[1] = cur_pos[1] - parent.geom.dim[1] + mesh.geom.dim[1] + parent.margin[1];
+         mesh.geom.pos[2] = parent.geom.pos[2]+1;
+         // console.log(mesh.name, mesh.geom.pos[2])
       }
       else {
 
@@ -389,18 +389,16 @@ function Calculate_positions_recursive(parent, options) {
 
             const num_chars = mesh.mat.num_faces
             mesh.geom.pos[0] = cur_pos[0] - mesh.geom.dim[0] * num_chars + parent.pad[0] / 2;// Fixes the button mis-alignment
-            mesh.geom.pos[1] = cur_pos[1];// Fixes the button mis-alignment
+            mesh.geom.pos[1] = cur_pos[1];
+            mesh.geom.pos[2] = parent.geom.pos[2]+1;
+            // console.log(mesh.name, mesh.geom.pos[2])
          }
          else {
-
-            // mesh.geom.pos[0] = cur_pos[0] - parent.geom.dim[0] + mesh.geom.dim[0] * 1.5;// Fixes the button mis-alignment
-            // mesh.geom.pos[1] = cur_pos[1] - parent.geom.dim[1] + mesh.geom.dim[1] * 1.5;// Fixes the button mis-alignment
-            // mesh.geom.pos[0] = cur_pos[0] - parent.geom.dim[0] + mesh.geom.dim[0];// Fixes the button mis-alignment
-            // mesh.geom.pos[1] = cur_pos[1] - parent.geom.dim[1] + mesh.geom.dim[1];// Fixes the button mis-alignment
+            
             mesh.geom.pos[0] = cur_pos[0] - mesh.geom.dim[0] * 3;// Fixes the button mis-alignment
             mesh.geom.pos[1] = cur_pos[1];// Fixes the button mis-alignment
-            // mesh.geom.pos[0] = cur_pos[0];// Fixes the button mis-alignment
-            // mesh.geom.pos[1] = cur_pos[1] ;// Fixes the button mis-alignment
+            mesh.geom.pos[2] = parent.geom.pos[2]+1;
+            // console.log(mesh.name, mesh.geom.pos[2])
          }
       }
 

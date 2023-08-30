@@ -17,44 +17,46 @@ export class Event_Listener {
       this.event_type = new Array(LISTEN_EVENT_TYPES_INDEX.SIZE);
    }
 
-   AddEvent(TYPE_IDX, Clbk = null, self_params = null, target = null) {
+   AddEvent(TYPE_IDX, Clbk = null, source_params = null, target_params = null) {
 
       if (this.event_type[TYPE_IDX] === undefined) {
 
          console.log('Creating new event type events buffer')
-
          this.event_type[TYPE_IDX] = new M_Buffer();
       }
 
-      const params = {
+      const event_params = {
          type: TYPE_IDX,
          Clbk: Clbk,
-         self: self_params,
-         target: target,
+         source_params: source_params,
+         target_params: target_params,
       }
 
       LISTENERS_ACTIVE[TYPE_IDX] = true;
-      return this.event_type[TYPE_IDX].Add(params);
+      return this.event_type[TYPE_IDX].Add(event_params);
    }
 
    DispatchEvents(TYPE_IDX, trigger_params) {
 
       if (this.event_type[TYPE_IDX] === undefined) return;
       if (TYPE_IDX < 0 || TYPE_IDX >= LISTEN_EVENT_TYPES_INDEX.SIZE) alert('Event type index does not exist.');
-
       for (let i = 0; i < this.event_type[TYPE_IDX].count; i++) {
-
+         
          if (this.event_type[TYPE_IDX].buffer[i]) {
-
-            const params = {
-               self_params: this.event_type[TYPE_IDX].buffer[i].self,
-               target_params: this.event_type[TYPE_IDX].buffer[i].target,
+            
+            const dispatch_params = {
+               source_params: this.event_type[TYPE_IDX].buffer[i].source_params,
+               target_params: this.event_type[TYPE_IDX].buffer[i].target_params,
                trigger_params: trigger_params,
                event_type: TYPE_IDX,
             }
+            
+            const success = this.event_type[TYPE_IDX].buffer[i].Clbk(dispatch_params);
+            if (success) {
+               console.log(this.event_type[TYPE_IDX].buffer[i].source_params.name)
+               break;
 
-            const success = this.event_type[TYPE_IDX].buffer[i].Clbk(params);
-            if (success) break;
+            }
          }
       }
    }
@@ -73,7 +75,7 @@ export class Event_Listener {
 
             const point = MouseGetPos();
 
-            const mesh = this.event_type[TYPE_IDX].buffer[i].self
+            const mesh = this.event_type[TYPE_IDX].buffer[i].source_params
             const d = mesh.geom;
 
             const rect = [
@@ -116,7 +118,7 @@ export class Event_Listener {
 
    //          const point = MouseGetPos();
 
-   //          const mesh = this.event_type[TYPE_IDX].buffer[i].self
+   //          const mesh = this.event_type[TYPE_IDX].buffer[i].source_params
    //          const d = mesh.geom;
 
    //          const rect = [
@@ -159,12 +161,12 @@ export class Event_Listener {
                if(this.event_type[i].buffer[j]){
                   if (i === LISTEN_EVENT_TYPES_INDEX.HOVER) {
    
-                     console.log(`i: ${j} Hover Listener`, this.event_type[i].buffer[j].self.name);
+                     console.log(`i: ${j} Hover Listener`, this.event_type[i].buffer[j].source_params.name);
                      hover_cnt++;
                   }
                   else if (i === LISTEN_EVENT_TYPES_INDEX.CLICK) {
    
-                     console.log(`i: ${j} Click Listener`, this.event_type[i].buffer[j].self.name);
+                     console.log(`i: ${j} Click Listener`, this.event_type[i].buffer[j].source_params.name);
                      click_cnt++;
                   }
                }

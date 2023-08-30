@@ -59,7 +59,7 @@ const SID = {
         POS3:       BIT2 <<= 1,
         SCALE3:     BIT2 <<= 1,
         COL4_PER_VERTEX: BIT2 <<= 1,
-        // EMPTY: 0x10000000,
+        EMPTY: BIT2 <<= 1,
     },
 
     UNIF: {

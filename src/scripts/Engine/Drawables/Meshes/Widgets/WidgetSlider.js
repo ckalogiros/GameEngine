@@ -71,7 +71,7 @@ export class Widget_Slider extends Mesh {
       bar.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       bar.SetStyle([0, 3, 2]);
       bar.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_HOVER_COLORABLE | MESH_STATE.HAS_POPUP);
-      bar.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick, bar)
+      bar.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick)
       bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
 
       bar.SetName();
@@ -210,13 +210,13 @@ export class Widget_Slider extends Mesh {
 
    OnClick(params) {
 
-      const mesh = params.self_params;
+      const mesh = params.source_params;
       const point = MouseGetPos();
       const m = mesh.geom;
 
       if (Check_intersection_point_rect(m.pos, m.dim, point, [0, 8])) {
 
-         STATE.mesh.SetClicked(params.self_params);
+         STATE.mesh.SetClicked(params.source_params);
 
          if (mesh.timeIntervalsIdxBuffer.count <= 0) {
 
@@ -242,7 +242,9 @@ export class Widget_Slider extends Mesh {
                Widget_popup_handler_onclick_event(mesh, btnId)
             }
          }
+         return true;
       }
+      return false;
    }
 
 }
@@ -268,21 +270,20 @@ export function Slider_connect(_params) {
 
          // The connection already exists
          if (newTargetId === existingTargetId) {
-            console.log('Disconnecting. STATE.mesh.clicked:', STATE.mesh.clickedId);
-
+            console.log('Disconnecting target:', sliderBar.eventCallbacks.buffer[i].target.name, ' clicked:', STATE.mesh.clickedId);
+            
             clicked_mesh.SetColor(RED)
-
+            
             // Disconnect
             sliderBar.eventCallbacks.RemoveByIdx(i);
-            // console.log(sliderBar.eventCallbacks)
-
+            // console.log('Slider bar:', sliderBar.name, sliderBar.eventCallbacks)         
             return;
          }
       }
-
+      
    }
-
-   console.log('Connecting. STATE.mesh.clicked:', STATE.mesh.clickedId);
+   
+   console.log('Connecting target:', target.name, ' clicked:', STATE.mesh.clickedId);
    clicked_mesh.SetColor(GREEN)
 
    const params = {
@@ -292,7 +293,7 @@ export function Slider_connect(_params) {
    // sliderBar.eventCallbacks.Add(params);
    // sliderBar.CreateEvent(params);
    sliderBar.eventCallbacks.Add(params);
-   // console.log(sliderBar.eventCallbacks)
+   // console.log('Slider bar:', sliderBar.name, sliderBar.eventCallbacks)
 
 }
 
@@ -336,7 +337,7 @@ export function Slider_on_update_handle(_params) {
    const val = Slider_calculate_value(bar, handle); // Calculate slider's value based on the handles position.
 
    slider_val.UpdateTextFromVal(val); // Change the text mesh to the current slider's value
-
+   // console.log('Slider bar:', bar.name, bar.eventCallbacks)
    /**
     * Dispatch all callbacks for all targets, that is
     * found on every eventCallbacks[] buffer.  
@@ -411,101 +412,101 @@ function Geometry2D_set_posx(params) {
  * Slider Specific Menu Options - Constructor Functions 
  */
 
-_cnt = 0;
+// _cnt = 0;
 
-const SLIDER_MENU_OPTIONS = {
-   OPTION_1: _cnt++,
+// const SLIDER_MENU_OPTIONS = {
+//    OPTION_1: _cnt++,
 
-   SIZE: _cnt,
-};
+//    SIZE: _cnt,
+// };
 
-const _slider_options = []; // Stores the state of the options for the popup menu or any other menu for that matter.
+// const _slider_options = []; // Stores the state of the options for the popup menu or any other menu for that matter.
 
-export function Slider_menu_create_options(clickedMesh, _pos) {
+// export function Slider_menu_create_options(clickedMesh, _pos) {
 
-   /** Main Options */
-   const font = MENU_FONT_IDX;
-   const fontSize = MENU_FONT_SIZE;
-   const topPad = 12, pad = 5;
-   const height = fontSize * FontGetFontDimRatio(font);
-   const textlabelpad = [2, 2];
-   let maxWidth = 0;
-   const options = [];
-   const pos = [0, 0, 0];
-
-
-   let totalHeight = 0;
-
-   CopyArr3(pos, _pos);
-   pos[0] += pad + textlabelpad[0];
-   pos[1] += height + topPad + pad + textlabelpad[1];
-   pos[2] += 1;
-
-   totalHeight += height + topPad + pad + textlabelpad[1];
+//    /** Main Options */
+//    const font = MENU_FONT_IDX;
+//    const fontSize = MENU_FONT_SIZE;
+//    const topPad = 12, pad = 5;
+//    const height = fontSize * FontGetFontDimRatio(font);
+//    const textlabelpad = [2, 2];
+//    let maxWidth = 0;
+//    const options = [];
+//    const pos = [0, 0, 0];
 
 
-   if (clickedMesh.menu_options.idx > INT_NULL) {
+//    let totalHeight = 0;
 
-      const saved = _slider_options[clickedMesh.menu_options.idx];
-      const count = saved.count;
-      for (let i = 0; i < count; i++) {
+//    CopyArr3(pos, _pos);
+//    pos[0] += pad + textlabelpad[0];
+//    pos[1] += height + topPad + pad + textlabelpad[1];
+//    pos[2] += 1;
 
-         CopyArr3(pos, _pos);
-         pos[0] += pad + textlabelpad[0] + saved.buffer[i].geom.dim[0];
-         pos[1] = saved.buffer[i].geom.pos[1];
+//    totalHeight += height + topPad + pad + textlabelpad[1];
+
+
+//    if (clickedMesh.menu_options.idx > INT_NULL) {
+
+//       const saved = _slider_options[clickedMesh.menu_options.idx];
+//       const count = saved.count;
+//       for (let i = 0; i < count; i++) {
+
+//          CopyArr3(pos, _pos);
+//          pos[0] += pad + textlabelpad[0] + saved.buffer[i].geom.dim[0];
+//          pos[1] = saved.buffer[i].geom.pos[1];
          
-         saved.buffer[i].SetPosRecursive(pos);
-      }
+//          saved.buffer[i].SetPosRecursive(pos);
+//       }
 
-      return _slider_options[clickedMesh.menu_options.idx]
-   }
+//       return _slider_options[clickedMesh.menu_options.idx]
+//    }
 
-   const meshes = Scenes_get_children(STATE.scene.active_idx);
+//    const meshes = Scenes_get_children(STATE.scene.active_idx);
 
-   for (let i = 0; i < meshes.count; i++) {
+//    for (let i = 0; i < meshes.count; i++) {
 
-      const mesh = meshes.buffer[i];
-      ERROR_NULL(mesh)
+//       const mesh = meshes.buffer[i];
+//       ERROR_NULL(mesh)
 
-      if (i === 0)
-         var option = new Widget_Switch_Mesh(pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-      else
-         var option = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${mesh.id}`, pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
+//       if (i === 0)
+//          var option = new Widget_Switch_Mesh(pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
+//       else
+//          var option = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${mesh.id}`, pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
 
-      option.SetName();
+//       option.SetName();
 
-      if (maxWidth < option.geom.dim[0])
-         maxWidth = option.geom.dim[0];
+//       if (maxWidth < option.geom.dim[0])
+//          maxWidth = option.geom.dim[0];
 
-      CopyArr3(pos, _pos);
-      pos[0] += pad + textlabelpad[0];
-      pos[1] = option.geom.pos[1] + pad + textlabelpad[1] + height * 2 + 2;
-      pos[2] += 1;
+//       CopyArr3(pos, _pos);
+//       pos[0] += pad + textlabelpad[0];
+//       pos[1] = option.geom.pos[1] + pad + textlabelpad[1] + height * 2 + 2;
+//       pos[2] += 1;
 
-      totalHeight += option.geom.dim[1];
+//       totalHeight += option.geom.dim[1];
 
-      options[i] = option;
-   }
+//       options[i] = option;
+//    }
 
-   const menu = {
+//    const menu = {
 
-      buffer: options,
-      targets: meshes.buffer.slice(0, options.length),
-      maxWidth: maxWidth,
-      count: options.length,
-      totalHeight: totalHeight,
-      params: {
+//       buffer: options,
+//       targets: meshes.buffer.slice(0, options.length),
+//       maxWidth: maxWidth,
+//       count: options.length,
+//       totalHeight: totalHeight,
+//       params: {
 
-         targetBindingFunctions: Bind_change_brightness,
-         EventClbk: Slider_connect,
-         self_mesh: clickedMesh,
-         target_mesh: null,
-      },
-   }
+//          targetBindingFunctions: Bind_change_brightness,
+//          EventClbk: Slider_connect,
+//          clicked_mesh: clickedMesh,
+//          target_mesh: null,
+//       },
+//    }
 
-   const idx = _slider_options.push(menu);
-   clickedMesh.menu_options.idx = idx - 1; // Store the index of the menu options in the owner mesh.
+//    const idx = _slider_options.push(menu);
+//    clickedMesh.menu_options.idx = idx - 1; // Store the index of the menu options in the owner mesh.
 
-   return menu;
-}
+//    return menu;
+// }
 

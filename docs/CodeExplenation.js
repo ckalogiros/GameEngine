@@ -27,19 +27,51 @@
  * 
  * Enabling uniforms and attributes in shaders.
  *    Different 'enables' of uniforms for different meshes,
- *    creates differnt glPrograms. On the other hand
+ *    creates different glPrograms.
  *    Uniforms have to be set, attributes already exist in the shaders.
  *    That saying, enable a uniform can only happen from the first mesh, 
- *    cause the shader will be created with the state at the creation time.
+ *    cause the shader will be created with its uniforms state at the creation time.
  *    Attributes on the other hand, may be enabled from any mesh belonging to the 
  *    shader program,   
  */
 
-/**
+/** TODO:NOT VALID, RE-WRITE
  * Position-Size Controler and grid sections
  * 
  * A section should be responsible for:
  *    position: all its children
  *    size: resize all its children, if they are sections
  *          resize its self, tha means repositioning its children
+ */
+
+/**
+   ### Event Listener
+
+   [CreateListenEvent(TYPE_IDX, Clbk, source_params, target_params)]
+   Listener takes a callback, [source_params] and [target_params].
+   Internaly creates and stores an object 'event_params':
+      const event_params = {
+         type: TYPE_IDX, 
+         Clbk: Clbk,
+         source_params: source_params,
+         target_params: target_params,
+      }
+
+
+   [DispatchEvents(TYPE_IDX, trigger_params)]
+   Upon Dispatch, the callback[Clbk] is called, passing an object 'dispatch_params':
+      const dispatch_params = {
+         source_params:    this.event_type[TYPE_IDX].buffer[i].source_params,
+         target_params:    this.event_type[TYPE_IDX].buffer[i].target_params,
+         trigger_params:   trigger_params,
+         event_type:       TYPE_IDX,
+      }
+   So any [Clbk] function must accept as params an object of type: 
+   [dispatch_params]
+      source_params: 
+      target_params: 
+      trigger_params:
+      event_type:    
+   
+
  */

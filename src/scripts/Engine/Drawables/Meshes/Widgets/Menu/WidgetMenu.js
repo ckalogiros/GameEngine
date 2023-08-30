@@ -36,7 +36,7 @@ export class Widget_Menu_Bar extends Mesh{
 
       this.AddChild(btn);
       
-      btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, btn.OnClick, btn);
+      btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, btn.OnClick);
    }
 
    Destroy(target){

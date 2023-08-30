@@ -62,13 +62,13 @@ export class Widget_Text_Mesh extends Text_Mesh {
 
 	OnClick(params) {
 
-		const mesh = params.self_params;
+		const mesh = params.source_params;
 		const point = MouseGetPos();
 		const m = mesh.geom;
 
 		if (Check_intersection_point_rect(m.pos, m.dim, point, [0, 8])) {
 
-			STATE.mesh.SetClicked(params.self_params);
+			STATE.mesh.SetClicked(params.source_params);
 
 			if (mesh.timeIntervalsIdxBuffer.count <= 0) {
 

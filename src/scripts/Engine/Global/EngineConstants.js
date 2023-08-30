@@ -577,7 +577,12 @@ const DEBUG = {
 
 	BINDING_FUNCTIONS: true,
 
-	OLD_HOVER_LISTENER_IS_ENABLED: false,
+	LISTENERS: false,
 
 	SET_HOVER_TO_ALL_MESHES: false,
+
+	GFX: {
+		ADD_MESH: true,
+
+	},
 };

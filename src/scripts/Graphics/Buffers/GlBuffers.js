@@ -171,6 +171,9 @@ class VertexBuffer {
                 params1Index++;
             }
         }
+        /** IMPORTANT! The stayle attributes(counts 3 attributes) use the attrParams vector4 to be passed.
+         * Therefore, in order to count the totaol attributes we must take into consideration the empty attribute
+         */
         if (sid.attr & SID.ATTR.EMPTY) { // Increment vertex count for unused vector elements
             this.count += shaderInfo.verticesPerRect * numFaces;
         }

@@ -14,7 +14,7 @@ import { SizeOfObject } from '../Helpers/Helpers.js';
 import { PerformanceTimerCreate, PerformanceTimerInit, _Tm1GetFps, _Tm1GetMilisec, _Tm1GetNanosec, _Tm2GetFps, _Tm2GetMilisec, _Tm3GetFps, _Tm3GetMilisec, _Tm5GetFps, _Tm5GetMilisec, _Tm6GetFps, _Tm6GetMilisec } from '../Engine/Timers/PerformanceTimers.js';
 import { TimeIntervalsCreate, TimeIntervalsInit } from '../Engine/Timers/TimeIntervals.js';
 import { MESH_ENABLE, Mesh } from '../Engine/Drawables/Meshes/Base/Mesh.js';
-import { Widget_Slider, Slider_menu_create_options } from '../Engine/Drawables/Meshes/Widgets/WidgetSlider.js';
+import { Widget_Slider } from '../Engine/Drawables/Meshes/Widgets/WidgetSlider.js';
 
 /** Performance Timers */
 import { TestArraysPerformance } from '../../Tests/Arrays.js';
@@ -89,7 +89,7 @@ export function AppInit() {
      */
 
     CreateUiTimers(scene)
-    CreateButtons(scene)
+    // CreateButtons(scene)
     // CreateSwitches(scene)
     BindSliderToTextLabel(scene)
     // CreateMenuBar(scene)
@@ -98,7 +98,7 @@ export function AppInit() {
     // CreateGenericWidget(scene)
 
     Help(scene)
-    CreateSection(scene)
+    // CreateSection(scene)
 
     const section = MeshInfo(scene)
     TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
@@ -358,12 +358,12 @@ function BindSliderToTextLabel(scene) {
     const hover_margin  = [5, 0]
     const slider = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220, hover_margin);
     scene.AddMesh(slider);
-    slider.SetMenuOptionsClbk(Slider_menu_create_options);
+    // slider.SetMenuOptionsClbk(Slider_menu_create_options);
 
     posy += height * 2 + pad;
     const slider2 = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220, hover_margin);
     scene.AddMesh(slider2);
-    slider2.SetMenuOptionsClbk(Slider_menu_create_options);
+    // slider2.SetMenuOptionsClbk(Slider_menu_create_options);
 }
 
 function CreateButtons(scene) {
@@ -371,10 +371,10 @@ function CreateButtons(scene) {
     let posy = Viewport.bottom - 50;
 
     const btn1 = new Widget_Button_Mesh('BUTTON 1', [40, posy, 0], 10, GREY5, WHITE, [1, 1], [5, 3], .3);
-    btn1.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, btn1.OnClick, btn1, null)
+    btn1.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, btn1.OnClick)
     btn1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
     btn1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
-    btn1.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE, { style: [6, 10, 3] })
+    btn1.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE, { style: [6, 6, 3] })
     scene.AddMesh(btn1);
 
 
@@ -430,7 +430,7 @@ function CreateSection(scene) {
     }
     const btn = new Widget_Button_Mesh('btn1', [200, 100, 0], 7, TRANSPARENCY(YELLOW, .9), WHITE, [1, 1], [2, 2], .5);
     scene.AddMesh(btn)
-    btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, btn.OnClick, btn)
+    btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, btn.OnClick)
     btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
     btn.SetName('Sectioned btn1')
 
@@ -533,7 +533,7 @@ function MeshInfo(scene) {
 
     for (let i = 0; i < 1; i++) {
 
-        const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 0000000000000000', 'id:000', [300, 20, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
+        const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 0000000000000000', 'id:000', [60, 200, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
         infomesh.CreateNewText('pos: 000,000,0', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
         infomesh.CreateNewText('dim: 000,000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
         infomesh.CreateNewText('gfx: prog:0, vb:0', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);

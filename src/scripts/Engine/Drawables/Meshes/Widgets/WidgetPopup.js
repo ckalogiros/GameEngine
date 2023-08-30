@@ -31,7 +31,7 @@ class Widget_PopUp extends Section {
       this.SetStyle([6, 4, 3]);
       this.SetName('Root popup');
 
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick, this, null)
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick)
       this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
       this.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
@@ -42,18 +42,17 @@ class Widget_PopUp extends Section {
    GenGfx() {
 
       // Must guarantee that the options menu first mesh is of type: Section,
-      // so that we can steal its vbidx and simply add the popup to tha same vertex buffer. 
+      // so that we can steal its vbidx and simply add the popup to the same vertex buffer. 
       // const vbidx = this.children.buffer[0].gfx.vb.idx;
       const gfx = super.GenGfx(GL_VB.NEW);
-      // GlSetVertexBufferPrivate(gfx.prog.idx, gfx.vb.idx)
       return gfx;
    }
 
    ActivatePopup() {
 
-      // this.AddToGfx();
       Gfx_activate(this);
-
+      // this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick)
+      // this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
       this.isActive = true;
    }
 
@@ -79,9 +78,7 @@ class Widget_PopUp extends Section {
       // Recursive_deactivate_secondary_popups(this);
 
       Gfx_deactivate(this); // Recursively deactivates the private buffers of popup and all its options 
-
       this.RemoveChildren(); // Remove from the childrens buffer.
-
       this.isActive = false;
    }
    
@@ -101,7 +98,7 @@ class Widget_PopUp extends Section {
             // Deactivate all meshes of type 'WIDGET_POP_UP' with all its options(recursively), from the curent popup level.
             if (mesh.type & MESH_TYPES_DBG.WIDGET_POP_UP) {
    
-               Recursive_deactivate_secondary_popups(mesh);
+               // Recursive_deactivate_secondary_popups(mesh);
                mesh.RemoveChildren(); // TODO: Do we need to strip down all meshes??? Only if they are shared pointers to some mesh of the appliction
                mesh.Set_graphics_vertex_buffer_render(false);
                this.RemoveChildByIdx(i); // Remove from the childrens buffer.
@@ -117,10 +114,9 @@ let _popup = null;
 // Initialize
 export function Initializer_popup_initialization(){
 
-   _popup = new Widget_PopUp([200, 300, 0], [35,50], TRANSPARENCY(GREY2, .6));
+   _popup = new Widget_PopUp([200, 300, 0], [35,50], TRANSPARENCY(GREY2, .1));
 
-   const gfx_pool = Gfx_get_pool();
-   gfx_pool.RequestPrivateGfxCtx(_popup, GFX_CTX_FLAGS.INACTIVE | GFX_CTX_FLAGS.PRIVATE);
+   Request_private_gfx_ctx(_popup, GFX_CTX_FLAGS.INACTIVE | GFX_CTX_FLAGS.PRIVATE);
    Gfx_end_session(true)
    _popup.DeactivatePopup();
 }
@@ -156,26 +152,23 @@ export function Widget_popup_handler_onclick_event(clicked_mesh, clickedButtonId
 
       if(popup.isActive) popup.DeactivatePopup()
       
-      const clickpos = MouseGetPos();
-      const popuppos = Helpers_calc_bottom_right_pos(clickpos, popup.geom.dim);
-      CopyArr2(popup.geom.pos, popuppos);
-
+      // Request_private_gfx_ctx(popup, GFX_CTX_FLAGS.PRIVATE | GFX_CTX_FLAGS.INACTIVE, 0, 0)
       
-      const optionsMenu = Menu_options_create(clicked_mesh, popup.geom.pos, popup.gfx.prog.idx, popup.gfx.vb.idx);
-      const menu_section = optionsMenu.section;
+      const options_menu_section = Menu_options_create(clicked_mesh, popup.geom.pos, popup.gfx.prog.idx, popup.gfx.vb.idx);
       popup.menu_options_idx = clicked_mesh.menu_options_idx;
       
-      Request_private_gfx_ctx(popup, GFX_CTX_FLAGS.PRIVATE | GFX_CTX_FLAGS.INACTIVE, 0, 0)
-      popup.UpdatePosXY()
-      popup.AddItem(menu_section);
+      const clickpos = MouseGetPos();
+      CopyArr2(popup.geom.dim, options_menu_section.geom.dim);
+      const popuppos = Helpers_calc_bottom_right_pos(clickpos, popup.geom.dim);
+      CopyArr2(popup.geom.pos, popuppos);
+      // console.log(popup.geom.dim, options_menu_section.geom.dim, popuppos)
       
+      popup.AddItem(options_menu_section, SECTION.ITEM_FIT);
+      Request_private_gfx_ctx(popup, GFX_CTX_FLAGS.INACTIVE | GFX_CTX_FLAGS.PRIVATE, popup.gfx.prog.idx, popup.gfx.vb.idx);
       popup.ActivatePopup();
-      // popup.Calc(SECTION.ITEM_FIT);
-      popup.Recalc(SECTION.ITEM_FIT);
+      popup.Recalc(); // Reset pos-dim and calculate.
       popup.UpdateGfx(popup, popup.sceneIdx);
-      // popup.UpdateGfxRecursive(popup, popup.sceneIdx);
 
-      
 
       return;
 
@@ -184,7 +177,7 @@ export function Widget_popup_handler_onclick_event(clicked_mesh, clickedButtonId
 
       if (clicked_mesh) { // Case clicked mesh does not belong to popup or its options
 
-         if(clicked_mesh.type & MESH_TYPES_DBG.WIDGET_POP_UP) return; // Do nothing onclick on a popup menu area
+         if(!popup.isActive || clicked_mesh.type & MESH_TYPES_DBG.WIDGET_POP_UP) return; // Do nothing onclick on a popup menu area
 
          const parent = clicked_mesh.parent;
          if (parent && // Not null

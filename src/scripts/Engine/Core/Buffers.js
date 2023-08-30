@@ -52,10 +52,10 @@ class Buffer_Interface {
             return;
          }
 
-         else if (this.count === this.size) {
-            this.count--;
-            return;
-         }
+         // else if (this.count === this.size) {
+         //    this.count--;
+         //    return;
+         // }
 
          else {
             const count = this.count + 1;
@@ -167,8 +167,41 @@ export class Int8Buffer extends Buffer_Interface {
 
       this.buffer[idx] = elem;
       this.active_count++;
+      this.count++;
       if(this.count < idx) this.count = idx+1;
       return idx;
+   }
+
+   RemoveByIdx(idx) {
+
+      if (this.buffer[idx] !== null) {
+
+         this.buffer[idx] = null;
+         this.active_count--;
+
+         if (this.count === 1) {
+            this.count = 0;
+            return;
+         }
+
+         else if (this.count === this.size) {
+            this.count--;
+            return;
+         }
+
+         else {
+            const count = this.count + 1;
+            for (let i = count; i > 0; i--) {
+
+               if (this.buffer[this.count - 1] || this.count === 0) break;
+               this.count--;
+            }
+         }
+
+         if(this.count === INT_NULL) 
+            alert('M_Buffer count = -1')
+         ERROR_NULL(this.active_count);
+      }
    }
 
    Realloc() {

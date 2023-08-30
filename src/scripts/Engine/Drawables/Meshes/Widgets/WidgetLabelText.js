@@ -352,24 +352,26 @@ export class Widget_Label_Text_Mesh_Menu_Options extends Widget_Label_Text_Mesh 
 
     OnClick(_params) {
 
-        const mesh = _params.self_params;
+        const mesh = _params.source_params;
         const point = MouseGetPos();
         const m = mesh.geom;
 
+        // console.log('click')
         if (Check_intersection_point_rect(m.pos, m.dim, point, [0, 0])) {
 
+            console.log('Button Clicked! ', mesh.name)
             STATE.mesh.SetClicked(mesh);
 
             /**
              * For popup menu options and slider connections.
-             * If the option is clicked, the we must call the slider connect function
+             * If the option is clicked, then we must call the slider connect function
              */
             if (_params.target_params) {
 
                 const target_params = {
 
                     targetBindingFunctions: _params.target_params.targetBindingFunctions,
-                    self_mesh: _params.target_params.self_mesh,
+                    self_mesh: _params.target_params.clicked_mesh,
                     target_mesh: _params.target_params.target_mesh,
                     event_type: _params.event_type,
                     /*FOR DEBUG*/clicked_mesh: mesh,
