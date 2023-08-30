@@ -82,7 +82,7 @@ export class WebGlRenderer {
 
    Render() {
 
-      if (g_state.game.paused === false) {
+      if (STATE.loop.paused === false) {
          
          TimeUpdate(); 
          

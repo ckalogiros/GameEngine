@@ -46,6 +46,28 @@ const PLATFORM = {
 	BLACK_BERRY_IMPL: false,
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Engine Constants */
+
+const Device = {
+	MAX_WIDTH: 500,
+	MAX_HEIGHT: 800,
+	width:  0,
+	height: 0,
+	ratio: 1, // Create same proportions throughout any device. It measures the ratio of the game's build device width and the current device width
+}
+const Viewport = {
+	width: 0,
+	height: 0,
+	left: 0,
+	right: 0,
+	top: 0,
+	bottom: 0,
+	ratio: 0,
+	leftMargin:0,
+	topMargin:0,
+};
+
 const STATE = {
 
 	scene:{
@@ -394,7 +416,7 @@ const COMIC_FONT_METRICS_PATH = '../../../../consolas_sdf/metrics/consolas_sdf.t
 const TEXTURE_TEST = 'msdf';
 
 const MENU_FONT_IDX = TEXTURES.SDF_CONSOLAS_LARGE;
-const MENU_FONT_SIZE = 5;
+const MENU_FONT_SIZE = 4;
 
 
 

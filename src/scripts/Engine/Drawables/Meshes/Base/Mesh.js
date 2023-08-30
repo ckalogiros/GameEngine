@@ -2,7 +2,7 @@
 import { GlSetAttrTime, GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
 import { GfxSetVbRender } from "../../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh, GlGetProgram } from "../../../../Graphics/GlProgram.js";
-import { Int8Buffer, M_Buffer } from "../../../Core/Buffers.js";
+import { Int8Buffer, Int8Buffer2, M_Buffer } from "../../../Core/Buffers.js";
 import { FontGetFontDimRatio, FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { TimerGetGlobalTimer } from "../../../Timers/Timers.js";
 import { Listener_create_event, Listener_remove_event } from "../../../Events/EventListeners.js";
@@ -125,7 +125,7 @@ export class Mesh {
         // Add the type 'Mesh'
         this.type |= MESH_TYPES_DBG.MESH;
 
-        this.listeners = new Int8Buffer(LISTEN_EVENT_TYPES_INDEX.SIZE);
+        this.listeners = new Int8Buffer2(LISTEN_EVENT_TYPES_INDEX.SIZE);
         this.listeners.Init(INT_NULL);
 
         this.eventCallbacks = new M_Buffer();

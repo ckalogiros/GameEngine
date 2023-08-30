@@ -430,13 +430,13 @@ function Menu_options_create_slider_popup_menu_options(clicked_mesh, _pos, progi
 
    const font = MENU_FONT_IDX;
    const fontSize = MENU_FONT_SIZE;
-   const textlabelpad = [4, 6];
+   const textlabelpad = [4, 3];
    const pos = [0, 0, 0];
 
    const meshes = Scenes_get_children(STATE.scene.active_idx);
    let flags = GFX_CTX_FLAGS.INACTIVE | GFX_CTX_FLAGS.PRIVATE;
 
-   const section_menu = new Section(SECTION.VERTICAL, [10, 10], pos, [20, 40], TRANSPARENCY(GREEN, .6));
+   const section_menu = new Section(SECTION.VERTICAL, [2, 2], pos, [20, 40], TRANSPARENCY(GREY7, .8));
    section_menu.SetName('section_menu' + clicked_mesh.menu_options_idx)
    section_menu.SetSceneIdx(STATE.scene.active_idx);
    // _gfx_pool.RequestPrivateGfxCtx(section_menu, flags); // Render to private buffers
@@ -449,14 +449,14 @@ function Menu_options_create_slider_popup_menu_options(clicked_mesh, _pos, progi
       ERROR_NULL(mesh)
       
       
-      const section_option = new Section(SECTION.HORIZONTAL, [5, 5], pos, [20, 40], TRANSPARENCY(YELLOW, .2));
+      const section_option = new Section(SECTION.HORIZONTAL, [3, 3], pos, [20, 40], TRANSPARENCY(BLACK, .4));
       section_option.SetName('section_option:' + i);
       section_option.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
       section_option.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
       
       
-      const option_switch = new Widget_Switch_Mesh(pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-      const option_label = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${mesh.id}`, pos, fontSize, GREY5, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
+      const option_switch = new Widget_Switch_Mesh(pos, fontSize, TRANSPARENCY(BLUE_10_120_220, .0), WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
+      const option_label = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${mesh.id}`, pos, fontSize, TRANSPARENCY(BLUE_10_120_220, .0), WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
       option_switch.SetName(`switch:${i}`);
       option_label.SetName(`label:${i}`);
       // option.SetSceneIdx(STATE.scene.active_idx);
@@ -477,8 +477,8 @@ function Menu_options_create_slider_popup_menu_options(clicked_mesh, _pos, progi
       
       ERROR_NULL(option_switch.OnClick); // Make sure the option mesh has an OnClick method
       option_switch.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, option_switch.OnClick, target_params)
-      option_switch.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-      option_switch.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+      // option_switch.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+      // option_switch.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
       // RenderQueueGet().UpdateActiveQueue();
       if (!GlCheckSid(option_switch.sid, progidx))

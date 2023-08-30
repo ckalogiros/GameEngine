@@ -114,7 +114,7 @@ let _popup = null;
 // Initialize
 export function Initializer_popup_initialization(){
 
-   _popup = new Widget_PopUp([200, 300, 0], [35,50], TRANSPARENCY(GREY2, .1));
+   _popup = new Widget_PopUp([200, 300, 0], [15,10], TRANSPARENCY(GREY2, .6));
 
    Request_private_gfx_ctx(_popup, GFX_CTX_FLAGS.INACTIVE | GFX_CTX_FLAGS.PRIVATE);
    Gfx_end_session(true)

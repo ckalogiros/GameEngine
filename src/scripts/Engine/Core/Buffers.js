@@ -161,47 +161,79 @@ export class Int8Buffer extends Buffer_Interface {
          this.buffer[i] = val;
    }
 
+   Realloc() {
+
+      if (this.size <= 0) {
+         this.size = 1;
+      }
+      else this.size *= 2;
+
+      const oldData = this.buffer;
+      this.buffer = new Int8Array(this.size);
+
+      if (oldData) this.CopyBuffer(oldData)
+      console.warn('Resizing Int8Buffer!')
+   }
+
+}
+
+// Does not 'null' the elements on 'Remove()', instead it sets them to INT_NULL
+export class Int8Buffer2 extends Buffer_Interface {
+
+   constructor(size) {
+
+      super(size);
+   }
+
+   Init(val) {
+
+      if(!this.buffer) this.buffer = new Int8Array(this.size)
+      for (let i = 0; i < this.size; i++)
+         this.buffer[i] = val;
+   }
+
    AddAtIndex(idx, elem) {
       if(idx <0 || idx > this.size) console.error('WRONG Index. Adding item at: ', idx, ' with size:', this.size)
-      // if(!this.buffer) this.Init(this.size, INT_NULL)
+   
+   this.buffer[idx] = elem;
+   this.active_count++;
 
-      this.buffer[idx] = elem;
-      this.active_count++;
-      this.count++;
-      if(this.count < idx) this.count = idx+1;
+   this.count++;
+   if(this.count > this.size) // Case for Mesh.listeners buffer. Inserting first and then deleting from the listener. See popup - Widget_popup_handler_onclick_event(),
+      //  where we first initialize the options menu with the new listeners added and then we deactivate the popup and delete all listeners, so the count goes to total types of listeners +1
+      this.count = this.size;
+
+   if(this.count < idx) this.count = idx+1; // Same here
       return idx;
    }
 
    RemoveByIdx(idx) {
 
-      if (this.buffer[idx] !== null) {
+      this.buffer[idx] = INT_NULL;
+      this.active_count--;
 
-         this.buffer[idx] = null;
-         this.active_count--;
-
-         if (this.count === 1) {
-            this.count = 0;
-            return;
-         }
-
-         else if (this.count === this.size) {
-            this.count--;
-            return;
-         }
-
-         else {
-            const count = this.count + 1;
-            for (let i = count; i > 0; i--) {
-
-               if (this.buffer[this.count - 1] || this.count === 0) break;
-               this.count--;
-            }
-         }
-
-         if(this.count === INT_NULL) 
-            alert('M_Buffer count = -1')
-         ERROR_NULL(this.active_count);
+      if (this.count === 1) {
+         this.count = 0;
+         return;
       }
+
+      // else if (this.count === this.size) {
+      //    this.count--;
+      //    return;
+      // }
+
+      else {
+         const count = this.count;
+         for (let i = count; i > 0; i--) {
+
+            if (this.buffer[this.count] !== INT_NULL|| this.count === 0) break;
+            this.count--;
+         }
+      }
+
+      if(this.count === INT_NULL) 
+         alert('M_Buffer count = -1')
+      ERROR_NULL(this.active_count);
    }
 
    Realloc() {
