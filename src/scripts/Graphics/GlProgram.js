@@ -29,12 +29,17 @@ export class GfxInfoMesh {
 	sid = INT_NULL;
 	sceneIdx = INT_NULL;
 	isPrivate = false;
+	sessionId = INT_NULL;
 	numFaces = 0;
 	vertsPerRect = 0;
 	attribsPerVertex = 0;
 	meshIdx = INT_NULL; // The index of the current mesh from scene's mesh buffer.
 	vao = null;
-
+	
+	gfx_ctx = { // This refers to the GfxCtx2 class interface. GfxCtx2 is used to connect Engine system with application's Graphic System. 
+		sessionId: INT_NULL, // If the vertex buffer has private use, the sessionid 'categorizes' all the vertex buffers belonging to a session. 
+		idx: INT_NULL // The index of the GfxCtx2 buffer. 
+	}
 	prog = {
 		idx: INT_NULL,
 	}

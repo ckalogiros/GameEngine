@@ -211,13 +211,30 @@ const V_ROUND_CORNER_STRIDE = 0;
 const V_BORDER_WIDTH_STRIDE = 1;
 const V_BORDER_FEATHER_STRIDE = 2;
 
-// 
+
 const NO_SPECIFIC_GL_BUFFER = INT_NULL;
 const GL_VB = {
-    NEW: 0, // Create a new vertexBuffer.
-    SPECIFIC: 1, // Use specific index of a vertex buffer.
-    ANY: 2, /* Let the application decide. 
-        If a vertex buffer with the same SID exists, it wiill use it, else it will create a new one. */
+
+    // Let the application decide. If a vertex buffer with the same ...
+    ANY: 0, // SID exists, it will use it, else it will create a new one.
+    NEW: 1, // Create a new vertexBuffer.
+    SPECIFIC: 2, // Use specific index of a vertex buffer.
+    // Use private vertex buffer. If a private and inactive buffer exists it will use that, ...
+    PRIVATE: 3, // ... else it will create a new buffer and render it as private
+};
+
+_cnt = 0x1;
+const GFX = {
+
+    // Let the application decide. If a vertex buffer with the same ...
+    ANY: _cnt<<=0x1, // SID exists, it will use it, else it will create a new one.
+    NEW: _cnt<<=0x1, // Create a new vertexBuffer.
+    SPECIFIC: _cnt<<=0x1, // Use specific index of a vertex buffer.
+    // Use private vertex buffer. If a private and inactive buffer exists it will use that, ...
+    PRIVATE: _cnt<<=0x1, // ... else it will create a new buffer and render it as private
+    
+    STATIC: _cnt<<=0x1, // Choose a buffer that is going to be updated rarely
+    DYNAMIC: _cnt<<=0x1, // Choose a buffer that is going to be updated every frame
 };
 
 const MAX_RESERVED_BUFFERS = 10;

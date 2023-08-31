@@ -18,16 +18,3 @@ export class Rect extends Mesh{
    }
 
 }
-
-
-class Section extends Rect {
-
-   constructor(pos = POSITION_CENTER, dim = [10, 10], col = BLUER3){
-
-      const section = new Rect(pos, dim, col);
-      
-      super(section.geom, section.mat);
-
-      this.type |= MESH_TYPES_DBG.SECTION_MESH;
-   }
-}

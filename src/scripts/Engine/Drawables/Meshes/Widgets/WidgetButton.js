@@ -2,6 +2,7 @@
 
 import { Check_intersection_point_rect } from '../../../Collisions.js';
 import { MouseGetPos } from '../../../Controls/Input/Mouse.js';
+import { Gfx_generate_context2 } from '../../../Interface/GfxCtx2.js';
 import { Widget_Label_Text_Mesh } from './WidgetLabelText.js';
 
 export class Widget_Button_Mesh extends Widget_Label_Text_Mesh {
@@ -43,6 +44,17 @@ export class Widget_Button_Mesh extends Widget_Label_Text_Mesh {
    SetZindex(params) {
       params.mesh.children.buffer[0].SetZindex(params.z)
    }
+
+   GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
+
+
+      super.GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]);
+      // this.gfx = Gfx_generate_context2(this.sid, this.sceneIdx, this.mat.num_faces, FLAGS, gfxidx);
+
+
+
+      return this.gfx;
+  }
 
 }
 

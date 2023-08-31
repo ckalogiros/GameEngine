@@ -9,6 +9,7 @@ import { Listener_create_event, Listener_remove_event } from "../../../Events/Ev
 import { CopyArr3, CopyArr4 } from "../../../../Helpers/Math/MathOperations.js";
 import { Scenes_get_count, Scenes_get_scene_by_idx } from "../../../Scenes.js";
 import { Gfx_generate_context } from "../../../Interface/GfxContext.js";
+import { Gfx_generate_context2 } from "../../../Interface/GfxCtx2.js";
 
 
 
@@ -248,6 +249,31 @@ export class Mesh {
                 this.isFontSet = true;
                 // Correct the text face height by calculating the ratio from the current font metrics.
                 this.geom.dim[1] *= FontGetFontDimRatio(this.mat.uvIdx);
+            }
+        }
+
+        return this.gfx;
+    }
+    GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
+
+
+        this.gfx = Gfx_generate_context2(this.sid, this.sceneIdx, this.mat.num_faces, FLAGS, gfxidx);
+
+        const prog = GlGetProgram(this.gfx.prog.idx);
+        if (this.sid.unif & SID.UNIF.BUFFER_RES) {
+            const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
+            prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
+            prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
+        }
+
+        // Set Texture if this is a textured this.
+        if (this.mat.texId !== INT_NULL) { // texId is init with INT_NULL that means there is no texture passed to the Material constructor.
+
+            // Set font parameters if this is a text this.
+            if (this.mat.hasFontTex) {
+                this.isFontSet = true;
+                // Correct the text face height by calculating the ratio from the current font metrics.
+                // this.geom.dim[1] *= FontGetFontDimRatio(this.mat.uvIdx);
             }
         }
 
@@ -569,11 +595,36 @@ export class Text_Mesh extends Mesh {
         return this.gfx;
     }
 
+    GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
+
+
+        this.gfx = Gfx_generate_context2(this.sid, this.sceneIdx, this.mat.num_faces, FLAGS, gfxidx);
+
+        const prog = GlGetProgram(this.gfx.prog.idx);
+        if (this.sid.unif & SID.UNIF.BUFFER_RES) {
+            const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
+            prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
+            prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
+        }
+
+        // Set Texture if this is a textured this.
+        if (this.mat.texId !== INT_NULL) { // texId is init with INT_NULL that means there is no texture passed to the Material constructor.
+
+            // Set font parameters if this is a text this.
+            if (this.mat.hasFontTex) {
+                this.isFontSet = true;
+                // Correct the text face height by calculating the ratio from the current font metrics.
+                // this.geom.dim[1] *= FontGetFontDimRatio(this.mat.uvIdx);
+            }
+        }
+
+        return this.gfx;
+    }
+
     AddToGfx() {
 
         this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
         const start = this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
-        // this.num_faces = this.mat.num_faces;
         return start;
     }
 

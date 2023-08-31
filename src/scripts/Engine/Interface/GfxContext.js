@@ -14,7 +14,6 @@ class Gfx_Pool extends M_Buffer {
       this.session = []; // SEE ## Gfx_Pool.session
    }
 
-
    GenerateGfxCtx(sid, sceneIdx, useSpecificVertexBuffer, mesh_count) {
 
       if (useSpecificVertexBuffer === GL_VB.NEW) {

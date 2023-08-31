@@ -29,6 +29,9 @@ import { FloorArr3 } from '../Helpers/Math/MathOperations.js';
 import { MAT_ENABLE, Material, Material_TEMP_fromBufferFor3D } from '../Engine/Drawables/Material/Base/Material.js';
 import { GetShaderTypeId } from '../Graphics/Z_Debug/GfxDebug.js';
 import { Gfx_end_session, Gfx_generate_context_and_add, Request_private_gfx_ctx } from '../Engine/Interface/GfxContext.js';
+import { T_Label, T_Rect, T_Slider, T_Text } from '../Engine/Temp.js';
+import { Gfx_end_session2 } from '../Engine/Interface/GfxCtx2.js';
+import { Section2 } from '../Engine/Drawables/Meshes/Sections2.js';
 
 
 // var osu = require('node-os-utils')
@@ -91,19 +94,122 @@ export function AppInit() {
     CreateUiTimers(scene)
     // CreateButtons(scene)
     // CreateSwitches(scene)
-    BindSliderToTextLabel(scene)
+    // BindSliderToTextLabel(scene)
     // CreateMenuBar(scene)
 
-    CreateMinimizer(scene);
+    // CreateMinimizer(scene);
 
 
     // CreateGenericWidget(scene)
 
-    Help(scene)
-    // CreateSection(scene)
+    // Help(scene)
+    CreateSection(scene)
 
     const section = MeshInfo(scene)
     TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
+    
+
+
+
+    const label = new T_Label('btn0', [200, 100, 0]);
+    label.SetName('btn0')
+    label.GenGfxCtx(GFX.ANY)
+    label.AddToGfx()
+    scene.StoreGfxInfo(label.gfx);
+
+
+    // let gfxidx = [INT_NULL, INT_NULL]
+    // let ypos = 350
+    // const a = new Section2(SECTION.HORIZONTAL, [10,10], [200, 450, 0], [20,20], TRANSPARENCY(BLUE_10_120_220, .3));
+    // {
+    //     const b = new Section2(SECTION.HORIZONTAL, [10,10], [200, 450, 0], [20,20], TRANSPARENCY(BLUE_10_120_220, .3));
+    //     a.AddItem(b)
+    // }
+    // {
+    //     const c = new Section2(SECTION.VERTICAL, [10,10], [200, 450, 0], [20,20], TRANSPARENCY(BLUE_10_120_220, .3));
+    //     const d1 = new Section2(SECTION.HORIZONTAL, [10,10], [200, 450, 0], [20,20], TRANSPARENCY(YELLOW_240_220_10, .3));
+    //     const d2 = new Section2(SECTION.HORIZONTAL, [10,10], [200, 450, 0], [20,20], TRANSPARENCY(YELLOW_240_220_10, .3));
+    //     const d3 = new Section2(SECTION.HORIZONTAL, [10,10], [200, 450, 0], [20,20], TRANSPARENCY(YELLOW_240_220_10, .3));
+        
+    //     c.AddItem(d1)
+    //     c.AddItem(d2)
+    //     c.AddItem(d3)
+    //     a.AddItem(c)
+    // }
+
+    // a.Recalc()
+
+    // a.GenGfxCtx(GFX.ANY);
+    // a.AddToGfx()
+    // scene.StoreGfxInfo(a.gfx);
+    // console.log(a.gfx.gfx_ctx);
+    
+    
+    
+    { // Test the new GfxCtx2
+        
+        { // Slider implementation
+    
+            // let gfxidx = [INT_NULL, INT_NULL]
+            // let ypos = 350
+            // const a = new T_Slider([150, ypos, 0], [50, 25], BLUE_10_120_220);
+            // a.GenGfxCtx(GFX.ANY);
+            // a.AddToGfx()
+            // scene.StoreGfxInfo(a.gfx);
+            // console.log(a.gfx.gfx_ctx);
+        }
+
+
+        /**
+         * TODO!!!!!!!!!!!
+         * The cause of non rendering is the uniforms buffers!!!
+         */
+        { // Test: Add to Private after Session_end is called
+            // let gfxidx = [INT_NULL, INT_NULL]
+            // let ypos = 350
+            // {
+            //     const a = new T_Rect([150, ypos, 0], [50, 25], BLUE_10_120_220);
+            //     a.GenGfxCtx(GFX.PRIVATE);
+            //     a.AddToGfx()
+            //     scene.StoreGfxInfo(a.gfx);
+            //     console.log(a.gfx.gfx_ctx);
+            // }
+            
+            // {    
+            //     ypos += 54
+            //     const a = new T_Rect([150, ypos, 0], [50, 25], BLUE_10_120_220);
+            //     a.GenGfxCtx(GFX.PRIVATE);
+            //     a.AddToGfx()
+            //     scene.StoreGfxInfo(a.gfx);
+            //     Gfx_end_session2(true);
+            //     gfxidx[0] = a.gfx.prog.idx
+            //     gfxidx[1] = a.gfx.vb.idx
+            //     console.log(a.gfx.gfx_ctx);
+            // }
+            
+            // {    
+            //     ypos += 54
+            //     const a = new T_Rect([150, ypos, 0], [50, 25], BLUE_10_120_220);
+            //     a.GenGfxCtx(GFX.PRIVATE, gfxidx);
+            //     // a.GenGfxCtx(GFX.PRIVATE);
+            //     a.AddToGfx()
+            //     scene.StoreGfxInfo(a.gfx);
+            //     console.log(a.gfx.gfx_ctx);
+            // }
+
+        }
+        
+        { // Text
+            // const l = new T_Label('Hello world2', [150, 550, 0])
+            // l.GenGfxCtx(GFX.PRIVATE);
+            // l.Render()
+            
+            // const t = new T_Text('Hello world', [150, 400, 0])
+            // t.GenGfxCtx(GFX.ANY);
+            // t.AddToGfx()
+        }
+    }
+
 
 
     // Test_Old_vs_new_hover_listener(scene)
@@ -430,49 +536,51 @@ function CreateSection(scene) {
 
     const flags = (SECTION.ITEM_FIT | SECTION.EXPAND);
 
-    const blu = new Section(SECTION.HORIZONTAL, [15, 15], [220, 630, 0], [10, 0], TRANSPARENCY(BLUE, .2));
+    const blu = new Section2(SECTION.HORIZONTAL, [15, 15], [220, 630, 0], [10, 0], TRANSPARENCY(BLUE, .2));
 
-    const red = new Section(SECTION.VERTICAL, [15, 15], [100, 100, 0], [20, 20], TRANSPARENCY(PURPLE, .2));
-    const gre = new Section(SECTION.VERTICAL, [12, 12], [100, 100, 0], [20, 20], TRANSPARENCY(GREEN, .4));
-    const yel = new Section(SECTION.HORIZONTAL, [12, 12], [200, 400, 0], [20, 20], TRANSPARENCY(YELLOW, .4));
-    const ora = new Section(SECTION.HORIZONTAL, [12, 12], [200, 400, 0], [20, 20], TRANSPARENCY(ORANGE, .4));
-    const cie = new Section(SECTION.HORIZONTAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLUE_LIGHT, .4));
-    const bla = new Section(SECTION.VERTICAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLACK, .4));
+    const red = new Section2(SECTION.VERTICAL, [15, 15], [100, 100, 0], [20, 20], TRANSPARENCY(PURPLE, .2));
+    const gre = new Section2(SECTION.VERTICAL, [12, 12], [100, 100, 0], [20, 20], TRANSPARENCY(GREEN, .4));
+    const yel = new Section2(SECTION.HORIZONTAL, [12, 12], [200, 400, 0], [20, 20], TRANSPARENCY(YELLOW, .4));
+    const ora = new Section2(SECTION.HORIZONTAL, [12, 12], [200, 400, 0], [20, 20], TRANSPARENCY(ORANGE, .4));
+    const cie = new Section2(SECTION.HORIZONTAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLUE_LIGHT, .4));
+    const bla = new Section2(SECTION.VERTICAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLACK, .4));
 
     {
-        var bla_1 = new Section(SECTION.HORIZONTAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLACK, .3));
-        var pin_1 = new Section(SECTION.VERTICAL, [25, 10], [100, 100, 0], [20, 20], TRANSPARENCY(PINK_240_60_160, .3));
-        var blu_1 = new Section(SECTION.VERTICAL, [25, 10], [100, 100, 0], [20, 20], TRANSPARENCY(BLUE,   .3));
-        var pur_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(PURPLE, .8));
-        var red_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(RED,    .8));
-        var yel_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
-        var yel_2 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
-        var red_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(RED,    .8));
-        var yel_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
-        var gre_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREEN,  .8));
-        var red_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(RED,    .8));
-        var yel_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
-        var gre_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREEN,  .8));
-        var ora_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(ORANGE, .8));
-        var gry1_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY3, .8));
-        var gry1_2 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY5, .8));
-        var gry1_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY7, .8));
-        var gry2_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY3, .9));
-        var gry2_2 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY5, .9));
-        var gry2_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY7, .9));
-        var gry2_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY7, .9));
-        var vert_0 = new Section(SECTION.VERTICAL, [20, 20], [100, 100, 0], [20, 20], TRANSPARENCY(GREY2, .4));
+        var bla_1 = new Section2(SECTION.HORIZONTAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLACK, .3));
+        var pin_1 = new Section2(SECTION.VERTICAL, [25, 10], [100, 100, 0], [20, 20], TRANSPARENCY(PINK_240_60_160, .3));
+        var blu_1 = new Section2(SECTION.VERTICAL, [25, 10], [100, 100, 0], [20, 20], TRANSPARENCY(BLUE,   .3));
+        var pur_1 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(PURPLE, .8));
+        var red_1 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(RED,    .8));
+        var yel_1 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
+        var yel_2 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
+        var red_3 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(RED,    .8));
+        var yel_3 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
+        var gre_3 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREEN,  .8));
+        var red_4 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(RED,    .8));
+        var yel_4 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
+        var gre_4 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREEN,  .8));
+        var ora_4 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(ORANGE, .8));
+        var gry1_1 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY3, .8));
+        var gry1_2 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY5, .8));
+        var gry1_3 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY7, .8));
+        var gry2_1 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY3, .9));
+        var gry2_2 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY5, .9));
+        var gry2_3 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY7, .9));
+        var gry2_4 = new Section2(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY7, .9));
+        var vert_0 = new Section2(SECTION.VERTICAL, [20, 20], [100, 100, 0], [20, 20], TRANSPARENCY(GREY2, .4));
 
     }
-    const btn = new Widget_Button_Mesh('btn1', [200, 100, 0], 7, TRANSPARENCY(YELLOW, .9), WHITE, [1, 1], [2, 2], .5);
-    scene.AddMesh(btn)
-    btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, btn.OnClick)
-    btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-    btn.SetName('Sectioned btn1')
-
+    // const btn = new Widget_Button_Mesh('btn1', [200, 100, 0], 7, TRANSPARENCY(YELLOW, .9), WHITE, [1, 1], [2, 2], .5);
+    // // scene.AddMesh(btn)
+    // btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, btn.OnClick)
+    // btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+    // btn.SetName('Sectioned btn1')
+    
+    const label = new T_Label('btn1', [200, 100, 0]);
+    label.SetName('Sectioned btn1')
+    label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+    label.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
     blu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, blu.OnClick, blu, null);
-    // blu.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-    // blu.StateEnable(MESH_STATE.IS_FAKE_HOVER)
 
     {
 
@@ -516,19 +624,130 @@ function CreateSection(scene) {
         ora.AddItem(yel_4, flags);  ora.AddItem(red_4, flags);  ora.AddItem(yel_2, flags); ora.AddItem(ora_4, flags); 
         cie.AddItem(gre_3, flags);  cie.AddItem(yel_3, flags);  cie.AddItem(bla, flags);
         bla.AddItem(gry1_1, flags); bla.AddItem(gry1_2, flags);     bla.AddItem(gry1_3, flags);
-        gry1_1.AddItem(btn, flags); gry1_1.AddItem(vert_0, flags); 
+        gry1_1.AddItem(label, flags); gry1_1.AddItem(vert_0, flags); 
         gre.AddItem(yel_1, flags);  gre.AddItem(red_1, flags);
     }
 
     yel.AddItem(gre, flags);
     blu.AddItem(red, flags);
 
+    blu.GenGfxCtx(GFX.ANY);
+    
     blu.Calc();
-    scene.AddMesh(blu);
+    // a.Recalc()
+
+    blu.AddToGfx()
+    scene.StoreGfxInfo(blu.gfx);
+
+    // scene.AddMesh(blu);
     blu.UpdateGfx(blu);
     // blu.ReconstructListenersRecursive();
 
 }
+
+// function CreateSection(scene) {
+
+//     const flags = (SECTION.ITEM_FIT | SECTION.EXPAND);
+
+//     const blu = new Section(SECTION.HORIZONTAL, [15, 15], [220, 630, 0], [10, 0], TRANSPARENCY(BLUE, .2));
+
+//     const red = new Section(SECTION.VERTICAL, [15, 15], [100, 100, 0], [20, 20], TRANSPARENCY(PURPLE, .2));
+//     const gre = new Section(SECTION.VERTICAL, [12, 12], [100, 100, 0], [20, 20], TRANSPARENCY(GREEN, .4));
+//     const yel = new Section(SECTION.HORIZONTAL, [12, 12], [200, 400, 0], [20, 20], TRANSPARENCY(YELLOW, .4));
+//     const ora = new Section(SECTION.HORIZONTAL, [12, 12], [200, 400, 0], [20, 20], TRANSPARENCY(ORANGE, .4));
+//     const cie = new Section(SECTION.HORIZONTAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLUE_LIGHT, .4));
+//     const bla = new Section(SECTION.VERTICAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLACK, .4));
+
+//     {
+//         var bla_1 = new Section(SECTION.HORIZONTAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLACK, .3));
+//         var pin_1 = new Section(SECTION.VERTICAL, [25, 10], [100, 100, 0], [20, 20], TRANSPARENCY(PINK_240_60_160, .3));
+//         var blu_1 = new Section(SECTION.VERTICAL, [25, 10], [100, 100, 0], [20, 20], TRANSPARENCY(BLUE,   .3));
+//         var pur_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(PURPLE, .8));
+//         var red_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(RED,    .8));
+//         var yel_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
+//         var yel_2 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
+//         var red_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(RED,    .8));
+//         var yel_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
+//         var gre_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREEN,  .8));
+//         var red_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(RED,    .8));
+//         var yel_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
+//         var gre_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREEN,  .8));
+//         var ora_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(ORANGE, .8));
+//         var gry1_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY3, .8));
+//         var gry1_2 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY5, .8));
+//         var gry1_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY7, .8));
+//         var gry2_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY3, .9));
+//         var gry2_2 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY5, .9));
+//         var gry2_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY7, .9));
+//         var gry2_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY7, .9));
+//         var vert_0 = new Section(SECTION.VERTICAL, [20, 20], [100, 100, 0], [20, 20], TRANSPARENCY(GREY2, .4));
+
+//     }
+//     const btn = new Widget_Button_Mesh('btn1', [200, 100, 0], 7, TRANSPARENCY(YELLOW, .9), WHITE, [1, 1], [2, 2], .5);
+//     scene.AddMesh(btn)
+//     btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, btn.OnClick)
+//     btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+//     btn.SetName('Sectioned btn1')
+
+//     blu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, blu.OnClick, blu, null);
+//     // blu.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+//     // blu.StateEnable(MESH_STATE.IS_FAKE_HOVER)
+
+//     {
+
+//         red.SetName('red');     red.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); red.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         gre.SetName('gre');     gre.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gre.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         yel.SetName('yel');     yel.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         ora.SetName('ora');     ora.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); ora.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         cie.SetName('cie');     cie.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); cie.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         bla.SetName('bla');     bla.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); bla.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         bla_1.SetName('bla_1'); bla_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); bla_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         pin_1.SetName('pin_1'); pin_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); pin_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         blu_1.SetName('blu_1'); blu_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); blu_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         pur_1.SetName('pur_1'); pur_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); pur_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         red_1.SetName('red_1'); red_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); red_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         yel_1.SetName('yel_1'); yel_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         yel_2.SetName('yel_2'); yel_2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel_2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         red_3.SetName('red_3'); red_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); red_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         yel_3.SetName('yel_3'); yel_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         gre_3.SetName('gre_3'); gre_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gre_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         red_4.SetName('red_4'); red_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); red_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         yel_4.SetName('yel_4'); yel_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         gre_4.SetName('gre_4'); gre_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gre_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         ora_4.SetName('ora_4'); ora_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); ora_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         gry1_1.SetName('gry1_1'); gry1_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry1_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         gry1_2.SetName('gry1_2'); gry1_2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry1_2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         gry1_3.SetName('gry1_3'); gry1_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry1_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         gry2_1.SetName('gry2_1'); gry2_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry2_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         gry2_2.SetName('gry2_2'); gry2_2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry2_2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         gry2_3.SetName('gry2_3'); gry2_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry2_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         gry2_4.SetName('gry2_4'); gry2_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry2_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//         vert_0.SetName('vert_0'); vert_0.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); vert_0.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+
+//     }
+
+//     {
+//         pin_1.AddItem(gry2_1, flags); pin_1.AddItem(gry2_2, flags);
+//         blu_1.AddItem(gry2_3, flags); blu_1.AddItem(gry2_4, flags);
+//         bla_1.AddItem(pin_1,  flags);  bla_1.AddItem(blu_1, flags);
+//         red.AddItem(bla_1);   red.AddItem(yel, flags);    red.AddItem(ora, flags);    red.AddItem(cie, flags);
+//         yel.AddItem(gre_4, flags);  yel.AddItem(pur_1, flags);  yel.AddItem(red_3, flags); 
+//         ora.AddItem(yel_4, flags);  ora.AddItem(red_4, flags);  ora.AddItem(yel_2, flags); ora.AddItem(ora_4, flags); 
+//         cie.AddItem(gre_3, flags);  cie.AddItem(yel_3, flags);  cie.AddItem(bla, flags);
+//         bla.AddItem(gry1_1, flags); bla.AddItem(gry1_2, flags);     bla.AddItem(gry1_3, flags);
+//         gry1_1.AddItem(btn, flags); gry1_1.AddItem(vert_0, flags); 
+//         gre.AddItem(yel_1, flags);  gre.AddItem(red_1, flags);
+//     }
+
+//     yel.AddItem(gre, flags);
+//     blu.AddItem(red, flags);
+
+//     blu.Calc();
+//     scene.AddMesh(blu);
+//     blu.UpdateGfx(blu);
+//     // blu.ReconstructListenersRecursive();
+
+// }
 
 function Help(scene) {
 
@@ -581,7 +800,7 @@ function MeshInfo(scene) {
         const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 0000000000000000', 'id:000', [60, 200, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
         infomesh.CreateNewText('pos: 000,000,0', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
         infomesh.CreateNewText('dim: 000,000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
-        infomesh.CreateNewText('gfx: prog:0, vb:0', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+        infomesh.CreateNewText('gfx: prog:0, vb:0, start:000000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
 
         infomesh.Align(ALIGN.VERTICAL)
         scene.AddMesh(infomesh);
@@ -605,7 +824,7 @@ function MeshInfoUpdate(params) {
                 `id:${infoMesh.id}`,
                 `pos:${FloorArr3(infoMesh.geom.pos)}`,
                 `dim:${infoMesh.geom.dim}`,
-                `gfx: prog:${infoMesh.gfx.prog.idx}, vb:${infoMesh.gfx.vb.idx}`
+                `gfx: prog:${infoMesh.gfx.prog.idx}, vb:${infoMesh.gfx.vb.idx}, vb:${infoMesh.gfx.vb.start}`
             ];
 
             for (let i = 0; i < textMesh.children.count; i++) {
