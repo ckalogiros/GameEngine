@@ -7,7 +7,7 @@ import { CopyArr2, CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../../Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
-import { Gfx_generate_context } from "../../../MenuOptions/MenuOptionsBuilder.js";
+import { Gfx_generate_context } from "../../../Interface/GfxContext.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx, TimeIntervalsGetByIdx } from "../../../Timers/TimeIntervals.js";
 import { Geometry2D_Text } from "../../Geometry/Geometry2DText.js";
 import { FontMaterial } from "../../Material/Base/Material.js";

@@ -226,7 +226,7 @@ export class Int8Buffer2 extends Buffer_Interface {
          const count = this.count;
          for (let i = count; i > 0; i--) {
 
-            if (this.buffer[this.count] !== INT_NULL|| this.count === 0) break;
+            if (this.buffer[this.count-1] !== INT_NULL|| this.count === 0) break;
             this.count--;
          }
       }

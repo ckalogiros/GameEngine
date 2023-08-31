@@ -3,67 +3,13 @@
 import { CopyArr2, CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../Controls/Input/Mouse.js";
-import { M_Buffer } from "../../Core/Buffers.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../Timers/TimeIntervals.js";
 import { Geometry2D } from "../Geometry/Base/Geometry.js";
 import { Material } from "../Material/Base/Material.js";
 import { MESH_ENABLE, Mesh } from "./Base/Mesh.js";
 
 
-export class Panel extends Mesh {
 
-   sections; // Buffer to store Sections
-
-   constructor(pos = [0, 0, 0], dim = [100, 100], col = BLUE) {
-
-      const geom = new Geometry2D(pos, dim);
-      const mat = new Material(col);
-
-      super(geom, mat);
-
-      this.sections = new M_Buffer;
-      this.type |= MESH_TYPES_DBG.PANEL_MESH;
-   }
-
-   AddSection(section) {
-      ERROR_TYPE(section, MESH_TYPES_DBG.SECTION_MESH);
-
-      this.sections.Add(section);
-
-      if (section.children.active_count) {
-
-         for (let i = 0; i < section.children.count; i++) {
-
-            const child = section.children.buffer[i];
-            this.AddChild(child);
-         }
-      }
-   }
-
-   GenGfx() {
-
-      const gfx = super.GenGfx();
-
-      for (let i = 0; i < this.sections.count; i++) {
-
-         const section = this.sections.buffer[i];
-
-         if (section.sections.count) {
-
-            for (let i = 0; i < section.sections.count; i++) {
-
-               const s = section.sections.buffer[i];
-
-               s.GenGfx();
-            }
-         }
-
-         section.GenGfx();
-      }
-
-      return gfx;
-   }
-}
 
 /**
  * TODO: 

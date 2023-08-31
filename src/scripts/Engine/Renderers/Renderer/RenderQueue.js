@@ -166,6 +166,24 @@ class RenderQueue {
       }
    }
 
+   /**
+    * INEFFICIENT.
+    * But we do not care for now.
+    * TODO: Implement correct bubble? sort 
+    */
+   SetPriorityProgram(flag, progIdx){
+
+      if(!this.count) return; // Case RenderQueue hasn't been initialized
+
+      for (let i = 0; i < this.size; i++) {
+         
+         if (this.buffer[i].progIdx === progIdx) {
+            this.SetPriority(flag, progIdx, i)
+         }
+      }
+
+   }
+
    SetPrioritySwap(progIdx1, vbIdx1, progIdx2, vbIdx2){
 
       const idx1 = this.Find(progIdx1, vbIdx1);

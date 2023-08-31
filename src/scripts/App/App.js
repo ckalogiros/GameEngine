@@ -20,15 +20,15 @@ import { Widget_Slider } from '../Engine/Drawables/Meshes/Widgets/WidgetSlider.j
 import { TestArraysPerformance } from '../../Tests/Arrays.js';
 import { Event_Listener, Listener_create_event } from '../Engine/Events/EventListeners.js';
 import { Test_Old_vs_new_hover_listener } from '../../Tests/Performane.js';
-import { Widget_Menu_Bar } from '../Engine/Drawables/Meshes/Widgets/Menu/WidgetMenu.js';
-import { Panel, Section } from '../Engine/Drawables/Meshes/Panel.js';
+import { Widget_Menu_Bar, Widget_Minimize } from '../Engine/Drawables/Meshes/Widgets/Menu/WidgetMenu.js';
+import { Section } from '../Engine/Drawables/Meshes/Section.js';
 import { Initializer_popup_initialization } from '../Engine/Drawables/Meshes/Widgets/WidgetPopup.js';
 import { Geometry2D } from '../Engine/Drawables/Geometry/Base/Geometry.js';
 import { DEBUG_PRINT_KEYS } from '../Engine/Controls/Input/Keys.js';
 import { FloorArr3 } from '../Helpers/Math/MathOperations.js';
-import { Gfx_end_session, Gfx_generate_context, Request_private_gfx_ctx } from '../Engine/MenuOptions/MenuOptionsBuilder.js';
 import { MAT_ENABLE, Material, Material_TEMP_fromBufferFor3D } from '../Engine/Drawables/Material/Base/Material.js';
 import { GetShaderTypeId } from '../Graphics/Z_Debug/GfxDebug.js';
+import { Gfx_end_session, Gfx_generate_context_and_add, Request_private_gfx_ctx } from '../Engine/Interface/GfxContext.js';
 
 
 // var osu = require('node-os-utils')
@@ -94,6 +94,8 @@ export function AppInit() {
     BindSliderToTextLabel(scene)
     // CreateMenuBar(scene)
 
+    CreateMinimizer(scene);
+
 
     // CreateGenericWidget(scene)
 
@@ -112,8 +114,7 @@ export function AppInit() {
     // If camera is static, update projection matrix uniform only once
     camera.UpdateProjectionUniform(renderer.gl);
 
-    // RenderQueueGet().SetPriority('first', 0, 0);
-    RenderQueueGet().SetPriority('last', 1, 0);
+    RenderQueueGet().SetPriorityProgram('last', 0);
 
     RenderQueueGet().UpdateActiveQueue(); // Update active queue buffer with the vertex buffers set to be drawn
 
@@ -150,12 +151,13 @@ export function AppInit() {
 
             const mesh = scene.children.buffer[i];
 
+            // if (mesh && mesh.listeners.buffer[0] === INT_NULL) {
             if (mesh) {
 
-                mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-                mesh.StateEnable(MESH_STATE.IS_FAKE_HOVER)
-                mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-                console.log(mesh.name)
+                // mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+                // mesh.StateEnable(MESH_STATE.IS_FAKE_HOVER)
+                // mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+                // console.log(mesh.name)
                 SetHoverToAllMeshesRecursive(scene.children.buffer[i]);
             }
 
@@ -179,6 +181,36 @@ function CreateSwitches(scene) {
     btn1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
     scene.AddMesh(btn1);
 
+}
+
+function CreateMinimizer(scene){
+
+    const section = new Section(SECTION.HORIZONTAL, [10,10], [200, 450, 0], [0,0], TRANSPARENCY(BLUE_10_120_220, .3))
+    section.SetName('Minimizer section')
+    section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+    // section.CreateListenEvent()
+    
+    
+    const  min = new Widget_Minimize([200, 450, 0]);
+    min.SetName('minimizer button')
+    min.parent = section;
+    min.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, min.OnClick, min);
+    min.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    min.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+    
+    section.AddItem(min);
+    
+
+    Request_private_gfx_ctx(section, GFX_CTX_FLAGS.INACTIVE | GFX_CTX_FLAGS.PRIVATE, INT_NULL, INT_NULL);
+    // Gfx_generate_context(section.sid, section.sceneIdx, GL_VB.NEW, mesh_count)
+    // scene.AddMesh(min);
+
+    Gfx_end_session(true);
+
+    
+    section.Recalc(); // Reset pos-dim and calculate.
+    // section.Calc();
+    section.UpdateGfx(section, section.sceneIdx);
 }
 
 function CreateUiTimersWithSections(scene) {
@@ -357,13 +389,17 @@ function BindSliderToTextLabel(scene) {
     posy += height * 2 + pad;
     const hover_margin  = [5, 0]
     const slider = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220, hover_margin);
-    scene.AddMesh(slider);
     // slider.SetMenuOptionsClbk(Slider_menu_create_options);
-
+    scene.AddMesh(slider);
+    // Gfx_generate_context_and_add(slider, GL_VB.ANY);
+    // scene.StoreMesh(slider)
+    
     posy += height * 2 + pad;
     const slider2 = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220, hover_margin);
+    // Gfx_generate_context_and_add(slider2, GL_VB.ANY);
     scene.AddMesh(slider2);
     // slider2.SetMenuOptionsClbk(Slider_menu_create_options);
+    // scene.StoreMesh(slider2)
 }
 
 function CreateButtons(scene) {
@@ -501,7 +537,11 @@ function Help(scene) {
 
     const section = new Section(SECTION.HORIZONTAL, [10, 10], [550, 600, 0], [0, 0], TRANSPARENCY(GREY1, .2));
     section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick, section, null);
+    section.SetName('Help section')
+    scene.StoreMesh(section)
     const s1 = new Section(SECTION.VERTICAL, [15, 10], [220, 400, 0], [0, 0], TRANSPARENCY(GREY1, .2));
+    s1.SetName('Help section 2')
+    // scene.StoreMesh(s1)
 
     let msgs = [];
     for (let i = 0; i < DEBUG_PRINT_KEYS.length; i++) {
@@ -510,8 +550,11 @@ function Help(scene) {
         const label = new Widget_Label_Text_Mesh(msgs[i], [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [1, 1], [7, 6], .5, undefined, [0, 4, 3])
         label.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
         label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-        scene.AddMesh(label);
+        
         s1.AddItem(label)
+        
+        // scene.AddMesh(label);
+        // scene.StoreMesh(label)
     }
     
     section.AddItem(s1, flags)
@@ -522,7 +565,9 @@ function Help(scene) {
 
     section.Calc(flags)
 
-    scene.AddMesh(section);
+    Request_private_gfx_ctx(section, GFX_CTX_FLAGS.INACTIVE | GFX_CTX_FLAGS.PRIVATE, INT_NULL, INT_NULL);
+    Gfx_end_session(true);
+    // scene.AddMesh(section);
 
     section.UpdateGfx(section, scene.sceneIdx);
 }
@@ -552,28 +597,6 @@ function MeshInfoUpdate(params) {
 
     if (infoMesh) {
 
-
-
-        // if (infoMesh.children.active_count && infoMesh.children.buffer[0]) {
-        //     const children = infoMesh.children.buffer[0];
-
-        //     if (children) {
-
-        //         let msgs = [
-        //             `id:${children.id}`,
-        //             `pos:${FloorArr3(children.geom.pos)}`,
-        //             `dim:${children.geom.dim}`,
-        //             `gfx: prog:${children.gfx.prog.idx}, vb:${children.gfx.prog.idx}`
-        //         ];
-
-        //         for (let i = 0; i < textMesh.children.count; i++) {
-
-        //             const childText = textMesh.children.buffer[i];
-        //             childText.UpdateTextFromVal(msgs[i])
-        //         }
-        //     }
-        // }
-
         textMesh.UpdateTextFromVal(infoMesh.name)
 
         if (infoMesh) {
@@ -582,7 +605,7 @@ function MeshInfoUpdate(params) {
                 `id:${infoMesh.id}`,
                 `pos:${FloorArr3(infoMesh.geom.pos)}`,
                 `dim:${infoMesh.geom.dim}`,
-                `gfx: prog:${infoMesh.gfx.prog.idx}, vb:${infoMesh.gfx.prog.idx}`
+                `gfx: prog:${infoMesh.gfx.prog.idx}, vb:${infoMesh.gfx.vb.idx}`
             ];
 
             for (let i = 0; i < textMesh.children.count; i++) {
@@ -599,17 +622,17 @@ function MeshInfoUpdate(params) {
 function SetHoverToAllMeshesRecursive(mesh) {
 
 
+    // if(mesh.listeners.buffer[0] === INT_NULL)
+    mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+    console.log(mesh.name)
+    
     for (let i = 0; i < mesh.children.count; i++) {
 
         const child = mesh.children.buffer[i];
         if (child.children.active_count)
             SetHoverToAllMeshesRecursive(child);
-
-
     }
-    // mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-    console.log(mesh.name)
 
 }
 

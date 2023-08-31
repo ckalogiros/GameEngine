@@ -50,10 +50,11 @@ export class Event_Listener {
                trigger_params: trigger_params,
                event_type: TYPE_IDX,
             }
-            
+            if(!this.event_type[TYPE_IDX].buffer[i])
+            console.log()
             const success = this.event_type[TYPE_IDX].buffer[i].Clbk(dispatch_params);
             if (success) {
-               console.log(this.event_type[TYPE_IDX].buffer[i].source_params.name)
+               // console.log(this.event_type[TYPE_IDX].buffer[i].source_params.name)
                break;
 
             }

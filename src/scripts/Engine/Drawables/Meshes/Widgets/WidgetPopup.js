@@ -4,10 +4,10 @@ import { GlCheckSid } from '../../../../Graphics/GlProgram.js';
 import { Helpers_calc_bottom_right_pos } from '../../../../Helpers/Helpers.js';
 import { MouseGetPos } from '../../../Controls/Input/Mouse.js';
 import { MESH_ENABLE } from '../Base/Mesh.js';
-import { Section } from '../Panel.js';
+import { Section } from '../Section.js';
 import { CopyArr2 } from '../../../../Helpers/Math/MathOperations.js';
-import { Gfx_activate, Gfx_deactivate, Gfx_end_session, Gfx_get_pool, Menu_options_create, Request_private_gfx_ctx } from '../../../MenuOptions/MenuOptionsBuilder.js';
-
+import { Menu_options_create } from '../../../MenuOptions/MenuOptionsBuilder.js';
+import { Gfx_activate, Gfx_deactivate, Gfx_end_session, Request_private_gfx_ctx } from "../../../Interface/GfxContext.js";
 
 
 class Widget_PopUp extends Section {
@@ -114,11 +114,11 @@ let _popup = null;
 // Initialize
 export function Initializer_popup_initialization(){
 
-   _popup = new Widget_PopUp([200, 300, 0], [15,10], TRANSPARENCY(GREY2, .6));
+   // _popup = new Widget_PopUp([200, 300, 0], [15,10], TRANSPARENCY(GREY2, .6));
 
-   Request_private_gfx_ctx(_popup, GFX_CTX_FLAGS.INACTIVE | GFX_CTX_FLAGS.PRIVATE);
-   Gfx_end_session(true)
-   _popup.DeactivatePopup();
+   // Request_private_gfx_ctx(_popup, GFX_CTX_FLAGS.INACTIVE | GFX_CTX_FLAGS.PRIVATE);
+   // Gfx_end_session(true)
+   // _popup.DeactivatePopup();
 }
 
 /** DO NOT DELETE */
@@ -146,14 +146,19 @@ export function Initializer_popup_initialization(){
  */
 export function Widget_popup_handler_onclick_event(clicked_mesh, clickedButtonId) {
 
-   const popup = _popup;
+   let popup = _popup;
 
    if (clickedButtonId === MOUSE.BTN_ID.RIGHT) {
 
+      if(!popup){
+         _popup = new Widget_PopUp([200, 300, 0], [15,10], TRANSPARENCY(GREY2, .6));
+         popup = _popup;
+         Request_private_gfx_ctx(popup, GFX_CTX_FLAGS.INACTIVE | GFX_CTX_FLAGS.PRIVATE, INT_NULL, INT_NULL);
+      }
+      
       if(popup.isActive) popup.DeactivatePopup()
       
-      // Request_private_gfx_ctx(popup, GFX_CTX_FLAGS.PRIVATE | GFX_CTX_FLAGS.INACTIVE, 0, 0)
-      
+
       const options_menu_section = Menu_options_create(clicked_mesh, popup.geom.pos, popup.gfx.prog.idx, popup.gfx.vb.idx);
       popup.menu_options_idx = clicked_mesh.menu_options_idx;
       
