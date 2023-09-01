@@ -4,9 +4,8 @@ import { CopyArr2, CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../Controls/Input/Mouse.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../Timers/TimeIntervals.js";
-import { Geometry2D } from "../Geometry/Base/Geometry.js";
-import { Material } from "../Material/Base/Material.js";
-import { MESH_ENABLE, Mesh } from "./Base/Mesh.js";
+import { MESH_ENABLE } from "./Base/Mesh.js";
+import { Rect } from "./Rect.js";
 
 
 
@@ -17,7 +16,7 @@ import { MESH_ENABLE, Mesh } from "./Base/Mesh.js";
  *       Add_pre. add a mesh at the start of the children's buffer.
  *       Add_specific. add a mesh at a specific index of the children's buffer.
  */
-export class Section extends Mesh {
+export class Section extends Rect {
 
    options; // Stores some state of 'this'.
    margin; // [1,1] Stores the x-y margins
@@ -26,10 +25,8 @@ export class Section extends Mesh {
 
    constructor(options = (SECTION.VERTICAL), margin = [4, 4], pos = [200, 400, 0], dim = [40, 40], col = TRANSPARENCY(BLUE, .6)) {
 
-      const geom = new Geometry2D(pos, dim);
-      const mat = new Material(col);
+      super(pos, dim, col)
 
-      super(geom, mat);
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
 
       this.options = options;
@@ -37,7 +34,7 @@ export class Section extends Mesh {
       this.max_size = [0, 0];
 
       this.type |= MESH_TYPES_DBG.SECTION_MESH;
-      this.SetName();
+      this.SetName(this.name);
 
       this.SetStyle([0, 3.5, 2.]);
    }
@@ -45,7 +42,7 @@ export class Section extends Mesh {
    AddItem(mesh, options) {
 
       this.options |= options;
-      const idx = this.children.Add(mesh);
+      this.AddChild(mesh);
 
       if (mesh.type & MESH_TYPES_DBG.SECTION_MESH) { // Handle other sections
 
@@ -56,14 +53,11 @@ export class Section extends Mesh {
          else if (options & SECTION.ITEM_FIT) {
 
             CopyArr3(mesh.geom.pos, this.geom.pos);
-            // mesh.geom.pos[2] += 1;
          }
       }
       else { // Handle Items 
 
-         // CopyArr3(mesh.geom.pos, this.geom.pos);
          CopyArr2(this.geom.pos, mesh.geom.pos);
-         // mesh.geom.pos[2] += 1;
       }
    }
 
@@ -98,10 +92,10 @@ export class Section extends Mesh {
       let top = section.geom.pos[1]; // Top starting position
       let left = section.geom.pos[0]; // Left starting position
 
-      Calculate_sizes_recursive(section, top, left, options)
+      Calculate_sizes_recursive2(section, top, left, options)
       CopyArr2(section.geom.dim, section.max_size); // Set size for the root.
 
-      Calculate_positions_recursive(section, options);
+      Calculate_positions_recursive2(section, options);
 
       section.SetMargin()
       section.geom.pos[1] += section.margin[1];
@@ -133,12 +127,12 @@ export class Section extends Mesh {
 
    }
 
-   UpdateGfx(section) {
+   UpdateGfx(GFX_FLAGS, section) {
 
       this.UpdateGfxRecursive(section); // Looks like this approach is faster!!!?
       // this.UpdateGfxRecursive_bottomUpTraverse(section);
 
-      if (!section.gfx) section.GenGfx(); // Add any un-added meshes.
+      if (!section.gfx) section.GenGfxCtx(GFX_FLAGS, gfxidx); // Add any un-added meshes.
       section.UpdatePosXY(); // Update for the root
       section.UpdateDim(); // Update for the root
    }
@@ -155,7 +149,7 @@ export class Section extends Mesh {
       }
       else {
          // console.log(mesh.name)
-         mesh.GenGfx(); // Add any none-added meshes.
+         mesh.GenGfxCtx(FLAGS, gfxidx); // Add any none-added meshes.
       }
 
       for (let i = 0; i < mesh.children.count; i++) {
@@ -177,8 +171,6 @@ export class Section extends Mesh {
          if (child.children.active_count && child.type & MESH_TYPES_DBG.SECTION_MESH)
             this.UpdateGfxRecursive(child);
 
-         // console.log(child.geom.pos[1])
-
          if (child.gfx !== null) {
 
             if (child.type & MESH_TYPES_DBG.TEXT_MESH)
@@ -188,25 +180,21 @@ export class Section extends Mesh {
          }
          else {
             // console.log(mesh.name)
-            child.GenGfx(); // Add any none-added meshes.
+            child.GenGfxCtx(FLAGS, gfxidx); // Add any none-added meshes.
          }
       }
 
    }
 
+   GenGfxCtx(FLAGS, gfxidx){
+      
+      // this function must be at an interface class to the Graphics System(Gfx class).  
+      super.GenGfxCtx(FLAGS, gfxidx);
+   }
+   
+   AddToGfx(){
 
-   GenGfx(useSpecificVertexBuffer = GL_VB.ANY) {
-
-      const gfx = super.GenGfx(useSpecificVertexBuffer);
       super.AddToGfx();
-      // for (let i = this.children.count - 1; i >= 0; i--) {
-
-      //    const child = this.children.buffer[i];
-      //    if (child)
-      //       var ggg = child.GenGfx(sceneIdx, useSpecificVertexBuffer, vertexBufferIdx);
-      // }
-
-      return gfx;
    }
 
    SetMargin() {
@@ -232,7 +220,7 @@ export class Section extends Mesh {
              * That means that the timeInterval is created and destroyed upon 
              * onClickDown and onClickUp respectively.
              */
-            const idx = TimeIntervalsCreate(5, 'Move Section Mesh', TIME_INTERVAL_REPEAT_ALWAYS, Section_move_event, section);
+            const idx = TimeIntervalsCreate(5, 'Move Section Mesh', TIME_INTERVAL_REPEAT_ALWAYS, Section_move_event2, section);
             section.timeIntervalsIdxBuffer.Add(idx);
 
             if (section.StateCheck(MESH_STATE.IS_GRABABLE)) {
@@ -257,7 +245,7 @@ export class Section extends Mesh {
 
 }
 
-function Section_move_event(_params) {
+function Section_move_event2(_params) {
    /**
     * The function is called by the timeInterval.
     * The timeInterval has been set by the 'OnClick' event.
@@ -288,7 +276,7 @@ function Section_move_event(_params) {
 
 }
 
-function Expand(section, options) {
+function Expand2(section, options) {
 
    for (let i = 0; i < section.children.count; i++) {
 
@@ -304,7 +292,7 @@ function Expand(section, options) {
          }
       }
 
-      Expand(mesh, options)
+      Expand2(mesh, options)
 
       if (section.options & SECTION.VERTICAL) {
       }
@@ -313,7 +301,7 @@ function Expand(section, options) {
    }
 }
 
-function Calculate_positions_recursive(parent, options) {
+function Calculate_positions_recursive2(parent, options) {
 
    const padding = [0, 0]
    const cur_pos = [parent.geom.pos[0], parent.geom.pos[1]]
@@ -334,21 +322,22 @@ function Calculate_positions_recursive(parent, options) {
          if (mesh.type & MESH_TYPES_DBG.TEXT_MESH) {
 
             const num_chars = mesh.mat.num_faces
-            mesh.geom.pos[0] = cur_pos[0] - mesh.geom.dim[0] * num_chars + parent.pad[0] / 2;// Fixes the button mis-alignment
+            mesh.geom.pos[0] = cur_pos[0] - (mesh.geom.dim[0] * num_chars) + mesh.geom.dim[0];
             mesh.geom.pos[1] = cur_pos[1];
             mesh.geom.pos[2] = parent.geom.pos[2]+1;
             // console.log(mesh.name, mesh.geom.pos[2])
          }
          else {
             
-            mesh.geom.pos[0] = cur_pos[0] - mesh.geom.dim[0] * 3;// Fixes the button mis-alignment
+            // mesh.geom.pos[0] = cur_pos[0] - mesh.geom.dim[0] * 3;// Fixes the button mis-alignment
+            mesh.geom.pos[0] = cur_pos[0] - mesh.geom.dim[0];
             mesh.geom.pos[1] = cur_pos[1];// Fixes the button mis-alignment
             mesh.geom.pos[2] = parent.geom.pos[2]+1;
             // console.log(mesh.name, mesh.geom.pos[2])
          }
       }
 
-      Calculate_positions_recursive(mesh, options)
+      Calculate_positions_recursive2(mesh, options)
 
       if (parent.options & SECTION.VERTICAL) {
          cur_pos[1] += mesh.geom.dim[1] * 2
@@ -361,7 +350,7 @@ function Calculate_positions_recursive(parent, options) {
    return cur_pos;
 }
 
-function Calculate_sizes_recursive(section, top, left, options, accumulative_margin = [0, 0]) {
+function Calculate_sizes_recursive2(section, top, left, options, accumulative_margin = [0, 0]) {
 
    const padding = [0, 0]
    const margin = accumulative_margin;
@@ -374,7 +363,7 @@ function Calculate_sizes_recursive(section, top, left, options, accumulative_mar
 
          margin[1] += mesh.margin[1];
          margin[0] += mesh.margin[0];
-         Calculate_sizes_recursive(mesh, top, left, options, margin);
+         Calculate_sizes_recursive2(mesh, top, left, options, margin);
 
          mesh.geom.dim[0] = mesh.max_size[0]
          mesh.geom.dim[1] = mesh.max_size[1]

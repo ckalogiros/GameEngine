@@ -1,7 +1,6 @@
 "use strict";
 
 import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
-import { GlGenerateContext } from "../../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh, GlGetProgram } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
@@ -10,10 +9,10 @@ import { MouseGetPos } from "../../../Controls/Input/Mouse.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { Gfx_generate_context } from "../../../Interface/GfxContext.js";
 import { TimeIntervalsCreate } from "../../../Timers/TimeIntervals.js";
-import { Geometry2D } from "../../Geometry/Base/Geometry.js";
 import { Geometry2D_Text } from "../../Geometry/Geometry2DText.js";
-import { FontMaterial, Material } from "../../Material/Base/Material.js";
-import { MESH_ENABLE, Mesh, Recursive_gfx_operations, Text_Mesh } from "../Base/Mesh.js";
+import { FontMaterial } from "../../Material/Base/Material.js";
+import { MESH_ENABLE, Text_Mesh } from "../Base/Mesh.js";
+import { I_Text, Rect } from "../Rect.js";
 
 
 
@@ -60,37 +59,33 @@ function CalculateArea(text, _dim, pos, pad = [0, 0]) {
 /**
  * The difference with plain text is that a label draws the text inside a rect mesh
  */
-export class Widget_Label_Text_Mesh extends Mesh {
-// export class Widget_Label_Text_Mesh extends Text_Mesh {
+export class Widget_Label extends Rect {
 
-    type = 0;
     pad = [0, 0];
 
-    constructor(text, pos=[200, 300], fontSize, col = GREY3, textCol = WHITE, scale = [1, 1], pad = [0, 0], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [6, 5, 3]) {
+    constructor(text, pos=[200, 300], fontSize=8, col = BLACK, textCol = WHITE, scale = [1, 1], pad = [10, 5], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [0, 0, 0]) {
 
         const sdfouter = CalculateSdfOuterFromDim(fontSize);
         if (sdfouter + bold > 1) bold = 1 - sdfouter;
-        const textmat = new FontMaterial(textCol, font, text, [bold, sdfouter])
-        const textgeom = new Geometry2D_Text(pos, fontSize, scale, text, font);
+        
+        const textMesh = new I_Text(text, pos, fontSize)
 
-        const areaMetrics = CalculateArea(text, textgeom.dim, pos, pad)
-        const areageom = new Geometry2D(areaMetrics.pos, areaMetrics.dim, scale);
-        const areamat = new Material(col)
+        pos[0] -= pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
+        pos[2] -= 1; // In essence we set as the left (start of text label) the label area and not the left of text.
 
-        super(areageom, areamat);
 
-        textgeom.pos[0] += pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
-        textgeom.pos[1] += pad[1]; // In essence we set as the left (start of text label) the label area and not the left of text.
-        textgeom.pos[2] += 1; // In essence we set as the left (start of text label) the label area and not the left of text.
+        const areaMetrics = CalculateArea(text, textMesh.geom.dim, pos, pad)
+
+        super(areaMetrics.pos, areaMetrics.dim, col);
+
         
         this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
         this.SetStyle(style);
-
-        const textMesh = new Text_Mesh(textgeom, textmat);
+        
         textMesh.SetName();
         textMesh.SetSceneIdx(this.sceneIdx);
 
-        this.type |= MESH_TYPES_DBG.WIDGET_TEXT_LABEL | textgeom.type | textmat.type | areageom.type | areamat.type;
+        this.type |= MESH_TYPES_DBG.WIDGET_TEXT_LABEL | textMesh.type | this.geom.type | this.mat.type;
         this.SetName();
         this.pad = pad;
         this.AddChild(textMesh);
@@ -150,67 +145,21 @@ export class Widget_Label_Text_Mesh extends Mesh {
 
     //////////////////////////////////////////////////////////////
 
-    GenGfx(useSpecificVertexBuffer = GL_VB.ANY) {
+    GenGfxCtx(FLAGS, gfxidx) {
 
-        const gfx = []
-        gfx[0] = super.GenGfx();
-        for (let i = 0; i < this.children.count; i++) {
-            if(this.children.buffer[i])
-                gfx[i + 1] = this.children.buffer[i].GenGfx();
-        }
-
+        const gfx = super.GenGfxCtx(FLAGS, gfxidx);
         return gfx;
-
     }
 	
 	AddToGfx(){
         
         super.AddToGfx()
-        for(let i=0; i<this.children.count; i++){
-            
-            const child = this.children.buffer[i];
-			const gfxCopy = new GfxInfoMesh(this.children.buffer[0].gfx);
-            
-			child.geom.AddToGraphicsBuffer(child.sid, gfxCopy, child.name);
-			gfxCopy.vb.start = child.mat.AddToGraphicsBuffer(child.sid, gfxCopy);
-            
-		}
-
 	}
 
-    Listener_listen_mouse_hover() {
-        this.geom.Listener_listen_mouse_hover();
-    }
+    Align_pre(target_mesh, flags) { // Align pre-added to the vertexBuffers
 
-    BringToFront(z) {
-
-        this.geom.SetZindex(z, this.gfx)
-
-        if (this.children.count) {
-            const params = {
-                z: z + 1, // +1: more close than the label area.
-                numFaces: this.children.buffer[0].geom.num_faces, // A Label_Text class guarantees the first child (buffer[0]) to be the first character.
-            }
-            Recursive_gfx_operations(this, Bring_to_front, params)
-        }
-    }
-
-    SetDefaultZindex() {
-
-        this.geom.SetZindex(this.geom.zIndex, this.gfx)
-
-        if (this.children.count) {
-            const params = {
-                numFaces: this.children.buffer[0].geom.num_faces, // A Label_Text class guarantees the first child (buffer[0]) to be the first character.
-            }
-            Recursive_gfx_operations(this, Set_default_zindex, params)
-        }
-    }
-
-    Align_pre(mesh1, flags) { // Align pre-added to the vertexBuffers
-
-        const pos1 = mesh1.geom.pos;
-        const dim1 = mesh1.geom.dim;
+        const pos1 = target_mesh.geom.pos;
+        const dim1 = target_mesh.geom.dim;
         const pos2 = this.geom.pos;
         const dim2 = this.geom.dim;
 
@@ -240,17 +189,20 @@ export class Widget_Label_Text_Mesh extends Mesh {
 }
 
 
-export class Widget_Label_Dynamic_Text extends Widget_Label_Text_Mesh {
+export class Widget_Label_Dynamic_Text extends Widget_Label {
 
     /** Set the max number of characters for the dynamic text, 
      * by passing any text as 'maxDynamicTextChars' of length= dynamic text number of characters*/
-    constructor(text, maxDynamicTextChars, pos, fontSize, col, textcol, scale, pad, bold) {
+    constructor(text, maxDynamicTextChars, pos, fontSize=4, col, textcol, scale, pad=[10,10], bold) {
 
         super(text, pos, fontSize, col, textcol, scale, pad, bold);
 
         // Translate the dynamic text by the width of the constant text's width
-        pos[0] += (fontSize * 2 * text.length) + fontSize + pad[0];
-        const dynamicText = new Widget_Label_Text_Mesh(maxDynamicTextChars, pos, fontSize, col, textcol, scale, pad, bold);
+        CopyArr2(pos, this.geom.pos)
+        this.pad = [5,5]
+        pos[0] += this.geom.dim[0] + this.pad[0]*2;
+        
+        const dynamicText = new Widget_Label(maxDynamicTextChars, pos, fontSize, YELLOW_240_220_10, textcol, scale, this.pad, bold);
         dynamicText.SetName();
 
         this.AddChild(dynamicText)
@@ -259,33 +211,16 @@ export class Widget_Label_Dynamic_Text extends Widget_Label_Text_Mesh {
         this.SetName();
     }
 
-    GenGfx() {
+    GenGfxCtx(FLAGS, gfxidx) {
 
-        /** Add the constant text */
-        super.GenGfx();
-
-        /** Add the dynamic text to the graphics buffer */
-        const dynamicText = this.children.buffer[0];
-        // dynamicText.gfx = GlGenerateContext(dynamicText.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER);
-        dynamicText.gfx = Gfx_generate_context(dynamicText.sid, dynamicText.sceneIdx, GL_VB.ANY, dynamicText.mat,num_faces);
-        const prog = GlGetProgram(dynamicText.gfx.prog.idx);
-
-        if (dynamicText.sid.unif & SID.UNIF.BUFFER_RES) {
-            const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
-            prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
-            prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
-        }
-
-        return this.gfx;
+        const gfx = super.GenGfxCtx(FLAGS, gfxidx);
+        return gfx;
     }
-
-    AddToGfx(){
-
-        super.AddToGfx();
-        const dynamicText = this.children.buffer[0];
-        dynamicText.geom.AddToGraphicsBuffer(dynamicText.sid, dynamicText.gfx, dynamicText.name);
-        dynamicText.mat.AddToGraphicsBuffer(dynamicText.sid, dynamicText.gfx);
-    }
+	
+	AddToGfx(){
+        
+        super.AddToGfx()
+	}
 
     /**
       * 
@@ -337,13 +272,24 @@ export class Widget_Label_Dynamic_Text extends Widget_Label_Text_Mesh {
  * This is just to have a class named specific for menus text, like the popup menu,
  * so that we only use this kind of class for all menus with text.
  */
-export class Widget_Label_Text_Mesh_Menu_Options extends Widget_Label_Text_Mesh {
+export class Widget_Label_Text_Mesh_Menu_Options extends Widget_Label {
 
     constructor(text, pos, fontSize, col, textCol, scale, pad, bold, font, style) {
 
         super(text, pos, fontSize, col, textCol, scale, pad, bold, font, style)
         this.type |= MESH_TYPES_DBG.WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS;
     }
+
+    GenGfxCtx(FLAGS, gfxidx) {
+
+		const gfx = super.GenGfxCtx(FLAGS, gfxidx);
+		return gfx;
+	}
+
+	AddToGfx() {
+
+		super.AddToGfx()
+	}
 
     SetPos(pos) {
         super.SetPos(pos)
@@ -393,12 +339,12 @@ export class Widget_Label_Text_Mesh_Menu_Options extends Widget_Label_Text_Mesh 
 
 
 
-function Bring_to_front(mesh, params) {
+// function Bring_to_front(mesh, params) {
 
-    mesh.geom.SetZindex(params.z, mesh.gfx, params.numFaces)
-}
-function Set_default_zindex(mesh, params) {
+//     mesh.geom.SetZindex(params.z, mesh.gfx, params.numFaces)
+// }
+// function Set_default_zindex(mesh, params) {
 
-    const defZ = mesh.geom.zIndex;
-    mesh.geom.SetZindex(defZ, mesh.gfx, params.numFaces)
-}
+//     const defZ = mesh.geom.zIndex;
+//     mesh.geom.SetZindex(defZ, mesh.gfx, params.numFaces)
+// }

@@ -3,7 +3,7 @@ import { Geometry2D } from "./Drawables/Geometry/Base/Geometry.js";
 import { Geometry2D_Text } from "./Drawables/Geometry/Geometry2DText.js";
 import { FontMaterial, Material } from "./Drawables/Material/Base/Material.js";
 import { MESH_ENABLE, Mesh, Text_Mesh } from "./Drawables/Meshes/Base/Mesh.js";
-import { Gfx_generate_context2 } from "./Interface/GfxCtx2.js"; 
+import { Gfx_generate_context } from "./Interface/GfxContext.js"; 
 
 
 export class T_Rect extends Mesh{
@@ -119,7 +119,6 @@ export class T_Label extends T_Rect{
       
       // this function must be at an interface class to the Graphics System(Gfx class).  
       super.GenGfxCtx(FLAGS, gfxidx);
-      console.log(this.name, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.vb.start)
    }
 
    /** This should be called from the mesh.Render() */
@@ -216,13 +215,11 @@ export class T_Slider extends T_Rect{
    GenGfxCtx(FLAGS, gfxIdx){
 
       super.GenGfxCtx(FLAGS, gfxIdx);
-
    }
 
    AddToGfx(){
 
       super.AddToGfx()
-
    }
 
    /** Private Methods */
@@ -331,13 +328,13 @@ export class T_Slider extends T_Rect{
 //        * Text 
 //        */
 //       // Create slider_name_text
-//       const slider_name_text = new Widget_Text_Mesh('Slider', pos, fontSize, [1, 1], GREEN_140_240_10, .4);
+//       const slider_name_text = new Widget_Text('Slider', pos, fontSize, [1, 1], GREEN_140_240_10, .4);
 //       slider_name_text.SetName()
 //       this.AddChild(slider_name_text);
 
 //       pos[0] += this.geom.dim[0] * 2;
 //       // Create slider_value_text
-//       const slider_value_text = new Widget_Text_Mesh('0000', pos, fontSize, [1, 1], YELLOW_240_220_10, .4);
+//       const slider_value_text = new Widget_Text('0000', pos, fontSize, [1, 1], YELLOW_240_220_10, .4);
 //       slider_value_text.SetName();
 //       slider_value_text.geom.pos[0] -= slider_value_text.CalcTextWidth();
       
@@ -353,23 +350,23 @@ export class T_Slider extends T_Rect{
 
 //    }
 
-//    GenGfx() {
+//    GenGfxCtx() {
 
 //       /**
 //        * TODO: Implement an automatic adding to the graphics pipeline.
 //        */
-//       const gfx = super.GenGfx();
+//       const gfx = super.GenGfxCtx();
 
 //       const bar = this.children.buffer[BAR_IDX];
 //       const handle = bar.children.buffer[0];
-//       bar.GenGfx();
-//       handle.GenGfx();
+//       bar.GenGfxCtx();
+//       handle.GenGfxCtx();
 
 //       const slider_name_text = this.children.buffer[1];
-//       slider_name_text.GenGfx();
+//       slider_name_text.GenGfxCtx();
 
 //       const slider_value_text = bar.children.buffer[1];
-//       slider_value_text.GenGfx();
+//       slider_value_text.GenGfxCtx();
 
 //       return gfx;
 

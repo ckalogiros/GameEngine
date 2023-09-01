@@ -2,10 +2,10 @@
 
 import { Check_intersection_point_rect } from "../../../../Collisions.js";
 import { MouseGetPos } from "../../../../Controls/Input/Mouse.js";
-import { Gfx_activate, Gfx_deactivate, Gfx_end_session, Request_private_gfx_ctx } from "../../../../Interface/GfxContext.js";
+import { Gfx_activate, Gfx_deactivate, Gfx_end_session } from "../../../../Interface/GfxContext.js";
 import { Geometry2D } from "../../../Geometry/Base/Geometry.js";
 import { MESH_ENABLE, Mesh, } from "../../Base/Mesh.js";
-import { Widget_Button_Mesh } from "../WidgetButton.js";
+import { Widget_Button } from "../WidgetButton.js";
 
 
 
@@ -27,7 +27,7 @@ export class Widget_Menu_Bar extends Mesh{
       
       pos[2] += 1; // Put in front of the bar.
 
-      const btn = new Widget_Button_Mesh(text, pos, fontSize, col, textCol, scale, pad, bold, font, style);
+      const btn = new Widget_Button(text, pos, fontSize, col, textCol, scale, pad, bold, font, style);
       btn.Align_pre(this, ALIGN.VERT_CENTER | ALIGN.RIGHT);
 
       const params = {
@@ -46,15 +46,15 @@ export class Widget_Menu_Bar extends Mesh{
       console.log('DESTROY!!!')
    }
 
-   GenGfx() {
+   GenGfxCtx(FLAGS, gfxidx) {
 
       const gfx = []
-      gfx[0] = super.GenGfx();
+      gfx[0] = super.GenGfxCtx(FLAGS, gfxidx);
 
       for(let i=0; i<this.children.count; i++){
 
          const child = this.children.buffer[i];
-         child.GenGfx();
+         child.GenGfxCtx(FLAGS, gfxidx);
       }
 
       return gfx;
@@ -62,7 +62,7 @@ export class Widget_Menu_Bar extends Mesh{
 } 
 
 
-export class Widget_Minimize extends Widget_Button_Mesh{
+export class Widget_Minimize extends Widget_Button{
 
    restore_pos;
    toggle;
@@ -113,7 +113,7 @@ export class Widget_Minimize extends Widget_Button_Mesh{
                mesh.children.buffer[0].CreateListenEvent(LISTEN_EVENT_TYPES.CHOVER)
                mesh.toggle = true;
 
-               mesh.minimized_mesh = new Widget_Button_Mesh('Minimized', mesh.geom.pos, 3, mesh.mat.col, WHITE);
+               mesh.minimized_mesh = new Widget_Button('Minimized', mesh.geom.pos, 3, mesh.mat.col, WHITE);
                mesh.minimized_mesh.SetName('minimized_mesh')
                Request_private_gfx_ctx(mesh.minimized_mesh, GFX_CTX_FLAGS.INACTIVE | GFX_CTX_FLAGS.PRIVATE, INT_NULL, INT_NULL);
                console.log(mesh.gfx)

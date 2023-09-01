@@ -54,7 +54,7 @@ export class Event_Listener {
             console.log()
             const success = this.event_type[TYPE_IDX].buffer[i].Clbk(dispatch_params);
             if (success) {
-               // console.log(this.event_type[TYPE_IDX].buffer[i].source_params.name)
+               console.log(this.event_type[TYPE_IDX].buffer[i].source_params.name)
                break;
 
             }

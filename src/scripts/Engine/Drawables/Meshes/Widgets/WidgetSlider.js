@@ -1,19 +1,15 @@
 "use strict";
 
-import { CopyArr3 } from '../../../../Helpers/Math/MathOperations.js';
-import { Bind_change_brightness } from '../../../BindingFunctions.js';
 import { Check_intersection_point_rect } from '../../../Collisions.js';
 import { MouseGetPos } from '../../../Controls/Input/Mouse.js';
-import { FontGetFontDimRatio } from '../../../Loaders/Font/Font.js';
-import { Scenes_get_children } from '../../../Scenes.js';
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from '../../../Timers/TimeIntervals.js';
 import { Geometry2D } from '../../Geometry/Base/Geometry.js';
 import { Material } from '../../Material/Base/Material.js';
 import { MESH_ENABLE, Mesh } from '../Base/Mesh.js';
-import { Widget_Switch_Mesh } from './WidgetButton.js';
-import { Widget_Label_Text_Mesh_Menu_Options } from './WidgetLabelText.js';
+import { I_Text, Rect } from '../Rect.js';
+import { Widget_Label } from './WidgetLabel.js';
 import { Widget_popup_handler_onclick_event } from './WidgetPopup.js';
-import { Widget_Text_Mesh } from './WidgetText.js';
+import { Widget_Text } from './WidgetText.js';
 
 /**
  * Slider's tree structure
@@ -35,96 +31,81 @@ import { Widget_Text_Mesh } from './WidgetText.js';
 
 let BAR_IDX = INT_NULL;
 
-export class Widget_Slider extends Mesh {
+// export class Widget_Slider extends Mesh {
+export class Widget_Slider extends Rect {
 
    constructor(pos, dim, color, hover_margin = [0,0]) {
 
-      const geom = new Geometry2D(pos, dim);
-      const mat = new Material(color)
+      super(pos, dim, color)
 
-      super(geom, mat);
-
-      this.type |= MESH_TYPES_DBG.WIDGET_SLIDER | geom.type | mat.type;
+      this.type |= MESH_TYPES_DBG.WIDGET_SLIDER | this.geom.type | this.mat.type;
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       this.SetStyle([1, 8, 3]);
-      this.SetName('Widget_Slider');
+      this.SetName('Slider');
 
 
-      /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-       * Slider Bar: Bar is child of the slider mesh
-       */
       // Calculate the bar's and handle's horizontal pading.
       const ratio = dim[0] / dim[1];
       const pad = [dim[0] * 0.5, dim[1] / 2.8];
       pad[0] /= ratio;
-
+      
+      /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+       * Slider Bar: Bar is child of the slider mesh
+       */
       // Calculate bar's dimentions and position.
       const barpos = [this.geom.pos[0], this.geom.pos[1], this.geom.pos[2]]
       const barMetrics = this.#CalculateBarArea(barpos, this.geom.dim, pad)
 
-      // Create slider_bar mesh 
-      const bargeom = new Geometry2D(barMetrics.pos, barMetrics.dim);
-      const barmat = new Material(YELLOW_240_240_10)
-      const bar = new Mesh(bargeom, barmat);
+      const bar = new Rect(barMetrics.pos, barMetrics.dim, YELLOW_240_240_10);
 
-      bar.type |= MESH_TYPES_DBG.WIDGET_SLIDER_BAR | bargeom | barmat;
+      bar.type |= MESH_TYPES_DBG.WIDGET_SLIDER_BAR | bar.geom | bar.mat;
       bar.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       bar.SetStyle([0, 3, 2]);
       bar.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_HOVER_COLORABLE | MESH_STATE.HAS_POPUP);
       bar.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick)
       bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-
-      bar.SetName();
-      BAR_IDX = this.AddChild(bar);
+      bar.SetName('Bar');
 
 
       /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
        * Slider Handle: Handle is a child of the bar mesh
        */
       pad[1] = dim[1] / 10;
-      const handleMetrics = this.#CalculateHandleArea(bargeom.pos, this.geom.dim, pad)
+      const handleMetrics = this.#CalculateHandleArea(bar.geom.pos, this.geom.dim, pad)
 
-      // Create hndle_bar mesh 
-      const handlegeom = new Geometry2D(handleMetrics.pos, handleMetrics.dim);
-      const handlemat = new Material(YELLOW_240_220_10)
-      const handle = new Mesh(handlegeom, handlemat);
+      const handle = new Rect(handleMetrics.pos, handleMetrics.dim, YELLOW_240_220_10);
 
+      handle.type |= MESH_TYPES_DBG.WIDGET_SLIDER_HANDLE | handle.geom | handle.mat;
       handle.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       handle.SetStyle([5, 35, 3]);
       handle.StateEnable(MESH_STATE.IS_MOVABLE);
-      handle.SetName();
-      handle.type |= MESH_TYPES_DBG.WIDGET_SLIDER_HANDLE | handlegeom | handlemat;
+      handle.SetName('handle');
 
-      bar.AddChild(handle); // The handle is added as a child to the bar mesh.
 
-      /**
+      // Calculate the font size of the sliders texts, base on the sliders dimentions
+      const min_font_size = 4.5, max_font_size = 10;
+      const fontSize = max_font_size < (dim[1] / 3) ? max_font_size : (min_font_size > (dim[1] / 3) ? min_font_size : (dim[1] / 3));
+      // Alignment for the name_text mesh
+      pos[0] -= this.geom.dim[0];
+      pos[1] -= this.geom.dim[1] + fontSize + 4;
+      
+      
+      /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
        * Text Meshes
        * Create slider_name_text and slider_value_text.
        * Text's are children of the slider mesh
        */
-      const min_font_size = 4.5, max_font_size = 10;
-      const fontSize = max_font_size < (dim[1] / 3) ? max_font_size : (min_font_size > (dim[1] / 3) ? min_font_size : (dim[1] / 3));
-      pos[0] -= this.geom.dim[0];
-      pos[1] -= this.geom.dim[1] + fontSize + 4;
-
-
-      /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-       * Text 
-       */
       // Create slider_name_text
-      const slider_name_text = new Widget_Text_Mesh('Slider', pos, fontSize, [1, 1], GREEN_140_240_10, .4);
-      slider_name_text.SetName()
-      this.AddChild(slider_name_text);
+      const name_text = new I_Text('Slider', pos, fontSize, [1, 1], GREEN_140_240_10, .4);
+      name_text.SetName(this.name + ' - name_text')
 
-      pos[0] += this.geom.dim[0] * 2;
-      // Create slider_value_text
-      const slider_value_text = new Widget_Text_Mesh('0000', pos, fontSize, [1, 1], YELLOW_240_220_10, .4);
-      slider_value_text.SetName();
-      slider_value_text.geom.pos[0] -= slider_value_text.CalcTextWidth();
+      pos[0] += this.geom.dim[0] * 2; // Alignment for the value_text mesh
+
+      // Create value_text
+      const value_text = new I_Text('0000', pos, fontSize, [1, 1], YELLOW_240_220_10, .4);
+      value_text.SetName(this.name + ' - value_text');
+      value_text.geom.pos[0] -= value_text.CalcTextWidth();
       
-      // Let bar handle the value text, because the mesh bar has the hover listener.
-      bar.AddChild(slider_value_text);
-
 
       // Make the vertical area of the bar larger for hover and handle moving.
       if(hover_margin)
@@ -132,45 +113,21 @@ export class Widget_Slider extends Mesh {
       else
          bar.hover_margin = handle.geom.dim[1] - bar.geom.dim[1];
 
+      BAR_IDX = this.AddChild(bar)
+      this.AddChild(name_text)
+      bar.AddChild(handle)
+      bar.AddChild(value_text)
+
    }
 
-   GenGfx() {
+   GenGfxCtx(FLAGS, gfxIdx){
 
-      /**
-       * TODO: Implement an automatic adding to the graphics pipeline.
-       */
-      const gfx = super.GenGfx();
-
-      const bar = this.children.buffer[BAR_IDX];
-      const handle = bar.children.buffer[0];
-      bar.GenGfx();
-      handle.GenGfx();
-
-      const slider_name_text = this.children.buffer[1];
-      slider_name_text.GenGfx();
-
-      const slider_value_text = bar.children.buffer[1];
-      slider_value_text.GenGfx();
-
-      return gfx;
-
+      super.GenGfxCtx(FLAGS, gfxIdx);
    }
 
    AddToGfx(){
 
-      super.AddToGfx();
-
-      const bar = this.children.buffer[BAR_IDX];
-      const handle = bar.children.buffer[0];
-      bar.AddToGfx();
-      handle.AddToGfx();
-
-      const slider_name_text = this.children.buffer[1];
-      slider_name_text.AddToGfx();
-
-      // const slider_value_text = this.children.buffer[2];
-      const slider_value_text = bar.children.buffer[1];
-      slider_value_text.AddToGfx();
+      super.AddToGfx()
    }
 
    SetMenuOptionsClbk(ClbkFunction) {
@@ -469,7 +426,7 @@ function Geometry2D_set_posx(params) {
 //       ERROR_NULL(mesh)
 
 //       if (i === 0)
-//          var option = new Widget_Switch_Mesh(pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
+//          var option = new Widget_Switch(pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
 //       else
 //          var option = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${mesh.id}`, pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
 

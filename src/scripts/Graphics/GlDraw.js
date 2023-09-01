@@ -42,7 +42,8 @@ export function GlDraw(gl) {
         const vb = progs[progIdx].vertexBuffer[vbIdx];
         const ib = progs[progIdx].indexBuffer[vbIdx];
         
-        if(GL.BOUND_VAO !== ib.vao) GlBindVAO(ib.vao)
+        if(GL.BOUND_VAO !== ib.vao) 
+        GlBindVAO(ib.vao)
         
         if (progs[progIdx].sid.attr & SID.ATTR.TEX2) {
             if (vb.texIdx !== INT_NULL) {

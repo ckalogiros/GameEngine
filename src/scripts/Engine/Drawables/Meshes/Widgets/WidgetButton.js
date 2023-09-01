@@ -2,18 +2,28 @@
 
 import { Check_intersection_point_rect } from '../../../Collisions.js';
 import { MouseGetPos } from '../../../Controls/Input/Mouse.js';
-import { Gfx_generate_context2 } from '../../../Interface/GfxCtx2.js';
-import { Widget_Label_Text_Mesh } from './WidgetLabelText.js';
+import { Gfx_generate_context } from '../../../Interface/GfxContext.js';
+import { Widget_Label } from './WidgetLabel.js';
 
-export class Widget_Button_Mesh extends Widget_Label_Text_Mesh {
+export class Widget_Button extends Widget_Label {
 
-   constructor(text, pos, fontSize = 10, color = GREY3, colorText = WHITE, scale = [1, 1], pad, bold, font, style) {
+   constructor(text, pos, fontSize = 10, color = BLUE_10_120_220, colorText = WHITE, scale = [1, 1], pad, bold, font, style) {
 
       super(text, pos, fontSize, color, colorText, scale, pad, bold, font, style)
 
       this.type |= MESH_TYPES_DBG.WIDGET_BUTTON;
       this.SetName();
 
+   }
+   
+   GenGfxCtx(FLAGS=GFX.ANY, gfxIdx){
+
+      super.GenGfxCtx(FLAGS, gfxIdx);
+   }
+
+   AddToGfx(){
+
+      super.AddToGfx()
    }
 
    OnClick(params) {
@@ -45,21 +55,10 @@ export class Widget_Button_Mesh extends Widget_Label_Text_Mesh {
       params.mesh.children.buffer[0].SetZindex(params.z)
    }
 
-   GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
-
-
-      super.GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]);
-      // this.gfx = Gfx_generate_context2(this.sid, this.sceneIdx, this.mat.num_faces, FLAGS, gfxidx);
-
-
-
-      return this.gfx;
-  }
-
 }
 
 
-export class Widget_Switch_Mesh extends Widget_Button_Mesh {
+export class Widget_Switch extends Widget_Button {
 
    isOn;
    state_text;
@@ -104,7 +103,7 @@ export class Widget_Switch_Mesh extends Widget_Button_Mesh {
                   /*FOR DEBUG*/clicked_mesh: mesh,
             }
             const EventClbk = params.target_params.EventClbk;
-            // console.log('OnClick callback IN. meshId ', mesh.id)
+            console.log('OnClick callback IN. meshId ', mesh.id)
             EventClbk(target_params);
             // console.log('OnClick callback OUT. meshId ', mesh.id)
          }

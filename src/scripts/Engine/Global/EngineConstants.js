@@ -479,11 +479,11 @@ function GetMeshNameFromType(type) {
 	if (type & MESH_TYPES_DBG.SECTION_MESH) { meshType.push('SECTION_MESH'); }
 	
 	if (type & MESH_TYPES_DBG.WIDGET_GENERIC) { meshType.push('WIDGET_GENERIC'); }
-	if (type & MESH_TYPES_DBG.WIDGET_TEXT_LABEL) { meshType.push('Widget_Label_Text_Mesh'); }
+	if (type & MESH_TYPES_DBG.WIDGET_TEXT_LABEL) { meshType.push('Widget_Label'); }
 	if (type & MESH_TYPES_DBG.Widget_Label_Text_Mesh_Menu_Options) { meshType = 'Widget_Label_Text_Mesh_Menu_Options'; }
-	if (type & MESH_TYPES_DBG.WIDGET_BUTTON) { meshType.push('Widget_Button_Mesh'); }
-	if (type & MESH_TYPES_DBG.WIDGET_SWITCH) { meshType.push('Widget_Switch_Mesh'); }
-	if (type & MESH_TYPES_DBG.WIDGET_TEXT) { meshType.push('Widget_Text_Mesh'); }
+	if (type & MESH_TYPES_DBG.WIDGET_BUTTON) { meshType.push('Widget_Button'); }
+	if (type & MESH_TYPES_DBG.WIDGET_SWITCH) { meshType.push('Widget_Switch'); }
+	if (type & MESH_TYPES_DBG.WIDGET_TEXT) { meshType.push('Widget_Text'); }
 	if (type & MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC) { meshType.push('Widget_Dynamic_Text_Mesh'); }
 	if (type & MESH_TYPES_DBG.WIDGET_SLIDER) { meshType.push('WIDGET_SLIDER'); }
 	if (type & MESH_TYPES_DBG.WIDGET_SLIDER_BAR) { meshType.push('WIDGET_SLIDER_BAR'); }

@@ -8,7 +8,7 @@
      * and automatic selection to add to a private buffer, by 'GlGenerateContext()', is prohibited.
      * The core reason of private buffers is to have control over the vertexBuffer rendering (Render: On/Off).
      * By setting the vb to be private, the only way to add to that buffer is by 
-     * passing "useSpecificVertexBuffer = GL_VB.SPECIFIC, vertexBufferIdx = 'the private buffer index'" 
+     * passing "FLAGS = GL_VB.SPECIFIC, vertexBufferIdx = 'the private buffer index'" 
      * upon drawable's 'AddToGraphicsBuffer()' function.
      */
 

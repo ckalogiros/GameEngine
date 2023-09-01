@@ -4,7 +4,6 @@ import { AnimationsGet } from './Animations/Animations.js';
 import { M_Buffer } from './Core/Buffers.js';
 import { HandleEvents } from './Events/Events.js';
 import { __pt5, __pt6 } from './Timers/PerformanceTimers.js';
-import { FpsGet } from './Timers/Time.js';
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *  LOGIC:
@@ -66,28 +65,33 @@ export class Scene {
         // Update uniform values for gl Program
 
         /** Run Animations */
-        // animations.Run();
+        animations.Run();
 
         /** Handle Events */
         HandleEvents();
     }
 
-    AddMesh(mesh) {
+    AddMesh(mesh, FLAGS=GFX.ANY, gfxidx) {
 
         if (!mesh || mesh === undefined) {
             console.error('Mesh shouldn\'t be undefined. @ class Scene.AddMesh().');
             return;
         }
 
-        // Here we add the mesh into the graphics buffers
-        const gfx = mesh.GenGfx(this.sceneIdx);
-        this.StoreGfxInfo(gfx);
-
+        mesh.sceneIdx = this.sceneIdx;
+        mesh.GenGfxCtx(FLAGS, gfxidx);
+        this.StoreGfxInfo(mesh.gfx);
         this.StoreMesh(mesh);
+        return mesh.gfx;
+    }
 
-        mesh.AddToGfx();
+    Render(){
 
-        return gfx;
+        for(let i=0; i<this.children.count; i++){
+
+            const mesh = this.children.buffer[i];
+            mesh.AddToGfx();
+        }
     }
 
     RemoveMesh(mesh){
@@ -99,6 +103,7 @@ export class Scene {
     StoreMesh(mesh) {
 
         const idx = this.children.Add(mesh);
+        mesh.parent = this;
         mesh.idx = idx;
     }
 
@@ -221,7 +226,7 @@ export function ScenesPrintSceneMeshes(array) {
     for (let i = 0; i < array.count; i++) {
 
         const mesh = array.buffer[i];
-        console.log(i, GetMeshHighOrderNameFromType(mesh.type))
+        console.log(i, mesh.name)
 
         total_count++;
     }

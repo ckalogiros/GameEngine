@@ -1,4 +1,4 @@
-import { GlGetProgram, GlGetPrograms, GlGetProgramsCnt } from "../../../Graphics/GlProgram.js";
+import { GlGetPrograms, GlGetProgramsCnt } from "../../../Graphics/GlProgram.js";
 
 const MAX_DRAWQUEUE_COUNT = 32; // Number of Gl programs for the queue  
 

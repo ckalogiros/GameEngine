@@ -3,13 +3,12 @@ import { GlSetAttrTime, GlSetTex } from "../../../../Graphics/Buffers/GlBufferOp
 import { GfxSetVbRender } from "../../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh, GlGetProgram } from "../../../../Graphics/GlProgram.js";
 import { Int8Buffer, Int8Buffer2, M_Buffer } from "../../../Core/Buffers.js";
-import { FontGetFontDimRatio, FontGetUvCoords } from "../../../Loaders/Font/Font.js";
+import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { TimerGetGlobalTimer } from "../../../Timers/Timers.js";
 import { Listener_create_event, Listener_remove_event } from "../../../Events/EventListeners.js";
 import { CopyArr3, CopyArr4 } from "../../../../Helpers/Math/MathOperations.js";
 import { Scenes_get_count, Scenes_get_scene_by_idx } from "../../../Scenes.js";
 import { Gfx_generate_context } from "../../../Interface/GfxContext.js";
-import { Gfx_generate_context2 } from "../../../Interface/GfxCtx2.js";
 
 
 
@@ -35,13 +34,6 @@ export const MESH_ENABLE = {
     },
 }
 
-_cnt = 0;
-const LISTENER_EVENT_FUNCS_INDEXES = {
-    SCALE_ANIMATION: _cnt++,
-    DIM_COLOR_ANIMATION: _cnt++,
-};
-
-
 
 class BitMask {
 
@@ -58,7 +50,6 @@ class BitMask {
 
 }
 
-class Bit_Mask { mask = 0; }
 
 let _meshId = 0;
 export class Mesh {
@@ -168,8 +159,8 @@ export class Mesh {
 
     AddChild(mesh) {
 
-        mesh.parent = this;
         mesh.idx = this.children.Add(mesh);
+        mesh.parent = this;
         return mesh.idx;
     }
 
@@ -229,35 +220,11 @@ export class Mesh {
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * GRAPHICS
      */
-    GenGfx(useSpecificVertexBuffer = GL_VB.ANY) {
 
-
-        this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, useSpecificVertexBuffer, this.mat.num_faces);
-
-        const prog = GlGetProgram(this.gfx.prog.idx);
-        if (this.sid.unif & SID.UNIF.BUFFER_RES) {
-            const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
-            prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
-            prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
-        }
-
-        // Set Texture if this is a textured this.
-        if (this.mat.texId !== INT_NULL) { // texId is init with INT_NULL that means there is no texture passed to the Material constructor.
-
-            // Set font parameters if this is a text this.
-            if (this.mat.hasFontTex) {
-                this.isFontSet = true;
-                // Correct the text face height by calculating the ratio from the current font metrics.
-                this.geom.dim[1] *= FontGetFontDimRatio(this.mat.uvIdx);
-            }
-        }
-
-        return this.gfx;
-    }
     GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
 
 
-        this.gfx = Gfx_generate_context2(this.sid, this.sceneIdx, this.mat.num_faces, FLAGS, gfxidx);
+        this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, this.mat.num_faces, FLAGS, gfxidx);
 
         const prog = GlGetProgram(this.gfx.prog.idx);
         if (this.sid.unif & SID.UNIF.BUFFER_RES) {
@@ -272,8 +239,6 @@ export class Mesh {
             // Set font parameters if this is a text this.
             if (this.mat.hasFontTex) {
                 this.isFontSet = true;
-                // Correct the text face height by calculating the ratio from the current font metrics.
-                // this.geom.dim[1] *= FontGetFontDimRatio(this.mat.uvIdx);
             }
         }
 
@@ -568,22 +533,19 @@ function ReconstructListenersRecursive(mesh){
 export class Text_Mesh extends Mesh {
 
     isFontSet;
-    // num_faces;
 
     constructor(geom, mat) {
 
         super(geom, mat);
+
         this.isFontSet = false;
-
         this.sceneIdx = STATE.scene.active_idx;
-        // this.num_faces = 0;
-
         this.type |= MESH_TYPES_DBG.TEXT_MESH;
     }
 
-    GenGfx(useSpecificVertexBuffer = GL_VB.ANY) {
+    GenGfx(FLAGS = GL_VB.ANY) {
 
-        this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, useSpecificVertexBuffer, this.mat.num_faces);
+        this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, FLAGS, this.mat.num_faces);
 
         const prog = GlGetProgram(this.gfx.prog.idx);
         if (this.sid.unif & SID.UNIF.BUFFER_RES) {
@@ -598,7 +560,7 @@ export class Text_Mesh extends Mesh {
     GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
 
 
-        this.gfx = Gfx_generate_context2(this.sid, this.sceneIdx, this.mat.num_faces, FLAGS, gfxidx);
+        this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, this.mat.num_faces, FLAGS, gfxidx);
 
         const prog = GlGetProgram(this.gfx.prog.idx);
         if (this.sid.unif & SID.UNIF.BUFFER_RES) {

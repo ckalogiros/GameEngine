@@ -1,17 +1,14 @@
 "use strict";
 
 import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
-import { GfxInfoMesh, GlGetProgram } from "../../../../Graphics/GlProgram.js";
+import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr2, CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../../Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
-import { Gfx_generate_context } from "../../../Interface/GfxContext.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx, TimeIntervalsGetByIdx } from "../../../Timers/TimeIntervals.js";
-import { Geometry2D_Text } from "../../Geometry/Geometry2DText.js";
-import { FontMaterial } from "../../Material/Base/Material.js";
-import { Text_Mesh } from "../Base/Mesh.js";
+import { I_Text } from "../Rect.js";
 
 /**
  * 
@@ -20,20 +17,29 @@ import { Text_Mesh } from "../Base/Mesh.js";
  * 1. live in an if statment (if(fontType is sdf))
  * 2. move the function to the parent class instead of call it from all children classes of Text_Mesh
  */
-export class Widget_Text_Mesh extends Text_Mesh {
+export class Widget_Text extends I_Text {
 
 	pad = [0, 0];
 
-	constructor(text, pos, fontSize = 10, scale = [1, 1], color = WHITE, bold = 4, font = TEXTURES.SDF_CONSOLAS_LARGE) {
+	constructor(text, pos, fontSize = 5, scale = [1, 1], color = WHITE, bold = 4, font = TEXTURES.SDF_CONSOLAS_LARGE) {
 
 		const sdfouter = CalculateSdfOuterFromDim(fontSize);
 		if (sdfouter + bold > 1) bold = 1 - sdfouter;
-		const mat = new FontMaterial(color, font, text, [bold, sdfouter])
-		const geom = new Geometry2D_Text(pos, fontSize, scale, text, font);
-		super(geom, mat);
 
-		this.type |= MESH_TYPES_DBG.WIDGET_TEXT | geom.type | mat.type;
+		super(text, pos, fontSize, scale, color)
+		this.type |= MESH_TYPES_DBG.WIDGET_TEXT | this.type;
 
+	}
+
+	GenGfxCtx(FLAGS, gfxidx) {
+
+		const gfx = super.GenGfxCtx(FLAGS, gfxidx);
+		return gfx;
+	}
+
+	AddToGfx() {
+
+		super.AddToGfx()
 	}
 
 	Align(flags) { // Align pre-added to the vertexBuffers
@@ -78,7 +84,7 @@ export class Widget_Text_Mesh extends Text_Mesh {
 				 * That means that the timeInterval is created and destroyed upon 
 				 * onClickDown and onClickUp respectively.
 				 */
-				const idx = TimeIntervalsCreate(10, 'Move Widget_Text_Mesh', TIME_INTERVAL_REPEAT_ALWAYS, mesh.OnMove, mesh);
+				const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, mesh.OnMove, mesh);
 				mesh.timeIntervalsIdxBuffer.Add(idx);
 
 				if (mesh.StateCheck(MESH_STATE.IS_GRABABLE)) {
@@ -123,7 +129,7 @@ export class Widget_Text_Mesh extends Text_Mesh {
 
 let DYN_TEXT_UPDATE_INTERVAL_IDX = INT_NULL;
 
-export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
+export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 
 
 	/** The 'maxDynamicTextChars' sets the max number of characters for the dynamic text.
@@ -139,55 +145,66 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 
 	}
 
-	GenGfx() {
+	GenGfxCtx(FLAGS, gfxidx) {
 
-		let total_char_count = this.mat.num_faces;
-		for (let i = 0; i < this.children.count; i++)
-			total_char_count += this.children.buffer[i].mat.num_faces;
-
-		// this.gfx = GlGenerateContext(this.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER, total_char_count);
-		this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, GL_VB.ANY, total_char_count);
-
-		const prog = GlGetProgram(this.gfx.prog.idx);
-		if (this.sid.unif & SID.UNIF.BUFFER_RES) {
-			const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
-			prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
-			prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
-		}
-
-		return this.gfx;
+		const gfx = super.GenGfxCtx(FLAGS, gfxidx);
+		return gfx;
 	}
 
 	AddToGfx() {
 
-		const start = super.AddToGfx()
-		let gfxCopy = new GfxInfoMesh(this.gfx);
-		gfxCopy.vb.start = start;
-
-		for (let i = 0; i < this.children.count; i++) {
-
-			const child = this.children.buffer[i];
-			child.gfx = new GfxInfoMesh(gfxCopy);
-
-			child.geom.AddToGraphicsBuffer(this.sid, gfxCopy, this.name);
-			gfxCopy.vb.start = child.mat.AddToGraphicsBuffer(this.sid, gfxCopy);
-
-		}
-
+		super.AddToGfx()
 	}
 
-	CreateNewText(maxDynamicTextChars, fontSize, color2, pad, bold) {
+	// GenGfxCtx() {
 
-		if(!Array.isArray(pad)) console.error; /** DEBUG */
+	// 	let total_char_count = this.mat.num_faces;
+	// 	for (let i = 0; i < this.children.count; i++)
+	// 		total_char_count += this.children.buffer[i].mat.num_faces;
+
+	// 	// this.gfx = GlGenerateContext(this.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER, total_char_count);
+	// 	this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, GL_VB.ANY, total_char_count);
+
+	// 	const prog = GlGetProgram(this.gfx.prog.idx);
+	// 	if (this.sid.unif & SID.UNIF.BUFFER_RES) {
+	// 		const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
+	// 		prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
+	// 		prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
+	// 	}
+
+	// 	return this.gfx;
+	// }
+
+	// AddToGfx() {
+
+	// 	const start = super.AddToGfx()
+	// 	let gfxCopy = new GfxInfoMesh(this.gfx);
+	// 	gfxCopy.vb.start = start;
+
+	// 	for (let i = 0; i < this.children.count; i++) {
+
+	// 		const child = this.children.buffer[i];
+	// 		child.gfx = new GfxInfoMesh(gfxCopy);
+
+	// 		child.geom.AddToGraphicsBuffer(this.sid, gfxCopy, this.name);
+	// 		gfxCopy.vb.start = child.mat.AddToGraphicsBuffer(this.sid, gfxCopy);
+
+	// 	}
+
+	// }
+
+	CreateNewText(maxDynamicTextChars, fontSize, color2, pad=this.pad, bold=this.bold) {
+
+		if (!Array.isArray(pad)) console.error; /** DEBUG */
 		this.pad = pad;
 
 		let pos = [0, 0, 0];
-		// Get the last child mesh (suppose to be dynamicText)
+		// Get the last child mesh (suppose to be dynamicText).
 		if (this.children.buffer !== null) {
 
 			const lastChild = this.children.buffer[this.children.count - 1];
 			ERROR_NULL(lastChild, ' @ Widget_Dynamic_Text_Mesh.CreateNewText(). WidgetText.js');
-			console.log(lastChild.geom.pos)
+			// console.log(lastChild.geom.pos)
 			// Translate to right after the previous dynamicText.
 			pos = [0, 0, 0];
 			CopyArr3(pos, lastChild.geom.pos); // Copy the dynamic's text mesh pos
@@ -200,11 +217,11 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 			pos[0] += this.geom.CalcTextWidth()
 		}
 
-		const dynamicText = new Widget_Text_Mesh(maxDynamicTextChars, pos, fontSize, [1, 1], color2, bold);
+		const dynamicText = new Widget_Text(maxDynamicTextChars, pos, fontSize, [1, 1], color2, bold);
 		dynamicText.SetName(dynamicText.mat.text);
 
 		// Add the new dynamicText as a child of 'this'.
-		const idx = this.children.Add(dynamicText);
+		const idx = this.AddChild(dynamicText);
 
 
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | dynamicText.geom.type | dynamicText.mat.type;
@@ -328,16 +345,21 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text_Mesh {
 		}
 	}
 
-	Update(params) { // TODO: Runs on every timeInterval. Make as efficient as possible
+	Update(params) { // TODO!!!: Runs on every timeInterval. Make as efficient as possible
 
 		if (!Array.isArray(params.params.meshes)) alert('Array must be passed as param.meshes to TimeInterval instantiation.')
 
 		const meshes = params.params.meshes;
 		const mesheslen = meshes.length
 
+		
 		for (let i = 0; i < mesheslen; i++) {
-
-			const val = params.params.func[i](params.params.func_params[i]);
+			
+			let val = 0;
+			if(params.params.func_params) // Case 
+			val = params.params.func[i](params.params.func_params[i]);
+			else 
+				val = params.params.func[i]();
 
 			const text = `${val}`;
 			const geom = meshes[i].geom;
@@ -379,18 +401,17 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 
 		// Translate the dynamic text by the width of the constant text's width
 		pos[0] += this.geom.CalcTextWidth();
-		const dynamicText = new Widget_Text_Mesh(maxDynamicTextChars, pos, fontSize, scale, color2, bold);
+		const dynamicText = new Widget_Text(maxDynamicTextChars, pos, fontSize, scale, color2, bold);
 
-		this.children.Init(text.length);
-		this.children.Add(dynamicText);
+		this.AddChild(dynamicText)
 
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | dynamicText.geom.type | dynamicText.mat.type;
 
 	}
 
-	GenGfx() {
+	GenGfxCtx(FLAGS, gfxidx) {
 
-		super.GenGfx();
+		super.GenGfxCtx(FLAGS, gfxidx);
 		return this.gfx;
 	}
 
@@ -450,7 +471,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 			const params = {
 				func: [], // All timeInterval's callbacks here
 				func_params: [], /* These are the parameters NOT for the timeInterval and the 'this.Update()' 
-										function callback, rather for the callback the 'this.Update()' 
+										function callback, rather for the callback that the 'this.Update()' 
 										will call, that is the text-creation function for the dynamicText update. */
 				meshes: [], // all the dynamicTexts here. They will be Updated() by one timeInterval.
 			};
@@ -500,24 +521,6 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 			const tIdx = TimeIntervalsCreate(msInterval, name, TIME_INTERVAL_REPEAT_ALWAYS, this.Update, params);
 			this.timeIntervalsIdxBuffer[0] = tIdx;
 		}
-	}
-}
-
-function Widget_text_mesh_add_to_gfx_recursive(mesh, gfx) {
-
-
-	for (let i = 0; i < mesh.children.count; i++) {
-
-		const child = mesh.children.buffer[i];
-
-		if (child.children.active_count) {
-			Widget_text_mesh_add_to_gfx_recursive(child, gfx);
-		}
-
-		gfx.vb.start += gfx.vb.count;
-
-		this.geom.AddToGraphicsBuffer(child.sid, gfx, child.name);
-		this.mat.AddToGraphicsBuffer(child.sid, gfx);
 	}
 }
 
