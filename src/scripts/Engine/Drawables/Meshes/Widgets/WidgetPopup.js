@@ -112,6 +112,8 @@ let _popup = null;
 export function Initializer_popup_initialization(){
 
    _popup = new Widget_PopUp([200, 300, 0], [15,10], TRANSPARENCY(GREY2, .6));
+   _popup.GenGfxCtx(GFX.PRIVATE);
+   _popup.Deactivate()
 }
 
 /** DO NOT DELETE */

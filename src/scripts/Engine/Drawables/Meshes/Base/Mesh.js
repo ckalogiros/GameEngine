@@ -5,7 +5,7 @@ import { GfxInfoMesh, GlGetProgram } from "../../../../Graphics/GlProgram.js";
 import { Int8Buffer, Int8Buffer2, M_Buffer } from "../../../Core/Buffers.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { TimerGetGlobalTimer } from "../../../Timers/Timers.js";
-import { Listener_create_event, Listener_remove_event } from "../../../Events/EventListeners.js";
+import { Listener_create_event, Listener_remove_event_by_idx } from "../../../Events/EventListeners.js";
 import { CopyArr3, CopyArr4 } from "../../../../Helpers/Math/MathOperations.js";
 import { Scenes_get_count, Scenes_get_scene_by_idx } from "../../../Scenes.js";
 import { Gfx_generate_context } from "../../../Interface/GfxContext.js";
@@ -79,7 +79,7 @@ export class Mesh {
     hover_margin; // A margin to be set for hovering. TODO: Abstract to a struct.
     menu_options; // A callback and an index. Constructs the options popup menu for the mesh
     menu_options_idx; // An index to the menu options handler's buffer
-
+    minimized; // Pointer to a minimized version of the mesh.
     name;
 
     constructor(geom = null, mat = null, time = 0, attrParams1 = [0, 0, 0, 0], name = '???') {
@@ -225,23 +225,6 @@ export class Mesh {
 
 
         this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, this.mat.num_faces, FLAGS, gfxidx);
-
-        const prog = GlGetProgram(this.gfx.prog.idx);
-        if (this.sid.unif & SID.UNIF.BUFFER_RES) {
-            const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
-            prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
-            prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
-        }
-
-        // Set Texture if this is a textured this.
-        if (this.mat.texId !== INT_NULL) { // texId is init with INT_NULL that means there is no texture passed to the Material constructor.
-
-            // Set font parameters if this is a text this.
-            if (this.mat.hasFontTex) {
-                this.isFontSet = true;
-            }
-        }
-
         return this.gfx;
     }
 
@@ -272,8 +255,8 @@ export class Mesh {
     }
 
 
-    /**
-     * Mesh States.
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     * Mesh State.
      * Enable, disable, etc, mesh states.
      * E.x. enable mesh to be movable or to have a popup menu when right clicked...
      */
@@ -283,19 +266,6 @@ export class Mesh {
     StateCheck(bit) { return this.state.mask & bit; }
 
 
-
-    /**
-     * Uniforms
-     */
-    SetTimeBufferUniform() {
-        if (this.uniforms.time.idx === INT_NULL) {
-            console.error('Buffer uniform time has not been created. @Mesh.SetBufferTimeUniform.');
-            return;
-        }
-        const prog = GlGetProgram(this.gfx.prog.idx);
-        prog.UniformsSetBufferUniform(this.time);
-    }
-
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * Event Listeners
      */
@@ -304,7 +274,6 @@ export class Mesh {
         if (event_type & LISTEN_EVENT_TYPES.CLICK_DOWN) {
             if (ERROR_NULL(Clbk)) console.error('Passing null parmeters. @  CreateListenEvent(), Mesh.js')
 
-            // TODO: If the params is used only to pass the this object, the params is not needed for creating listen events
             const idx = Listener_create_event(LISTEN_EVENT_TYPES_INDEX.CLICK, Clbk, this, target);
             this.listeners.AddAtIndex(LISTEN_EVENT_TYPES_INDEX.CLICK, idx);
             this.StateEnable(MESH_STATE.IS_HOVERABLE);
@@ -333,7 +302,7 @@ export class Mesh {
             for (let i = 0; i < count; i++) {
 
                 if (this.listeners.buffer[i] !== INT_NULL) { // If this type of listen event is enabled 
-                    Listener_remove_event(i, this.listeners.buffer[i]);
+                    Listener_remove_event_by_idx(i, this.listeners.buffer[i]);
                     // this.listeners.buffer[i] = INT_NULL;
                     this.listeners.RemoveByIdx(i);
 
@@ -349,15 +318,39 @@ export class Mesh {
 
             const idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
             if (this.listeners.buffer[idx])
-                Listener_remove_event(idx, this.listeners.buffer[idx]);
+                Listener_remove_event_by_idx(idx, this.listeners.buffer[idx]);
             this.listeners.buffer[idx] = INT_NULL;
         }
         else if (event_type & LISTEN_EVENT_TYPES.HOVER) {
 
             const idx = LISTEN_EVENT_TYPES_INDEX.HOVER;
             if (this.listeners.buffer[idx])
-                Listener_remove_event(idx, this.listeners.buffer[idx]);
+                Listener_remove_event_by_idx(idx, this.listeners.buffer[idx]);
             this.listeners.buffer[idx] = INT_NULL;
+        }
+    }
+
+    RecreateListenEvents(parent){
+        /**
+         * In case we removed all listeners from the EventListeners buffer,
+         * but the mesh still has all event indexes to the EventListeners buffer.
+         */
+        
+
+
+        for(let i=0; i<parent.children.count; i++){
+            
+            const mesh = parent.children.buffer[i];
+            const listeners = mesh.listeners;
+
+            if(mesh.children.count)
+                this.RecreateListenEvents(mesh)
+
+            if(listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER] !== INT_NULL)
+                mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+            if(listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] !== INT_NULL)
+                mesh.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, mesh.OnClick)
+
         }
     }
 
@@ -368,19 +361,24 @@ export class Mesh {
         return eventIdx;
     }
 
-    /**
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     * Set mesh's menu options (on left mouse click).
+     * If the callback that will create the menu options for this mesh
+     * is set and the 'MESH_STATE.HAS_POPUP' is enabled, then this mesh has options menu.
      * 
      * @param {*} ClbkFunction The function to call for contructing the menu options of 'this' mesh.
      */
     SetMenuOptionsClbk(ClbkFunction) {
+        
         this.menu_options.Clbk = ClbkFunction;
     }
 
-    /**
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * Setters-Getters
      */
     SetColor(col) { this.mat.SetColor(col, this.gfx) }
     SetDefaultColor() { this.mat.SetDefaultColor(this.gfx) }
+    SetDefaultPosXY() { this.geom.SetDefaultPosXY(this.gfx) }
     SetColorRGB(col) { this.mat.SetColorRGB(col, this.gfx) }
     SetColorAlpha(alpha) { this.mat.SetColorAlpha(alpha, this.gfx) }
     SetPos(pos) { this.geom.SetPos(pos, this.gfx); }
@@ -429,13 +427,10 @@ export class Mesh {
     }
 
 
-    /**
+    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * Enable shader properties.
-     * In order for a mesh to be drawn in a certain way, 
-     * specific shaders must be build.
-     * Allow the shader constructor
-     * to combine different shader by enabling
-     * meshes 'sid' bit field. 
+     * In order for a mesh to be drawn in a certain way, specific shaders must be build.
+     * Allow the shader constructor to combine different shader by enabling* meshes 'sid' bit field. 
      */
     EnableGfxAttributes(which, params) {
 
@@ -454,12 +449,16 @@ export class Mesh {
         }
     }
     CheckCase(which, params) {
+
         switch (which) {
+
             case MESH_ENABLE.GFX.UNIF_RESOLUTION: {
+
                 this.sid.unif |= SID.UNIF.BUFFER_RES | SID.UNIF.U_BUFFER; // Enable the screen resolution to be contructed as a uniform in the vertex shader, to be used in the fragment shader.
                 break;
             }
             case MESH_ENABLE.GFX.ATTR_STYLE: {
+
                 this.sid.attr |= (SID.ATTR.BORDER | SID.ATTR.R_CORNERS | SID.ATTR.FEATHER) | SID.ATTR.PARAMS1 | SID.ATTR.EMPTY;
                 this.sid.unif |= SID.UNIF.U_BUFFER;
                 this.sid.pass |= SID.PASS.WPOS2 | SID.PASS.DIM2;
@@ -471,6 +470,7 @@ export class Mesh {
                 break;
             }
             case MESH_ENABLE.GFX.ATTR_TIME: {
+
                 this.sid.attr |= SID.ATTR.TIME;
                 break;
             }
@@ -512,7 +512,7 @@ function ReconstructListenersRecursive(mesh){
         const event_type = LISTEN_EVENT_TYPES.HOVER;
         if(child.StateCheck(MESH_STATE.IS_HOVERABLE)){
                 // console.log(mesh.listeners.buffer)
-                // Listener_remove_event(event_type, mesh.listeners.buffer[event_type]);
+                // Listener_remove_event_by_idx(event_type, mesh.listeners.buffer[event_type]);
                 child.RemoveListenEvent(event_type);
                 console.log(child.name, child.listeners.buffer)
                 // console.log('--------------------------')
@@ -522,64 +522,52 @@ function ReconstructListenersRecursive(mesh){
     // if(mesh.StateCheck(MESH_STATE.IS_HOVERABLE) && 
     //     mesh.listeners.buffer[event_type] !== INT_NULL){
     //         console.log(mesh.listeners.buffer[event_type])
-    //         // Listener_remove_event(event_type, mesh.listeners.buffer[event_type]);
+    //         // Listener_remove_event_by_idx(event_type, mesh.listeners.buffer[event_type]);
     //         mesh.RemoveListenEvent(event_type);
     //         console.log(mesh.listeners.buffer[event_type])
     //         console.log('--------------------------')
     // }
 }
+export function Remove_event_listeners_no_member_listeners_touch_recursive(mesh){
+
+    // Cache indexes for name convinience
+    const hoveridx = LISTEN_EVENT_TYPES_INDEX.HOVER;
+    const clickidx = LISTEN_EVENT_TYPES_INDEX.CLICK;
+
+    for(let i=0; i< mesh.children.count; i++){
+
+        const child = mesh.children.buffer[i];
+        if(child)
+            Remove_event_listeners_no_member_listeners_touch_recursive(child);
+
+        // If current mesh has a hover listener, remove it and the hover will be checked if the parent is hovered.
+        const event_type = LISTEN_EVENT_TYPES.HOVER;
+        if(child.listeners.buffer[hoveridx] !== INT_NULL){
+            Listener_remove_event_by_idx(hoveridx, child.listeners.buffer[hoveridx])
+            // console.log(child.listeners.buffer[hoveridx])
+        }
+        if(child.listeners.buffer[clickidx] !== INT_NULL){
+            Listener_remove_event_by_idx(clickidx, child.listeners.buffer[clickidx])
+            // console.log(child.listeners.buffer[clickidx])
+        }
+    }
+}
 
 
 export class Text_Mesh extends Mesh {
-
-    isFontSet;
 
     constructor(geom, mat) {
 
         super(geom, mat);
 
-        this.isFontSet = false;
         this.sceneIdx = STATE.scene.active_idx;
         this.type |= MESH_TYPES_DBG.TEXT_MESH;
-    }
-
-    GenGfx(FLAGS = GL_VB.ANY) {
-
-        this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, FLAGS, this.mat.num_faces);
-
-        const prog = GlGetProgram(this.gfx.prog.idx);
-        if (this.sid.unif & SID.UNIF.BUFFER_RES) {
-            const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
-            prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
-            prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
-        }
-
-        return this.gfx;
     }
 
     GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
 
 
         this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, this.mat.num_faces, FLAGS, gfxidx);
-
-        const prog = GlGetProgram(this.gfx.prog.idx);
-        if (this.sid.unif & SID.UNIF.BUFFER_RES) {
-            const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
-            prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
-            prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
-        }
-
-        // Set Texture if this is a textured this.
-        if (this.mat.texId !== INT_NULL) { // texId is init with INT_NULL that means there is no texture passed to the Material constructor.
-
-            // Set font parameters if this is a text this.
-            if (this.mat.hasFontTex) {
-                this.isFontSet = true;
-                // Correct the text face height by calculating the ratio from the current font metrics.
-                // this.geom.dim[1] *= FontGetFontDimRatio(this.mat.uvIdx);
-            }
-        }
-
         return this.gfx;
     }
 

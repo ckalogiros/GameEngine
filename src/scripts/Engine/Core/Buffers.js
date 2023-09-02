@@ -28,6 +28,7 @@ class Buffer_Interface {
 
       this.size = INT_NULL;
       this.count = 0;
+      this.active_count = 0;
       this.buffer = null;
    }
 
@@ -118,9 +119,11 @@ class Buffer_Interface {
 }
 export class M_Buffer extends Buffer_Interface{
 
-   constructor() {
+   constructor(m_buffer) {
 
       super();
+
+      // if(m_buffer && m_buffer !== undefined && m_buffer typeof M_Buffer)
    }
 
    Init(size) {

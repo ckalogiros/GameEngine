@@ -601,7 +601,7 @@ const DEBUG = {
 
 	LISTENERS: false,
 
-	SET_HOVER_TO_ALL_MESHES: true,
+	SET_HOVER_TO_ALL_MESHES: false,
 
 	GFX: {
 		ADD_MESH: true,

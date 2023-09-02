@@ -70,7 +70,7 @@ export class Geometry2D {
         this.pos[0] = x;
         glBufferOps.GlSetWposX(gfx, x);
     }
-    SetPosY(y) {
+    SetPosY(y, gfx) {
         this.pos[1] = y;
         glBufferOps.GlSetWposY(gfx, y);
     }
@@ -79,6 +79,10 @@ export class Geometry2D {
     }
     UpdatePosXY(gfx) {
         glBufferOps.GlSetWposXY(gfx, this.pos);
+    }
+    SetDefaultPosXY(gfx){
+        math.CopyArr2(this.pos, this.defPos)
+        glBufferOps.GlSetWposXY(gfx, this.defPos);
     }
     SetZindex(z, gfx, numFaces) {
         this.pos[2] = z;

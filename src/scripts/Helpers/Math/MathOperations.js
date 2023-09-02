@@ -99,6 +99,9 @@ export function AddArr2(arr1, arr2){
 }
 
 
+export function Floor(val){
+    return ~~val;
+}
 export function FloorArr2(arr){
     return [~~arr[0], ~~arr[1]]
 }

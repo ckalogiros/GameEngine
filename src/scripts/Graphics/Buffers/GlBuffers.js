@@ -7,6 +7,7 @@ import { GlCreateProgram } from '../GlProgram.js'
 import { GlGetIB, GlGetProgram, GlGetPrograms, GlGetVB } from '../GlProgram.js';
 import { RenderQueueGet, RenderQueueUpdate } from '../../Engine/Renderers/Renderer/RenderQueue.js';
 import { M_Buffer } from '../../Engine/Core/Buffers.js';
+import { TimerGetGlobalTimerCycle } from '../../Engine/Timers/Timers.js';
 
 
 class VertexBuffer {
@@ -309,20 +310,18 @@ export let GlFrameBuffer = {
 export function GlCheckContext(sid, sceneIdx) {
 
     const progs = GlGetPrograms();
-
     const progidx = ProgramExists(sid, progs);
     
     if(progidx !== INT_NULL){
         
         const vbidx = VertexBufferExists(sceneIdx, progs[progidx]);
-
         if(vbidx !== INT_NULL) return [progidx, vbidx];
     }
 
     return[INT_NULL, INT_NULL];
 }
 
-export function GlGenerateContext2(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer, mesh_count=1) {
+export function GlGenerateContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer, mesh_count=1) {
 
     if(ERROR_NULL(sceneIdx)) console.error('Scene index is null. @ GlGenerateContext()')
     if(Array.isArray(GL_BUFFER) || Array.isArray(addToSpecificGlBuffer)) console.error('Array of indexes instead of vbIdx is passed. @ GlGenerateContext()')
@@ -335,6 +334,22 @@ export function GlGenerateContext2(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuff
     // If the program already exists, add mesh
     if (progIdx === INT_NULL) { // Else create new program
         progIdx = GlCreateProgram(sid);
+                        
+        // Enable screen_resolution vec2 uniform  
+        if (sid.unif & SID.UNIF.BUFFER_RES) {
+            const unifBufferResIdx = progs[progIdx].UniformsBufferCreateScreenRes();
+            progs[progIdx].UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
+            progs[progIdx].UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
+        }
+
+        // Enable global_timer float uniform  
+        if (sid.unif & SID.UNIF.BUFFER_RES) {
+            // const t = TimerGetGlobalTimerCycle();
+            const step = 0.1;
+            progs[progIdx].UniformsCreateTimer(step);
+        }
+
+
     }
 
     GlUseProgram(progs[progIdx].webgl_program, progIdx);
@@ -360,137 +375,6 @@ export function GlGenerateContext2(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuff
         } 
     }
     else if (GL_BUFFER == GFX.ANY) {
-        vbIdx = VertexBufferExists(sceneIdx, progs[progIdx]);
-    }
-
-    // If the chosen vertexBuffer is used as private by another drawable, then it should not be used if addToSpecificGlBuffer is not passed.
-    // SEE ## PRIVATE_BUFFERS
-    if(vbIdx > INT_NULL && vbIdx !== addToSpecificGlBuffer && progs[progIdx].vertexBuffer[vbIdx].isPrivate) vbIdx = INT_NULL;
-
-    let vb = null; // Cash for convinience
-    let ib = null; // Cash for convinience
-
-    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    * Initialize gl buffers
-    */
-    if (vbIdx < 0) { // Create gl buffer
-
-        vbIdx = progs[progIdx].vertexBufferCount++;
-        progs[progIdx].vertexBuffer[vbIdx] = vb = new VertexBuffer(sid, sceneIdx, vbIdx, gfxCtx.gl);
-
-        gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
-
-        // Initialize attribute locations of the shader for every newly created vertex buffer.
-	    GlEnableAttribsLocations(gfxCtx.gl, progs[progIdx]);
-
-        // Connect the vertex buffer with the atlas texture. 
-        if (sid.attr & SID.ATTR.TEX2) {
-            if (sid.shad & SID.SHAD.TEXT_SDF) vb.texIdx = Texture.font;
-            else vb.texIdx = Texture.atlas;
-        }
-        if (dbg.GL_DEBUG_BUFFERS_ALL) console.log('===== VertexBuffer =====\nvbIdx:', vbIdx, 'progIdx:', progIdx);
-
-        /**
-         * Create Index buffer
-         */
-        if (sid.shad & SID.SHAD.INDEXED) {
-
-            ibIdx = progs[progIdx].indexBufferCount++;
-            progs[progIdx].indexBuffer[ibIdx] = ib = new IndexBuffer(sid, sceneIdx, ibIdx, gfxCtx.gl);
-            ib.vao = vb.vao; // Let index buffer have a copy of the vao
-            if (dbg.GL_DEBUG_BUFFERS_ALL) console.log('----- VertexBuffer -----\nibIdx:', ibIdx, 'progIdx:', progIdx)
-        }
-
-        
-        // Add the new vertexBuffer to render queue
-        RenderQueueGet().Add(progIdx, vbIdx, vb.show);
-        
-    }
-    else {
-
-        vb = progs[progIdx].vertexBuffer[vbIdx];
-        gfxCtx.gl.bindVertexArray(vb.vao)
-        gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer)
-
-        // Index buffer. TODO: we bound the ibIdx with the vbIdx. What if later we want to use arbitary index buffers??? We must implement another way of finding the correct ib(Most probable is to pass the ibIdx to this function)
-        ibIdx = IndexBufferExists(vbIdx, sceneIdx, progs[progIdx]);
-        ib = progs[progIdx].indexBuffer[ibIdx];
-
-    }
-
-    // if(isPrivate) vb.SetPrivate();
-
-    // Cash values
-    const vertsPerRect = progs[progIdx].shaderInfo.verticesPerRect;
-    const attribsPerVertex = progs[progIdx].shaderInfo.attribsPerVertex;
-    const start = numFaces * vb.mesh_count * vertsPerRect * attribsPerVertex; // Add meshes to the vb continuously
-    vb.mesh_count += mesh_count;
-    const count = numFaces * vertsPerRect * attribsPerVertex; // Total attributes of the mesh
-
-    // Set meshes gfx info
-    const gfxInfo = new GfxInfoMesh; // NOTE: This is the only construction of a new GfxInfoMesh object(as for now), all other calls are for creating a copy of an existing GfxInfoMesh. 
-    gfxInfo.sid = sid;
-    gfxInfo.sceneIdx = sceneIdx;
-    // gfxInfo.isPrivate = isPrivate;
-    gfxInfo.vao = vb.vao;
-    gfxInfo.numFaces = numFaces;
-    gfxInfo.vertsPerRect = vertsPerRect;
-    gfxInfo.attribsPerVertex = attribsPerVertex;
-    gfxInfo.prog.idx = progIdx;
-    gfxInfo.vb.idx = vbIdx;
-    gfxInfo.vb.start = start;
-    gfxInfo.vb.count = count;
-    gfxInfo.ib.idx = ibIdx;
-    gfxInfo.ib.count = ib.count;
-
-
-
-    // const index = progs[progIdx].vertexBuffer[vbIdx].meshes.length;
-    // gfxInfo.meshIdx = index; // Store the current meshe's index so the mesh know in what index can find it's self in the vertexBuffer's meshes array.
-    // Store the same reference to the vertex buffer's array so that we can manipulate the vertex buffer and update the gfxInfo from within the progs[].vertexBuffer[]
-    // progs[progIdx].vertexBuffer[vbIdx].meshes[index] = gfxInfo;
-
-    return gfxInfo;
-}
-export function GlGenerateContext(sid, sceneIdx, GL_BUFFER, addToSpecificGlBuffer, mesh_count=1) {
-if(mesh_count === undefined)
-console.log()
-    if(ERROR_NULL(sceneIdx)) console.error('Scene index is null. @ GlGenerateContext()')
-    if(Array.isArray(GL_BUFFER) || Array.isArray(addToSpecificGlBuffer)) console.error('Array of indexes instead of vbIdx is passed. @ GlGenerateContext()')
-
-    const numFaces = 1;
-    const progs = GlGetPrograms();
-    // ProgramExists returns 0 index based program or -1 for not found
-    let progIdx = ProgramExists(sid, progs);
-
-    // If the program already exists, add mesh
-    if (progIdx === INT_NULL) { // Else create new program
-        progIdx = GlCreateProgram(sid);
-    }
-
-    GlUseProgram(progs[progIdx].webgl_program, progIdx);
-
-    let vbIdx = INT_NULL;
-    let ibIdx = INT_NULL;
-    
-    if (GL_BUFFER == GL_VB.NEW) {
-        vbIdx = INT_NULL;
-    }
-    else if (GL_BUFFER == GL_VB.SPECIFIC) { // Case caller accidentally 'specific buffer' flag but the vbIdx is either null or does not exist. 
-        if (addToSpecificGlBuffer === INT_NULL) {
-            vbIdx = VertexBufferExists(sceneIdx, progs[progIdx]);
-        }
-        else { //  Check id the vbIdx passed by the caller exists and it is valid for adding the mesh.
-
-            vbIdx = addToSpecificGlBuffer;
-
-            // If the passsed vbIdx does not exist or comply with the program, set to create new vertex buffer.
-            if (!(progs[progIdx].vertexBuffer[vbIdx] && 
-                  SID.CheckSidMatch(sid, progs[progIdx].sid)) ) 
-                vbIdx = INT_NULL;
-        } 
-    }
-    else if (GL_BUFFER == GL_VB.ANY) {
         vbIdx = VertexBufferExists(sceneIdx, progs[progIdx]);
     }
 
@@ -639,6 +523,7 @@ export function GlAddGeometry(sid, pos, dim, time, gfx, meshName, numFaces) {
         gfx.ib.count = ib.count;
     }
 }
+
 export function Gl_remove_geometry_fast(gfx, numFaces) {
 
     const progIdx = gfx.prog.idx;

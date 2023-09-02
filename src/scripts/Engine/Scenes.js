@@ -167,7 +167,7 @@ export class Scene {
         this.cameras.push(camera);
     }
 
-    Temp_FindMeshById(id) {
+    FindMeshById(id) {
         for (let i = 0; i < this.children.count; i++) {
             if (this.children.buffer && this.children.buffer[i].id === id)
                 return this.children.buffer[i];
@@ -246,7 +246,8 @@ export function ScenesPrintAllMeshes(_children, count) {
         for (let j = 0; j < count; j++){
             r += '->';
         }
-        console.log(i, r, child.id, GetMeshHighOrderNameFromType(child.type))
+        // console.log(i, r, child.id, GetMeshHighOrderNameFromType(child.type))
+        console.log(i, r, child.name)
         total_count++;
         
         if (child.children.count) {

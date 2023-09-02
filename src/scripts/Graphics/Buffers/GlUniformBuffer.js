@@ -3,17 +3,17 @@
 import { GlUseProgram } from "./GlBuffers.js";
 
 export class Uniform {
+
    val;
    loc;
    Update;
+   
    constructor(val = null, loc = null, type = null) {
 
       this.val = val;// Uniform value
       this.loc = loc; // Uniform Location
       this.Update = null; // Function
-      // this.needsUpdate = false;
 
-      // 
       switch (type) {
          // From THREE.js
          case UNIF_TYPE.FLOAT: { this.Update = this.SetValueV1f; break; } // FLOAT
@@ -75,6 +75,7 @@ export class Uniform {
 }
 
 export class UniformsBuffer {
+   
    ub;
    names; // A way to get a specific uniforms index.
    count;
@@ -104,10 +105,12 @@ export class UniformsBuffer {
       this.names[idx] = name;
       return idx;
    }
+
    Set(value, index) {
       this.ub[index] = value;
       this.needsUpdate = true;
    }
+
    Update(gl) {
       gl.uniform1fv(this.loc, this.ub); // And the shader decides the number of elements to draw from the buffer
       this.needsUpdate = false;

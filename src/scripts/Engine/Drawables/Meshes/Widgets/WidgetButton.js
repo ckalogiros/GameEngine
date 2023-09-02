@@ -2,7 +2,6 @@
 
 import { Check_intersection_point_rect } from '../../../Collisions.js';
 import { MouseGetPos } from '../../../Controls/Input/Mouse.js';
-import { Gfx_generate_context } from '../../../Interface/GfxContext.js';
 import { Widget_Label } from './WidgetLabel.js';
 
 export class Widget_Button extends Widget_Label {

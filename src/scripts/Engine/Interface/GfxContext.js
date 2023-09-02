@@ -1,8 +1,9 @@
 "use strict";
 
-import { GfxSetVbRender, GlGenerateContext2, GlResetIndexBuffer, GlResetVertexBuffer, GlSetVertexBufferPrivate } from "../../Graphics/Buffers/GlBuffers.js";
+import { GfxSetVbRender, GlGenerateContext, GlResetIndexBuffer, GlResetVertexBuffer, GlSetVertexBufferPrivate } from "../../Graphics/Buffers/GlBuffers.js";
 import { GlCheckSid } from "../../Graphics/GlProgram.js";
 import { M_Buffer } from "../Core/Buffers.js";
+import { Listener_remove_event_by_idx } from "../Events/EventListeners.js";
 
 
 let _sessionId = 0;
@@ -27,7 +28,7 @@ export class Gfx_Pool extends M_Buffer {
 
       if (FLAGS & GFX.NEW) {
 
-         const gfx = GlGenerateContext2(sid, sceneIdx, FLAGS, NO_SPECIFIC_GL_BUFFER, mesh_count);
+         const gfx = GlGenerateContext(sid, sceneIdx, FLAGS, NO_SPECIFIC_GL_BUFFER, mesh_count);
          gfx.gfx_ctx.idx = this.#StoreGfx(gfx);
          return gfx;
       }
@@ -39,12 +40,12 @@ export class Gfx_Pool extends M_Buffer {
             const found = this.#GetNotPrivateBySid(sid);
             if (found) {
 
-               const gfx = GlGenerateContext2(sid, sceneIdx, GFX.SPECIFIC, found.vbidx, mesh_count);
+               const gfx = GlGenerateContext(sid, sceneIdx, GFX.SPECIFIC, found.vbidx, mesh_count);
                return gfx;
             }
             else { // ... else if pool didn't find any buffer, create a new one ...
 
-               const gfx = GlGenerateContext2(sid, sceneIdx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh_count);
+               const gfx = GlGenerateContext(sid, sceneIdx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh_count);
                gfx.gfx_ctx.idx = this.#StoreGfx(gfx, FLAGS & GFX.PRIVATE);
                return gfx;
             }
@@ -59,7 +60,7 @@ export class Gfx_Pool extends M_Buffer {
             const gfx_idx = this.#FindGfx(gfxIdx[0], gfxIdx[1]);
             if(gfx_idx){
                
-               const gfx = GlGenerateContext2(sid, sceneIdx, GFX.SPECIFIC, gfx_idx.vbidx, mesh_count);
+               const gfx = GlGenerateContext(sid, sceneIdx, GFX.SPECIFIC, gfx_idx.vbidx, mesh_count);
                gfx.gfx_ctx.idx = this.#StoreGfx(gfx);
                return gfx;
             }
@@ -73,7 +74,7 @@ export class Gfx_Pool extends M_Buffer {
             if (foundIdx !== INT_NULL) {
 
                const vbidx = this.buffer[foundIdx].vbidx
-               const gfx = GlGenerateContext2(sid, sceneIdx, GFX.SPECIFIC, vbidx, mesh_count);
+               const gfx = GlGenerateContext(sid, sceneIdx, GFX.SPECIFIC, vbidx, mesh_count);
                gfx.gfx_ctx.idx = foundIdx;
                
                // Add this gfx to the session
@@ -87,7 +88,7 @@ export class Gfx_Pool extends M_Buffer {
             }
             else { // ... else if pool didn't find any Private buffer, create a new one ...
 
-               const gfx = GlGenerateContext2(sid, sceneIdx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh_count);
+               const gfx = GlGenerateContext(sid, sceneIdx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh_count);
                gfx.gfx_ctx.idx = this.#StoreGfx(gfx, FLAGS & GFX.PRIVATE);
                gfx.gfx_ctx.sessionId = _sessionId; // MAYBE BUG. Better to extract sessionId from 'this.buffer[gfx.gfx_ctx.idx].sessionId'
                return gfx;
@@ -188,6 +189,7 @@ export class Gfx_Pool extends M_Buffer {
 
       return null
    }
+
    #FindGfxIdx(progidx, vbidx) {
 
       for (let i = 0; i < this.count; i++)
@@ -215,7 +217,7 @@ export class Gfx_Pool extends M_Buffer {
 
    //    if (FLAGS & GFX.NEW) { // Create new buffer but not private
 
-   //       mesh.gfx = GlGenerateContext2(mesh.sid, mesh.sceneIdx, FLAGS, NO_SPECIFIC_GL_BUFFER, mesh.num_faces);
+   //       mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, FLAGS, NO_SPECIFIC_GL_BUFFER, mesh.num_faces);
    //       this.#StoreGfx(mesh.gfx);
    //       mesh.AddToGfx();
    //    }
@@ -227,12 +229,12 @@ export class Gfx_Pool extends M_Buffer {
    //          const found = this.#GetNotPrivateBySid(mesh.sid);
    //          if (found) {
                
-   //             mesh.gfx = GlGenerateContext2(mesh.sid, mesh.sceneIdx, GFX.SPECIFIC, found.vbidx, mesh.num_faces);
+   //             mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GFX.SPECIFIC, found.vbidx, mesh.num_faces);
    //             mesh.AddToGfx();
    //          }
    //          else { // ... else if pool didn't find any buffer, create a new one ...
                
-   //             mesh.gfx = GlGenerateContext2(mesh.sid, mesh.sceneIdx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh.num_faces);
+   //             mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh.num_faces);
    //             this.#StoreGfx(mesh.gfx);
    //             mesh.AddToGfx();
    //          }
@@ -264,7 +266,8 @@ export class Gfx_Pool extends M_Buffer {
       for (let i = 0; i < mesh.children.count; i++) {
 
          const child = mesh.children.buffer[i];
-         if (child) this.DeactivateRecursive(child)
+         if (child) 
+            this.DeactivateRecursive(child)
       }
 
       const progidx = mesh.gfx.prog.idx;
@@ -277,6 +280,58 @@ export class Gfx_Pool extends M_Buffer {
 
       mesh.RemoveAllListenEvents();
 
+   }
+   // ActivateRecursive_no_listeners_touch(mesh) {
+
+   //    for (let i = 0; i < mesh.children.count; i++) {
+
+   //       const child = mesh.children.buffer[i];
+   //       if (child) this.ActivateRecursive(child)
+   //    }
+
+   //    const progidx = mesh.gfx.prog.idx;
+   //    const vbidx = mesh.gfx.vb.idx;
+
+   //    this.#ActDeactFromPool(progidx, vbidx, true);
+   //    GfxSetVbRender(progidx, vbidx, true);
+
+   // }
+
+   /** */
+   Gfx_deactivate_no_member_listeners_touch(mesh) {
+
+      for (let i = 0; i < mesh.children.count; i++) {
+
+         const child = mesh.children.buffer[i];
+         if (child) 
+            this.Gfx_deactivate_no_member_listeners_touch(child)
+      }
+
+      const progidx = mesh.gfx.prog.idx;
+      const vbidx = mesh.gfx.vb.idx;
+
+      this.#ActDeactFromPool(progidx, vbidx, false);
+      GlResetVertexBuffer(mesh.gfx);
+      GlResetIndexBuffer(mesh.gfx);
+      GfxSetVbRender(progidx, vbidx, false);
+
+   }
+   DeactivateRecursive_no_listeners_touch(mesh) {
+
+      for (let i = 0; i < mesh.children.count; i++) {
+
+         const child = mesh.children.buffer[i];
+         if (child) 
+            this.DeactivateRecursive_no_listeners_touch(child)
+      }
+
+      const progidx = mesh.gfx.prog.idx;
+      const vbidx = mesh.gfx.vb.idx;
+
+      this.#ActDeactFromPool(progidx, vbidx, false);
+      GlResetVertexBuffer(mesh.gfx);
+      GlResetIndexBuffer(mesh.gfx);
+      GfxSetVbRender(progidx, vbidx, false);
    }
 
    /** */
@@ -308,20 +363,20 @@ export class Gfx_Pool extends M_Buffer {
 
    //          if (gfx) { // ... If we have, use it...
    //             // use specific gfx context
-   //             mesh.gfx = GlGenerateContext2(mesh.sid, mesh.sceneIdx, GFX.SPECIFIC, gfx.vbidx, mesh.mat.num_faces);
+   //             mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GFX.SPECIFIC, gfx.vbidx, mesh.mat.num_faces);
    //             // console.log(mesh.name, mesh.mat.num_faces)
    //          }
    //          else { // ... else create a new buffer and register it to the pool...
 
    //             // Create new buffers
-   //             mesh.gfx = GlGenerateContext2(mesh.sid, mesh.sceneIdx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh.mat.num_faces)
+   //             mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh.mat.num_faces)
    //             this.#Store(mesh.gfx.prog.idx, mesh.gfx.vb.idx, true, false)
    //          }
    //       }
    //       // ... case the mesh already has a gfx and matches the root's mesh gfx.
    //       else if (mesh.gfx.prog.idx === progidx, mesh.gfx.vb.idx === vbidx) {
 
-   //          mesh.gfx = GlGenerateContext2(mesh.sid, mesh.sceneIdx, GFX.SPECIFIC, vbidx, mesh.mat.num_faces); // we pass the roots vbidx
+   //          mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GFX.SPECIFIC, vbidx, mesh.mat.num_faces); // we pass the roots vbidx
    //          const gfx = this.#FindGfx(progidx, vbidx)
    //       }
    //       else{
@@ -361,6 +416,9 @@ export function Gfx_generate_context(sid, sceneIdx, mesh_count, FLAGS, gfxidx) {
 /** Activates the gfx buffers recursively for all the children meshes. */
 export function Gfx_activate(mesh) { _gfx_pool.ActivateRecursive(mesh); }
 export function Gfx_deactivate(mesh) { _gfx_pool.DeactivateRecursive(mesh); }
+// export function Gfx_activate_no_listeners_touch(mesh) { _gfx_pool.ActivateRecursive(mesh); }
+export function Gfx_deactivate_no_listeners_touch(mesh) { _gfx_pool.DeactivateRecursive_no_listeners_touch(mesh); }
+export function Gfx_deactivate_no_member_listeners_touch(mesh) { _gfx_pool.Gfx_deactivate_no_member_listeners_touch(mesh); }
 
 export function Gfx_pool_print() {
 

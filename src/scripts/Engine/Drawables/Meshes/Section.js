@@ -61,29 +61,29 @@ export class Section extends Rect {
       }
    }
 
-   AddItemRecursive(_mesh, options) {
+   // AddItemRecursive(_mesh, options) {
 
-      let new_section = null;
-      for (let i = 0; i < _mesh.children.count; i++) {
+   //    let new_section = null;
+   //    for (let i = 0; i < _mesh.children.count; i++) {
 
-         const mesh = _mesh.children.buffer[i];
+   //       const mesh = _mesh.children.buffer[i];
 
-         if (mesh.children.active_count && mesh.type) {
+   //       if (mesh.children.active_count && mesh.type) {
 
-            this.AddItemRecursive(mesh, sceneIdx);
-         }
-         if (options & SECTION.OPTIONS.WITH_NEW_SECTION) {
-            new_section = new Section(SECTION.HORIZONTAL, [2, 2], [100, 100, 0], [20, 20], TRANSPARENCY(GREY2, .7))
-            new_section.AddItem(mesh);
-         }
-         else {
+   //          this.AddItemRecursive(mesh, sceneIdx);
+   //       }
+   //       if (options & SECTION.OPTIONS.WITH_NEW_SECTION) {
+   //          new_section = new Section(SECTION.HORIZONTAL, [2, 2], [100, 100, 0], [20, 20], TRANSPARENCY(GREY2, .7))
+   //          new_section.AddItem(mesh);
+   //       }
+   //       else {
 
-            this.AddItem(mesh);
-         }
-         if (new_section) this.AddItem(new_section);
-      }
+   //          this.AddItem(mesh);
+   //       }
+   //       if (new_section) this.AddItem(new_section);
+   //    }
 
-   }
+   // }
 
    Calc(options) {
 
@@ -264,8 +264,11 @@ function Section_move_event2(_params) {
    }
 
    // Move the mesh
-   console.log('MOVING SECTION', section.name)
    const mouse_pos = MouseGetPosDif();
+   if(mouse_pos.x === 0 && mouse_pos.y === 0) return;
+   
+   // console.log('MOVING SECTION', section.name, mouse_pos)
+   console.log('MOVING SECTION', section.name)
    section.MoveRecursive(mouse_pos.x, -mouse_pos.y);
 
    // const mouse_pos = MouseGetPos();

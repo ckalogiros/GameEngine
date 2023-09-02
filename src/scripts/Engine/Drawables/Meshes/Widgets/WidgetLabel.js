@@ -156,6 +156,30 @@ export class Widget_Label extends Rect {
         super.AddToGfx()
 	}
 
+	Align(flags) { // Align pre-added to the vertexBuffers
+
+		const pos = [0, 0];
+		const dim = this.geom.dim;
+		CopyArr2(pos, this.geom.pos);
+		let ypos = pos[1] + dim[1] * 2;
+
+		pos[0] -= dim[0] * this.mat.num_faces / 2 - this.pad[0] / 2;
+		this.geom.pos[0] = pos[0]
+
+		if (flags & ALIGN.VERTICAL) {
+
+			for (let i = 0; i < this.children.count; i++) {
+
+				const child = this.children.buffer[i];
+				pos[1] = ypos;
+
+				child.geom.Reposition_pre(pos);
+				ypos += child.geom.dim[1] * 2;
+			}
+
+		}
+	}
+
     Align_pre(target_mesh, flags) { // Align pre-added to the vertexBuffers
 
         const pos1 = target_mesh.geom.pos;

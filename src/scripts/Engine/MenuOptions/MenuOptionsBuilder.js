@@ -110,7 +110,7 @@ function Menu_options_create_slider_popup_menu_options(clicked_mesh, _pos) {
       
       
       const option_switch = new Widget_Switch(pos, fontSize, TRANSPARENCY(BLUE_10_120_220, .0), WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-      const option_label = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${mesh.id}`, pos, fontSize, TRANSPARENCY(BLUE_10_120_220, .0), WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
+      const option_label = new Widget_Label_Text_Mesh_Menu_Options(mesh.name, pos, fontSize, TRANSPARENCY(BLUE_10_120_220, .0), WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
       option_switch.SetName(`switch:${i}`);
       option_label.SetName(`label:${i}`);
       

@@ -40,6 +40,25 @@ export class Event_Listener {
 
       if (this.event_type[TYPE_IDX] === undefined) return;
       if (TYPE_IDX < 0 || TYPE_IDX >= LISTEN_EVENT_TYPES_INDEX.SIZE) alert('Event type index does not exist.');
+      
+                  
+      if( STATE.mesh.hovered && 
+         STATE.mesh.hovered.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER] !== INT_NULL && 
+         STATE.mesh.hovered.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] !== INT_NULL){
+            
+         const idx = STATE.mesh.hovered.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK];
+            // console.log('!!!!!', this.event_type[LISTEN_EVENT_TYPES_INDEX.CLICK].buffer[idx].source_params.name);
+            const dispatch_params = {
+               source_params: this.event_type[LISTEN_EVENT_TYPES_INDEX.CLICK].buffer[idx].source_params,
+               target_params: this.event_type[LISTEN_EVENT_TYPES_INDEX.CLICK].buffer[idx].target_params,
+               trigger_params: trigger_params,
+               event_type: TYPE_IDX,
+            }
+            this.event_type[TYPE_IDX].buffer[idx].Clbk(dispatch_params);
+            return;
+      }
+
+      
       for (let i = 0; i < this.event_type[TYPE_IDX].count; i++) {
          
          if (this.event_type[TYPE_IDX].buffer[i]) {
@@ -50,13 +69,12 @@ export class Event_Listener {
                trigger_params: trigger_params,
                event_type: TYPE_IDX,
             }
-            if(!this.event_type[TYPE_IDX].buffer[i])
-            console.log()
+            
             const success = this.event_type[TYPE_IDX].buffer[i].Clbk(dispatch_params);
             if (success) {
-               console.log(this.event_type[TYPE_IDX].buffer[i].source_params.name)
+               // if(this.event_type[TYPE_IDX].buffer[i]) // Case the dispatch removed the listener
+               //    console.log('EVENT DISPATCH: ', this.event_type[TYPE_IDX].buffer[i].source_params.name)
                break;
-
             }
          }
       }
@@ -162,12 +180,14 @@ export class Event_Listener {
                if(this.event_type[i].buffer[j]){
                   if (i === LISTEN_EVENT_TYPES_INDEX.HOVER) {
    
-                     console.log(`i: ${j} Hover Listener`, this.event_type[i].buffer[j].source_params.name);
+                     console.log(`i: ${j} Hover Listener`, this.event_type[i].buffer[j].source_params.name,
+                        this.event_type[i].buffer[j].source_params.geom.pos);
                      hover_cnt++;
                   }
                   else if (i === LISTEN_EVENT_TYPES_INDEX.CLICK) {
-   
-                     console.log(`i: ${j} Click Listener`, this.event_type[i].buffer[j].source_params.name);
+                     
+                     console.log(`i: ${j} Click Listener`, this.event_type[i].buffer[j].source_params.name,
+                        this.event_type[i].buffer[j].source_params.geom.pos);
                      click_cnt++;
                   }
                }
@@ -234,7 +254,7 @@ export function Listener_dispatch_check_hover_event() {
    _listener.CheckHover();
 }
 
-export function Listener_remove_event(TYPE_IDX, idx) {
+export function Listener_remove_event_by_idx(TYPE_IDX, idx) {
 
    // console.log(_listener.event_type[TYPE_IDX].buffer)
    _listener.event_type[TYPE_IDX].RemoveByIdx(idx);
@@ -248,7 +268,7 @@ export function Listener_get_event(TYPE_IDX, event_idx) {
    return _listener.event_type[TYPE_IDX].buffer[event_idx];
 }
 
-export function Listener_debug_print_all(TYPE_IDX, event_idx) {
+export function Listener_debug_print_all() {
 
    _listener.PrintAll();
 }

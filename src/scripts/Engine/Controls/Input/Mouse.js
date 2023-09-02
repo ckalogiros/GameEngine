@@ -1,6 +1,7 @@
 "use strict";
 
 import { GetSign } from "../../../Helpers/Helpers.js";
+import { Floor } from "../../../Helpers/Math/MathOperations.js";
 import { RegisterEvent } from "../../Events/Events.js";
 
 
@@ -30,8 +31,8 @@ const mouse = {
       },
       GetDif(){
          return {
-            x:this.xdiff,
-            y:this.ydiff,
+            x:Floor(this.xdiff),
+            y:Floor(this.ydiff),
          };
       },
       GetPrevPos(){
@@ -133,6 +134,7 @@ export function MouseGetPosDif() {
    return mouse.pos.GetDif();
 }
 export function MouseGetDir() {
+
    return mouse.pos.GetDif();
 }
 export function MouseGetXdir() {
@@ -177,9 +179,10 @@ export function OnMouseMove(e) {
       mouse.pos.yprev = newPosY;
    }
 
-   mouse.pos.xdiff = mouse.pos.x - mouse.pos.xprev;
-   mouse.pos.ydiff = -(mouse.pos.y - mouse.pos.yprev); // Reverse the direction(negative for down dir and positive for up dir) 
-
+   // mouse.pos.xdiff = Floor(mouse.pos.x - mouse.pos.xprev);
+   // mouse.pos.ydiff = -Floor((mouse.pos.y - mouse.pos.yprev)); // Reverse the direction(negative for down dir and positive for up dir) 
+   mouse.pos.xdiff = (mouse.pos.x - mouse.pos.xprev);
+   mouse.pos.ydiff = -((mouse.pos.y - mouse.pos.yprev)); // Reverse the direction(negative for down dir and positive for up dir) 
    // const params = {
    //    mouseButton: e.which-1
    // };

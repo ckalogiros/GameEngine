@@ -156,43 +156,6 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 		super.AddToGfx()
 	}
 
-	// GenGfxCtx() {
-
-	// 	let total_char_count = this.mat.num_faces;
-	// 	for (let i = 0; i < this.children.count; i++)
-	// 		total_char_count += this.children.buffer[i].mat.num_faces;
-
-	// 	// this.gfx = GlGenerateContext(this.sid, sceneIdx, GL_VB.ANY, NO_SPECIFIC_GL_BUFFER, total_char_count);
-	// 	this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, GL_VB.ANY, total_char_count);
-
-	// 	const prog = GlGetProgram(this.gfx.prog.idx);
-	// 	if (this.sid.unif & SID.UNIF.BUFFER_RES) {
-	// 		const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
-	// 		prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
-	// 		prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
-	// 	}
-
-	// 	return this.gfx;
-	// }
-
-	// AddToGfx() {
-
-	// 	const start = super.AddToGfx()
-	// 	let gfxCopy = new GfxInfoMesh(this.gfx);
-	// 	gfxCopy.vb.start = start;
-
-	// 	for (let i = 0; i < this.children.count; i++) {
-
-	// 		const child = this.children.buffer[i];
-	// 		child.gfx = new GfxInfoMesh(gfxCopy);
-
-	// 		child.geom.AddToGraphicsBuffer(this.sid, gfxCopy, this.name);
-	// 		gfxCopy.vb.start = child.mat.AddToGraphicsBuffer(this.sid, gfxCopy);
-
-	// 	}
-
-	// }
-
 	CreateNewText(maxDynamicTextChars, fontSize, color2, pad=this.pad, bold=this.bold) {
 
 		if (!Array.isArray(pad)) console.error; /** DEBUG */
@@ -204,6 +167,7 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 
 			const lastChild = this.children.buffer[this.children.count - 1];
 			ERROR_NULL(lastChild, ' @ Widget_Dynamic_Text_Mesh.CreateNewText(). WidgetText.js');
+			
 			// console.log(lastChild.geom.pos)
 			// Translate to right after the previous dynamicText.
 			pos = [0, 0, 0];

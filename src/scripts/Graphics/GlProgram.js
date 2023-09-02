@@ -144,8 +144,11 @@ export class GlProgram {
 		this.shaderInfo = {
 
 			attributes: {
+				
 				size: this.#PrivateCalculateAttributesSize(this.sid),
+				
 				loc: {
+
 					col: gl.getAttribLocation(this.webgl_program, 'a_col'), // Color	
 					wposTime: gl.getAttribLocation(this.webgl_program, 'a_wpos_time'), // World Position + Time attrib	 		
 					pos: gl.getAttribLocation(this.webgl_program, 'a_pos'),	// Vertex Position	 
@@ -153,7 +156,9 @@ export class GlProgram {
 					params1: gl.getAttribLocation(this.webgl_program, 'a_params1'), // A 4 component vector to pass any parameter to a vertex as an attribute 	 		
 					sdf: gl.getAttribLocation(this.webgl_program, 'a_sdf'),	// For Sdf's  	 		 		
 				},
+
 				offset: {
+
 					col: INT_NULL,
 					wposTime: INT_NULL,
 					pos: INT_NULL,
@@ -163,16 +168,19 @@ export class GlProgram {
 				},
 			},
 
-			// Create uniforms buffer. TODO: Create a dynamic buffer Float32Array, by knowing the num of uniforms all meshes will create.
+			// Create uniforms buffer. TODO: Create a dynamic buffer Float32Array, by knowing the num of uniforms meshes will create.
 			uniforms: {
+
 				// Static uniforms
-				// projection: gl.getUniformLocation(this.webgl_program, 'u_projection'), 	// Projection Matrix4 	
 				projection: new Uniform(
+
 					/* value */ 	0,
 					/* Location */ gl.getUniformLocation(this.webgl_program, 'u_projection'),
 					/* type */		UNIF_TYPE.MAT4,
 				),
 				sampler: gl.getUniformLocation(this.webgl_program, 'u_sampler0'),	// Sampler for texture units 	
+
+				// Uniforms buffer. Stores any uniform as an array of values.
 				buffer: new UniformsBuffer(gfxCtx.gl, this, SHADER_CONSTANTS.UNIFORM_BUFFER_COUNT),
 			},
 
@@ -239,7 +247,9 @@ export class GlProgram {
 			 */
 			let attribsOffset = 0;
 			for (let prop in sortedAttribLocations) {
+
 				if (sortedAttribLocations[prop] > INT_NULL) {
+
 					if (prop === 'col') {
 						this.shaderInfo.attributes.offset.col = attribsOffset;
 						attribsOffset += this.shaderInfo.attributes.size.col;
@@ -289,6 +299,7 @@ export class GlProgram {
 
 	/** Update all program's Uniforms */
 	UpdateUniforms(gl){
+
 		if (this.timer.isActive) this,UniformsUpdateTimer();
 		if (this.shaderInfo.uniforms.buffer.needsUpdate) {
 			this.UniformsUpdateBufferUniforms(gl);
@@ -321,18 +332,28 @@ export class GlProgram {
 	 * New uniforms that are set by the client and are created as a seperate uniforms in the shaders.
 	 */
 	UniformsCreateTimer(step) {
+
+		// 'Activates' 1 array element of the uniforms buffer array.
 		this.timer.isActive = true;
 		this.timer.step = step;
 		this.timer.index = this.shaderInfo.uniforms.buffer.CreateUniform('Timer');
 	}
+
 	UniformsUpdateTimer() {
+
 		this.shaderInfo.uniforms.buffer.Set(this.timer.val, this.timer.index);
 		this.uniformsNeedUpdate = true;
 		this.timer.val += this.timer.step;
 	}
+
 	UniformsBufferCreateScreenRes() {
+		/**
+		 * 'Activates' 2 array elements of the uniforms buffer array, and returns the 2 indexes
+		 *  so the caller can 'Set' the uniforms value at it's site.
+		 */
 		const resXidx = this.shaderInfo.uniforms.buffer.CreateUniform('ScreenResX');
 		const resYidx = this.shaderInfo.uniforms.buffer.CreateUniform('ScreenResY');
+
 		return {
 			resXidx: resXidx,
 			resYidx: resYidx,
