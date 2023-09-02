@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "buffer": "^6.0.3"
+  },
+  "lock": {
+    "buffer#^6.0.3": "buffer@v6.0.3-9TXtXoOPyENPVOx2wqZk"
+  }
+}

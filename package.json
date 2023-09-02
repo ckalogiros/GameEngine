@@ -1,23 +1,21 @@
 {
-    "name": "arkanoid",
+    "name": "gameengine",
     "version": "1.0.0",
     "description": "Game Engine",
     "main": "Entry.js",
-    "type": "module",
+    "type": "commonjs",
     "author": "CHR",
     "license": "MIT",
-    "//": "nodemon ./src/scripts/Entry.js",
     "repository": {
         "type": "git",
-        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
-        "directory": "types/three"
+        "url": "https://github.com/ckalogiros/GameEngine.git",
+        "directory": "/"
     },
     "scripts": {
-        "lite": "lite-server --port 6001",
-        "start": "npm run lite"
+        "start": "snowpack dev",
+        "build": "snowpack build"
     },
-    "dependencies": {
-        "lite-server": "^2.2.0",
-        "node-os-utils": "^1.3.7"
+    "devDependencies": {
+        "snowpack": "^3.8.8"
     }
 }

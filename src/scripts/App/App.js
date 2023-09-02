@@ -102,6 +102,9 @@ export function AppInit() {
     TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
     
     const b = Buffer.alloc(10)
+    b.write(0x1)
+    console.log('BUFFER!!!!!!!!!!!!!!!!!!!!!!!:', b)
+    console.log('B:', b)
 
     { // Test the new GfxCtx2
         // {
