@@ -42,8 +42,7 @@ class PerformanceTimer {
 
    GetFps(){ return Math.floor( 1 / (this.accum * MILISEC / this.cnt)); }
    GetMilisec(){ 
-      const ret = (this.accum / this.cnt); 
-      return ret.toFixed(4);
+      return (this.accum / this.cnt).toFixed(4);
    }
    GetNanosec(){ return (this.accum / NANOSEC / this.cnt).toFixed(1); } // * MILISEC cause the accum is allready in milisecond
 
@@ -80,6 +79,21 @@ export function PerformanceTimerCreate(name = '') {
 }
 
 
+export function PerformanceTimersGetFps(timer){
+   return Math.floor( 1 / (timer.accum * MILISEC / timer.cnt));
+}
+export function PerformanceTimersGetMilisec(timer){
+   return (timer.accum / timer.cnt).toFixed(4); 
+}
+export function PerformanceTimersGetNanosec(timer){
+   return (timer.accum / NANOSEC / timer.cnt).toFixed(1);
+}
+export function PerformanceTimersGetCurTime(timer){
+   return (timer.cur);
+}
+
+
+
 /**
  * Global Variables for mesuring code.
  * Must be declared somewhere globally because they are gonna be used mainly in Render loop
@@ -87,32 +101,13 @@ export function PerformanceTimerCreate(name = '') {
  * Also its better for callbacks to be functions rather than class methods,
  * which they dont have any object state through the callback.
  */
-export const __pt1 = PerformanceTimerCreate('_pt1');
-export function _Tm1GetFps(){ return __pt1.GetFps(); }
-export function _Tm1GetMilisec(){ return __pt1.GetMilisec(); }
-export function _Tm1GetNanosec(){ return __pt1.GetNanosec(); }
 
-export const __pt2 = PerformanceTimerCreate('_pt2');
-export function _Tm2GetFps(){ return __pt2.GetFps(); }
-export function _Tm2GetMilisec(){ return __pt2.GetMilisec(); }
-export function _Tm2GetNanosec(){ return __pt2.GetNanosec(); }
+export const _pt_fps = new PerformanceTimerCreate('Fps'); // Generic performance timer
+// export const _pt_fps_1s_avg = new PerformanceTimerCreate('Fps1sAvg'); // Generic performance timer
+export const _pt2 = new PerformanceTimerCreate('AllTimersUpdate'); // Generic performance timer
+export const _pt3 = new PerformanceTimerCreate('SceneUpdate'); // Generic performance timer
+export const _pt4 = new PerformanceTimerCreate('GlDraw'); // Generic performance timer
+export const _pt5 = new PerformanceTimerCreate('EventListener'); // Generic performance timer
+export const _pt6 = new PerformanceTimerCreate('HoverListener'); // Generic performance timer
 
-export const _pt3 = PerformanceTimerCreate();
-export function _Tm3GetFps(){ return _pt3.GetFps('_pt3'); }
-export function _Tm3GetMilisec(){ return _pt3.GetMilisec(); }
-export function _Tm3GetNanosec(){ return _pt3.GetNanosec(); }
 
-export const _pt4 = PerformanceTimerCreate();
-export function _Tm4GetFps(){ return _pt4.GetFps('_pt4'); }
-export function _Tm4GetMilisec(){ return _pt4.GetMilisec(); }
-export function _Tm4GetNanosec(){ return _pt4.GetNanosec(); }
-
-export const __pt5 = PerformanceTimerCreate();
-export function _Tm5GetFps(){ return __pt5.GetFps('_pt5'); }
-export function _Tm5GetMilisec(){ return __pt5.GetMilisec(); }
-export function _Tm5GetNanosec(){ return __pt5.GetNanosec(); }
-
-export const __pt6 = PerformanceTimerCreate();
-export function _Tm6GetFps(){ return __pt6.GetFps('_pt6'); }
-export function _Tm6GetMilisec(){ return __pt6.GetMilisec(); }
-export function _Tm6GetNanosec(){ return __pt6.GetNanosec(); }

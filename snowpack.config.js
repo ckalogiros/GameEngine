@@ -6,8 +6,8 @@ module.exports = {
   mount: {
     /* ... */
     src: '/',
-    resources: '/resources'
-
+    resources: '/resources',
+    style: '/src/style/style.css'
   },
   plugins: [
     /* ... */

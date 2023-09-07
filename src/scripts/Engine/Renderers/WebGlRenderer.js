@@ -5,7 +5,9 @@ import { MouseResetDif, MouseResetWheel } from "../Controls/Input/Mouse.js";
 import { FpsGet, TimeSample, TimeUpdate } from "../Timers/Time.js";
 import { TimersUpdateGlobalTimer } from "../Timers/Timers.js";
 import { TimeIntervalsUpdateAll } from "../Timers/TimeIntervals.js";
-import { __pt1, __pt2, _pt3 } from "../Timers/PerformanceTimers.js";
+// import { PerformanceTimerCreate, __pt1, __pt2, _pt3 } from "../Timers/PerformanceTimers.js";
+import { PerformanceTimerCreate } from "../Timers/PerformanceTimers.js";
+import {_pt_fps ,_pt2, _pt3, _pt4 } from '../Timers/PerformanceTimers.js'
 
 /**
  * WebGl
@@ -45,13 +47,9 @@ import { __pt1, __pt2, _pt3 } from "../Timers/PerformanceTimers.js";
 
 
 /**
- * Time Measure Variables
+ * Performance Timers
  */
 
-const _pt1 = __pt1; // Generic performance timer
-const _pt2 = __pt2; // Generic performance timer
-const tm3 = _pt3; // Generic performance timer
-// const ta1 = _ta1; // Currently used for FPS average;
 
 export class WebGlRenderer {
 
@@ -85,25 +83,26 @@ export class WebGlRenderer {
       if (STATE.loop.paused === false) {
          
          TimeUpdate(); 
+         _pt_fps.Start();
          
-         _pt1.Start();
+         _pt2.Start();
          TimeIntervalsUpdateAll(); // Update and run callbacks for each interval timer that has been set.
          TimersUpdateGlobalTimer(); // This is a globbal timer, going only forward
          // TimersUpdateTimers();
          // TimersUpdateStepTimers();
-         _pt1.Stop();
+         _pt2.Stop();
          
          // TODO!!! Update camera uniform if camera needs update 
          // this.camera.Update(this.gl)
          
-         _pt2.Start(); this.scene.OnUpdate(); _pt2.Stop();
+         _pt3.Start(); this.scene.OnUpdate(); _pt3.Stop();
          
-         tm3.Start(); GlDraw(this.gl); tm3.Stop();
+         _pt4.Start(); GlDraw(this.gl); _pt4.Stop();
          
          MouseResetDif(.5);
          MouseResetWheel();
          
-         
+         _pt_fps.Stop();
          TimeSample()
          this.fpsTimer.Stop();
       }

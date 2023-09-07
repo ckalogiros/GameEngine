@@ -32,7 +32,7 @@ export function HandleEvents() {
 
         if (e.type === 'mouse-move') {
 
-            if(LISTENERS_ACTIVE[LISTEN_EVENT_TYPES_INDEX.HOVER] === true) // ..if no events, skip dispatching
+            if(LISTENERS_FLAGS[LISTEN_EVENT_TYPES_INDEX.HOVER] === true) // ..if no events, skip dispatching
                 Listener_dispatch_check_hover_event();
 
         }
@@ -53,7 +53,7 @@ export function HandleEvents() {
 
             STATE.mouse.activeClickedButtonId = e.params.mouseButton;
 
-            if(LISTENERS_ACTIVE[LISTEN_EVENT_TYPES_INDEX.CLICK] === true) // ..if no events, skip dispatching
+            if(LISTENERS_FLAGS[LISTEN_EVENT_TYPES_INDEX.CLICK] === true) // ..if no events, skip dispatching
                 Listener_dispatch_event(LISTEN_EVENT_TYPES_INDEX.CLICK, e.params.mouseButton);
         }
 

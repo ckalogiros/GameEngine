@@ -1,32 +1,95 @@
-4  Adding mesh: label:0          id:76 vbidx:  0 0 At: 0    MenuOptionsBuilder.js:201:41
-5  Adding mesh: switch:0         id:74 vbidx:  0 0 At: 56   MenuOptionsBuilder.js:201:41
-4  Adding mesh: section_option:0 id:73 vbidx:  0 0 At: 112  MenuOptionsBuilder.js:201:41
-5  Adding mesh: label:1          id:81 vbidx:  0 0 At: 168  MenuOptionsBuilder.js:201:41
-6  Adding mesh: switch:1         id:79 vbidx:  0 0 At: 224  MenuOptionsBuilder.js:201:41
-5  Adding mesh: section_option:1 id:78 vbidx:  0 0 At: 280  MenuOptionsBuilder.js:201:41
-6  Adding mesh: label:2          id:86 vbidx:  0 0 At: 336  MenuOptionsBuilder.js:201:41
-7  Adding mesh: switch:2         id:84 vbidx:  0 0 At: 392  MenuOptionsBuilder.js:201:41
-6  Adding mesh: section_option:2 id:83 vbidx:  0 0 At: 448  MenuOptionsBuilder.js:201:41
-7  Adding mesh: label:3          id:91 vbidx:  0 0 At: 504  MenuOptionsBuilder.js:201:41
-8  Adding mesh: switch:3         id:89 vbidx:  0 0 At: 560  MenuOptionsBuilder.js:201:41
-7  Adding mesh: section_option:3 id:88 vbidx:  0 0 At: 616  MenuOptionsBuilder.js:201:41
-8  Adding mesh: label:4          id:96 vbidx:  0 0 At: 672  MenuOptionsBuilder.js:201:41
-9  Adding mesh: switch:4         id:94 vbidx:  0 0 At: 728  MenuOptionsBuilder.js:201:41
-8  Adding mesh: section_option:4 id:93 vbidx:  0 0 At: 784  MenuOptionsBuilder.js:201:41
-9  Adding mesh: label:5          id:101 vbidx: 0 0 At: 840  MenuOptionsBuilder.js:201:41
-10 Adding mesh: switch:5         id:99 vbidx:  0 0 At: 896  MenuOptionsBuilder.js:201:41
-9  Adding mesh: section_option:5 id:98 vbidx:  0 0 At: 952  MenuOptionsBuilder.js:201:41
-10 Adding mesh: label:6          id:106 vbidx: 0 0 At: 1008 MenuOptionsBuilder.js:201:41
-11 Adding mesh: switch:6         id:104 vbidx: 0 0 At: 1064 MenuOptionsBuilder.js:201:41
-10 Adding mesh: section_option:6 id:103 vbidx: 0 0 At: 1120 MenuOptionsBuilder.js:201:41
-11 Adding mesh: label:7          id:111 vbidx: 0 0 At: 1176 MenuOptionsBuilder.js:201:41
-12 Adding mesh: switch:7         id:109 vbidx: 0 0 At: 1232 MenuOptionsBuilder.js:201:41
-11 Adding mesh: section_option:7 id:108 vbidx: 0 0 At: 1288 MenuOptionsBuilder.js:201:41
-12 Adding mesh: label:8          id:116 vbidx: 0 0 At: 1344 MenuOptionsBuilder.js:201:41
-13 Adding mesh: switch:8         id:114 vbidx: 0 0 At: 1400 MenuOptionsBuilder.js:201:41
-12 Adding mesh: section_option:8 id:113 vbidx: 0 0 At: 1456 MenuOptionsBuilder.js:201:41
-13 Adding mesh: label:9          id:121 vbidx: 0 0 At: 1512 MenuOptionsBuilder.js:201:41
-14 Adding mesh: switch:9         id:119 vbidx: 0 0 At: 1568 MenuOptionsBuilder.js:201:41
-13 Adding mesh: section_option:9 id:118 vbidx: 0 0 At: 1624 MenuOptionsBuilder.js:201:41
-11 Adding mesh: section_menu-1   id:72 vbidx:  0 0 At: 1680 MenuOptionsBuilder.js:201:41
-1  Adding mesh: Root popup       id:0 vbidx:   0 0 At: 0
+-- Listener_debug_print_all -- Keys.js:91:18                
+---- Recurse. Event type: 0 EventListeners.js:299:30
+evt:0  minimizer id:72 EventListeners.js:358:21
+evt:1  WIDGET_TEXT_LABEL id: 39 EventListeners.js:358:21
+evt:2  WIDGET_TEXT_LABEL id: 41 EventListeners.js:358:21
+evt:3  WIDGET_TEXT_LABEL id: 43 EventListeners.js:358:21
+evt:4  WIDGET_TEXT_LABEL id: 45 EventListeners.js:358:21
+evt:5  WIDGET_TEXT_LABEL id: 47 EventListeners.js:358:21
+evt:6  WIDGET_TEXT_LABEL id: 49 EventListeners.js:358:21
+evt:7  WIDGET_TEXT_LABEL id: 51 EventListeners.js:358:21
+evt:8  WIDGET_TEXT_LABEL id: 53 EventListeners.js:358:21
+evt:9  WIDGET_TEXT_LABEL id: 55 EventListeners.js:358:21
+evt:10  WIDGET_TEXT_LABEL id: 57 EventListeners.js:358:21
+evt:11  WIDGET_TEXT_LABEL id: 59 EventListeners.js:358:21
+evt:12  WIDGET_TEXT_LABEL id: 61 EventListeners.js:358:21
+evt:13  WIDGET_TEXT_LABEL id: 63 EventListeners.js:358:21
+evt:14  WIDGET_TEXT_LABEL id: 65 EventListeners.js:358:21
+evt:15  WIDGET_TEXT_LABEL id: 67 EventListeners.js:358:21
+evt:16  WIDGET_TEXT_LABEL id: 69 EventListeners.js:358:21
+--- Return EventListeners.js:301:30
+17 :type:0 evt:17:  Help section id:36 EventListeners.js:305:27
+---- Recurse. Event type: 0 EventListeners.js:299:30
+evt:0  minimizer id:107 EventListeners.js:358:21
+evt:1  gry2_1 id:97 EventListeners.js:358:21
+evt:2  gry2_2 id:98 EventListeners.js:358:21
+evt:3  pin_1 id:81 EventListeners.js:358:21
+evt:4  gry2_3 id:99 EventListeners.js:358:21
+evt:5  gry2_4 id:100 EventListeners.js:358:21
+evt:6  blu_1 id:82 EventListeners.js:358:21
+evt:7  bla_1 id:80 EventListeners.js:358:21
+evt:8  gre_4 id:92 EventListeners.js:358:21
+evt:9  pur_1 id:83 EventListeners.js:358:21
+evt:10  red_3 id:87 EventListeners.js:358:21
+evt:11  yel_1 id:85 EventListeners.js:358:21
+evt:12  red_1 id:84 EventListeners.js:358:21
+evt:13  gre id:75 EventListeners.js:358:21
+evt:14  yel id:76 EventListeners.js:358:21
+evt:15  yel_4 id:91 EventListeners.js:358:21
+evt:16  red_4 id:90 EventListeners.js:358:21
+evt:17  yel_2 id:86 EventListeners.js:358:21
+evt:18  ora_4 id:93 EventListeners.js:358:21
+evt:19  ora id:77 EventListeners.js:358:21
+evt:20  gre_3 id:89 EventListeners.js:358:21
+evt:21  yel_3 id:88 EventListeners.js:358:21
+evt:22  Sectioned btn1 id:103 EventListeners.js:358:21
+evt:23  Sectioned btn1 id:105 EventListeners.js:358:21
+evt:24  vert_0 id:101 EventListeners.js:358:21
+evt:25  gry1_1 id:94 EventListeners.js:358:21
+evt:26  gry1_2 id:95 EventListeners.js:358:21
+evt:27  gry1_3 id:96 EventListeners.js:358:21
+evt:28  bla id:79 EventListeners.js:358:21
+evt:29  cie id:78 EventListeners.js:358:21
+evt:30  red id:74 EventListeners.js:358:21
+--- Return EventListeners.js:301:30
+32 :type:0 evt:32:  SECTION_MESH id: 73 EventListeners.js:305:27
+---- Recurse. Event type: 1 EventListeners.js:299:30
+evt:0  minimizer id:72 EventListeners.js:358:21
+--- Return EventListeners.js:301:30
+34 :type:1 evt:0:  Help section id:36 EventListeners.js:305:27
+---- Recurse. Event type: 1 EventListeners.js:299:30
+evt:0  minimizer id:107 EventListeners.js:358:21
+evt:1  Sectioned btn1 id:105 EventListeners.js:358:21
+
+
+-- Listener_debug_print_all -- Keys.js:91:18
+---- Recurse. Event type: 0 EventListeners.js:299:30
+evt:0  minimizer id:72 EventListeners.js:334:21
+evt:1  WIDGET_TEXT_LABEL id: 39 EventListeners.js:334:21
+evt:2  WIDGET_TEXT_LABEL id: 41 EventListeners.js:334:21
+evt:3  WIDGET_TEXT_LABEL id: 43 EventListeners.js:334:21
+evt:4  WIDGET_TEXT_LABEL id: 45 EventListeners.js:334:21
+evt:5  WIDGET_TEXT_LABEL id: 47 EventListeners.js:334:21
+evt:6  WIDGET_TEXT_LABEL id: 49 EventListeners.js:334:21
+evt:7  WIDGET_TEXT_LABEL id: 51 EventListeners.js:334:21
+evt:8  WIDGET_TEXT_LABEL id: 53 EventListeners.js:334:21
+evt:9  WIDGET_TEXT_LABEL id: 55 EventListeners.js:334:21
+evt:10  WIDGET_TEXT_LABEL id: 57 EventListeners.js:334:21
+evt:11  WIDGET_TEXT_LABEL id: 59 EventListeners.js:334:21
+evt:12  WIDGET_TEXT_LABEL id: 61 EventListeners.js:334:21
+evt:13  WIDGET_TEXT_LABEL id: 63 EventListeners.js:334:21
+evt:14  WIDGET_TEXT_LABEL id: 65 EventListeners.js:334:21
+evt:15  WIDGET_TEXT_LABEL id: 67 EventListeners.js:334:21
+evt:16  WIDGET_TEXT_LABEL id: 69 EventListeners.js:334:21
+--- Return EventListeners.js:301:30
+0 :type:0 evt:0:  Help section id:36 EventListeners.js:305:27
+---- Recurse. Event type: 1 EventListeners.js:299:30
+evt:0  minimizer id:72 EventListeners.js:334:21
+--- Return EventListeners.js:301:30
+2 :type:1 evt:0:  Help section id:36 EventListeners.js:305:27
+---- Recurse. Event type: 1 EventListeners.js:299:30
+evt:0  minimizer id:107 EventListeners.js:334:21
+evt:1  Sectioned btn1 id:105 EventListeners.js:334:21
+--- Return EventListeners.js:301:30
+3 :type:1 evt:1:  SECTION_MESH id: 73 EventListeners.js:305:27
+4 :type:1 evt:2:  Mesh name 0000000000000000 id:108

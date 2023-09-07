@@ -55,7 +55,10 @@ export class Geometry2D_Text extends Geometry2D {
 
 
    MoveXY(x, y, gfx) {
-      this.MoveXYConcecutive(x, y, gfx, this.num_faces)
+      super.MoveXY(x, y, gfx, this.num_faces)
+   }
+   SetPosXYZ(pos, gfx) {
+      super.SetPosXYZ(pos, gfx, this.num_faces)
    }
 
    CalcTextWidth(){

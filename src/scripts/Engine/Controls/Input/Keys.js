@@ -6,7 +6,7 @@ import { RenderQueueGet } from "../../Renderers/Renderer/RenderQueue.js";
 import { ScenesPrintAllMeshes, ScenesPrintSceneMeshes } from "../../Scenes.js";
 import { FpsGet } from "../../Timers/Time.js";
 import { TimeIntervalsPrintAll } from "../../Timers/TimeIntervals.js";
-import { Gfx_pool_print } from "../../Interface/GfxContext.js";
+import { Gfx_pool_print } from "../../Interfaces/GfxContext.js";
 
 
 
@@ -88,6 +88,7 @@ export const DEBUG_PRINT_KEYS = [
       key: 'e',
       discr: 'Listener_debug_print_all',
       func: (e)=>{
+         console.log('-- Listener_debug_print_all --')
          Listener_debug_print_all()
       },
    },
@@ -95,6 +96,7 @@ export const DEBUG_PRINT_KEYS = [
       key: 'E',
       discr: 'Listener_debug_print_all',
       func: (e)=>{
+         console.log('-- Listener_debug_print_all --')
          Listener_debug_print_all();
       },
    },
@@ -103,6 +105,7 @@ export const DEBUG_PRINT_KEYS = [
       discr: 'ScenesPrintAllMeshes',
       func: (e)=>{
          let cnt = 0;
+         console.log('-- Scene\'s All meshes (recursive) --')
          const count = ScenesPrintAllMeshes(STATE.scene.active.children, cnt);
          console.log('Count: ', count)
       },
@@ -111,7 +114,8 @@ export const DEBUG_PRINT_KEYS = [
       key: 'M',
       discr: 'ScenesPrintSceneMeshes',
       func: (e)=>{
-         const count = console.log(ScenesPrintSceneMeshes(STATE.scene.active.children))
+         console.log('-- Scene\'s direct children meshes --')
+         const count = ScenesPrintSceneMeshes(STATE.scene.active.children);
          console.log('Count: ', count)
       },
    },

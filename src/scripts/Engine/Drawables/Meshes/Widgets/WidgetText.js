@@ -320,10 +320,24 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 		for (let i = 0; i < mesheslen; i++) {
 			
 			let val = 0;
-			if(params.params.func_params) // Case 
-			val = params.params.func[i](params.params.func_params[i]);
-			else 
-				val = params.params.func[i]();
+			if(params.params.func[i]){
+
+				if(params.params.func_params[i])
+					val = params.params.func[i](params.params.func_params[i]); // Callback with parameters
+					
+				else val = params.params.func[i](); // Callback with no parameters
+			}
+			else if(params.params.func_params[i]){
+				val = params.params.func_params[i].delta_avg; // No callback, just a value
+			}
+			// console.log(params.params.func_params[i])
+			// if(params.params.func_params)
+			// 	val = params.params.func[i](params.params.func_params[i]); // Callback with parameters
+			// else if(params.params.func[i])
+			// 	val = params.params.func[i](); // Callback with no parameters
+			// else if(params.params.func_params[i])
+			// 	val = params.params.func_params[i]; // No callback, just a value
+
 
 			const text = `${val}`;
 			const geom = meshes[i].geom;
@@ -348,6 +362,15 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 			}
 		}
 	}
+
+	SetColorRGB(col) { 
+
+		let num_faces = this.geom.num_faces;
+		for(let i=0; i<this.children.count; i++){
+			num_faces += this.children.buffer[i].geom.num_faces;
+		}
+		this.mat.SetColorRGB(col, this.gfx, num_faces) 
+  }
 }
 
 
@@ -389,7 +412,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 	  * @param {callbackfunction} func The function to call upon time interval
 	  * See explanation at ##SetDynamicText
 	  */
-	SetDynamicText(msInterval, func, name, idx = INT_NULL, func_params = null) {
+	SetDynamicText(name, msInterval, func, func_params = null, idx = INT_NULL) {
 
 		if (idx !== INT_NULL || this.children.count <= 1) {
 			/**
@@ -416,7 +439,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 
 			const params = {
 				func: [func], // Array in case we expand to have more dynamic texts
-				func_params: func_params,
+				func_params: [func_params],
 				meshes: null,
 			};
 
@@ -426,7 +449,6 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 			params.meshes = meshes;
 
 			const tIdx = TimeIntervalsCreate(msInterval, name, TIME_INTERVAL_REPEAT_ALWAYS, this.Update, params);
-			// DYN_TEXT_UPDATE_INTERVAL_IDX = tIdx;
 			this.timeIntervalsIdxBuffer.Add(tIdx);
 		}
 		else { // Update dynamicText via one timeIntrval Update().

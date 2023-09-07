@@ -1,21 +1,14 @@
+!!
+Static draw meshes should be rendered to a render buffer once
+and render buffer should been drawn every frame without 
+redrawing the meshes to it's self
+!!
+
+
 --------------------------------------------------- REMOVE!
-. Old listener
-. BringToFront
-. Check for remove:
-  . SetDefaultZindex
 --------------------------------------------------- REMOVE!
 
 --------------------------------------------------- ALGORITHMS!
-Set an efficient hover checking.
-Implement an algorithm that will recontruct the hover 
-listening of all application's meshes.
-The algo will execute upon creation of all meshes.
-The core idea is to build an efficient hover checking,
-based upon the children mesh count and their siblings
-in conjunction as to what meshes must have a hover listen event,
-since it really plays the most significant role for efficiency.
-
-SEE: dock/ScemeDraws/HoverListenEvents.drawio
 --------------------------------------------------- ALGORITHMS!
 
 --------------------------------------------------- TESTING!
@@ -24,14 +17,11 @@ SEE: dock/ScemeDraws/HoverListenEvents.drawio
   subtracting the 'oldest' one, with a constant counter.
   The 'oldest' value is up to dicision. For example
   we could set 100 samples, so the oldest will be the -100 delta. 
-. Create a performance test for accesing arrays with 'key' 
-  instead of ordinary int counter. Make it complex so the 
-  interpeter does not optimize.
 --------------------------------------------------- TESTING!
 
 --------------------------------------------------- IMIDIATE!
-. Extend from root classes as Mesh and Text_Mesh wher possible
-. Implement set render queue priority for meshes in a vertexBuffer.
+
+. Implement set render queue priority for meshes inside a vertexBuffer.
 
 . Definetly we need an implementation of removing vertices from the gfx buffers.
   . One way would be to keep track of all the free attributes of a vertex buffer
@@ -44,22 +34,6 @@ SEE: dock/ScemeDraws/HoverListenEvents.drawio
 
 --------------------------------------------------- TODO
 
-. Event listener: 
-  Lets say we have 2 buttons, These belong to a section.
-  We set the buttons to have a click event.
-  The event listener will run the check all click events.
-  If we create the listener to the parent, then the listener will check once
-  the parent for any click events inside it. Then and only if there is
-  a click in the parent the listener will check the 2 buttons.
-  This way we kind of slicing the space into categories, meshes rooted to the 
-  scene, and other meshes inside those root parent meshes.
-
-. Maybe implement Generic Global gl buffers, that will store progidx and vbidx of a 
-  multiuse on the fly gl program. Mainly for popups, but it can be used for any mesh
-  that wants to be displayed for a little while and the removed. Also the global state will
-  help to implement most of the gl code in the Graphics .js files and not in any specific
-  class as with the popup widget.
-   
 . Implement second popup menu(from the main popup menu)
 
 . Maybe we should implement timeIntervals for the GlDraw function. 
@@ -68,7 +42,6 @@ SEE: dock/ScemeDraws/HoverListenEvents.drawio
 . Implement:
     Widget Menu.
     Widget Drop-Down-Menu.
-    Widget check-radio-enable button.
 
 . Move touch screen input from MouseEvents.js to input folder
 
@@ -97,154 +70,12 @@ SEE: dock/ScemeDraws/HoverListenEvents.drawio
 --------------------------------------------------- TODO
 
 --------------------------------------------------- CONTINUE
-. If children of popup are created, do not create again
-. On widget_Menu add destroy menu.
+. If listen events works correctly, fix the menu minimization.
+  On minimizing 
+    . copy childrens buffer
+    . copy EventListeners children buffer OR set it to Inactive
 
 --------------------------------------------------- CONTINUE
-Correct the meshes dimentions to not create double the width and height
-
-Implement: An easy way of write and use custom shaders:
-  1. Create a geo and mat.
-  2. Implement: pass shaders to ???
-
-Finish the event dispatchEvent
-
-Create Camera controls 
---------------------------------------------------- ASAP
-
-Implement Renderer
-
-implement uniforms
-For the uniforms buffer in the shaders to be dynamic size, we must implement a 
-force reload shaders and relink current program, in order to add meshes at runtime.  
-
-implement flags (for material), 
-so that we can modify gl options, different material flags for dif shader rendering, lighting etc.  
-
-Implement a Renderer, that handles the webGl context
-and a Camera class that is part of the renderer class
-and can create Projection as orthographic views
---------------------------------------------------- ASAP
 
 
 
---------------------------------------------------- New ToDo's
-Reimplement sid to be a class. 
-The class will return a sid 
-object:{
-  attr:,
-  unif:,
-  fx:,
-  etc ...
-
-
-}
---------------------------------------------------- New ToDo's
-
-
-ERASABLE
-  
-  br.powUp[i]   
-  
-  the many calls to: gl.uniform3fv( program.unifLoc.pos,   [ 0.0, 0.0, 0.0 ] );
-  
-  br.col, br.pos?, .....
-  
-  activate br.changed for all buffers
-  
-  function vertexWPos3( wPos, numObjects-. null )
-  
---------------------------------------------------- ToDo
-
-typed Arrays views: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays
-// for transforming all kind of arrays to typed ones. ex. "brIndex = new Array"
-
-typed Arrays methods : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array
-
-change powUp.type from string to contant number
-
-change all arrays [] to new32FloatArrays or uints
-
-try to make one for loop for drawing everything in render
-
-try to create rectangles with general call to createRect
-
-use return in all if 's (like collisions, for unnecessary for loops)
-
-Display realFps with call to date.now()(instead of for loop)
-
-create unsignedInt or bool type
-
-brake the createData function into seperate for each  type
-
-//if( powUps[i].pos[1] < player[ plIndex ].pos[1] +1 )
-
-make the .split for texts inside CalculateTextDimentions so it finds
-all characters
-
-Make:	bricksCollumsIndexArr	//for collisions
-Make:	bricksRowsIndexArr		//for collisions
-Make:	bricksPowUpsIndexArr 	//for different texturing
-
-  Reverse all loops (ex. --i)
-  All loops ++i NOT i++
-
-
-  ### 2
-  Make texture creating and loading robust 
-    When creating the font texture we want texWidth and height in the glTexture object(for use)
-    OR connect the font texture(with an array index??) with the glTexture object
-
-!!!
-In meshes that consist of an array of meshes, like balls and bricks etc,
-it is best to implement an 'all active' array to hold the indexes of the
-active meshes, insted of looping through all meshes and checking if(mesh.isActive)
-OR having to sort the array by active meshes.
-
-XXX
-Implement the Rect class as extension to every class  that has a rect mesh
-
-Remove all unecessary functions like: BallGetDim() etc
-
-XXX
-See if we can set all animations via Animation class
-(Current Animations are implemented as folows: 
-    export function RunAnimations() {
-
-      Animations_create_scale_up_down();
-      UiModRunAnimation();
-      PowerUpRunAnimation();
-      PlayerEnlargeAnimation();
-
-    }
-)
-
-Change the vars name 'name' in TextLabel class to 'str' or 'text'
-
-*** Implement the players xdir momentum to speed up ball
-    Make PlayerOnUpdate() or correct existing OnPlayerMove() function
-    to run on every frame so we can update the player's state.inMove, 
-
-
-Make the BallUpdateProjectLine() to run smoother with a timer(every 16 ms)
-
-
-Create some sort of timed events with a class similar to animations 
-so that we initiate an event, passing 2 callbacks.
-One callback is checking when the event is completed and the second callback 
-is for the following event to start
-
-Create a font that is [0,0] uv coords, if not already implemented
-
-!!
-All GetNextFree class member fuctions should not waste time
-doing a search for free element from the start every time,
-instead the function should have an iterator pointing to the next i-th
-element each time it is called, and the iterator should return to 0-th element at the end of the array. 
-
-
-
-!!!!
-Check all fragment shaders for constant variables for all fragments.
-If any, calculate them in vertex shader instead of making the calculations 
-for every fragment

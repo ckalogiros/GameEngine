@@ -92,10 +92,13 @@ export function CopyArr1_2(dst, val){
 }
 
 export function AddArr2(arr1, arr2){
-    return [
-        arr1[0]+arr2[0],
-        arr1[1]+arr2[1],
-    ];
+    arr1[0]+=arr2[0];
+    arr1[1]+=arr2[1];
+}
+export function AddArr3(arr1, arr2){
+    arr1[0] += arr2[0];
+    arr1[1] += arr2[1];
+    arr1[2] += arr2[2];
 }
 
 

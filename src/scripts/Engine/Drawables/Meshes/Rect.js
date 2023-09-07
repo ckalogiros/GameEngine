@@ -44,6 +44,7 @@ export class Rect extends Mesh{
             child.AddToGfx(); // Propagate the same functionality we apply here down the tree of meshes
       }
    }
+   
 }
 
 

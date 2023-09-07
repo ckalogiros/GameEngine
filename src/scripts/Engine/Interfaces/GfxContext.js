@@ -3,7 +3,6 @@
 import { GfxSetVbRender, GlGenerateContext, GlResetIndexBuffer, GlResetVertexBuffer, GlSetVertexBufferPrivate } from "../../Graphics/Buffers/GlBuffers.js";
 import { GlCheckSid } from "../../Graphics/GlProgram.js";
 import { M_Buffer } from "../Core/Buffers.js";
-import { Listener_remove_event_by_idx } from "../Events/EventListeners.js";
 
 
 let _sessionId = 0;
@@ -97,7 +96,7 @@ export class Gfx_Pool extends M_Buffer {
       }
    }
 
-   SessionEnd(setPrivate) {
+   SessionEnd(setPrivate, setActive=true) {
 
       const count = this.session.length;
 
@@ -107,7 +106,7 @@ export class Gfx_Pool extends M_Buffer {
 
          const idx = this.session[i];
 
-         this.buffer[idx].isActive = true;
+         this.buffer[idx].isActive = setActive;
          this.buffer[idx].isPrivate = setPrivate;
 
          const progidx = this.buffer[idx].progidx,
@@ -281,41 +280,7 @@ export class Gfx_Pool extends M_Buffer {
       mesh.RemoveAllListenEvents();
 
    }
-   // ActivateRecursive_no_listeners_touch(mesh) {
 
-   //    for (let i = 0; i < mesh.children.count; i++) {
-
-   //       const child = mesh.children.buffer[i];
-   //       if (child) this.ActivateRecursive(child)
-   //    }
-
-   //    const progidx = mesh.gfx.prog.idx;
-   //    const vbidx = mesh.gfx.vb.idx;
-
-   //    this.#ActDeactFromPool(progidx, vbidx, true);
-   //    GfxSetVbRender(progidx, vbidx, true);
-
-   // }
-
-   /** */
-   Gfx_deactivate_no_member_listeners_touch(mesh) {
-
-      for (let i = 0; i < mesh.children.count; i++) {
-
-         const child = mesh.children.buffer[i];
-         if (child) 
-            this.Gfx_deactivate_no_member_listeners_touch(child)
-      }
-
-      const progidx = mesh.gfx.prog.idx;
-      const vbidx = mesh.gfx.vb.idx;
-
-      this.#ActDeactFromPool(progidx, vbidx, false);
-      GlResetVertexBuffer(mesh.gfx);
-      GlResetIndexBuffer(mesh.gfx);
-      GfxSetVbRender(progidx, vbidx, false);
-
-   }
    DeactivateRecursive_no_listeners_touch(mesh) {
 
       for (let i = 0; i < mesh.children.count; i++) {
@@ -398,27 +363,18 @@ const _gfx_pool = new Gfx_Pool;
 // export function Gfx_get_pool2() { return _gfx_pool; }
 
 /** Finish the session by setting all the assigned gfx buffers to active. Also sets private all the gfx buffers  */
-export function Gfx_end_session(setPrivate) { return _gfx_pool.SessionEnd(setPrivate); }
+export function Gfx_end_session(setPrivate, setActive) { return _gfx_pool.SessionEnd(setPrivate, setActive); }
 
 // mesh_count is nesessary for calculating vertex buffer attribute offset for Text Meshes
 export function Gfx_generate_context(sid, sceneIdx, mesh_count, FLAGS, gfxidx) {
    return _gfx_pool.GenerateGfxCtx(sid, sceneIdx, mesh_count, FLAGS, gfxidx);
 }
-// TODO!!! LOK the implementation
-// export function Gfx_generate_context_and_add2(mesh, FLAGS) {
-//    return _gfx_pool.GenerateAndAddGfxCtx(mesh, FLAGS);
-// }
-// /** Also adds all meshes recursively to the gfx pipeline, so we need to pass the root mesh for the function to work */
-// export function Request_private_gfx_ctx2(mesh, flags, progidx, vbidx) {
-//    return _gfx_pool.RequestPrivateGfxCtx(mesh, flags, progidx, vbidx);
-// }
 
 /** Activates the gfx buffers recursively for all the children meshes. */
 export function Gfx_activate(mesh) { _gfx_pool.ActivateRecursive(mesh); }
 export function Gfx_deactivate(mesh) { _gfx_pool.DeactivateRecursive(mesh); }
 // export function Gfx_activate_no_listeners_touch(mesh) { _gfx_pool.ActivateRecursive(mesh); }
 export function Gfx_deactivate_no_listeners_touch(mesh) { _gfx_pool.DeactivateRecursive_no_listeners_touch(mesh); }
-export function Gfx_deactivate_no_member_listeners_touch(mesh) { _gfx_pool.Gfx_deactivate_no_member_listeners_touch(mesh); }
 
 export function Gfx_pool_print() {
 

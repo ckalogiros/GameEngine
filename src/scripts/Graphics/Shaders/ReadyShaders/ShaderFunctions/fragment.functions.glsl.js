@@ -73,10 +73,10 @@ vec2 res = vec2(824., 893.);    \n\
   // color *= 2.*vec3(abs(wa * wb));              \n\
   \n\
   // Bevel. TODO: Control @colorIntensity for the pow() and @darkness for the mult of the pow() \n\
-  float r = min(rCorners*.17, min(dim.x, dim.y)); \n\
-  // float r = min(.023, min(dim.x, dim.y)); \n\
-  float f = smoothstep(r, .0, abs(d.x)-borderWidth); \n\
-  color = mix(color, pow(color, vec3(1.5))*.85, f); \n\
+  // float r = min(rCorners*.17, min(dim.x, dim.y)); \n\
+  // // float r = min(.023, min(dim.x, dim.y)); \n\
+  // float f = smoothstep(r, .0, abs(d.x)-borderWidth); \n\
+  // color = mix(color, pow(color, vec3(1.5))*.85, f); \n\
   \n\
   // if(v_uniforms_buffer[2] > 10.) return vec4(1.); \n\
   return vec4(color, alpha); \n\

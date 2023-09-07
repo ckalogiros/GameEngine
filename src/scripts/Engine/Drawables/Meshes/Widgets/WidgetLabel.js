@@ -3,11 +3,11 @@
 import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
 import { GfxInfoMesh, GlGetProgram } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
-import { CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
+import { AddArr3, CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../../Collisions.js";
 import { MouseGetPos } from "../../../Controls/Input/Mouse.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
-import { Gfx_generate_context } from "../../../Interface/GfxContext.js";
+import { Gfx_generate_context } from "../../../Interfaces/GfxContext.js";
 import { TimeIntervalsCreate } from "../../../Timers/TimeIntervals.js";
 import { Geometry2D_Text } from "../../Geometry/Geometry2DText.js";
 import { FontMaterial } from "../../Material/Base/Material.js";
@@ -63,15 +63,17 @@ export class Widget_Label extends Rect {
 
     pad = [0, 0];
 
-    constructor(text, pos=[200, 300], fontSize=8, col = BLACK, textCol = WHITE, scale = [1, 1], pad = [10, 5], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [0, 0, 0]) {
+    constructor(text, pos=[200, 300], fontSize=8, col = GREY1, textCol = WHITE, scale = [1, 1], pad = [10, 5], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [0, 6, 2]) {
 
         const sdfouter = CalculateSdfOuterFromDim(fontSize);
         if (sdfouter + bold > 1) bold = 1 - sdfouter;
+        pos[2] += 1; // In essence we set as the left (start of text label) the label area and not the left of text.
+        pos[2] += 1; // In essence we set as the left (start of text label) the label area and not the left of text.
         
         const textMesh = new I_Text(text, pos, fontSize)
 
         pos[0] -= pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
-        pos[2] -= 1; // In essence we set as the left (start of text label) the label area and not the left of text.
+        // pos[2] -= 1; // In essence we set as the left (start of text label) the label area and not the left of text.
 
 
         const areaMetrics = CalculateArea(text, textMesh.geom.dim, pos, pad)
@@ -137,14 +139,6 @@ export class Widget_Label extends Rect {
          }
     }
 
-    UpdatePosXYZ(){
-
-        super.UpdatePosXYZ();
-        this.children.buffer[0].UpdatePosXYZ()
-    }
-
-    //////////////////////////////////////////////////////////////
-
     GenGfxCtx(FLAGS, gfxidx) {
 
         const gfx = super.GenGfxCtx(FLAGS, gfxidx);
@@ -208,6 +202,13 @@ export class Widget_Label extends Rect {
 
     Align_post(){ // Align and update gfx buffers
 
+    }
+
+    SetPosXYZFromDif(pos_dif){
+
+        const text = this.children.buffer[0];
+        const new_pos = AddArr3(text.geom.pos, pos_dif)
+        text.SetPosXYZ(new_pos);
     }
 
 }

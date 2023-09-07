@@ -110,15 +110,15 @@ export class Material {
    }
    SetDefaultColor(gfx) {
       math.CopyArr4(this.col, this.defCol);
-      GlSetColor(gfx, this.col);
+      GlSetColor(gfx, this.col, this.num_faces);
    }
-   SetColorRGB(col, gfx) {
+   SetColorRGB(col, gfx, num_faces=1) {
       math.CopyArr3(this.col, col);
-      GlSetColor(gfx, this.col);
+      GlSetColor(gfx, this.col, num_faces);
    }
-   SetColorAlpha(alpha, gfx) {
+   SetColorAlpha(alpha, gfx, num_faces=1) {
       this.col[3] = alpha;
-      GlSetColorAlpha(gfx, this.col[3]);
+      GlSetColorAlpha(gfx, this.col[3], num_faces);
    }
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////

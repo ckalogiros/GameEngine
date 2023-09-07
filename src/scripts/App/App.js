@@ -5,30 +5,34 @@ import { RenderQueueGet, RenderQueueInit } from '../Engine/Renderers/Renderer/Re
 import { WebGlRenderer } from '../Engine/Renderers/WebGlRenderer.js';
 import { CameraOrthographic } from '../Engine/Renderers/Renderer/Camera.js';
 import { TextureInitBuffers } from '../Engine/Loaders/Textures/Texture.js';
-import { TimeGetDeltaAvg, TimeGetFps, TimeGetTimer } from '../Engine/Timers/Time.js';
+import { PerformanceTimerGetFps1sAvg, TimeGetDeltaAvg, TimeGetFps, TimeGetTimer, _fps_100ms_avg, _fps_1s_avg, _fps_200ms_avg, _fps_500ms_avg } from '../Engine/Timers/Time.js';
 import { Widget_Label_Dynamic_Text, Widget_Label, Widget_Label_Text_Mesh_Menu_Options } from '../Engine/Drawables/Meshes/Widgets/WidgetLabel.js';
-import { Widget_Button, Widget_Switch } from '../Engine/Drawables/Meshes/Widgets/WidgetButton.js';
+import { Widget_Button, Widget_Minimize, Widget_Switch } from '../Engine/Drawables/Meshes/Widgets/WidgetButton.js';
 import { Widget_Text, Widget_Dynamic_Text_Mesh, Widget_Dynamic_Text_Mesh_Only } from '../Engine/Drawables/Meshes/Widgets/WidgetText.js';
 import { CubeGeometry } from '../Engine/Drawables/Geometry/Geometry3DCube.js';
-import { PerformanceTimerCreate, PerformanceTimerInit, _Tm1GetFps, _Tm1GetMilisec, _Tm1GetNanosec, _Tm2GetFps, _Tm2GetMilisec, _Tm3GetFps, _Tm3GetMilisec, _Tm5GetFps, _Tm5GetMilisec, _Tm6GetFps, _Tm6GetMilisec } from '../Engine/Timers/PerformanceTimers.js';
+// import { PerformanceTimerCreate, PerformanceTimerInit, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _Tm1GetFps, _Tm1GetMilisec, _Tm1GetNanosec, _Tm2GetFps, _Tm2GetMilisec, _Tm3GetFps, _Tm3GetMilisec, _Tm5GetFps, _Tm5GetMilisec, _Tm6GetFps, _Tm6GetMilisec } from '../Engine/Timers/PerformanceTimers.js';
+import { PerformanceTimerCreate, PerformanceTimerInit, PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec } from '../Engine/Timers/PerformanceTimers.js';
 import { TimeIntervalsCreate, TimeIntervalsInit } from '../Engine/Timers/TimeIntervals.js';
 import { MESH_ENABLE, Mesh } from '../Engine/Drawables/Meshes/Base/Mesh.js';
 import { Widget_Slider } from '../Engine/Drawables/Meshes/Widgets/WidgetSlider.js';
-import { Widget_Menu_Bar, Widget_Minimize } from '../Engine/Drawables/Meshes/Widgets/Menu/WidgetMenu.js';
+import { Widget_Menu_Bar } from '../Engine/Drawables/Meshes/Widgets/Menu/WidgetMenu.js';
 import { Geometry2D } from '../Engine/Drawables/Geometry/Base/Geometry.js';
 import { FloorArr3 } from '../Helpers/Math/MathOperations.js';
 import { MAT_ENABLE, Material, Material_TEMP_fromBufferFor3D } from '../Engine/Drawables/Material/Base/Material.js';
-import { Gfx_end_session } from '../Engine/Interface/GfxContext.js';
+import { Gfx_end_session } from '../Engine/Interfaces/GfxContext.js';
 import { Section } from '../Engine/Drawables/Meshes/Section.js';
 import { Initializer_popup_initialization } from '../Engine/Drawables/Meshes/Widgets/WidgetPopup.js';
 
 /** Performance Timers */
+import { _pt_fps, _pt2, _pt3, _pt4, _pt5, _pt6 } from '../Engine/Timers/PerformanceTimers.js';
+
 import { DEBUG_PRINT_KEYS } from '../Engine/Controls/Input/Keys.js';
 import { GetShaderTypeId } from '../Graphics/Z_Debug/GfxDebug.js';
 import { MouseGetPos, MouseGetPosDif } from '../Engine/Controls/Input/Mouse.js';
 
 // import { Buffer } from 'buffer';
 import { Buffer } from 'buffer';
+import { Debug_get_event_listeners } from '../Engine/Events/EventListeners.js';
 
 
 // var osu = require('node-os-utils')
@@ -47,16 +51,6 @@ export function AppInit() {
 
     tm.Start();
 
-    // Create a time interval for the fps average
-    // TimeIntervalsCreate(1000, 'Fps-Avg-500ms', TIME_INTERVAL_REPEAT_ALWAYS, _Ta1GetAvg, null);
-
-    // Load font image to the browser.
-    // LoadFontImage(FONT_CONSOLAS_SDF_LARGE, FONT_TEXTURE_PATH_CONSOLAS_SDF_11115w, FONT_TYPE_CONSOLAS, 'png');
-
-    // const fontConsolas = new ImageLoader('fonts/consolas_sdf', FONT_CONSOLAS_SDF_LARGE, 'png');
-    // const fontConsolas = ImageLoader.Load('fonts/consolas_sdf', FONT_CONSOLAS_SDF_LARGE, 'png');
-    // TEMP_FONT = fontConsolas
-
     // Create and initialize the buffers that will be storing texture-font-uv data. 
     TextureInitBuffers();
 
@@ -65,11 +59,9 @@ export function AppInit() {
     /* * * * * * * * * * * * * * * * * * * * * * * * * * *
     * Create Renderer and Scene
     */
-    // const scene = new Scene();
     const scene = Scenes_create_scene();
     const camera = new CameraOrthographic();
     // const camera = new CameraPerspective();
-
     // camera.SetControls(CAMERA_CONTROLS.PAN);
     // camera.SetControls(CAMERA_CONTROLS.ZOOM);
     // camera.SetControls(CAMERA_CONTROLS.ROTATE);
@@ -85,26 +77,28 @@ export function AppInit() {
 
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * *
-    * Create meshes
+     * Create meshes
      */
 
     CreateUiTimers(scene)
     // CreateButtons(scene)
     // CreateSwitches(scene)
-    BindSliderToTextLabel(scene)
+    // BindSliderToTextLabel(scene)
     // CreateMenuBar(scene)
     // CreateMinimizer(scene);
 
-    // Help(scene)
-    // CreateSection(scene)
+    Help(scene)
+    CreateSection(scene)
+
+    // CreateManySectionσ(scene);
 
     const section = MeshInfo(scene)
     TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
     
-    const b = Buffer.alloc(10)
-    b.write(0x1)
-    console.log('BUFFER!!!!!!!!!!!!!!!!!!!!!!!:', b)
-    console.log('B:', b)
+    // const b = Buffer.alloc(10)
+    // b.write(0x1)
+    // console.log('BUFFER!!!!!!!!!!!!!!!!!!!!!!!:', b)
+    // console.log('B:', b)
 
     { // Test the new GfxCtx2
         // {
@@ -225,7 +219,7 @@ export function AppInit() {
     camera.UpdateProjectionUniform(renderer.gl);
     scene.Render();
 
-    RenderQueueGet().SetPriorityProgram('last', 0);
+    RenderQueueGet().SetPriorityProgram('last', 1);
 
     RenderQueueGet().UpdateActiveQueue(); // Update active queue buffer with the vertex buffers set to be drawn
 
@@ -289,6 +283,7 @@ function CreateMinimizer(scene){
     const section = new Section(SECTION.HORIZONTAL, [10,10], [200, 450, 0], [0,0], TRANSPARENCY(BLUE_10_120_220, .3))
     section.SetName('Minimizer section')
     section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
     
     const  min = new Widget_Minimize([200, 450, 0]);
     min.SetName('minimizer button')
@@ -299,7 +294,10 @@ function CreateMinimizer(scene){
     section.AddItem(min);
     scene.AddMesh(section, GFX.PRIVATE);
     Gfx_end_session(true);
-    section.Recalc(); // Reset pos-dim and calculate.
+    section.Recalc(); // Reset pos-dim and re-calculate.
+
+    section.Reconstruct_listeners_recursive();
+    // section.ReconstructHoverListenersRecursive();
 }
 
 function CreateUiTimersWithSections(scene) {
@@ -311,13 +309,13 @@ function CreateUiTimersWithSections(scene) {
     const pt = PerformanceTimerCreate('Widget menu construct.');
     pt.Start();
     const timer = new Widget_Dynamic_Text_Mesh('Fps Avg:', '000000', [0, ypos, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .5);
-    timer.SetDynamicText(ms, TimeGetFps, `DynamicText ${ms} Timer TimeGetFps`)
+    timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, TimeGetFps, pt)
     timer.CreateNewText('delta:', fontsize, undefined, GREEN_140_240_10, [fontsize * 3, 0], .9);
     idx = timer.CreateNewText('00000', fontsize, undefined, YELLOW_240_220_10, [0, 0], .9); // idx is for use in creating separate time intervals for each dynamic text.
-    timer.SetDynamicText(ms, TimeGetDeltaAvg, `DynamicText ${ms} Timer TimeGetDeltaAvg`)
+    timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetDeltaAvg`, ms, TimeGetDeltaAvg, pt)
     timer.CreateNewText('nano:', fontsize, undefined, GREEN_140_240_10, [fontsize * 4, 0], .9);
     idx = timer.CreateNewText('000000', fontsize, undefined, YELLOW_240_220_10, [0, 0], .5);
-    timer.SetDynamicText(ms, TimeGetTimer, `DynamicText ${ms} Timer TimeGetTimer`)
+    timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, TimeGetTimer, pt)
     scene.AddMesh(timer, GL_VB.NEW);
     pt.Stop(); pt.Print();
 
@@ -347,56 +345,84 @@ function CreateUiTimersWithSections(scene) {
 function CreateUiTimers(scene) {
 
     const fontsize = 4, pad = 6; let ypos = fontsize * 2, ms = 200; let idx = INT_NULL;
-    ms = 400;
+    ms = 200;
     
-    const pt = PerformanceTimerCreate('Widget menu construct.');
-    pt.Start();
     const timer = new Widget_Dynamic_Text_Mesh('Fps Avg:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .5);
-    timer.SetDynamicText(ms, TimeGetFps, `DynamicText ${ms} Timer TimeGetFps`); // idx is for use in creating separate time intervals for each dynamic text.
-    timer.CreateNewText('delta:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
+    // timer.SetDynamicText(ms, TimeGetFps, `DynamicText ${ms} Timer TimeGetFps`); // idx is for use in creating separate time intervals for each dynamic text.
+    timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimersGetFps, _pt_fps); // idx is for use in creating separate time intervals for each dynamic text.
+    timer.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
     timer.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .9); 
-    timer.SetDynamicText(ms, TimeGetDeltaAvg, `DynamicText ${ms} Timer TimeGetDeltaAvg`)
-    timer.CreateNewText('nano:', fontsize, BLUE_10_160_220, [fontsize * 4, 0], .9);
+    timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetDeltaAvg`, ms, PerformanceTimersGetMilisec, _pt_fps)
+    timer.CreateNewText('CurTime ms:', fontsize, BLUE_10_160_220, [fontsize * 4, 0], .9);
     timer.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .5);
-    timer.SetDynamicText(ms, TimeGetTimer, `DynamicText ${ms} Timer TimeGetTimer`);
+    timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, PerformanceTimersGetCurTime, _pt_fps);
     scene.AddMesh(timer, GFX.PRIVATE);
-    pt.Stop(); pt.Print();
+    
+    ms = 1000; ypos += fontsize * 2 + pad;
+    const fps1sAvg = new Widget_Dynamic_Text_Mesh('Fps 1sec avg:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .5);
+    fps1sAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_1s_avg); // idx is for use in creating separate time intervals for each dynamic text.
+    fps1sAvg.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+    fps1sAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_1s_avg);
+    scene.AddMesh(fps1sAvg, GFX.PRIVATE);
+    
+    ms = 500; ypos += fontsize * 2 + pad;
+    const fps500msAvg = new Widget_Dynamic_Text_Mesh('Fps 500ms avg:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .5);
+    fps500msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_500ms_avg); // idx is for use in creating separate time intervals for each dynamic text.
+    fps500msAvg.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+    fps500msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_500ms_avg);
+    scene.AddMesh(fps500msAvg, GFX.PRIVATE);
+    
+    ms = 200; ypos += fontsize * 2 + pad;
+    const fps200msAvg = new Widget_Dynamic_Text_Mesh('Fps 200ms avg:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .5);
+    fps200msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_200ms_avg); // idx is for use in creating separate time intervals for each dynamic text.
+    fps200msAvg.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+    fps200msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_200ms_avg);
+    scene.AddMesh(fps200msAvg, GFX.PRIVATE);
     
     // Performance Time Measure 1
     ms = 500; ypos += fontsize * 2 + pad;
-    const timeMeasure1 = new Widget_Dynamic_Text_Mesh('All Timers Update:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
-    timeMeasure1.SetDynamicText(ms, _Tm1GetFps, `DynamicText ${ms} All Timers Update _Tm1GetFps`)
-    timeMeasure1.CreateNewText('ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
+    const timeMeasure1 = new Widget_Dynamic_Text_Mesh('Timers Update:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
+    timeMeasure1.SetDynamicText(`DynamicText ${ms} All Timers Update _Tm1GetFps`, ms, PerformanceTimersGetFps, _pt2)
+    timeMeasure1.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
     idx = timeMeasure1.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .4);
-    timeMeasure1.SetDynamicText(ms, _Tm1GetMilisec, `DynamicText ${ms} All Timers Update _Tm1GetMilisec`)
+    timeMeasure1.SetDynamicText(`DynamicText ${ms} All Timers Update _Tm1GetMilisec`, ms, PerformanceTimersGetMilisec, _pt2)
     scene.AddMesh(timeMeasure1, GFX.ANY);
-    
-    // Performance Time Measure 3
-    ms = 500; ypos += fontsize * 2 + pad;
-    const timeMeasure2 = new Widget_Dynamic_Text_Mesh('GlDraw:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
-    timeMeasure2.SetDynamicText(ms, _Tm3GetFps, `DynamicText ${ms} GlDraw _Tm3GetFps`)
-    timeMeasure2.CreateNewText('ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-    timeMeasure2.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .4);
-    timeMeasure2.SetDynamicText(ms, _Tm3GetMilisec, `DynamicText ${ms} GlDraw _Tm3GetMilisec`)
-    scene.AddMesh(timeMeasure2, GFX.ANY);
     
     // Performance Time Measure 2
     ms = 500; ypos += fontsize * 2 + pad;
     const timeMeasure3 = new Widget_Dynamic_Text_Mesh('Scene Update:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
-    timeMeasure3.SetDynamicText(ms, _Tm2GetFps, `DynamicText ${ms} Scene Update _Tm2GetFps`)
-    timeMeasure3.CreateNewText('ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
+    timeMeasure3.SetDynamicText(`DynamicText ${ms} Scene Update _Tm2GetFps`, ms, PerformanceTimersGetFps, _pt3)
+    timeMeasure3.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
     timeMeasure3.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .4);
-    timeMeasure3.SetDynamicText(ms, _Tm2GetMilisec, `DynamicText ${ms} Scene Update _Tm2GetMilisec`)
+    timeMeasure3.SetDynamicText(`DynamicText ${ms} Scene Update _Tm2GetMilisec`, ms, PerformanceTimersGetMilisec, _pt3)
     scene.AddMesh(timeMeasure3);
+    
+    // Performance Time Measure 3
+    ms = 500; ypos += fontsize * 2 + pad;
+    const timeMeasure2 = new Widget_Dynamic_Text_Mesh('GlDraw:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
+    timeMeasure2.SetDynamicText(`DynamicText ${ms} GlDraw _Tm3GetFps`, ms, PerformanceTimersGetFps, _pt4)
+    timeMeasure2.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
+    timeMeasure2.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .4);
+    timeMeasure2.SetDynamicText(`DynamicText ${ms} GlDraw _Tm3GetMilisec`, ms, PerformanceTimersGetMilisec, _pt4)
+    scene.AddMesh(timeMeasure2, GFX.ANY);
     
     // Performance Time Measure 2
     ms = 500; ypos += fontsize * 2 + pad;
-    const timeMeasure4 = new Widget_Dynamic_Text_Mesh('New hover listen:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
-    timeMeasure4.SetDynamicText(ms, _Tm6GetFps, `DynamicText ${ms} Scene Update _Tm6GetFps`)
-    timeMeasure4.CreateNewText('ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
+    const timeMeasure4 = new Widget_Dynamic_Text_Mesh('Event listener:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
+    timeMeasure4.SetDynamicText(`DynamicText ${ms} Scene Update _Tm6GetFps`, ms, PerformanceTimersGetFps, _pt5)
+    timeMeasure4.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
     timeMeasure4.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .4);
-    timeMeasure4.SetDynamicText(ms, _Tm6GetMilisec, `DynamicText ${ms} Scene Update _Tm6GetMilisec`)
+    timeMeasure4.SetDynamicText(`DynamicText ${ms} Scene Update _Tm6GetMilisec`, ms, PerformanceTimersGetMilisec, _pt5)
     scene.AddMesh(timeMeasure4, GFX.ANY);
+
+    // Performance Time Measure 2
+    ms = 500; ypos += fontsize * 2 + pad;
+    const timeMeasure5 = new Widget_Dynamic_Text_Mesh('Hover listen:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
+    timeMeasure5.SetDynamicText(`DynamicText ${ms} Scene Update _Tm6GetFps`, ms, PerformanceTimersGetFps, _pt6)
+    timeMeasure5.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
+    timeMeasure5.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .4);
+    timeMeasure5.SetDynamicText(`DynamicText ${ms} Scene Update _Tm6GetMilisec`, ms, PerformanceTimersGetMilisec, _pt6)
+    scene.AddMesh(timeMeasure5, GFX.ANY);
 
     Gfx_end_session(true);
 }
@@ -405,15 +431,75 @@ function BindSliderToTextLabel(scene) {
 
     let posy = 200, height = 10, pad = 25;
     posy += height * 2 + pad;
-    const hover_margin  = [5, 0];
+    // const hover_margin  = [5, 0];
 
-    const slider = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220, hover_margin);
-    scene.AddMesh(slider)
+    {
+        const section = new Section(SECTION.VERTICAL, [10,25], [400,200,0], [0,0], TRANSPARENCY(BLUE, .2))
+        section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
+        section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+    
+        const minimizer = new Widget_Minimize([200,200,0]);
+        minimizer.SetName('minimizer button')
+        minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, minimizer.OnClick, minimizer);
+        minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        minimizer.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+        section.AddItem(minimizer)
+    
+        const slider = new Widget_Slider([400, posy, 0], [150, height]);
+        section.AddItem(slider)
         
-    posy += height * 2 + pad;
-    const slider2 = new Widget_Slider([200, posy, 0], [150, height], BLUE_10_160_220, hover_margin);
-    scene.AddMesh(slider2)
-
+        posy += height * 2 + pad;
+        const slider2 = new Widget_Slider([200, posy, 0], [150, height]);
+        section.AddItem(slider2)
+        
+        posy += height * 2 + pad;
+        const slider3 = new Widget_Slider([200, posy, 0], [150, height]);
+        section.AddItem(slider3)
+        
+        posy += height * 2 + pad;
+        const slider4 = new Widget_Slider([200, posy, 0], [150, height]);
+        section.AddItem(slider4)
+       
+        scene.AddMesh(section, GFX.PRIVATE);
+        Gfx_end_session(true, true);
+    
+        section.Calc(SECTION.NO_ITEMS_CALC)
+        section.Reconstruct_listeners_recursive();
+    }
+    posy += 150;
+    {
+        const section = new Section(SECTION.VERTICAL, [10,25], [400,200,0], [0,0], TRANSPARENCY(BLUE, .2))
+        section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
+        section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+    
+        const minimizer = new Widget_Minimize([200,200,0]);
+        minimizer.SetName('minimizer button')
+        minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, minimizer.OnClick, minimizer);
+        minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        minimizer.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+        section.AddItem(minimizer)
+    
+        const slider = new Widget_Slider([400, posy, 0], [150, height]);
+        section.AddItem(slider)
+        
+        posy += height * 2 + pad;
+        const slider2 = new Widget_Slider([200, posy, 0], [150, height]);
+        section.AddItem(slider2)
+        
+        posy += height * 2 + pad;
+        const slider3 = new Widget_Slider([200, posy, 0], [150, height]);
+        section.AddItem(slider3)
+        
+        posy += height * 2 + pad;
+        const slider4 = new Widget_Slider([200, posy, 0], [150, height]);
+        section.AddItem(slider4)
+       
+        scene.AddMesh(section, GFX.PRIVATE);
+        Gfx_end_session(true, true);
+    
+        section.Calc(SECTION.NO_ITEMS_CALC)
+        section.Reconstruct_listeners_recursive();
+    }
 }
 
 function CreateButtons(scene) {
@@ -444,7 +530,7 @@ function CreateSection(scene) {
 
     const flags = (SECTION.ITEM_FIT | SECTION.EXPAND);
 
-    const blu = new Section(SECTION.HORIZONTAL, [15, 15], [220, 630, 0], [10, 0], TRANSPARENCY(BLUE, .2));
+    const blu = new Section(SECTION.VERTICAL, [15, 15], [220, 630, 0], [10, 0], TRANSPARENCY(BLUE, .2));
 
     const red = new Section(SECTION.VERTICAL, [15, 15], [100, 100, 0], [20, 20], TRANSPARENCY(PURPLE, .2));
     const gre = new Section(SECTION.VERTICAL, [12, 12], [100, 100, 0], [20, 20], TRANSPARENCY(GREEN, .4));
@@ -453,7 +539,7 @@ function CreateSection(scene) {
     const cie = new Section(SECTION.HORIZONTAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLUE_LIGHT, .4));
     const bla = new Section(SECTION.VERTICAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLACK, .4));
 
-    {
+    { // Construct sub-sections
         var bla_1 = new Section(SECTION.HORIZONTAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLACK, .3));
         var pin_1 = new Section(SECTION.VERTICAL, [25, 10], [100, 100, 0], [20, 20], TRANSPARENCY(PINK_240_60_160, .3));
         var blu_1 = new Section(SECTION.VERTICAL, [25, 10], [100, 100, 0], [20, 20], TRANSPARENCY(BLUE,   .3));
@@ -471,26 +557,30 @@ function CreateSection(scene) {
         var gry1_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY3, .8));
         var gry1_2 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY5, .8));
         var gry1_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY7, .8));
-        var gry2_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY3, .9));
-        var gry2_2 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY5, .9));
-        var gry2_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY7, .9));
-        var gry2_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY7, .9));
+        var gry2_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY1, .9));
+        var gry2_2 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY1, .9));
+        var gry2_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY1, .9));
+        var gry2_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY1, .9));
         var vert_0 = new Section(SECTION.VERTICAL, [20, 20], [100, 100, 0], [20, 20], TRANSPARENCY(GREY2, .4));
 
     }
-    // const btn = new Widget_Button('btn1', [200, 100, 0], 7, TRANSPARENCY(YELLOW, .9), WHITE, [1, 1], [2, 2], .5);
-    // // scene.AddMesh(btn)
-    // btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, btn.OnClick)
-    // btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-    // btn.SetName('Sectioned btn1')
-    
-    const label = new Widget_Label('btnBTN', [200, 100, 0]);
-    label.SetName('Sectioned btn1')
-    label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-    label.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-    blu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, blu.OnClick, blu, null);
 
-    {
+    // Construct widgets
+    const label = new Widget_Label('label', [200, 100, 0]);
+    const btn = new Widget_Button('btnl', [200, 100, 0]);
+    { // Set widgets parameters
+        label.SetName('Sectioned btn1')
+        label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+        label.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+        blu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, blu.OnClick, blu, null);
+        
+        btn.SetName('Sectioned btn1')
+        btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+        btn.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+        btn.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, btn.OnClick);
+    }
+
+    { // Set naming and listeners
 
         red.SetName('red');     red.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); red.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
         gre.SetName('gre');     gre.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gre.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
@@ -523,7 +613,7 @@ function CreateSection(scene) {
 
     }
 
-    {
+    { // Set hierarchy
         pin_1.AddItem(gry2_1, flags); pin_1.AddItem(gry2_2, flags);
         blu_1.AddItem(gry2_3, flags); blu_1.AddItem(gry2_4, flags);
         bla_1.AddItem(pin_1,  flags);  bla_1.AddItem(blu_1, flags);
@@ -532,9 +622,17 @@ function CreateSection(scene) {
         ora.AddItem(yel_4, flags);  ora.AddItem(red_4, flags);  ora.AddItem(yel_2, flags); ora.AddItem(ora_4, flags); 
         cie.AddItem(gre_3, flags);  cie.AddItem(yel_3, flags);  cie.AddItem(bla, flags);
         bla.AddItem(gry1_1, flags); bla.AddItem(gry1_2, flags);     bla.AddItem(gry1_3, flags);
-        gry1_1.AddItem(label, flags); gry1_1.AddItem(vert_0, flags); 
+        gry1_1.AddItem(label, flags); gry1_1.AddItem(btn, flags); gry1_1.AddItem(vert_0, flags); 
         gre.AddItem(yel_1, flags);  gre.AddItem(red_1, flags);
     }
+
+    const minimizer = new Widget_Minimize(blu.geom.pos);
+    minimizer.SetName('minimizer')
+    minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, minimizer.OnClick, minimizer);
+    minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    minimizer.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+    
+    blu.AddItem(minimizer);
 
     yel.AddItem(gre, flags);
     blu.AddItem(red, flags);
@@ -542,7 +640,27 @@ function CreateSection(scene) {
     scene.AddMesh(blu, GFX.PRIVATE);
     Gfx_end_session(true);
     blu.Calc();
+
+    const l = Debug_get_event_listeners();
+    l.PrintAll()
+    // blu.ReconstructHoverListenersRecursive();
+    blu.Reconstruct_listeners_recursive();
     
+}
+
+function CreateManySectionσ(scene) {
+
+    const btn = new Widget_Button('btn1', [200, 200, 0], 5)
+
+    const gr = new Section(SECTION.HORIZONTAL, [10,10], [100, 200, 0], [20, 20], TRANSPARENCY(GREY3, .3));
+
+    gr.AddItem(btn);
+    
+    scene.AddMesh(gr, GFX.PRIVATE);
+    Gfx_end_session(true);
+
+    
+    gr.Calc(SECTION.NO_ITEMS_CALC);
 }
 
 function Help(scene) {
@@ -557,7 +675,6 @@ function Help(scene) {
     // scene.StoreMesh(section)
     const s1 = new Section(SECTION.VERTICAL, [15, 10], [220, 400, 0], [0, 0], TRANSPARENCY(GREY1, .2));
     s1.SetName('Help section 2')
-    // scene.StoreMesh(s1)
 
     let msgs = [];
     for (let i = 0; i < DEBUG_PRINT_KEYS.length; i++) {
@@ -576,18 +693,22 @@ function Help(scene) {
     minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, minimizer.OnClick, minimizer);
     minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
     minimizer.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-    // section.AddItem(minimizer);
     
-    // section.AddItem(s2);
     section.AddItem(minimizer);
     section.AddItem(s1, flags)
     
+    // s1.Reconstruct_listeners_recursive();
+    section.Reconstruct_listeners_recursive();
+    
+    console.log(section)
 
     scene.AddMesh(section, GFX.PRIVATE);
+    // scene.AddMesh(section);
 
     Gfx_end_session(true);
 
     section.Calc(flags)
+
 
 }
 
@@ -595,7 +716,7 @@ function MeshInfo(scene) {
 
     const fontsize = 4.3;
 
-    const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 0000000000000000', 'id:000', [50, 100, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
+    const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 0000000000000000', 'id:000', [50, 200, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
     infomesh.CreateNewText('pos: 000,000,0', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('dim: 000,000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('gfx: prog:0, vb:0, start:000000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
@@ -604,7 +725,8 @@ function MeshInfo(scene) {
 
     infomesh.Align(ALIGN.VERTICAL)
     infomesh.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, infomesh.OnClick);
-    scene.AddMesh(infomesh);
+    scene.AddMesh(infomesh, GFX.PRIVATE);
+    Gfx_end_session(true);
 
     return infomesh;
 }

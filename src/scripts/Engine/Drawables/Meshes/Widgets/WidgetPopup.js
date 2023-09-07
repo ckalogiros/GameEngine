@@ -6,7 +6,7 @@ import { MESH_ENABLE } from '../Base/Mesh.js';
 import { CopyArr2 } from '../../../../Helpers/Math/MathOperations.js';
 import { Menu_options_create } from '../../../MenuOptions/MenuOptionsBuilder.js';
 import { Section } from '../Section.js';
-import { Gfx_activate, Gfx_deactivate, Gfx_end_session } from '../../../Interface/GfxContext.js';
+import { Gfx_activate, Gfx_deactivate, Gfx_end_session } from '../../../Interfaces/GfxContext.js';
 import { RenderQueueGet } from '../../../Renderers/Renderer/RenderQueue.js';
 
 
@@ -113,7 +113,8 @@ export function Initializer_popup_initialization(){
 
    _popup = new Widget_PopUp([200, 300, 0], [15,10], TRANSPARENCY(GREY2, .6));
    _popup.GenGfxCtx(GFX.PRIVATE);
-   _popup.Deactivate()
+   _popup.Deactivate();
+   Gfx_end_session(true, false);
 }
 
 /** DO NOT DELETE */
@@ -154,7 +155,6 @@ export function Widget_popup_handler_onclick_event(clicked_mesh, clickedButtonId
       CopyArr2(popup.geom.dim, options_menu_section.geom.dim);
       const popuppos = Helpers_calc_bottom_right_pos(clickpos, popup.geom.dim);
       CopyArr2(popup.geom.pos, popuppos);
-      // console.log(popup.geom.dim, options_menu_section.geom.dim, popuppos)
       
       popup.AddItem(options_menu_section, SECTION.ITEM_FIT);
       popup.Recalc(); // Reset pos-dim and calculate.
@@ -164,8 +164,6 @@ export function Widget_popup_handler_onclick_event(clicked_mesh, clickedButtonId
       popup.AddToGfx();
 
       popup.Activate();
-
-      // RenderQueueGet().UpdateActiveQueue();
 
       return;
 

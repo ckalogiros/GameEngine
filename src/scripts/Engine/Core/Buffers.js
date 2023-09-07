@@ -7,12 +7,17 @@ class Buffer_Interface {
    active_count; // Counts how many elements are not null
    size;
 
-   constructor(size=INT_NULL) {
+   constructor(m_buffer=null) {
 
       this.buffer = null;
       this.count = 0;
       this.active_count = 0;
-      this.size = size;
+      this.size = INT_NULL;
+
+      if(m_buffer){
+
+         return this.Copy(m_buffer);
+      }
    }
 
    Add(elem) {
@@ -30,6 +35,24 @@ class Buffer_Interface {
       this.count = 0;
       this.active_count = 0;
       this.buffer = null;
+   }
+
+   Copy(m_buffer){
+
+      this.size = m_buffer.size;
+      this.buffer = new Array(this.size);
+
+      if(m_buffer instanceof Buffer_Interface){
+         for(let i=0; i<m_buffer.count; i++){
+
+            this.buffer[i] = m_buffer.buffer[i];
+            this.count++;
+            this.active_count++;
+         }
+
+         return this;
+      }
+      return null;
    }
 
    RemoveByIdx(idx) {
@@ -52,11 +75,6 @@ class Buffer_Interface {
             this.count = 0;
             return;
          }
-
-         // else if (this.count === this.size) {
-         //    this.count--;
-         //    return;
-         // }
 
          else {
             const count = this.count + 1;
@@ -93,7 +111,7 @@ class Buffer_Interface {
       }
    }
 
-   CopyBuffer(oldData) {
+   CopyBufferElements(oldData) {
 
       const size = oldData.length;
       for (let i = 0; i < size; i++) {
@@ -121,9 +139,7 @@ export class M_Buffer extends Buffer_Interface{
 
    constructor(m_buffer) {
 
-      super();
-
-      // if(m_buffer && m_buffer !== undefined && m_buffer typeof M_Buffer)
+      super(m_buffer);
    }
 
    Init(size) {
@@ -143,7 +159,7 @@ export class M_Buffer extends Buffer_Interface{
       const oldData = this.buffer;
       this.buffer = new Array(this.size);
 
-      if (oldData) this.CopyBuffer(oldData)
+      if (oldData) this.CopyBufferElements(oldData)
       console.warn('Resizing M_Buffer!')
    }
 
@@ -174,7 +190,7 @@ export class Int8Buffer extends Buffer_Interface {
       const oldData = this.buffer;
       this.buffer = new Int8Array(this.size);
 
-      if (oldData) this.CopyBuffer(oldData)
+      if (oldData) this.CopyBufferElements(oldData)
       console.warn('Resizing Int8Buffer!')
    }
 
@@ -183,13 +199,15 @@ export class Int8Buffer extends Buffer_Interface {
 // Does not 'null' the elements on 'Remove()', instead it sets them to INT_NULL
 export class Int8Buffer2 extends Buffer_Interface {
 
-   constructor(size) {
+   constructor() {
 
-      super(size);
+      super();
    }
 
-   Init(val) {
+   Init(size, val) {
 
+      if(size < 1) alert('Invalid size for Int8Buffer2 buffer.')
+      this.size = size;
       if(!this.buffer) this.buffer = new Int8Array(this.size)
       for (let i = 0; i < this.size; i++)
          this.buffer[i] = val;
@@ -249,7 +267,7 @@ export class Int8Buffer2 extends Buffer_Interface {
       const oldData = this.buffer;
       this.buffer = new Int8Array(this.size);
 
-      if (oldData) this.CopyBuffer(oldData)
+      if (oldData) this.CopyBufferElements(oldData)
       console.warn('Resizing Int8Buffer!')
    }
 

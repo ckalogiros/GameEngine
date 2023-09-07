@@ -55,71 +55,44 @@ export function TimeGetFps() { return Math.floor(1 / ((_time.deltaAvg*MILISEC) /
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Time Averages
- */
-
-/**
  * Time Average does not need call to Date.now() or performance.now(). 
  * It updates its accumulator directly from the '_time' variable of class Time.
+ * IMPORTANT: 
+ *    The PerformanceTimerGetFps1sAvg() does not run by its self on a time interval,
+ *    so it is the user's responsibility to set an interval timer (calling PerformanceTimerGetFps1sAvg)
+ *    with 1 second interval.
  */
-// class TimeAverage{
 
-//    accum;
-//    cnt;
 
-//    constructor() {
+export const _fps_1s_avg      = { accum: 0, cnt: 0, delta_avg: 0, };
+export const _fps_500ms_avg   = { accum: 0, cnt: 0, delta_avg: 0, };
+export const _fps_200ms_avg   = { accum: 0, cnt: 0, delta_avg: 0, };
+export const _fps_100ms_avg   = { accum: 0, cnt: 0, delta_avg: 0, };
 
-//       this.accum = 0;
-//       this.cnt = 0;
-//    }
 
-//    Update(){ 
-      
-//       this.accum += _time.delta; 
-//       this.cnt++;
-//    }
 
-//    GetAvg(){ 
-      
-//       const avg = Math.floor(1 / (this.accum * MILISEC / this.cnt)) ;
-//       this.accum = 0; 
-//       this.cnt = 0;
-//       return avg;
-//    }
+export function PerformanceTimerGetFps1sAvg(static_accumulator){
+
+   const cur = { accum: 0, cnt: 0 };
+   cur.accum   = _time.deltaAvg;
+   cur.cnt     = _time.cnt;
+
+   const dif_accum = cur.accum - static_accumulator.accum; // Calculate the diffference
+   const dif_cnt = cur.cnt - static_accumulator.cnt; // Calculate the diffference
    
-// }
+   const avg_1s = Math.floor( 1 / (dif_accum * MILISEC / dif_cnt));
+   static_accumulator.delta_avg = (dif_accum / dif_cnt);
+   // console.log(static_accumulator.delta_avg)
 
-// class TimeAverages extends M_Buffer{
+   // Store cur now for next use
+   static_accumulator.accum = cur.accum;
+   static_accumulator.cnt = cur.cnt;
 
-//    constructor() { super(); }
-
-//    Create() { return this.Add(new TimeAverage); }
- 
-// }
-
-// const _timeAvgs = new TimeAverages();
-// _timeAvgs.Init(16);
+   return avg_1s;
+}
 
 
-// /**
-//  * Global Functions
-//  */
 
-// export function TimeAverageCreate() {
-
-//    const idx = _timeAvgs.Create();
-//    return _timeAvgs.buffer[idx];
-// }
-
-// /**
-//  * Global Variables for mesuring code.
-//  * Must be declared somewhere globally because they are gonna be used mainly in Render loop
-//  * so we need some global declaration to access them. 
-//  * Also its better for callbacks to be functions rather than class methods.
-//  */
-// export const _ta1 = TimeAverageCreate();
-// export function _Ta1GetAvg(){ return _ta1.GetAvg(); }
-// export function _Ta1Start() { _ta1.Start(); }
-// export function _Ta1Stop() { _ta1.Stop(); }
 
 
 

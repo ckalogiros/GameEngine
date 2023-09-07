@@ -1,5 +1,6 @@
 "use strict";
 
+import { CopyArr3 } from "../../Helpers/Math/MathOperations.js";
 import { Bind_change_brightness } from "../BindingFunctions.js";
 import { Section } from "../Drawables/Meshes/Section.js";
 import { Widget_Switch } from "../Drawables/Meshes/Widgets/WidgetButton.js";
@@ -74,12 +75,14 @@ export function Menu_options_create(clicked_mesh, pos) {
    }
 
    // ELSE it does not exist, so create options menu
-   if (clicked_mesh.type & MESH_TYPES_DBG.WIDGET_SLIDER_BAR) {
+   if (clicked_mesh.type & MESH_TYPES_DBG.WIDGET_SLIDER) {
 
       const options_menu = Menu_options_create_slider_popup_menu_options(clicked_mesh, pos);
       
       return options_menu;
    }
+
+   return null;
 }
 
 function Menu_options_create_slider_popup_menu_options(clicked_mesh, _pos) {
@@ -88,6 +91,7 @@ function Menu_options_create_slider_popup_menu_options(clicked_mesh, _pos) {
    const fontSize = MENU_FONT_SIZE;
    const textlabelpad = [4, 3];
    const pos = [0, 0, 0];
+   CopyArr3(pos, _pos)
 
    const meshes = Scenes_get_children(STATE.scene.active_idx);
 
@@ -98,6 +102,7 @@ function Menu_options_create_slider_popup_menu_options(clicked_mesh, _pos) {
    section_menu.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
    
    for (let i = 0; i < meshes.count-1; i++) {
+   // for (let i = 0; i < 1; i++) {
       
       const mesh = meshes.buffer[i];
       ERROR_NULL(mesh)
@@ -110,7 +115,8 @@ function Menu_options_create_slider_popup_menu_options(clicked_mesh, _pos) {
       
       
       const option_switch = new Widget_Switch(pos, fontSize, TRANSPARENCY(BLUE_10_120_220, .0), WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-      const option_label = new Widget_Label_Text_Mesh_Menu_Options(mesh.name, pos, fontSize, TRANSPARENCY(BLUE_10_120_220, .0), WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
+      // const option_label = new Widget_Label_Text_Mesh_Menu_Options(mesh.name, pos, fontSize, TRANSPARENCY(BLUE_10_120_220, .0), WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
+      const option_label = new Widget_Label_Text_Mesh_Menu_Options('1', pos, fontSize, TRANSPARENCY(BLUE_10_120_220, .0), WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
       option_switch.SetName(`switch:${i}`);
       option_label.SetName(`label:${i}`);
       
@@ -132,7 +138,7 @@ function Menu_options_create_slider_popup_menu_options(clicked_mesh, _pos) {
 
    }
 
-   section_menu.Calc()
+   // section_menu.Calc()
 
    const count = section_menu.children.count;
 
@@ -153,7 +159,6 @@ function Menu_options_create_slider_popup_menu_options(clicked_mesh, _pos) {
    const idx = _menu_options.push(menu)
    clicked_mesh.menu_options_idx = idx - 1; // Store the index of the menu options buffer in the owner's mesh.
 
-   // return _menu_options[idx - 1];
    return section_menu;
 }
 

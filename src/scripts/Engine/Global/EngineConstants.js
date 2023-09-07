@@ -157,6 +157,7 @@ const SECTION = {
 	ITEM_FIT: _cnt<<=0x1,
 	ITEM_RESTRICT: _cnt<<=0x1,
 
+	NO_ITEMS_CALC: _cnt2<<=0x1,
 	OPTIONS:{
 		WITH_NEW_SECTION: _cnt2<<=0x1,
 	},
@@ -177,7 +178,8 @@ const MESH_STATE = {
 	IS_CLICKABLE: _cnt <<= 1,
 	IS_MOVABLE: _cnt <<= 1,
 	IS_GRABABLE: _cnt <<= 1,
-	IS_FAKE_HOVER: _cnt <<= 1,
+	IS_FAKE_HOVERABLE: _cnt <<= 1,
+	IS_FAKE_CLICKABLE: _cnt <<= 1,
 	IS_HOVER_COLORABLE: _cnt <<= 1,
 	
 	CLICKED_MOUSE_L: _cnt <<= 1,
@@ -185,6 +187,9 @@ const MESH_STATE = {
 	CLICKED_MOUSE_R: _cnt <<= 1,
 	
 	HAS_POPUP: _cnt <<= 1,
+	
+	CHILDREN_HAVE_CLICK_EVENT: _cnt <<= 1,
+	CHILDREN_HAVE_HOVER_EVENT: _cnt <<= 1,
 
 
 	Print(mask){
@@ -234,13 +239,20 @@ const ALIGN = {
    HORIZONTAL: _cnt <<= 0x1,
 }
 
-_cnt = 0x1;
-const SIZER = {
-   RESTRICT: _cnt <<= 0x1,
-}
+// _cnt = 0x1;
+// const SIZER = {
+//    RESTRICT: _cnt <<= 0x1,
+// }
 
 const POSITION_CENTER = [0,0,0]
 
+_cnt = 0x1;
+const UPDATER = {
+
+	SELF: _cnt<<=0x1,
+	CHILDREN: _cnt<<=0x1,
+	ALL: _cnt<<=0x1,
+}
 
 _cnt = 0x1;
 /**
@@ -409,6 +421,7 @@ const TEXTURES = {
 // SDF Font textures names and paths
 const RESOURCES_PATH = '/resources';
 const FONT_CONSOLAS_SDF_LARGE = 'consolas_sdf_11115w';
+// const FONT_CONSOLAS_SDF_LARGE = 'consolas_sdf_2048w';
 const FONT_CONSOLAS_SDF_SMALL = 'consolas_sdf_2048w';
 const COMIC_FONT_METRICS_PATH = '../../../../consolas_sdf/metrics/consolas_sdf.txt'
 
@@ -529,13 +542,25 @@ function GetMeshHighOrderNameFromType(type) {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Events  
  */
+_cnt = 0x1;
+const LISTENERS_FLAGS = {
+	ANY_HOVER:  _cnt<<=0x1,
+	ANY_CLICK:  _cnt<<=0x1,
+	ANY:  _cnt<<=0x1,
 
-const LISTENERS_ACTIVE = {
-	ANY_HOVER: false,
-	ANY_CLICK: false,
+	HOVER: _cnt<<=0x1,
+	CLICK: _cnt<<=0x1,
+	ALL: _cnt<<=0x1,
 
-	ANY: false,
+
+	mask:0x0, // the variable to sto
 };
+
+// const LISTENERS_FLAGS = {
+// 	ANY_HOVER: false,
+// 	ANY_CLICK: false,
+// 	ANY: false,
+// };
 
 _cnt = 0x1;
 const LISTEN_EVENT_TYPES = {

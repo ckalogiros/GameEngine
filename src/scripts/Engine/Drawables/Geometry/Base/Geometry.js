@@ -52,16 +52,10 @@ export class Geometry2D {
     }
 
     //////////////////////////////////////////////////////////////
-    SetPosXYZ(pos, gfx) {
+    SetPosXYZ(pos, gfx, numMeshes) {
         math.CopyArr3(this.pos, pos);
-        glBufferOps.GlSetWpos(gfx, pos);
+        glBufferOps.GlSetWpos(gfx, pos, numMeshes);
     }
-    MoveXYConcecutive(x, y, gfx, numMeshes) {
-        this.pos[0] += x;
-        this.pos[1] += y;
-        glBufferOps.GlMoveXY(gfx, [x, y], numMeshes); // TODO: We do not need separate functions for 'consecutive', we just implement the numFaces to all gl operations
-    }
-
     SetPosXY(pos, gfx) {
         math.CopyArr2(this.pos, pos);
         glBufferOps.GlSetWposXY(gfx, pos);
@@ -77,6 +71,9 @@ export class Geometry2D {
     UpdatePosXYZ(gfx) {
         glBufferOps.GlSetWpos(gfx, this.pos);
     }
+    UpdateFromPosXYZ(gfx, pos) {
+        glBufferOps.GlSetWpos(gfx, pos);
+    }
     UpdatePosXY(gfx) {
         glBufferOps.GlSetWposXY(gfx, this.pos);
     }
@@ -88,10 +85,10 @@ export class Geometry2D {
         this.pos[2] = z;
         glBufferOps.GlSetWposZ(gfx, z, numFaces);
     }
-    MoveXY(x, y, gfx) {
+    MoveXY(x, y, gfx, num_faces) {
         this.pos[0] += x;
         this.pos[1] += y;
-        glBufferOps.GlMoveXY(gfx, [x, y]);
+        glBufferOps.GlMoveXY(gfx, [x, y], num_faces);
     }
     MoveX(x, gfx) {
         this.pos[0] += x;
