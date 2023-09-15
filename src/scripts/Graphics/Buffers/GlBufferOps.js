@@ -108,8 +108,8 @@ export function VbSetAttribCol(vb, start, count, stride, col, num_faces) {
     }
 }
 export function VbSetAttribPos(vb, start, count, stride, dim, num_faces) {
-    if(dim[0] === NaN || dim[1] === NaN)
-    console.log('NaN value')
+    if(dim[0] === NaN || dim[1] === NaN) console.log('NaN value')
+
     let index = start;
     const end = start + (count * num_faces);
 

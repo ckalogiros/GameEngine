@@ -1,17 +1,14 @@
 "use strict";
 
-import { AddArr3, CopyArr } from '../../../../Helpers/Math/MathOperations.js';
+import { AddArr3 } from '../../../../Helpers/Math/MathOperations.js';
 import { Check_intersection_point_rect } from '../../../Collisions.js';
 import { MouseGetPos, MouseGetPosDif } from '../../../Controls/Input/Mouse.js';
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from '../../../Timers/TimeIntervals.js';
-import { Geometry2D } from '../../Geometry/Base/Geometry.js';
-import { Material } from '../../Material/Base/Material.js';
-import { MESH_ENABLE, Mesh } from '../Base/Mesh.js';
+import { MESH_ENABLE } from '../Base/Mesh.js';
 import { I_Text, Rect } from '../Rect.js';
-import { Section } from '../Section.js';
-import { Widget_Label } from './WidgetLabel.js';
+
 import { Widget_popup_handler_onclick_event } from './WidgetPopup.js';
-import { Widget_Text } from './WidgetText.js';
+
 
 /**
  * Slider's tree structure
@@ -173,9 +170,9 @@ export class Widget_Slider extends Rect {
    }
 
 
-   OnHover(params) {
-      console.log('Slider Hover!!!')
-   }
+   // OnHover(params) {
+   //    console.log('Slider Hover!!!')
+   // }
 
    OnClick(params) {
 
@@ -358,7 +355,6 @@ export function Slider_on_update_handle(_params) {
    const handle = bar.children.buffer[0];
    const slider_val = bar.children.buffer[1];
 
-   // MESH_STATE.Print(bar.state.mask)
    if (bar.StateCheck(MESH_STATE.IN_GRAB) === 0) {
 
       // If bar out of hover, delete the timeInterval for moving the handle
@@ -434,116 +430,13 @@ function Slider_calculate_value(bar, handle) {
    return sliderVal;
 }
 
-function Geometry2D_set_posx(params) {
+// function Geometry2D_set_posx(params) {
 
-   /**
-    * This function is run as callback from the 'mesh-created' event,
-    * to set the slider's value_text mesh position alligned with the 
-    * right side of the slider.
-    */
-   params.mesh.MoveRecursive(params.x, 0)
-}
-
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Slider Specific Menu Options - Constructor Functions 
- */
-
-// _cnt = 0;
-
-// const SLIDER_MENU_OPTIONS = {
-//    OPTION_1: _cnt++,
-
-//    SIZE: _cnt,
-// };
-
-// const _slider_options = []; // Stores the state of the options for the popup menu or any other menu for that matter.
-
-// export function Slider_menu_create_options(clickedMesh, _pos) {
-
-//    /** Main Options */
-//    const font = MENU_FONT_IDX;
-//    const fontSize = MENU_FONT_SIZE;
-//    const topPad = 12, pad = 5;
-//    const height = fontSize * FontGetFontDimRatio(font);
-//    const textlabelpad = [2, 2];
-//    let maxWidth = 0;
-//    const options = [];
-//    const pos = [0, 0, 0];
-
-
-//    let totalHeight = 0;
-
-//    CopyArr3(pos, _pos);
-//    pos[0] += pad + textlabelpad[0];
-//    pos[1] += height + topPad + pad + textlabelpad[1];
-//    pos[2] += 1;
-
-//    totalHeight += height + topPad + pad + textlabelpad[1];
-
-
-//    if (clickedMesh.menu_options.idx > INT_NULL) {
-
-//       const saved = _slider_options[clickedMesh.menu_options.idx];
-//       const count = saved.count;
-//       for (let i = 0; i < count; i++) {
-
-//          CopyArr3(pos, _pos);
-//          pos[0] += pad + textlabelpad[0] + saved.buffer[i].geom.dim[0];
-//          pos[1] = saved.buffer[i].geom.pos[1];
-         
-//          saved.buffer[i].SetPosRecursive(pos);
-//       }
-
-//       return _slider_options[clickedMesh.menu_options.idx]
-//    }
-
-//    const meshes = Scenes_get_children(STATE.scene.active_idx);
-
-//    for (let i = 0; i < meshes.count; i++) {
-
-//       const mesh = meshes.buffer[i];
-//       ERROR_NULL(mesh)
-
-//       if (i === 0)
-//          var option = new Widget_Switch(pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-//       else
-//          var option = new Widget_Label_Text_Mesh_Menu_Options(`Mesh id: ${mesh.id}`, pos, fontSize, GREY3, WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-
-//       option.SetName();
-
-//       if (maxWidth < option.geom.dim[0])
-//          maxWidth = option.geom.dim[0];
-
-//       CopyArr3(pos, _pos);
-//       pos[0] += pad + textlabelpad[0];
-//       pos[1] = option.geom.pos[1] + pad + textlabelpad[1] + height * 2 + 2;
-//       pos[2] += 1;
-
-//       totalHeight += option.geom.dim[1];
-
-//       options[i] = option;
-//    }
-
-//    const menu = {
-
-//       buffer: options,
-//       targets: meshes.buffer.slice(0, options.length),
-//       maxWidth: maxWidth,
-//       count: options.length,
-//       totalHeight: totalHeight,
-//       params: {
-
-//          targetBindingFunctions: Bind_change_brightness,
-//          EventClbk: Slider_connect,
-//          clicked_mesh: clickedMesh,
-//          target_mesh: null,
-//       },
-//    }
-
-//    const idx = _slider_options.push(menu);
-//    clickedMesh.menu_options.idx = idx - 1; // Store the index of the menu options in the owner mesh.
-
-//    return menu;
+//    /**
+//     * This function is run as callback from the 'mesh-created' event,
+//     * to set the slider's value_text mesh position alligned with the 
+//     * right side of the slider.
+//     */
+//    params.mesh.MoveRecursive(params.x, 0)
 // }
 

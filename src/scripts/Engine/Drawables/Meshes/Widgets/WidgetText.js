@@ -1,12 +1,14 @@
 "use strict";
 
 import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
+import { Gl_remove_geometry, Gl_shift_right_geometry } from "../../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr2, CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../../Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
+import { Scenes_update_all_gfx_starts2 } from "../../../Scenes.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx, TimeIntervalsGetByIdx } from "../../../Timers/TimeIntervals.js";
 import { I_Text } from "../Rect.js";
 
@@ -42,15 +44,15 @@ export class Widget_Text extends I_Text {
 		super.AddToGfx()
 	}
 
-	Align(flags) { // Align pre-added to the vertexBuffers
+	Align_pre(target_mesh, flags, pad=[0,0]) { // Align pre-added to the vertexBuffers
 
 		const pos = [0, 0];
 		const dim = this.geom.dim;
 		CopyArr2(pos, this.geom.pos);
 		let ypos = pos[1] + dim[1] * 2;
 
-		pos[0] -= dim[0] * this.mat.num_faces / 2 - this.pad[0] / 2;
-		this.geom.pos[0] = pos[0]
+		// pos[0] -= dim[0] * this.mat.num_faces / 2 - this.pad[0] / 2;
+		// this.geom.pos[0] = pos[0]
 
 		if (flags & ALIGN.VERTICAL) {
 
@@ -62,8 +64,40 @@ export class Widget_Text extends I_Text {
 				child.geom.Reposition_pre(pos);
 				ypos += child.geom.dim[1] * 2;
 			}
+		}
+
+
+		if (flags & ALIGN.LEFT) {
+
+			const pos = [0, 0];
+			CopyArr2(pos, this.geom.pos);
+
+			// Vertical allignment
+			pos[1] = target_mesh.geom.pos[1];
+
+			// Horizontal allignment
+			pos[0] = (target_mesh.geom.pos[0] - target_mesh.geom.dim[0]) + (this.geom.dim[0]) + pad[0];
+
+			CopyArr2(this.geom.pos, pos);
 
 		}
+		else if (flags & ALIGN.RIGHT) {
+
+			const pos = [0, 0];
+			CopyArr2(pos, this.geom.pos);
+
+			// Vertical allignment
+			pos[1] = target_mesh.geom.pos[1];
+
+			// Horizontal allignment
+			const num_faces = (this.geom.num_faces-1 > 1) ? this.geom.num_faces-1 : 1;
+			pos[0] = (target_mesh.geom.pos[0] + target_mesh.geom.dim[0]) - (this.geom.dim[0]*2*num_faces) - pad[0];
+
+			CopyArr2(this.geom.pos, pos);
+
+		}
+
+
 	}
 
 	OnClick(params) {
@@ -71,6 +105,8 @@ export class Widget_Text extends I_Text {
 		const mesh = params.source_params;
 		const point = MouseGetPos();
 		const m = mesh.geom;
+
+		console.log(point, m.pos, m.dim)
 
 		if (Check_intersection_point_rect(m.pos, m.dim, point, [0, 8])) {
 
@@ -123,6 +159,56 @@ export class Widget_Text extends I_Text {
 		const mouse_pos = MouseGetPosDif();
 		mesh.MoveRecursive(mouse_pos.x, -mouse_pos.y);
 
+	}
+
+	UpdateText(new_text){
+
+		const textMesh = this;
+		if ((textMesh.type & MESH_TYPES_DBG.TEXT_MESH) === 0) return; // Guard against none text meshes
+
+		const textLen = new_text.length;
+
+		if(textMesh.geom.num_faces < textLen){
+
+			const dif_num_faces = textLen - textMesh.geom.num_faces;
+			
+			// If the text to be update is larger than the text allready in the vertex buffer, 
+			// shift all next elements of the buffer to the start of the curent text, 
+			// and re-add the text mesh at the end of the vertex buffer.
+			// Need to update all ther gfx.starts of all the shifted meshes.
+			// const ret = Gl_remove_geometry(this.gfx, this.geom.num_faces)
+			const ret = Gl_shift_right_geometry(textMesh.gfx, textMesh.geom.num_faces, dif_num_faces)
+			Scenes_update_all_gfx_starts2(textMesh.sceneIdx, textMesh.gfx.prog.idx, textMesh.gfx.vb.idx, ret);
+
+			textMesh.mat.text = new_text; 
+			textMesh.geom.num_faces = textLen;
+			textMesh.mat.num_faces = textLen;
+			
+			textMesh.geom.AddToGraphicsBuffer(textMesh.sid, textMesh.gfx, textMesh.name);
+			textMesh.mat.AddToGraphicsBuffer(textMesh.sid, textMesh.gfx);
+			return;
+		}
+
+		/** CAUTION!: Be sure to initialize the 'textMesh.mat.num_faces' 
+		with the longest text so the vertexBuffers have enough 
+		space to store the longest text */
+
+		let gfxInfo = new GfxInfoMesh(textMesh.gfx);
+
+
+		const len = textMesh.geom.num_faces > textLen ? textMesh.geom.num_faces : (textLen > textMesh.geom.num_faces ? textMesh.geom.num_faces : textLen);
+
+		// const len = textLen;
+		for (let i = 0; i < len; i++) {
+
+			 /** Update fps average */
+			 let uvs = [0, 0, 0, 0];
+			 if (new_text[i] !== undefined) {
+				  uvs = FontGetUvCoords(textMesh.mat.uvIdx, new_text[i]);
+			 }
+			 GlSetTex(gfxInfo, uvs);
+			 gfxInfo.vb.start += gfxInfo.vb.count
+		}
 	}
 
 }

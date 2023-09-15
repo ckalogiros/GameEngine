@@ -54,6 +54,7 @@ export class GfxInfoMesh {
 		idx: INT_NULL,	// The idx buffer's  idx.
 		start: 0,		// The current meshe's starting idx in vertex buffer. 
 		count: 0,		// Number of total meshe's attributes  
+		vertices_per_rect: 0,
 	};
 
 	tb = { // The Texture info for the mesh

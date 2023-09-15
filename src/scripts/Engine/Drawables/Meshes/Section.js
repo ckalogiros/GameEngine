@@ -57,32 +57,48 @@ export class Section extends Rect {
          }
       }
       else { // Handle Items 
-
+         
          CopyArr2(this.geom.pos, mesh.geom.pos);
+         // if(mesh.StateCheck(MESH_STATE.CHILDREN_HAVE_CLICK_EVENT)){
+   
+         //    this.StateEnable(MESH_STATE.CHILDREN_HAVE_CLICK_EVENT)
+         // }
       }
    }
 
-   Calc(options = 0x0) {
+   Calc(options = SECTION.INHERIT) {
 
       const section = this;
 
       let top = section.geom.pos[1]; // Top starting position
       let left = section.geom.pos[0]; // Left starting position
-
-      const accum_size = Calculate_sizes_recursive2(section, top, left, options)
+      let h = section.geom.dim[1]-section.margin[1];
+      
+      const accum = Calculate_sizes_recursive(section, top, left, options)
       CopyArr2(section.geom.dim, section.max_size); // Set size for the root.
-
-      const accum_ypos = Calculate_positions_recursive2(section, options);
-
-
+      
+      
+      if(section.geom.dim[1] > h){
+         
+         section.geom.pos[1] += accum.size[1];
+         section.geom.pos[1] += section.margin[1]+accum.margin[1]*2 + section.margin[1]*2;
+         section.geom.pos[0] += section.margin[0]+accum.margin[0]*2 + section.margin[0]*2;
+         console.log('111111', accum, section.geom.dim[1], h)
+      }
+      else if(section.geom.dim[1] < h){
+         console.log('222222', accum, section.geom.dim[1], h)
+         
+         section.geom.pos[1] -= accum.size[1];
+         section.geom.pos[1] -= section.margin[1]+accum.margin[1]*2 + section.margin[1]*2;
+         section.geom.pos[0] -= section.margin[0]+accum.margin[0]*2 + section.margin[0]*2;
+      }
       section.SetMargin()
 
-      // if((options & SECTION.NO_ITEMS_CALC) !== 0)
-      //    section.geom.pos[1] = (accum_ypos[0]-section.geom.pos[1])/accum_ypos[1];
-      // else{
-      section.geom.pos[1] += section.margin[1];
-      section.geom.pos[0] += section.margin[0];
-      // }
+      // section.geom.pos[1] += section.margin[1];
+      // section.geom.pos[0] += section.margin[0];
+      const accum_ypos = Calculate_positions_recursive(section, options);
+      
+
 
    }
 
@@ -110,28 +126,12 @@ export class Section extends Rect {
 
    }
 
-   // UpdateGfx(GFX_FLAGS, section) {
+   UpdateGfxPosRecursive_bottomUpTraverse(mesh) {
 
-   //    this.UpdateGfxRecursive(section); // Looks like this approach is faster!!!?
-   //    // this.UpdateGfxRecursive_bottomUpTraverse(section);
-
-   //    // if (!section.gfx) section.GenGfxCtx(GFX_FLAGS, gfxidx); // Add any un-added meshes.
-   //    section.UpdatePosXY(); // Update for the root
-   //    section.UpdateDim(); // Update for the root
-   // }
-
-   UpdateGfxRecursive_bottomUpTraverse(mesh) {
-
-      console.log(mesh.geom.pos[1])
       if (mesh.gfx !== null) {
-
-         if (mesh.type & MESH_TYPES_DBG.TEXT_MESH)
-            mesh.UpdatePosXYZ();
-         else
-            mesh.UpdatePosXYZ();
+         mesh.UpdatePosXYZ();
       }
       else {
-         // console.log(mesh.name)
          mesh.GenGfxCtx(FLAGS, gfxidx); // Add any none-added meshes.
       }
 
@@ -140,33 +140,29 @@ export class Section extends Rect {
          const child = mesh.children.buffer[i];
 
          if (child && child.type & MESH_TYPES_DBG.SECTION_MESH)
-            this.UpdateGfxRecursive_bottomUpTraverse(child);
+            this.UpdateGfxPosRecursive_bottomUpTraverse(child);
       }
 
    }
 
-   UpdateGfxRecursive(mesh) {
+   UpdateGfxPosDimRecursive(mesh) {
 
       for (let i = 0; i < mesh.children.count; i++) {
 
          const child = mesh.children.buffer[i];
 
          if (child.children.active_count && child.type & MESH_TYPES_DBG.SECTION_MESH)
-            this.UpdateGfxRecursive(child);
+            this.UpdateGfxPosDimRecursive(child);
 
-         if (child.gfx !== null) {
+         if (mesh.gfx !== null) {
 
-            if (child.type & MESH_TYPES_DBG.TEXT_MESH)
-               child.UpdatePosXYZ();
-            else
-               child.UpdatePosXYZ();
+            mesh.UpdatePosXYZ();
+            mesh.UpdateDim();
          }
          else {
-            // console.log(mesh.name)
-            child.GenGfxCtx(FLAGS, gfxidx); // Add any none-added meshes.
+            mesh.GenGfxCtx(FLAGS, gfxidx); // Add any none-added meshes.
          }
       }
-
    }
 
    GenGfxCtx(FLAGS, gfxidx) {
@@ -192,71 +188,113 @@ export class Section extends Rect {
 
       if (Check_intersection_point_rect(m.pos, m.dim, point, [0, 8])) {
 
-         /**
-          * Efficiency.
-          * If current mesh has chhildren with click event, check the first.
-          */
+         STATE.mesh.SetClicked(section);
 
-         let children_event = false;
+         if (section.timeIntervalsIdxBuffer.count <= 0) {
 
-         if (section.StateCheck(MESH_STATE.CHILDREN_HAVE_CLICK_EVENT)) {
-
-            for (let i = 0; i < section.children.count; i++) {
-
-               const child = section.children.buffer[i];
-               if (child.listeners[LISTEN_EVENT_TYPES_INDEX.CLICK] !== INT_NULL) {
-
-                     // const dispatch_params = {
-                     //    source_params: child.listeners[LISTEN_EVENT_TYPES_INDEX.CLICK].buffer[i].source_params,
-                     //    target_params: child.listeners[LISTEN_EVENT_TYPES_INDEX.CLICK].buffer[i].target_params,
-                     //    trigger_params: trigger_params,
-                     //    event_type: LISTEN_EVENT_TYPES_INDEX.CLICK,
-                     // }
-                     
-                     // // const success = this.event_type[TYPE_IDX].buffer[i].Clbk(dispatch_params);
-                     // children_event = section.event_type[LISTEN_EVENT_TYPES_INDEX.CLICK].buffer[i].Clbk(dispatch_params);
-               }
-            }
-         }
-         if (!children_event) {
-
-            STATE.mesh.SetClicked(section);
-
-            if (section.timeIntervalsIdxBuffer.count <= 0) {
-
-               /**
-                * Create move event.
-                * The move event runs only when the mesh is GRABED.
-                * That means that the timeInterval is created and destroyed upon 
-                * onClickDown and onClickUp respectively.
-                */
-               const idx = TimeIntervalsCreate(5, 'Move Section Mesh', TIME_INTERVAL_REPEAT_ALWAYS, Section_move_event2, section);
+            /**
+             * Create move event.
+             * The move event runs only when the mesh is GRABED.
+             * That means that the timeInterval is created and destroyed upon 
+             * onClickDown and onClickUp respectively.
+             */
+            
+            if (section.StateCheck(MESH_STATE.IS_GRABABLE)) {
+               
+               const idx = TimeIntervalsCreate(5, 'Move Section Mesh', TIME_INTERVAL_REPEAT_ALWAYS, Section_move_section, section);
                section.timeIntervalsIdxBuffer.Add(idx);
-
-               if (section.StateCheck(MESH_STATE.IS_GRABABLE)) {
-
-                  STATE.mesh.SetGrabed(section);
-                  section.StateEnable(MESH_STATE.IN_GRAB);
-               }
-
-               /** Code left for implementing popup for Sections */
-               // Handle any menu (on leftClick only)
-               // if (section.StateCheck(MESH_STATE.HAS_POPUP)) {
-
-               //    const btnId = params.trigger_params;
-               //    Widget_popup_handler_onclick_event(section, btnId)
-               // }
-
-               return true;
+               STATE.mesh.SetGrabed(section);
+               section.StateEnable(MESH_STATE.IN_GRAB);
             }
+
+            /** Code left for implementing popup for Sections */
+            // Handle any menu (on leftClick only)
+            // if (section.StateCheck(MESH_STATE.HAS_POPUP)) {
+
+            //    const btnId = params.trigger_params;
+            //    Widget_popup_handler_onclick_event(section, btnId)
+            // }
+
+            return true;
          }
       }
       return false;
+      /** DO NOT DELETE: Save OnClick */
+      // OnClick(params) {
+   
+      //    const section = params.source_params;
+      //    const point = MouseGetPos();
+      //    const m = section.geom;
+   
+      //    if (Check_intersection_point_rect(m.pos, m.dim, point, [0, 8])) {
+   
+      //       /**
+      //        * Efficiency.
+      //        * If current mesh has children with click event, check them first.
+      //        */
+   
+      //       let children_event = false;
+   
+      //       if (section.StateCheck(MESH_STATE.CHILDREN_HAVE_CLICK_EVENT)) {
+   
+      //          for (let i = 0; i < section.children.count; i++) {
+   
+      //             const child = section.children.buffer[i];
+      //             if (child.listeners[LISTEN_EVENT_TYPES_INDEX.CLICK] !== INT_NULL) {
+   
+      //                   console.log('FOUND!!!')
+      //                   const dispatch_params = {
+      //                      source_params: child.listeners[LISTEN_EVENT_TYPES_INDEX.CLICK].buffer[i].source_params,
+      //                      target_params: child.listeners[LISTEN_EVENT_TYPES_INDEX.CLICK].buffer[i].target_params,
+      //                      trigger_params: trigger_params,
+      //                      event_type: LISTEN_EVENT_TYPES_INDEX.CLICK,
+      //                   }
+                        
+      //                   // // const success = this.event_type[TYPE_IDX].buffer[i].Clbk(dispatch_params);
+      //                   children_event = section.event_type[LISTEN_EVENT_TYPES_INDEX.CLICK].buffer[i].Clbk(dispatch_params);
+      //             }
+      //          }
+      //       }
+      //       if (!children_event) {
+   
+      //          STATE.mesh.SetClicked(section);
+   
+      //          if (section.timeIntervalsIdxBuffer.count <= 0) {
+   
+      //             /**
+      //              * Create move event.
+      //              * The move event runs only when the mesh is GRABED.
+      //              * That means that the timeInterval is created and destroyed upon 
+      //              * onClickDown and onClickUp respectively.
+      //              */
+                  
+      //             if (section.StateCheck(MESH_STATE.IS_GRABABLE)) {
+                     
+      //                const idx = TimeIntervalsCreate(5, 'Move Section Mesh', TIME_INTERVAL_REPEAT_ALWAYS, Section_move_section, section);
+      //                section.timeIntervalsIdxBuffer.Add(idx);
+      //                STATE.mesh.SetGrabed(section);
+      //                section.StateEnable(MESH_STATE.IN_GRAB);
+      //             }
+   
+      //             /** Code left for implementing popup for Sections */
+      //             // Handle any menu (on leftClick only)
+      //             // if (section.StateCheck(MESH_STATE.HAS_POPUP)) {
+   
+      //             //    const btnId = params.trigger_params;
+      //             //    Widget_popup_handler_onclick_event(section, btnId)
+      //             // }
+   
+      //             return true;
+      //          }
+      //       }
+      //    }
+      //    return false;
+      // }
    }
 
 }
 
-function Section_move_event2(_params) {
+function Section_move_section(_params) {
    /**
     * The function is called by the timeInterval.
     * The timeInterval has been set by the 'OnClick' event.
@@ -315,7 +353,7 @@ function Expand2(section, options) {
    }
 }
 
-function Calculate_positions_recursive2(parent, options = 0, _accum_ypos = [parent.geom.pos[1], 0]) {
+function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum_ypos = [parent.geom.pos[1], 0]) {
 
    const padding = [0, 0]
    const cur_pos = [parent.geom.pos[0], parent.geom.pos[1]];
@@ -325,31 +363,37 @@ function Calculate_positions_recursive2(parent, options = 0, _accum_ypos = [pare
 
       const mesh = parent.children.buffer[i];
       let continue_recur = true;
+      let opt = options
+      if(options & SECTION.INHERIT) opt = parent.options
+
+      // CopyArr2(mesh.geom.pos, parent.geom.pos)
 
       if (parent.type & MESH_TYPES_DBG.SECTION_MESH) { // For meshes with a parent of type Section
 
-         // if (!mesh.geom.pos[0] && !mesh.geom.pos[1]) {
-         //    CopyArr2(mesh.geom.pos, parent.geom.pos)
-         // }
-         const initial_pos = [mesh.geom.pos[0], mesh.geom.pos[1]];
+
          const new_pos = [cur_pos[0] - parent.geom.dim[0] + mesh.geom.dim[0] + parent.margin[0],
                            cur_pos[1] - parent.geom.dim[1] + mesh.geom.dim[1] + parent.margin[1],
+                           // cur_pos[1] + parent.geom.dim[1] + mesh.geom.dim[1] + parent.margin[1],
                            parent.geom.pos[2]+1,];
 
-         // console.log('(1)newpos', new_pos, 'meshpos', mesh.geom.pos, mesh.name)
          if ((mesh.type & MESH_TYPES_DBG.SECTION_MESH) === 0) {
-
+            
             const pos_dif = [new_pos[0] - mesh.geom.pos[0], new_pos[1] - mesh.geom.pos[1], new_pos[2] + 1];
-            // console.log('(2)posdif', pos_dif, 'meshpos', mesh.geom.pos, mesh.name)
             UpdaterAdd(mesh, 0, null, pos_dif)
+            
+            if(mesh.type & MESH_TYPES_DBG.WIDGET_MENU_BAR){
 
-            // console.log('STOP recursion at:', mesh.name, ' pos:',mesh.geom.pos,' newpos', new_pos)
+               mesh.geom.dim[0] = mesh.parent.geom.dim[0] + parent.margin[0];
+               mesh.geom.pos[0] += mesh.pad[0];
+               mesh.geom.pos[1] -= parent.margin[1];
+               mesh.ReAlign();
+            }
 
             continue_recur = false; // Stop recursion for meshe's children, let the mesh deal with it's children.
          }
          else {
 
-            CopyArr3(mesh.geom.pos, new_pos, mesh.name);
+            CopyArr3(mesh.geom.pos, new_pos);
          }
       }
 
@@ -359,124 +403,68 @@ function Calculate_positions_recursive2(parent, options = 0, _accum_ypos = [pare
          mesh.geom.pos[0] = cur_pos[0] - (mesh.geom.dim[0] * num_chars) + mesh.geom.dim[0];
          mesh.geom.pos[1] = cur_pos[1];
          mesh.geom.pos[2] = parent.geom.pos[2] + 1;
-         // console.log(mesh.name, mesh.geom.pos[2])
       }
-      // else { // For any other meshes
-
-      //    mesh.geom.pos[0] = cur_pos[0] - mesh.geom.dim[0];
-      //    mesh.geom.pos[1] = cur_pos[1];// Fixes the button mis-alignment
-      //    mesh.geom.pos[2] = parent.geom.pos[2] + 1;
-      //    // console.log(mesh.name, mesh.geom.pos[2])
-      // }
 
       if (continue_recur)
-         Calculate_positions_recursive2(mesh, options, accum_ypos)
+         Calculate_positions_recursive(mesh, options, accum_ypos)
 
-      if (parent.options & SECTION.VERTICAL) {
+      // if (parent.options & SECTION.VERTICAL) {
+      if (opt & SECTION.VERTICAL) {
          cur_pos[1] += mesh.geom.dim[1] * 2;
          accum_ypos[0] += mesh.geom.pos[1];
          accum_ypos[1]++;
       }
-      else if (parent.options & SECTION.HORIZONTAL) {
+      // else if (parent.options & SECTION.HORIZONTAL) {
+      else if (opt & SECTION.HORIZONTAL) {
          cur_pos[0] += mesh.geom.dim[0] * 2
       }
    }
 
    return accum_ypos;
 }
-// function Calculate_positions_recursive2(parent, options=0, _accum_ypos=[parent.geom.pos[1], 0]) {
 
-//    const padding = [0, 0]
-//    const cur_pos = [parent.geom.pos[0], parent.geom.pos[1]];
-//    const accum_ypos = _accum_ypos;
-
-//    for (let i = 0; i < parent.children.count; i++) {
-
-//       const mesh = parent.children.buffer[i];
-
-//       if((options & SECTION.NO_ITEMS_CALC) === 0){
-
-//          if (parent.type & MESH_TYPES_DBG.SECTION_MESH) {
-
-//             mesh.geom.pos[0] = cur_pos[0] - parent.geom.dim[0] + mesh.geom.dim[0] + parent.margin[0];
-//             mesh.geom.pos[1] = cur_pos[1] - parent.geom.dim[1] + mesh.geom.dim[1] + parent.margin[1];
-//             mesh.geom.pos[2] = parent.geom.pos[2]+1;
-//             // console.log(mesh.name, mesh.geom.pos[2])
-//          }
-
-//          else if (mesh.type & MESH_TYPES_DBG.TEXT_MESH) {
-
-//             const num_chars = mesh.mat.num_faces
-//             mesh.geom.pos[0] = cur_pos[0] - (mesh.geom.dim[0] * num_chars) + mesh.geom.dim[0];
-//             mesh.geom.pos[1] = cur_pos[1];
-//             mesh.geom.pos[2] = parent.geom.pos[2]+1;
-//             // console.log(mesh.name, mesh.geom.pos[2])
-//          }
-//          else {
-
-//             // mesh.geom.pos[0] = cur_pos[0] - mesh.geom.dim[0] * 3;// Fixes the button mis-alignment
-//             mesh.geom.pos[0] = cur_pos[0] - mesh.geom.dim[0];
-//             mesh.geom.pos[1] = cur_pos[1];// Fixes the button mis-alignment
-//             mesh.geom.pos[2] = parent.geom.pos[2]+1;
-//             // console.log(mesh.name, mesh.geom.pos[2])
-//          }
-//       }
-
-
-//       Calculate_positions_recursive2(mesh, options, accum_ypos)
-
-//       if (parent.options & SECTION.VERTICAL) {
-//          cur_pos[1] += mesh.geom.dim[1] * 2;
-//          accum_ypos[0] += mesh.geom.pos[1];
-//          accum_ypos[1]++;
-//       }
-//       else if (parent.options & SECTION.HORIZONTAL) {
-//          cur_pos[0] += mesh.geom.dim[0] * 2
-//       }
-//    }
-
-//    return accum_ypos;
-// }
-
-function Calculate_sizes_recursive2(section, top, left, options, accumulative_margin = [0, 0]) {
+function Calculate_sizes_recursive(section, top, left, options, accumulative_margin = [0, 0]) {
 
    const padding = [0, 0]
    const margin = accumulative_margin;
-   let accum_size = [0, 0]
+   const accum_size = [0, 0]
 
    for (let i = 0; i < section.children.count; i++) {
+
+      let opt = options
+      if(options & SECTION.INHERIT) 
+         opt = section.options
 
       const mesh = section.children.buffer[i];
       if (mesh.children.active_count && mesh.type & MESH_TYPES_DBG.SECTION_MESH) {
 
          margin[1] += mesh.margin[1];
          margin[0] += mesh.margin[0];
-         Calculate_sizes_recursive2(mesh, top, left, options, margin);
+         Calculate_sizes_recursive(mesh, top, left, SECTION.INHERIT, margin);
 
          mesh.geom.dim[0] = mesh.max_size[0]
          mesh.geom.dim[1] = mesh.max_size[1]
 
          mesh.SetMargin();
 
-         if (section.options & SECTION.VERTICAL) {
+         if (opt & SECTION.VERTICAL) {
             if (section.max_size[0] < mesh.geom.dim[0]) section.max_size[0] = mesh.geom.dim[0]
             section.max_size[1] += mesh.geom.dim[1]
          }
-         else if (section.options & SECTION.HORIZONTAL) {
+         else if (opt & SECTION.HORIZONTAL) {
             section.max_size[0] += mesh.geom.dim[0]
             if (section.max_size[1] < mesh.geom.dim[1]) section.max_size[1] = mesh.geom.dim[1]
          }
-
       }
       else if (mesh.type & MESH_TYPES_DBG.TEXT_MESH) { // Case the current item does not have children.
 
-         if (section.options & SECTION.VERTICAL) {
+         if (opt & SECTION.VERTICAL) {
             accum_size[1] += mesh.geom.dim[1]
-            accum_size[0] = mesh.geom.dim[0]
-            if (section.max_size[0] < accum_size[0]) section.max_size[0] = mesh.geom.dim[0]
-            section.max_size[1] += mesh.geom.dim[1]
+            accum_size[0] = mesh.geom.dim[0] * mesh.mat.num_faces
+            section.max_size[1] += mesh.geom.dim[1];
+            if (section.max_size[0] < accum_size[0]) section.max_size[0] = mesh.geom.dim[0] * mesh.mat.num_faces
          }
-         else if (section.options & SECTION.HORIZONTAL) {
+         else if (opt & SECTION.HORIZONTAL) {
             accum_size[0] += mesh.geom.dim[0] * mesh.mat.num_faces
             accum_size[1] = mesh.geom.dim[1]
             section.max_size[0] += mesh.geom.dim[0] * mesh.mat.num_faces
@@ -485,13 +473,13 @@ function Calculate_sizes_recursive2(section, top, left, options, accumulative_ma
       }
       else { // Case the current item does not have children.
 
-         if (section.options & SECTION.VERTICAL) {
+         if (opt & SECTION.VERTICAL) {
             accum_size[1] += mesh.geom.dim[1]
             accum_size[0] = mesh.geom.dim[0]
+            section.max_size[1] += mesh.geom.dim[1];
             if (section.max_size[0] < accum_size[0]) section.max_size[0] = mesh.geom.dim[0]
-            section.max_size[1] += mesh.geom.dim[1]
          }
-         else if (section.options & SECTION.HORIZONTAL) {
+         else if (opt & SECTION.HORIZONTAL) {
             accum_size[0] += mesh.geom.dim[0]
             accum_size[1] = mesh.geom.dim[1]
             section.max_size[0] += mesh.geom.dim[0]
@@ -500,6 +488,7 @@ function Calculate_sizes_recursive2(section, top, left, options, accumulative_ma
       }
    }
 
-   return accum_size;
+   // return [accum_size, margin];
+   return {size:accum_size, margin:margin};
 }
 

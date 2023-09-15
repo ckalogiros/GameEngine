@@ -3,12 +3,30 @@
 import { PrintAttributes, PrintIndexBufferAll, PrintVertexBufferDataAndNames, PrintVertexDataAll } from "../../../Graphics/Z_Debug/GfxDebug.js";
 import { Listener_debug_print_all } from "../../Events/EventListeners.js";
 import { RenderQueueGet } from "../../Renderers/Renderer/RenderQueue.js";
-import { ScenesPrintAllMeshes, ScenesPrintSceneMeshes } from "../../Scenes.js";
+import { ScenesPrintAllMeshes, ScenesPrintSceneMeshes, Scenes_get_scene_by_idx } from "../../Scenes.js";
 import { FpsGet } from "../../Timers/Time.js";
 import { TimeIntervalsPrintAll } from "../../Timers/TimeIntervals.js";
 import { Gfx_pool_print } from "../../Interfaces/GfxContext.js";
+import { Mesh_print_all_mesh_listeners } from "../../Drawables/Meshes/Base/Mesh.js";
 
-
+_cnt = 0;
+const p = _cnt++;
+const x = _cnt++;
+const X = _cnt++;
+const c = _cnt++;
+const z = _cnt++;
+const r = _cnt++;
+const R = _cnt++;
+const f = _cnt++;
+const i = _cnt++;
+const E = _cnt++;
+const m = _cnt++;
+const M = _cnt++;
+const S = _cnt++;
+const sm = _cnt++;
+const L = _cnt++;
+const g = _cnt++;
+const em = _cnt++;
 
 export const DEBUG_PRINT_KEYS = [
 
@@ -85,14 +103,6 @@ export const DEBUG_PRINT_KEYS = [
       },
    },
    {
-      key: 'e',
-      discr: 'Listener_debug_print_all',
-      func: (e)=>{
-         console.log('-- Listener_debug_print_all --')
-         Listener_debug_print_all()
-      },
-   },
-   {
       key: 'E',
       discr: 'Listener_debug_print_all',
       func: (e)=>{
@@ -127,6 +137,14 @@ export const DEBUG_PRINT_KEYS = [
       },
    },
    {
+      key: 'sm',
+      discr: 'STATE',
+      func: (e)=>{
+         const scene = Scenes_get_scene_by_idx(STATE.scene.active_idx);
+         scene.PrintMeshInGfx();
+      },
+   },
+   {
       key: 'L',
       discr: 'NULL',
       func: (e)=>{
@@ -140,41 +158,84 @@ export const DEBUG_PRINT_KEYS = [
          Gfx_pool_print();
       },
    },
+   { 
+      key: 'em',
+      discr: 'Mesh_print_all_mesh_listeners',
+      func: (e)=>{
+         Mesh_print_all_mesh_listeners();
+      },
+   },
 
 ];
 
 
+let _keys_buffer = [];
 
 console.log(DEBUG_PRINT_KEYS)
 export function OnKeyDown(e){
 
    e.stopPropagation();
 
-   let i=0;
-   switch(e.key){
+   if(!e.repeat){
 
-      case ('p'):{ DEBUG_PRINT_KEYS[0].func(e); break; }
-      case ('x'):{ DEBUG_PRINT_KEYS[1].func(e); break; }
-      case ('X'):{ DEBUG_PRINT_KEYS[2].func(e); break; }
-      case ('c'):{ DEBUG_PRINT_KEYS[3].func(e); break; }
-      case ('z'):{ DEBUG_PRINT_KEYS[4].func(e); break; }
-      case ('r'):{ DEBUG_PRINT_KEYS[5].func(e); break; }
-      case ('R'):{ DEBUG_PRINT_KEYS[6].func(e); break; }
-      case ('f'):{ DEBUG_PRINT_KEYS[7].func(e); break; }
-      case ('i'):{ DEBUG_PRINT_KEYS[8].func(e); break; }
-      case ('e'):{ DEBUG_PRINT_KEYS[9].func(e); break; }
-      case ('E'):{ DEBUG_PRINT_KEYS[10].func(e); break; }
-      case ('m'):{ DEBUG_PRINT_KEYS[11].func(e); break; }
-      case ('M'):{ DEBUG_PRINT_KEYS[12].func(e); break; }
-      case ('S'):{ DEBUG_PRINT_KEYS[13].func(e); break; }
-      case ('L'):{ DEBUG_PRINT_KEYS[14].func(e); break; }
-      case ('g'):{ DEBUG_PRINT_KEYS[15].func(e); break; }
-
+      _keys_buffer.push({
+         key: e.key,
+         ctrl:e.ctrlKey,
+         shift:e.shiftKey,
+         alt:e.altKey,
+      })
    }
 }
 export function OnKeyUp(e){
-
+   
    e.stopPropagation();
+
+
+   const len = _keys_buffer.length-1;
+
+   if(len === 1){
+      
+      if (_keys_buffer[0].key === 'e' && _keys_buffer[1].key === 'm') { 
+         
+         const idx = 'e'.charCodeAt(0) + 'm'.charCodeAt(0) - CHAR_ARRAY_LETTERS_START_OFFSET;
+         DEBUG_PRINT_KEYS[em].func(e);  
+      }
+      else if  (_keys_buffer[len].key === 'M' && _keys_buffer[0].key === 'Shift') { 
+         DEBUG_PRINT_KEYS[M].func(e); 
+      }
+      else if  (_keys_buffer[len].key === 'S' && _keys_buffer[0].key === 'Shift') { 
+         DEBUG_PRINT_KEYS[S].func(e); 
+      }
+      else if  (_keys_buffer[len].key === 'L' && _keys_buffer[0].key === 'Shift') { 
+         DEBUG_PRINT_KEYS[L].func(e); 
+      }
+      else if  (_keys_buffer[len].key === 'R' && _keys_buffer[0].key === 'Shift') { 
+         DEBUG_PRINT_KEYS[R].func(e);  
+      }
+      else if  (_keys_buffer[len].key === 'X' && _keys_buffer[0].key === 'Shift') { 
+         DEBUG_PRINT_KEYS[X].func(e);  
+      }
+      else if  (_keys_buffer[len].key === 'm' && _keys_buffer[0].key === 's') { 
+         DEBUG_PRINT_KEYS[sm].func(e);  
+      }
+   }
+   else if(len === 0){
+
+      if       (_keys_buffer[len].key === 'p') { DEBUG_PRINT_KEYS[p].func(e);  }
+      else if  (_keys_buffer[len].key === 'x') { DEBUG_PRINT_KEYS[x].func(e);  }
+      else if  (_keys_buffer[len].key === 'c') { DEBUG_PRINT_KEYS[c].func(e);  }
+      else if  (_keys_buffer[len].key === 'z') { DEBUG_PRINT_KEYS[z].func(e);  }
+      else if  (_keys_buffer[len].key === 'r') { DEBUG_PRINT_KEYS[r].func(e);  }
+      else if  (_keys_buffer[len].key === 'f') { DEBUG_PRINT_KEYS[f].func(e);  }
+      else if  (_keys_buffer[len].key === 'i') { DEBUG_PRINT_KEYS[i].func(e);  }
+      else if  (_keys_buffer[len].key === 'e') { DEBUG_PRINT_KEYS[E].func(e);  }
+      // else if  (_keys_buffer[len].key === 'E') { DEBUG_PRINT_KEYS[E].func(e); }
+      else if  (_keys_buffer[len].key === 'm') { DEBUG_PRINT_KEYS[m].func(e); }
+      else if  (_keys_buffer[len].key === 'g') { DEBUG_PRINT_KEYS[g].func(e); }
+   }
+
    // e.preventDefault();
+   console.log(_keys_buffer)
+   _keys_buffer = [];
 
 }

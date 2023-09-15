@@ -56,7 +56,7 @@ export class Gfx_Pool extends M_Buffer {
          else if((FLAGS & GFX.SPECIFIC) ||
             (FLAGS & GFX.PRIVATE) && gfxIdx[0] !== INT_NULL && gfxIdx[1] !== INT_NULL){
             
-            const gfx_idx = this.#FindGfx(gfxIdx[0], gfxIdx[1]);
+            const gfx_idx = this.FindGfx(gfxIdx[0], gfxIdx[1]);
             if(gfx_idx){
                
                const gfx = GlGenerateContext(sid, sceneIdx, GFX.SPECIFIC, gfx_idx.vbidx, mesh_count);
@@ -75,13 +75,14 @@ export class Gfx_Pool extends M_Buffer {
                const vbidx = this.buffer[foundIdx].vbidx
                const gfx = GlGenerateContext(sid, sceneIdx, GFX.SPECIFIC, vbidx, mesh_count);
                gfx.gfx_ctx.idx = foundIdx;
-               
                // Add this gfx to the session
-               const idx = this.#FindGfxIdx(gfx.prog.idx, gfx.vb.idx)
+               const idx = this.FindGfxIdx(gfx.prog.idx, gfx.vb.idx)
                /*DEBUG*/ ERROR_NULL(idx);
                this.session.push(idx);
                
                gfx.gfx_ctx.sessionId = this.buffer[idx].sessionId;
+
+               GfxSetVbRender(gfx.prog.idx, gfx.vb.idx, true); // Corrects the none rendering of the deactivated popup's [0] vertex buffer
 
                return gfx;
             }
@@ -179,7 +180,7 @@ export class Gfx_Pool extends M_Buffer {
       return null;
    }
 
-   #FindGfx(progidx, vbidx) {
+   FindGfx(progidx, vbidx) {
 
       for (let i = 0; i < this.count; i++)
          if (this.buffer[i].progidx === progidx &&
@@ -189,14 +190,14 @@ export class Gfx_Pool extends M_Buffer {
       return null
    }
 
-   #FindGfxIdx(progidx, vbidx) {
+   FindGfxIdx(progidx, vbidx) {
 
       for (let i = 0; i < this.count; i++)
          if (this.buffer[i].progidx === progidx &&
             this.buffer[i].vbidx === vbidx)
             return i;
 
-      return null
+      return INT_NULL
    }
 
    #FindGfxNotPrivate(progidx, vbidx) {
@@ -210,38 +211,6 @@ export class Gfx_Pool extends M_Buffer {
       return INT_NULL
    }
 
-   /** */
-   // // TODO: If we ask for a new buffer IMPLEMENT in what buffers the children will be set
-   // GenerateAndAddGfxCtx(mesh, FLAGS) {
-
-   //    if (FLAGS & GFX.NEW) { // Create new buffer but not private
-
-   //       mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, FLAGS, NO_SPECIFIC_GL_BUFFER, mesh.num_faces);
-   //       this.#StoreGfx(mesh.gfx);
-   //       mesh.AddToGfx();
-   //    }
-   //    else { // ... case specific or any gfx buffer is acceptable ...
-         
-   //       if (FLAGS & GFX.ANY) { // ... if mesh could be added to any gfx buffer ... 
-            
-   //          // ... Check if an available gfx buffer exists ...
-   //          const found = this.#GetNotPrivateBySid(mesh.sid);
-   //          if (found) {
-               
-   //             mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GFX.SPECIFIC, found.vbidx, mesh.num_faces);
-   //             mesh.AddToGfx();
-   //          }
-   //          else { // ... else if pool didn't find any buffer, create a new one ...
-               
-   //             mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh.num_faces);
-   //             this.#StoreGfx(mesh.gfx);
-   //             mesh.AddToGfx();
-   //          }
-   //       }
-   //    }
-   // }
-
-   /** */
    // Activates the rendering of the gfx buffers
    ActivateRecursive(mesh) {
 
@@ -298,69 +267,11 @@ export class Gfx_Pool extends M_Buffer {
       GlResetIndexBuffer(mesh.gfx);
       GfxSetVbRender(progidx, vbidx, false);
    }
-
-   /** */
-   // RequestPrivateGfxCtx(mesh, flags, handler_progidx = INT_NULL, handler_vbidx = INT_NULL) {
-
-   //    this.#ResolveGfxCtxRecursive(mesh, flags, handler_progidx, handler_vbidx);
-   // }
-
-   /** */
-   // #ResolveGfxCtxRecursive(mesh, flags, progidx, vbidx, COUNTER = null) {
-
-   //    /*DEBUG*/if(COUNTER === null) COUNTER = 0;
-
-   //    if (flags & (GFX_CTX_FLAGS.PRIVATE | GFX_CTX_FLAGS.INACTIVE)) {
-
-   //       for (let i = 0; i < mesh.children.count; i++) {
-   //          /*DEBUG*/COUNTER++;
-
-   //          const child = mesh.children.buffer[i];
-   //          if (child) {
-   //             // if(DEBUG.GFX.ADD_MESH) console.log(COUNTER, 'traversing... child:', child.name)
-   //             this.#ResolveGfxCtxRecursive(child, flags, progidx, vbidx, COUNTER)
-   //          }
-   //       }
-
-   //       if (!mesh.gfx) { // ... Case its a newly created mesh and looking to be added to gfx ...
-
-   //          const gfx = this.#GetInactiveAndPrivateBySid(mesh.sid); // ... Check if we have a buffer for the request...
-
-   //          if (gfx) { // ... If we have, use it...
-   //             // use specific gfx context
-   //             mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GFX.SPECIFIC, gfx.vbidx, mesh.mat.num_faces);
-   //             // console.log(mesh.name, mesh.mat.num_faces)
-   //          }
-   //          else { // ... else create a new buffer and register it to the pool...
-
-   //             // Create new buffers
-   //             mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh.mat.num_faces)
-   //             this.#Store(mesh.gfx.prog.idx, mesh.gfx.vb.idx, true, false)
-   //          }
-   //       }
-   //       // ... case the mesh already has a gfx and matches the root's mesh gfx.
-   //       else if (mesh.gfx.prog.idx === progidx, mesh.gfx.vb.idx === vbidx) {
-
-   //          mesh.gfx = GlGenerateContext(mesh.sid, mesh.sceneIdx, GFX.SPECIFIC, vbidx, mesh.mat.num_faces); // we pass the roots vbidx
-   //          const gfx = this.#FindGfx(progidx, vbidx)
-   //       }
-   //       else{
-   //          // TODO: Else the mesh already has a gfx but we have to check if it belongs to a private buffer.
-   //          // If NOT, then we must create one
-   //          // 'Η αλλιως μπορουμε να κανουμε το check στοαρχικο if statement: if(!mesh.gfx || mesh.gfx && mesh.gfx  is in private buffer)
-   //       }
-   //       if(DEBUG.GFX.ADD_MESH) console.log(COUNTER, 'Adding mesh:', mesh.name, 'vbidx:', mesh.gfx.prog.idx, mesh.gfx.vb.idx, 'At:', mesh.gfx.vb.start)
-   //       mesh.AddToGfx();
-   //    }
-
-   // }
 };
 
 
 const _gfx_pool = new Gfx_Pool;
 
-
-// export function Gfx_get_pool2() { return _gfx_pool; }
 
 /** Finish the session by setting all the assigned gfx buffers to active. Also sets private all the gfx buffers  */
 export function Gfx_end_session(setPrivate, setActive) { return _gfx_pool.SessionEnd(setPrivate, setActive); }
@@ -383,4 +294,11 @@ export function Gfx_pool_print() {
 
       console.log('Gfx Pool: ', _gfx_pool.buffer[i]);
    }
+}
+
+export function Gfx_is_private_vb(progidx, vbidx){
+
+   const gfx = _gfx_pool.FindGfx(progidx, vbidx);
+   if(gfx.isPrivate) return true;
+   return false;
 }

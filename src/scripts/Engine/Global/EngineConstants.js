@@ -150,6 +150,7 @@ const SECTION = {
 
    VERTICAL: _cnt<<=0x1,
    HORIZONTAL: _cnt<<=0x1,
+   INHERIT: _cnt<<=0x1,
 	EXPAND: _cnt<<=0x1,
 	FIT: _cnt<<=0x1,
 	FOLLOW: _cnt<<=0x1,
@@ -239,11 +240,6 @@ const ALIGN = {
    HORIZONTAL: _cnt <<= 0x1,
 }
 
-// _cnt = 0x1;
-// const SIZER = {
-//    RESTRICT: _cnt <<= 0x1,
-// }
-
 const POSITION_CENTER = [0,0,0]
 
 _cnt = 0x1;
@@ -269,11 +265,20 @@ const BINDING_TYPE = {
 	
 };
 
+_cnt = 0x1;
+const FLAGS = {
+
+	FALSE: 0,
+	TRUE: 1,
+	DESTROY: _cnt<<=0x1,
+}
+
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Loaders's Constants 
  */
 const CHAR_ARRAY_START_OFFSET = ' '.charCodeAt(0);
+const CHAR_ARRAY_LETTERS_START_OFFSET = 'A'.charCodeAt(0);
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -471,6 +476,9 @@ const MESH_TYPES_DBG = {
 	WIDGET_SLIDER_BAR: 		_cnt <<= 1,
 	WIDGET_SLIDER_HANDLE: 	_cnt <<= 1,
 	WIDGET_POP_UP: 			_cnt <<= 1,
+	WIDGET_MENU_BAR: 			_cnt <<= 1,
+	
+	SCENE: 			_cnt <<= 1,
 };
 
 function GetMeshNameFromType(type) {
@@ -556,12 +564,6 @@ const LISTENERS_FLAGS = {
 	mask:0x0, // the variable to sto
 };
 
-// const LISTENERS_FLAGS = {
-// 	ANY_HOVER: false,
-// 	ANY_CLICK: false,
-// 	ANY: false,
-// };
-
 _cnt = 0x1;
 const LISTEN_EVENT_TYPES = {
 	HOVER: _cnt <<= 1,
@@ -580,26 +582,40 @@ const LISTEN_EVENT_TYPES_INDEX = {
 	SIZE: _cnt,
 };
 
-// function GetListenEventsType(type) {
-
-// 	if (type & LISTEN_EVENT_TYPES.HOVER) { return 'HOVER'; }
-// }
+function Listeners_get_event_type_string(event_type_idx){
+	switch(event_type_idx){
+		case LISTEN_EVENT_TYPES_INDEX.HOVER: return 'Hover';
+		case LISTEN_EVENT_TYPES_INDEX.CLICK: return 'Click';
+	}
+}
 
 _cnt = 0x1;
-const DISPATCH_LISTEN_EVENT_TYPES = {
-	SCALE_UP_DOWN: _cnt <<= 1,
-	DIM_COLOR: _cnt <<= 1,
+const INFO_LISTEN_EVENT_TYPE = {
 
-	EXCLUSIVE: _cnt <<= 1,
+   GFX:_cnt<<=0x1,
+   GFX_EVT_TYPE: {
+		VB: _cnt<<=0x1,
 
-	NULL: _cnt <<= 1,
-};
+	},
 
-function GetDispatchEventsType(type) {
-
-	if (type & DISPATCH_LISTEN_EVENT_TYPES.SCALE_UP_DOWN) { return 'SCALE_UP_DOWN'; }
-	if (type & DISPATCH_LISTEN_EVENT_TYPES.DIM_COLOR) { return 'DIM_COLOR'; }
 }
+
+
+// _cnt = 0x1;
+// const DISPATCH_LISTEN_EVENT_TYPES = {
+// 	SCALE_UP_DOWN: _cnt <<= 1,
+// 	DIM_COLOR: _cnt <<= 1,
+
+// 	EXCLUSIVE: _cnt <<= 1,
+
+// 	NULL: _cnt <<= 1,
+// };
+
+// function GetDispatchEventsType(type) {
+
+// 	if (type & DISPATCH_LISTEN_EVENT_TYPES.SCALE_UP_DOWN) { return 'SCALE_UP_DOWN'; }
+// 	if (type & DISPATCH_LISTEN_EVENT_TYPES.DIM_COLOR) { return 'DIM_COLOR'; }
+// }
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -630,6 +646,6 @@ const DEBUG = {
 
 	GFX: {
 		ADD_MESH: true,
-
+		REMOVE_MESH: true,
 	},
 };

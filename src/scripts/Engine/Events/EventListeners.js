@@ -7,7 +7,62 @@ import { _pt5, _pt6 } from "../Timers/PerformanceTimers.js";
 import { Events_handle_immidiate } from "./Events.js";
 
 
+/** TODO!!: For efficiency
+ * 
+ * 
+ * I am sure all for looping the listeners buffer and children's buffer run for count,
+ * eventhough the buffers may have a lot of null elements due to the implementation of the EventListener.
+ * FIX THAT!
+ * 
+ * Also ipmlement the: 
+ *    If we check for click event, and the cur mesh has a hover, it's much more efficient
+ *    to directly check for click the 'STATE.mesh.hovered' and skip all 
+ *    the one by one top root meshes checking for click, since the only clicked mesh is
+ *    the one that is allready hovered.
+ * CODE:
+ *     
+       * If we already have registered a hovered mesh to STATE.mesh.hovered,
+       * skip checking all click listen events since the only possible ckicked is the one that is curently hovered.
+       * More Efficient.
+      
+      if (STATE.mesh.hovered &&
+         STATE.mesh.hovered.listeners.buffer[H] !== INT_NULL &&
+         STATE.mesh.hovered.listeners.buffer[C] !== INT_NULL) {
 
+         const idx = STATE.mesh.hovered.listeners.buffer[C];
+
+         const dispatch_params = {
+            source_params: this.event_type[C].buffer[idx].source_params,
+            target_params: this.event_type[C].buffer[idx].target_params,
+            trigger_params: trigger_params,
+            event_type: TYPE_IDX,
+         }
+         ret = this.event_type[TYPE_IDX].buffer[idx].Clbk(dispatch_params);
+
+      // First check the children's event buffer
+      if(this.event_type[C].buffer[idx].children !== null){ // Check children for events
+
+         for(let j=0; j<this.event_type[C].buffer[idx].children.count; j++){
+
+            const child_event = this.event_type[C].buffer[idx].children.buffer[j];
+
+            const dispatch_params = {
+               source_params: child_event.source_params,
+               target_params: child_event.target_params,
+               trigger_params: trigger_params,
+               event_type: TYPE_IDX,
+            }
+            
+            ret = child_event.Clbk(dispatch_params);
+            
+            if(ret) return; // If at least one event is handled, do not continue.
+         }
+         
+      }
+         return;
+
+      // }
+ */
 
 export class Event_Listener {
 
@@ -46,57 +101,9 @@ export class Event_Listener {
 
       if (this.event_type[TYPE_IDX] === undefined) return;
       if (TYPE_IDX < 0 || TYPE_IDX >= LISTEN_EVENT_TYPES_INDEX.SIZE) alert('Event type index does not exist.');
-      
-      // Cache variables
-      const C = LISTEN_EVENT_TYPES_INDEX.CLICK;
-      const H = LISTEN_EVENT_TYPES_INDEX.HOVER;
-      let success = false;
 
-      /**
-       * If we already have registered a hovered mesh to STATE.mesh.hovered,
-       * skip checking all click listen events since the only possible ckicked is the one that is curently hovered.
-       * More Efficient.
-       */
+      let ret = false;
 
-      /** SAVE Trick to dispatch an event based on hovered mesh */
-      
-      // if (STATE.mesh.hovered &&
-      //    STATE.mesh.hovered.listeners.buffer[H] !== INT_NULL &&
-      //    STATE.mesh.hovered.listeners.buffer[C] !== INT_NULL) {
-
-      //    const idx = STATE.mesh.hovered.listeners.buffer[C];
-
-      //    const dispatch_params = {
-      //       source_params: this.event_type[C].buffer[idx].source_params,
-      //       target_params: this.event_type[C].buffer[idx].target_params,
-      //       trigger_params: trigger_params,
-      //       event_type: TYPE_IDX,
-      //    }
-      //    success = this.event_type[TYPE_IDX].buffer[idx].Clbk(dispatch_params);
-
-      // // First check the children's event buffer
-      // if(this.event_type[C].buffer[idx].children !== null){ // Check children for events
-
-      //    for(let j=0; j<this.event_type[C].buffer[idx].children.count; j++){
-
-      //       const child_event = this.event_type[C].buffer[idx].children.buffer[j];
-
-      //       const dispatch_params = {
-      //          source_params: child_event.source_params,
-      //          target_params: child_event.target_params,
-      //          trigger_params: trigger_params,
-      //          event_type: TYPE_IDX,
-      //       }
-            
-      //       success = child_event.Clbk(dispatch_params);
-            
-      //       if(success) return; // If at least one event is handled, do not continue.
-      //    }
-         
-      // }
-      //    return;
-
-      // }
 
       for (let i = 0; i < this.event_type[TYPE_IDX].count; i++) {
             
@@ -115,43 +122,68 @@ export class Event_Listener {
             ];
          
             // If and only if mouse is intersecting with the current mesh(mouse hover) ...
-            success = Intersection_point_rect(point, rect);
+            ret = Intersection_point_rect(point, rect);
             
             // ... see if any of it's children  have the same event type, check them and dispatch thei event first.
-            if(success){ // If we have an event on the parent, check if children have too.
+            if(ret){ // If we have an event on the parent, check if children have too.
    
                if(evt.anyChildrenActive && evt.children !== null){ // Check if has children events.
    
+                  ret = false; // Use ret to test the children events intersection
                   for(let j=0; j<evt.children.count; j++){
-   
+                     
                      const child_event = evt.children.buffer[j];
+                     if(child_event){
+
+                        const child = child_event.source_params;
+                        const child_rect = [ // The rect area to check for event(mouse hover)
+                           [child.geom.pos[0] - child.geom.dim[0], child.geom.pos[0] + child.geom.dim[0]], // Left  Right 
+                           [(child.geom.pos[1] - child.geom.dim[1]), (child.geom.pos[1] + child.geom.dim[1])], // Top  Bottom
+                        ];
+
+                        ret = Intersection_point_rect(point, child_rect);
+                        if(ret){
+
    
-                     const dispatch_params = {
-                        source_params: child_event.source_params,
-                        target_params: child_event.target_params,
-                        trigger_params: trigger_params,
-                        event_type: TYPE_IDX,
+                           const dispatch_params = {
+                              source_params: child_event.source_params,
+                              target_params: child_event.target_params,
+                              trigger_params: trigger_params,
+                              event_type: TYPE_IDX,
+                           }
+                           
+                           if(child_event.Clbk){
+   
+                              ret = child_event.Clbk(dispatch_params);
+                              if(ret === FLAGS.DESTROY){
+                                 evt.children.RemoveByIdx(j);
+                              }
+                           }
+                        }
+                        
+                        _pt5.Stop(); /* Performance measure */
                      }
-                     
-                     success = child_event.Clbk(dispatch_params);
-                     
-                     _pt5.Stop(); /* Performance measure */
+   
    
                      // If at least one event is handled, do not continue with the rest 
                      // since it is a depth traversal so we found the inner most mesh.
-                     if(success) return; 
+                     // Else continue looping through all childrent for an event.
+                     if(ret & FLAGS.TRUE) return; 
                   }
                   
                }
    
-               // In the case 'no children' or 'children have no success event', then call parents Clbk, since it succeded.
+               // In the case 'no children' or 'children have no ret event', then call parents Clbk, since it succeded.
                const dispatch_params = {
                   source_params: evt.source_params,
                   target_params: evt.target_params,
                   trigger_params: trigger_params,
                   event_type: TYPE_IDX,
                }
-               evt.Clbk(dispatch_params);
+               ret = evt.Clbk(dispatch_params);
+               if(ret === FLAGS.DESTROY){
+                  this.event_type[TYPE_IDX].RemoveByIdx(i);
+               }
    
                _pt5.Stop();
                return; 
@@ -209,7 +241,8 @@ export class Event_Listener {
       const TYPE_IDX = LISTEN_EVENT_TYPES_INDEX.HOVER;
 
       if (this.event_type[TYPE_IDX] === undefined) return;
-      if (TYPE_IDX < 0 || TYPE_IDX >= LISTEN_EVENT_TYPES_INDEX.SIZE) alert('Event type index does not exist.');
+      if (TYPE_IDX < 0 || TYPE_IDX >= LISTEN_EVENT_TYPES_INDEX.SIZE) 
+      console.error('Event type index does not exist.');
 
 
       for (let i = 0; i < this.event_type[TYPE_IDX].count; i++) {
@@ -237,12 +270,6 @@ export class Event_Listener {
                }
 
                Events_handle_immidiate({ type: 'hover', params: { mesh: mesh } });
-            // if (mesh.StateCheck(MESH_STATE.IS_FAKE_HOVERABLE)) {
-            //    Check_hover_recursive(mesh, point);
-            // }
-                  // else if (mesh.StateCheck(MESH_STATE.IN_HOVER) === 0) { 
-               //    Events_handle_immidiate({ type: 'hover', params: { mesh: mesh } });
-               // }
 
             } else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (
                !mesh.StateCheck(MESH_STATE.IN_MOVE) || !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
@@ -279,100 +306,75 @@ export class Event_Listener {
    }
 
    /** Debug */
-   PrintAll(event_type, count=0) {
-
-      // let hover_cnt = 0, click_cnt = 0;
-      if(!event_type) event_type = this.event_type
-      let r = ' ';
-      
-      for (let i = 0; i < LISTEN_EVENT_TYPES_INDEX.SIZE; i++) {
-         
-         if (event_type[i]) {
-            for (let j = 0; j < event_type[i].count; j++) {
-               // console.log(`Event type ${i} event:${j}`);
-               
-               const event = event_type[i].buffer[j]
-               if(event){
-                  
-                  if(event.children){
-                     
-                     console.log(`---- Recurse. Event type: ${i}`);
-                     Print_all_recursive(event.children, count)
-                     console.log(`--- Return`);
-                  } 
-                  
-                  for (let j = 0; j < count; j++) r += '->';
-                  console.log(`${count} :type:${i} evt:${j}: `, event.source_params.name);
-               }
-               count++;
-            }
-         }
-         count++;
-      }
+   PrintAll() {
+      console.log('Listener: ', _listener.event_type)
    }
 }
 
-function Print_all_recursive(event_type, count=0) {
+function Print_all_recursive(children_buffer, count=0) {
 
-      // let hover_cnt = 0, click_cnt = 0;
-      let r = ' ';
+   // let hover_cnt = 0, click_cnt = 0;
+   
+   for (let i = 0; i < children_buffer.count; i++) {
+      let r = '   ';
+      // console.log(`Childen Event Type: ${Listeners_get_event_type_string(i)}`);
+      
+      const event = children_buffer.buffer[i];
+      if (event) {
 
-      for (let i = 0; i < event_type.count; i++) {
+         for (let j = 0; j < count; j++) r += '->';
+         console.log(`${r} ${count} `, event.source_params.name);
          
-         const event = event_type.buffer[i];
-         if (event) {
-
-            if(event.children){
-               
-               count++;
-               console.log(`----- Recurse`);
-               this.PrintAll(event.children.buffer, count)
-               console.log(`----- Return`);
-            } 
-
-            for (let j = 0; j < count; j++) r += '->';
-            console.log(`evt:${i} `, event.source_params.name);
+         if(event.children){
+            
+            count++;
+            console.log(`Children Events:`);
+            this.PrintAll(event.children.buffer, count)
             count--;
-               
-         }
+         } 
+            
       }
-
+   }
 }
 
 function Check_hover_recursive(events, point) {
 
    for(let i=0; i<events.children.count; i++){
 
-      const evt = events.children.buffer[i];
+      if(events.children.buffer[i]){
 
-      const child_event = evt.children;
-      if(child_event)
-         Check_hover_recursive(child_event, point);
-
-      
-      const mesh = evt.source_params
-      const d = mesh.geom;
-      const rect = [
-         [d.pos[0] - d.dim[0], d.pos[0] + d.dim[0]],     // Left  Right 
-         [(d.pos[1] - d.dim[1]), (d.pos[1] + d.dim[1])], // Top  Bottom
-      ];
-      
-      // console.log(mesh.name, evt.isActive, point, rect)
-      if (evt.isActive && Intersection_point_rect(point, rect)) {
-         // console.log('', mesh.name)
-
-         if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
-            Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
+         const evt = events.children.buffer[i];
+   
+         const child_event = evt.children;
+         if(child_event)
+            Check_hover_recursive(child_event, point);
+   
+         
+         const mesh = evt.source_params
+         const d = mesh.geom;
+         const rect = [
+            [d.pos[0] - d.dim[0], d.pos[0] + d.dim[0]],     // Left  Right 
+            [(d.pos[1] - d.dim[1]), (d.pos[1] + d.dim[1])], // Top  Bottom
+         ];
+         
+         // console.log(mesh.name, evt.isActive, point, rect)
+         if (evt.isActive && Intersection_point_rect(point, rect)) {
+            // console.log('', mesh.name)
+   
+            if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
+               Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
+            }
+   
+            Events_handle_immidiate({ type: 'hover', params: { mesh: mesh } });
+            return true;
+   
+         } else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (
+            !mesh.StateCheck(MESH_STATE.IN_MOVE) || !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
+   
+            Events_handle_immidiate({ type: 'unhover', params: { mesh: mesh } });
          }
-
-         Events_handle_immidiate({ type: 'hover', params: { mesh: mesh } });
-         return true;
-
-      } else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (
-         !mesh.StateCheck(MESH_STATE.IN_MOVE) || !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
-
-         Events_handle_immidiate({ type: 'unhover', params: { mesh: mesh } });
       }
+
    }
 
 }
@@ -422,7 +424,7 @@ const _listener = new Event_Listener();
 export function Debug_get_event_listeners(){ return _listener; }
 
 export function Listeners_get_event(TYPE_IDX, event_idx){ return _listener.event_type[TYPE_IDX].buffer[event_idx]; }
-// export function Listeners_copy_event_children_buffer(TYPE_IDX, event_idx){ return _listener.event_type[TYPE_IDX].buffer[event_idx].children; }
+
 export function Listeners_copy_event_children_buffer(TYPE_IDX, event_idx){ return _listener.CopyChildren(TYPE_IDX, event_idx); }
 
 export function Listener_create_event(TYPE_IDX, Clbk, params, target) {
@@ -442,11 +444,15 @@ export function Listener_dispatch_check_hover_event() {
 
 export function Listener_remove_event_by_idx(TYPE_IDX, idx) {
 
-   // _listener.event_type[TYPE_IDX].RemoveByIdx(idx);
    _listener.event_type[TYPE_IDX].RemoveByIdx(idx);
 
    if (_listener.event_type[TYPE_IDX].active_count === 0)
       LISTENERS_FLAGS[TYPE_IDX] = false;
+}
+
+export function Listener_remove_children_event_by_idx(TYPE_IDX, event_idx, child_event_idx) {
+
+   _listener.event_type[TYPE_IDX].buffer[event_idx].children.buffer.RemoveByIdx(child_event_idx);
 }
 
 export function Listener_deactivate_children_events_buffer(FLAGS, mesh_listeners){
@@ -489,6 +495,11 @@ export function Listener_set_event_active_by_idx(TYPE_IDX, root, childs_evt_idx)
    // Cache.
    const evt = _listener.event_type[TYPE_IDX].buffer[parent_event_idx];
 
+   if(evt === null){
+
+      console.error('evt is null');
+      return;
+   }
 
    if (evt.children === null){
 
@@ -500,11 +511,11 @@ export function Listener_set_event_active_by_idx(TYPE_IDX, root, childs_evt_idx)
    const event_params = _listener.event_type[TYPE_IDX].buffer[childs_evt_idx];
 
    // Store them to the parents children event buffer
-   evt.children.Add(event_params);
+   const idx = evt.children.Add(event_params);
    _listener.event_type[TYPE_IDX].RemoveByIdx(childs_evt_idx); // Remove the child's event from the root eventListeners buffer
 
+   return idx;
 }
-
 
 export function Listener_get_event(TYPE_IDX, event_idx) {
 
@@ -515,22 +526,3 @@ export function Listener_debug_print_all() {
 
    _listener.PrintAll();
 }
-
-
-// export function Listener_listen_mouse_hover(params) {
-
-//    const mousePos = MouseGetPos();
-//    const point = mousePos;
-
-//    const verticalMargin = params.hover_margin;
-
-//    const rect = [
-//       [params.geom.pos[0] - params.geom.dim[0], params.geom.pos[0] + params.geom.dim[0]], // Left  Right 
-//       [(params.geom.pos[1] - params.geom.dim[1]) - verticalMargin, (params.geom.pos[1] + params.geom.dim[1]) + verticalMargin], // Top  Bottom
-//    ];
-//    // console.log('verticalMargin:', rect[1])
-
-//    return Intersection_point_rect(point, rect);
-// }
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////

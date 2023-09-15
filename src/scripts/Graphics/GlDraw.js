@@ -7,7 +7,6 @@ import { GlGetPrograms } from './GlProgram.js';
 
 export function GlDraw(gl) {
 
-    // const gl = gl;
     const progs = GlGetPrograms();
     const drawQueue = RenderQueueGetActive();
     const drawQueueCount = RenderQueueGetActiveCount();
@@ -59,7 +58,8 @@ export function GlDraw(gl) {
             GlUpdateVertexBufferData(gl, vb)
 
         gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
-        // gl.drawElements(gl.TRIANGLES, 120, gl.UNSIGNED_SHORT, 0);
+        // gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        // gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 6);
     }
     
     // const fb = FramebuffersGet(FRAMEBUFFERS_IDX.buffer0);

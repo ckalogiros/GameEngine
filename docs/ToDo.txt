@@ -25,7 +25,7 @@ redrawing the meshes to it's self
 
 . Definetly we need an implementation of removing vertices from the gfx buffers.
   . One way would be to keep track of all the free attributes of a vertex buffer
-    and add to that free space when it is fit. Also we need a kind of combining
+    and add to that free space when it sees fit. Also we need a kind of combining
     overlaping free space implementation
 
   . Implement destruction of gfx buffers and gl program.
@@ -70,10 +70,7 @@ redrawing the meshes to it's self
 --------------------------------------------------- TODO
 
 --------------------------------------------------- CONTINUE
-. If listen events works correctly, fix the menu minimization.
-  On minimizing 
-    . copy childrens buffer
-    . copy EventListeners children buffer OR set it to Inactive
+
 
 --------------------------------------------------- CONTINUE
 

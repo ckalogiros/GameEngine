@@ -50,7 +50,7 @@ export class Rect extends Mesh{
 
 export class I_Text extends Text_Mesh{
 
-	constructor(text, pos, fontSize = 4, scale = [1, 1], color = WHITE, bold = 4, font = TEXTURES.SDF_CONSOLAS_LARGE) {
+	constructor(text, pos=[0,0,0], fontSize = 4, scale = [1, 1], color = WHITE, bold = 4, font = TEXTURES.SDF_CONSOLAS_LARGE) {
 
 		const sdfouter = CalculateSdfOuterFromDim(fontSize);
 		if (sdfouter + bold > 1) bold = 1 - sdfouter;

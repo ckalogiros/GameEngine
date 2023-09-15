@@ -13,6 +13,7 @@ import { Geometry2D_Text } from "../../Geometry/Geometry2DText.js";
 import { FontMaterial } from "../../Material/Base/Material.js";
 import { MESH_ENABLE, Text_Mesh } from "../Base/Mesh.js";
 import { I_Text, Rect } from "../Rect.js";
+import { Widget_Text } from "./WidgetText.js";
 
 
 
@@ -63,34 +64,33 @@ export class Widget_Label extends Rect {
 
     pad = [0, 0];
 
-    constructor(text, pos=[200, 300], fontSize=8, col = GREY1, textCol = WHITE, scale = [1, 1], pad = [10, 5], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [0, 6, 2]) {
+    constructor(text, Align=(ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos=[200, 300], fontSize=8, col = GREY1, textCol = WHITE, scale = [1, 1], pad = [10, 5], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [0, 6, 2]) {
 
         const sdfouter = CalculateSdfOuterFromDim(fontSize);
         if (sdfouter + bold > 1) bold = 1 - sdfouter;
         pos[2] += 1; // In essence we set as the left (start of text label) the label area and not the left of text.
-        pos[2] += 1; // In essence we set as the left (start of text label) the label area and not the left of text.
         
-        const textMesh = new I_Text(text, pos, fontSize)
+        const textMesh = new Widget_Text(text, pos, fontSize)
 
         pos[0] -= pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
-        // pos[2] -= 1; // In essence we set as the left (start of text label) the label area and not the left of text.
-
-
+        
         const areaMetrics = CalculateArea(text, textMesh.geom.dim, pos, pad)
-
+        
         super(areaMetrics.pos, areaMetrics.dim, col);
-
+        
         
         this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
         this.SetStyle(style);
         
-        textMesh.SetName();
+        textMesh.SetName(text);
         textMesh.SetSceneIdx(this.sceneIdx);
-
+        
         this.type |= MESH_TYPES_DBG.WIDGET_TEXT_LABEL | textMesh.type | this.geom.type | this.mat.type;
         this.SetName();
         this.pad = pad;
         this.AddChild(textMesh);
+        
+        textMesh.Align_pre(this, Align, pad)
     }
 
     UpdateText(text) {
@@ -150,53 +150,51 @@ export class Widget_Label extends Rect {
         super.AddToGfx()
 	}
 
-	Align(flags) { // Align pre-added to the vertexBuffers
+    Align_pre(target_mesh, flags, pad=[0,0]) { // Align pre-added to the vertexBuffers
 
-		const pos = [0, 0];
-		const dim = this.geom.dim;
-		CopyArr2(pos, this.geom.pos);
-		let ypos = pos[1] + dim[1] * 2;
-
-		pos[0] -= dim[0] * this.mat.num_faces / 2 - this.pad[0] / 2;
-		this.geom.pos[0] = pos[0]
-
-		if (flags & ALIGN.VERTICAL) {
-
-			for (let i = 0; i < this.children.count; i++) {
-
-				const child = this.children.buffer[i];
-				pos[1] = ypos;
-
-				child.geom.Reposition_pre(pos);
-				ypos += child.geom.dim[1] * 2;
-			}
-
-		}
-	}
-
-    Align_pre(target_mesh, flags) { // Align pre-added to the vertexBuffers
-
-        const pos1 = target_mesh.geom.pos;
-        const dim1 = target_mesh.geom.dim;
-        const pos2 = this.geom.pos;
-        const dim2 = this.geom.dim;
+        const pos = [0, 0];
+        CopyArr2(pos, this.geom.pos);
 
         if (flags & (ALIGN.VERT_CENTER | ALIGN.RIGHT)) {
 
-            const pos = [0, 0];
-            CopyArr2(pos, pos2);
-
             // Vertical allignment
-            pos[1] = pos1[1];
+            pos[1] = target_mesh.geom.pos[1];
 
             // Horizontal allignment
-            pos[0] = pos1[0] + dim1[0] - dim2[0];
+            pos[0] = target_mesh.geom.pos[0] + target_mesh.geom.dim[0] - this.geom.dim[0] - pad[0];
 
-            CopyArr2(pos2, pos);
+            CopyArr2(this.geom.pos, pos);
+
+        }
+        else if (flags & ALIGN.RIGHT) {
+
+            // CopyArr2(pos, this.geom.pos);
+
+            // Horizontal allignment
+            pos[0] = target_mesh.geom.pos[0] + target_mesh.geom.dim[0] - this.geom.dim[0] - pad[0];
+
+            CopyArr2(this.geom.pos, pos);
+
+        }
+        else if (flags & ALIGN.LEFT) {
+
+            // const pos = [0, 0];
+            // CopyArr2(pos, this.geom.pos);
+
+            // Horizontal allignment
+            pos[0] = (target_mesh.geom.pos[0] - target_mesh.geom.dim[0]) + this.geom.dim[0] + pad[0];
+
+            CopyArr2(this.geom.pos, pos);
+
+        }
+
+
+
+        
+        if(this.children.buffer[0]){
 
             const child = this.children.buffer[0]; // We know that there is a text childern at 0 index.
             child.geom.Reposition_pre(pos);
-
         }
     }
 
@@ -218,16 +216,16 @@ export class Widget_Label_Dynamic_Text extends Widget_Label {
 
     /** Set the max number of characters for the dynamic text, 
      * by passing any text as 'maxDynamicTextChars' of length= dynamic text number of characters*/
-    constructor(text, maxDynamicTextChars, pos, fontSize=4, col, textcol, scale, pad=[10,10], bold) {
+    constructor(text, Align, maxDynamicTextChars, pos, fontSize=4, col, textcol, scale, pad=[10,10], bold) {
 
-        super(text, pos, fontSize, col, textcol, scale, pad, bold);
+        super(text, Align, pos, fontSize, col, textcol, scale, pad, bold);
 
         // Translate the dynamic text by the width of the constant text's width
         CopyArr2(pos, this.geom.pos)
         this.pad = [5,5]
         pos[0] += this.geom.dim[0] + this.pad[0]*2;
         
-        const dynamicText = new Widget_Label(maxDynamicTextChars, pos, fontSize, YELLOW_240_220_10, textcol, scale, this.pad, bold);
+        const dynamicText = new Widget_Label(maxDynamicTextChars, ALIGN.HOR_CENTER | ALIGN.VERT_CENTER,  pos, fontSize, YELLOW_240_220_10, textcol, scale, this.pad, bold);
         dynamicText.SetName();
 
         this.AddChild(dynamicText)
@@ -299,9 +297,9 @@ export class Widget_Label_Dynamic_Text extends Widget_Label {
  */
 export class Widget_Label_Text_Mesh_Menu_Options extends Widget_Label {
 
-    constructor(text, pos, fontSize, col, textCol, scale, pad, bold, font, style) {
+    constructor(text, Align, pos, fontSize, col, textCol, scale, pad, bold, font, style) {
 
-        super(text, pos, fontSize, col, textCol, scale, pad, bold, font, style)
+        super(text, Align, pos, fontSize, col, textCol, scale, pad, bold, font, style)
         this.type |= MESH_TYPES_DBG.WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS;
     }
 

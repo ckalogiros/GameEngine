@@ -114,9 +114,9 @@ function Menu_options_create_slider_popup_menu_options(clicked_mesh, _pos) {
       section_option.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
       
       
-      const option_switch = new Widget_Switch(pos, fontSize, TRANSPARENCY(BLUE_10_120_220, .0), WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
+      const option_switch = new Widget_Switch('on', 'off', pos, fontSize, TRANSPARENCY(BLUE_10_120_220, .0), WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
       // const option_label = new Widget_Label_Text_Mesh_Menu_Options(mesh.name, pos, fontSize, TRANSPARENCY(BLUE_10_120_220, .0), WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
-      const option_label = new Widget_Label_Text_Mesh_Menu_Options('1', pos, fontSize, TRANSPARENCY(BLUE_10_120_220, .0), WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
+      const option_label = new Widget_Label_Text_Mesh_Menu_Options('1', (ALIGN.HOR_CENTER|ALIGN.VERT_CENTER), pos, fontSize, TRANSPARENCY(BLUE_10_120_220, .0), WHITE, [1, 1], textlabelpad, .4, font, [2, 3, 2]);
       option_switch.SetName(`switch:${i}`);
       option_label.SetName(`label:${i}`);
       
