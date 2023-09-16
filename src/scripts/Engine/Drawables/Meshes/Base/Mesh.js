@@ -5,7 +5,7 @@ import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { Int8Buffer, Int8Buffer2, M_Buffer } from "../../../Core/Buffers.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { TimerGetGlobalTimer } from "../../../Timers/Timers.js";
-import { Listener_create_event, Listener_remove_children_event_by_idx, Listener_remove_event_by_idx, Listener_set_event_active_by_idx } from "../../../Events/EventListeners.js";
+import { Listener_create_event, Listener_remove_children_event_by_idx, Listener_remove_event_by_idx, Listener_remove_event_by_idx2, Listener_set_event_active_by_idx } from "../../../Events/EventListeners.js";
 import { CopyArr3, CopyArr4 } from "../../../../Helpers/Math/MathOperations.js";
 import { Scenes_get_children, Scenes_get_count, Scenes_get_scene_by_idx, Scenes_update_all_gfx_starts } from "../../../Scenes.js";
 import { Gfx_deactivate, Gfx_generate_context, Gfx_is_private_vb } from "../../../Interfaces/GfxContext.js";
@@ -353,20 +353,30 @@ export class Mesh {
 
     RemoveAllListenEvents() {
 
+        
         if (this.listeners.active_count) {
-
+            
             if(DEBUG.LISTENERS)console.log('--- Removing Events from mesh: ', this.name)
             const count = this.listeners.count;
-            
+        
             for (let i = 0; i < count; i++) {
+            
+                const idx = 0;
+                const gathered = Gather_all_listen_events_recursive(this, i, idx);
+                console.log(i, this.name,  '00000000000000000 ', gathered.idxs)
 
                 if (this.listeners.buffer[i] !== INT_NULL) { // If this type of listen event is enabled 
-
-                    Listener_remove_event_by_idx(i, this.listeners.buffer[i]);
+                
+                    Listener_remove_event_by_idx2(i, gathered.idxs);
                     this.listeners.RemoveByIdx(i);
-
-                    if(DEBUG.LISTENERS)console.log('type:', i, ' this.listeners', this.listeners.buffer[i])
                 }
+                // if (this.listeners.buffer[i] !== INT_NULL) { // If this type of listen event is enabled 
+
+                //     Listener_remove_event_by_idx(i, this.listeners.buffer[i]);
+                //     this.listeners.RemoveByIdx(i);
+
+                //     if(DEBUG.LISTENERS)console.log('type:', i, ' this.listeners', this.listeners.buffer[i])
+                // }
             }
         }
     }
@@ -632,6 +642,27 @@ function Reconstruct_listeners_recursive(mesh, root){
             // console.log('Remove click event:', type, child.name, child.listeners.buffer, ' parent:', mesh.name, ' root:', root.name)
         }
     }
+}
+
+function Gather_all_listen_events_recursive(mesh, event_type, idx=0){
+
+    // let gathered.idxs = [];
+    let gathered = {
+        idxs: [],
+        count: 0,
+    };
+
+    if(mesh.parent && (mesh.parent.type & MESH_TYPES_DBG.SCENE) === 0){
+
+        gathered = Gather_all_listen_events_recursive(mesh.parent, event_type, idx);
+        gathered.count++;
+    }
+
+    if(mesh.listeners.active_count){
+        gathered.idxs[idx] = mesh.listeners.buffer[event_type]
+    }
+
+    return gathered;
 }
 
 export function Remove_event_listeners_no_member_listeners_touch_recursive(mesh){

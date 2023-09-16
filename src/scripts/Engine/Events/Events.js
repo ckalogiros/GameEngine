@@ -125,10 +125,10 @@ export function Events_handle_immidiate(e){
      *      change the order inside the vertexBuuffer, if is drawn before. 
      */
     if (e.type === 'hover') {
-        // console.debug('hover: ', e.params.mesh.name);
-
+        
         // Apply Hover Color
         if (e.params.mesh.StateCheck(MESH_STATE.IS_HOVER_COLORABLE)){
+            // console.debug('hover: ', e.params.mesh.name, e.params.mesh.geom.pos, e.params.mesh.geom.dim);
             e.params.mesh.SetColor(TRANSPARENCY(WHITE, .8));
             // e.params.mesh.SetColorAlpha(1-e.params.mesh.mat.col[3]+.4);
             e.params.mesh.StateEnable(MESH_STATE.IN_HOVER_COLOR);

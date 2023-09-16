@@ -270,6 +270,7 @@ export class Event_Listener {
                }
 
                Events_handle_immidiate({ type: 'hover', params: { mesh: mesh } });
+               // console.log('', mesh.name)
 
             } else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (
                !mesh.StateCheck(MESH_STATE.IN_MOVE) || !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
@@ -450,6 +451,33 @@ export function Listener_remove_event_by_idx(TYPE_IDX, idx) {
       LISTENERS_FLAGS[TYPE_IDX] = false;
 }
 
+export function Listener_remove_event_by_idx2(TYPE_IDX, gatheredIdxs) {
+
+   const i = gatheredIdxs;
+   const count = i.length;
+   switch(count){
+
+      case 1:{
+
+         _listener.event_type[TYPE_IDX].RemoveByIdx(gatheredIdxs[0]);
+         break;
+      }
+      case 2:{
+         
+         _listener.event_type[TYPE_IDX].buffer[i[0]].children.RemoveByIdx([i[1]]);
+         break;
+      }
+      case 3:{
+         
+         _listener.event_type[TYPE_IDX].buffer[i[0]].children.buffer[i[1]].children.RemoveByIdx(i[2]);
+         break;
+      }
+   }
+
+   // A way of not bothering dispatching this type of event (if none exist), from the Events.js
+   if (_listener.event_type[TYPE_IDX].active_count === 0)
+      LISTENERS_FLAGS[TYPE_IDX] = false;
+}
 export function Listener_remove_children_event_by_idx(TYPE_IDX, event_idx, child_event_idx) {
 
    _listener.event_type[TYPE_IDX].buffer[event_idx].children.buffer.RemoveByIdx(child_event_idx);

@@ -3,6 +3,7 @@
 import { AddArr3, CopyArr2, CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../Controls/Input/Mouse.js";
+import { Gfx_end_session, Gfx_generate_context } from "../../Interfaces/GfxContext.js";
 import { UpdaterAdd } from "../../Scenes.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../Timers/TimeIntervals.js";
 import { MESH_ENABLE } from "./Base/Mesh.js";
@@ -83,10 +84,10 @@ export class Section extends Rect {
          section.geom.pos[1] += accum.size[1];
          section.geom.pos[1] += section.margin[1]+accum.margin[1]*2 + section.margin[1]*2;
          section.geom.pos[0] += section.margin[0]+accum.margin[0]*2 + section.margin[0]*2;
-         console.log('111111', accum, section.geom.dim[1], h)
+         // console.log('111111', accum, section.geom.dim[1], h)
       }
       else if(section.geom.dim[1] < h){
-         console.log('222222', accum, section.geom.dim[1], h)
+         // console.log('222222', accum, section.geom.dim[1], h)
          
          section.geom.pos[1] -= accum.size[1];
          section.geom.pos[1] -= section.margin[1]+accum.margin[1]*2 + section.margin[1]*2;
@@ -168,6 +169,8 @@ export class Section extends Rect {
    GenGfxCtx(FLAGS, gfxidx) {
 
       super.GenGfxCtx(FLAGS, gfxidx);
+      // this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, this.mat.num_faces, FLAGS, gfxidx);
+      // Gfx_end_session(true)
    }
 
    AddToGfx() {

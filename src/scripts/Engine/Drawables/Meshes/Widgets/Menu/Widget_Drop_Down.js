@@ -1,9 +1,10 @@
 "use strict";
 
+import { GetRandomColor } from "../../../../../Helpers/Helpers";
 import { MouseGetPosDif } from "../../../../Controls/Input/Mouse";
 import { Info_listener_dispatch_event } from "../../../../DebugInfo/InfoListeners";
-import { Debug_get_event_listeners } from "../../../../Events/EventListeners";
-import { Gfx_activate, Gfx_deactivate, Gfx_end_session } from "../../../../Interfaces/GfxContext";
+import { Debug_get_event_listeners, Listener_remove_event_by_idx } from "../../../../Events/EventListeners";
+import { Gfx_activate, Gfx_deactivate, Gfx_deactivate_no_listeners_touch, Gfx_end_session } from "../../../../Interfaces/GfxContext";
 import { RenderQueueGet } from "../../../../Renderers/Renderer/RenderQueue";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../../../Timers/TimeIntervals";
 import { MESH_ENABLE } from "../../Base/Mesh";
@@ -19,9 +20,9 @@ export class Widget_Drop_Down extends Section {
    isOn;
    menu;
 
-   constructor(text, Align, pos, dim, col = GREY3, text_col = WHITE, scale = [1, 1], pad = [0, 0], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [2, 5, 2]) {
+   constructor(text, Align, pos, dim, col1 = GREY3, col2 = PINK_240_60_160, text_col = WHITE, scale = [1, 1], pad = [0, 0], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [2, 5, 2]) {
 
-      super(SECTION.VERTICAL, [4, 4], pos, [10, 10], ORANGE_240_160_10);
+      super(SECTION.VERTICAL, [4, 4], pos, [10, 10], col2);
 
       this.isOn = 0x0;
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
@@ -30,7 +31,7 @@ export class Widget_Drop_Down extends Section {
       this.type |= MESH_TYPES_DBG.WIDGET_MENU_BAR;
       this.menu = null;
 
-      const btn = new Widget_Button(text, Align, pos, 4, col, text_col, scale, pad, bold, font, style);
+      const btn = new Widget_Button(text, Align, pos, 4, col1, text_col, scale, pad, bold, font, style);
       btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
       btn.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
@@ -40,7 +41,7 @@ export class Widget_Drop_Down extends Section {
       btn.AddChild(text_symbol);
       this.AddItem(btn);
 
-      this.menu = new Section(SECTION.VERTICAL, [14, 4], [0, 0, 0], [0, 0], TRANSPARENCY(GREY1, .7));
+      this.menu = new Section(SECTION.VERTICAL, [14, 4], [0, 0, 0], [0, 0], TRANSPARENCY(GetRandomColor(), .7));
       const params = { // Build the parameters for the OnClick callback function.
          drop_down: this,
          menu: this.menu,
@@ -62,6 +63,7 @@ export class Widget_Drop_Down extends Section {
 
          drop_down_mesh.AddItem(menu); // Add the menu which is a storage of Widget_Drop_Down only as a child to the drop_down
          menu.GenGfxCtx(GFX.PRIVATE); // Generate gfx context since the 'menu does not exist in the vertex buffers'
+         Gfx_end_session(true, true);
          menu.AddToGfx(); // Add to the vertex buffers
 
          // drop_down_mesh.Calc();
@@ -76,7 +78,8 @@ export class Widget_Drop_Down extends Section {
 
       if (menu) {
          const l = Debug_get_event_listeners();
-         Gfx_deactivate(menu); // Also deactivates the gfx buffers.
+         // Gfx_deactivate(menu); // Also deactivates the gfx buffers.
+         Gfx_deactivate_no_listeners_touch(menu); // Also deactivates the gfx buffers.
          drop_down_mesh.RemoveChildByIdx(menu.idx)
 
          // drop_down_mesh.Calc();
@@ -95,14 +98,11 @@ export class Widget_Drop_Down extends Section {
          text_symbol.UpdateTextFromVal('v');
 
          if (menu) {
-
+            console.log('1 :', drop_down_mesh.name, ' menu:', menu.name)
             drop_down_mesh.AddItem(menu); // Add the menu which is a storage of Widget_Drop_Down only as a child to the drop_down
             menu.GenGfxCtx(GFX.PRIVATE); // Generate gfx context since the 'menu does not exist in the vertex buffers'
+            Gfx_end_session(true, true);
             menu.AddToGfx(); // Add to the vertex buffers
-
-            // drop_down_mesh.Reconstruct_listeners_recursive();
-            // menu.RecreateListenEvents();
-            // menu.Reconstruct_listeners_recursive();
 
             // const trigger_params = { info: 'This is the update info' }
             // const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
@@ -121,9 +121,13 @@ export class Widget_Drop_Down extends Section {
 
          if (menu) {
 
-            Gfx_deactivate(menu); // Also deactivates the gfx buffers.
+            console.log('2 :', drop_down_mesh.name, ' menu:', menu.name)
+            // Gfx_deactivate(menu); // Also deactivates the gfx buffers.
+            Gfx_deactivate_no_listeners_touch(menu); // Also deactivates the gfx buffers.
             drop_down_mesh.RemoveChildByIdx(menu.idx)
             drop_down_mesh.Recalc();
+            // menu.RemoveAllListenEvents();
+            // Listener_remove_event_by_idx(TYPE_IDX, idx)
             drop_down_mesh.UpdateGfxPosDimRecursive(drop_down_mesh);
          }
       }
@@ -173,7 +177,7 @@ export class Widget_Drop_Down extends Section {
       }
 
       // Move the mesh
-      console.log('MOVING Widget_Drop_Down:', mesh.name)
+      // console.log('MOVING Widget_Drop_Down:', mesh.name)
       const mouse_pos = MouseGetPosDif();
       mesh.MoveRecursive(mouse_pos.x, -mouse_pos.y);
 

@@ -31,6 +31,8 @@ export class Widget_Text extends I_Text {
 		super(text, pos, fontSize, scale, color)
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT | this.type;
 
+		this.SetName(text)
+
 	}
 
 	GenGfxCtx(FLAGS, gfxidx) {
