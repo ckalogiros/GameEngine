@@ -9,6 +9,8 @@ const MAX_INT = 10000
 const MILISEC = 0.001;
 const NANOSEC = 0.000001;
 
+const ALL = 0xffff;
+
 const Rename_evtClbk_elem0 = 0; // The first element in the eventCallbacks buffer of every Mesh.
 const Rename_evtClbk_elem1 = 1; // The first element in the eventCallbacks buffer of every Mesh.
 
@@ -477,6 +479,8 @@ const MESH_TYPES_DBG = {
 	WIDGET_SLIDER_HANDLE: 	_cnt <<= 1,
 	WIDGET_POP_UP: 			_cnt <<= 1,
 	WIDGET_MENU_BAR: 			_cnt <<= 1,
+	WIDGET_DROP_DOWN:			_cnt <<= 1,
+	DROP_DOWN_MENU: 			_cnt <<= 1,
 	
 	SCENE: 			_cnt <<= 1,
 };

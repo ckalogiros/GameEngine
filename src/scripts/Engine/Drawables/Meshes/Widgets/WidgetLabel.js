@@ -82,11 +82,11 @@ export class Widget_Label extends Rect {
         this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
         this.SetStyle(style);
         
-        textMesh.SetName(text);
+        textMesh.SetName('Text ' + text);
         textMesh.SetSceneIdx(this.sceneIdx);
         
         this.type |= MESH_TYPES_DBG.WIDGET_TEXT_LABEL | textMesh.type | this.geom.type | this.mat.type;
-        this.SetName();
+        this.SetName('label area ' + text);
         this.pad = pad;
         this.AddChild(textMesh);
         
@@ -216,22 +216,25 @@ export class Widget_Label_Dynamic_Text extends Widget_Label {
 
     /** Set the max number of characters for the dynamic text, 
      * by passing any text as 'maxDynamicTextChars' of length= dynamic text number of characters*/
-    constructor(text, Align, maxDynamicTextChars, pos, fontSize=4, col, textcol, scale, pad=[10,10], bold) {
+    constructor(text1, Align, text2, pos, fontSize=4, col, textcol, scale, pad=[10,10], bold) {
 
-        super(text, Align, pos, fontSize, col, textcol, scale, pad, bold);
+        super(text1, Align, pos, fontSize, col, textcol, scale, pad, bold);
 
         // Translate the dynamic text by the width of the constant text's width
         CopyArr2(pos, this.geom.pos)
         this.pad = [5,5]
         pos[0] += this.geom.dim[0] + this.pad[0]*2;
         
-        const dynamicText = new Widget_Label(maxDynamicTextChars, ALIGN.HOR_CENTER | ALIGN.VERT_CENTER,  pos, fontSize, YELLOW_240_220_10, textcol, scale, this.pad, bold);
-        dynamicText.SetName();
+        const dynamicText = new Widget_Label(text2, ALIGN.HOR_CENTER | ALIGN.VERT_CENTER,  pos, fontSize, YELLOW_240_220_10, textcol, scale, this.pad, bold);
+        // let txt = text;
+        // for(let i=0; i<maxDynamicTextChars; i++) txt += ' '
+        // const dynamicText = new Widget_Label(txt, ALIGN.HOR_CENTER | ALIGN.VERT_CENTER,  pos, fontSize, YELLOW_240_220_10, textcol, scale, this.pad, bold);
+        dynamicText.SetName('Dynamic Text ' + text1.slice(0, 7));
 
         this.AddChild(dynamicText)
 
         this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | dynamicText.geom.type | dynamicText.mat.type;
-        this.SetName();
+        this.SetName('Dynamic Text area ' + text1.slice(0, 7));
     }
 
     GenGfxCtx(FLAGS, gfxidx) {

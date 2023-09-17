@@ -130,6 +130,17 @@ class RenderQueue {
       }
       return INT_NULL;
    }
+   FindAllBuffersFromProgram(progIdx) {
+
+      if(!this.count) return INT_NULL; // Case RenderQueue hasn't been initialized
+      let idxs = [];
+      for (let i = 0; i < this.size; i++) {
+         if (this.buffer[i].progIdx === progIdx) {
+            idxs.push(i);
+         }
+      }
+      return idxs;
+   }
 
    Swap(obj1, obj2){
 
@@ -139,7 +150,37 @@ class RenderQueue {
       obj2.Set(temp);
    }
 
-   SetPriority(flag, progIdx, vbIdx){
+   // TODO: SLOW, 
+   SetPriority(flag, progIdx, vbIdx = ALL){
+
+      if(vbIdx === ALL){
+
+         const idxs = this.FindAllBuffersFromProgram(progIdx);
+
+         for(let k=0; k<idxs.length; KeyframeEffect++){
+
+            if(flag === 'first' && idxs[k] > 0){
+
+               // Move all elements to the right
+               for(let i = idxs[k]; i>0; i--){
+                  this.buffer[i].Set(this.buffer[i-1]);
+               }
+               // Store back prioritized element
+               this.buffer[0].Set(temp);
+            }
+            else if(flag === 'last' && idxs[k] < this.count-1){
+               // Move all elements to the left
+               for(let i = idxs[k]; i<this.count; i++){
+                  this.buffer[i].Set(this.buffer[i+1]);
+               }
+               // Store back prioritized element
+               this.buffer[this.count-1].Set(temp); 
+            }
+         }
+
+      }
+
+      /**************************************************************************/
 
       const idx = this.Find(progIdx, vbIdx);
       if(idx !== INT_NULL){

@@ -8,6 +8,7 @@ import { GlGetIB, GlGetProgram, GlGetPrograms, GlGetVB } from '../GlProgram.js';
 import { RenderQueueGet, RenderQueueUpdate } from '../../Engine/Renderers/Renderer/RenderQueue.js';
 import { M_Buffer } from '../../Engine/Core/Buffers.js';
 import { TimerGetGlobalTimerCycle } from '../../Engine/Timers/Timers.js';
+import { Info_listener_dispatch_event } from '../../Engine/DebugInfo/InfoListeners.js';
 
 
 class VertexBuffer {
@@ -841,6 +842,12 @@ export function GlUpdateVertexBufferData(gl, buffer) {
     // bufferData(target, srcData, usage, srcOffset)
     gl.bufferData(gl.ARRAY_BUFFER, buffer.data, gl.STATIC_DRAW, 0);
     // gl.bufferData(gl.ARRAY_BUFFER, buffer.data, gl.DYNAMIC_DRAW, 0);
+
+    const trigger_params = { info: `${buffer.count}` }
+    const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+    Info_listener_dispatch_event(info_event_type, trigger_params);
+    // console.log(buffer)
+
     buffer.needsUpdate = false;
 }
 export function GlUpdateVertexBufferSubData(gl, buffer, src_offset, dst_offset, byte_length) {

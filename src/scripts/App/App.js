@@ -35,7 +35,7 @@ import { MouseGetPos, MouseGetPosDif } from '../Engine/Controls/Input/Mouse.js';
 import { Buffer } from 'buffer';
 import { Debug_get_event_listeners } from '../Engine/Events/EventListeners.js';
 import { Gl_remove_geometry } from '../Graphics/Buffers/GlBuffers.js';
-import { Widget_Drop_Down } from '../Engine/Drawables/Meshes/Widgets/Menu/Widget_Drop_Down.js';
+import { Drop_down_set_root_for_debug, Widget_Drop_Down } from '../Engine/Drawables/Meshes/Widgets/Menu/Widget_Drop_Down.js';
 import { Info_listener_create_event, Info_listener_dispatch_event } from '../Engine/DebugInfo/InfoListeners.js';
 import { GlGetPrograms } from '../Graphics/GlProgram.js';
 
@@ -78,7 +78,7 @@ export function AppInit() {
 
     EventsAddListeners();
     RenderQueueInit();
-    Initializer_popup_initialization();
+    // Initializer_popup_initialization();
 
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -94,73 +94,14 @@ export function AppInit() {
     // CreateMenuBar(scene)
     // CreateAndAddMenuBarSectioned(scene, 4);
     // CreateMinimizer(scene);
+    // Test_drop_down_widget(scene)
+    Test_drop_down_widget2(scene)
 
     // Help(scene)
     // CreateSection(scene)
     // CreateSectionedWidgets(scene)
 
     // CreateManySection(scene);
-
-    { // DropDownMenu
-
-        const drop_down = new Widget_Drop_Down('GFX', ALIGN.LEFT, [100, 300, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [1,1], [10, 4]);
-        drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-        drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
-        scene.AddMesh(drop_down);
-
-        { // Add another dropdown in dropdown
-            const drop_down2 = new Widget_Drop_Down('DP1', ALIGN.LEFT, [0, 0, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], [10, 4]);
-            drop_down2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            drop_down2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-            {
-                const text = new Widget_Text('DP1 1 TEXT', [100, 100, 0], 4, TRANSPARENCY(GREY1, 0.9), WHITE, [1,1], [4,4]);
-                text.debug_info_type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-                text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-                drop_down2.AddToMenu(text);
-            }
-            {
-                const text = new Widget_Text('DP1 2 TEXT', [100, 100, 0], 4, TRANSPARENCY(GREY1, 0.9), WHITE, [1,1], [4,4]);
-                text.debug_info_type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-                text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-                drop_down2.AddToMenu(text);
-            }
-
-            drop_down.AddToMenu(drop_down2);
-        }
-        { // Add another dropdown in dropdown
-            const drop_down2 = new Widget_Drop_Down('DP2', ALIGN.LEFT, [0, 0, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], [10, 4]);
-            drop_down2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            drop_down2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-            {
-                const text = new Widget_Text('DP2 1 TEXT', [100, 100, 0], 4, TRANSPARENCY(GREY1, 0.9), WHITE, [1,1], [4,4]);
-                text.debug_info_type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-                text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-                drop_down2.AddToMenu(text);
-            }
-            {
-                const text = new Widget_Text('DP2 2 TEXT', [100, 100, 0], 4, TRANSPARENCY(GREY1, 0.9), WHITE, [1,1], [4,4]);
-                text.debug_info_type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-                text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-                drop_down2.AddToMenu(text);
-            }
-
-            drop_down.AddToMenu(drop_down2);
-        }
-        
-        const l = Debug_get_event_listeners();
-        drop_down.TempAct();
-        drop_down.Reconstruct_listeners_recursive();
-        drop_down.TempDeact();
-        drop_down.Calc();
-
-        const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-        Info_listener_create_event(info_event_type, CLBK, drop_down, null);
-    }
 
 
     // Test(scene);
@@ -182,8 +123,8 @@ export function AppInit() {
     console.log(progs)
     
     
+    RenderQueueGet().UpdateActiveQueue(); // Update active queue buffer with the used/active vertex buffers.
     RenderQueueGet().SetPriorityProgram('last', 1);
-    RenderQueueGet().UpdateActiveQueue(); // Update active queue buffer with the vertex buffers set to be drawn
 
     { // PERFORMANCE OBJECTS
         var performance = window.performance || window.mozPerformance || window.msPerformance || window.webkitPerformance || {};
@@ -225,6 +166,233 @@ export function AppRender() {
     renderer.Render();
 }
 
+function Test_drop_down_widget(scene)
+{ // DropDownMenu
+
+    const pad = [10, 2.5]
+    const drop_down = new Widget_Drop_Down('DP1', ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [1,1], pad);
+    drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+    // drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
+    // scene.AddMesh(drop_down);
+
+    { // Add another dropdown in dropdown
+        const drop_down2 = new Widget_Drop_Down('DP2', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+        drop_down2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        drop_down2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+        {
+            const drop_down3 = new Widget_Drop_Down('DP3 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+            drop_down3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+            drop_down3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+            drop_down2.AddToMenu(drop_down3);
+            {
+                const drop_down4 = new Widget_Drop_Down('DP4 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+                drop_down4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+                drop_down4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+                drop_down3.AddToMenu(drop_down4);
+    
+                {
+                    const drop_down5 = new Widget_Drop_Down('DP5 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+                    drop_down5.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+                    drop_down5.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+                    drop_down4.AddToMenu(drop_down5);
+                    
+                    {
+                        const drop_down6 = new Widget_Drop_Down('DP6 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+                        drop_down6.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+                        drop_down6.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+                        drop_down5.AddToMenu(drop_down6);
+            
+                        {
+                            const text = new Widget_Text('DP5 -->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, TRANSPARENCY(GREY1, 0.9), WHITE, [1,1], [4,4]);
+                            text.debug_info_type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+                            text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+                            text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+                            
+                            drop_down6.AddToMenu(text);
+                        }
+            
+                    }
+                }
+            }
+
+            const text = new Widget_Text('DP2 ->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, TRANSPARENCY(GREY1, 0.9), WHITE, [1,1], [4,4]);
+            text.debug_info_type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+            text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+            text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+            drop_down2.AddToMenu(text);
+        }
+        {
+            const text = new Widget_Text('DP2 ->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, TRANSPARENCY(GREY1, 0.9), WHITE, [1,1], [4,4]);
+            text.debug_info_type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+            text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+            text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+            drop_down2.AddToMenu(text);
+        }
+        {
+            const drop_down3 = new Widget_Drop_Down('DP3 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+            drop_down3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+            drop_down3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+
+            {
+                const text = new Widget_Text('DP3 -->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, TRANSPARENCY(GREY1, 0.9), WHITE, [1,1], [4,4]);
+                text.debug_info_type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+                text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+                text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+                
+                drop_down3.AddToMenu(text);
+            }
+
+            drop_down2.AddToMenu(drop_down3);
+        }
+
+        drop_down.AddToMenu(drop_down2);
+    }
+    { // Add another dropdown in dropdown
+        const drop_down2 = new Widget_Drop_Down('DP4', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+        drop_down2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        drop_down2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+        {
+            const text = new Widget_Text('DP4 ->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, TRANSPARENCY(GREY1, 0.9), WHITE, [1,1], [4,4]);
+            text.debug_info_type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+            text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+            text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+            drop_down2.AddToMenu(text);
+        }
+        {
+            const text = new Widget_Text('DP4 ->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, TRANSPARENCY(GREY1, 0.9), WHITE, [1,1], [4,4]);
+            text.debug_info_type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+            text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+            text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+            drop_down2.AddToMenu(text);
+        }
+
+        drop_down.AddToMenu(drop_down2);
+    }
+    scene.AddMesh(drop_down);
+    
+    const l = Debug_get_event_listeners();
+    // drop_down.TempAct();
+    // drop_down.Reconstruct_listeners_recursive();
+    // drop_down.TempDeact();
+    // drop_down.Init();
+    drop_down.Calc();
+    Drop_down_set_root_for_debug(drop_down);
+
+    const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+    Info_listener_create_event(info_event_type, CLBK, drop_down, null);
+}
+function Test_drop_down_widget2(scene)
+{ // DropDownMenu
+
+    const pad = [10, 2.5]
+    const drop_down = new Widget_Drop_Down('DP1', ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [1,1], pad);
+    drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+    // drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
+
+    { // Add another dropdown in dropdown
+        const drop_down2 = new Widget_Drop_Down('DP2', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+        drop_down2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+        drop_down.AddToMenu(drop_down2);
+
+        const text = new Widget_Text('DP2 TEXT ->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, TRANSPARENCY(GREY1, 0.9), WHITE, [1,1], [4,4]);
+        text.debug_info_type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+        text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+        drop_down2.AddToMenu(text);
+        {
+            const drop_down3 = new Widget_Drop_Down('DP3 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+            drop_down3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+            drop_down2.AddToMenu(drop_down3);
+            {
+                const drop_down4 = new Widget_Drop_Down('DP4 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+                drop_down4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+                drop_down3.AddToMenu(drop_down4);
+    
+                {
+                    const drop_down5 = new Widget_Drop_Down('DP5 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+                    drop_down5.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down5.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+                    drop_down4.AddToMenu(drop_down5);
+                    
+                    {
+                        const drop_down6 = new Widget_Drop_Down('DP6 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+                        drop_down6.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down6.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+                        drop_down5.AddToMenu(drop_down6);
+            
+                        {
+                            const text = new Widget_Text('DP5 -->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, TRANSPARENCY(GREY1, 0.9), WHITE, [1,1], [4,4]);
+                            text.debug_info_type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+                            text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+                            
+                            drop_down6.AddToMenu(text);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    scene.AddMesh(drop_down);
+    drop_down.Calc();
+    Drop_down_set_root_for_debug(drop_down);
+
+    const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+    Info_listener_create_event(info_event_type, CLBK, drop_down, null);
+}
+
+function CLBK_recursive(mesh, dispatch_event_type, info){
+    
+    if(mesh.children.active_count){
+
+        for(let i=0; i<mesh.children.count; i++){
+
+            const child = mesh.children.buffer[i];
+
+            if(child){
+                CLBK_recursive(child, dispatch_event_type, info); // Recurse
+            }
+        }
+    }
+
+    // No more recursion? Handle mesh.
+    // console.log(mesh.name, mesh.debug_info_type, dispatch_event_type)
+    // console.log(mesh.debug_info_type & dispatch_event_type)
+    if(mesh.debug_info_type & dispatch_event_type){
+        // console.log('HIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        mesh.UpdateText(info)
+    }
+ }
+
+function CLBK(params){
+    // console.log('++++++++++++++++++++++++ This is the callback');
+    // console.log('-----------------------------------');
+    
+    const mesh = params.source_params;
+    const dispatch_event_type = params.dispatch_event_type;
+    const info = params.trigger_params.info;
+    CLBK_recursive(mesh, dispatch_event_type, info);
+}
+// function CLBK(params){
+//     console.log('++++++++++++++++++++++++ This is the callback');
+    
+//     const mesh = params.source_params;
+//     // const menu = mesh.menu;
+//     const menu = mesh.children.buffer[1];
+//     if(!menu) return;
+
+//     const trigger_params = params.trigger_params;
+//     const dispatch_event_type = params.dispatch_event_type;
+    
+//     for(let i=0; i<menu.children.count; i++){
+        
+//         const item = menu.children.buffer[i];
+        
+//         if(item.debug_info_type & dispatch_event_type){
+//             const info = trigger_params.info;
+//             item.UpdateText(info)
+//         }
+//     }
+// }
+
 function Test(scene){
 
     const section = new Section(SECTION.VERTICAL, [20,20]);
@@ -258,27 +426,6 @@ function Test(scene){
     s.RemoveAllListenEvents();
 }
 
-function CLBK(params){
-    // console.log('++++++++++++++++++++++++ This is the callback');
-    
-    const mesh = params.source_params;
-    // const menu = mesh.menu;
-    const menu = mesh.children.buffer[1];
-    if(!menu) return;
-
-    const trigger_params = params.trigger_params;
-    const dispatch_event_type = params.dispatch_event_type;
-    
-    for(let i=0; i<menu.children.count; i++){
-        
-        const item = menu.children.buffer[i];
-        
-        if(item.debug_info_type & dispatch_event_type){
-            const info = trigger_params.info;
-            item.UpdateText(info)
-        }
-    }
-}
 
 function CreateSwitches(scene) {
 
@@ -1113,8 +1260,6 @@ function MeshInfo(scene) {
 
 function MeshInfoUpdate(params) {
 
-    // const section = params.params.mesh;
-    // const textMesh = section.children.buffer[0];
     const textMesh = params.params.mesh;
     const infoMesh = STATE.mesh.hovered;
 

@@ -31,7 +31,7 @@ export class Widget_Text extends I_Text {
 		super(text, pos, fontSize, scale, color)
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT | this.type;
 
-		this.SetName(text)
+		this.SetName('Text ' + text.slice(0, 7))
 
 	}
 
@@ -228,7 +228,7 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | this.geom.type | this.mat.type;
 
-		this.SetName(this.mat.text);
+		this.SetName('Dynamic Text ' + this.mat.text.slice(0, 7));
 
 
 	}
@@ -270,10 +270,10 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 		}
 
 		const dynamicText = new Widget_Text(maxDynamicTextChars, pos, fontSize, [1, 1], color2, bold);
-		dynamicText.SetName(dynamicText.mat.text);
-
+		
 		// Add the new dynamicText as a child of 'this'.
 		const idx = this.AddChild(dynamicText);
+		dynamicText.SetName(idx, ' Dynamic Text ' + this.mat.text.slice(0, 7));
 
 
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | dynamicText.geom.type | dynamicText.mat.type;

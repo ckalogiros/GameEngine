@@ -179,13 +179,9 @@ export function OnMouseMove(e) {
       mouse.pos.yprev = newPosY;
    }
 
-   // mouse.pos.xdiff = Floor(mouse.pos.x - mouse.pos.xprev);
-   // mouse.pos.ydiff = -Floor((mouse.pos.y - mouse.pos.yprev)); // Reverse the direction(negative for down dir and positive for up dir) 
    mouse.pos.xdiff = (mouse.pos.x - mouse.pos.xprev);
    mouse.pos.ydiff = -((mouse.pos.y - mouse.pos.yprev)); // Reverse the direction(negative for down dir and positive for up dir) 
-   // const params = {
-   //    mouseButton: e.which-1
-   // };
+
    RegisterEvent('mouse-move', null);
 }
 

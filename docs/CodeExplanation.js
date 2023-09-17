@@ -72,6 +72,27 @@
       target_params: 
       trigger_params:
       event_type:    
-   
 
+ */
+
+/**
+ * Widget Drop down menu.
+ * 
+ * Widget is comprised of a section with a button widget as the trigger (expansion/contraction).
+ * The expanded mesh is called 'menu' (type of section). The 'menu exists as a class variable,
+ * so that it can be activated and deactivated from the drop down mesh (as child) but also
+ * from the graphics buffers.
+ * 
+ * GFX:
+ * The drop down is split into 2 conceptual categories.
+ * 1. the drop down section mesh with the trigger button,
+ * 2. the menu section mesh.
+ * In that sense the menu gfx must be separate from the drop down gfx, for the reason of 
+ * show/hide the menu upon drop down trigger.
+ * The children meshes of the menu
+ * 
+ * OnClick():
+ * Upon trigger 'On', the class variable 'menu' is coppied as a reference to the drop down children.
+ * Then we call for gfx generation, to find private gfx buffers for the menu section mesh 
+ * and its children (text, buttons and other drop downs).   
  */

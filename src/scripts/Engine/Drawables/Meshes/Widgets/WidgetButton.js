@@ -13,7 +13,7 @@ export class Widget_Button extends Widget_Label {
       super(text, Align, pos, fontSize, color, colorText, scale, pad, bold, font, style)
 
       this.type |= MESH_TYPES_DBG.WIDGET_BUTTON;
-      // this.SetName();
+      this.SetName(text);
 
    }
    

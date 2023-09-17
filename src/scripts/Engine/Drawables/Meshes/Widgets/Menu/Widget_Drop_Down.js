@@ -3,17 +3,16 @@
 import { GetRandomColor } from "../../../../../Helpers/Helpers";
 import { MouseGetPosDif } from "../../../../Controls/Input/Mouse";
 import { Info_listener_dispatch_event } from "../../../../DebugInfo/InfoListeners";
-import { Debug_get_event_listeners, Listener_remove_event_by_idx } from "../../../../Events/EventListeners";
-import { Gfx_activate, Gfx_deactivate, Gfx_deactivate_no_listeners_touch, Gfx_end_session } from "../../../../Interfaces/GfxContext";
+import { Gfx_activate, Gfx_deactivate_no_listeners_touch, Gfx_end_session, Gfx_generate_context } from "../../../../Interfaces/GfxContext";
 import { RenderQueueGet } from "../../../../Renderers/Renderer/RenderQueue";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../../../Timers/TimeIntervals";
 import { MESH_ENABLE } from "../../Base/Mesh";
 import { Section } from "../../Section";
 import { Widget_Button } from "../WidgetButton";
-import { Widget_Label } from "../WidgetLabel";
 import { Widget_Text } from "../WidgetText";
 
-
+let _root = null;
+export function Drop_down_set_root_for_debug(mesh){_root = mesh;}
 
 export class Widget_Drop_Down extends Section {
 
@@ -28,7 +27,7 @@ export class Widget_Drop_Down extends Section {
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       this.SetStyle(style);
       this.SetName('Widget_Drop_Down');
-      this.type |= MESH_TYPES_DBG.WIDGET_MENU_BAR;
+      this.type |= MESH_TYPES_DBG.WIDGET_DROP_DOWN;
       this.menu = null;
 
       const btn = new Widget_Button(text, Align, pos, 4, col1, text_col, scale, pad, bold, font, style);
@@ -41,7 +40,8 @@ export class Widget_Drop_Down extends Section {
       btn.AddChild(text_symbol);
       this.AddItem(btn);
 
-      this.menu = new Section(SECTION.VERTICAL, [14, 4], [0, 0, 0], [0, 0], TRANSPARENCY(GetRandomColor(), .7));
+      this.menu = new Section(SECTION.VERTICAL, [4, 4], [OUT_OF_VIEW, OUT_OF_VIEW, 0], [0, 0], TRANSPARENCY(GetRandomColor(), .7));
+      this.menu.type |= MESH_TYPES_DBG.DROP_DOWN_MENU;
       const params = { // Build the parameters for the OnClick callback function.
          drop_down: this,
          menu: this.menu,
@@ -57,34 +57,80 @@ export class Widget_Drop_Down extends Section {
    TempAct() {
 
       const drop_down_mesh = this;
-      const menu = this.menu;
+      if (this.menu) {
 
-      if (menu) {
-
-         drop_down_mesh.AddItem(menu); // Add the menu which is a storage of Widget_Drop_Down only as a child to the drop_down
-         menu.GenGfxCtx(GFX.PRIVATE); // Generate gfx context since the 'menu does not exist in the vertex buffers'
+         drop_down_mesh.AddItem(this.menu); // Add the menu which is a storage of Widget_Drop_Down only as a child to the drop_down
+         this.menu.GenGfxCtx(GFX.PRIVATE); // Generate gfx context since the 'menu does not exist in the vertex buffers'
          Gfx_end_session(true, true);
-         menu.AddToGfx(); // Add to the vertex buffers
-
-         // drop_down_mesh.Calc();
-         // drop_down_mesh.UpdateGfxPosDimRecursive(drop_down_mesh);
-
+         this.menu.AddToGfx(); // Add to the vertex buffers
       }
    }
    TempDeact() {
 
       const drop_down_mesh = this;
-      const menu = this.menu;
-
-      if (menu) {
-         const l = Debug_get_event_listeners();
-         // Gfx_deactivate(menu); // Also deactivates the gfx buffers.
-         Gfx_deactivate_no_listeners_touch(menu); // Also deactivates the gfx buffers.
-         drop_down_mesh.RemoveChildByIdx(menu.idx)
-
-         // drop_down_mesh.Calc();
-         // drop_down_mesh.UpdateGfxPosDimRecursive(drop_down_mesh);
+      if (this.menu) {
+         Gfx_deactivate_no_listeners_touch(this.menu); // Also deactivates the gfx buffers.
+         drop_down_mesh.RemoveChildByIdx(this.menu.idx)
       }
+   }
+
+   Init() {
+
+      const drop_down_mesh = this;
+      const menu = this.menu;
+      const btn = this.children.buffer[0];
+      const text_symbol = btn.children.buffer[1];
+
+      /****************************************************************************** */
+      // Deactivate
+
+      drop_down_mesh.AddItem(menu); // Add the menu which is a storage of Widget_Drop_Down only as a child to the drop_down
+
+      menu.gfx = Gfx_generate_context(menu.sid, menu.sceneIdx, menu.mat.num_faces, GFX.PRIVATE);
+      Gfx_end_session(true, true);
+      
+      // Here we have to gfxGen all menus children, NOT private
+      for(let i=0; i<menu.children.count; i++){
+         
+         const child = menu.children.buffer[i];
+         if(child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN){
+
+            // child.gfx = Gfx_generate_context(child.sid, child.sceneIdx, child.mat.num_faces, GFX.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
+            child.gfx = child.GenGfxCtx(child.sid, child.sceneIdx, child.mat.num_faces, GFX.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
+            const btn = child.children.buffer[0];
+            btn.GenGfxCtx(GFX.SPECIFIC,  [menu.gfx.prog.idx, menu.gfx.vb.idx]);
+
+            const menu2 = child.menu;
+            if(menu2.isOn){
+
+               menu2.gfx = Gfx_generate_context(menu2.sid, menu2.sceneIdx, menu2.mat.num_faces, GFX.PRIVATE);
+               Gfx_end_session(true, true);
+            }
+            
+         }
+         else{
+
+            child.GenGfxCtx(GFX.PRIVATE);
+         }
+         
+      }
+      
+      menu.AddToGfx(); // Add to the vertex buffers
+
+      Gfx_activate(drop_down_mesh);
+
+
+      this.Reconstruct_listeners_recursive();
+
+      /****************************************************************************** */
+      // Deactivate
+
+      Gfx_deactivate_no_listeners_touch(menu); // Also deactivates the gfx buffers.
+      drop_down_mesh.RemoveChildByIdx(menu.idx)
+      // drop_down_mesh.Recalc();
+      // drop_down_mesh.UpdateGfxPosDimRecursive(drop_down_mesh);
+
+      return true;
    }
 
    OnClick(params) {
@@ -98,18 +144,48 @@ export class Widget_Drop_Down extends Section {
          text_symbol.UpdateTextFromVal('v');
 
          if (menu) {
-            console.log('1 :', drop_down_mesh.name, ' menu:', menu.name)
+
             drop_down_mesh.AddItem(menu); // Add the menu which is a storage of Widget_Drop_Down only as a child to the drop_down
-            menu.GenGfxCtx(GFX.PRIVATE); // Generate gfx context since the 'menu does not exist in the vertex buffers'
+
+            menu.gfx = Gfx_generate_context(menu.sid, menu.sceneIdx, menu.mat.num_faces, GFX.PRIVATE);
+            // Gfx_end_session(true, true);
+            
+            // Here we have to gfxGen all menus children, NOT private
+            for(let i=0; i<menu.children.count; i++){
+               
+               const child = menu.children.buffer[i];
+               if(child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN){
+
+                  child.gfx = Gfx_generate_context(child.sid, child.sceneIdx, child.mat.num_faces, GFX.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
+                  const btn = child.children.buffer[0];
+                  btn.GenGfxCtx(GFX.SPECIFIC,  [menu.gfx.prog.idx, menu.gfx.vb.idx]);
+
+                  const menu2 = child.menu;
+                  if(menu2.isOn){
+
+                     menu2.gfx = Gfx_generate_context(menu2.sid, menu2.sceneIdx, menu2.mat.num_faces, GFX.PRIVATE);
+                     // Gfx_end_session(true, true);
+                  }
+                  
+               }
+               else{
+                  
+                  child.GenGfxCtx(GFX.PRIVATE);
+               }
+               
+            }
             Gfx_end_session(true, true);
+            
             menu.AddToGfx(); // Add to the vertex buffers
 
             // const trigger_params = { info: 'This is the update info' }
             // const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
             // Info_listener_dispatch_event(info_event_type, trigger_params);
 
-            drop_down_mesh.Recalc();
-            drop_down_mesh.UpdateGfxPosDimRecursive(drop_down_mesh);
+            _root.Recalc();
+            _root.UpdateGfxPosDimRecursive(_root);
+
+            Gfx_activate(drop_down_mesh); // activate the gfx buffers
 
             RenderQueueGet().SetPriority('first', 0, 0)
          }
@@ -121,16 +197,14 @@ export class Widget_Drop_Down extends Section {
 
          if (menu) {
 
-            console.log('2 :', drop_down_mesh.name, ' menu:', menu.name)
-            // Gfx_deactivate(menu); // Also deactivates the gfx buffers.
-            Gfx_deactivate_no_listeners_touch(menu); // Also deactivates the gfx buffers.
-            drop_down_mesh.RemoveChildByIdx(menu.idx)
-            drop_down_mesh.Recalc();
-            // menu.RemoveAllListenEvents();
-            // Listener_remove_event_by_idx(TYPE_IDX, idx)
-            drop_down_mesh.UpdateGfxPosDimRecursive(drop_down_mesh);
+            Gfx_deactivate_no_listeners_touch(menu); // Deactivates the gfx buffers.
+            drop_down_mesh.RemoveChildByIdx(menu.idx); // Remove menu from drop down
+            
+            _root.Recalc();
+            _root.UpdateGfxPosDimRecursive(_root);
          }
       }
+      
       STATE.mesh.SetClicked(text_symbol);
 
       drop_down_mesh.isOn ^= 0x1;
@@ -236,8 +310,25 @@ export class Widget_Drop_Down extends Section {
 
    GenGfxCtx(FLAGS, gfxidx) {
 
-      const gfx = super.GenGfxCtx(FLAGS, gfxidx);
-      return gfx;
+      const btn = this.children.buffer[0];
+      const menu = this.menu;
+
+      this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, this.mat.num_faces, GFX.PRIVATE);
+      btn.GenGfxCtx(GFX.PRIVATE); // Set button's area gfx same with dropDown mesh 
+      Gfx_end_session(true, true);
+
+      // the menu section mesh must be in a separate gfx buffer.
+      menu.gfx = Gfx_generate_context(menu.sid, menu.sceneIdx, menu.mat.num_faces, GFX.PRIVATE);
+      Gfx_end_session(true, true);
+      return this.gfx;
+   }
+
+   AddToGfx(){
+
+      super.AddToGfx();
    }
 
 }
+
+
+

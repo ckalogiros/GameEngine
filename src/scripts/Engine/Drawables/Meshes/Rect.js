@@ -58,7 +58,7 @@ export class I_Text extends Text_Mesh{
 		const geom = new Geometry2D_Text(pos, fontSize, scale, text, font);
 
 		super(geom, mat);
-      super.SetName('T_Text')
+      // super.SetName('T_Text')
    }
 
    GenGfxCtx(FLAGS, gfxidx){

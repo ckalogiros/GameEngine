@@ -319,6 +319,7 @@ export function VbSetAttribBuffer(vb, start, count, stride, buffer, attribSize) 
 export function GlSetColor(gfxInfo, color, num_faces = 1) {
 
     const progs = GlGetPrograms();
+
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.col;

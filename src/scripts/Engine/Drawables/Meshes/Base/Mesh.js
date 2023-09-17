@@ -286,7 +286,7 @@ export class Mesh {
         this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
         this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
 
-        // Add mmesh to scene's mesh_in_gfx buffer.
+        // Add mesh to scene's mesh_in_gfx buffer.
         const scene = Scenes_get_scene_by_idx(this.sceneIdx)
         scene.StoreMeshInGfx(this)
     }
@@ -551,7 +551,7 @@ export class Mesh {
     SetName(name = null) {
 
         // if(name) this.name = name + this.id;
-        if (name) this.name = name + ' id:' + this.id;
+        if (name !== '' && name) this.name = name + ' id:' + this.id;
         else {
             this.name = GetMeshHighOrderNameFromType(this.type);
             this.name += ' id: ' + this.id;
