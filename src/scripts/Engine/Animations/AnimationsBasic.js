@@ -3,7 +3,6 @@
 import { GlSetAttrSdfParamsOuter, GlSetWposX, GlSetDim, GlSetColor } from "../../Graphics/Buffers/GlBufferOps.js";
 import { GfxInfoMesh } from "../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../Helpers/Helpers.js";
-import { CopyArr4 } from "../../Helpers/Math/MathOperations.js";
 import { AnimationsGet } from "./Animations.js";
 
 // Temporary store. 

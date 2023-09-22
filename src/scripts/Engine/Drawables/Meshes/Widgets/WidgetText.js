@@ -455,15 +455,6 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 		}
 	}
 
-	// Reposition_post(dif_pos){
-
-	// 	this.MoveXY(dif_pos[0], dif_pos[1])
-	// 	for(let i=0; i<this.children.count; i++){
-
-	// 		const child = this.children.buffer[i];
-	// 		child.MoveXY(dif_pos[0], dif_pos[1])
-	// 	}
-   // }
 
 	SetColorRGB(col) { 
 

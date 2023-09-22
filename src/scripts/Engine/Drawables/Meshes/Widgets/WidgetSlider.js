@@ -126,12 +126,6 @@ export class Widget_Slider extends Rect {
       name_text.geom.pos[0] = bar.geom.pos[0] - bar.geom.dim[0] + name_text.geom.dim[0];
       name_text.geom.pos[2] = this.geom.pos[2] + 1;
 
-      // console.log('slider:', this.geom.pos)
-      // console.log('bar:', bar.geom.pos)
-      // console.log('bhandlear:', handle.geom.pos)
-      // console.log('value:', value_text.geom.pos)
-      // console.log('name:', name_text.geom.pos)
-
       BAR_IDX = this.AddChild(bar)
       this.AddChild(name_text)
       bar.AddChild(handle)
@@ -193,11 +187,6 @@ export class Widget_Slider extends Rect {
       };
    }
 
-
-   // OnHover(params) {
-   //    console.log('Slider Hover!!!')
-   // }
-
    OnClick(params) {
 
       const mesh = params.source_params;
@@ -250,31 +239,6 @@ export class Widget_Slider extends Rect {
       }
       return false;
    }
-
-   // SetPosXYZFromDif(pos_dif){
-
-   //    const bar = this.children.buffer[BAR_IDX];
-   //    {
-   //       const new_pos = AddArr3(bar.geom.pos, pos_dif)
-   //       bar.SetPosXYZ(new_pos);
-   //    }
-   //    {
-   //       const handle = bar.children.buffer[BAR_IDX];
-   //       const new_pos = AddArr3(handle.geom.pos, pos_dif)
-   //       handle.SetPosXYZ(new_pos);
-   //    }      
-   //    {
-   //       const name_text = this.children.buffer[BAR_IDX+1];
-   //       const new_pos = AddArr3(name_text.geom.pos, pos_dif)
-   //       name_text.SetPosXYZ(new_pos);
-   //    }
-   //    {
-   //       const value_text = bar.children.buffer[1];
-   //       const new_pos = AddArr3(value_text.geom.pos, pos_dif)
-   //       value_text.SetPosXYZ(new_pos);
-   //    }
-   // }
-
 }
 
 function Slider_move_event(params) {
@@ -342,10 +306,7 @@ export function Slider_connect(_params) {
       target: target,
       Clbk: Binding_function,
    }
-   // sliderBar.eventCallbacks.Add(params);
-   // sliderBar.CreateEvent(params);
    sliderBar.eventCallbacks.Add(params);
-   // console.log('Slider bar:', sliderBar.name, sliderBar.eventCallbacks)
 
 }
 
@@ -388,7 +349,7 @@ export function Slider_on_update_handle(_params) {
    const val = Slider_calculate_value(bar, handle); // Calculate slider's value based on the handles position.
 
    slider_val.UpdateTextFromVal(val); // Change the text mesh to the current slider's value
-   // console.log('Slider bar:', bar.name, bar.eventCallbacks)
+
    /**
     * Dispatch all callbacks for all targets, that is
     * found on every eventCallbacks[] buffer.  
@@ -442,19 +403,8 @@ function Slider_calculate_value(bar, handle) {
    const max = 100; // Set the max value the slider will interpolate to.
    // Interpolate to a 0-max value.
    const sliderVal = (val * max) / (barwidth);
-   // console.log(`val:${val}, handlexpos:${handlexpos}, barwidth:${barwidth}, barleft:${barleft}`)
-   // console.log(sliderVal)
 
    return sliderVal;
 }
 
-// function Geometry2D_set_posx(params) {
-
-//    /**
-//     * This function is run as callback from the 'mesh-created' event,
-//     * to set the slider's value_text mesh position alligned with the 
-//     * right side of the slider.
-//     */
-//    params.mesh.MoveRecursive(params.x, 0)
-// }
 

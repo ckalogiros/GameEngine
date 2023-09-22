@@ -3,8 +3,8 @@
 import { Intersection_point_rect } from "../Collisions.js";
 import { MouseGetPos } from "../Controls/Input/Mouse.js";
 import { M_Buffer } from "../Core/Buffers.js";
-import { Info_listener_create_event, Info_listener_dispatch_event } from "../DebugInfo/InfoListeners.js";
-import { Drop_down_set_root, Drop_down_set_root_for_debug, Widget_Drop_Down } from "../Drawables/Meshes/Widgets/Menu/Widget_Drop_Down.js";
+import { Info_listener_dispatch_event } from "../DebugInfo/InfoListeners.js";
+import { Drop_down_set_root, Widget_Drop_Down } from "../Drawables/Meshes/Widgets/Menu/Widget_Drop_Down.js";
 import { Widget_Text } from "../Drawables/Meshes/Widgets/WidgetText.js";
 import { _pt5, _pt6 } from "../Timers/PerformanceTimers.js";
 import { Events_handle_immidiate } from "./Events.js";
@@ -13,7 +13,7 @@ import { Events_handle_immidiate } from "./Events.js";
 /** TODO!!: For efficiency
  * 
  * 
- * I am sure all for looping the listeners buffer and children's buffer run for count,
+ * All buffer's listeners and children run for count,
  * eventhough the buffers may have a lot of null elements due to the implementation of the EventListener.
  * FIX THAT!
  * 
@@ -201,50 +201,6 @@ export class Event_Listener {
       } 
    }
 
-   // CheckHover() {
-   //    _pt6.Start();
-   //    const TYPE_IDX = LISTEN_EVENT_TYPES_INDEX.HOVER;
-
-   //    if (this.event_type[TYPE_IDX] === undefined) return;
-   //    if (TYPE_IDX < 0 || TYPE_IDX >= LISTEN_EVENT_TYPES_INDEX.SIZE) alert('Event type index does not exist.');
-
-
-   //    for (let i = 0; i < this.event_type[TYPE_IDX].count; i++) {
-
-   //       if (this.event_type[TYPE_IDX].buffer[i]) {
-
-   //          const point = MouseGetPos();
-
-   //          const mesh = this.event_type[TYPE_IDX].buffer[i].source_params
-   //          const d = mesh.geom;
-
-   //          const rect = [
-   //             [d.pos[0] - d.dim[0], d.pos[0] + d.dim[0]],     // Left  Right 
-   //             [(d.pos[1] - d.dim[1]), (d.pos[1] + d.dim[1])], // Top  Bottom
-   //          ];
-
-   //          if (Intersection_point_rect(point, rect)) {
-
-   //             if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
-   //                Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
-   //             }
-
-   //             if (mesh.StateCheck(MESH_STATE.IN_HOVER) === 0) { // Skip hover event, if mesh is already in hover
-   //                Events_handle_immidiate({ type: 'hover', params: { mesh: mesh } });
-   //             }
-
-   //          }
-   //          else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (
-   //             !mesh.StateCheck(MESH_STATE.IN_MOVE) ||
-   //             !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
-
-   //             Events_handle_immidiate({ type: 'unhover', params: { mesh: mesh } });
-   //          }
-   //       }
-   //    }
-   //    _pt6.Stop();
-   // }
-
    CheckHover() {
       _pt6.Start();
       const TYPE_IDX = LISTEN_EVENT_TYPES_INDEX.HOVER;
@@ -388,45 +344,7 @@ function Check_hover_recursive(events, point) {
    }
 
 }
-// function Check_hover_recursive(mesh, point) {
 
-//    // const point = MouseGetPos();
-//    const d = mesh.geom;
-
-//    const rect = [
-//       [d.pos[0] - d.dim[0], d.pos[0] + d.dim[0]],     // Left  Right 
-//       [(d.pos[1] - d.dim[1]), (d.pos[1] + d.dim[1])], // Top  Bottom
-//    ];
-
-//    if (Intersection_point_rect(point, rect)) {
-
-//       if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
-//          Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
-//       }
-
-//       if (mesh.StateCheck(MESH_STATE.IN_HOVER) === 0) { // Skip hover event, if mesh is already in hover
-//          Events_handle_immidiate({ type: 'hover', params: { mesh: mesh } });
-//       }
-
-//    }
-//    else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (
-//       !mesh.StateCheck(MESH_STATE.IN_MOVE) ||
-//       !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
-
-//       Events_handle_immidiate({ type: 'unhover', params: { mesh: mesh } });
-//    }
-
-//    for (let i = 0; i < mesh.children.count; i++) {
-
-//       if (mesh.children.active_count) {
-
-//          const child = mesh.children.buffer[i];
-
-//          if (child)
-//             Check_hover_recursive(child, point);
-//       }
-//    }
-// }
 
 const _listener = new Event_Listener();
 
@@ -610,10 +528,6 @@ export function Listeners_debug_info_create(scene){
       dropdown.AddToMenu(drop_down_evt_type)
       
    }
-
-   // const info_event_type = INFO_LISTEN_EVENT_TYPE.LISTENERS;
-   // Info_listener_create_event(info_event_type, Listeners_debug_info_update, dropdown, null)
-
 
    scene.AddMesh(dropdown);
    dropdown.Init();

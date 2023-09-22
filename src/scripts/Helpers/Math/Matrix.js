@@ -4,7 +4,7 @@
 // | 0			 | 0			 | f-n		 | 0 |
 // | -r+l / r-l |-t+b / t-b | f+n / f-n | 1 |
 
-import { Matrix4 } from "../../Engine/math/Matrix4.js";
+import { Matrix4 } from "../THREE_math/Matrix4.js";
 import { AddArr2 } from "./MathOperations.js";
 
 // |-(r+l)/(r-l)|-(t+b) / (t-b) |-(zFar+zNear)/(zFar-zNear)	| 1 |

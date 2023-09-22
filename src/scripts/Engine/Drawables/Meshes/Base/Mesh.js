@@ -577,48 +577,6 @@ export class Mesh {
     }
 }
 
-// function Recreate_listen_events_from_listeners_buffer_recursive(parent){
-//     /**
-//      * In case we removed all listeners from the EventListeners buffer,
-//      * but the mesh still has all event's indexes in the .listeners buffer.
-//      */
-//     for(let i=0; i<parent.children.count; i++){
-        
-//         const mesh = parent.children.buffer[i];
-//         const listeners = mesh.listeners;
-
-//         if(mesh.children.count)
-//             Recreate_listen_events_from_listeners_buffer_recursive(mesh)
-
-//         if(listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER] !== INT_NULL)
-//             mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-//         if(listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] !== INT_NULL)
-//             mesh.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, mesh.OnClick)
-
-//     }
-// }
-
-// function ReconstructHoverListenersRecursive(mesh){
-
-//     for(let i=0; i< mesh.children.count; i++){
-
-//         const child = mesh.children.buffer[i];
-//         if(child)
-//             ReconstructHoverListenersRecursive(child);
-        
-//         // If current mesh has a hover listener, remove it and the hover will be checked 
-//         // if the parent is hovered (automatic check via EventListeners checkHover recursive).
-//         const event_type = LISTEN_EVENT_TYPES.HOVER;
-//         if(child.StateCheck(MESH_STATE.IS_HOVERABLE)){
-
-//                 // console.log(mesh.listeners.buffer)
-//                 child.RemoveListenEvent(event_type);
-//                 // console.log(child.name, child.listeners.buffer)
-//                 // console.log('--------------------------')
-//         }
-//     }
-// }
-
 /**
  * Deactivate all event listeners of meshe's children,
  * so that the parent mesh can check on demand for it's children events 
@@ -682,30 +640,6 @@ function Gather_all_listen_events_recursive(mesh, event_type, idx=0){
 
     return gathered;
 }
-
-// export function Remove_event_listeners_no_member_listeners_touch_recursive(mesh){
-
-//     // Cache indexes for name convinience
-//     const hoveridx = LISTEN_EVENT_TYPES_INDEX.HOVER;
-//     const clickidx = LISTEN_EVENT_TYPES_INDEX.CLICK;
-
-//     for(let i=0; i< mesh.children.count; i++){
-
-//         const child = mesh.children.buffer[i];
-//         if(child)
-//             Remove_event_listeners_no_member_listeners_touch_recursive(child);
-
-//         // If current mesh has a hover listener, remove it and the hover will be checked if the parent is hovered.
-//         if(child.listeners.buffer[hoveridx] !== INT_NULL){
-//             Listener_remove_event_by_idx(hoveridx, child.listeners.buffer[hoveridx])
-//             // console.log(child.listeners.buffer[hoveridx])
-//         }
-//         if(child.listeners.buffer[clickidx] !== INT_NULL){
-//             Listener_remove_event_by_idx(clickidx, child.listeners.buffer[clickidx])
-//             // console.log(child.listeners.buffer[clickidx])
-//         }
-//     }
-// }
 
 export class Text_Mesh extends Mesh {
 

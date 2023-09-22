@@ -19,7 +19,6 @@ const GL = {
     BOUND_VBO: INT_NULL, // The current bound vertex buffer 
     BOUND_TEXTURE_IDX: INT_NULL, // The current bound texture index 
     BOUND_TEXTURE_ID: INT_NULL, // The current bound texture 
-    // ACTIVE_TEXTURE_ID: INT_NULL, // The current bound texture index 
 };
 
 
@@ -32,10 +31,11 @@ const GFX_CTX_FLAGS = {
 } 
 
 
-
-// SID: Shader Type ID, for creating different _glPrograms with 
-// different vertex and fragment shaders bbbased uppon the input attribbutes, input uniforms and other properties.
-// Shader creation flags 
+/**
+ * SID: Shader Type ID, for creating different _glPrograms with 
+ * different vertex and fragment shaders bbbased uppon the input attribbutes, input uniforms and other properties.
+ * Shader creation flags 
+ */
 
 let BIT1 = 0x1, BIT2 = 0x1, BIT3 = 0x1, BIT4 = 0x1;
 const SID = {
@@ -102,12 +102,6 @@ const SID = {
 
     CheckSidMatch(sid1, sid2){
 
-        // if( !(
-        //     sid1.shad & sid2.shad && 
-        //     sid1.attr & sid2.attr && 
-        //     sid1.unif & sid2.unif && 
-        //     sid1.pass & sid2.pass )
-        // )
         if( 
             sid1.shad === sid2.shad && 
             sid1.attr === sid2.attr && 
@@ -155,27 +149,6 @@ const SID_DEFAULT_TEXTURE_SDF = {
     pass: SID.PASS.DIM2,
     // pass: 0,
 }
-// const SID_EXPLOSION = 
-//     (SID.ATTR.COL4 | SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4 | SID.SHAD.INDEXED | SID.ATTR.TIME);
-// const SID_NOISE = 
-//     (SID.ATTR.COL4 | SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4 | SID.SHAD.INDEXED | SID.ATTR.TIME | SID.FX.FS_NOISE);
-// const SID_PARTICLES_TAIL = 
-//     (SID.ATTR.COL4 | SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4 | SID.SHAD.INDEXED | SID.ATTR.TIME | SID.ATTR.PARAMS1 | SID.FX.FS_PARTICLES);
-
-// const SID_MIN = 
-//     (SID.ATTR.COL4 | SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4 | SID.SHAD.INDEXED | SID.ATTR.TIME);
-// const SID_DEFAULT = 
-//     (SID.ATTR.COL4 | SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4 | SID.ATTR.TIME | SID.ATTR.PARAMS1 | SID.ATTR.STYLE | SID.SHAD.INDEXED);
-// const SID_DEFAULT_TEXTURE = 
-//     (SID.ATTR.COL4 | SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4 | SID.SHAD.INDEXED | SID.ATTR.TEX2);
-// const SID_DEFAULT_TEXTURE_SDF = 
-//     (SID.ATTR.COL4 | SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4 | SID.SHAD.INDEXED | SID.ATTR.TEX2 | SID.TEXT_SDF | SID.ATTR.SDF);
-// const SID_EXPLOSION = 
-//     (SID.ATTR.COL4 | SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4 | SID.SHAD.INDEXED | SID.ATTR.TIME);
-// const SID_NOISE = 
-//     (SID.ATTR.COL4 | SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4 | SID.SHAD.INDEXED | SID.ATTR.TIME | SID.FX.FS_NOISE);
-// const SID_PARTICLES_TAIL = 
-//     (SID.ATTR.COL4 | SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4 | SID.SHAD.INDEXED | SID.ATTR.TIME | SID.ATTR.PARAMS1 | SID.FX.FS_PARTICLES);
 
 /**
  * GL program's indexes
@@ -328,10 +301,6 @@ const Texture = {
     atlas: INT_NULL,
     font: INT_NULL,
     frameBufferTexture0: INT_NULL,
-    
-    // fontBuffer: INT_NULL,
-    // textureBuffer: INT_NULL,
-    // framBufferBuffer: INT_NULL,
 
     // Current Bound Texture's index(in the texture array. See GlTextures.js). 
     // Only one bound texture is allowed at any time by webGl, so this is a global access
@@ -446,42 +415,4 @@ const RZ3D = [
     TRIG.SIN,  TRIG.COS, 0,
            0,         0, 1,
 ];
-
-/** Cube Faces */
-// const vPosF = [
-//     -1,  1, 1,
-//     -1, -1, 1,
-//      1,  1, 1,
-//      1, -1, 1,
-// ];
-// const vPosBK = [
-//     -1,  1, -1,
-//     -1, -1, -1,
-//      1,  1, -1,
-//      1, -1, -1,
-// ];
-// const vPosL = [
-//     -1,  1, -1,
-//     -1, -1, -1,
-//     -1,  1,  1,
-//     -1, -1,  1,
-// ];
-// const vPosR = [
-//     1,  1, -1,
-//     1, -1, -1,
-//     1,  1,  1,
-//     1, -1,  1,
-// ];
-// const vPosT = [
-//     -1, 1,  1,
-//     -1, 1, -1,
-//      1, 1,  1,
-//      1, 1, -1,
-// ];
-// const vPosBT = [
-//     -1, -1,  1,
-//     -1, -1, -1,
-//      1, -1,  1,
-//      1, -1, -1,
-// ];
 

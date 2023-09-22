@@ -34,7 +34,7 @@ import { MouseGetArea, MouseGetPos, MouseGetPosDif } from '../Engine/Controls/In
 // import { Buffer } from 'buffer';
 import { Debug_get_event_listeners, Listeners_debug_info_create, Listeners_get_event } from '../Engine/Events/EventListeners.js';
 import { Gl_remove_geometry } from '../Graphics/Buffers/GlBuffers.js';
-import { Drop_down_set_root_for_debug, Widget_Drop_Down } from '../Engine/Drawables/Meshes/Widgets/Menu/Widget_Drop_Down.js';
+import { Drop_down_set_root, Drop_down_set_root_for_debug, Widget_Drop_Down } from '../Engine/Drawables/Meshes/Widgets/Menu/Widget_Drop_Down.js';
 import { Info_listener_create_event, Info_listener_dispatch_event } from '../Engine/DebugInfo/InfoListeners.js';
 import { GlGetPrograms } from '../Graphics/GlProgram.js';
 import { Input_create_user_input_listeners } from '../Engine/Controls/Input/Input.js';
@@ -53,13 +53,9 @@ export function AppInit() {
 
     TimeIntervalsInit();
     PerformanceTimerInit();
-    const tm = PerformanceTimerCreate();
-
-    tm.Start();
 
     // Create and initialize the buffers that will be storing texture-font-uv data. 
     TextureInitBuffers();
-
 
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -67,13 +63,15 @@ export function AppInit() {
     */
     const scene = Scenes_create_scene();
     const camera = new CameraOrthographic();
-    // const camera = new CameraPerspective();
-    // camera.SetControls(CAMERA_CONTROLS.PAN);
-    // camera.SetControls(CAMERA_CONTROLS.ZOOM);
-    // camera.SetControls(CAMERA_CONTROLS.ROTATE);
-    // camera.Translate(80, 80, 20)
-    // STATE.scene.active = scene;
-    // STATE.scene.active_idx = scene.sceneIdx;
+    {
+        // const camera = new CameraPerspective();
+        // camera.SetControls(CAMERA_CONTROLS.PAN);
+        // camera.SetControls(CAMERA_CONTROLS.ZOOM);
+        // camera.SetControls(CAMERA_CONTROLS.ROTATE);
+        // camera.Translate(80, 80, 20)
+        // STATE.scene.active = scene;
+        // STATE.scene.active_idx = scene.sceneIdx;
+    }
 
     renderer = new WebGlRenderer(scene, camera);
 
@@ -86,24 +84,16 @@ export function AppInit() {
      * Create meshes
      */
 
-    // const enable_ui_timers = new Widget_Switch('[on] Deactivate Ui Timers','[off] Activate Ui Timers', [Viewport.right-300, 20,0],4,BLUE_10_120_220,WHITE,[8,4]);
-    // enable_ui_timers.Bind(Debug_info_create_ui_performance_timers, null, scene);
-    // scene.AddMesh(enable_ui_timers);
     Debug_info_ui_performance(scene);
 
 
-    // CreateUiTimers(scene)
-    // CreateUiTimersWithSections(scene)
     // CreateButtons(scene)
-    // CreateSwitches(scene)
-    // BindSliderToTextLabel(scene)
     CreateSliders(scene)
     // CreateSlidersSectioned(scene)
     // CreateMenuBar(scene, 3)
     // CreateAndAddMenuBarSectioned(scene, 4);
     // CreateMinimizer(scene);
-    // Test_drop_down_widget(scene)
-    // Test_drop_down_widget2(scene)
+    Test_drop_down_widget(scene)
     
     // Help(scene)
     // CreateSection(scene)
@@ -113,39 +103,29 @@ export function AppInit() {
     // Listeners_debug_info_create(scene);
     
     
-    // Test(scene);
-    
-    
-    
     // const section = MeshInfo(scene)
     // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
     
     const section = MeshInfo(scene)
     TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
     
-    // const l = Debug_get_event_listeners();
     // Listeners_debug_info_create(scene);
     // Scenes_debug_info_create(scene);
-    
-    // Create_gfx_debu_info(scene)
 
 
     // If camera is static, update projection matrix uniform only once
     camera.UpdateProjectionUniform(renderer.gl);
     scene.Render();
-    tm.Stop();
-    tm.Print();
 
     const progs = GlGetPrograms();
     console.log(progs)
     
     
     RenderQueueGet().SetPriorityProgram('last', 1, 0);
-    // RenderQueueGet().UpdateActiveQueue(); // Update active queue buffer with the used/active vertex buffers.
 
     { // PERFORMANCE OBJECTS
         var performance = window.performance || window.mozPerformance || window.msPerformance || window.webkitPerformance || {};
-        console.log(performance)
+        console.log('PERFORMANCE:', performance)
         // const mem = window.performance.memory;
         // console.error(mem)
         // console.error(mem)
@@ -183,127 +163,14 @@ export function AppRender() {
     renderer.Render();
 }
 
+/**************************************************************************************************************************************/
+// Test Functions
+
 function Test_drop_down_widget(scene)
 { // DropDownMenu
 
     const pad = [10, 2.5]
-    const drop_down = new Widget_Drop_Down('DP1', ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [1,1], pad);
-    drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-    // drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
-    // scene.AddMesh(drop_down);
-
-    { // Add another dropdown in dropdown
-        const drop_down2 = new Widget_Drop_Down('DP2', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
-        drop_down2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        drop_down2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-        {
-            const drop_down3 = new Widget_Drop_Down('DP3 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
-            drop_down3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            drop_down3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-            drop_down2.AddToMenu(drop_down3);
-            {
-                const drop_down4 = new Widget_Drop_Down('DP4 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
-                drop_down4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                drop_down4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-                drop_down3.AddToMenu(drop_down4);
-    
-                {
-                    const drop_down5 = new Widget_Drop_Down('DP5 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
-                    drop_down5.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                    drop_down5.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-                    drop_down4.AddToMenu(drop_down5);
-                    
-                    {
-                        const drop_down6 = new Widget_Drop_Down('DP6 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
-                        drop_down6.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                        drop_down6.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-                        drop_down5.AddToMenu(drop_down6);
-            
-                        {
-                            const text = new Widget_Text('DP5 -->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-                            text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-                            text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                            text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-                            
-                            drop_down6.AddToMenu(text);
-                        }
-            
-                    }
-                }
-            }
-
-            const text = new Widget_Text('DP2 ->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-            text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-            text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-            drop_down2.AddToMenu(text);
-        }
-        {
-            const text = new Widget_Text('DP2 ->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-            text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-            text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-            drop_down2.AddToMenu(text);
-        }
-        {
-            const drop_down3 = new Widget_Drop_Down('DP3 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
-            drop_down3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            drop_down3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-
-            {
-                const text = new Widget_Text('DP3 -->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-                text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-                text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-                
-                drop_down3.AddToMenu(text);
-            }
-
-            drop_down2.AddToMenu(drop_down3);
-        }
-
-        drop_down.AddToMenu(drop_down2);
-    }
-    { // Add another dropdown in dropdown
-        const drop_down2 = new Widget_Drop_Down('DP4', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
-        drop_down2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        drop_down2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-        {
-            const text = new Widget_Text('DP4 ->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-            text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-            text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-            drop_down2.AddToMenu(text);
-        }
-        {
-            const text = new Widget_Text('DP4 ->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-            text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-            text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-            drop_down2.AddToMenu(text);
-        }
-
-        drop_down.AddToMenu(drop_down2);
-    }
-    scene.AddMesh(drop_down);
-    
-    const l = Debug_get_event_listeners();
-    // drop_down.TempAct();
-    // drop_down.Reconstruct_listeners_recursive();
-    // drop_down.TempDeact();
-    // drop_down.Init();
-    drop_down.Calc();
-    Drop_down_set_root_for_debug(drop_down);
-
-    const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-    Info_listener_create_event(info_event_type, CLBK, drop_down, null);
-}
-function Test_drop_down_widget2(scene)
-{ // DropDownMenu
-
-    const pad = [10, 2.5]
-    const drop_down = new Widget_Drop_Down('DP1', ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [1,1], pad);
+    const drop_down = new Widget_Drop_Down('DP1', ALIGN.LEFT, [200, 200, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [1,1], pad);
     drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
     // drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
 
@@ -316,28 +183,32 @@ function Test_drop_down_widget2(scene)
         {// Create debug info event
             text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
             const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-            Info_listener_create_event(info_event_type, Debug_info_event_callback, text, null)
         }
         text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
         drop_down2.AddToMenu(text);
+        Drop_down_set_root(drop_down, drop_down2);
         {
-            const drop_down3 = new Widget_Drop_Down('DP3 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+            const drop_down3 = new Widget_Drop_Down('DP3 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, [1,1], pad);
             drop_down3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
             drop_down2.AddToMenu(drop_down3);
+            Drop_down_set_root(drop_down, drop_down3);
             {
-                const drop_down4 = new Widget_Drop_Down('DP4 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+                const drop_down4 = new Widget_Drop_Down('DP4 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, GREEN_140_240_10, WHITE, [1,1], pad);
                 drop_down4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
                 drop_down3.AddToMenu(drop_down4);
+                Drop_down_set_root(drop_down, drop_down4);
     
                 {
-                    const drop_down5 = new Widget_Drop_Down('DP5 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+                    const drop_down5 = new Widget_Drop_Down('DP5 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, PINK_240_60_200, WHITE, [1,1], pad);
                     drop_down5.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down5.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
                     drop_down4.AddToMenu(drop_down5);
+                    Drop_down_set_root(drop_down, drop_down5);
                     
                     {
-                        const drop_down6 = new Widget_Drop_Down('DP6 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
+                        const drop_down6 = new Widget_Drop_Down('DP6 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, RED_200_10_10, WHITE, [1,1], pad);
                         drop_down6.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down6.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
                         drop_down5.AddToMenu(drop_down6);
+                        Drop_down_set_root(drop_down, drop_down6);
             
                         {
                             const text = new Widget_Text('DP5 -->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
@@ -354,191 +225,7 @@ function Test_drop_down_widget2(scene)
 
     scene.AddMesh(drop_down);
     drop_down.Calc();
-    Drop_down_set_root_for_debug(drop_down);
-
-}
-
-function Create_gfx_debu_info(scene)
-{ // DropDownMenu
-
-    const pad = [10, 2.5]
-    const drop_down = new Widget_Drop_Down('Gfx', ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [1,1], pad);
-    drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-    // drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
-
-    const progs = GlGetPrograms();
-    for(let i=0; i<progs.length; i++){
-        
-        for(let j=0; j<progs[i].vertexBufferCount; j++){
-
-            const vb = progs[i].vertexBuffer[j];
-            const info = `progidx: ${i} | vbidx: ${vb.idx}`;
-            const text = new Widget_Text(info, [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-            text.info_id = [i, vb.idx]
-            text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-            drop_down.AddToMenu(text)
-        }
-
-    }
-
-
-    const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-    Info_listener_create_event(info_event_type, CLBK, drop_down, null)
-
-
-    scene.AddMesh(drop_down);
-    drop_down.Calc();
-    Drop_down_set_root_for_debug(drop_down);
-}
-// function Create_gfx_debu_info(scene)
-// { // DropDownMenu
-
-//     const pad = [10, 2.5]
-//     const drop_down = new Widget_Drop_Down('Gfx', ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [1,1], pad);
-//     drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-//     // drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
-//     {
-//         const text1 = new Widget_Text('vb count', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, TRANSPARENCY(GREY1, 0.2), WHITE, [1,1], [4,4]);
-//         text1.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-//         drop_down.AddToMenu(text1)
-//     }
-//     {// Create debug info event
-//         // const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-//         // Info_listener_create_event(info_event_type, Debug_info_event_callback, text, null)
-//     }
-
-//     const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-//     Info_listener_create_event(info_event_type, CLBK, drop_down, null)
-
-
-//     scene.AddMesh(drop_down);
-//     drop_down.Calc();
-//     Drop_down_set_root_for_debug(drop_down);
-// }
-
-let counter = 0;
-function Debug_info_event_callback(params){
-    // console.log(counter)
-
-    const mesh = params.source_params;
-    const info = params.trigger_params.info;
-    const vbidx = params.trigger_params.vbidx;
-    counter++;
-    if(mesh.gfx && mesh.gfx.vb.idx === vbidx) mesh.UpdateText(`vbidx: ${vbidx} | count:${info} | times called: ${counter}`)
-}
-
-function CLBK_recursive(root, mesh, dispatch_event_type, progidx, vbidx){
-    
-    if(mesh.children.active_count){
-
-        for(let i=0; i<mesh.children.count; i++){
-
-            const child = mesh.children.buffer[i];
-
-            if(child){
-                CLBK_recursive(mesh, child, dispatch_event_type, progidx, vbidx); // Recurse
-            }
-        }
-    }
-
-    // No more recursion? Handle mesh.
-    if(mesh.debug_info.type & dispatch_event_type){
-
-        // mesh.UpdateText(info)
-
-        if(mesh.gfx && mesh.val[0] === progidx && mesh.val[1] === vbidx) 
-            mesh.UpdateText(`progidx: ${progidx} | vbidx: ${vbidx} | times called: ${counter}`)
-        else{
-            console.log(root.name, root, progidx, vbidx);
-
-            const info = `progidx: ${progidx} | vbidx: ${vbidx}`;
-            const text = new Widget_Text(info, [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-            text.info_id = [progidx, vbidx]
-
-            const dropdown = root.parent;
-            dropdown.AddToMenuAndGenGfx(text)
-            dropdown.Calc();
-        }
-    }
- }
-
-function CLBK(params){
-    // console.log('++++++++++++++++++++++++ This is the callback');
-    // console.log('-----------------------------------');
-    
-    const mesh = params.source_params;
-    const dispatch_event_type = params.dispatch_event_type;
-    // const info = params.trigger_params.info;
-    const vbidx = params.trigger_params.vbidx;
-    const progidx = params.trigger_params.vbidx;
-    counter++;
-    CLBK_recursive(mesh, mesh, dispatch_event_type, progidx, vbidx);
-}
-// function CLBK(params){
-//     console.log('++++++++++++++++++++++++ This is the callback');
-    
-//     const mesh = params.source_params;
-//     // const menu = mesh.menu;
-//     const menu = mesh.children.buffer[1];
-//     if(!menu) return;
-
-//     const trigger_params = params.trigger_params;
-//     const dispatch_event_type = params.dispatch_event_type;
-    
-//     for(let i=0; i<menu.children.count; i++){
-        
-//         const item = menu.children.buffer[i];
-        
-//         if(item.debug_info.type & dispatch_event_type){
-//             const info = trigger_params.info;
-//             item.UpdateText(info)
-//         }
-//     }
-// }
-
-function Test(scene){
-
-    const section = new Section(SECTION.VERTICAL, [20,20]);
-    
-    section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    section.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-    
-        const s = new Section(SECTION.VERTICAL, [20,20]);
-        s.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        s.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-        
-            const s1 = new Section(SECTION.VERTICAL, [20,20]);
-            s1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            s1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-            
-                const s2 = new Section(SECTION.VERTICAL, [20,20]);
-                s2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                s2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-                
-                s1.AddItem(s2)
-
-            s.AddItem(s1)
-
-        section.AddItem(s)
-
-    section.Calc();
-    scene.AddMesh(section);
-    section.Reconstruct_listeners_recursive();
-
-    s1.RemoveAllListenEvents();
-    s.RemoveAllListenEvents();
-}
-
-
-function CreateSwitches(scene) {
-
-    const switch1 = new Widget_Switch('on', 'off', [400, 200, 0]);
-    scene.AddMesh(switch1)
-
-    const btn1 = new Widget_Button('x', [400, 150, 0], 6, GREY1, WHITE, [1, 1], [8, 4], .8, undefined, [1, 4, 2]);
-    btn1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    btn1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
-    scene.AddMesh(btn1);
+    Drop_down_set_root(drop_down, drop_down);
 
 }
 
@@ -562,176 +249,6 @@ function CreateMinimizer(scene){
 
     section.Reconstruct_listeners_recursive();
     // section.ReconstructHoverListenersRecursive();
-}
-
-function CreateUiTimersWithSections(scene) {
-
-    const fontsize = 4; let ypos = fontsize * 2, ms = 200; let idx = INT_NULL;
-    ms = 400;
-    const pad = [fontsize * 3, fontsize * 3];
-
-    const pt = PerformanceTimerCreate('Widget menu construct.');
-    pt.Start();
-    const timer = new Widget_Dynamic_Text_Mesh('Fps Avg:', '000000', [0, ypos, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .5);
-    timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, TimeGetFps, pt)
-    timer.CreateNewText('delta:', fontsize, undefined, GREEN_140_240_10, [fontsize * 3, 0], .9);
-    idx = timer.CreateNewText('00000', fontsize, undefined, YELLOW_240_220_10, [0, 0], .9); // idx is for use in creating separate time intervals for each dynamic text.
-    timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetDeltaAvg`, ms, TimeGetDeltaAvg, pt)
-    timer.CreateNewText('nano:', fontsize, undefined, GREEN_140_240_10, [fontsize * 4, 0], .9);
-    idx = timer.CreateNewText('000000', fontsize, undefined, YELLOW_240_220_10, [0, 0], .5);
-    timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, TimeGetTimer, pt)
-    scene.AddMesh(timer, GL_VB.PRIVATE);
-    timer.AddToGfx()
-    pt.Stop(); pt.Print();
-
-    const flags = SECTION.ITEM_FIT;
-    const section = new Section(SECTION.HORIZONTAL, [5, 5], [200, 40, 0], [20, 20], TRANSPARENCY(GREY5, .7))
-    const s1 = new Section(SECTION.HORIZONTAL, [3, 4], [200, 40, 0], [20, 20], TRANSPARENCY(GREY1, .9))
-    const s2 = new Section(SECTION.HORIZONTAL, [3, 4], [200, 80, 0], [20, 20], TRANSPARENCY(GREY1, .9))
-    const s3 = new Section(SECTION.HORIZONTAL, [4, 4], [200, 120, 0], [20, 20], TRANSPARENCY(GREY1, .2))
-
-
-    { // Add each text seperately into sections
-        s1.AddItem(timer.children.buffer[1], flags); s1.SetName('s1');
-        s2.AddItem(timer.children.buffer[2], flags); s2.SetName('s2');
-        section.AddItem(s1, flags)
-        section.AddItem(s2, flags)
-    }
-
-
-    section.Recalc(flags)
-
-    scene.AddMesh(section, GFX.PRIVATE);
-    Gfx_end_session(true);
-    section.AddToGfx()
-
-}
-
-
-// function CreateUiTimers(scene) {
-
-//     const fontsize = 4, pad = 6; let ypos = fontsize * 2, ms = 200; let idx = INT_NULL;
-//     ms = 200;
-    
-//     const timer = new Widget_Dynamic_Text_Mesh('Fps Avg:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .5);
-//     // timer.SetDynamicText(ms, TimeGetFps, `DynamicText ${ms} Timer TimeGetFps`); // idx is for use in creating separate time intervals for each dynamic text.
-//     timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimersGetFps, _pt_fps); // idx is for use in creating separate time intervals for each dynamic text.
-//     timer.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-//     timer.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .9); 
-//     timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetDeltaAvg`, ms, PerformanceTimersGetMilisec, _pt_fps)
-//     timer.CreateNewText('CurTime ms:', fontsize, BLUE_10_160_220, [fontsize * 4, 0], .9);
-//     timer.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .5);
-//     timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, PerformanceTimersGetCurTime, _pt_fps);
-//     scene.AddMesh(timer, GFX.PRIVATE);
-    
-//     ms = 1000; ypos += fontsize * 2 + pad;
-//     const fps1sAvg = new Widget_Dynamic_Text_Mesh('Fps 1sec avg:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .5);
-//     fps1sAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_1s_avg); // idx is for use in creating separate time intervals for each dynamic text.
-//     fps1sAvg.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .5);
-//     fps1sAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_1s_avg);
-//     scene.AddMesh(fps1sAvg, GFX.PRIVATE);
-    
-//     ms = 500; ypos += fontsize * 2 + pad;
-//     const fps500msAvg = new Widget_Dynamic_Text_Mesh('Fps 500ms avg:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .5);
-//     fps500msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_500ms_avg); // idx is for use in creating separate time intervals for each dynamic text.
-//     fps500msAvg.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .5);
-//     fps500msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_500ms_avg);
-//     scene.AddMesh(fps500msAvg, GFX.PRIVATE);
-    
-//     ms = 200; ypos += fontsize * 2 + pad;
-//     const fps200msAvg = new Widget_Dynamic_Text_Mesh('Fps 200ms avg:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .5);
-//     fps200msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_200ms_avg); // idx is for use in creating separate time intervals for each dynamic text.
-//     fps200msAvg.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .5);
-//     fps200msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_200ms_avg);
-//     scene.AddMesh(fps200msAvg, GFX.PRIVATE);
-    
-//     // Performance Time Measure 1
-//     ms = 500; ypos += fontsize * 2 + pad;
-//     const timeMeasure1 = new Widget_Dynamic_Text_Mesh('Timers Update:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
-//     timeMeasure1.SetDynamicText(`DynamicText ${ms} All Timers Update _Tm1GetFps`, ms, PerformanceTimersGetFps, _pt2)
-//     timeMeasure1.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-//     idx = timeMeasure1.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .4);
-//     timeMeasure1.SetDynamicText(`DynamicText ${ms} All Timers Update _Tm1GetMilisec`, ms, PerformanceTimersGetMilisec, _pt2)
-//     scene.AddMesh(timeMeasure1, GFX.ANY);
-    
-//     // Performance Time Measure 2
-//     ms = 500; ypos += fontsize * 2 + pad;
-//     const timeMeasure3 = new Widget_Dynamic_Text_Mesh('Scene Update:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
-//     timeMeasure3.SetDynamicText(`DynamicText ${ms} Scene Update _Tm2GetFps`, ms, PerformanceTimersGetFps, _pt3)
-//     timeMeasure3.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-//     timeMeasure3.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .4);
-//     timeMeasure3.SetDynamicText(`DynamicText ${ms} Scene Update _Tm2GetMilisec`, ms, PerformanceTimersGetMilisec, _pt3)
-//     scene.AddMesh(timeMeasure3);
-    
-//     // Performance Time Measure 3
-//     ms = 500; ypos += fontsize * 2 + pad;
-//     const timeMeasure2 = new Widget_Dynamic_Text_Mesh('GlDraw:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
-//     timeMeasure2.SetDynamicText(`DynamicText ${ms} GlDraw _Tm3GetFps`, ms, PerformanceTimersGetFps, _pt4)
-//     timeMeasure2.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-//     timeMeasure2.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .4);
-//     timeMeasure2.SetDynamicText(`DynamicText ${ms} GlDraw _Tm3GetMilisec`, ms, PerformanceTimersGetMilisec, _pt4)
-//     scene.AddMesh(timeMeasure2, GFX.ANY);
-    
-//     // Performance Time Measure 2
-//     ms = 500; ypos += fontsize * 2 + pad;
-//     const timeMeasure4 = new Widget_Dynamic_Text_Mesh('Event listener:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
-//     timeMeasure4.SetDynamicText(`DynamicText ${ms} Scene Update _Tm6GetFps`, ms, PerformanceTimersGetFps, _pt5)
-//     timeMeasure4.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-//     timeMeasure4.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .4);
-//     timeMeasure4.SetDynamicText(`DynamicText ${ms} Scene Update _Tm6GetMilisec`, ms, PerformanceTimersGetMilisec, _pt5)
-//     scene.AddMesh(timeMeasure4, GFX.ANY);
-
-//     // Performance Time Measure 2
-//     ms = 500; ypos += fontsize * 2 + pad;
-//     const timeMeasure5 = new Widget_Dynamic_Text_Mesh('Hover listen:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
-//     timeMeasure5.SetDynamicText(`DynamicText ${ms} Scene Update _Tm6GetFps`, ms, PerformanceTimersGetFps, _pt6)
-//     timeMeasure5.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-//     timeMeasure5.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .4);
-//     timeMeasure5.SetDynamicText(`DynamicText ${ms} Scene Update _Tm6GetMilisec`, ms, PerformanceTimersGetMilisec, _pt6)
-//     scene.AddMesh(timeMeasure5, GFX.ANY);
-
-//     Gfx_end_session(true);
-// }
-
-function BindSliderToTextLabel(scene) {
-
-    let posy = 200, height = 10, pad = 25;
-    posy += height * 2 + pad;
-    // const hover_margin  = [5, 0];
-
-    {
-        const section = new Section(SECTION.VERTICAL, [10,25], [300,300,0], [0,0], TRANSPARENCY(BLUE, .2), 'Slider Section Panel')
-        section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
-        section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-    
-        const minimizer = new Widget_Minimize(section, [200,200,0]);
-        minimizer.SetName('minimizer button')
-        minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, minimizer.OnClick, minimizer);
-        minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        minimizer.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-        section.AddItem(minimizer)
-    
-        const slider = new Widget_Slider([0, 0, 0], [150, height]);
-        section.AddItem(slider)
-        
-        posy += height * 2 + pad;
-        const slider2 = new Widget_Slider([0, 0, 0], [150, height]);
-        section.AddItem(slider2)
-        
-        posy += height * 2 + pad;
-        const slider3 = new Widget_Slider([0, 0, 0], [150, height]);
-        section.AddItem(slider3)
-        
-        posy += height * 2 + pad;
-        const slider4 = new Widget_Slider([0, 0, 0], [150, height]);
-        section.AddItem(slider4)
-       
-        scene.AddMesh(section, GFX.PRIVATE);
-        Gfx_end_session(true, true);
-    
-        section.Calc(SECTION.NO_ITEMS_CALC)
-        section.Reconstruct_listeners_recursive();
-    }
 }
 
 function CreateSliders(scene) {
@@ -776,6 +293,7 @@ function CreateSliders(scene) {
     }
 
 }
+
 function CreateSlidersSectioned(scene) {
 
     let posy = 200, height = 10, pad = 25;
@@ -1287,9 +805,6 @@ function MeshInfo(scene) {
     infomesh.CreateNewText('defpos: 00000,00000,0', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('dim: 00000,00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('gfx: prog:0, vb:0, start:000000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
-    // infomesh.CreateNewText('mousepos: x:0000, y:0000', fontsize, GREEN_60_240_60, [fontsize * 3, 0], .9);
-    // infomesh.CreateNewText('mousedif: x:0000, y:0000', fontsize, GREEN_60_240_60, [fontsize * 3, 0], .9);
-    // infomesh.CreateNewText('Area: x:0000, y:0000', fontsize, PINK_240_60_200, [fontsize * 3, 0], .9);
 
     infomesh.Align_pre(infomesh, ALIGN.VERTICAL)
     infomesh.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, infomesh.OnClick);
@@ -1303,20 +818,6 @@ function MeshInfoUpdate(params) {
 
     const textMesh = params.params.mesh;
     const infoMesh = STATE.mesh.hovered;
-
-    // const mouse_pos = MouseGetPos();
-    // const mp = `mousepos: x:${mouse_pos[0]}, y:${mouse_pos[1]}`;
-    // const mouse_dif = MouseGetPosDif();
-    // const md = `mousedif: x:${mouse_dif.x}, y:${mouse_dif.y}`;
-    // const area = MouseGetArea();
-    // const ar = `Area: x:${area.x}, y:${area.y}`;
-
-    // const mouse_pos_text = textMesh.children.buffer[5];
-    // mouse_pos_text.UpdateTextFromVal(mp)
-    // const mouse_dif_text = textMesh.children.buffer[6];
-    // mouse_dif_text.UpdateTextFromVal(md)
-    // const mouse_area_text = textMesh.children.buffer[7];
-    // mouse_area_text.UpdateTextFromVal(ar)
 
     if (infoMesh) {
 
@@ -1332,9 +833,6 @@ function MeshInfoUpdate(params) {
             // `dim: x:${infoMesh.geom.dim[0]} y:${infoMesh.geom.dim[1]}`,
             `dim: ${infoMesh.geom.dim}`,
             gfx,
-            // `mousepos: x:${mouse_pos[0]}, y:${mouse_pos[1]}`,
-            // `mousedif: x:${mouse_dif.x}, y:${mouse_dif.y}`,
-            // `Area: x:${area.x}, y:${area.y}`,
         ];
         
         for (let i = 0; i < textMesh.children.count; i++) {
@@ -1351,7 +849,6 @@ function SetHoverToAllMeshesRecursive(mesh) {
 
     mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
     mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-    // console.log(mesh.name)
     
     for (let i = 0; i < mesh.children.count; i++) {
 
@@ -1520,36 +1017,4 @@ function Create3DCubes(scene){
     }
 }
 
-// function MeshConstantsSetUp() {
-
-//     STAGE.MENU.PAD = 20;
-//     STAGE.MENU.WIDTH = (Viewport.width / 2) - STAGE.MENU.PAD;
-//     STAGE.MENU.HEIGHT = 20 + STAGE.MENU.PAD * 2;
-//     STAGE.TOP = Viewport.height / 5;
-
-//     // Calculate left and right padd of the start and end of brick's1 grid.
-//     const mod = (Viewport.width % ((BRICK.WIDTH * 2) + (BRICK.PAD * 2))) - (BRICK.PAD * 2);
-//     // STAGE.PADD.LEFT  = (BRICK.WIDTH*2) + (mod / 2);
-//     STAGE.PADD.LEFT = (60) + (mod / 2);
-//     STAGE.PADD.RIGHT = STAGE.PADD.LEFT;
-
-//     let keepRelativeLarger = 1;
-
-//     PLAYER.WIDTH *= Device.ratio * keepRelativeLarger;
-//     PLAYER.HEIGHT *= Device.ratio * keepRelativeLarger;
-
-//     BALL.RADIUS *= Device.ratio * keepRelativeLarger;
-
-//     BRICK.WIDTH *= Device.ratio * keepRelativeLarger;
-//     BRICK.HEIGHT *= Device.ratio * keepRelativeLarger;
-
-//     POW_UP.WIDTH *= Device.ratio * keepRelativeLarger;
-//     POW_UP.HEIGHT *= Device.ratio * keepRelativeLarger;
-
-//     COIN.WIDTH *= Device.ratio * keepRelativeLarger;
-//     COIN.HEIGHT *= Device.ratio * keepRelativeLarger;
-
-//     UI_TEXT.FONT_SIZE *= Device.ratio;
-
-// }
 

@@ -151,8 +151,6 @@ export class Widget_Label extends Rect {
         }
         else if (flags & ALIGN.RIGHT) {
 
-            // CopyArr2(pos, this.geom.pos);
-
             // Horizontal allignment
             pos[0] = target_mesh.geom.pos[0] + target_mesh.geom.dim[0] - this.geom.dim[0] - pad[0];
 
@@ -160,9 +158,6 @@ export class Widget_Label extends Rect {
 
         }
         else if (flags & ALIGN.LEFT) {
-
-            // const pos = [0, 0];
-            // CopyArr2(pos, this.geom.pos);
 
             // Horizontal allignment
             pos[0] = (target_mesh.geom.pos[0] - target_mesh.geom.dim[0]) + this.geom.dim[0] + pad[0];

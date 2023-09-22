@@ -21,8 +21,6 @@ export class Info_Listeners {
          source_params: source_params,
          target_params: target_params,
          isActive: true,
-         // children: null, // current mesh may have children with events. This is the buffer to store them, but only after 'ReconstructEvents' function call.
-         // anyChildrenActive: false, // This is to check if the current event has any children events(eficient since we do not have to check every child event if 'isActive')
       }
 
       return this.events.Add(event_params);

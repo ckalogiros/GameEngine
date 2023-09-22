@@ -279,69 +279,8 @@ export function RenderQueueInit() {
    renderQueue.Init(); // One time initialization(creates an empty buffer...)
 }
 export function RenderQueueCreate() {
-   // renderQueue.Init(); // One time initialization(creates an empty buffer...)
    renderQueue.Create();
-
-   /** Build up the draw queue, to draw all meshes in the correct order */
-   {
-       /**
-        * In order to draw on top must:
-        *  1. render the mesh last in the buffer
-        *  2. have a z-index greater 
-        * OR
-        *  1. First draw the mesh with the less z-index
-        *  2. Then draw the on top mesh with greater z-index 
-       */
-       //    scenes.SetPriority(APP_MESHES_IDX.bricks, 'first');
-
-       // Ui. All ui are in one buffer, so setting any one ui is enough 
-       // scenes.SetPriority(APP_MESHES_IDX.ui.animText, 'first');
-
-       // scenes.SetPriority(APP_MESHES_IDX.coins, 'first');
-       // scenes.SetPriority(APP_MESHES_IDX.powUps, 'first');
-       // scenes.SetPriority(APP_MESHES_IDX.balls, 'first');
-
-
-       // // Explosions
-       // scenes.SetPriority(APP_MESHES_IDX.fx.twist, 'first');
-       // scenes.SetPriority(APP_MESHES_IDX.fx.explosions.circle, 'first');
-       // scenes.SetPriority(APP_MESHES_IDX.fx.explosions.simple, 'first');
-       // scenes.SetPriority(APP_MESHES_IDX.fx.glow, 'first');
-       // scenes.SetPriority(APP_MESHES_IDX.fx.shadow, 'first');
-
-       // scenes.SetPriority(APP_MESHES_IDX.player, 'first');
-
-
-       // // Particles
-       // scenes.SetPriority(APP_MESHES_IDX.fx.particleSystem.ballTail, 'first');
-
-       // scenes.SetPriority(APP_MESHES_IDX.ui.fps.avg1s, 'first');
-       // scenes.SetPriority(APP_MESHES_IDX.ui.fps.avg, 'first');
-       // scenes.SetPriority(APP_MESHES_IDX.fx.vortex, 'first');
-
-       // scenes.SetPriority(APP_MESHES_IDX.bricks, 'first');
-       
-       // // Buttons
-       // scenes.SetPriority(APP_MESHES_IDX.buttons.play, 'first');
-       // scenes.SetPriority(APP_MESHES_IDX.buttons.continue, 'first');
-       // scenes.SetPriority(APP_MESHES_IDX.buttons.start, 'first');
-       
-       // scenes.SetPriority(APP_MESHES_IDX.framebuffer, 'first');
-       
-       // // RenderQueueSetPriority('last',5,3);
-       // // Backgrounds
-       // scenes.SetPriority(APP_MESHES_IDX.background.finishStage, 'first');
-       // scenes.SetPriority(APP_MESHES_IDX.background.stageMenu, 'first');
-       // scenes.SetPriority(APP_MESHES_IDX.background.stage, 'first');
-       // scenes.SetPriority(APP_MESHES_IDX.background.startStage, 'first');
-       // scenes.SetPriority(APP_MESHES_IDX.background.startMenu, 'first');
-       
-   }
-
    renderQueue.UpdateActiveQueue();
-   // renderQueue.PrintAll();
-
-   // BallProjLineSetPriority();
 }
 
 

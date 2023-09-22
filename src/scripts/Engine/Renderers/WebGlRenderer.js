@@ -5,8 +5,6 @@ import { MouseResetDif, MouseResetWheel } from "../Controls/Input/Mouse.js";
 import { FpsGet, TimeSample, TimeUpdate } from "../Timers/Time.js";
 import { TimersUpdateGlobalTimer } from "../Timers/Timers.js";
 import { TimeIntervalsUpdateAll } from "../Timers/TimeIntervals.js";
-// import { PerformanceTimerCreate, __pt1, __pt2, _pt3 } from "../Timers/PerformanceTimers.js";
-import { PerformanceTimerCreate } from "../Timers/PerformanceTimers.js";
 import {_pt_fps ,_pt2, _pt3, _pt4 } from '../Timers/PerformanceTimers.js'
 
 /**
@@ -44,11 +42,6 @@ import {_pt_fps ,_pt2, _pt3, _pt4 } from '../Timers/PerformanceTimers.js'
 
 
 // TODO: Make PLATFORM, Device and Viewport private to Renderer???
-
-
-/**
- * Performance Timers
- */
 
 
 export class WebGlRenderer {

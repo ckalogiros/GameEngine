@@ -2,15 +2,15 @@
 
 import { GlGetPrograms, GlGetVB } from "../../Graphics/GlProgram";
 import { Section } from "../Drawables/Meshes/Section";
-import { Drop_down_set_root, Drop_down_set_root_for_debug, Widget_Drop_Down } from "../Drawables/Meshes/Widgets/Menu/Widget_Drop_Down";
+import { Drop_down_set_root, Widget_Drop_Down } from "../Drawables/Meshes/Widgets/Menu/Widget_Drop_Down";
 import { Widget_Switch } from "../Drawables/Meshes/Widgets/WidgetButton";
 import { Widget_Label_Text_Mesh_Menu_Options } from "../Drawables/Meshes/Widgets/WidgetLabel";
 import { Widget_Dynamic_Text_Mesh } from "../Drawables/Meshes/Widgets/WidgetText";
-import { Gfx_end_session, Gfx_open_session, Gfx_pool_print } from "../Interfaces/GfxContext";
+import { Gfx_end_session } from "../Interfaces/GfxContext";
 import { Scenes_get_children } from "../Scenes";
 import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _pt_fps } from "../Timers/PerformanceTimers";
 import { PerformanceTimerGetFps1sAvg, _fps_1s_avg, _fps_500ms_avg } from "../Timers/Time";
-import { Info_listener_create_event, Info_listener_destroy_event, Info_listener_dispatch_event } from "./InfoListeners";
+import { Info_listener_create_event, Info_listener_destroy_event } from "./InfoListeners";
 
 
 export function Debug_info_ui_performance(scene) {
@@ -20,7 +20,7 @@ export function Debug_info_ui_performance(scene) {
    const fontsize = 4;
 
    // the drop down menu to hold the enabling/disabling of the 
-   const dp = new Widget_Drop_Down('Generic Ui Debug Info', ALIGN.LEFT, [20, 400, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [1, 1], [8, 3]);
+   const dp = new Widget_Drop_Down('Generic Ui Debug Info', ALIGN.LEFT, [10, 10, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [1, 1], [8, 3]);
 
 
    /************************************************************************************************************************************************/
@@ -67,7 +67,7 @@ export function Debug_info_ui_performance(scene) {
       label.SetName(`ui gfx label`);
       section.AddItem(label);
 
-      const ui_switch = new Widget_Switch('on', 'off', [Viewport.right - 500, 200, 0], 4.4, BLUE_10_120_220, WHITE, [2, 3]);
+      const ui_switch = new Widget_Switch('on', 'off', [Viewport.right - 500, 10, 0], 4.4, BLUE_10_120_220, WHITE, [2, 3]);
       ui_switch.Bind(Debug_info_create_gfx_info, null, scene);
       ui_switch.SetName(`ui gfx switch`);
       section.AddItem(ui_switch);
@@ -146,58 +146,6 @@ export function Debug_info_create_ui_performance_timers(params) {
    fps500msAvg.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .5);
    fps500msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_500ms_avg);
    section.AddItem(fps500msAvg);
-
-   // ms = 200; ypos += fontsize * 2 + pad;
-   // const fps200msAvg = new Widget_Dynamic_Text_Mesh('Fps 200ms avg:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .5);
-   // fps200msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_200ms_avg); // idx is for use in creating separate time intervals for each dynamic text.
-   // fps200msAvg.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .5);
-   // fps200msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_200ms_avg);
-   // scene.AddMesh(fps200msAvg, GFX.PRIVATE);
-
-   // // Performance Time Measure 1
-   // ms = 500; ypos += fontsize * 2 + pad;
-   // const timeMeasure1 = new Widget_Dynamic_Text_Mesh('Timers Update:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
-   // timeMeasure1.SetDynamicText(`DynamicText ${ms} All Timers Update _Tm1GetFps`, ms, PerformanceTimersGetFps, _pt2)
-   // timeMeasure1.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-   // idx = timeMeasure1.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .4);
-   // timeMeasure1.SetDynamicText(`DynamicText ${ms} All Timers Update _Tm1GetMilisec`, ms, PerformanceTimersGetMilisec, _pt2)
-   // scene.AddMesh(timeMeasure1, GFX.ANY);
-
-   // // Performance Time Measure 2
-   // ms = 500; ypos += fontsize * 2 + pad;
-   // const timeMeasure3 = new Widget_Dynamic_Text_Mesh('Scene Update:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
-   // timeMeasure3.SetDynamicText(`DynamicText ${ms} Scene Update _Tm2GetFps`, ms, PerformanceTimersGetFps, _pt3)
-   // timeMeasure3.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-   // timeMeasure3.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .4);
-   // timeMeasure3.SetDynamicText(`DynamicText ${ms} Scene Update _Tm2GetMilisec`, ms, PerformanceTimersGetMilisec, _pt3)
-   // scene.AddMesh(timeMeasure3);
-
-   // // Performance Time Measure 3
-   // ms = 500; ypos += fontsize * 2 + pad;
-   // const timeMeasure2 = new Widget_Dynamic_Text_Mesh('GlDraw:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
-   // timeMeasure2.SetDynamicText(`DynamicText ${ms} GlDraw _Tm3GetFps`, ms, PerformanceTimersGetFps, _pt4)
-   // timeMeasure2.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-   // timeMeasure2.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .4);
-   // timeMeasure2.SetDynamicText(`DynamicText ${ms} GlDraw _Tm3GetMilisec`, ms, PerformanceTimersGetMilisec, _pt4)
-   // scene.AddMesh(timeMeasure2, GFX.ANY);
-
-   // // Performance Time Measure 2
-   // ms = 500; ypos += fontsize * 2 + pad;
-   // const timeMeasure4 = new Widget_Dynamic_Text_Mesh('Event listener:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
-   // timeMeasure4.SetDynamicText(`DynamicText ${ms} Scene Update _Tm6GetFps`, ms, PerformanceTimersGetFps, _pt5)
-   // timeMeasure4.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-   // timeMeasure4.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .4);
-   // timeMeasure4.SetDynamicText(`DynamicText ${ms} Scene Update _Tm6GetMilisec`, ms, PerformanceTimersGetMilisec, _pt5)
-   // scene.AddMesh(timeMeasure4, GFX.ANY);
-
-   // // Performance Time Measure 2
-   // ms = 500; ypos += fontsize * 2 + pad;
-   // const timeMeasure5 = new Widget_Dynamic_Text_Mesh('Hover listen:', '000000', [0, ypos, 0], fontsize, [1, 1], BLUE_10_160_220, ORANGE_240_160_10, .4);
-   // timeMeasure5.SetDynamicText(`DynamicText ${ms} Scene Update _Tm6GetFps`, ms, PerformanceTimersGetFps, _pt6)
-   // timeMeasure5.CreateNewText('deltaAvg ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-   // timeMeasure5.CreateNewText('000000', fontsize, ORANGE_240_160_10, [0, 0], .4);
-   // timeMeasure5.SetDynamicText(`DynamicText ${ms} Scene Update _Tm6GetMilisec`, ms, PerformanceTimersGetMilisec, _pt6)
-   // scene.AddMesh(timeMeasure5, GFX.ANY);
 
    scene.AddMesh(section, GFX.PRIVATE);
    section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
@@ -287,8 +235,6 @@ export function Debug_info_create_gfx_info(params) {
       mesh.DestroyPrivateGfxRecursive();
       // mesh.Destroy();
 
-      // Gfx_pool_print();
-
       DEBUG_INFO.UI_GFX.IDX = INT_NULL; // Refference to the scene's mesh buffer
       DEBUG_INFO.UI_GFX.IS_ON = false;
       return;
@@ -298,16 +244,16 @@ export function Debug_info_create_gfx_info(params) {
    const tr = .6;
    const section = new Section(SECTION.VERTICAL, [3, 3], DEBUG_INFO.UI_GFX.POS, [0, 0], TRANSPARENCY(GREY1, .4), 'ui gfx info panel');
    // section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
+   
    const dp = new Widget_Drop_Down(`Gfx Info`, ALIGN.LEFT, [200, 400, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [1, 1], [8, 3]);
    dp.SetName('Gfx Info DP')
-   const progs = GlGetPrograms();
    
+   const progs = GlGetPrograms();
    const count = progs.length;
    for (let i=0; i<count; i++){
       
       const dp_pr = new Widget_Drop_Down(`prog:${i}`, ALIGN.LEFT, [200, 400, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [1, 1], [8, 3]);
       dp_pr.SetName(`Program DP:${i}`)
-      // const dp_pr = new Section(SECTION.VERTICAL, [3, 3], DEBUG_INFO.UI_GFX.POS, [0, 0], TRANSPARENCY(GREY1, .4), `prog:${i}`);
       // dp_pr.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick);
       
       for (let j=0; j<progs[i].vertexBufferCount; j++){
@@ -397,81 +343,3 @@ export function Debug_info_update_gfx_info(params) {
    dp_prog.AddToMenu(new_dp_vb)
 
 }
-/**SAVE */
-// export function Debug_info_update_gfx_info(params) {
-
-//    /**
-//     * Target mesh should be the section root mesh holding the 'Gfx' drop down as child.
-//     * The dropdown has a 'gfx' button and a menu. 
-//     * The menu has as children all programs of type 'Widget_Dropdown' (children[0]:prog[0], children[1]:prog[1], ... etc)
-//     * Each dropdown children has all vertex buffers as children (dp[0]:vb[0], dp[1]:vb[1], ... etc)
-//     */
-
-//    const tr = .6; // Transparency
-//    const section = params.target_params;
-//    const dp_gfx = section.children.buffer[0];
-//    const menu_progs = dp_gfx.menu;
-//    const added_gfxs = params.trigger_params.added_gfxs;
-
-//    // console.log(section.name, dp.name, added_gfxs);
-   
-//    const count = added_gfxs.length;
-//    for(let i=0; i<count; i++){
-
-//       const progidx = added_gfxs[i].progidx;
-//       const dp_prog = menu_progs.children.buffer[progidx]; // This is a drop down with a btn 'prog:i' and a menu of all vertex buffers of type 'Widget_Dropdown'.
-//       // If program is a new created program, add it to the ui as a new dropdown widget.
-//       if(!dp_prog){
-   
-//          const new_dp_prog = new Widget_Drop_Down(`prog:${progidx}`, ALIGN.LEFT, [200, 400, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [1, 1], [8, 3]);
-//          new_dp_prog.SetName(`Program DP:${progidx}`)
-//          // alert('Adding new program, IMPLEMENET ME!!! @ Debug_info_update_gfx_info()');
-      
-//          dp_gfx.AddToMenu(new_dp_prog)
-//       }
-//       else{ // Program exists, so check if the vertex buffer exists and add it if its not, and also update the vb's dropdown info 
-   
-//          const vbidx = added_gfxs[i].vbidx;
-//          const menu_vb = dp_prog.menu;
-//          let mesh_idx = INT_NULL;
-//          for(let j=0; j<menu_vb.children.count; j++){
-//             if(menu_vb.children.buffer[j].debug_info.data.vbidx === vbidx)
-//                mesh_idx = j;
-//          }
-//          if(mesh_idx === INT_NULL){ // Case there is no dropdown menu with the vertex buffer index, so create new dropdown
-   
-//             // const dp_vb = menu_vb.children.buffer[mesh_idx];
-//             const vb = GlGetVB(progidx, vbidx);
-//             const new_dp_vb = new Widget_Drop_Down(`vb:${vbidx} | count:${vb.count}`, ALIGN.LEFT, [200, 400, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [1, 1], [8, 3]);
-//             new_dp_vb.SetName(`VB DP:${vbidx}`);
-//             new_dp_vb.debug_info.data = {
-//                progidx: progidx,
-//                vbidx: vbidx,
-//             };
-//             dp_prog.AddToMenu(new_dp_vb);
-
-//             // Build an array of all progidx and vbidx of the current dropdown(that supposes to be in its own private gfx buffers)
-//             let k = 0;
-//             const gfx_idxs = []; 
-//             for(let i=0; i<menu_vb.children.count; i++){
-
-//                const child = menu_vb.children.buffer[i];
-//                if(child.gfx) {
-
-//                   gfx_idxs[k] = {
-//                      progidx:child.gfx.prog.idx,
-//                      vbidx:child.gfx.vb.idx,
-//                   };
-//                   console.log( gfx_idxs[k])
-//                   k++;
-//                }
-//             }
-
-//             // Gfx_open_session(gfx_idxs)
-//             new_dp_vb.GenGfxCtx(GFX.PRIVATE)
-//             new_dp_vb.AddToGfx();
-//             // Gfx_end_session(true, true)
-//          }
-//       }
-//    }
-// }

@@ -1,6 +1,6 @@
 "use strict";
 
-import { CopyArr2, CopyArr3 } from "../../../../../Helpers/Math/MathOperations.js";
+import { CopyArr3 } from "../../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../../../Collisions.js";
 import { MouseGetPos } from "../../../../Controls/Input/Mouse.js";
 import { M_Buffer } from "../../../../Core/Buffers.js";

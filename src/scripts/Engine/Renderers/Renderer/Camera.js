@@ -1,7 +1,7 @@
 import { GlProgramUpdateUniformProjectionMatrix } from '../../../Graphics/GlProgram.js';
 import { MouseGetPosDif, MouseGetWheel } from '../../Controls/Input/Mouse.js';
 import { TimerGetGlobalTimer } from '../../Timers/Timers.js';
-import { Matrix4 } from '../../math/Matrix4.js';
+import { Matrix4 } from '../../../Helpers/THREE_math/Matrix4.js';
 
 /**
  * TODO:

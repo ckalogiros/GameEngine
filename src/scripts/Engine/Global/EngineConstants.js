@@ -28,12 +28,6 @@ function ERROR_TYPE(obj, type, msg) {
 	}
 }
 
-// function ERROR_CLASS_TYPE(obj, type, msg) {
-// 	if (!(obj.type instanceof type)) {
-// 		console.error(`Class type ERROR. type: ${typeof type}, objectType: ${typeof obj}`, msg)
-// 		return true;
-// 	}
-// }
 
 let _cnt = 0x1;
 
@@ -161,10 +155,6 @@ const SECTION = {
 	ITEM_RESTRICT: _cnt<<=0x1,
 
 	NO_ITEMS_CALC: _cnt<<=0x1,
-	// OPTIONS:{
-	// 	WITH_NEW_SECTION: _cnt2<<=0x1,
-	// },
-
 	TOP_DOWN: _cnt<<=0x1,
 
 };
@@ -233,6 +223,7 @@ const MOUSE = {
 
 _cnt = 0x1;
 const ALIGN = {
+
    LEFT: _cnt <<= 0x1,
    RIGHT: _cnt <<= 0x1,
    TOP: _cnt <<= 0x1,
@@ -246,28 +237,6 @@ const ALIGN = {
 
 const POSITION_CENTER = [0,0,0]
 
-_cnt = 0x1;
-const UPDATER = {
-
-	SELF: _cnt<<=0x1,
-	CHILDREN: _cnt<<=0x1,
-	ALL: _cnt<<=0x1,
-}
-
-_cnt = 0x1;
-/**
- * The type of binding of source-target objects,
- * That is what function will be called based on the type or types (many functions). 
- * Used for events like slider-target, where the slider has to call a function
- * OF the target and ON the target.
- */
-const BINDING_TYPE = {
-	/**
-	 * We choose a bit mask for space efficiency.
-	 */
-	CHANGE_COLOR_RGB: _cnt <<= 1,
-	
-};
 
 _cnt = 0x1;
 const FLAGS = {
@@ -296,7 +265,6 @@ const TIME_INTERVAL_REPEAT_ALWAYS = 9999999999; // Repeat always a time interval
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Mesh's Constants 
  */
-const SCALE_DEFAULT = [1, 1];
 const OUT_OF_VIEW = 1000; // Out of screen view in pixels
 
 
@@ -305,10 +273,6 @@ const OUT_OF_VIEW = 1000; // Out of screen view in pixels
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Events Constants 
  */
-const EVENTS = {
-	NONE: 0,
-	MOUSE: 1,
-}
 
 
 
@@ -614,36 +578,20 @@ const DEBUG_INFO = {
 	UI_TIMERS: {
 		IS_ON: false,
 		IDX: INT_NULL,
-		POS: [200,20,0]
+		POS: [60,860,0]
 	},
 	UI_MOUSE: {
 		IS_ON: false,
 		IDX: INT_NULL,
-		POS: [200,60,0]
+		POS: [30,820,0]
 	},
 	UI_GFX: {
 		IS_ON: false,
 		IDX: INT_NULL,
-		POS: [400,100,0]
+		POS: [400,13,0]
 	},
 }
 
-
-// _cnt = 0x1;
-// const DISPATCH_LISTEN_EVENT_TYPES = {
-// 	SCALE_UP_DOWN: _cnt <<= 1,
-// 	DIM_COLOR: _cnt <<= 1,
-
-// 	EXCLUSIVE: _cnt <<= 1,
-
-// 	NULL: _cnt <<= 1,
-// };
-
-// function GetDispatchEventsType(type) {
-
-// 	if (type & DISPATCH_LISTEN_EVENT_TYPES.SCALE_UP_DOWN) { return 'SCALE_UP_DOWN'; }
-// 	if (type & DISPATCH_LISTEN_EVENT_TYPES.DIM_COLOR) { return 'DIM_COLOR'; }
-// }
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
