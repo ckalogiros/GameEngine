@@ -1,15 +1,18 @@
 "use strict";
 
 import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
-import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
+import { GfxInfoMesh, GlGetProgram } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
-import { CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
+import { AddArr3, CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../../Collisions.js";
 import { MouseGetPos } from "../../../Controls/Input/Mouse.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
+import { Gfx_generate_context } from "../../../Interfaces/GfxContext.js";
 import { TimeIntervalsCreate } from "../../../Timers/TimeIntervals.js";
-import { MESH_ENABLE } from "../Base/Mesh.js";
-import { Rect } from "../Rect.js";
+import { Geometry2D_Text } from "../../Geometry/Geometry2DText.js";
+import { FontMaterial } from "../../Material/Base/Material.js";
+import { MESH_ENABLE, Text_Mesh } from "../Base/Mesh.js";
+import { I_Text, Rect } from "../Rect.js";
 import { Widget_Text } from "./WidgetText.js";
 
 
@@ -68,9 +71,8 @@ export class Widget_Label extends Rect {
         pos[2] += 1; // In essence we set as the left (start of text label) the label area and not the left of text.
         
         const textMesh = new Widget_Text(text, pos, fontSize)
-        
+
         pos[0] -= pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
-        pos[2] -= 1; // Set z for area 'behind' text_mesh
         
         const areaMetrics = CalculateArea(text, textMesh.geom.dim, pos, pad)
         
@@ -120,6 +122,21 @@ export class Widget_Label extends Rect {
             GlSetTex(gfxInfo, uvs);
             gfxInfo.vb.start += gfxInfo.vb.count
         }
+    }
+
+    UpdateChildrenPos(){
+
+        for(let i=0; i<this.children.count; i++){
+
+            const child = this.children.buffer[i];
+
+            if(child){
+
+                const areaMetrics = CalculateAreaNoPadding(child.mat.text, child.geom.dim, this.geom.pos, this.pad);
+                areaMetrics.pos[0] -= this.geom.dim[0];
+                CopyArr2(child.geom.pos, areaMetrics.pos);
+            }
+         }
     }
 
     GenGfxCtx(FLAGS, gfxidx) {
@@ -185,13 +202,11 @@ export class Widget_Label extends Rect {
 
     }
 
-    Reposition_pre(){}
-    
-    Reposition_post(dif_pos){
+    SetPosXYZFromDif(pos_dif){
 
-        const text_mesh = this.children.buffer[0];
-        this.MoveXYZ(dif_pos)
-        text_mesh.MoveXYZ(dif_pos)
+        const text = this.children.buffer[0];
+        const new_pos = AddArr3(text.geom.pos, pos_dif)
+        text.SetPosXYZ(new_pos);
     }
 
 }
@@ -211,6 +226,9 @@ export class Widget_Label_Dynamic_Text extends Widget_Label {
         pos[0] += this.geom.dim[0] + this.pad[0]*2;
         
         const dynamicText = new Widget_Label(text2, ALIGN.HOR_CENTER | ALIGN.VERT_CENTER,  pos, fontSize, YELLOW_240_220_10, textcol, scale, this.pad, bold);
+        // let txt = text;
+        // for(let i=0; i<maxDynamicTextChars; i++) txt += ' '
+        // const dynamicText = new Widget_Label(txt, ALIGN.HOR_CENTER | ALIGN.VERT_CENTER,  pos, fontSize, YELLOW_240_220_10, textcol, scale, this.pad, bold);
         dynamicText.SetName('Dynamic Text ' + text1.slice(0, 7));
 
         this.AddChild(dynamicText)
@@ -344,3 +362,15 @@ export class Widget_Label_Text_Mesh_Menu_Options extends Widget_Label {
     
 
 }
+
+
+
+// function Bring_to_front(mesh, params) {
+
+//     mesh.geom.SetZindex(params.z, mesh.gfx, params.numFaces)
+// }
+// function Set_default_zindex(mesh, params) {
+
+//     const defZ = mesh.geom.zIndex;
+//     mesh.geom.SetZindex(defZ, mesh.gfx, params.numFaces)
+// }

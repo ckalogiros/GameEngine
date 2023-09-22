@@ -1,6 +1,6 @@
 "use strict";
 
-import { AddArr3, CopyArr2 } from '../../../../Helpers/Math/MathOperations.js';
+import { AddArr3 } from '../../../../Helpers/Math/MathOperations.js';
 import { Check_intersection_point_rect } from '../../../Collisions.js';
 import { MouseGetPos, MouseGetPosDif } from '../../../Controls/Input/Mouse.js';
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from '../../../Timers/TimeIntervals.js';
@@ -15,8 +15,8 @@ import { Widget_popup_handler_onclick_event } from './WidgetPopup.js';
  * 
  * slider.
  *    ->bar.
- *       -->handle.
- *       -->value-text.
+ *       ->handle.
+ *    ->value-text.
  *    ->name-text.
  * 
  * 
@@ -114,23 +114,13 @@ export class Widget_Slider extends Rect {
 
       bar.geom.pos[0] = this.geom.pos[0];
       bar.geom.pos[1] = this.geom.pos[1] + this.geom.dim[1]- handle.geom.dim[1] - pad[1];
-      
       handle.geom.pos[0] = bar.geom.pos[0];
       handle.geom.pos[1] = bar.geom.pos[1];
-   
-      value_text.geom.pos[1] = handle.geom.pos[1] - handle.geom.dim[1] - value_text.geom.dim[1]
-      value_text.geom.pos[0] = bar.geom.pos[0] + bar.geom.dim[0] - (value_text.CalcTextWidth() );
-      value_text.geom.pos[2] = bar.geom.pos[2] + 1;
-      
       name_text.geom.pos[1] = handle.geom.pos[1] - handle.geom.dim[1] - name_text.geom.dim[1]
       name_text.geom.pos[0] = bar.geom.pos[0] - bar.geom.dim[0] + name_text.geom.dim[0];
-      name_text.geom.pos[2] = this.geom.pos[2] + 1;
+      value_text.geom.pos[1] = handle.geom.pos[1] - handle.geom.dim[1] - value_text.geom.dim[1]
+      value_text.geom.pos[0] = bar.geom.pos[0] + bar.geom.dim[0] - (value_text.CalcTextWidth() );
 
-      // console.log('slider:', this.geom.pos)
-      // console.log('bar:', bar.geom.pos)
-      // console.log('bhandlear:', handle.geom.pos)
-      // console.log('value:', value_text.geom.pos)
-      // console.log('name:', name_text.geom.pos)
 
       BAR_IDX = this.AddChild(bar)
       this.AddChild(name_text)
@@ -153,20 +143,6 @@ export class Widget_Slider extends Rect {
 
       const bar = this.children.buffer[BAR_IDX];
       bar.menu_options.Clbk = ClbkFunction;
-   }
-
-
-   Reposition_post(dif_pos){
-
-      this.MoveXYZ(dif_pos);
-      const bar = this.children.buffer[0];
-      bar.MoveXYZ(dif_pos);
-      const handle = bar.children.buffer[0];
-      handle.MoveXYZ(dif_pos);
-      const value = bar.children.buffer[1];
-      value.MoveXYZ(dif_pos);
-      const name = this.children.buffer[1];
-      name.MoveXYZ(dif_pos);
    }
 
    /** Private Methods */
@@ -251,29 +227,29 @@ export class Widget_Slider extends Rect {
       return false;
    }
 
-   // SetPosXYZFromDif(pos_dif){
+   SetPosXYZFromDif(pos_dif){
 
-   //    const bar = this.children.buffer[BAR_IDX];
-   //    {
-   //       const new_pos = AddArr3(bar.geom.pos, pos_dif)
-   //       bar.SetPosXYZ(new_pos);
-   //    }
-   //    {
-   //       const handle = bar.children.buffer[BAR_IDX];
-   //       const new_pos = AddArr3(handle.geom.pos, pos_dif)
-   //       handle.SetPosXYZ(new_pos);
-   //    }      
-   //    {
-   //       const name_text = this.children.buffer[BAR_IDX+1];
-   //       const new_pos = AddArr3(name_text.geom.pos, pos_dif)
-   //       name_text.SetPosXYZ(new_pos);
-   //    }
-   //    {
-   //       const value_text = bar.children.buffer[1];
-   //       const new_pos = AddArr3(value_text.geom.pos, pos_dif)
-   //       value_text.SetPosXYZ(new_pos);
-   //    }
-   // }
+      const bar = this.children.buffer[BAR_IDX];
+      {
+         const new_pos = AddArr3(bar.geom.pos, pos_dif)
+         bar.SetPosXYZ(new_pos);
+      }
+      {
+         const handle = bar.children.buffer[BAR_IDX];
+         const new_pos = AddArr3(handle.geom.pos, pos_dif)
+         handle.SetPosXYZ(new_pos);
+      }      
+      {
+         const name_text = this.children.buffer[BAR_IDX+1];
+         const new_pos = AddArr3(name_text.geom.pos, pos_dif)
+         name_text.SetPosXYZ(new_pos);
+      }
+      {
+         const value_text = bar.children.buffer[1];
+         const new_pos = AddArr3(value_text.geom.pos, pos_dif)
+         value_text.SetPosXYZ(new_pos);
+      }
+   }
 
 }
 
@@ -302,6 +278,12 @@ function Slider_move_event(params) {
    // console.log('MOVING SECTION', slider.name, mouse_pos)
    console.log('MOVING SLIDER', slider.name)
    slider.MoveRecursive(mouse_pos.x, -mouse_pos.y);
+
+   // const mouse_pos = MouseGetPos();
+   // // mouse_pos[0] -= slider.geom.pos[0];
+   // // mouse_pos[1] -= slider.geom.pos[1];
+   // slider.SetPosXYRecursiveMove(mouse_pos);
+   // // slider.SetPos(mouse_pos);
 
 }
 

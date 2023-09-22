@@ -52,7 +52,7 @@ const PLATFORM = {
  * Engine Constants */
 
 const Device = {
-	MAX_WIDTH: 1200,
+	MAX_WIDTH: 500,
 	MAX_HEIGHT: 800,
 	width:  0,
 	height: 0,
@@ -160,12 +160,10 @@ const SECTION = {
 	ITEM_FIT: _cnt<<=0x1,
 	ITEM_RESTRICT: _cnt<<=0x1,
 
-	NO_ITEMS_CALC: _cnt<<=0x1,
-	// OPTIONS:{
-	// 	WITH_NEW_SECTION: _cnt2<<=0x1,
-	// },
-
-	TOP_DOWN: _cnt<<=0x1,
+	NO_ITEMS_CALC: _cnt2<<=0x1,
+	OPTIONS:{
+		WITH_NEW_SECTION: _cnt2<<=0x1,
+	},
 
 };
 
@@ -603,29 +601,7 @@ const INFO_LISTEN_EVENT_TYPE = {
 		VB: _cnt<<=0x1,
 
 	},
-	LISTENERS:_cnt<<=0x1,
-	ALL_MESHES:_cnt<<=0x1,
-	MOUSE:_cnt<<=0x1,
-	GFX:_cnt<<=0x1,
 
-}
-const DEBUG_INFO = {
-
-	UI_TIMERS: {
-		IS_ON: false,
-		IDX: INT_NULL,
-		POS: [200,20,0]
-	},
-	UI_MOUSE: {
-		IS_ON: false,
-		IDX: INT_NULL,
-		POS: [200,60,0]
-	},
-	UI_GFX: {
-		IS_ON: false,
-		IDX: INT_NULL,
-		POS: [400,100,0]
-	},
 }
 
 

@@ -2,7 +2,6 @@
 
 import { GetSign } from "../../../Helpers/Helpers.js";
 import { Floor } from "../../../Helpers/Math/MathOperations.js";
-import { Info_listener_dispatch_event } from "../../DebugInfo/InfoListeners.js";
 import { RegisterEvent } from "../../Events/Events.js";
 
 
@@ -144,9 +143,6 @@ export function MouseGetXdir() {
 export function MouseGetYdir() {
    return mouse.pos.ydiff;
 }
-export function MouseGetArea() {
-   return mouse.click.drag;
-}
 export function MouseResetDif(factor) {
    mouse.pos.DampenDif(factor)
 }
@@ -187,8 +183,6 @@ export function OnMouseMove(e) {
    mouse.pos.ydiff = -((mouse.pos.y - mouse.pos.yprev)); // Reverse the direction(negative for down dir and positive for up dir) 
 
    RegisterEvent('mouse-move', null);
-
-   Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.MOUSE, { mouse: mouse });
 }
 
 export function OnMouseOut(e){
@@ -240,6 +234,5 @@ export function OnMouseUp(e) {
    const params = {
       mouseButton: e.which-1
    };
-
    RegisterEvent('mouse-click-up', params)
 }

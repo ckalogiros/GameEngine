@@ -216,11 +216,10 @@ class RenderQueue {
 
       if(!this.count) return; // Case RenderQueue hasn't been initialized
 
-      // for (let i = 0; i < this.size; i++) {
-      for (let i = 0; i < this.count; i++) {
+      for (let i = 0; i < this.size; i++) {
          
          if (this.buffer[i].progIdx === progIdx) {
-            this.SetPriority(flag, progIdx, this.buffer[i].vbIdx)
+            this.SetPriority(flag, progIdx, i)
          }
       }
 

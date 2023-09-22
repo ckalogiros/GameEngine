@@ -16,7 +16,7 @@ export class Widget_Menu_Bar extends Widget_Label {
       
    constructor(text, Align, pos, dim, col = GREY3, text_col = WHITE, scale = [1, 1], pad = [0, 0], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [2, 5, 2]) {
          
-      super(text, Align, pos, 4, col, text_col, scale, pad, bold, font, style);
+      super(text, Align, pos, 5, col, text_col, scale, pad, bold, font, style);
 
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       this.SetStyle(style);
@@ -27,7 +27,7 @@ export class Widget_Menu_Bar extends Widget_Label {
 
    AddCloseButton(root, text, pos, fontSize, col = GREY3, text_col = WHITE, scale = [1, 1], pad = [4, 2], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [6, 5, 3]) {
 
-      // CopyArr3(pos, this.geom.pos);
+      CopyArr3(pos, this.geom.pos);
       pos[2] += 1; // Put close button in front of the parent widget.
 
       const close_btn = new Close_Button(root, text, pos, fontSize, col, text_col, scale, pad, bold, font, style);
@@ -75,17 +75,6 @@ export class Widget_Menu_Bar extends Widget_Label {
       }
 
    }
-
-   Reposition_post(dif_pos){
-
-      this.MoveXYZ(dif_pos);
-
-      for(let i=0; i<this.children.count; i++){
-         
-         const child = this.children.buffer[i];
-         child.Reposition_post(dif_pos)
-      }
-  }
 
    GenGfxCtx(FLAGS, gfxidx) {
 

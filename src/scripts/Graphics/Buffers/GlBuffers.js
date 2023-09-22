@@ -843,6 +843,11 @@ export function GlUpdateVertexBufferData(gl, buffer) {
     gl.bufferData(gl.ARRAY_BUFFER, buffer.data, gl.STATIC_DRAW, 0);
     // gl.bufferData(gl.ARRAY_BUFFER, buffer.data, gl.DYNAMIC_DRAW, 0);
 
+    const trigger_params = { info: `${buffer.count}` }
+    const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+    Info_listener_dispatch_event(info_event_type, trigger_params);
+    // console.log(buffer)
+
     buffer.needsUpdate = false;
 }
 export function GlUpdateVertexBufferSubData(gl, buffer, src_offset, dst_offset, byte_length) {

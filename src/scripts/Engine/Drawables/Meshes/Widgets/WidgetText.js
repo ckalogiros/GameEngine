@@ -23,7 +23,7 @@ export class Widget_Text extends I_Text {
 
 	pad = [0, 0];
 
-	constructor(text, pos, fontSize = 5,  color = WHITE, bold = 4, font, scale) {
+	constructor(text, pos, fontSize = 5, scale = [1, 1], color = WHITE, bold = 4, font = TEXTURES.SDF_CONSOLAS_LARGE) {
 
 		const sdfouter = CalculateSdfOuterFromDim(fontSize);
 		if (sdfouter + bold > 1) bold = 1 - sdfouter;
@@ -213,16 +213,6 @@ export class Widget_Text extends I_Text {
 		}
 	}
 
-	Reposition_post(dif_pos){
-
-		this.MoveXYZ(dif_pos)
-		for(let i=0; i<this.children.count; i++){
-
-			const child = this.children.buffer[i];
-			child.MoveXYZ(dif_pos)
-		}
-   }
-
 }
 
 let DYN_TEXT_UPDATE_INTERVAL_IDX = INT_NULL;
@@ -234,7 +224,7 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 	 * If the text changes to a lesser number of chars, the update function just adds empty spaces*/
 	constructor(maxDynamicTextChars, pos, fontSize, scale, color1, bold) {
 
-		super(maxDynamicTextChars, pos, fontSize, color1, bold, scale);
+		super(maxDynamicTextChars, pos, fontSize, scale, color1, bold);
 
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | this.geom.type | this.mat.type;
 
@@ -256,7 +246,7 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 
 	CreateNewText(maxDynamicTextChars, fontSize, color2, pad=this.pad, bold=this.bold) {
 
-		 /** DEBUG */ if (!Array.isArray(pad)) console.error('Pad is not of type array');
+		if (!Array.isArray(pad)) console.error; /** DEBUG */
 		this.pad = pad;
 
 		let pos = [0, 0, 0];
@@ -279,14 +269,12 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 			pos[0] += this.geom.CalcTextWidth()
 		}
 
-		const dynamicText = new Widget_Text(maxDynamicTextChars, pos, fontSize, color2, bold);
-		dynamicText.type = MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC;
+		const dynamicText = new Widget_Text(maxDynamicTextChars, pos, fontSize, [1, 1], color2, bold);
 		
 		// Add the new dynamicText as a child of 'this'.
 		const idx = this.AddChild(dynamicText);
 		dynamicText.SetName(idx, ' Dynamic Text ' + this.mat.text.slice(0, 7));
 
-		// console.log('dynamicText:', dynamicText.mat.text,  dynamicText.geom.pos)
 
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | dynamicText.geom.type | dynamicText.mat.type;
 
@@ -354,7 +342,7 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 			const tIdx = TimeIntervalsCreate(msInterval, name, TIME_INTERVAL_REPEAT_ALWAYS, this.Update, params);
 			this.timeIntervalsIdxBuffer.Add(tIdx);
 		}
-		else { // Update dynamicText via one timeInterval Update().
+		else { // Update dynamicText via one timeIntrval Update().
 
 			// The 'new' params to be passed to the new timeInterval.
 			const params = {
@@ -430,6 +418,14 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 			else if(params.params.func_params[i]){
 				val = params.params.func_params[i].delta_avg; // No callback, just a value
 			}
+			// console.log(params.params.func_params[i])
+			// if(params.params.func_params)
+			// 	val = params.params.func[i](params.params.func_params[i]); // Callback with parameters
+			// else if(params.params.func[i])
+			// 	val = params.params.func[i](); // Callback with no parameters
+			// else if(params.params.func_params[i])
+			// 	val = params.params.func_params[i]; // No callback, just a value
+
 
 			const text = `${val}`;
 			const geom = meshes[i].geom;
@@ -455,16 +451,6 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 		}
 	}
 
-	// Reposition_post(dif_pos){
-
-	// 	this.MoveXY(dif_pos[0], dif_pos[1])
-	// 	for(let i=0; i<this.children.count; i++){
-
-	// 		const child = this.children.buffer[i];
-	// 		child.MoveXY(dif_pos[0], dif_pos[1])
-	// 	}
-   // }
-
 	SetColorRGB(col) { 
 
 		let num_faces = this.geom.num_faces;
@@ -474,6 +460,7 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 		this.mat.SetColorRGB(col, this.gfx, num_faces) 
   }
 }
+
 
 /**
  * A widget of rendering static text 
@@ -489,7 +476,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 
 		// Translate the dynamic text by the width of the constant text's width
 		pos[0] += this.geom.CalcTextWidth();
-		const dynamicText = new Widget_Text(maxDynamicTextChars, pos, fontSize, color2, bold);
+		const dynamicText = new Widget_Text(maxDynamicTextChars, pos, fontSize, scale, color2, bold);
 
 		this.AddChild(dynamicText)
 

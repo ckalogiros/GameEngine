@@ -3,9 +3,6 @@
 import { Intersection_point_rect } from "../Collisions.js";
 import { MouseGetPos } from "../Controls/Input/Mouse.js";
 import { M_Buffer } from "../Core/Buffers.js";
-import { Info_listener_create_event, Info_listener_dispatch_event } from "../DebugInfo/InfoListeners.js";
-import { Drop_down_set_root, Drop_down_set_root_for_debug, Widget_Drop_Down } from "../Drawables/Meshes/Widgets/Menu/Widget_Drop_Down.js";
-import { Widget_Text } from "../Drawables/Meshes/Widgets/WidgetText.js";
 import { _pt5, _pt6 } from "../Timers/PerformanceTimers.js";
 import { Events_handle_immidiate } from "./Events.js";
 
@@ -93,12 +90,6 @@ export class Event_Listener {
          children: null, // current mesh may have children with events. This is the buffer to store them, but only after 'ReconstructEvents' function call.
          anyChildrenActive: false, // This is to check if the current event has any children events(eficient since we do not have to check every child event if 'isActive')
       }
-
-      // const trigger_params = { progidx: gfx.prog.idx,  vbidx: gfx.vb.idx }
-      const info_event_type = INFO_LISTEN_EVENT_TYPE.LISTENERS;
-      Info_listener_dispatch_event(info_event_type, event_params);
-
-      // Listeners_debug_info_update(params)
 
       LISTENERS_FLAGS[TYPE_IDX] = true;
       return this.event_type[TYPE_IDX].Add(event_params);
@@ -437,9 +428,9 @@ export function Listeners_get_event(TYPE_IDX, event_idx){ return _listener.event
 
 export function Listeners_copy_event_children_buffer(TYPE_IDX, event_idx){ return _listener.CopyChildren(TYPE_IDX, event_idx); }
 
-export function Listener_create_event(TYPE_IDX, Clbk, source_params, target_params) {
+export function Listener_create_event(TYPE_IDX, Clbk, params, target) {
 
-   return _listener.AddEvent(TYPE_IDX, Clbk, source_params, target_params);
+   return _listener.AddEvent(TYPE_IDX, Clbk, params, target);
 }
 
 export function Listener_dispatch_event(TYPE_IDX, trigger_params) {
@@ -481,14 +472,12 @@ export function Listener_remove_event_by_idx2(TYPE_IDX, gatheredIdxs) {
          _listener.event_type[TYPE_IDX].buffer[i[0]].children.buffer[i[1]].children.RemoveByIdx(i[2]);
          break;
       }
-      default: alert('No depth fount. @ Listener_remove_event_by_idx2()')
    }
 
    // A way of not bothering dispatching this type of event (if none exist), from the Events.js
    if (_listener.event_type[TYPE_IDX].active_count === 0)
       LISTENERS_FLAGS[TYPE_IDX] = false;
 }
-
 export function Listener_remove_children_event_by_idx(TYPE_IDX, event_idx, child_event_idx) {
 
    _listener.event_type[TYPE_IDX].buffer[event_idx].children.buffer.RemoveByIdx(child_event_idx);
@@ -565,106 +554,3 @@ export function Listener_debug_print_all() {
 
    _listener.PrintAll();
 }
-
-/**************************************************************************************************************************/
-// Debug Info Drop Down
-
-export function Listeners_debug_info_create(scene){
-
-   const dp_btn_pad = [10, 2]
-   const dropdown = new Widget_Drop_Down('Listeners Dropdown Section Panel', ALIGN.LEFT, [300, 20, 0], [60, 20], GREY1, TRANSPARENCY(GREY5, .8), WHITE, [1,1], dp_btn_pad);
-   dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dropdown.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-   // dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, dropdown.SetOnMove);
-   
-
-
-   for(let i=0; i<_listener.event_type.length; i++){
-       
-      const evt_type = _listener.event_type[i];
-      const type = Listeners_get_event_type_string(i);
-
-      let count = evt_type.count;
-      
-      const drop_down_evt_type = new Widget_Drop_Down(`buffer type:${type} | count:${evt_type.count}`, ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(BLACK, 1.1), WHITE, [1,1], dp_btn_pad);
-      drop_down_evt_type.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down_evt_type.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-      
-      for(let j=0; j<evt_type.count; j++){
-         
-         const evt = evt_type.buffer[j];
-   
-         if(evt.anyChildrenActive)
-            count += Listeners_debug_info_create_recursive(scene, drop_down_evt_type, evt.children, evt.source_params.name);
-         
-         if(evt) {
-            const info = `type: ${type} | idx: ${j} | ${evt.source_params.name}`;
-            const text = new Widget_Text(info, [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-            text.info_id = [i, j]
-            text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;
-            drop_down_evt_type.AddToMenu(text)
-    
-         }
-
-         
-      }
-
-      dropdown.AddToMenu(drop_down_evt_type)
-      
-   }
-
-   // const info_event_type = INFO_LISTEN_EVENT_TYPE.LISTENERS;
-   // Info_listener_create_event(info_event_type, Listeners_debug_info_update, dropdown, null)
-
-
-   scene.AddMesh(dropdown);
-   dropdown.Init();
-   // dropdown.Reconstruct_listeners_recursive();
-   dropdown.Calc();
-   Drop_down_set_root(dropdown, dropdown);
-}
-
-function Listeners_debug_info_create_recursive(scene, dropdown_root, evt_children, parent_discription){
-
-   // if children events exist, put them in a new drop down.
-   const dp_btn_pad = [0, 0]
-   const drop_down_evt_type = new Widget_Drop_Down(`children of: ${parent_discription}`, ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [1,1], dp_btn_pad);
-   drop_down_evt_type.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down_evt_type.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-
-
-   for(let j=0; j<evt_children.count; j++){
-      
-      const evt = evt_children.buffer[j];
-
-      if(evt.anyChildrenActive) // Pass as new root for the recursion the current dropdown menu
-         Listeners_debug_info_create_recursive(scene, drop_down_evt_type, evt.children);
-
-      const type = Listeners_get_event_type_string(evt.type);
-      const info = `type: ${type} | event: ${j} | name:${evt.source_params.name}`;
-      const text = new Widget_Text(info, [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-      text.info_id = [type, j]
-      text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;
-      drop_down_evt_type.AddToMenu(text)
-   }
-
-   dropdown_root.AddToMenu(drop_down_evt_type);
-}
-
-export function Listeners_debug_info_update(params){
-
-   const dropdown_root = params.source_params;
-
-   const evt = params.target_params;
-
-   for(let i=0; i<dropdown_root.children.count; i++){
-
-      const dropdown_child = dropdown_root.children.buffer[i];
-      if(dropdown_child.info_id[0] === evt.type){
-
-         const type = Listeners_get_event_type_string(evt.type);
-         const info = `type: ${type} | name:${evt.source_params.name}`;
-         const text = new Widget_Text(info, [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-         text.info_id = [evt.type, 0]
-         text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;
-         dropdown_child.AddToMenu(text);
-      }
-   } 
-} 

@@ -1,6 +1,5 @@
 "use strict";
 
-import { GlSetWposY } from "../../../Graphics/Buffers/GlBufferOps.js";
 import { GlAddGeometry } from "../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh } from "../../../Graphics/GlProgram.js";
 import { CopyArr2 } from "../../../Helpers/Math/MathOperations.js";
@@ -55,20 +54,12 @@ export class Geometry2D_Text extends Geometry2D {
    }
 
 
-   MoveXYZ(pos, gfx) {
-      super.MoveXYZ(pos, gfx, this.num_faces)
-   }
    MoveXY(x, y, gfx) {
       super.MoveXY(x, y, gfx, this.num_faces)
    }
    SetPosXYZ(pos, gfx) {
       super.SetPosXYZ(pos, gfx, this.num_faces)
    }
-   SetPosY(y, gfx) {
-      this.pos[1] = y;
-      GlSetWposY(gfx, y, this.num_faces);
-      // super.GlSetWposY(gfx, y, this.num_faces);
-  }
 
    CalcTextWidth(){
       return this.num_faces * this.dim[0] * 2;
