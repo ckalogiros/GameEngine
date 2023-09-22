@@ -320,6 +320,9 @@ export function GlSetColor(gfxInfo, color, num_faces = 1) {
 
     const progs = GlGetPrograms();
 
+    if(gfxInfo === null){
+        return
+    }
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.col;
@@ -444,6 +447,26 @@ export function GlMoveXY(gfxInfo, wpos, num_faces = 1) {
     }
     vb.needsUpdate = true;
 }
+export function GlMoveXYZ(gfxInfo, wpos, num_faces = 1) {
+
+    const progs = GlGetPrograms();
+    const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
+
+    let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.wposTime;
+    let verts = num_faces * gfxInfo.vertsPerRect;
+    let stride = gfxInfo.attribsPerVertex - V_WPOS_COUNT;
+
+    while (verts) {
+
+        vb.data[index++] += wpos[0]; // Move mesh's x pos by amt
+        vb.data[index++] += wpos[1]; // Move mesh's y pos by amt
+        vb.data[index++] += wpos[2]; // Move mesh's y pos by amt
+
+        index += stride; // Go to next vertice's pos. +1 for skipping pos.z
+        verts--;
+    }
+    vb.needsUpdate = true;
+}
 
 export function GlSetWpos(gfxInfo, pos, num_faces = 1) {
 
@@ -510,7 +533,7 @@ export function GlSetWposX(gfxInfo, posx, num_faces = 1) {
     }
     vb.needsUpdate = true;
 }
-export function GlSetWposY(gfxInfo, posy) {
+export function GlSetWposY(gfxInfo, posy, num_faces = 1) {
 
     const progs = GlGetPrograms();
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];

@@ -31,6 +31,7 @@ export class Rect extends Mesh{
             child.GenGfxCtx(FLAGS, gfxidx); // Propagate the same functionality we apply here down the tree of meshes
       }
 
+      return this.gfx;
    }
    
    AddToGfx(){
@@ -58,7 +59,6 @@ export class I_Text extends Text_Mesh{
 		const geom = new Geometry2D_Text(pos, fontSize, scale, text, font);
 
 		super(geom, mat);
-      // super.SetName('T_Text')
    }
 
    GenGfxCtx(FLAGS, gfxidx){
@@ -72,7 +72,7 @@ export class I_Text extends Text_Mesh{
          if(child)
             child.GenGfxCtx(FLAGS, gfxidx); // Propagate the same functionality we apply here down the tree of meshes
       }
-
+      return this.gfx;
    }
    
    AddToGfx(){
