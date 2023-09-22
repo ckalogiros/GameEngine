@@ -20,6 +20,7 @@ export class Widget_Button extends Widget_Label {
    GenGfxCtx(FLAGS=GFX.ANY, gfxIdx){
 
       super.GenGfxCtx(FLAGS, gfxIdx);
+      return this.gfx;
    }
 
    AddToGfx(){
@@ -65,12 +66,12 @@ export class Widget_Switch extends Widget_Button {
    isOn;
    state_text;
 
-   constructor(text_on, text_off, pos, fontSize = 5, color = GREY1, colorText = WHITE, scale, pad = [fontSize, fontSize], bold, font, style = [3, 6, 2]) {
+   constructor(text_on, text_off, pos, fontSize = 5, color = GREY1, colorText = WHITE, pad = [fontSize, fontSize], bold, font, style = [3, 6, 2], scale) {
 
       super(text_off, (ALIGN.HOR_CENTER|ALIGN.VERT_CENTER), pos, fontSize, color, colorText, scale, pad, bold, font, style)
 
       this.isOn = 0x0;
-      this.state_text = [text_on, text_off];
+      this.state_text = [text_off, text_on];
       this.type |= MESH_TYPES_DBG.WIDGET_BUTTON;
       this.SetName('Switch');
 
@@ -79,41 +80,47 @@ export class Widget_Switch extends Widget_Button {
    OnClick(params) {
 
       const mesh = params.source_params;
-      // const point = MouseGetPos();
-      // const m = mesh.geom;
 
-      // console.log('click')
-      // if (Check_intersection_point_rect(m.pos, m.dim, point, [0, 0])) {
+      mesh.isOn ^= 0x1;
+      mesh.UpdateText(mesh.state_text[mesh.isOn]);
+      STATE.mesh.SetClicked(mesh);
 
+      /**
+       * For popup menu options and slider connections.
+       * If the option is clicked, then we must call the slider connect function
+       */
 
-         mesh.isOn ^= 0x1;
-         mesh.UpdateText(mesh.state_text[mesh.isOn]);
-         STATE.mesh.SetClicked(mesh);
+      if (params.target_params) {
 
-         /**
-          * For popup menu options and slider connections.
-          * If the option is clicked, then we must call the slider connect function
-          */
-         if (params.target_params) {
+         // const target_params = {
 
-            const target_params = {
+         //    targetBindingFunctions: params.target_params.targetBindingFunctions,
+         //    self_mesh: params.target_params.clicked_mesh,
+         //    target_mesh: params.target_params.target_mesh,
+         //    event_type: params.event_type,
+         //       /*FOR DEBUG*/clicked_mesh: mesh,
+         // }
+         const EventClbk = params.target_params.EventClbk;
+         console.log('OnClick callback IN. meshId ', mesh.id)
+         // EventClbk(target_params);
+         EventClbk(params.target_params);
+         // console.log('OnClick callback OUT. meshId ', mesh.id)
+      }
 
-               targetBindingFunctions: params.target_params.targetBindingFunctions,
-               self_mesh: params.target_params.clicked_mesh,
-               target_mesh: params.target_params.target_mesh,
-               event_type: params.event_type,
-                  /*FOR DEBUG*/clicked_mesh: mesh,
-            }
-            const EventClbk = params.target_params.EventClbk;
-            console.log('OnClick callback IN. meshId ', mesh.id)
-            EventClbk(target_params);
-            // console.log('OnClick callback OUT. meshId ', mesh.id)
-         }
+      return true;
+   }
 
-         return true;
-      // }
+   Bind(EventClbk, targetBindingFunctions, _params){
 
-      // return false;
+      const target_params = {
+         EventClbk: EventClbk,
+         targetBindingFunctions: targetBindingFunctions,
+         clicked_mesh: this,
+         target_mesh: null,
+         params: _params,
+      }
+      
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick, target_params)
    }
 }
 

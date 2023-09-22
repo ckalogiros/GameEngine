@@ -28,6 +28,11 @@ export class Info_Listeners {
       return this.events.Add(event_params);
    }
 
+   DestroyEvent(idx){
+
+      this.events.RemoveByIdx(idx);
+   }
+
    DispatchEvents(EVENT_TYPE, trigger_params) {
 
       for (let i = 0; i < this.events.count; i++) {
@@ -53,12 +58,17 @@ export class Info_Listeners {
 
 const _info_listeners = new Info_Listeners();
 
-export function Info_listener_create_event(TYPE_IDX, Clbk, params, target) {
+export function Info_listener_create_event(TYPE_IDX, Clbk, source_params, target_params) {
 
-   return _info_listeners.AddEvent(TYPE_IDX, Clbk, params, target);
+   return _info_listeners.AddEvent(TYPE_IDX, Clbk, source_params, target_params);
 }
 
 export function Info_listener_dispatch_event(TYPE_IDX, trigger_params) {
 
    _info_listeners.DispatchEvents(TYPE_IDX, trigger_params);
+}
+
+export function Info_listener_destroy_event(event_idx) {
+
+   _info_listeners.DestroyEvent(event_idx);
 }

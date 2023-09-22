@@ -235,7 +235,7 @@ export function OnKeyUp(e){
    }
 
    // e.preventDefault();
-   console.log(_keys_buffer)
+   // console.log(_keys_buffer)
    _keys_buffer = [];
 
 }

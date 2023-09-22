@@ -57,6 +57,9 @@ class Buffer_Interface {
 
    RemoveByIdx(idx) {
 
+      /**DEBUG */ if(idx < 0 || idx > this.size-1) 
+         alert('Index Out of bounds. @ M_Buffer.RemoveByIdx().')
+
       if (this.buffer[idx] !== null) {
 
          /**
@@ -160,7 +163,7 @@ export class M_Buffer extends Buffer_Interface{
       this.buffer = new Array(this.size);
 
       if (oldData) this.CopyBufferElements(oldData)
-      console.warn('Resizing M_Buffer!')
+      console.warn('Resizing M_Buffer!', this.size)
    }
 
 }

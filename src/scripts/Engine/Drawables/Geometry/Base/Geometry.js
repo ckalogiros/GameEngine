@@ -52,9 +52,9 @@ export class Geometry2D {
     }
 
     //////////////////////////////////////////////////////////////
-    SetPosXYZ(pos, gfx, numMeshes) {
+    SetPosXYZ(pos, gfx, numFaces=1) {
         math.CopyArr3(this.pos, pos);
-        glBufferOps.GlSetWpos(gfx, pos, numMeshes);
+        glBufferOps.GlSetWpos(gfx, pos, numFaces);
     }
     SetPosXY(pos, gfx) {
         math.CopyArr2(this.pos, pos);
@@ -64,9 +64,9 @@ export class Geometry2D {
         this.pos[0] = x;
         glBufferOps.GlSetWposX(gfx, x);
     }
-    SetPosY(y, gfx) {
+    SetPosY(y, gfx, numFaces) {
         this.pos[1] = y;
-        glBufferOps.GlSetWposY(gfx, y);
+        glBufferOps.GlSetWposY(gfx, y, numFaces);
     }
     UpdatePosXYZ(gfx) {
         glBufferOps.GlSetWpos(gfx, this.pos);
@@ -84,6 +84,11 @@ export class Geometry2D {
     SetZindex(z, gfx, numFaces) {
         this.pos[2] = z;
         glBufferOps.GlSetWposZ(gfx, z, numFaces);
+    }
+    MoveXYZ(pos, gfx, num_faces) {
+        /** DEBUG */ if(pos.length !== 3) console.error('Wrong array dimention for position xyz. @ class Geometry2D, Geometry.js')
+        math.AddArr3(this.pos, pos);
+        glBufferOps.GlMoveXYZ(gfx, pos, num_faces);
     }
     MoveXY(x, y, gfx, num_faces) {
         this.pos[0] += x;
