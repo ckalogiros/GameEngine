@@ -33,7 +33,7 @@ export class Info_Listeners {
 
    DispatchEvents(EVENT_TYPE, trigger_params) {
 
-      for (let i = 0; i < this.events.count; i++) {
+      for (let i = 0; i < this.events.boundary; i++) {
             
          const evt = this.events.buffer[i]; 
 

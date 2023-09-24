@@ -43,7 +43,7 @@ function Animations_run_scale_up_start(mesh) {
    GlSetWposX(mesh.gfx, posx);
    mesh.UpdateDim();
 
-   if (mesh.children.count) {
+   if (mesh.children.boundary) {
 
       if(mesh.children.buffer[0].type & MESH_TYPES_DBG.TEXT_MESH){
          
@@ -82,7 +82,7 @@ function Animations_run_scale_down_start(mesh) {
    GlSetWposX(mesh.gfx, posx);
    mesh.UpdateDim();
 
-   if (mesh.children.count) {
+   if (mesh.children.boundary) {
       
       if(mesh.children.buffer[0].type & MESH_TYPES_DBG.TEXT_MESH){
          
@@ -132,7 +132,7 @@ function Animations_run_scale_down_stop(mesh) {
    mesh.geom.dim[1] = mesh.geom.defDim[1];   // Reset button's area dimentions y
    mesh.UpdateDim();
 
-   if (mesh.children.count) {
+   if (mesh.children.boundary) {
 
       const scaleFactor = 1; // Must pass param scaleFactor
 
@@ -186,13 +186,13 @@ function Animations_run_scale_down_stop(mesh) {
 function Helper_scale_rect(_mesh, scaleFactor) {
 
    const children = _mesh.children;
-   const count = children.count;
+   const count = children.boundary;
 
    for (let i = 0; i < count; i++) {
       
       const mesh = children.buffer[i];
 
-      if(mesh.children.count){ // Recursive
+      if(mesh.children.boundary){ // Recursive
          Helper_scale_rect(mesh, scaleFactor);
       }
 

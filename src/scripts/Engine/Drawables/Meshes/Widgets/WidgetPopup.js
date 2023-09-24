@@ -6,7 +6,7 @@ import { MESH_ENABLE } from '../Base/Mesh.js';
 import { CopyArr2 } from '../../../../Helpers/Math/MathOperations.js';
 import { Menu_options_create } from '../../../MenuOptions/MenuOptionsBuilder.js';
 import { Section } from '../Section.js';
-import { Gfx_activate, Gfx_deactivate, Gfx_end_session } from '../../../Interfaces/GfxContext.js';
+import { Gfx_activate, Gfx_deactivate, Gfx_end_session } from '../../../Interfaces/Gfx/GfxContext.js';
 
 
 class Widget_PopUp extends Section {
@@ -56,7 +56,7 @@ class Widget_PopUp extends Section {
       
       // this.DeactivateSecondaryPopups(); // First deactivate any other popups rooted to the this popup (which is the root).
 
-      // for (let i = 0; i < this.children.count; i++) { // Then 
+      // for (let i = 0; i < this.children.boundary; i++) { // Then 
 
       //    const mesh = this.children.buffer[i];
 
@@ -86,7 +86,7 @@ class Widget_PopUp extends Section {
     */
    DeactivateSecondaryPopups() {
 
-      for (let i = 0; i < this.children.count; i++) {
+      for (let i = 0; i < this.children.boundary; i++) {
          
          const mesh = this.children.buffer[i];
          if(mesh){
@@ -121,12 +121,12 @@ export function Initializer_popup_initialization(){
 
 //    const children = _mesh.children;
    
-//    for (let i = 0; i < children.count; i++) {
+//    for (let i = 0; i < children.boundary; i++) {
       
 //       const mesh = children.buffer[i];
 //       if (mesh){
 
-//          if (mesh.children.count)
+//          if (mesh.children.boundary)
 //             Recursive_deactivate_secondary_popups(mesh)
    
 //          GlResetVertexBuffer(mesh.gfx);

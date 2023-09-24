@@ -4,7 +4,7 @@ import { PrintVertexDataAll } from "../../../../../Graphics/Z_Debug/GfxDebug";
 import { GetRandomColor } from "../../../../../Helpers/Helpers";
 import { MouseGetPosDif } from "../../../../Controls/Input/Mouse";
 import { M_Buffer } from "../../../../Core/Buffers";
-import { Gfx_activate, Gfx_deactivate, Gfx_deactivate_no_listeners_touch, Gfx_end_session, Gfx_generate_context } from "../../../../Interfaces/GfxContext";
+import { Gfx_activate, Gfx_deactivate, Gfx_deactivate_no_listeners_touch, Gfx_end_session, Gfx_generate_context } from "../../../../Interfaces/Gfx/GfxContext";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../../../Timers/TimeIntervals";
 import { MESH_ENABLE } from "../../Base/Mesh";
 import { Section } from "../../Section";
@@ -109,7 +109,7 @@ export class Widget_Drop_Down extends Section {
             params.gather_gfx_idxs.push({ progidx: menu.gfx.prog.idx, vbidx: menu.gfx.vb.idx, name: `menu:${menu.name}` });
             
             // Here we have to gfxGen all menus children, NOT private
-            for(let i=0; i<menu.children.count; i++){
+            for(let i=0; i<menu.children.boundary; i++){
                
                const child = menu.children.buffer[i];
                if(child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN){
@@ -176,7 +176,7 @@ export class Widget_Drop_Down extends Section {
       const mesh = params.source_params;
       STATE.mesh.SetClicked(mesh);
 
-      if (mesh.timeIntervalsIdxBuffer.count <= 0) {
+      if (mesh.timeIntervalsIdxBuffer.boundary <= 0) {
 
          const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, mesh.OnMove, mesh);
          mesh.timeIntervalsIdxBuffer.Add(idx);
@@ -225,7 +225,7 @@ export class Widget_Drop_Down extends Section {
 
       let pad = [this.pad[0], this.pad[1]];
 
-      for (let i = 1; i < this.children.count; i++) {
+      for (let i = 1; i < this.children.boundary; i++) {
 
          const b = this.children.buffer[i];
          b.Align_pre(this, ALIGN.RIGHT | ALIGN.VERT_CENTER, pad);

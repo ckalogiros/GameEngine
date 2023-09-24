@@ -6,7 +6,7 @@ import { MouseGetPos, MouseGetPosDif } from "../../Controls/Input/Mouse.js";
 import { UpdaterAdd } from "../../Scenes.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../Timers/TimeIntervals.js";
 import { MESH_ENABLE } from "./Base/Mesh.js";
-import { Rect } from "./Rect.js";
+import { Rect } from "./Rect_Mesh.js";
 
 
 
@@ -100,7 +100,7 @@ export class Section extends Rect {
 
    Reset(section) {
 
-      for (let i = 0; i < section.children.count; i++) {
+      for (let i = 0; i < section.children.boundary; i++) {
 
          const mesh = section.children.buffer[i];
          if (mesh.children.active_count && mesh.type & MESH_TYPES_DBG.SECTION_MESH) {
@@ -122,7 +122,7 @@ export class Section extends Rect {
    //       mesh.GenGfxCtx(FLAGS, gfxidx); // Add any none-added meshes.
    //    }
 
-   //    for (let i = 0; i < mesh.children.count; i++) {
+   //    for (let i = 0; i < mesh.children.boundary; i++) {
 
    //       const child = mesh.children.buffer[i];
 
@@ -134,7 +134,7 @@ export class Section extends Rect {
 
    UpdateGfxPosDimRecursive(mesh) {
       
-      for (let i = 0; i < mesh.children.count; i++) {
+      for (let i = 0; i < mesh.children.boundary; i++) {
 
          const child = mesh.children.buffer[i];
 
@@ -173,7 +173,7 @@ export class Section extends Rect {
 
          STATE.mesh.SetClicked(section);
 
-         if (section.timeIntervalsIdxBuffer.count <= 0) {
+         if (section.timeIntervalsIdxBuffer.boundary <= 0) {
 
             /**
              * Create move event.
@@ -205,13 +205,13 @@ export class Section extends Rect {
    }
 }
 
-function Section_move_section(_params) {
+function Section_move_section(params) {
    /**
     * The function is called by the timeInterval.
     * The timeInterval has been set by the 'OnClick' event.
     */
 
-   const section = _params.params;
+   const section = params.params;
 
    // Destroy the time interval calling this function if the mesh is not grabed.
    if (section.StateCheck(MESH_STATE.IN_GRAB) === 0) {
@@ -233,7 +233,7 @@ function Section_move_section(_params) {
 
 function Expand2(section, options) {
 
-   for (let i = 0; i < section.children.count; i++) {
+   for (let i = 0; i < section.children.boundary; i++) {
 
       const mesh = section.children.buffer[i];
 
@@ -264,7 +264,7 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
    const accum_pos = _accum_pos;
 
 
-   for (let i = 0; i < parent.children.count; i++) {
+   for (let i = 0; i < parent.children.boundary; i++) {
 
       const mesh = parent.children.buffer[i];
       let continue_recur = true;
@@ -320,7 +320,7 @@ function Calculate_sizes_recursive(section, top, left, options, total_margin = [
    const margin = total_margin;
    const accum_size = [0, 0];
 
-   for (let i = 0; i < section.children.count; i++) {
+   for (let i = 0; i < section.children.boundary; i++) {
 
       let opt = options
       if (options & SECTION.INHERIT)

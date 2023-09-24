@@ -773,31 +773,6 @@ export function GlSetWposXYMany(gfxInfo, pos, startsBuffer) {
         index = startsBuffer[numMeshes--];
     }
 }
-// // Move all vertices in consecutive order. Use to move text like meshes.
-// export function GlMoveXYConcecutive(gfxInfo, pos, numMeshes) {
-
-//     const progs = GlGetPrograms();
-//     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
-
-//     let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.wposTime;
-//     let stride = gfxInfo.attribsPerVertex - V_WPOS_COUNT;
-
-//     while (numMeshes) {
-//         let verts = num_faces * gfxInfo.vertsPerRect;
-//         while (verts) {
-
-//             vb.data[index++] += pos[0];
-//             vb.data[index++] += pos[1];
-//             index++
-
-//             index += stride; // Go to next vertice's pos. +1 for skipping pos.z
-//             verts--;
-//         }
-//         numMeshes--;
-//     }
-
-//     vb.needsUpdate = true;
-// }
 
 export function GlRotate2D(gfxInfo, dim, angle) {
 
@@ -823,120 +798,9 @@ export function GlRotate2D(gfxInfo, dim, angle) {
     vb.data[index++] = newPos[7];
 }
 
-/** */
-// export function GlRotateX3D(gfxInfo, dim, angle) {
 
-//     const progs = GlGetPrograms();
-//     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
-
-//     let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderInfo.attributes.offset.pos;
-//     let stride = gfxInfo.attribsPerVertex;
-//     let vertices = num_faces * gfxInfo.vertsPerRect;
-
-//     const c = Math.cos(angle);
-//     const s = Math.sin(angle);
-//     const r = [
-//         c, -s,
-//         s, c,
-//     ];
-
-//     const vPosF = [
-//         -1 * dim[0], 1 * dim[1], 1 * dim[2],
-//         -1 * dim[0], -1 * dim[1], 1 * dim[2],
-//         1 * dim[0], 1 * dim[1], 1 * dim[2],
-//         1 * dim[0], -1 * dim[1], 1 * dim[2],
-//     ];
-//     const vPosBK = [
-//         -1 * dim[0], 1 * dim[1], -1 * dim[2],
-//         -1 * dim[0], -1 * dim[1], -1 * dim[2],
-//         1 * dim[0], 1 * dim[1], -1 * dim[2],
-//         1 * dim[0], -1 * dim[1], -1 * dim[2],
-//     ];
-//     const vPosR = [
-//         1 * dim[0], -1 * dim[1], 1 * dim[2],
-//         1 * dim[0], -1 * dim[1], -1 * dim[2],
-//         1 * dim[0], 1 * dim[1], 1 * dim[2],
-//         1 * dim[0], 1 * dim[1], -1 * dim[2],
-//     ];
-//     const vPosL = [
-//         -1 * dim[0], -1 * dim[1], 1 * dim[2],
-//         -1 * dim[0], -1 * dim[1], -1 * dim[2],
-//         -1 * dim[0], 1 * dim[1], 1 * dim[2],
-//         -1 * dim[0], 1 * dim[1], -1 * dim[2],
-//     ];
-//     const vPosT = [
-//         -1 * dim[0], 1 * dim[1], 1 * dim[2],
-//         -1 * dim[0], 1 * dim[1], -1 * dim[2],
-//         1 * dim[0], 1 * dim[1], 1 * dim[2],
-//         1 * dim[0], 1 * dim[1], -1 * dim[2],
-//     ];
-//     const vPosBot = [
-//         -1 * dim[0], -1 * dim[1], 1 * dim[2],
-//         -1 * dim[0], -1 * dim[1], -1 * dim[2],
-//         1 * dim[0], -1 * dim[1], 1 * dim[2],
-//         1 * dim[0], -1 * dim[1], -1 * dim[2],
-//     ];
-
-//     let xf = 0,
-//         yf = 1,
-//         zf = 2;
-
-//     vertices = 4;
-//     while (vertices) {
-//         vb.data[index + 1] = vPosF[yf] * r[0] + vPosF[zf] * r[2];
-//         vb.data[index + 2] = vPosF[yf] * r[1] + vPosF[zf] * r[3];
-//         xf += 3; yf += 3; zf += 3;
-//         index += stride;
-//         vertices--;
-//     }
-//     vertices = 4;
-//     xf = 0, yf = 1, zf = 2;
-//     while (vertices) {
-//         vb.data[index + 1] = vPosL[yf] * r[0] + vPosL[zf] * r[2];
-//         vb.data[index + 2] = vPosL[yf] * r[1] + vPosL[zf] * r[3];
-//         xf += 3; yf += 3; zf += 3;
-//         index += stride;
-//         vertices--;
-//     }
-//     vertices = 4;
-//     xf = 0, yf = 1, zf = 2;
-//     while (vertices) {
-//         vb.data[index + 1] = vPosBK[yf] * r[0] + vPosBK[zf] * r[2];
-//         vb.data[index + 2] = vPosBK[yf] * r[1] + vPosBK[zf] * r[3];
-//         xf += 3; yf += 3; zf += 3;
-//         index += stride;
-//         vertices--;
-//     }
-//     xf = 0, yf = 1, zf = 2;
-//     vertices = 4;
-//     while (vertices) {
-//         vb.data[index + 1] = vPosR[yf] * r[0] + vPosR[zf] * r[2];
-//         vb.data[index + 2] = vPosR[yf] * r[1] + vPosR[zf] * r[3];
-//         xf += 3; yf += 3; zf += 3;
-//         index += stride;
-//         vertices--;
-//     }
-//     vertices = 4;
-//     xf = 0, yf = 1, zf = 2;
-//     while (vertices) {
-//         vb.data[index + 1] = vPosT[yf] * r[0] + vPosT[zf] * r[2];
-//         vb.data[index + 2] = vPosT[yf] * r[1] + vPosT[zf] * r[3];
-//         xf += 3; yf += 3; zf += 3;
-//         index += stride;
-//         vertices--;
-//     }
-//     vertices = 4;
-//     xf = 0, yf = 1, zf = 2;
-//     while (vertices) {
-//         vb.data[index + 1] = vPosBot[yf] * r[0] + vPosBot[zf] * r[2];
-//         vb.data[index + 2] = vPosBot[yf] * r[1] + vPosBot[zf] * r[3];
-//         xf += 3; yf += 3; zf += 3;
-//         index += stride;
-//         vertices--;
-//     }
-
-//     vb.needsUpdate = true;
-// }
+/*****************************************************************************************************************/
+// Geometry3D
 /** */
 export function GlRotateY3D2(mesh, angle) {
 
@@ -1055,7 +919,6 @@ export function GlRotateY3D2(mesh, angle) {
 
     vb.needsUpdate = true;
 }
-/** */
 
 /** */
 export function GlRotateX3D(mesh, angle) {
@@ -1093,6 +956,7 @@ export function GlRotateX3D(mesh, angle) {
 
     vb.needsUpdate = true;
 }
+
 /** */
 export function GlRotateY3D(mesh, angle) {
 
@@ -1131,6 +995,7 @@ export function GlRotateY3D(mesh, angle) {
 
     vb.needsUpdate = true;
 }
+
 /** */
 export function GlRotateZ3D(mesh, angle) {
 
@@ -1169,6 +1034,7 @@ export function GlRotateZ3D(mesh, angle) {
 
     vb.needsUpdate = true;
 }
+
 /** TODO: Store the new pos and dim to the mesh for collision detection */
 export function GlRotateXY3D(mesh, angle) {
 

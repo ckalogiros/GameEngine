@@ -27,17 +27,17 @@ export function UpdaterAdd(mesh, flags, callbacks, params) {
 }
 export function UpdaterRun() {
 
-    for (let i = 0; i < _update_meshes_buffer.count; i++) {
+    for (let i = 0; i < _update_meshes_buffer.boundary; i++) {
 
-        if(_update_meshes_buffer.buffer[i]){
+        if (_update_meshes_buffer.buffer[i]) {
 
             const mesh = _update_meshes_buffer.buffer[i].mesh;
             const params = _update_meshes_buffer.buffer[i].params;
-    
-            if(mesh.gfx){
-                
+
+            if (mesh.gfx) {
+
                 mesh.Reposition_post(params);
-        
+
                 // Mesh update handled, remove.
                 _update_meshes_buffer.RemoveByIdx(i)
             }
@@ -54,7 +54,7 @@ function UpdaterRunRecursive(mesh, params, level) {
     AddArr3(mesh.geom.pos, params)
     mesh.UpdateGfx();
 
-    for (let i = 0; i < mesh.children.count; i++) {
+    for (let i = 0; i < mesh.children.boundary; i++) {
 
         const child = mesh.children.buffer[i];
 
@@ -73,23 +73,21 @@ function UpdaterRunRecursive(mesh, params, level) {
 
 export class Scene {
 
-    sceneIdx = 0;   // Scene ID (of type: SCENE const structure).
-    cameras;        // Cameras buffer used by the scene
-    children;       // Store all meshes (by refference) that belong to the scene.
-    gfxBuffer;      // Quick access to graphics buffers (indexes only)
-    mesh_in_gfx;   // Store meshes as array of pointers per gfx vertex buffer. Store for every vertex buffer all meshes that belong to that vertex buffer.
+    sceneidx = 0;   // Scene ID (of type: SCENE const structure).
+    camera;        // Cameras buffer used by the scene
+    gfx;
+    root_meshes; // Holds only the root widget mesh of the scene(not widgets)
     name;
 
     constructor(idx) {
 
-        this.sceneIdx = idx;
-        this.cameras = [];
-        this.children = new M_Buffer();
-        this.children.Init(32);
-        this.gfxBuffer = [];
-        this.mesh_in_gfx = [];
+        this.sceneidx = idx;
+        this.camera = null;
         this.type |= MESH_TYPES_DBG.SCENE;
         this.name = 'scene, idx:' + this.idx;
+
+        this.gfx = null;
+        this.root_meshes = new M_Buffer();
 
     }
 
@@ -107,139 +105,262 @@ export class Scene {
         HandleEvents();
     }
 
-    AddMesh(mesh, FLAGS = GFX.ANY, gfxidx) {
+    // AddMesh(mesh, FLAGS = GFX.ANY, gfxidx) {
 
-        if (!mesh || mesh === undefined) {
+    //     if (!mesh || mesh === undefined) {
+    //         console.error('Mesh shouldn\'t be undefined. @ class Scene.AddMesh().');
+    //         return;
+    //     }
+
+    //     mesh.sceneidx = this.sceneidx;
+    //     const gfx = mesh.GenGfxCtx(FLAGS, gfxidx);
+    //     this.StoreGfxInfo(gfx);
+    //     this.StoreMesh(mesh);
+    //     return mesh.gfx;
+    // }
+
+    AddWidget(widget, FLAGS = GFX.ANY, gfxidx) {
+
+        /**DEBUG*/  if (!widget || widget === undefined) {
             console.error('Mesh shouldn\'t be undefined. @ class Scene.AddMesh().');
             return;
         }
 
-        mesh.sceneIdx = this.sceneIdx;
-        mesh.GenGfxCtx(FLAGS, gfxidx);
-        this.StoreGfxInfo(mesh.gfx);
-        this.StoreMesh(mesh);
-        return mesh.gfx;
+        widget.SetSceneIdx(this.sceneidx); // Set the sceneidx for all widgets meshes
+        widget.GenGfxCtx(FLAGS, gfxidx);
+        const widget_meshes = widget.GetAllMeshes();
+        this.StoreGfxCtx(widget_meshes);
+        this.StoreRootMesh(widget);
+
+    }
+
+    /*******************************************************************************************************************************************************/
+    // Graphics
+    StoreGfxCtx(mesh_buf) {
+        /** 
+         * Store all scene's meshes by the gfx vertex buffer they belong.
+         * and all vertex buffer indexes by the gfx program they belong.
+         * 
+         * Scema: this.gfx = [{ progidx: int, vb: [{ vbidx: int, meshes: [{ mesh: ref to type:Mesh }, ...], }, ...], }, ...]
+         * 
+         * #Case 1 : Meshe's progidx does not exist
+         *      create: this.gfx = new M_Buffer()
+         *      store the meshes progidx to:  this.gfx.Add({ vb: new M_Buffer(), progidx: mesh_gfx.prog.idx })
+         *      store the meshes vbidx to:  this.gfx[i].vb.Add({ mesh: new M_Buffer(), vbidx: mesh_gfx.vb.idx })
+         *      store the ref of the mesh to: this.gfx.buffer[j].vb[k].Add(mesh_buf[i])
+         * #Case 2 : Meshe's vbidx does not exist
+         *      create: this.gfx.buf[j] = new M_Buffer()
+         *      store the meshes vbidx to:  this.gfx[i].vb.Add({ mesh: new M_Buffer(), vbidx: mesh_gfx.vb.idx })
+         *      store the ref of the mesh to: this.gfx.buffer[j].vb[k].Add(mesh_buf[i])
+         * #Case 3 : Both progidx and vbidx exist
+         *      store the ref of the mesh to: this.gfx.buffer[j].vb[k].Add(mesh_buf[i])
+         * #Edge Case: The 'this.gfx' is not initialized.  
+         *      Do like #Case 1
+         */
+
+        const mesh_count = mesh_buf.length;
+        for (let i = 0; i < mesh_count; i++) {
+            
+            
+            const mesh_gfx = mesh_buf[i].gfx;
+            let handled = false;
+
+            if (!this.gfx) { // #Edge Case
+                this.gfx = new M_Buffer();
+                const idx_prog = this.gfx.Add({
+                    progidx: mesh_gfx.prog.idx,
+                    vb: new M_Buffer(),
+                });
+                const idx_vb = this.gfx.buffer[idx_prog].vb.Add({
+                    vbidx: mesh_gfx.vb.idx,
+                    mesh: new M_Buffer(),
+                });
+                mesh_buf[i].idx = this.gfx.buffer[idx_prog].vb.buffer[idx_vb].mesh.Add(mesh_buf[i]);
+
+                this.camera.StoreProgIdx(mesh_gfx.prog.idx); // Store the new program to the cameras progidx buffer for the program's matrix uniform update. 
+
+            }
+            else {
+
+                // Must loop through all existing 'gfx' to conclude if the current meshes gfx buffers are exist or not.
+                for (let j = 0; j < this.gfx.boundary; j++) { // loop for all gfx program buffer indexes
+
+                    if (this.gfx.buffer[j].progidx === mesh_gfx.prog.idx) {
+
+                        for (let k = 0; k < this.gfx.buffer[j].vb.boundary; k++) { // loop for all stored vertex buffer indexes
+
+                            if (this.gfx.buffer[j].vb.buffer[k].vbidx === mesh_gfx.vb.idx) {
+
+                                // #Case 3
+                                mesh_buf[i].idx = this.gfx.buffer[j].vb.buffer[k].mesh.Add(mesh_buf[i]);
+                                handled = true;
+                                break; // Break when gfx already stored.
+                            }
+                        }
+
+                        if(!handled){  // #Case 2
+                                
+                            const idx_vb = this.gfx.buffer[j].vb.Add({
+                                vbidx: mesh_gfx.vb.idx,
+                                mesh: new M_Buffer(),
+                            });
+                            mesh_buf[i].idx = this.gfx.buffer[j].vb.buffer[idx_vb].mesh.Add(mesh_buf[i]);
+                            handled = true;
+                        }
+
+                    }
+                    if (handled) break; // We broke the inner loop, but we need to break this one too and continue with the next mesh.
+                }
+
+                if (!handled) { // #Case 1. Program index not found.
+
+                    const idx_prog = this.gfx.Add({
+                        progidx: mesh_gfx.prog.idx,
+                        vb: new M_Buffer(),
+                    });
+                    const idx_vb = this.gfx.buffer[idx_prog].vb.Add({
+                        vbidx: mesh_gfx.vb.idx,
+                        mesh: new M_Buffer(),
+                    });
+                    mesh_buf[i].idx =this.gfx.buffer[idx_prog].vb.buffer[idx_vb].mesh.Add(mesh_buf[i]);
+
+                    this.camera.StoreProgIdx(mesh_gfx.prog.idx); // Store the new program to the cameras progidx buffer for the program's matrix uniform update. 
+                    handled = true;
+                }
+            }
+        }
+    }
+
+    StoreRootMesh(widget) {
+        widget.idx = this.root_meshes.Add(widget);
     }
 
     Render() {
 
-        for (let i = 0; i < this.children.count; i++) {
+        /**
+         * Add all secene meshes to the graphics vertex buffers.
+         * Use: Runs only once. We wait to insert all meshes to the graphics buffers,
+         * so that all meshe's calculations (position, dimention, etc) have taken place.
+         * In case of RunTime mesh creation, the meshe's Render() method is called directly.
+         */
 
-            const mesh = this.children.buffer[i];
-            mesh.AddToGfx();
+        for (let i = 0; i < this.root_meshes.boundary; i++) {
+
+            const widget = this.root_meshes.buffer[i];
+            widget.Render();
         }
     }
 
     RemoveMesh(mesh) {
 
-        ERROR_NULL(mesh.idx)
-        this.children.RemoveByIdx(mesh.idx);
+        ERROR_NULL(mesh.idx);
+        const progidx = mesh.gfx.prog.idx;
+        const vbidx = mesh.gfx.vb.idx;
+        this.gfx.buffer[progidx].vb.buffer[vbidx].mesh.RemoveByIdx(mesh.idx);
     }
 
-    StoreMesh(mesh) {
+    RemoveRootMesh(widget) {
 
-        const idx = this.children.Add(mesh);
-        mesh.parent = this;
-        mesh.idx = idx;
+        ERROR_NULL(widget.idx);
+        this.root_meshes.RemoveByIdx(widget.idx);
     }
+
+    /*******************************************************************************************************************************************************/
+    // Camera
+    // StoreMesh(mesh) {
+
+    //     const idx = this.children.Add(mesh);
+    //     mesh.parent = this;
+    //     mesh.idx = idx;
+    // }
 
     // Store meshe's graphics info (program index, vertex buffer index), 
     // as an easy and light-weight way of dealing with all Graphics buffers of the scene.
-    StoreGfxInfo(gfxInfo) {
+    // StoreGfxInfo(gfxInfo) {
 
-        let index = INT_NULL;
+    //     let index = INT_NULL;
 
-        if (Array.isArray(gfxInfo)) {
+    //     if (Array.isArray(gfxInfo)) {
 
-            const gfxlen = gfxInfo.length;
-            for (let numGfx = 0; numGfx < gfxlen; numGfx++) {
+    //         const gfxlen = gfxInfo.length;
+    //         for (let numGfx = 0; numGfx < gfxlen; numGfx++) {
 
-                // Check if the glVertexBuffer index of the current Mesh is already stored
-                let found = false;
-                const len = this.gfxBuffer.length;
+    //             // Check if the glVertexBuffer index of the current Mesh is already stored
+    //             let found = false;
+    //             const len = this.gfxBuffer.length;
 
-                for (let i = 0; i < len; i++) {
-                    if (this.gfxBuffer[i].progidx === gfxInfo[numGfx].prog.idx && this.gfxBuffer[i].vbidx === gfxInfo[numGfx].vb.idx) {
-                        found = true;
-                        index = i;
-                        break;
-                    }
-                }
-                // Store it, if not stored.
-                if (!found) {
-                    index = this.gfxBuffer.push({ progidx: gfxInfo[numGfx].prog.idx, vbidx: gfxInfo[numGfx].vb.idx, active: false }) - 1;
-                }
+    //             for (let i = 0; i < len; i++) {
+    //                 if (this.gfxBuffer[i].progidx === gfxInfo[numGfx].prog.idx && this.gfxBuffer[i].vbidx === gfxInfo[numGfx].vb.idx) {
+    //                     found = true;
+    //                     index = i;
+    //                     break;
+    //                 }
+    //             }
+    //             // Store it, if not stored.
+    //             if (!found) {
+    //                 index = this.gfxBuffer.push({ progidx: gfxInfo[numGfx].prog.idx, vbidx: gfxInfo[numGfx].vb.idx, active: false }) - 1;
+    //                 this.camera.StoreProgIdx(gfxInfo[numGfx].prog.idx);
+    //             }
 
-                this.cameras[0].StoreProgIdx(gfxInfo[0].prog.idx);
-            }
+    //         }
 
-            return index;
-        }
-        else {
+    //         return index;
+    //     }
+    //     else {
 
-            // Check if the glVertexBuffer index of the current Mesh is already stored
-            let found = false;
-            const len = this.gfxBuffer.length;
+    //         // Check if the glVertexBuffer index of the current Mesh is already stored
+    //         let found = false;
+    //         const len = this.gfxBuffer.length;
 
-            for (let i = 0; i < len; i++) {
-                if (this.gfxBuffer[i].progidx === gfxInfo.prog.idx && this.gfxBuffer[i].vbidx === gfxInfo.vb.idx) {
-                    found = true;
-                    index = i;
-                    break;
-                }
-            }
-            // Store it, if not stored.
-            if (!found) {
-                index = this.gfxBuffer.push({ progidx: gfxInfo.prog.idx, vbidx: gfxInfo.vb.idx, active: false }) - 1;
-            }
+    //         for (let i = 0; i < len; i++) {
+    //             if (this.gfxBuffer[i].progidx === gfxInfo.prog.idx && this.gfxBuffer[i].vbidx === gfxInfo.vb.idx) {
+    //                 found = true;
+    //                 index = i;
+    //                 break;
+    //             }
+    //         }
+    //         // Store it, if not stored.
+    //         if (!found) {
+    //             index = this.gfxBuffer.push({ progidx: gfxInfo.prog.idx, vbidx: gfxInfo.vb.idx, active: false }) - 1;
+    //             this.camera.StoreProgIdx(gfxInfo.prog.idx);
+    //         }
 
-            this.cameras[0].StoreProgIdx(gfxInfo.prog.idx);
 
-            return index;
-        }
+    //         return index;
+    //     }
 
-    }
+    // }
 
-    StoreMeshInGfx(mesh) {
-        const idx = this.StoreGfxInfo(mesh.gfx);
-        if (this.mesh_in_gfx[idx] === undefined) {
-            this.mesh_in_gfx[idx] = new M_Buffer();
-        }
-        this.mesh_in_gfx[idx].Add(mesh);
-    }
+    // StoreMeshInGfx(mesh) {
+    //     const idx = this.StoreGfxInfo(mesh.gfx);
+    //     if (this.mesh_in_gfx[idx] === undefined) {
+    //         this.mesh_in_gfx[idx] = new M_Buffer();
+    //     }
+    //     this.mesh_in_gfx[idx].Add(mesh);
+    // }
 
     // Store a refference to the camera object
-    UseCamera(camera) {
-        this.cameras.push(camera);
+    SetCamera(camera) {
+        if (this.camera) alert('Camera already existas for scene:', this.sceneidx)
+        this.camera = camera;
     }
 
+    /*******************************************************************************************************************************************************/
+    // Helpers
     FindMeshById(id) {
-        for (let i = 0; i < this.children.count; i++) {
+        for (let i = 0; i < this.children.boundary; i++) {
             if (this.children.buffer && this.children.buffer[i].id === id)
                 return this.children.buffer[i];
             return null;
         }
     }
 
-    MeshInGfxFind(progidx, vbidx) {
-
-        const count = this.gfxBuffer.length;
-        for (let i = 0; i < count; i++) {
-            if (this.gfxBuffer[i].progidx === progidx && this.gfxBuffer[i].vbidx === vbidx) {
-                return i;
-            }
-        }
-
-        return INT_NULL;
+    GetRoortMeshes() {
+        return this.root_meshes;
     }
 
-    GetChildren() {
-        return this.children;
-    }
-
-    /**
-     * Debug
-     */
+    /*******************************************************************************************************************************************************/
+    /** DEBUG PRINT */
     Print() {
         ScenesPrintSceneMeshes(this.children, 0)
     }
@@ -247,15 +368,36 @@ export class Scene {
         console.log('PrintMeshInGfx:')
         for (let i = 0; i < this.mesh_in_gfx.length; i++) {
 
-            console.log('prog, vb:', this.gfxBuffer[i], 'meshes:', this.mesh_in_gfx[i].count);
-            for (let j = 0; j < this.mesh_in_gfx[i].count; j++) {
+            console.log('prog, vb:', this.gfxBuffer[i], 'meshes:', this.mesh_in_gfx[i].boundary);
+            for (let j = 0; j < this.mesh_in_gfx[i].boundary; j++) {
                 console.log(
                     'name:', this.mesh_in_gfx[i].buffer[j].name
                 );
             }
         }
     }
+    PrintGfxStorageBuffer() {
+        // console.log(this.gfx)
+        
+        for (let i = 0; i < this.gfx.boundary; i++){
 
+            console.log('progidx:', this.gfx.buffer[i].progidx);
+            for (let j = 0; j < this.gfx.buffer[i].vb.boundary; j++){
+                
+                console.log(' vbidx:', this.gfx.buffer[i].vb.buffer[j].vbidx);
+                for (let k = 0; k < this.gfx.buffer[i].vb.buffer[j].mesh.boundary; k++) { 
+                    if(this.gfx.buffer[i].vb.buffer[j].mesh.buffer[k]){
+
+                        const mesh = this.gfx.buffer[i].vb.buffer[j].mesh.buffer[k];
+                        console.log('mesh:', mesh.name)
+                    } 
+                }
+            }
+        }
+    }
+    PrintRootMesheBuffer() {
+        console.log(this.root_meshes)
+    }
 };
 
 class Scenes extends M_Buffer {
@@ -267,13 +409,16 @@ class Scenes extends M_Buffer {
 
     Create() {
 
-        const scene = new Scene(this.count);
+        const scene = new Scene(this.boundary);
         this.Add(scene);
         return scene;
     }
 
-    GetChildren(idx) {
-        return this.buffer[idx].GetChildren();
+    /**
+     * @returns type of M_Buffer, not just an array[]
+     */
+    GetRootMeshes(sceneidx) {
+        return this.buffer[sceneidx].GetRootMeshes();
     }
 
 }
@@ -283,34 +428,38 @@ _scenes.Init(1);
 
 export function Scenes_get_scene_by_idx(idx) { return _scenes.buffer[idx]; }
 export function Scenes_create_scene() { return _scenes.Create(); }
-export function Scenes_get_children(idx) { return _scenes.GetChildren(idx); }
+export function Scenes_get_root_meshes(idx) { return _scenes.GetRootMeshes(sceneidx); }
 export function Scenes_get_count() { return _scenes.active_count; }
+export function Scenes_remove_mesh(mesh) { 
+    _scenes.buffer[mesh.sceneidx].RemoveMesh(mesh);
+}
+export function Scenes_remove_root_mesh(widget, sceneidx) { 
+    _scenes.buffer[sceneidx].RemoveRootMesh(widget);
+}
 
+/**
+ * Upon mesh's removal of the vertex buffers, 
+ * we must update all the starts of the other meshes
+ * that are located at the right of the removed mesh.
+ * Otherwise the 'mesh.gfx.vb.start' will point to the original index. 
+ */
 export function Scenes_update_all_gfx_starts(sceneidx, progidx, vbidx, ret) {
 
     const scene = _scenes.buffer[sceneidx];
+    const meshes = scene.gfx.buffer[progidx].vb.buffer[vbidx].mesh;
+    for (let k = 0; k < meshes.boundary; k++) { 
+        
+        if(meshes.buffer[k]){ // Make sure for any removed meshes
 
-    for (let i = 0; i < scene.children.count; i++) {
-        if (scene.children.buffer[i])
-            Scenes_update_all_gfx_starts_recursive(scene.children.buffer[i], progidx, vbidx, ret)
-    }
-}
-export function Scenes_update_all_gfx_starts_recursive(mesh, progidx, vbidx, ret) {
+            const gfx = meshes.buffer[k].gfx;
+            // Decrement all meshes start indices (that belong to the same vertex buffer) 
+            // if they are 'positioned' after the removed mesh.
+            if (gfx.vb.start > ret.start && gfx.prog.idx === progidx && gfx.vb.idx === vbidx) {
 
-    if (mesh.children.count) {
-
-        for (let i = 0; i < mesh.children.count; i++) {
-
-            const child = mesh.children.buffer[i];
-            if (child) Scenes_update_all_gfx_starts_recursive(child, progidx, vbidx, ret)
-        }
-    }
-
-    // Decrement all meshes start indices (that belong to the same vertex buffer) if they are 'positioned' after the removed mesh.
-    if (mesh.gfx.vb.start > ret.start && mesh.gfx.prog.idx === progidx && mesh.gfx.vb.idx === vbidx) {
-
-        mesh.gfx.vb.start -= ret.counts[0];
-        if (mesh.gfx.ib.start > 0) mesh.gfx.ib.start -= ret.counts[1];
+                gfx.vb.start -= ret.counts[0];
+                if (gfx.ib.start > 0) gfx.ib.start -= ret.counts[1];
+            }
+        } 
     }
 }
 
@@ -321,7 +470,7 @@ export function Scenes_update_all_gfx_starts2(sceneidx, progidx, vbidx, ret) {
     const idx = scene.MeshInGfxFind(progidx, vbidx); // Find in which index is the vertex buffer located. 
     const meshes = scene.mesh_in_gfx[idx]; // Get all meshes references of that specific vertex buffer
 
-    for (let i = 0; i < meshes.count; i++) {
+    for (let i = 0; i < meshes.boundary; i++) {
 
         const start = meshes.buffer[i].gfx.vb.start
 
@@ -342,7 +491,7 @@ export function ScenesPrintSceneMeshes(array) {
 
     let total_count = 0;
 
-    for (let i = 0; i < array.count; i++) {
+    for (let i = 0; i < array.boundary; i++) {
 
         const mesh = array.buffer[i];
         if (mesh) {
@@ -356,16 +505,13 @@ export function ScenesPrintSceneMeshes(array) {
     return total_count;
 }
 
-export function ScenesPrintAllMeshes(_children, count) {
+export function ScenesPrintAllMeshes(children, count) {
 
     let total_count = 0;
 
-    for (let i = 0; i < _children.count; i++) {
+    for (let i = 0; i < children.boundary; i++) {
 
-        const child = _children.buffer[i];
-
-        // if(child === null)
-        //     console.log('NULL child:', _children)
+        const child = children.buffer[i];
 
         if (child) {
 
@@ -377,7 +523,7 @@ export function ScenesPrintAllMeshes(_children, count) {
             console.log(i, r, child.name, FloorArr3(child.geom.pos));
             total_count++;
 
-            if (child.children.count) {
+            if (child.children.boundary) {
                 count++;
                 total_count += ScenesPrintAllMeshes(child.children, count);
                 count--;
@@ -390,6 +536,7 @@ export function ScenesPrintAllMeshes(_children, count) {
 }
 
 
+
 /**************************************************************************************************************************/
 // Debug Info Drop Down
 // TODO!!: Maybe implement the debug info and its creation functions in another file and use a standardized 
@@ -397,12 +544,12 @@ export function ScenesPrintAllMeshes(_children, count) {
 const temp_transparency = 0.02;
 const pad = [20, 2.5]
 
-function Gather_mesh_children_names(mesh){
-    
+function Gather_mesh_children_names(mesh) {
+
     let buffer = '';
-    for(let i=0; i<mesh.children.count; i++){
+    for (let i = 0; i < mesh.children.boundary; i++) {
         const child = mesh.children.buffer[i];
-        if(child){
+        if (child) {
             buffer += `${i}: ${child.name} | `;
         }
     }
@@ -418,7 +565,7 @@ function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children,
     // dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dropdown.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
 
-    for (let j = 0; j < mesh_children.count; j++) {
+    for (let j = 0; j < mesh_children.boundary; j++) {
 
         const mesh = mesh_children.buffer[j];
 
@@ -429,15 +576,15 @@ function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children,
         text.info_id = [type, j]
         text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;
         dropdown.AddToMenu(text)
-        
+
         { // Mesh's Gfx info
             const gfx = mesh.gfx;
-            const dp_info = `prog:${gfx.prog.idx} | vb:${gfx.vb.idx}, start:${gfx.vb.start}, count:${gfx.vb.count}`;
+            const dp_info = `prog:${gfx.prog.idx} | vb:${gfx.vb.idx}, start:${gfx.vb.start}, count:${gfx.vb.boundary}`;
             const dp_gfx = new Widget_Drop_Down(`Gfx: ${dp_info}`, ALIGN.LEFT, [200, 400, 0], [60, 20], GREY6, TRANSPARENCY(RED, .05), WHITE, [1, 1], pad);
             // dp_gfx.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dp_gfx.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-            
-            
-            const info = `prog:${gfx.prog.idx} | vb:${gfx.vb.idx}, start:${gfx.vb.start}, count:${gfx.vb.count}`;
+
+
+            const info = `prog:${gfx.prog.idx} | vb:${gfx.vb.idx}, start:${gfx.vb.start}, count:${gfx.vb.boundary}`;
             const gfx_text = new Widget_Text(info, [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, TRANSPARENCY(GREEN_140_240_10, 1));
             gfx_text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;
             dropdown.AddToMenu(gfx_text)
@@ -446,7 +593,7 @@ function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children,
             const dp_info = `geom: pos:${mesh.geom.pos} dim:${mesh.geom.dim}`;
             const dp = new Widget_Drop_Down(dp_info, ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GREY1, 1), WHITE, [1, 1], pad);
             // dp.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dp.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-            
+
             const info = `defPos:${mesh.geom.defPos} | defDim:${mesh.geom.defDim}, numFaces:${mesh.geom.num_face}`;
             const gfx_text = new Widget_Text(info, [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, TRANSPARENCY(GREEN_140_240_10, 1));
             gfx_text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;
@@ -456,7 +603,7 @@ function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children,
         { // Miscelaneus info
             const dp = new Widget_Drop_Down('Misc', ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GREY1, 1), WHITE, [1, 1], pad);
             // dp.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dp.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-            
+
             {// Children buffer
                 // const info = `children:${mesh.children.buffer}`;
                 const info = Gather_mesh_children_names(mesh);
@@ -493,7 +640,7 @@ export function Scenes_debug_info_create(scene) {
     // Drop_down_set_root(dropdown, dropdown);
 
 
-    for (let i = 0; i < _scenes.count; i++) {
+    for (let i = 0; i < _scenes.boundary; i++) {
 
         const scene = _scenes.buffer[i];
         //    const type = Listeners_get_event_type_string(i);
@@ -504,7 +651,7 @@ export function Scenes_debug_info_create(scene) {
 
         const meshes_buffer = scene.children;
 
-        for (let j = 0; j < meshes_buffer.count; j++) {
+        for (let j = 0; j < meshes_buffer.boundary; j++) {
 
             const mesh = meshes_buffer.buffer[j];
 
@@ -540,7 +687,7 @@ export function Scenes_debug_info_update(params) {
 
     const evt = params.target_params;
 
-    for (let i = 0; i < dropdown_root.children.count; i++) {
+    for (let i = 0; i < dropdown_root.children.boundary; i++) {
 
         const dropdown_child = dropdown_root.children.buffer[i];
         if (dropdown_child.val[0] === evt.type) {

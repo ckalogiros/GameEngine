@@ -1,5 +1,5 @@
 "use strict";
-import { Scenes_create_scene, Scenes_debug_info_create, Scenes_get_children } from '../Engine/Scenes.js'
+import { Scenes_create_scene, Scenes_debug_info_create } from '../Engine/Scenes.js'
 import { RenderQueueGet, RenderQueueInit } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { WebGlRenderer } from '../Engine/Renderers/WebGlRenderer.js';
 import { CameraOrthographic } from '../Engine/Renderers/Renderer/Camera.js';
@@ -18,7 +18,7 @@ import { Widget_Menu_Bar, Widget_Minimize } from '../Engine/Drawables/Meshes/Wid
 import { Geometry2D } from '../Engine/Drawables/Geometry/Base/Geometry.js';
 import { FloorArr3 } from '../Helpers/Math/MathOperations.js';
 import { MAT_ENABLE, Material, Material_TEMP_fromBufferFor3D } from '../Engine/Drawables/Material/Base/Material.js';
-import { Gfx_end_session } from '../Engine/Interfaces/GfxContext.js';
+import { Gfx_end_session } from '../Engine/Interfaces/Gfx/GfxContext.js';
 import { Section } from '../Engine/Drawables/Meshes/Section.js';
 import { Initializer_popup_initialization } from '../Engine/Drawables/Meshes/Widgets/WidgetPopup.js';
 
@@ -70,7 +70,7 @@ export function AppInit() {
         // camera.SetControls(CAMERA_CONTROLS.ROTATE);
         // camera.Translate(80, 80, 20)
         // STATE.scene.active = scene;
-        // STATE.scene.active_idx = scene.sceneIdx;
+        // STATE.scene.active_idx = scene.sceneidx;
     }
 
     renderer = new WebGlRenderer(scene, camera);
@@ -84,16 +84,22 @@ export function AppInit() {
      * Create meshes
      */
 
-    Debug_info_ui_performance(scene);
+    // Debug_info_ui_performance(scene);
 
 
-    // CreateButtons(scene)
-    CreateSliders(scene)
+    const label = CreateLabel(scene);
+    // DestroyMeshTest(scene, label)
+    // const button = CreateButton(scene); // DestroyMeshTest(scene, button)
+    // const switch1 = CreateSwitch(scene) // DestroyMeshTest(scene, switch1)
+
+    // const menu = CreateMenu(scene)
+
+    // CreateSliders(scene)
     // CreateSlidersSectioned(scene)
     // CreateMenuBar(scene, 3)
     // CreateAndAddMenuBarSectioned(scene, 4);
     // CreateMinimizer(scene);
-    Test_drop_down_widget(scene)
+    // Test_drop_down_widget(scene)
     
     // Help(scene)
     // CreateSection(scene)
@@ -106,8 +112,8 @@ export function AppInit() {
     // const section = MeshInfo(scene)
     // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
     
-    const section = MeshInfo(scene)
-    TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
+    // const section = MeshInfo(scene)
+    // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
     
     // Listeners_debug_info_create(scene);
     // Scenes_debug_info_create(scene);
@@ -122,6 +128,7 @@ export function AppInit() {
     
     
     RenderQueueGet().SetPriorityProgram('last', 1, 0);
+    RenderQueueGet().UpdateActiveQueue();
 
     { // PERFORMANCE OBJECTS
         var performance = window.performance || window.mozPerformance || window.msPerformance || window.webkitPerformance || {};
@@ -166,19 +173,96 @@ export function AppRender() {
 /**************************************************************************************************************************************/
 // Test Functions
 
+function CreateLabel(scene){
+
+    const label = new Widget_Label('Label', ALIGN.HOR_CENTER|ALIGN.VERT_CENTER, [200, 400, 0], 5, GREY1, WHITE, [4,4], .5);
+    label.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    label.area_mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+
+    
+    scene.AddWidget(label)
+    label.text_mesh.SetColorRGB(RED);
+
+    label.Render()
+    label.Align(ALIGN.LEFT, label.area_mesh, label.text_mesh, [0,0]);
+
+
+    console.log(label)
+
+    return label;
+}
+
+function CreateButton(scene) {
+
+    let ypos = 100
+    const btn1 = new Widget_Button('Button', ALIGN.HOR_CENTER|ALIGN.VERT_CENTER, [30, ypos, 0], 5, GREY1, WHITE, [4,4], .5);
+    // btn1.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    btn1.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN)
+    btn1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+    btn1.area_mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
+    btn1.area_mesh.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE, { style: [6, 6, 3] })
+    scene.AddWidget(btn1, GFX.PRIVATE);
+    btn1.text_mesh.SetColorRGB(BLUE_10_120_220);
+
+    return btn1;
+}
+
+function DestroyMeshTest(scene, widget) {
+    
+    const customCallback = function(params){
+
+        console.log('Destroy Text mesh test:', widget.area_mesh.name );
+        widget.Destroy();
+    }
+    const btn1 = new Widget_Button('Destroy', ALIGN.HOR_CENTER|ALIGN.VERT_CENTER, [200, 100, 0], 5, GREY1, WHITE, [4,4], .5);
+    btn1.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, customCallback)
+    btn1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+    btn1.area_mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
+    btn1.area_mesh.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE, { style: [6, 6, 3] })
+    scene.AddWidget(btn1);
+    btn1.text_mesh.SetColorRGB(YELLOW_240_220_10);
+}
+
+function CreateSwitch(scene) {
+
+    let ypos = 100
+    const switch1 = new Widget_Switch('switch on', 'switch off', [100, ypos, 0], 5, GREY1, WHITE, [4,4], .5);
+    switch1.area_mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
+    switch1.area_mesh.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE, { style: [6, 6, 3] })
+    scene.AddWidget(switch1);
+    switch1.text_mesh.SetColorRGB(BLUE_10_120_220);
+    ypos += switch1.area_mesh.geom.dim[1]*2 + 5;
+
+    switch1.Bind(function(){console.log('CALLBACK FROM USER !!!!!!!!!!!!!!!!!!!!!!!!!!!')})
+
+    return switch1;
+}
+
+/***********************************************************************/
+
+function CreateMenu(scene){
+
+    const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [0, 0, 0], [130, 20], TRANSPARENCY(GREY1, .2), WHITE, [1, 1], [12, 8], .3);
+
+    scene.AddWidget(menu)
+}
+
+/***********************************************************************/
+
 function Test_drop_down_widget(scene)
 { // DropDownMenu
-
+    
     const pad = [10, 2.5]
     const drop_down = new Widget_Drop_Down('DP1', ALIGN.LEFT, [200, 200, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [1,1], pad);
     drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
     // drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
-
+    
     { // Add another dropdown in dropdown
         const drop_down2 = new Widget_Drop_Down('DP2', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1,1], pad);
         drop_down2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
         drop_down.AddToMenu(drop_down2);
-
+        
         const text = new Widget_Text('DP2 TEXT ->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
         {// Create debug info event
             text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
@@ -197,7 +281,7 @@ function Test_drop_down_widget(scene)
                 drop_down4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
                 drop_down3.AddToMenu(drop_down4);
                 Drop_down_set_root(drop_down, drop_down4);
-    
+                
                 {
                     const drop_down5 = new Widget_Drop_Down('DP5 DP1', ALIGN.LEFT, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, PINK_240_60_200, WHITE, [1,1], pad);
                     drop_down5.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down5.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
@@ -209,7 +293,7 @@ function Test_drop_down_widget(scene)
                         drop_down6.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down6.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
                         drop_down5.AddToMenu(drop_down6);
                         Drop_down_set_root(drop_down, drop_down6);
-            
+                        
                         {
                             const text = new Widget_Text('DP5 -->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
                             text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
@@ -222,11 +306,11 @@ function Test_drop_down_widget(scene)
             }
         }
     }
-
+    
     scene.AddMesh(drop_down);
     drop_down.Calc();
     Drop_down_set_root(drop_down, drop_down);
-
+    
 }
 
 function CreateMinimizer(scene){
@@ -403,21 +487,6 @@ function CreateSlidersSectioned(scene) {
         section.Reconstruct_listeners_recursive();
     }
 
-}
-
-function CreateButtons(scene) {
-
-    let posy = Viewport.bottom - 350;
-
-    const btn1 = new Widget_Button('BUTTON 1', undefined, [40, posy, 0], 10, GREY5, WHITE, [1, 1], [5, 3], .3);
-    btn1.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, btn1.OnClick)
-    btn1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-    btn1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
-    btn1.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE, { style: [6, 6, 3] })
-    scene.AddMesh(btn1);
-
-
-    RenderQueueGet().SetPriority('last', btn1.children.buffer[0].gfx.prog.idx, btn1.gfx.vb.idx);
 }
 
 function CreateMenuBar(scene, count) {
@@ -905,7 +974,7 @@ function Menu_labels_switches(scene) {
     scene.AddMesh(switch3);
     scene.AddMesh(switch4);
 
-    section.UpdateGfx(section, scene.sceneIdx);
+    section.UpdateGfx(section, scene.sceneidx);
     // section.UpdateGfxRecursive(section);
     console.log();
 }

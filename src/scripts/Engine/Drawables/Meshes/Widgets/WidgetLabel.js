@@ -5,16 +5,18 @@ import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../../Collisions.js";
-import { MouseGetPos } from "../../../Controls/Input/Mouse.js";
+import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
+import { Gfx_generate_context } from "../../../Interfaces/Gfx/GfxContext.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
-import { TimeIntervalsCreate } from "../../../Timers/TimeIntervals.js";
+import { Scenes_remove_root_mesh } from "../../../Scenes.js";
+import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals.js";
 import { MESH_ENABLE } from "../Base/Mesh.js";
-import { Rect } from "../Rect.js";
-import { Widget_Text } from "./WidgetText.js";
+import { Rect } from "../Rect_Mesh.js";
+import { Text } from "../Text_Mesh.js";
 
 
 
-function CalculateAreaNoPadding(text, _dim, pos, pad=[0,0]) {
+function CalculateAreaNoPadding(text, _dim, pos, pad = [0, 0]) {
 
     const textLen = text.length;
     const dim = [_dim[0] * textLen, _dim[1]];
@@ -57,86 +59,91 @@ function CalculateArea(text, _dim, pos, pad = [0, 0]) {
 /**
  * The difference with plain text is that a label draws the text inside a rect mesh
  */
-export class Widget_Label extends Rect {
+// export class Widget_Label extends Rect {
+export class Widget_Label {
 
+    area_mesh;
+    text_mesh;
+    idx; // Stores the index of the scene's root_mesh buffer, that keeps all scene's root meshes. 
     pad = [0, 0];
 
-    constructor(text, Align=(ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos=[200, 300], fontSize=8, col = GREY1, textCol = WHITE, scale = [1, 1], pad = [10, 5], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [0, 6, 2]) {
+    // text, Align, pos, col = GREY3, text_col = WHITE, pad = [0, 0], bold = .4, style = [2, 5, 2], font
+    constructor(text='null', Align = (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos = [200, 300, 0], fontSize = 8, col = GREY1, text_col = WHITE, pad = [10, 5], bold = .4, style = [0, 6, 2], font = TEXTURES.SDF_CONSOLAS_LARGE) {
 
         const sdfouter = CalculateSdfOuterFromDim(fontSize);
         if (sdfouter + bold > 1) bold = 1 - sdfouter;
         pos[2] += 1; // In essence we set as the left (start of text label) the label area and not the left of text.
-        
-        const textMesh = new Widget_Text(text, pos, fontSize)
-        
+
+        /** Label tex mesh */
+        this.text_mesh = new Text(text, pos, fontSize);
+
         pos[0] -= pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
-        pos[2] -= 1; // Set z for area 'behind' text_mesh
-        
-        const areaMetrics = CalculateArea(text, textMesh.geom.dim, pos, pad)
-        
-        super(areaMetrics.pos, areaMetrics.dim, col);
-        
-        
-        this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
-        this.SetStyle(style);
-        
-        textMesh.SetName('Text ' + text);
-        textMesh.SetSceneIdx(this.sceneIdx);
-        
-        this.type |= MESH_TYPES_DBG.WIDGET_TEXT_LABEL | textMesh.type | this.geom.type | this.mat.type;
-        this.SetName('label area ' + text);
+        pos[2] -= 1; // Set z for area 'behind' this.text_mesh
+
+        const areaMetrics = CalculateArea(text, this.text_mesh.geom.dim, pos, pad)
+
+        /** Label area mesh */
+        this.area_mesh = new Rect(areaMetrics.pos, areaMetrics.dim, col);
+
+        this.area_mesh.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
+        this.area_mesh.SetStyle(style);
+
+        this.text_mesh.SetName('Text ' + text);
+        this.text_mesh.SetSceneIdx(this.area_mesh.sceneIdx);
+
+        this.type |= MESH_TYPES_DBG.WIDGET_TEXT_LABEL | this.text_mesh.type | this.area_mesh.geom.type | this.area_mesh.mat.type;
+        this.area_mesh.SetName('label area ' + text);
         this.pad = pad;
-        this.AddChild(textMesh);
-        
-        textMesh.Align_pre(this, Align, pad)
+        // this.area_mesh.AddChild(this.text_mesh);
+
+        this.text_mesh.Align_pre(this, Align, pad)
     }
 
-    UpdateText(text) {
+    Destroy() {
 
-        const textMesh = this.children.buffer[0];
-        textMesh.mat.text = text; /** CAUTION!: Be sure to initialize the 'textMesh.mat.num_faces' 
-                                        with the longest text so the vertexBuffers have enough 
-                                        space to store the longest text */
-
-        if ((textMesh.type & MESH_TYPES_DBG.TEXT_MESH) === 0) return; // Guard against none text meshes
-
-        const geom = textMesh.geom;
-        const gfx = textMesh.gfx;
-        const mat = textMesh.mat;
-
-        let gfxInfo = new GfxInfoMesh(gfx);
-
-        const textLen = text.length;
-        const len = geom.num_faces > textLen ? geom.num_faces : (textLen > geom.num_faces ? geom.num_faces : textLen);
-
-        // const len = textLen;
-        for (let i = 0; i < len; i++) {
-
-            /** Update fps average */
-            let uvs = [0, 0, 0, 0];
-            if (text[i] !== undefined) {
-                uvs = FontGetUvCoords(mat.uvIdx, text[i]);
-            }
-            GlSetTex(gfxInfo, uvs);
-            gfxInfo.vb.start += gfxInfo.vb.count
-        }
+        const sceneidx = this.area_mesh.sceneidx;
+        this.text_mesh.Destroy();
+        this.area_mesh.Destroy();
+        Scenes_remove_root_mesh(this, sceneidx);
+        this.text_mesh = null;
+        this.area_mesh = null;
     }
 
-    GenGfxCtx(FLAGS, gfxidx) {
+    /*******************************************************************************************************************************************************/
+    // Graphics
+    GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
 
-        const gfx = super.GenGfxCtx(FLAGS, gfxidx);
-        return gfx;
+        this.area_mesh.gfx = Gfx_generate_context(this.area_mesh.sid, this.area_mesh.sceneIdx, this.area_mesh.mat.num_faces, FLAGS, gfxidx);
+        this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneIdx, this.text_mesh.mat.num_faces, FLAGS, gfxidx);
+        return this.area_mesh.gfx;
     }
-	
-	AddToGfx(){
-        
-        super.AddToGfx()
-	}
 
-    Align_pre(target_mesh, flags, pad=[0,0]) { // Align pre-added to the vertexBuffers
+    Render() {
+
+        if(!this.area_mesh.is_gfx_inserted) {this.area_mesh.AddToGfx(); this.area_mesh.is_gfx_inserted = true}
+        if(!this.text_mesh.is_gfx_inserted) {this.text_mesh.AddToGfx(); this.text_mesh.is_gfx_inserted = true}
+    }
+
+    /*******************************************************************************************************************************************************/
+    // Setters-Getters
+
+    SetSceneIdx(sceneidx) {
+        this.area_mesh.sceneidx = sceneidx;
+        this.text_mesh.sceneidx = sceneidx;
+    }
+
+    /** Return type: Array. Returns an array of all widgets meshes */
+    GetAllMeshes() {
+
+        return [this.area_mesh, this.text_mesh];
+    }
+    
+    /*******************************************************************************************************************************************************/
+    // Alignment
+    Align(flags, target_mesh, pad=[0,0]) { // Align pre-added to the vertexBuffers
 
         const pos = [0, 0];
-        CopyArr2(pos, this.geom.pos);
+        CopyArr2(pos, this.area_mesh.geom.pos);
 
         if (flags & (ALIGN.VERT_CENTER | ALIGN.RIGHT)) {
 
@@ -144,49 +151,134 @@ export class Widget_Label extends Rect {
             pos[1] = target_mesh.geom.pos[1];
 
             // Horizontal allignment
-            pos[0] = target_mesh.geom.pos[0] + target_mesh.geom.dim[0] - this.geom.dim[0] - pad[0];
-
-            CopyArr2(this.geom.pos, pos);
+            pos[0] = target_mesh.geom.pos[0] + target_mesh.geom.dim[0] - this.area_mesh.geom.dim[0] - pad[0];
+            CopyArr2(this.area_mesh.geom.pos, pos);
 
         }
         else if (flags & ALIGN.RIGHT) {
 
             // Horizontal allignment
-            pos[0] = target_mesh.geom.pos[0] + target_mesh.geom.dim[0] - this.geom.dim[0] - pad[0];
-
-            CopyArr2(this.geom.pos, pos);
+            pos[0] = target_mesh.geom.pos[0] + target_mesh.geom.dim[0] - this.area_mesh.geom.dim[0] - pad[0];
+            CopyArr2(this.area_mesh.geom.pos, pos);
 
         }
         else if (flags & ALIGN.LEFT) {
 
             // Horizontal allignment
-            pos[0] = (target_mesh.geom.pos[0] - target_mesh.geom.dim[0]) + this.geom.dim[0] + pad[0];
-
-            CopyArr2(this.geom.pos, pos);
+            pos[0] = (target_mesh.geom.pos[0] - target_mesh.geom.dim[0]) + this.area_mesh.geom.dim[0] + pad[0];
+            CopyArr2(this.area_mesh.geom.pos, pos);
 
         }
 
+        /**
+         * If the alignment happens after the widgets insertion to 
+         * the vertex buffers, we must update the vertex buffers too.
+         * If the target_mesh is of type 'Text', we must update all characters one by one.
+         */
+
+        if(this.area_mesh.is_gfx_inserted){
 
 
-        
-        if(this.children.buffer[0]){
-
-            const child = this.children.buffer[0]; // We know that there is a text childern at 0 index.
-            child.geom.Reposition_pre(pos);
         }
+
     }
 
-    Align_post(){ // Align and update gfx buffers
+    Align_post(flags, target_mesh, pad=[0,0]){ // Align and update gfx buffers
 
+        /**
+         * If the target_mesh is of type 'Text', we must update all characters in the vertex buffers.
+         */
+
+        this.Align_pre(flags, target_mesh, pad);
     }
 
     Reposition_pre(){}
-    
+
     Reposition_post(dif_pos){
 
-        const text_mesh = this.children.buffer[0];
         this.MoveXYZ(dif_pos)
-        text_mesh.MoveXYZ(dif_pos)
+        this.text_mesh.MoveXYZ(dif_pos)
+    }
+
+    /*******************************************************************************************************************************************************/
+    // Listeners
+    /**
+     * @param {*} event_type typeof 'LISTEN_EVENT_TYPES'
+     * @param {*} Clbk User may choose the callback for the listen event.
+     */
+    CreateListenEvent(event_type, Clbk = null) {
+
+        const target_params = {
+            EventClbk: null,
+            targetBindingFunctions: null,
+            // clicked_mesh: this.area_mesh,
+            target_mesh: this,
+            params: null,
+        }
+
+        if (Clbk) this.area_mesh.AddEventListener(event_type, Clbk, target_params);
+        else this.area_mesh.AddEventListener(event_type, this.OnClick, target_params);
+    }
+
+    OnClick(params) {
+
+        const mesh = params.target_params.target_mesh;
+        const area_mesh = mesh.area_mesh;
+        const text_mesh = mesh.text_mesh;
+        const OnMoveFn  = mesh.OnMove;
+
+        const point = MouseGetPos();
+        const g = area_mesh.geom;
+        if (Check_intersection_point_rect(g.pos, g.dim, point, [0, 8])) {
+
+            STATE.mesh.SetClicked(area_mesh);
+            console.log('Clicked:', area_mesh.name)
+
+            if (area_mesh.timeIntervalsIdxBuffer.boundary <= 0) {
+
+                /**
+                 * Create Move event.
+                 * The Move event runs only when the mesh is GRABED. That means that the timeInterval 
+                 * is created and destroyed upon 'onClickDown' and 'onClickUp' respectively.
+                 */
+                const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, OnMoveFn, { area_mesh: area_mesh, text_mesh: text_mesh });
+                area_mesh.timeIntervalsIdxBuffer.Add(idx);
+
+                if (area_mesh.StateCheck(MESH_STATE.IS_GRABABLE)) {
+
+                    STATE.mesh.SetGrabed(area_mesh);
+                    area_mesh.StateEnable(MESH_STATE.IN_GRAB);
+                }
+
+            }
+            return true;
+        }
+        return false;
+    }
+
+    OnMove(params) {
+
+        // The 'OnMove' function is called by the timeInterval.
+        // The timeInterval has been set by the 'OnClick' event.
+        const area_mesh = params.params.area_mesh;
+        const text_mesh = params.params.text_mesh;
+
+        // Destroy the time interval and the Move operation, if the mesh is not grabed
+        // MESH_STATE.IN_GRAB is deactivated upon mouse click up in Events.js.
+        if (area_mesh.StateCheck(MESH_STATE.IN_GRAB) === 0) {
+
+            const intervalIdx = area_mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
+            TimeIntervalsDestroyByIdx(intervalIdx);
+            area_mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+
+            return;
+        }
+
+        // Move 
+        const mouse_pos = MouseGetPosDif();
+        area_mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, area_mesh.gfx);
+        text_mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, text_mesh.gfx);
+
     }
 
 }
@@ -196,16 +288,16 @@ export class Widget_Label_Dynamic_Text extends Widget_Label {
 
     /** Set the max number of characters for the dynamic text, 
      * by passing any text as 'maxDynamicTextChars' of length= dynamic text number of characters*/
-    constructor(text1, Align, text2, pos, fontSize=4, col, textcol, scale, pad=[10,10], bold) {
+    constructor(text1, Align, text2, pos, fontSize = 4, col, textcol, scale, pad = [10, 10], bold) {
 
         super(text1, Align, pos, fontSize, col, textcol, scale, pad, bold);
 
         // Translate the dynamic text by the width of the constant text's width
         CopyArr2(pos, this.geom.pos)
-        this.pad = [5,5]
-        pos[0] += this.geom.dim[0] + this.pad[0]*2;
-        
-        const dynamicText = new Widget_Label(text2, ALIGN.HOR_CENTER | ALIGN.VERT_CENTER,  pos, fontSize, YELLOW_240_220_10, textcol, scale, this.pad, bold);
+        this.pad = [5, 5]
+        pos[0] += this.geom.dim[0] + this.pad[0] * 2;
+
+        const dynamicText = new Widget_Label(text2, ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, pos, fontSize, YELLOW_240_220_10, textcol, scale, this.pad, bold);
         dynamicText.SetName('Dynamic Text ' + text1.slice(0, 7));
 
         this.AddChild(dynamicText)
@@ -219,11 +311,11 @@ export class Widget_Label_Dynamic_Text extends Widget_Label {
         const gfx = super.GenGfxCtx(FLAGS, gfxidx);
         return gfx;
     }
-	
-	AddToGfx(){
-        
+
+    AddToGfx() {
+
         super.AddToGfx()
-	}
+    }
 
     /**
       * 
@@ -285,23 +377,23 @@ export class Widget_Label_Text_Mesh_Menu_Options extends Widget_Label {
 
     GenGfxCtx(FLAGS, gfxidx) {
 
-		const gfx = super.GenGfxCtx(FLAGS, gfxidx);
-		return gfx;
-	}
+        const gfx = super.GenGfxCtx(FLAGS, gfxidx);
+        return gfx;
+    }
 
-	AddToGfx() {
+    AddToGfx() {
 
-		super.AddToGfx()
-	}
+        super.AddToGfx()
+    }
 
     SetPos(pos) {
         super.SetPos(pos)
     }
 
 
-    OnClick(_params) {
+    OnClick(params) {
 
-        const mesh = _params.source_params;
+        const mesh = params.source_params;
         const point = MouseGetPos();
         const m = mesh.geom;
 
@@ -315,27 +407,27 @@ export class Widget_Label_Text_Mesh_Menu_Options extends Widget_Label {
              * For popup menu options and slider connections.
              * If the option is clicked, then we must call the slider connect function
              */
-            if (_params.target_params) {
+            if (params.target_params) {
 
                 const target_params = {
 
-                    targetBindingFunctions: _params.target_params.targetBindingFunctions,
-                    self_mesh: _params.target_params.clicked_mesh,
-                    target_mesh: _params.target_params.target_mesh,
-                    event_type: _params.event_type,
+                    targetBindingFunctions: params.target_params.targetBindingFunctions,
+                    self_mesh: params.target_params.clicked_mesh,
+                    target_mesh: params.target_params.target_mesh,
+                    event_type: params.event_type,
                     /*FOR DEBUG*/clicked_mesh: mesh,
                 }
-                const EventClbk = _params.target_params.EventClbk;
+                const EventClbk = params.target_params.EventClbk;
                 console.log('OnClick callback IN. meshId ', mesh.id)
                 EventClbk(target_params);
                 console.log('OnClick callback OUT. meshId ', mesh.id)
             }
-           
+
             return true;
         }
-        
+
         return false;
     }
-    
+
 
 }

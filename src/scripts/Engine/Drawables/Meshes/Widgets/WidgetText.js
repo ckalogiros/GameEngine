@@ -1,7 +1,7 @@
 "use strict";
 
 import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
-import { Gl_remove_geometry, Gl_shift_right_geometry } from "../../../../Graphics/Buffers/GlBuffers.js";
+import { Gl_shift_right_geometry } from "../../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr2, CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
@@ -10,7 +10,7 @@ import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { Scenes_update_all_gfx_starts2 } from "../../../Scenes.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx, TimeIntervalsGetByIdx } from "../../../Timers/TimeIntervals.js";
-import { I_Text } from "../Rect.js";
+import { Text } from "../Text_Mesh.js";
 
 /**
  * 
@@ -19,209 +19,207 @@ import { I_Text } from "../Rect.js";
  * 1. live in an if statment (if(fontType is sdf))
  * 2. move the function to the parent class instead of call it from all children classes of Text_Mesh
  */
-export class Widget_Text extends I_Text {
+export class Widget_Text extends Text {
 
-	pad = [0, 0];
+	// pad = [0, 0];
 
-	constructor(text, pos, fontSize = 5,  color = WHITE, bold = 4, font, scale) {
+	// constructor(text, pos, fontSize = 5,  color = WHITE, bold = 4, font, scale) {
 
-		const sdfouter = CalculateSdfOuterFromDim(fontSize);
-		if (sdfouter + bold > 1) bold = 1 - sdfouter;
+	// 	const sdfouter = CalculateSdfOuterFromDim(fontSize);
+	// 	if (sdfouter + bold > 1) bold = 1 - sdfouter;
 
-		super(text, pos, fontSize, scale, color)
-		this.type |= MESH_TYPES_DBG.WIDGET_TEXT | this.type;
+	// 	super(text, pos, fontSize, scale, color)
+	// 	this.type |= MESH_TYPES_DBG.WIDGET_TEXT | this.type;
 
-		this.SetName('Text ' + text.slice(0, 7))
+	// 	this.SetName('Text ' + text.slice(0, 7))
 
-	}
+	// }
 
-	GenGfxCtx(FLAGS, gfxidx) {
+	// /*******************************************************************************************************************************************************/
+   // // Graphics
+	// GenGfxCtx(FLAGS, gfxidx) {
+		
+	// 	const gfx = super.GenGfxCtx(FLAGS, gfxidx);
+	// 	return gfx;
+	// }
 
-		const gfx = super.GenGfxCtx(FLAGS, gfxidx);
-		return gfx;
-	}
+	// AddToGfx() {
 
-	AddToGfx() {
+	// 	super.AddToGfx()
+	// }
+	
+	// /*******************************************************************************************************************************************************/
+	// Align_pre(target_mesh, flags, pad=[0,0]) { // Align pre-added to the vertexBuffers
 
-		super.AddToGfx()
-	}
+	// 	const pos = [0, 0];
+	// 	const dim = this.geom.dim;
+	// 	CopyArr2(pos, this.geom.pos);
+	// 	let ypos = pos[1] + dim[1] * 2;
 
-	Align_pre(target_mesh, flags, pad=[0,0]) { // Align pre-added to the vertexBuffers
+	// 	if (flags & ALIGN.VERTICAL) {
 
-		const pos = [0, 0];
-		const dim = this.geom.dim;
-		CopyArr2(pos, this.geom.pos);
-		let ypos = pos[1] + dim[1] * 2;
+	// 		for (let i = 0; i < this.children.boundary; i++) {
 
-		// pos[0] -= dim[0] * this.mat.num_faces / 2 - this.pad[0] / 2;
-		// this.geom.pos[0] = pos[0]
+	// 			const child = this.children.buffer[i];
+	// 			pos[1] = ypos;
 
-		if (flags & ALIGN.VERTICAL) {
-
-			for (let i = 0; i < this.children.count; i++) {
-
-				const child = this.children.buffer[i];
-				pos[1] = ypos;
-
-				child.geom.Reposition_pre(pos);
-				ypos += child.geom.dim[1] * 2;
-			}
-		}
-
-
-		if (flags & ALIGN.LEFT) {
-
-			const pos = [0, 0];
-			CopyArr2(pos, this.geom.pos);
-
-			// Vertical allignment
-			pos[1] = target_mesh.geom.pos[1];
-
-			// Horizontal allignment
-			pos[0] = (target_mesh.geom.pos[0] - target_mesh.geom.dim[0]) + (this.geom.dim[0]) + pad[0];
-
-			CopyArr2(this.geom.pos, pos);
-
-		}
-		else if (flags & ALIGN.RIGHT) {
-
-			const pos = [0, 0];
-			CopyArr2(pos, this.geom.pos);
-
-			// Vertical allignment
-			pos[1] = target_mesh.geom.pos[1];
-
-			// Horizontal allignment
-			const num_faces = (this.geom.num_faces-1 > 1) ? this.geom.num_faces-1 : 1;
-			pos[0] = (target_mesh.geom.pos[0] + target_mesh.geom.dim[0]) - (this.geom.dim[0]*2*num_faces) - pad[0];
-
-			CopyArr2(this.geom.pos, pos);
-
-		}
+	// 			child.geom.Reposition_pre(pos);
+	// 			ypos += child.geom.dim[1] * 2;
+	// 		}
+	// 	}
 
 
-	}
+	// 	if (flags & ALIGN.LEFT) {
 
-	OnClick(params) {
+	// 		const pos = [0, 0];
+	// 		CopyArr2(pos, this.geom.pos);
 
-		const mesh = params.source_params;
-		const point = MouseGetPos();
-		const m = mesh.geom;
+	// 		// Vertical allignment
+	// 		pos[1] = target_mesh.geom.pos[1];
 
-		console.log(point, m.pos, m.dim)
+	// 		// Horizontal allignment
+	// 		pos[0] = (target_mesh.geom.pos[0] - target_mesh.geom.dim[0]) + (this.geom.dim[0]) + pad[0];
 
-		if (Check_intersection_point_rect(m.pos, m.dim, point, [0, 8])) {
+	// 		CopyArr2(this.geom.pos, pos);
 
-			STATE.mesh.SetClicked(params.source_params);
+	// 	}
+	// 	else if (flags & ALIGN.RIGHT) {
 
-			if (mesh.timeIntervalsIdxBuffer.count <= 0) {
+	// 		const pos = [0, 0];
+	// 		CopyArr2(pos, this.geom.pos);
 
-				/**
-				 * Create move event.
-				 * The move event runs only when the mesh is GRABED.
-				 * That means that the timeInterval is created and destroyed upon 
-				 * onClickDown and onClickUp respectively.
-				 */
-				const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, mesh.OnMove, mesh);
-				mesh.timeIntervalsIdxBuffer.Add(idx);
+	// 		// Vertical allignment
+	// 		pos[1] = target_mesh.geom.pos[1];
 
-				if (mesh.StateCheck(MESH_STATE.IS_GRABABLE)) {
+	// 		// Horizontal allignment
+	// 		const num_faces = (this.geom.num_faces-1 > 1) ? this.geom.num_faces-1 : 1;
+	// 		pos[0] = (target_mesh.geom.pos[0] + target_mesh.geom.dim[0]) - (this.geom.dim[0]*2*num_faces) - pad[0];
 
-					STATE.mesh.SetGrabed(mesh);
-					mesh.StateEnable(MESH_STATE.IN_GRAB);
-				}
+	// 		CopyArr2(this.geom.pos, pos);
 
-			}
-			return true;
-		}
-		return false;
-	}
+	// 	}
+	// }
 
-	OnMove(_params) {
+	// OnClick(params) {
 
-		/**
-		 * The function is called by the timeInterval.
-		 * The timeInterval has been set by the 'OnClick' event.
-		 */
+	// 	const mesh = params.source_params;
+	// 	const point = MouseGetPos();
+	// 	const m = mesh.geom;
 
-		const mesh = _params.params;
+	// 	console.log(point, m.pos, m.dim)
 
-		// Destroy the time interval calling this function if the mesh is not grabed.
-		if (mesh.StateCheck(MESH_STATE.IN_GRAB) === 0) {
+	// 	if (Check_intersection_point_rect(m.pos, m.dim, point, [0, 8])) {
 
-			const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
-			TimeIntervalsDestroyByIdx(intervalIdx);
-			mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+	// 		STATE.mesh.SetClicked(params.source_params);
 
-			return;
-		}
+	// 		if (mesh.timeIntervalsIdxBuffer.boundary <= 0) {
 
-		// Move the mesh
-		console.log('MOVING Widget Text')
-		const mouse_pos = MouseGetPosDif();
-		mesh.MoveRecursive(mouse_pos.x, -mouse_pos.y);
+	// 			/**
+	// 			 * Create move event.
+	// 			 * The move event runs only when the mesh is GRABED.
+	// 			 * That means that the timeInterval is created and destroyed upon 
+	// 			 * onClickDown and onClickUp respectively.
+	// 			 */
+	// 			const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, mesh.OnMove, mesh);
+	// 			mesh.timeIntervalsIdxBuffer.Add(idx);
 
-	}
+	// 			if (mesh.StateCheck(MESH_STATE.IS_GRABABLE)) {
 
-	UpdateText(new_text){
+	// 				STATE.mesh.SetGrabed(mesh);
+	// 				mesh.StateEnable(MESH_STATE.IN_GRAB);
+	// 			}
 
-		const textMesh = this;
-		if ((textMesh.type & MESH_TYPES_DBG.TEXT_MESH) === 0) return; // Guard against none text meshes
+	// 		}
+	// 		return true;
+	// 	}
+	// 	return false;
+	// }
 
-		const textLen = new_text.length;
+	// OnMove(params) {
 
-		if(textMesh.geom.num_faces < textLen){
+	// 	/**
+	// 	 * The function is called by the timeInterval.
+	// 	 * The timeInterval has been set by the 'OnClick' event.
+	// 	 */
 
-			const dif_num_faces = textLen - textMesh.geom.num_faces;
+	// 	const mesh = params.params;
+		
+	// 	// Destroy the time interval calling this function if the mesh is not grabed.
+	// 	if (mesh.StateCheck(MESH_STATE.IN_GRAB) === 0) {
+
+	// 		const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
+	// 		TimeIntervalsDestroyByIdx(intervalIdx);
+	// 		mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+
+	// 		return;
+	// 	}
+
+	// 	// Move the mesh
+	// 	console.log('MOVING Widget Text')
+	// 	const mouse_pos = MouseGetPosDif();
+	// 	mesh.MoveRecursive(mouse_pos.x, -mouse_pos.y);
+
+	// }
+
+	// UpdateText(new_text){
+
+	// 	const textMesh = this;
+	// 	if ((textMesh.type & MESH_TYPES_DBG.TEXT_MESH) === 0) return; // Guard against none text meshes
+
+	// 	const textLen = new_text.length;
+
+	// 	if(textMesh.geom.num_faces < textLen){
+
+	// 		const dif_num_faces = textLen - textMesh.geom.num_faces;
 			
-			// If the text to be update is larger than the text allready in the vertex buffer, 
-			// shift all next elements of the buffer to the start of the curent text, 
-			// and re-add the text mesh at the end of the vertex buffer.
-			// Need to update all ther gfx.starts of all the shifted meshes.
-			// const ret = Gl_remove_geometry(this.gfx, this.geom.num_faces)
-			const ret = Gl_shift_right_geometry(textMesh.gfx, textMesh.geom.num_faces, dif_num_faces)
-			Scenes_update_all_gfx_starts2(textMesh.sceneIdx, textMesh.gfx.prog.idx, textMesh.gfx.vb.idx, ret);
+	// 		// If the text to be update is larger than the text allready in the vertex buffer, 
+	// 		// shift all next elements of the buffer to the start of the curent text, 
+	// 		// and re-add the text mesh at the end of the vertex buffer.
+	// 		// Need to update all ther gfx.starts of all the shifted meshes.
+	// 		// const ret = Gl_remove_geometry(this.gfx, this.geom.num_faces)
+	// 		const ret = Gl_shift_right_geometry(textMesh.gfx, textMesh.geom.num_faces, dif_num_faces)
+	// 		Scenes_update_all_gfx_starts2(textMesh.sceneIdx, textMesh.gfx.prog.idx, textMesh.gfx.vb.idx, ret);
 
-			textMesh.mat.text = new_text; 
-			textMesh.geom.num_faces = textLen;
-			textMesh.mat.num_faces = textLen;
+	// 		textMesh.mat.text = new_text; 
+	// 		textMesh.geom.num_faces = textLen;
+	// 		textMesh.mat.num_faces = textLen;
 			
-			textMesh.geom.AddToGraphicsBuffer(textMesh.sid, textMesh.gfx, textMesh.name);
-			textMesh.mat.AddToGraphicsBuffer(textMesh.sid, textMesh.gfx);
-			return;
-		}
+	// 		textMesh.geom.AddToGraphicsBuffer(textMesh.sid, textMesh.gfx, textMesh.name);
+	// 		textMesh.mat.AddToGraphicsBuffer(textMesh.sid, textMesh.gfx);
+	// 		return;
+	// 	}
 
-		/** CAUTION!: Be sure to initialize the 'textMesh.mat.num_faces' 
-		with the longest text so the vertexBuffers have enough 
-		space to store the longest text */
+	// 	/** CAUTION!: Be sure to initialize the 'textMesh.mat.num_faces' 
+	// 	with the longest text so the vertexBuffers have enough 
+	// 	space to store the longest text */
 
-		let gfxInfo = new GfxInfoMesh(textMesh.gfx);
+	// 	let gfxInfo = new GfxInfoMesh(textMesh.gfx);
 
 
-		const len = textMesh.geom.num_faces > textLen ? textMesh.geom.num_faces : (textLen > textMesh.geom.num_faces ? textMesh.geom.num_faces : textLen);
+	// 	const len = textMesh.geom.num_faces > textLen ? textMesh.geom.num_faces : (textLen > textMesh.geom.num_faces ? textMesh.geom.num_faces : textLen);
 
-		// const len = textLen;
-		for (let i = 0; i < len; i++) {
+	// 	// const len = textLen;
+	// 	for (let i = 0; i < len; i++) {
 
-			 /** Update fps average */
-			 let uvs = [0, 0, 0, 0];
-			 if (new_text[i] !== undefined) {
-				  uvs = FontGetUvCoords(textMesh.mat.uvIdx, new_text[i]);
-			 }
-			 GlSetTex(gfxInfo, uvs);
-			 gfxInfo.vb.start += gfxInfo.vb.count
-		}
-	}
+	// 		 /** Update fps average */
+	// 		 let uvs = [0, 0, 0, 0];
+	// 		 if (new_text[i] !== undefined) {
+	// 			  uvs = FontGetUvCoords(textMesh.mat.uvIdx, new_text[i]);
+	// 		 }
+	// 		 GlSetTex(gfxInfo, uvs);
+	// 		 gfxInfo.vb.start += gfxInfo.vb.count
+	// 	}
+	// }
 
-	Reposition_post(dif_pos){
+	// Reposition_post(dif_pos){
 
-		this.MoveXYZ(dif_pos)
-		for(let i=0; i<this.children.count; i++){
+	// 	this.MoveXYZ(dif_pos)
+	// 	for(let i=0; i<this.children.boundary; i++){
 
-			const child = this.children.buffer[i];
-			child.MoveXYZ(dif_pos)
-		}
-   }
+	// 		const child = this.children.buffer[i];
+	// 		child.MoveXYZ(dif_pos)
+	// 	}
+   // }
 
 }
 
@@ -263,7 +261,7 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 		// Get the last child mesh (suppose to be dynamicText).
 		if (this.children.buffer !== null) {
 
-			const lastChild = this.children.buffer[this.children.count - 1];
+			const lastChild = this.children.buffer[this.children.boundary - 1];
 			ERROR_NULL(lastChild, ' @ Widget_Dynamic_Text_Mesh.CreateNewText(). WidgetText.js');
 			
 			// console.log(lastChild.geom.pos)
@@ -316,9 +314,9 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 	SetDynamicText(msInterval, func, name, idx = INT_NULL, func_params = null, flag) {
 
 
-		if (idx !== INT_NULL || this.children.count <= 0 || flag) {
+		if (idx !== INT_NULL || this.children.boundary <= 0 || flag) {
 			/**
-			 * The this.children.count takes a snapshot of the children count upon this function call.
+			 * The this.children.boundary takes a snapshot of the children count upon this function call.
 			 * The idea is: for example uppon function call for the first time
 			 * with one dynamic text mesh, the count=1. At this time the idx param is null,
 			 * because it is the first call to the SetDynamicText() for this object instantiation.
@@ -459,7 +457,7 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 	SetColorRGB(col) { 
 
 		let num_faces = this.geom.num_faces;
-		for(let i=0; i<this.children.count; i++){
+		for(let i=0; i<this.children.boundary; i++){
 			num_faces += this.children.buffer[i].geom.num_faces;
 		}
 		this.mat.SetColorRGB(col, this.gfx, num_faces) 
@@ -506,9 +504,9 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 	  */
 	SetDynamicText(name, msInterval, func, func_params = null, idx = INT_NULL) {
 
-		if (idx !== INT_NULL || this.children.count <= 1) {
+		if (idx !== INT_NULL || this.children.boundary <= 1) {
 			/**
-			 * The this.children.count takes a snapshot of the children count upon this function call.
+			 * The this.children.boundary takes a snapshot of the children count upon this function call.
 			 * The idea is: for example uppon function call for the first time
 			 * with one dynamic text mesh, the count=1. At this time the idx param is null,
 			 * because it is the first call to the SetDynamicText() for this object instantiation.
@@ -585,7 +583,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 
 			params.func[i] = func;
 			params.func_params[i] = func_params;
-			params.meshes[i] = this.children.buffer[this.children.count - 1];
+			params.meshes[i] = this.children.buffer[this.children.boundary - 1];
 
 			/**
 			 * Substitute interval_time_value or leave the same??

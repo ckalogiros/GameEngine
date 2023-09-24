@@ -6,7 +6,7 @@ import { RenderQueueGet } from "../../Renderers/Renderer/RenderQueue.js";
 import { ScenesPrintAllMeshes, ScenesPrintSceneMeshes, Scenes_get_scene_by_idx } from "../../Scenes.js";
 import { FpsGet } from "../../Timers/Time.js";
 import { TimeIntervalsPrintAll } from "../../Timers/TimeIntervals.js";
-import { Gfx_pool_print } from "../../Interfaces/GfxContext.js";
+import { Gfx_pool_print } from "../../Interfaces/Gfx/GfxContext.js";
 import { Mesh_print_all_mesh_listeners } from "../../Drawables/Meshes/Base/Mesh.js";
 
 _cnt = 0;
@@ -23,7 +23,9 @@ const E = _cnt++;
 const m = _cnt++;
 const M = _cnt++;
 const S = _cnt++;
-const sm = _cnt++;
+const s3 = _cnt++;
+const s4 = _cnt++;
+const s5 = _cnt++;
 const L = _cnt++;
 const g = _cnt++;
 const em = _cnt++;
@@ -137,11 +139,21 @@ export const DEBUG_PRINT_KEYS = [
       },
    },
    {
-      key: 'sm',
-      discr: 'STATE',
+      key: 's3',
+      discr: 'Scene:PrintGfxStorageBuffer()',
       func: (e)=>{
+         console.log('-- Scene:PrintGfxStorageBuffer() --');
          const scene = Scenes_get_scene_by_idx(STATE.scene.active_idx);
-         scene.PrintMeshInGfx();
+         scene.PrintGfxStorageBuffer();
+      },
+   },
+   {
+      key: 's4',
+      discr: 'Scene:PrintRootMesheBuffer()',
+      func: (e)=>{
+         console.log('-- Scene:PrintRootMesheBuffer() --');
+         const scene = Scenes_get_scene_by_idx(STATE.scene.active_idx);
+         scene.PrintRootMesheBuffer();
       },
    },
    {
@@ -215,9 +227,17 @@ export function OnKeyUp(e){
       else if  (_keys_buffer[len].key === 'X' && _keys_buffer[0].key === 'Shift') { 
          DEBUG_PRINT_KEYS[X].func(e);  
       }
-      else if  (_keys_buffer[len].key === 'm' && _keys_buffer[0].key === 's') { 
-         DEBUG_PRINT_KEYS[sm].func(e);  
+      else if  (_keys_buffer[0].key === 's') { 
+
+         if       (_keys_buffer[len].key === '3') DEBUG_PRINT_KEYS[s3].func(e);  
+         else if  (_keys_buffer[len].key === '4') DEBUG_PRINT_KEYS[s4].func(e);  
       }
+      // else if  (_keys_buffer[len].key === '3' && _keys_buffer[0].key === 's') { 
+      //    DEBUG_PRINT_KEYS[s3].func(e);  
+      // }
+      // else if  (_keys_buffer[len].key === '4' && _keys_buffer[0].key === 's') { 
+      //    DEBUG_PRINT_KEYS[s4].func(e);  
+      // }
    }
    else if(len === 0){
 

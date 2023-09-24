@@ -30,8 +30,8 @@ export const CAMERA_CONTROLS = {
 
 export class Camera extends Matrix4 {
 
-	isSet; // To debug if camera has been created properly.
-	gfxBuffer; // Store all gl programs that the camera apllies to.
+	isSet; // To debug if camera has been created.
+	gfx_buf; // Store all gl programs that the camera apllies to.
 	controller;
 
 	constructor() {
@@ -41,7 +41,7 @@ export class Camera extends Matrix4 {
 			controls: new Uint8Array(CAMERA_CONTROLS.COUNT),
 			isActive: false,
 		}
-		this.gfxBuffer = [];
+		this.gfx_buf = [];
 		
 	}
 
@@ -61,16 +61,18 @@ export class Camera extends Matrix4 {
 
 		this.UpdateProjectionUniform(gl);
 	}
+
 	UpdateProjectionUniform(gl){
 		// Update proj matrix for all gl programs
-		const len = this.gfxBuffer.length;
+		const len = this.gfx_buf.length;
 		for(let i=0; i<len; i++){
-			GlProgramUpdateUniformProjectionMatrix(gl, this.gfxBuffer[i], this.elements);
+			GlProgramUpdateUniformProjectionMatrix(gl, this.gfx_buf[i], this.elements);
 		}
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/*************************************************************************************************************/
 	// Camera controls
+
 	SetControls(which) {
 		
 		if (Array.isArray(which)) {
@@ -92,18 +94,19 @@ export class Camera extends Matrix4 {
 		mouseDif.y /= Viewport.height / 2;
 		this.Translate(mouseDif.x, mouseDif.y, 0);
 	}
+
 	Zoom() {
 		const mouseWheel = MouseGetWheel();
 		this.Translate(0, 0, mouseWheel.delta);
-		// console.log(this.elements[14])
 	}
 	
-	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/*************************************************************************************************************/
 	// Matrix transformations
 	Translate(x, y, z) {
 		super.Translate(x, y, z);
 	}
-	Rotate(theta){
+
+	Rotate(theta){ // TODO: IMPLEMENT
 
 		const t = TimerGetGlobalTimer();
 		theta = t;
@@ -117,27 +120,11 @@ export class Camera extends Matrix4 {
 		this.elements[Z3] *=  s;
 		this.elements[Z4] *=  c;
 
-		// this.controller.controls[CAMERA_CONTROLS.PAN] = true
-		// this.controller.isActive = true;
 	}
 
-	StoreProgIdx(progIdx) { // This is the way for a camera to be updated(as a uniform mat4) in all gl programs. 
+	StoreProgIdx(progIdx) { // This is the way for a camera to be updated(as a uniform mat4) for all gl programs. 
 
-		// Check if the glVertexBuffer index of the current Mesh is already stored in the buffer.
-		let found = false;
-		const len = this.gfxBuffer.length;
-
-		for (let i = 0; i < len; i++) {
-			if (this.gfxBuffer[i] === progIdx) {
-				found = true;
-				break;
-			}
-		}
-
-		// Store it, if not stored.
-		if (!found) {
-			this.gfxBuffer.push(progIdx);
-		}
+		this.gfx_buf.push(progIdx);
 	}
 }
 
@@ -164,10 +151,10 @@ export class CameraOrthographic extends Camera {
 		this.isSet = true;
 	}
 }
+
 export class CameraPerspective extends Camera {
 	constructor() {
 		super();
-		
 	}
 	Init() {
 
@@ -183,6 +170,3 @@ export class CameraPerspective extends Camera {
 
 }
 
-export function CameraStoreProgramIdx(progIdx){
-
-}

@@ -6,8 +6,8 @@ import { Drop_down_set_root, Widget_Drop_Down } from "../Drawables/Meshes/Widget
 import { Widget_Switch } from "../Drawables/Meshes/Widgets/WidgetButton";
 import { Widget_Label_Text_Mesh_Menu_Options } from "../Drawables/Meshes/Widgets/WidgetLabel";
 import { Widget_Dynamic_Text_Mesh } from "../Drawables/Meshes/Widgets/WidgetText";
-import { Gfx_end_session } from "../Interfaces/GfxContext";
-import { Scenes_get_children } from "../Scenes";
+import { Gfx_end_session } from "../Interfaces/Gfx/GfxContext";
+// import { Scenes_get_children } from "../Scenes";
 import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _pt_fps } from "../Timers/PerformanceTimers";
 import { PerformanceTimerGetFps1sAvg, _fps_1s_avg, _fps_500ms_avg } from "../Timers/Time";
 import { Info_listener_create_event, Info_listener_destroy_event } from "./InfoListeners";
@@ -91,7 +91,7 @@ export function Debug_info_create_ui_performance_timers(params) {
 
    if (DEBUG_INFO.UI_TIMERS.IS_ON) {
 
-      const meshes = Scenes_get_children(scene.sceneIdx);
+      const meshes = Scenes_get_children(scene.sceneidx);
       const mesh = meshes.buffer[DEBUG_INFO.UI_TIMERS.IDX];
 
       DEBUG_INFO.UI_TIMERS.POS = mesh.geom.defPos; // Remember the info's position.
@@ -165,7 +165,7 @@ export function Debug_info_create_ui_mouse_coords(params) {
 
    if (DEBUG_INFO.UI_MOUSE.IS_ON) {
 
-      const meshes = Scenes_get_children(scene.sceneIdx);
+      const meshes = Scenes_get_children(scene.sceneidx);
       const mesh = meshes.buffer[DEBUG_INFO.UI_MOUSE.IDX];
 
       Info_listener_destroy_event(mesh.debug_info.evtidx);
@@ -227,7 +227,7 @@ export function Debug_info_create_gfx_info(params) {
 
    if (DEBUG_INFO.UI_GFX.IS_ON) {
 
-      const meshes = Scenes_get_children(scene.sceneIdx);
+      const meshes = Scenes_get_children(scene.sceneidx);
       const mesh = meshes.buffer[DEBUG_INFO.UI_GFX.IDX];
 
       Info_listener_destroy_event(mesh.debug_info.evtidx);

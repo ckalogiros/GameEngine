@@ -5,7 +5,7 @@ import { Check_intersection_point_rect } from "../../../../Collisions.js";
 import { MouseGetPos } from "../../../../Controls/Input/Mouse.js";
 import { M_Buffer } from "../../../../Core/Buffers.js";
 import { Debug_get_event_listeners, Listener_deactivate_children_events_buffer, Listener_recover_children_buffer, Listener_reset_children_buffer, Listeners_copy_event_children_buffer } from "../../../../Events/EventListeners.js";
-import { Gfx_activate, Gfx_deactivate_no_listeners_touch, Gfx_end_session } from "../../../../Interfaces/GfxContext.js";
+import { Gfx_activate, Gfx_deactivate_no_listeners_touch, Gfx_end_session } from "../../../../Interfaces/Gfx/GfxContext.js";
 import { MESH_ENABLE } from "../../Base/Mesh.js";
 import { Widget_Button } from "../WidgetButton.js";
 import { Widget_Label } from "../WidgetLabel.js";
@@ -14,13 +14,14 @@ import { Widget_Label } from "../WidgetLabel.js";
 
 export class Widget_Menu_Bar extends Widget_Label {
       
-   constructor(text, Align, pos, dim, col = GREY3, text_col = WHITE, scale = [1, 1], pad = [0, 0], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [2, 5, 2]) {
+   constructor(text, Align, pos, col = GREY3, text_col = WHITE, pad = [0, 0], bold = .4, style = [2, 5, 2], font = TEXTURES.SDF_CONSOLAS_LARGE) {
          
-      super(text, Align, pos, 4, col, text_col, scale, pad, bold, font, style);
+      // text, Align, pos, col = GREY3, text_col = WHITE, pad = [0, 0], bold = .4, style = [2, 5, 2], font
+      super(text, Align, pos, 4, col, text_col, pad, bold, font, style);
 
-      this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
-      this.SetStyle(style);
-      this.SetName('Widget_Menu_Bar');
+      this.area_mesh.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
+      this.area_mesh.SetStyle(style);
+      this.area_mesh.SetName('Widget_Menu_Bar');
       this.type |= MESH_TYPES_DBG.WIDGET_MENU_BAR;
 
    }
@@ -67,7 +68,7 @@ export class Widget_Menu_Bar extends Widget_Label {
 
       let pad = [this.pad[0], this.pad[1]];
 
-      for(let i=1; i<this.children.count; i++){
+      for(let i=1; i<this.children.boundary; i++){
 
          const b = this.children.buffer[i];
          b.Align_pre(this, ALIGN.RIGHT | ALIGN.VERT_CENTER, pad);
@@ -80,7 +81,7 @@ export class Widget_Menu_Bar extends Widget_Label {
 
       this.MoveXYZ(dif_pos);
 
-      for(let i=0; i<this.children.count; i++){
+      for(let i=0; i<this.children.boundary; i++){
          
          const child = this.children.buffer[i];
          child.Reposition_post(dif_pos)

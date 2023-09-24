@@ -21,6 +21,21 @@ redrawing the meshes to it's self
 
 --------------------------------------------------- IMIDIATE!
 
+. Any new mesh or existing mesh update to the gfx buffers should be an One Time Event().
+  ??
+    DispatchEvent(update gfx pipeline), which runs for every update separately
+    Or 
+    gather all updates {
+      IF: scene's progidx needsUpdate = true 
+      IF: scene's vbidx needsUpdate = true
+      IF: scene's mesh needsUpdate = true
+    }
+    which  runs all updates at once
+    but we have to check for updates on each frame
+  ??
+
+  with the Scene being responsible to run for the 'gfx.prog[i].vb[j].mesh.Render() ' functionality. 
+
 . Implement set render queue priority for meshes inside a vertexBuffer.
 
 . Definetly we need an implementation of removing vertices from the gfx buffers.

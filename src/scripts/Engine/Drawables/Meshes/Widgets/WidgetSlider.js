@@ -5,7 +5,8 @@ import { Check_intersection_point_rect } from '../../../Collisions.js';
 import { MouseGetPos, MouseGetPosDif } from '../../../Controls/Input/Mouse.js';
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from '../../../Timers/TimeIntervals.js';
 import { MESH_ENABLE } from '../Base/Mesh.js';
-import { I_Text, Rect } from '../Rect.js';
+import { Rect } from '../Rect_Mesh.js';
+import { Text} from '../Text_Mesh.js';
 
 import { Widget_popup_handler_onclick_event } from './WidgetPopup.js';
 
@@ -96,11 +97,11 @@ export class Widget_Slider extends Rect {
 
 
       // Create slider_name_text
-      const name_text = new I_Text('Slider', pos, fontSize, [1, 1], WHITE, .4);
+      const name_text = new Text('Slider', pos, fontSize, [1, 1], WHITE, .4);
       name_text.SetName(this.name + ' - name_text')
 
       // Create value_text
-      const value_text = new I_Text('0000', pos, fontSize, [1, 1], WHITE, .4);
+      const value_text = new Text('0000', pos, fontSize, [1, 1], WHITE, .4);
       value_text.SetName(this.name + ' - value_text');
 
 
@@ -201,7 +202,7 @@ export class Widget_Slider extends Rect {
 
             STATE.mesh.SetClicked(bar);
             
-            if(bar.type & MESH_TYPES_DBG.WIDGET_SLIDER_BAR && bar.StateCheck(MESH_STATE.IS_GRABABLE) && bar.timeIntervalsIdxBuffer.count <= 0){
+            if(bar.type & MESH_TYPES_DBG.WIDGET_SLIDER_BAR && bar.StateCheck(MESH_STATE.IS_GRABABLE) && bar.timeIntervalsIdxBuffer.boundary <= 0){
                
                const idx = TimeIntervalsCreate(10, 'Move Slider Handle', TIME_INTERVAL_REPEAT_ALWAYS, Slider_on_update_handle, bar);
                bar.timeIntervalsIdxBuffer.Add(idx);
@@ -218,7 +219,7 @@ export class Widget_Slider extends Rect {
             STATE.mesh.SetClicked(bar);
             
             // Move Slider
-            if(mesh.type & MESH_TYPES_DBG.WIDGET_SLIDER && mesh.StateCheck(MESH_STATE.IS_GRABABLE) && mesh.timeIntervalsIdxBuffer.count <= 0){
+            if(mesh.type & MESH_TYPES_DBG.WIDGET_SLIDER && mesh.StateCheck(MESH_STATE.IS_GRABABLE) && mesh.timeIntervalsIdxBuffer.boundary <= 0){
 
                const idx = TimeIntervalsCreate(10, 'Move Slider', TIME_INTERVAL_REPEAT_ALWAYS, Slider_move_event, mesh);
                mesh.timeIntervalsIdxBuffer.Add(idx);

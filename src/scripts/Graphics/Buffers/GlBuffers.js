@@ -143,6 +143,7 @@ class VertexBuffer {
         const start = gfx.vb.start + (gfx.vb.count * num_faces);
         const end = this.count
         let k = gfx.vb.start;
+        // Shift all attributes left to fil the gap of the removed attributes. 
         for(let i=start; i<end; i++){
 
             this.data[k++] = this.data[i]
@@ -369,19 +370,19 @@ class IndexBuffer {
         return count;
 
     }
-    Shift_geometry(num_faces) {
+    // Shift_geometry(num_faces) {
 
-        // const meshTotalAttrCount = this.indices_per_rect * num_faces;
-        // if (this.count + meshTotalAttrCount >= this.size) this.Realloc();
-        // const count = this.count - (this.count - meshTotalAttrCount);
-        // const vCount = meshTotalAttrCount / this.indices_per_rect;
-        // this.count += count;
-        // this.vCount += vCount;
-        // this.needsUpdate = true;
+    //     // const meshTotalAttrCount = this.indices_per_rect * num_faces;
+    //     // if (this.count + meshTotalAttrCount >= this.size) this.Realloc();
+    //     // const count = this.count - (this.count - meshTotalAttrCount);
+    //     // const vCount = meshTotalAttrCount / this.indices_per_rect;
+    //     // this.count += count;
+    //     // this.vCount += vCount;
+    //     // this.needsUpdate = true;
 
-        // return count;
+    //     // return count;
 
-    }
+    // }
 };
 
 
@@ -953,6 +954,7 @@ function CreateIndices(ib, num_faces) {
     ib.needsUpdate = true; // Make sure that we update GL bufferData 
 }
 
+// Set flag 'isPrivate' to true for specific gfx buffers.
 export function GlSetVertexBufferPrivate(progIdx, vbIdx) {
     const vb = GlGetVB(progIdx, vbIdx);
     vb.SetPrivate();

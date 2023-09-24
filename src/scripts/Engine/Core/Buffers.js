@@ -3,14 +3,14 @@
 class Buffer_Interface {
 
    buffer;
-   count; // Counts how many elements from start until last element. (Some elements in between could be null)
+   boundary; // Counts how many elements from start until last element. (Some elements in between could be null)
    active_count; // Counts how many elements are not null
    size;
 
    constructor(m_buffer=null) {
 
       this.buffer = null;
-      this.count = 0;
+      this.boundary = 0;
       this.active_count = 0;
       this.size = INT_NULL;
 
@@ -32,7 +32,7 @@ class Buffer_Interface {
    Reset() {
 
       this.size = INT_NULL;
-      this.count = 0;
+      this.boundary = 0;
       this.active_count = 0;
       this.buffer = null;
    }
@@ -43,10 +43,10 @@ class Buffer_Interface {
       this.buffer = new Array(this.size);
 
       if(m_buffer instanceof Buffer_Interface){
-         for(let i=0; i<m_buffer.count; i++){
+         for(let i=0; i<m_buffer.boundary; i++){
 
             this.buffer[i] = m_buffer.buffer[i];
-            this.count++;
+            this.boundary++;
             this.active_count++;
          }
 
@@ -64,51 +64,51 @@ class Buffer_Interface {
 
          /**
           * In this implementation of buffer, we run 
-          * the loops until count and not until size. 
-          * For this to work, we can only decrement count
+          * the loops until boundary and not until size. 
+          * For this to work, we can only decrement boundary
           * if all next elements are not used.
           * All we are doing is 
-          * to have the count at the last used element of the buffer.
+          * to have the boundary at the last used element of the buffer.
           */
 
          this.buffer[idx] = null;
          this.active_count--;
 
-         if (this.count === 1) {
-            this.count = 0;
+         if (this.boundary === 1) {
+            this.boundary = 0;
             return;
          }
 
          else {
-            const count = this.count + 1;
-            for (let i = count; i > 0; i--) {
+            const boundary = this.boundary + 1;
+            for (let i = boundary; i > 0; i--) {
 
-               if (this.buffer[this.count - 1] || this.count === 0) break;
-               this.count--;
+               if (this.buffer[this.boundary - 1] || this.boundary === 0) break;
+               this.boundary--;
             }
          }
 
-         if(this.count === INT_NULL) 
-            alert('M_Buffer count = -1')
+         if(this.boundary === INT_NULL) 
+            alert('M_Buffer boundary = -1')
          ERROR_NULL(this.active_count);
       }
    }
 
    GetNextFree() {
 
-      if (this.count >= this.size) {
+      if (this.boundary >= this.size) {
 
          this.Realloc(); // buffer is full.
-         const freeIdx = this.count++;
+         const freeIdx = this.boundary++;
          return freeIdx;
       }
 
-      // We run until count and not size (the whole buffer) 
-      // since count does not decrement (on remove) below the last element's index.
-      for (let i = 0; i <= this.count; i++) {
+      // We run until boundary and not size (the whole buffer) 
+      // since boundary does not decrement (on remove) below the last element's index.
+      for (let i = 0; i <= this.boundary; i++) {
          if (!this.buffer[i]) {
-            // Increment count only if the free element is after the last stored element in the buffer.
-            if (i >= this.count) this.count++;
+            // Increment boundary only if the free element is after the last stored element in the buffer.
+            if (i >= this.boundary) this.boundary++;
             return i;
          }
       }
@@ -124,13 +124,13 @@ class Buffer_Interface {
 
    /** Debug */
    Print(){
-      console.log('Count: ', this.count)
+      console.log('Count: ', this.boundary)
       console.log(this.buffer)
    }
 
    PrintMeshInfo(){
-      console.log('Count: ', this.count)
-      for (let i=0; i<this.count; i++){
+      console.log('Count: ', this.boundary)
+      for (let i=0; i<this.boundary; i++){
          if(this.buffer[i].mesh){
 
             console.log(this.buffer[i].mesh.name)
@@ -222,12 +222,12 @@ export class Int8Buffer2 extends Buffer_Interface {
    this.buffer[idx] = elem;
    this.active_count++;
 
-   this.count++;
-   if(this.count > this.size) // Case for Mesh.listeners buffer. Inserting first and then deleting from the listener. See popup - Widget_popup_handler_onclick_event(),
-      //  where we first initialize the options menu with the new listeners added and then we deactivate the popup and delete all listeners, so the count goes to total types of listeners +1
-      this.count = this.size;
+   this.boundary++;
+   if(this.boundary > this.size) // Case for Mesh.listeners buffer. Inserting first and then deleting from the listener. See popup - Widget_popup_handler_onclick_event(),
+      //  where we first initialize the options menu with the new listeners added and then we deactivate the popup and delete all listeners, so the boundary goes to total types of listeners +1
+      this.boundary = this.size;
 
-   if(this.count < idx) this.count = idx+1; // Same here
+   if(this.boundary < idx) this.boundary = idx+1; // Same here
       return idx;
    }
 
@@ -236,27 +236,27 @@ export class Int8Buffer2 extends Buffer_Interface {
       this.buffer[idx] = INT_NULL;
       this.active_count--;
 
-      if (this.count === 1) {
-         this.count = 0;
+      if (this.boundary === 1) {
+         this.boundary = 0;
          return;
       }
 
-      // else if (this.count === this.size) {
-      //    this.count--;
+      // else if (this.boundary === this.size) {
+      //    this.boundary--;
       //    return;
       // }
 
       else {
-         const count = this.count;
-         for (let i = count; i > 0; i--) {
+         const boundary = this.boundary;
+         for (let i = boundary; i > 0; i--) {
 
-            if (this.buffer[this.count-1] !== INT_NULL|| this.count === 0) break;
-            this.count--;
+            if (this.buffer[this.boundary-1] !== INT_NULL|| this.boundary === 0) break;
+            this.boundary--;
          }
       }
 
-      if(this.count === INT_NULL) 
-         alert('M_Buffer count = -1')
+      if(this.boundary === INT_NULL) 
+         alert('M_Buffer boundary = -1')
       ERROR_NULL(this.active_count);
    }
 
@@ -279,7 +279,7 @@ export class Int8Buffer2 extends Buffer_Interface {
 export class Int8_2DBuffer {
 
    buffer;
-   count; // CAUTION! Do not rely on the count variable.Its use is only for counting how many alements are in use(1 count for both rows and columns).
+   boundary; // CAUTION! Do not rely on the boundary variable.Its use is only for counting how many alements are in use(1 boundary for both rows and columns).
    size;
    numcols;
 
@@ -290,7 +290,7 @@ export class Int8_2DBuffer {
       if(ERROR_NULL(this.size)) alert('Must initialize Int8_2dBuffer with a size > 1');
 
       this.buffer = new Int8Array(this.size);
-      this.count = 0;
+      this.boundary = 0;
 
       this.Init(INT_NULL);
    }
@@ -306,7 +306,7 @@ export class Int8_2DBuffer {
       const idx = this.GetNextFree(rowidx);
       if(idx !== INT_NULL){
          this.buffer[idx] = val;
-         this.count++;
+         this.boundary++;
       }
    }
 
@@ -344,7 +344,7 @@ export class Int8_2DBuffer {
 
       if(idx > INT_NULL && idx < this.size){
          this.buffer[idx] = INT_NULL;
-         this.count--;
+         this.boundary--;
       }
    }
 
@@ -352,7 +352,7 @@ export class Int8_2DBuffer {
 
       for (let i = 0; i <= this.size; i++)
          this.buffer[i] = INT_NULL
-      this.count = 0;
+      this.boundary = 0;
    }
    // RemoveByIdx(idx) {
 
@@ -360,46 +360,46 @@ export class Int8_2DBuffer {
 
    //       /**
    //        * In this implementation of buffer, we run 
-   //        * the loops until count and not until size. 
-   //        * For this to work, we can only decrement count
+   //        * the loops until boundary and not until size. 
+   //        * For this to work, we can only decrement boundary
    //        * if all next elements are not used.
    //        * All we are doing is 
-   //        * to have the count at the last used element of the buffer.
+   //        * to have the boundary at the last used element of the buffer.
    //        */
 
    //       this.buffer[idx] = null;
 
-   //       if (this.count === 1) {
-   //          this.count = 0;
+   //       if (this.boundary === 1) {
+   //          this.boundary = 0;
    //          return;
    //       }
 
-   //       else if (this.count === this.size) {
-   //          this.count--;
+   //       else if (this.boundary === this.size) {
+   //          this.boundary--;
    //          return;
    //       }
 
    //       else {
-   //          const count = this.count + 1;
-   //          for (let i = count; i > 0; i--) {
+   //          const boundary = this.boundary + 1;
+   //          for (let i = boundary; i > 0; i--) {
 
-   //             if (this.buffer[this.count - 1] || this.count === 0) break;
-   //             this.count--;
+   //             if (this.buffer[this.boundary - 1] || this.boundary === 0) break;
+   //             this.boundary--;
    //          }
    //       }
-   //       if(this.count === INT_NULL) 
-   //          alert('M_Buffer count = -1')
+   //       if(this.boundary === INT_NULL) 
+   //          alert('M_Buffer boundary = -1')
    //    }
    // }
    /** Debug */
    Print(){
-      console.log('Count: ', this.count)
+      console.log('Count: ', this.boundary)
       console.log(this.buffer)
    }
 
    PrintMeshInfo(){
-      console.log('Count: ', this.count)
-      for (let i=0; i<this.count; i++){
+      console.log('Count: ', this.boundary)
+      for (let i=0; i<this.boundary; i++){
          if(this.buffer[i].mesh){
 
             console.log(this.buffer[i].mesh.name)

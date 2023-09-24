@@ -60,9 +60,9 @@ export class WebGlRenderer {
       this.Init();
 
       this.scene = scene;
-      scene.UseCamera(camera);
+      scene.SetCamera(camera);
       STATE.scene.active = this.scene;
-      STATE.scene.active_idx = this.scene.sceneIdx;
+      STATE.scene.active_idx = this.scene.sceneidx;
 
       this.camera = camera;
       this.camera.Init();

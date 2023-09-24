@@ -130,6 +130,7 @@ class RenderQueue {
       }
       return INT_NULL;
    }
+   
    FindAllBuffersFromProgram(progIdx) {
 
       if(!this.count) return INT_NULL; // Case RenderQueue hasn't been initialized
@@ -278,9 +279,9 @@ export function RenderQueueUpdate(progIdx, vbIdx, flag){
 export function RenderQueueInit() {
    renderQueue.Init(); // One time initialization(creates an empty buffer...)
 }
-export function RenderQueueCreate() {
-   renderQueue.Create();
-   renderQueue.UpdateActiveQueue();
-}
+// export function RenderQueueCreate() {
+//    renderQueue.Create();
+//    renderQueue.UpdateActiveQueue();
+// }
 
 

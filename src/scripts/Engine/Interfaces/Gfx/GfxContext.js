@@ -1,9 +1,9 @@
 "use strict";
 
-import { GfxSetVbRender, GlGenerateContext, GlResetIndexBuffer, GlResetVertexBuffer, GlSetVertexBufferPrivate } from "../../Graphics/Buffers/GlBuffers.js";
-import { GlCheckSid } from "../../Graphics/GlProgram.js";
-import { M_Buffer } from "../Core/Buffers.js";
-import { Info_listener_dispatch_event } from "../DebugInfo/InfoListeners.js";
+import { GfxSetVbRender, GlGenerateContext, GlResetIndexBuffer, GlResetVertexBuffer, GlSetVertexBufferPrivate } from "../../../Graphics/Buffers/GlBuffers.js";
+import { GlCheckSid } from "../../../Graphics/GlProgram.js";
+import { M_Buffer } from "../../Core/Buffers.js";
+import { Info_listener_dispatch_event } from "../../DebugInfo/InfoListeners.js";
 
 
 let _sessionId = 0;
@@ -115,8 +115,6 @@ export class Gfx_Pool extends M_Buffer {
          
          console.error('Gfx Session is already open')
          console.log('session:', this.session, this.buffer)
-         
-         // alert('Gfx Session is already open')
       } 
 
       const count = idxs.length;
@@ -161,7 +159,6 @@ export class Gfx_Pool extends M_Buffer {
    #StoreGfx(gfx, isPrivate) { // Does not store duplicates
 
       // Store it, if not stored.
-      // if (this.#FindGfxNotPrivate(gfx.prog.idx, gfx.vb.idx) === INT_NULL) {
       if (this.FindGfxIdx(gfx.prog.idx, gfx.vb.idx) === INT_NULL) {
          const idx = this.#Store(gfx.prog.idx, gfx.vb.idx, gfx.sceneIdx, true, isPrivate);
          return idx;
@@ -194,7 +191,7 @@ export class Gfx_Pool extends M_Buffer {
    }
 
    #ActDeactFromPool(progidx, vbidx, flag) {
-      for (let i = 0; i < this.count; i++) {
+      for (let i = 0; i < this.boundary; i++) {
          if (this.buffer[i].progidx === progidx && this.buffer[i].vbidx === vbidx) {
             this.buffer[i].isActive = flag;
             return true;
@@ -205,7 +202,7 @@ export class Gfx_Pool extends M_Buffer {
 
    #GetInactiveAndPrivateBySid(sid) {
 
-      for (let i = 0; i < this.count; i++) {
+      for (let i = 0; i < this.boundary; i++) {
          if (!this.buffer[i].isActive && this.buffer[i].isPrivate && GlCheckSid(sid, this.buffer[i].progidx))
             return i;
       }
@@ -215,7 +212,7 @@ export class Gfx_Pool extends M_Buffer {
 
    #GetNotPrivateBySid(sid) {
 
-      for (let i = 0; i < this.count; i++) {
+      for (let i = 0; i < this.boundary; i++) {
          if (!this.buffer[i].isPrivate && GlCheckSid(sid, this.buffer[i].progidx))
             return this.buffer[i];
       }
@@ -225,7 +222,7 @@ export class Gfx_Pool extends M_Buffer {
 
    FindGfx(progidx, vbidx) {
 
-      for (let i = 0; i < this.count; i++)
+      for (let i = 0; i < this.boundary; i++)
          if (this.buffer[i].progidx === progidx &&
             this.buffer[i].vbidx === vbidx)
             return this.buffer[i];
@@ -235,7 +232,7 @@ export class Gfx_Pool extends M_Buffer {
 
    FindGfxIdx(progidx, vbidx) {
 
-      for (let i = 0; i < this.count; i++)
+      for (let i = 0; i < this.boundary; i++)
          if (this.buffer[i].progidx === progidx &&
             this.buffer[i].vbidx === vbidx)
             return i;
@@ -245,7 +242,7 @@ export class Gfx_Pool extends M_Buffer {
 
    #FindGfxNotPrivate(progidx, vbidx) {
 
-      for (let i = 0; i < this.count; i++)
+      for (let i = 0; i < this.boundary; i++)
          if (!this.buffer[i].isPrivate &&
             this.buffer[i].progidx === progidx &&
             this.buffer[i].vbidx === vbidx)
@@ -254,10 +251,10 @@ export class Gfx_Pool extends M_Buffer {
       return INT_NULL
    }
 
-   // Activates the rendering of the gfx buffers
+   // Activates rendering of the meshe's gfx buffers
    ActivateRecursive(mesh) {
 
-      for (let i = 0; i < mesh.children.count; i++) {
+      for (let i = 0; i < mesh.children.boundary; i++) {
 
          const child = mesh.children.buffer[i];
          if (child) this.ActivateRecursive(child)
@@ -272,15 +269,12 @@ export class Gfx_Pool extends M_Buffer {
          GfxSetVbRender(progidx, vbidx, true);
       }
 
-      // const trigger_params = { info: `${buffer.count}`, progidx: progidx,  vbidx: vbidx }
-      // console.log(trigger_params)
-
    }
 
    /** */
    DeactivateRecursive(mesh) {
 
-      for (let i = 0; i < mesh.children.count; i++) {
+      for (let i = 0; i < mesh.children.boundary; i++) {
 
          const child = mesh.children.buffer[i];
          if (child) 
@@ -306,7 +300,7 @@ export class Gfx_Pool extends M_Buffer {
 
    DeactivateRecursive_no_listeners_touch(mesh) {
 
-      for (let i = 0; i < mesh.children.count; i++) {
+      for (let i = 0; i < mesh.children.boundary; i++) {
 
          const child = mesh.children.buffer[i];
          if (child) 
@@ -336,7 +330,7 @@ const _gfx_pool = new Gfx_Pool;
 export function Gfx_end_session(setPrivate, setActive) { return _gfx_pool.SessionEnd(setPrivate, setActive); }
 export function Gfx_open_session(gfx_idxs) { return _gfx_pool.SessionOpen(gfx_idxs); }
 
-// mesh_count is nesessary for calculating vertex buffer attribute offset for Text Meshes
+/* mesh_count is nesessary for calculating vertex buffer attribute offset for Text Meshes */
 export function Gfx_generate_context(sid, sceneIdx, mesh_count, FLAGS, gfxidx) {
    return _gfx_pool.GenerateGfxCtx(sid, sceneIdx, mesh_count, FLAGS, gfxidx);
 }
@@ -344,7 +338,6 @@ export function Gfx_generate_context(sid, sceneIdx, mesh_count, FLAGS, gfxidx) {
 /** Activates the gfx buffers recursively for all the children meshes. */
 export function Gfx_activate(mesh) { _gfx_pool.ActivateRecursive(mesh); }
 export function Gfx_deactivate(mesh) { _gfx_pool.DeactivateRecursive(mesh); }
-// export function Gfx_activate_no_listeners_touch(mesh) { _gfx_pool.ActivateRecursive(mesh); }
 export function Gfx_deactivate_no_listeners_touch(mesh) { _gfx_pool.DeactivateRecursive_no_listeners_touch(mesh); }
 
 export function Gfx_is_private_vb(progidx, vbidx){
@@ -354,14 +347,11 @@ export function Gfx_is_private_vb(progidx, vbidx){
    return false;
 }
 
-/** DEBUG */
-// export function DEBUG_Gfx_get_pool(){return}
 
-/** Debug Print */
+/** DEBUG PRINT */
 export function Gfx_pool_print() {
 
-   // console.log('Gfx Pool: ', _gfx_pool);
-   for (let i = 0; i < _gfx_pool.count; i++) {
+   for (let i = 0; i < _gfx_pool.boundary; i++) {
 
       console.log('Gfx Pool: ', _gfx_pool.buffer[i]);
    }
