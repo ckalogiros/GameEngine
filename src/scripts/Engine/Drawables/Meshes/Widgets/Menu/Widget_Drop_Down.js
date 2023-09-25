@@ -99,7 +99,7 @@ export class Widget_Drop_Down extends Section {
 
             dropdown_mesh.AddItem(menu); // Add the menu which is a storage of Widget_Drop_Down only as a child to the drop_down
             PrintVertexDataAll();
-            menu.gfx = Gfx_generate_context(menu.sid, menu.sceneIdx, menu.mat.num_faces, GFX.PRIVATE);
+            menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.mat.num_faces, GFX.PRIVATE);
 
             let params = {
                gather_gfx_idxs: [],
@@ -114,7 +114,7 @@ export class Widget_Drop_Down extends Section {
                const child = menu.children.buffer[i];
                if(child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN){
                   
-                  child.gfx = Gfx_generate_context(child.sid, child.sceneIdx, child.mat.num_faces, GFX.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
+                  child.gfx = Gfx_generate_context(child.sid, child.sceneidx, child.mat.num_faces, GFX.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
                   params.gather_gfx_idxs.push({ progidx: child.gfx.prog.idx, vbidx: child.gfx.vb.idx, name: `dp-child:${child.name}`});
                   const btn = child.children.buffer[0];
                   btn.GenGfxCtx(GFX.PRIVATE);
@@ -122,7 +122,7 @@ export class Widget_Drop_Down extends Section {
                   
                   const menu2 = child.menu;
                   if(menu2.isOn){
-                     menu2.gfx = Gfx_generate_context(menu2.sid, menu2.sceneIdx, menu2.mat.num_faces, GFX.PRIVATE);
+                     menu2.gfx = Gfx_generate_context(menu2.sid, menu2.sceneidx, menu2.mat.num_faces, GFX.PRIVATE);
                      params.gather_gfx_idxs.push({ progidx: child.gfx.prog.idx, vbidx: child.gfx.vb.idx, name: `menu-2:${menu2.name}`});
                   }
                   
@@ -238,7 +238,7 @@ export class Widget_Drop_Down extends Section {
 
       const btn = this.children.buffer[0];
       
-      this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, this.mat.num_faces, GFX.PRIVATE);
+      this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.mat.num_faces, GFX.PRIVATE);
       btn.GenGfxCtx(GFX.PRIVATE); // Set button's area gfx same with dropDown mesh 
       Gfx_end_session(true, true);
 

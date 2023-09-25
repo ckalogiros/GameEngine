@@ -4,7 +4,7 @@ import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
 import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
-import { Check_intersection_point_rect } from "../../../Collisions.js";
+import { Check_intersection_point_rect } from "../../Operations/Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
 import { Gfx_generate_context } from "../../../Interfaces/Gfx/GfxContext.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
@@ -13,6 +13,7 @@ import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../../Timers/
 import { MESH_ENABLE } from "../Base/Mesh.js";
 import { Rect } from "../Rect_Mesh.js";
 import { Text } from "../Text_Mesh.js";
+import { Align } from "../../Operations/Alignment.js";
 
 
 
@@ -89,14 +90,11 @@ export class Widget_Label {
         this.area_mesh.SetStyle(style);
 
         this.text_mesh.SetName('Text ' + text);
-        this.text_mesh.SetSceneIdx(this.area_mesh.sceneIdx);
+        this.text_mesh.SetSceneIdx(this.area_mesh.sceneidx);
 
         this.type |= MESH_TYPES_DBG.WIDGET_TEXT_LABEL | this.text_mesh.type | this.area_mesh.geom.type | this.area_mesh.mat.type;
         this.area_mesh.SetName('label area ' + text);
         this.pad = pad;
-        // this.area_mesh.AddChild(this.text_mesh);
-
-        this.text_mesh.Align_pre(this, Align, pad)
     }
 
     Destroy() {
@@ -113,8 +111,8 @@ export class Widget_Label {
     // Graphics
     GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
 
-        this.area_mesh.gfx = Gfx_generate_context(this.area_mesh.sid, this.area_mesh.sceneIdx, this.area_mesh.mat.num_faces, FLAGS, gfxidx);
-        this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneIdx, this.text_mesh.mat.num_faces, FLAGS, gfxidx);
+        this.area_mesh.gfx = Gfx_generate_context(this.area_mesh.sid, this.area_mesh.sceneidx, this.area_mesh.mat.num_faces, FLAGS, gfxidx);
+        this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.mat.num_faces, FLAGS, gfxidx);
         return this.area_mesh.gfx;
     }
 
@@ -126,7 +124,6 @@ export class Widget_Label {
 
     /*******************************************************************************************************************************************************/
     // Setters-Getters
-
     SetSceneIdx(sceneidx) {
         this.area_mesh.sceneidx = sceneidx;
         this.text_mesh.sceneidx = sceneidx;
@@ -140,56 +137,21 @@ export class Widget_Label {
     
     /*******************************************************************************************************************************************************/
     // Alignment
-    Align(flags, target_mesh, pad=[0,0]) { // Align pre-added to the vertexBuffers
+    Align(flags, pad=[0,0]) { // Align pre-added to the vertexBuffers
 
-        const pos = [0, 0];
-        CopyArr2(pos, this.area_mesh.geom.pos);
 
-        if (flags & (ALIGN.VERT_CENTER | ALIGN.RIGHT)) {
+        Align(flags, this.area_mesh.geom, this.text_mesh.geom, pad);
 
-            // Vertical allignment
-            pos[1] = target_mesh.geom.pos[1];
-
-            // Horizontal allignment
-            pos[0] = target_mesh.geom.pos[0] + target_mesh.geom.dim[0] - this.area_mesh.geom.dim[0] - pad[0];
-            CopyArr2(this.area_mesh.geom.pos, pos);
-
-        }
-        else if (flags & ALIGN.RIGHT) {
-
-            // Horizontal allignment
-            pos[0] = target_mesh.geom.pos[0] + target_mesh.geom.dim[0] - this.area_mesh.geom.dim[0] - pad[0];
-            CopyArr2(this.area_mesh.geom.pos, pos);
-
-        }
-        else if (flags & ALIGN.LEFT) {
-
-            // Horizontal allignment
-            pos[0] = (target_mesh.geom.pos[0] - target_mesh.geom.dim[0]) + this.area_mesh.geom.dim[0] + pad[0];
-            CopyArr2(this.area_mesh.geom.pos, pos);
-
-        }
-
-        /**
-         * If the alignment happens after the widgets insertion to 
-         * the vertex buffers, we must update the vertex buffers too.
-         * If the target_mesh is of type 'Text', we must update all characters one by one.
-         */
-
+        // Update vertex buffers
         if(this.area_mesh.is_gfx_inserted){
+            /**
+             * If the alignment happens after the widgets insertion to 
+             * the vertex buffers, we must update the vertex buffers too.
+             */
 
-
+            this.text_mesh.geom.UpdatePosXY(this.text_mesh.gfx)
         }
 
-    }
-
-    Align_post(flags, target_mesh, pad=[0,0]){ // Align and update gfx buffers
-
-        /**
-         * If the target_mesh is of type 'Text', we must update all characters in the vertex buffers.
-         */
-
-        this.Align_pre(flags, target_mesh, pad);
     }
 
     Reposition_pre(){}
@@ -201,7 +163,7 @@ export class Widget_Label {
     }
 
     /*******************************************************************************************************************************************************/
-    // Listeners
+    // Events
     /**
      * @param {*} event_type typeof 'LISTEN_EVENT_TYPES'
      * @param {*} Clbk User may choose the callback for the listen event.
@@ -241,7 +203,8 @@ export class Widget_Label {
                  * The Move event runs only when the mesh is GRABED. That means that the timeInterval 
                  * is created and destroyed upon 'onClickDown' and 'onClickUp' respectively.
                  */
-                const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, OnMoveFn, { area_mesh: area_mesh, text_mesh: text_mesh });
+                // const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, OnMoveFn, { area_mesh: area_mesh, text_mesh: text_mesh });
+                const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, OnMoveFn, mesh);
                 area_mesh.timeIntervalsIdxBuffer.Add(idx);
 
                 if (area_mesh.StateCheck(MESH_STATE.IS_GRABABLE)) {
@@ -260,18 +223,22 @@ export class Widget_Label {
 
         // The 'OnMove' function is called by the timeInterval.
         // The timeInterval has been set by the 'OnClick' event.
-        const area_mesh = params.params.area_mesh;
-        const text_mesh = params.params.text_mesh;
+        const widget = params.params;
+        const area_mesh = widget.area_mesh;
+        const text_mesh = widget.text_mesh;
 
         // Destroy the time interval and the Move operation, if the mesh is not grabed
         // MESH_STATE.IN_GRAB is deactivated upon mouse click up in Events.js.
         if (area_mesh.StateCheck(MESH_STATE.IN_GRAB) === 0) {
 
-            const intervalIdx = area_mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
-            TimeIntervalsDestroyByIdx(intervalIdx);
-            area_mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+            if(area_mesh.timeIntervalsIdxBuffer.boundary) {
 
-            return;
+                const intervalIdx = area_mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
+                TimeIntervalsDestroyByIdx(intervalIdx);
+                area_mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+    
+                return;
+            }
         }
 
         // Move 
@@ -282,6 +249,7 @@ export class Widget_Label {
     }
 
 }
+
 
 
 export class Widget_Label_Dynamic_Text extends Widget_Label {

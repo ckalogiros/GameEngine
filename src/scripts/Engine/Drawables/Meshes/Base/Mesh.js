@@ -66,7 +66,7 @@ export class Mesh {
     gfx;
     is_gfx_inserted; // A way to tell if the mesh has been inserted to the graphics pipeline;
     uniforms;
-    sceneIdx; // A refference to the scene that the mesh belongs to(index only).
+    sceneidx; // A refference to the scene that the mesh belongs to(index only).
     type; // A bit masked large integer to 'name' all different types of a mesh. 
     listeners; // Indexes to the EventListeners class.
     eventCallbacks; // A buffer to store all callback for any event enabled for the mesh.
@@ -97,7 +97,7 @@ export class Mesh {
         this.gfx = null;
         this.is_gfx_inserted = false;
 
-        this.sceneIdx = STATE.scene.active_idx;
+        this.sceneidx = STATE.scene.active_idx;
 
         if (time) this.time = time;
 
@@ -163,21 +163,14 @@ export class Mesh {
     SetSceneIdx(scene_idx) {
 
         if (scene_idx === INT_NULL || scene_idx >= Scenes_get_count()) alert('ERROR scene index.');
-        this.sceneIdx = scene_idx;
+        this.sceneidx = scene_idx;
     }
 
     AddChild(mesh) {
 
         mesh.idx = this.children.Add(mesh);
-        mesh.parent = this;
-
-        // if(mesh.StateCheck(MESH_STATE.IS_CLICKABLE)){
-        //     this.StateEnable(MESH_STATE.CHILDREN_HAVE_CLICK_EVENT)
-        // }
-        // if(mesh.StateCheck(MESH_STATE.IS_HOVERABLE)){
-        //     this.StateEnable(MESH_STATE.CHILDREN_HAVE_HOVER_EVENT)
-        // }
-
+        mesh.area_mesh.parent = this;
+        mesh.text_mesh.parent = this;
         return mesh.idx;
     }
 
@@ -216,7 +209,7 @@ export class Mesh {
 
         const ret = Gl_remove_geometry(this.gfx, this.geom.num_faces)
 
-        Scenes_update_all_gfx_starts(this.sceneIdx, this.gfx.prog.idx, this.gfx.vb.idx, ret);
+        Scenes_update_all_gfx_starts(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, ret);
 
         // Remove event listeners
         this.RemoveAllListenEvents();
@@ -240,7 +233,7 @@ export class Mesh {
          * and remove the mesh from the scene
          */
         // Remove from scene's mesh buffer
-        const scene = Scenes_get_scene_by_idx(this.sceneIdx);
+        const scene = Scenes_get_scene_by_idx(this.sceneidx);
         ERROR_NULL(scene);
         scene.RemoveMesh(this);
 
@@ -281,7 +274,7 @@ export class Mesh {
 
 
         // Remove from scene's mesh buffer
-        const scene = Scenes_get_scene_by_idx(this.sceneIdx);
+        const scene = Scenes_get_scene_by_idx(this.sceneidx);
         ERROR_NULL(scene);
         scene.RemoveMesh(this);
 
@@ -631,13 +624,13 @@ export class Text_Mesh extends Mesh {
 
     //     super(geom, mat);
 
-    //     this.sceneIdx = STATE.scene.active_idx;
+    //     this.sceneidx = STATE.scene.active_idx;
     //     this.type |= MESH_TYPES_DBG.TEXT_MESH;
     // }
 
     // GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
 
-    //     this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, this.mat.num_faces, FLAGS, gfxidx);
+    //     this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.mat.num_faces, FLAGS, gfxidx);
     //     return this.gfx;
     // }
 
@@ -746,7 +739,7 @@ function Mesh_recursive_destroy(parent) {
 
             mesh.RemoveChildren(); // TODO: Do we need to strip down all meshes??? Only if they are shared pointers to some mesh of the appliction
 
-            if (!ret.last) Scenes_update_all_gfx_starts(mesh.sceneIdx, mesh.gfx.prog.idx, mesh.gfx.vb.idx, ret);
+            if (!ret.last) Scenes_update_all_gfx_starts(mesh.sceneidx, mesh.gfx.prog.idx, mesh.gfx.vb.idx, ret);
 
             parent.RemoveChildByIdx(i); // Remove the current mesh from the parent
         }

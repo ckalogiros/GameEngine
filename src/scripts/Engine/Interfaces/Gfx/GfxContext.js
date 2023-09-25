@@ -3,7 +3,7 @@
 import { GfxSetVbRender, GlGenerateContext, GlResetIndexBuffer, GlResetVertexBuffer, GlSetVertexBufferPrivate } from "../../../Graphics/Buffers/GlBuffers.js";
 import { GlCheckSid } from "../../../Graphics/GlProgram.js";
 import { M_Buffer } from "../../Core/Buffers.js";
-import { Info_listener_dispatch_event } from "../../DebugInfo/InfoListeners.js";
+import { Info_listener_dispatch_event } from "../../Drawables/DebugInfo/InfoListeners.js";
 
 
 let _sessionId = 0;
@@ -17,7 +17,7 @@ export class Gfx_Pool extends M_Buffer {
       this.session = []; // SEE ## Gfx_Pool.session
    }
 
-   GenerateGfxCtx(sid, sceneIdx, mesh_count, FLAGS, gfxIdx=[INT_NULL, INT_NULL]) {
+   GenerateGfxCtx(sid, sceneidx, mesh_count, FLAGS, gfxIdx=[INT_NULL, INT_NULL]) {
 
       /** Case we have an open session and we dont want to pass any FLAGS 
        * to the rest of the mesh until the session is over. 
@@ -28,7 +28,7 @@ export class Gfx_Pool extends M_Buffer {
 
       if (FLAGS & GFX.NEW) {
 
-         const gfx = GlGenerateContext(sid, sceneIdx, FLAGS, NO_SPECIFIC_GL_BUFFER, mesh_count);
+         const gfx = GlGenerateContext(sid, sceneidx, FLAGS, NO_SPECIFIC_GL_BUFFER, mesh_count);
          gfx.gfx_ctx.idx = this.#StoreGfx(gfx);
          return gfx;
       }
@@ -40,12 +40,12 @@ export class Gfx_Pool extends M_Buffer {
             const found = this.#GetNotPrivateBySid(sid);
             if (found) {
 
-               const gfx = GlGenerateContext(sid, sceneIdx, GFX.SPECIFIC, found.vbidx, mesh_count);
+               const gfx = GlGenerateContext(sid, sceneidx, GFX.SPECIFIC, found.vbidx, mesh_count);
                return gfx;
             }
             else { // ... else if pool didn't find any buffer, create a new one ...
 
-               const gfx = GlGenerateContext(sid, sceneIdx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh_count);
+               const gfx = GlGenerateContext(sid, sceneidx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh_count);
                gfx.gfx_ctx.idx = this.#StoreGfx(gfx, FLAGS & GFX.PRIVATE);
                return gfx;
             }
@@ -60,7 +60,7 @@ export class Gfx_Pool extends M_Buffer {
             const gfx_idx = this.FindGfx(gfxIdx[0], gfxIdx[1]);
             if(gfx_idx){
                
-               const gfx = GlGenerateContext(sid, sceneIdx, GFX.SPECIFIC, gfx_idx.vbidx, mesh_count);
+               const gfx = GlGenerateContext(sid, sceneidx, GFX.SPECIFIC, gfx_idx.vbidx, mesh_count);
                gfx.gfx_ctx.idx = this.#StoreGfx(gfx);
                return gfx;
             }
@@ -74,7 +74,7 @@ export class Gfx_Pool extends M_Buffer {
             if (foundIdx !== INT_NULL) {
 
                const vbidx = this.buffer[foundIdx].vbidx
-               const gfx = GlGenerateContext(sid, sceneIdx, GFX.SPECIFIC, vbidx, mesh_count);
+               const gfx = GlGenerateContext(sid, sceneidx, GFX.SPECIFIC, vbidx, mesh_count);
                gfx.gfx_ctx.idx = foundIdx;
                // Add this gfx to the session
                const idx = this.FindGfxIdx(gfx.prog.idx, gfx.vb.idx)
@@ -89,7 +89,7 @@ export class Gfx_Pool extends M_Buffer {
             }
             else { // ... else if pool didn't find any Private buffer, create a new one ...
 
-               const gfx = GlGenerateContext(sid, sceneIdx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh_count);
+               const gfx = GlGenerateContext(sid, sceneidx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh_count);
                gfx.gfx_ctx.idx = this.#StoreGfx(gfx, FLAGS & GFX.PRIVATE);
                gfx.gfx_ctx.sessionId = _sessionId; // MAYBE BUG. Better to extract sessionId from 'this.buffer[gfx.gfx_ctx.idx].sessionId'
                // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX, {added_gfx:this.buffer[gfx.gfx_ctx.idx]});
@@ -160,18 +160,18 @@ export class Gfx_Pool extends M_Buffer {
 
       // Store it, if not stored.
       if (this.FindGfxIdx(gfx.prog.idx, gfx.vb.idx) === INT_NULL) {
-         const idx = this.#Store(gfx.prog.idx, gfx.vb.idx, gfx.sceneIdx, true, isPrivate);
+         const idx = this.#Store(gfx.prog.idx, gfx.vb.idx, gfx.sceneidx, true, isPrivate);
          return idx;
       }
    }
 
    /** This function is called only if progidx and vbidx have not been added. i.e. Does not run for duplicates  */
-   #Store(progidx, vbidx, sceneIdx, isActive = true, isPrivate) {
+   #Store(progidx, vbidx, sceneidx, isActive = true, isPrivate) {
 
       const obj = {
          progidx: progidx,
          vbidx: vbidx,
-         sceneidx: sceneIdx,
+         sceneidx: sceneidx,
          isActive: (isPrivate > 0) ? false : true,
          isPrivate: (isPrivate > 0) ? true : false,
          sessionId:  INT_NULL,
@@ -331,8 +331,8 @@ export function Gfx_end_session(setPrivate, setActive) { return _gfx_pool.Sessio
 export function Gfx_open_session(gfx_idxs) { return _gfx_pool.SessionOpen(gfx_idxs); }
 
 /* mesh_count is nesessary for calculating vertex buffer attribute offset for Text Meshes */
-export function Gfx_generate_context(sid, sceneIdx, mesh_count, FLAGS, gfxidx) {
-   return _gfx_pool.GenerateGfxCtx(sid, sceneIdx, mesh_count, FLAGS, gfxidx);
+export function Gfx_generate_context(sid, sceneidx, mesh_count, FLAGS, gfxidx) {
+   return _gfx_pool.GenerateGfxCtx(sid, sceneidx, mesh_count, FLAGS, gfxidx);
 }
 
 /** Activates the gfx buffers recursively for all the children meshes. */

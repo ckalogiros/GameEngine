@@ -2,7 +2,7 @@
 
 import { GetSign } from "../../../Helpers/Helpers.js";
 import { Floor } from "../../../Helpers/Math/MathOperations.js";
-import { Info_listener_dispatch_event } from "../../DebugInfo/InfoListeners.js";
+import { Info_listener_dispatch_event } from "../../Drawables/DebugInfo/InfoListeners.js";
 import { RegisterEvent } from "../../Events/Events.js";
 
 

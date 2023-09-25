@@ -27,7 +27,7 @@ export function GlSetTextureIdx(progIdx, vbIdx, texIdx){ _glPrograms[progIdx].ve
 export class GfxInfoMesh {
 
 	sid = INT_NULL;
-	sceneIdx = INT_NULL;
+	sceneidx = INT_NULL;
 	isPrivate = false;
 	sessionId = INT_NULL;
 	numFaces = 0;
@@ -67,7 +67,7 @@ export class GfxInfoMesh {
 		if (gfxInfoMesh instanceof GfxInfoMesh) {
 
 			this.sid = gfxInfoMesh.sid;
-			this.sceneIdx = gfxInfoMesh.sceneIdx;
+			this.sceneidx = gfxInfoMesh.sceneidx;
 			this.numFaces = gfxInfoMesh.numFaces;
 			this.vertsPerRect = gfxInfoMesh.vertsPerRect;
 			this.attribsPerVertex = gfxInfoMesh.attribsPerVertex;
@@ -94,7 +94,7 @@ export class GfxInfoMesh {
 		if (gfx instanceof GfxInfoMesh) {
 
 			this.sid.Copy(gfx.sid);
-			this.sceneIdx = gfx.sceneIdx;
+			this.sceneidx = gfx.sceneidx;
 			this.numFaces = gfx.numFaces;
 			this.vertsPerRect = gfx.vertsPerRect;
 			this.attribsPerVertex = gfx.attribsPerVertex;

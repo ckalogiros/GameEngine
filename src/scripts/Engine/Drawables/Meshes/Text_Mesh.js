@@ -1,11 +1,11 @@
 "use strict";
 
-import { GlSetTex } from "../../../Graphics/Buffers/GlBufferOps.js";
 import { Gl_remove_geometry } from "../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh } from "../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../Helpers/Helpers.js";
 import { CopyArr2, CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
 import { Gfx_deactivate } from "../../Interfaces/Gfx/GfxContext.js";
+import { GfxSetTex } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 import { FontGetUvCoords } from "../../Loaders/Font/Font.js";
 import { Scenes_remove_mesh, Scenes_update_all_gfx_starts } from "../../Scenes.js";
 import { Geometry2D_Text } from "../Geometry/Geometry2DText.js";
@@ -22,8 +22,9 @@ export class Text extends Mesh {
       if (sdfouter + bold > 1) bold = 1 - sdfouter;
       const mat = new FontMaterial(color, font, text, [bold, sdfouter])
       const geom = new Geometry2D_Text(pos, fontSize, scale, text, font);
-
+      
       super(geom, mat);
+      this.type |= MESH_TYPES_DBG.TEXT_MESH;
    }
 
    Destroy(){
@@ -32,7 +33,7 @@ export class Text extends Mesh {
 
       // Remove from gfx buffers.
       const ret = Gl_remove_geometry(this.gfx, this.geom.num_faces)
-      Scenes_update_all_gfx_starts(this.sceneIdx, this.gfx.prog.idx, this.gfx.vb.idx, ret);
+      Scenes_update_all_gfx_starts(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, ret);
 
       // Remove event listeners
       this.RemoveAllListenEvents();
@@ -48,7 +49,7 @@ export class Text extends Mesh {
          }
       }
 
-      if(this.parent) this.parent.RemoveChildByIdx(i); // Remove the current mesh from the parent
+      if(this.parent) this.parent.RemoveChildByIdx(this.idx); // Remove the current mesh from the parent
 
       // Remove from scene
       Scenes_remove_mesh(this);
@@ -59,7 +60,7 @@ export class Text extends Mesh {
    // Graphics
    GenGfxCtx(FLAGS, gfxidx) {
 
-      this.gfx = Gfx_generate_context(this.sid, this.sceneIdx, this.mat.num_faces, FLAGS, gfxidx);
+      this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.mat.num_faces, FLAGS, gfxidx);
       return this.gfx;
    }
 
@@ -119,7 +120,7 @@ export class Text extends Mesh {
          if (text[j] !== undefined) {
             uvs = FontGetUvCoords(this.mat.uvIdx, text[j]);
          }
-         GlSetTex(gfxInfoCopy, uvs);
+         GfxSetTex(gfxInfoCopy, uvs);
          gfxInfoCopy.vb.start += gfxInfoCopy.vb.count
       }
 
@@ -127,51 +128,6 @@ export class Text extends Mesh {
 
    SetColorRGB(col) {
       this.mat.SetColorRGB(col, this.gfx, this.geom.num_faces)
-   }
-
-   /*******************************************************************************************************************************************************/
-   Align_pre(target_mesh, flags, pad = [0, 0]) { // Align pre-added to the vertexBuffers
-
-      const pos = [0, 0];
-      const dim = this.geom.dim;
-      CopyArr2(pos, this.geom.pos);
-      let ypos = pos[1] + dim[1] * 2;
-
-      if (flags & ALIGN.VERTICAL) {
-
-         for (let i = 0; i < this.children.boundary; i++) {
-
-            const child = this.children.buffer[i];
-            pos[1] = ypos;
-            child.geom.Reposition_pre(pos);
-            ypos += child.geom.dim[1] * 2;
-         }
-      }
-
-
-      if (flags & ALIGN.LEFT) {
-
-         const pos = [0, 0];
-         CopyArr2(pos, this.geom.pos);
-         // Vertical allignment
-         pos[1] = target_mesh.geom.pos[1];
-         // Horizontal allignment
-         pos[0] = (target_mesh.geom.pos[0] - target_mesh.geom.dim[0]) + (this.geom.dim[0]) + pad[0];
-         CopyArr2(this.geom.pos, pos);
-
-      }
-      else if (flags & ALIGN.RIGHT) {
-
-         const pos = [0, 0];
-         CopyArr2(pos, this.geom.pos);
-         // Vertical allignment
-         pos[1] = target_mesh.geom.pos[1];
-         // Horizontal allignment
-         const num_faces = (this.geom.num_faces - 1 > 1) ? this.geom.num_faces - 1 : 1;
-         pos[0] = (target_mesh.geom.pos[0] + target_mesh.geom.dim[0]) - (this.geom.dim[0] * 2 * num_faces) - pad[0];
-         CopyArr2(this.geom.pos, pos);
-
-      }
    }
 
 

@@ -46,12 +46,12 @@ export class Geometry2D {
         }
     }
 
-    //////////////////////////////////////////////////////////////
+    /*******************************************************************************************************************************************************/
+    // Graphics
     AddToGraphicsBuffer(sid, gfx, meshName) {
         GlAddGeometry(sid, this.pos, this.dim, this.time, gfx, meshName, 1);
     }
 
-    //////////////////////////////////////////////////////////////
     SetPosXYZ(pos, gfx, numFaces=1) {
         math.CopyArr3(this.pos, pos);
         glBufferOps.GlSetWpos(gfx, pos, numFaces);

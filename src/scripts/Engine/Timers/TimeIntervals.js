@@ -136,7 +136,7 @@ class TimeIntervals {
 
       const freeIdx = this.GetNextFree();
       const parameters = {
-         idx: freeIdx,
+         time_interval_idx: freeIdx,
          params: params,
       }; 
       this.ti[freeIdx].Create(interval, this.count, name, repeat, clbk, parameters);

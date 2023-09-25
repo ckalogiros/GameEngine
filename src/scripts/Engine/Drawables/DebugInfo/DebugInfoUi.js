@@ -1,15 +1,15 @@
 "use strict";
 
-import { GlGetPrograms, GlGetVB } from "../../Graphics/GlProgram";
-import { Section } from "../Drawables/Meshes/Section";
-import { Drop_down_set_root, Widget_Drop_Down } from "../Drawables/Meshes/Widgets/Menu/Widget_Drop_Down";
-import { Widget_Switch } from "../Drawables/Meshes/Widgets/WidgetButton";
-import { Widget_Label_Text_Mesh_Menu_Options } from "../Drawables/Meshes/Widgets/WidgetLabel";
-import { Widget_Dynamic_Text_Mesh } from "../Drawables/Meshes/Widgets/WidgetText";
-import { Gfx_end_session } from "../Interfaces/Gfx/GfxContext";
+import { GlGetPrograms, GlGetVB } from "../../../Graphics/GlProgram";
+import { Section } from "../Meshes/Section";
+import { Drop_down_set_root, Widget_Drop_Down } from "../Meshes/Widgets/Menu/Widget_Drop_Down";
+import { Widget_Switch } from "../Meshes/Widgets/WidgetButton";
+import { Widget_Label_Text_Mesh_Menu_Options } from "../Meshes/Widgets/WidgetLabel";
+import { Widget_Dynamic_Text_Mesh } from "../Meshes/Widgets/WidgetText";
+import { Gfx_end_session } from "../../Interfaces/Gfx/GfxContext";
 // import { Scenes_get_children } from "../Scenes";
-import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _pt_fps } from "../Timers/PerformanceTimers";
-import { PerformanceTimerGetFps1sAvg, _fps_1s_avg, _fps_500ms_avg } from "../Timers/Time";
+import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _pt_fps } from "../../Timers/PerformanceTimers";
+import { PerformanceTimerGetFps1sAvg, _fps_1s_avg, _fps_500ms_avg } from "../../Timers/Time";
 import { Info_listener_create_event, Info_listener_destroy_event } from "./InfoListeners";
 
 

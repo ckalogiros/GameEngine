@@ -1,6 +1,6 @@
 "use strict";
 
-import { MapLinear } from "../Helpers/Math/MathOperations.js";
+import { MapLinear } from "../../../Helpers/Math/MathOperations.js";
 
 
 export function Bind_change_color_rgb(target, val, maxval){

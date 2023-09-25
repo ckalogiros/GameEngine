@@ -5,7 +5,7 @@ import { Gl_shift_right_geometry } from "../../../../Graphics/Buffers/GlBuffers.
 import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr2, CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
-import { Check_intersection_point_rect } from "../../../Collisions.js";
+import { Check_intersection_point_rect } from "../../Operations/Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { Scenes_update_all_gfx_starts2 } from "../../../Scenes.js";
@@ -178,7 +178,7 @@ export class Widget_Text extends Text {
 	// 		// Need to update all ther gfx.starts of all the shifted meshes.
 	// 		// const ret = Gl_remove_geometry(this.gfx, this.geom.num_faces)
 	// 		const ret = Gl_shift_right_geometry(textMesh.gfx, textMesh.geom.num_faces, dif_num_faces)
-	// 		Scenes_update_all_gfx_starts2(textMesh.sceneIdx, textMesh.gfx.prog.idx, textMesh.gfx.vb.idx, ret);
+	// 		Scenes_update_all_gfx_starts2(textMesh.sceneidx, textMesh.gfx.prog.idx, textMesh.gfx.vb.idx, ret);
 
 	// 		textMesh.mat.text = new_text; 
 	// 		textMesh.geom.num_faces = textLen;

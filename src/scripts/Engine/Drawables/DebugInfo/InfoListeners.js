@@ -1,6 +1,6 @@
 "use strict";
 
-import { M_Buffer } from "../Core/Buffers";
+import { M_Buffer } from "../../Core/Buffers";
 
 
 

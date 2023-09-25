@@ -428,11 +428,11 @@ const MESH_TYPES_DBG = {
 	MESH: 			_cnt <<= 1,
 	TEXT_MESH: 		_cnt <<= 1,
 	RECT_MESH: 		_cnt <<= 1,
-	PANEL_MESH: 		_cnt <<= 1,
+	PANEL_MESH: 	_cnt <<= 1,
 	
-	SECTION_MESH: 		_cnt <<= 1,
+	SECTION_MESH: 	_cnt <<= 1,
 
-	WIDGET_GENERIC: 		_cnt <<= 1,
+	WIDGET_GENERIC: 			_cnt <<= 1,
 	WIDGET_TEXT_LABEL: 		_cnt <<= 1,
 	WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS: 		_cnt <<= 1,
 	WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS: 		_cnt <<= 1,

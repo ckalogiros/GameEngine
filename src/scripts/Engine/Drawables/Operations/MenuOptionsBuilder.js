@@ -1,11 +1,11 @@
 "use strict";
 
-import { CopyArr3 } from "../../Helpers/Math/MathOperations.js";
-import { Bind_change_brightness } from "../BindingFunctions.js";
-import { Section } from "../Drawables/Meshes/Section.js";
-import { Widget_Switch } from "../Drawables/Meshes/Widgets/WidgetButton.js";
-import { Widget_Label_Text_Mesh_Menu_Options } from "../Drawables/Meshes/Widgets/WidgetLabel.js";
-import { Slider_connect } from "../Drawables/Meshes/Widgets/WidgetSlider.js";
+import { CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
+import { Bind_change_brightness } from "./BindingFunctions.js";
+import { Section } from "../Meshes/Section.js";
+import { Widget_Switch } from "../Meshes/Widgets/WidgetButton.js";
+import { Widget_Label_Text_Mesh_Menu_Options } from "../Meshes/Widgets/WidgetLabel.js";
+import { Slider_connect } from "../Meshes/Widgets/WidgetSlider.js";
 // import { Scenes_get_children } from "../Scenes.js";
 
 

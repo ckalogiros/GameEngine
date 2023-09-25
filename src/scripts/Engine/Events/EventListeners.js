@@ -1,9 +1,9 @@
 "use strict";
 
-import { Intersection_point_rect } from "../Collisions.js";
+import { Intersection_point_rect } from "../Drawables/Operations/Collisions.js";
 import { MouseGetPos } from "../Controls/Input/Mouse.js";
 import { M_Buffer } from "../Core/Buffers.js";
-import { Info_listener_dispatch_event } from "../DebugInfo/InfoListeners.js";
+import { Info_listener_dispatch_event } from "../Drawables/DebugInfo/InfoListeners.js";
 import { Drop_down_set_root, Widget_Drop_Down } from "../Drawables/Meshes/Widgets/Menu/Widget_Drop_Down.js";
 import { Widget_Text } from "../Drawables/Meshes/Widgets/WidgetText.js";
 import { _pt5, _pt6 } from "../Timers/PerformanceTimers.js";

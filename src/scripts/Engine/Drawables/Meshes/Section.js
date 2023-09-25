@@ -1,7 +1,7 @@
 "use strict";
 
 import { AddArr2, CopyArr2, CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
-import { Check_intersection_point_rect } from "../../Collisions.js";
+import { Check_intersection_point_rect } from "../Operations/Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../Controls/Input/Mouse.js";
 import { UpdaterAdd } from "../../Scenes.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../Timers/TimeIntervals.js";

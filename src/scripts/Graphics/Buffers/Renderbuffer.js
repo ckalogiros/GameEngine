@@ -55,7 +55,7 @@ export class Framebuffer extends TempMesh {
    depthBuffer;
    texture;
 
-   constructor(name, sceneIdx, sid, col, dim, scale, tex, pos, style, time) {
+   constructor(name, sceneidx, sid, col, dim, scale, tex, pos, style, time) {
       super('Framebuffer-' + name, sid, col, dim, scale, tex, pos, style, null, null);
       this.gfxInfo = null;
       this.name = name;
@@ -66,7 +66,7 @@ export class Framebuffer extends TempMesh {
 
    }
 
-   Init(sceneIdx, name, sid) {
+   Init(sceneidx, name, sid) {
       const gl = gfxCtx.gl;
       // Create the texture that Gl will render to
       this.texture = GlCreateTexture('FrameBufferTexture0', gl, null);
@@ -92,7 +92,7 @@ export class Framebuffer extends TempMesh {
          alert('FrameBbuffer is not Complete')
       }
 
-      this.gfxInfo = GlAddMesh(this.sid | sid, this.mesh, 1, sceneIdx,
+      this.gfxInfo = GlAddMesh(this.sid | sid, this.mesh, 1, sceneidx,
          this.name + name, GL_VB.NEW, NO_SPECIFIC_GL_BUFFER);
 
       this.fbq = new FrameBuffersQueue;
@@ -127,11 +127,11 @@ class Framebuffers extends MeshBuffer {
       super(FRAME_BUFFERS_SIZE, 'FrameBuffers');
       
    }
-   Init(sceneIdx) {
+   Init(sceneidx) {
       const tex = [0, 1, 1, 0];
       for (let i = 0; i < this.size; i++) {
          this.buffer[i] = new Framebuffer(
-            'FreamBuffer' + i, sceneIdx,
+            'FreamBuffer' + i, sceneidx,
             SID_DEFAULT_TEXTURE,
             WHITE, [Viewport.width / 2, Viewport.height / 2],
             [1, 1], tex,
@@ -139,7 +139,7 @@ class Framebuffers extends MeshBuffer {
          );
       }
    }
-   Create(sceneIdx, name, sid, dim, pos) {
+   Create(sceneidx, name, sid, dim, pos) {
       const idx = this.GetFreeElem();
       this.count++;
       // Catch buffer overflow
@@ -147,7 +147,7 @@ class Framebuffers extends MeshBuffer {
          console.log(`Max Size:${this.size}  current count:${this.count}`);
          alert(`ERROR. Buffer overflow for exlosions: name: ${this.name}`);
       }
-      this.buffer[idx].Init(sceneIdx, name, sid);
+      this.buffer[idx].Init(sceneidx, name, sid);
       this.buffer[idx].isActive = true;
       if (pos !== null) this.buffer[idx].SetPosXY(pos);
       if (dim !== null) this.buffer[idx].SetDim(dim);
@@ -181,13 +181,13 @@ export function FramebuffersGet(idx) {
 //    framebuffers.Draw();
 // }
 
-export function FramebuffersCreate(sceneIdx, name, sid, dim, pos) {
+export function FramebuffersCreate(sceneidx, name, sid, dim, pos) {
    pos[0] -= 80;
-   framebuffers.Create(sceneIdx, name, sid, dim, pos);
+   framebuffers.Create(sceneidx, name, sid, dim, pos);
    return framebuffers;
 }
-export function FramebuffersInit(sceneIdx) {
-   framebuffers.Init(sceneIdx);
+export function FramebuffersInit(sceneidx) {
+   framebuffers.Init(sceneidx);
 }
 
 export function FramebuffersSetActive(flag) {
