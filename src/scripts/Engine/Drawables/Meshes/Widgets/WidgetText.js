@@ -1,16 +1,12 @@
 "use strict";
 
 import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
-import { Gl_shift_right_geometry } from "../../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
-import { CopyArr2, CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
-import { Check_intersection_point_rect } from "../../Operations/Collisions.js";
-import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
+import { CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
-import { Scenes_update_all_gfx_starts2 } from "../../../Scenes.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx, TimeIntervalsGetByIdx } from "../../../Timers/TimeIntervals.js";
-import { Text } from "../Text_Mesh.js";
+import { Text_Mesh } from "../Text_Mesh.js";
 
 /**
  * 
@@ -19,36 +15,36 @@ import { Text } from "../Text_Mesh.js";
  * 1. live in an if statment (if(fontType is sdf))
  * 2. move the function to the parent class instead of call it from all children classes of Text_Mesh
  */
-export class Widget_Text extends Text {
+export class Widget_Text extends Text_Mesh {
 
-	// pad = [0, 0];
+	pad = [0, 0];
 
-	// constructor(text, pos, fontSize = 5,  color = WHITE, bold = 4, font, scale) {
+	constructor(text, pos, fontSize = 5,  color = WHITE, bold = 4, font, scale) {
 
-	// 	const sdfouter = CalculateSdfOuterFromDim(fontSize);
-	// 	if (sdfouter + bold > 1) bold = 1 - sdfouter;
+		const sdfouter = CalculateSdfOuterFromDim(fontSize);
+		if (sdfouter + bold > 1) bold = 1 - sdfouter;
 
-	// 	super(text, pos, fontSize, scale, color)
-	// 	this.type |= MESH_TYPES_DBG.WIDGET_TEXT | this.type;
+		super(text, pos, fontSize, scale, color)
+		this.type |= MESH_TYPES_DBG.WIDGET_TEXT | this.type;
 
-	// 	this.SetName('Text ' + text.slice(0, 7))
+		this.SetName('Text ' + text.slice(0, 7))
 
-	// }
+	}
 
-	// /*******************************************************************************************************************************************************/
-   // // Graphics
-	// GenGfxCtx(FLAGS, gfxidx) {
+	/*******************************************************************************************************************************************************/
+   // Graphics
+	GenGfxCtx(FLAGS, gfxidx) {
 		
-	// 	const gfx = super.GenGfxCtx(FLAGS, gfxidx);
-	// 	return gfx;
-	// }
+		const gfx = super.GenGfxCtx(FLAGS, gfxidx);
+		return gfx;
+	}
 
-	// AddToGfx() {
+	Render() {
 
-	// 	super.AddToGfx()
-	// }
-	
-	// /*******************************************************************************************************************************************************/
+		this.AddToGfx()
+	}
+
+	/*******************************************************************************************************************************************************/
 	// Align_pre(target_mesh, flags, pad=[0,0]) { // Align pre-added to the vertexBuffers
 
 	// 	const pos = [0, 0];
@@ -211,15 +207,15 @@ export class Widget_Text extends Text {
 	// 	}
 	// }
 
-	// Reposition_post(dif_pos){
+	Reposition_post(dif_pos){
 
-	// 	this.MoveXYZ(dif_pos)
-	// 	for(let i=0; i<this.children.boundary; i++){
+		this.MoveXYZ(dif_pos)
+		for(let i=0; i<this.children.boundary; i++){
 
-	// 		const child = this.children.buffer[i];
-	// 		child.MoveXYZ(dif_pos)
-	// 	}
-   // }
+			const child = this.children.buffer[i];
+			child.MoveXYZ(dif_pos)
+		}
+   }
 
 }
 
@@ -247,9 +243,9 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 		return gfx;
 	}
 
-	AddToGfx() {
+	Render() {
 
-		super.AddToGfx()
+		super.Render()
 	}
 
 	CreateNewText(maxDynamicTextChars, fontSize, color2, pad=this.pad, bold=this.bold) {
@@ -492,9 +488,9 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 		return this.gfx;
 	}
 
-	AddToGfx() {
+	Render() {
 
-		super.AddToGfx();
+		super.Render();
 	}
 
 	/**

@@ -5,8 +5,8 @@ import { Int8Buffer, Int8Buffer2, M_Buffer } from "../../../Core/Buffers.js";
 import { TimerGetGlobalTimer } from "../../../Timers/Timers.js";
 import { Listener_create_event, Listener_remove_event_by_idx, Listener_remove_event_by_idx2, Listener_set_event_active_by_idx } from "../../../Events/EventListeners.js";
 import { CopyArr4 } from "../../../../Helpers/Math/MathOperations.js";
-import { Scenes_get_count, Scenes_get_scene_by_idx, Scenes_update_all_gfx_starts } from "../../../Scenes.js";
-import { Gfx_deactivate, Gfx_is_private_vb } from "../../../Interfaces/Gfx/GfxContext.js";
+import { Scenes_get_count, Scenes_update_all_gfx_starts, Scenes_get_root_meshes } from "../../../Scenes.js";
+import { Gfx_deactivate_recursive } from "../../../Interfaces/Gfx/GfxContext.js";
 import { TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals.js";
 
 
@@ -166,13 +166,13 @@ export class Mesh {
         this.sceneidx = scene_idx;
     }
 
-    AddChild(mesh) {
+    // AddChild(mesh) {
 
-        mesh.idx = this.children.Add(mesh);
-        mesh.area_mesh.parent = this;
-        mesh.text_mesh.parent = this;
-        return mesh.idx;
-    }
+    //     mesh.idx = this.children.Add(mesh);
+    //     mesh.parent = this;
+    //     mesh.text_mesh.parent = this;
+    //     return mesh.idx;
+    // }
 
     RemoveChildren() {
 
@@ -188,98 +188,98 @@ export class Mesh {
         this.children.RemoveByIdx(idx);
     }
 
-    RecursiveDestroy() {
+    // RecursiveDestroy() {
 
-        /**
-         * Currently destroys the 'this' mesh, all of its listeners and the liste_hover event.
-         * Continues call destroy of any child recursively with the same destruction options.
-         * 
-         * TODO!!! Implement:
-         * 1.   If the curent mesh belongs to a Private vertex buffer, 
-         *          we should implement to destroy the vertex buffer to.
-         * 2.   Definetly we need an implementation of removing vertices from the gfx buffers.
-         *      One way would be to keep track of all the free attributes of a vertex buffer
-         *      and add to that free space when it is fit. Also we need a kind of combining
-         *      overlaping free space implementation
-         */
+    //     /**
+    //      * Currently destroys the 'this' mesh, all of its listeners and the liste_hover event.
+    //      * Continues call destroy of any child recursively with the same destruction options.
+    //      * 
+    //      * TODO!!! Implement:
+    //      * 1.   If the curent mesh belongs to a Private vertex buffer, 
+    //      *          we should implement to destroy the vertex buffer to.
+    //      * 2.   Definetly we need an implementation of removing vertices from the gfx buffers.
+    //      *      One way would be to keep track of all the free attributes of a vertex buffer
+    //      *      and add to that free space when it is fit. Also we need a kind of combining
+    //      *      overlaping free space implementation
+    //      */
 
-        Mesh_recursive_destroy(this);
+    //     Mesh_recursive_destroy(this);
 
-        if (DEBUG.GFX.REMOVE_MESH) console.log('Remove Parrent:', this.name)
+    //     if (DEBUG.GFX.REMOVE_MESH) console.log('Remove Parrent:', this.name)
 
-        const ret = Gl_remove_geometry(this.gfx, this.geom.num_faces)
+    //     const ret = Gl_remove_geometry(this.gfx, this.geom.num_faces)
 
-        Scenes_update_all_gfx_starts(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, ret);
+    //     Scenes_update_all_gfx_starts(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, ret);
 
-        // Remove event listeners
-        this.RemoveAllListenEvents();
+    //     // Remove event listeners
+    //     this.RemoveAllListenEvents();
 
-        // Remove any time intervalse
-        if (this.timeIntervalsIdxBuffer.active_count) {
+    //     // Remove any time intervalse
+    //     if (this.timeIntervalsIdxBuffer.active_count) {
 
-            const intervalIdx = this.timeIntervalsIdxBuffer.buffer[0];// TODO!!!: HACK We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
-            TimeIntervalsDestroyByIdx(intervalIdx);
-            this.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
-        }
+    //         const intervalIdx = this.timeIntervalsIdxBuffer.buffer[0];// TODO!!!: HACK We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
+    //         TimeIntervalsDestroyByIdx(intervalIdx);
+    //         this.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+    //     }
 
-        /** Case the mesh has parent, remove this mesh from the parent */
-        if (this.parent && (this.parent.type & MESH_TYPES_DBG.SCENE) === 0) {
-            this.parent.RemoveChildByIdx(this.idx)
-            return FLAGS.DESTROY;
-        }
+    //     /** Case the mesh has parent, remove this mesh from the parent */
+    //     if (this.parent && (this.parent.type & MESH_TYPES_DBG.SCENE) === 0) {
+    //         this.parent.RemoveChildByIdx(this.idx)
+    //         return FLAGS.DESTROY;
+    //     }
 
-        /* Case the mesh is child of the scene.
-         * Remove all listen events for the mesh
-         * and remove the mesh from the scene
-         */
-        // Remove from scene's mesh buffer
-        const scene = Scenes_get_scene_by_idx(this.sceneidx);
-        ERROR_NULL(scene);
-        scene.RemoveMesh(this);
+    //     /* Case the mesh is child of the scene.
+    //      * Remove all listen events for the mesh
+    //      * and remove the mesh from the scene
+    //      */
+    //     // Remove from scene's mesh buffer
+    //     const scene = Scenes_get_scene_by_idx(this.sceneidx);
+    //     ERROR_NULL(scene);
+    //     scene.RemoveMesh(this);
 
-        return FLAGS.DESTROY;
-    }
+    //     return FLAGS.DESTROY;
+    // }
 
-    /**
-     * Destroy a mesh and all of its children.
-     * Also if the graphics buffers are private use, reset and deactivate them.  
-     */
-    DestroyPrivateGfxRecursive() {
+    // /**
+    //  * Destroy a mesh and all of its children.
+    //  * Also if the graphics buffers are private use, reset and deactivate them.  
+    //  */
+    // DestroyPrivateGfxRecursive() {
 
-        const progidx = this.gfx.prog.idx;
-        const vbidx = this.gfx.vb.idx;
-        /**DEBUG*/ if (!Gfx_is_private_vb(progidx, vbidx)) alert('Mesh has Not private gfx buffers. @DestroyPrivateGfxRecursive()')
+    //     const progidx = this.gfx.prog.idx;
+    //     const vbidx = this.gfx.vb.idx;
+    //     /**DEBUG*/ if (!Gfx_is_private_vb(progidx, vbidx)) alert('Mesh has Not private gfx buffers. @DestroyPrivateGfxRecursive()')
 
-        // Reset gfx buffers
-        Gfx_deactivate(this);
+    //     // Reset gfx buffers
+    //     Gfx_deactivate_recursive(this);
 
-        Mesh_destroy_private_recursive(this);
+    //     Mesh_destroy_private_recursive(this);
 
-        // Remove event listeners
-        this.RemoveAllListenEvents();
+    //     // Remove event listeners
+    //     this.RemoveAllListenEvents();
 
-        // Remove any time intervals
-        if (this.timeIntervalsIdxBuffer.active_count) {
+    //     // Remove any time intervals
+    //     if (this.timeIntervalsIdxBuffer.active_count) {
 
-            const intervalIdx = this.timeIntervalsIdxBuffer.buffer[0];// TODO!!!: HACK We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
-            TimeIntervalsDestroyByIdx(intervalIdx);
-            this.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
-        }
+    //         const intervalIdx = this.timeIntervalsIdxBuffer.buffer[0];// TODO!!!: HACK We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
+    //         TimeIntervalsDestroyByIdx(intervalIdx);
+    //         this.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+    //     }
 
-        /** Case the mesh has parent, remove the this mesh from the parent */
-        if (this.parent && (this.parent.type & MESH_TYPES_DBG.SCENE) === 0) {
-            this.parent.RemoveChildByIdx(this.idx)
-            return FLAGS.DESTROY;
-        }
+    //     /** Case the mesh has parent, remove the this mesh from the parent */
+    //     if (this.parent && (this.parent.type & MESH_TYPES_DBG.SCENE) === 0) {
+    //         this.parent.RemoveChildByIdx(this.idx)
+    //         return FLAGS.DESTROY;
+    //     }
 
 
-        // Remove from scene's mesh buffer
-        const scene = Scenes_get_scene_by_idx(this.sceneidx);
-        ERROR_NULL(scene);
-        scene.RemoveMesh(this);
+    //     // Remove from scene's mesh buffer
+    //     const scene = Scenes_get_scene_by_idx(this.sceneidx);
+    //     ERROR_NULL(scene);
+    //     scene.RemoveMesh(this);
 
-        return FLAGS.DESTROY;
-    }
+    //     return FLAGS.DESTROY;
+    // }
 
     Reconstruct_listeners_recursive() {
 
@@ -289,12 +289,6 @@ export class Mesh {
 
    /*******************************************************************************************************************************************************/
    // Graphics
-
-    AddToGfx() {
-
-        this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
-        this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
-    }
 
     Set_graphics_vertex_buffer_render(flag) {
 
@@ -634,7 +628,7 @@ export class Text_Mesh extends Mesh {
     //     return this.gfx;
     // }
 
-    // AddToGfx() {
+    // Render() {
 
     //     this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
     //     const start = this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
@@ -758,7 +752,7 @@ function Mesh_destroy_private_recursive(parent) {
             if (mesh.children.boundary)
                 Mesh_destroy_private_recursive(mesh)
 
-            Gfx_deactivate(mesh);
+            Gfx_deactivate_recursive(mesh);
 
             mesh.RemoveChildren(); // TODO: Do we need to strip down all meshes??? Only if they are shared pointers to some mesh of the appliction
 
@@ -826,7 +820,7 @@ function Recursive_mesh_move(buffer, x, y) {
 /** DEBUG PRINT*/
 export function Mesh_print_all_mesh_listeners() {
 
-    const children = Scenes_get_children(STATE.scene.active_idx);
+    const children = Scenes_get_root_meshes(STATE.scene.active_idx);
 
     if (children) Mesh_print_all_mesh_listeners_recursive(children);
 }

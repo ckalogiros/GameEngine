@@ -3,8 +3,8 @@
 import { Gl_remove_geometry } from "../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh } from "../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../Helpers/Helpers.js";
-import { CopyArr2, CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
-import { Gfx_deactivate } from "../../Interfaces/Gfx/GfxContext.js";
+import { CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
+import { Gfx_deactivate, Gfx_generate_context } from "../../Interfaces/Gfx/GfxContext.js";
 import { GfxSetTex } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 import { FontGetUvCoords } from "../../Loaders/Font/Font.js";
 import { Scenes_remove_mesh, Scenes_update_all_gfx_starts } from "../../Scenes.js";
@@ -14,7 +14,7 @@ import { Mesh } from "./Base/Mesh.js";
 
 
 
-export class Text extends Mesh {
+export class Text_Mesh extends Mesh {
 
    constructor(text, pos = [0, 0, 0], fontSize = 4, scale = [1, 1], color = WHITE, bold = 4, font = TEXTURES.SDF_CONSOLAS_LARGE) {
 
@@ -29,7 +29,7 @@ export class Text extends Mesh {
 
    Destroy(){
 
-      console.log('text_mesh destroy');
+      console.log('text_mesh destroy:', this.name);
 
       // Remove from gfx buffers.
       const ret = Gl_remove_geometry(this.gfx, this.geom.num_faces)
@@ -69,6 +69,12 @@ export class Text extends Mesh {
       this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
       const start = this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
       return start;
+   }
+
+   DeactivateGfx(){
+
+      Gfx_deactivate(this.gfx);
+      this.is_gfx_inserted = false;
    }
 
    SetZindex(z) {
@@ -123,6 +129,25 @@ export class Text extends Mesh {
          GfxSetTex(gfxInfoCopy, uvs);
          gfxInfoCopy.vb.start += gfxInfoCopy.vb.count
       }
+
+   }
+
+   /** Update a specific character in text char array */
+   UpdateTextCharacter(char, idx) {
+
+      if(!this.gfx) return; // Case replace text before insert to gfx buffers;
+
+      var text = '';
+
+      if (typeof (char) === 'number') text = `${char}`;
+      else text = char;
+
+      let gfxInfoCopy = new GfxInfoMesh(this.gfx);
+      gfxInfoCopy.vb.start += gfxInfoCopy.vb.count * idx;  
+
+      const uvs = FontGetUvCoords(this.mat.uvIdx, char);
+
+      GfxSetTex(gfxInfoCopy, uvs);
 
    }
 

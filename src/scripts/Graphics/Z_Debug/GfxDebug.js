@@ -181,34 +181,9 @@ export function PrintVertexDataAll(){
     for(let i=0; i<progs.length; i++){
         console.log(' progidx:', i)
         console.log('vb:', progs[i].vertexBuffer);
-        
-        // console.log('prog:', i);
-        // for(let j=0; j<progs[i].vertexBuffer.length; j++){
-
-        //     console.log(progs[i].vertexBuffer[j]);
-        // }
     }
-
-    // for(let i=0; i<progs.length; i++){
-        
-    //     console.log('prog:', i);
-    //     for(let j=0; j<progs[i].vertexBuffer.length; j++){
-    //         const a = {
-
-    //             'idx: ': progs[i].vertexBuffer[j].idx,
-    //             'needs Update: ': progs[i].vertexBuffer[j].needsUpdate,
-    //             'show: ': progs[i].vertexBuffer[j].show,
-    //             'vCount: ': progs[i].vertexBuffer[j].vCount,
-    //             'size: ': progs[i].vertexBuffer[j].size,
-    //         }
-    //         console.log(
-    //             'vbidx: ', j,
-    //             'count: ', progs[i].vertexBuffer[j].count,
-    //         );
-    //         console.log(a);
-    //     }
-    // }
 }
+
 export function PrintVertexBufferAllPretty(){
     if(!GL_DEBUG_VERTEX_BUFFER) return;
     
@@ -224,15 +199,6 @@ export function PrintVertexBufferAllPretty(){
                 console.log(progs[i].vertexBuffer[j].data[k++], progs[i].vertexBuffer[j].data[k++], progs[i].vertexBuffer[j].data[k++], progs[i].vertexBuffer[j].data[k++])
                 console.log('vpos:', progs[i].vertexBuffer[j].data[k++],progs[i].vertexBuffer[j].data[k++],progs[i].vertexBuffer[j].data[k++])
                 console.log(progs[i].vertexBuffer[j].data[k++])
-                // for(let a=0; a<4; a++){
-                //     console.log( ', color:', progs[i].vertexBuffer[j].data[k++])
-                // }
-                // for(let a=0; a<4; a++){
-                //     console.log(', wpos', progs[i].vertexBuffer[j].data[k++])
-                // }
-                // for(let a=0; a<3; a++){
-                //     console.log(', vpos', progs[i].vertexBuffer[j].data[k++])
-                // }
             }
         }
     }

@@ -491,8 +491,6 @@ export function Listeners_debug_info_create(scene){
    const dropdown = new Widget_Drop_Down('Listeners Dropdown Section Panel', ALIGN.LEFT, [300, 20, 0], [60, 20], GREY1, TRANSPARENCY(GREY5, .8), WHITE, [1,1], dp_btn_pad);
    dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dropdown.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
    // dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, dropdown.SetOnMove);
-   
-
 
    for(let i=0; i<_listener.event_type.length; i++){
        

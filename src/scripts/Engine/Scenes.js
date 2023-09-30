@@ -4,7 +4,7 @@ import { GetRandomColor } from '../Helpers/Helpers.js';
 import { AddArr2, AddArr3, FloorArr3 } from '../Helpers/Math/MathOperations.js';
 import { AnimationsGet } from './Animations/Animations.js';
 import { M_Buffer } from './Core/Buffers.js';
-import { Drop_down_set_root, Drop_down_set_root_for_debug, Widget_Drop_Down } from './Drawables/Meshes/Widgets/Menu/Widget_Drop_Down.js';
+import { Drop_down_set_root, Widget_Drop_Down } from './Drawables/Meshes/Widgets/Menu/Widget_Drop_Down.js';
 import { Widget_Text } from './Drawables/Meshes/Widgets/WidgetText.js';
 import { HandleEvents } from './Events/Events.js';
 
@@ -175,7 +175,7 @@ export class Scene {
                     vbidx: mesh_gfx.vb.idx,
                     mesh: new M_Buffer(),
                 });
-                mesh_buf[i].idx = this.gfx.buffer[idx_prog].vb.buffer[idx_vb].mesh.Add(mesh_buf[i]);
+                this.gfx.buffer[idx_prog].vb.buffer[idx_vb].mesh.Add(mesh_buf[i]);
 
                 this.camera.StoreProgIdx(mesh_gfx.prog.idx); // Store the new program to the cameras progidx buffer for the program's matrix uniform update. 
 
@@ -192,7 +192,7 @@ export class Scene {
                             if (this.gfx.buffer[j].vb.buffer[k].vbidx === mesh_gfx.vb.idx) {
 
                                 // #Case 3
-                                mesh_buf[i].idx = this.gfx.buffer[j].vb.buffer[k].mesh.Add(mesh_buf[i]);
+                                this.gfx.buffer[j].vb.buffer[k].mesh.Add(mesh_buf[i]);
                                 handled = true;
                                 break; // Break when gfx already stored.
                             }
@@ -204,7 +204,7 @@ export class Scene {
                                 vbidx: mesh_gfx.vb.idx,
                                 mesh: new M_Buffer(),
                             });
-                            mesh_buf[i].idx = this.gfx.buffer[j].vb.buffer[idx_vb].mesh.Add(mesh_buf[i]);
+                            this.gfx.buffer[j].vb.buffer[idx_vb].mesh.Add(mesh_buf[i]);
                             handled = true;
                         }
 
@@ -232,7 +232,7 @@ export class Scene {
     }
 
     StoreRootMesh(widget) {
-        widget.idx = this.root_meshes.Add(widget);
+        widget.scene_rootidx = this.root_meshes.Add(widget);
     }
 
     Render() {
@@ -355,7 +355,7 @@ export class Scene {
         }
     }
 
-    GetRoortMeshes() {
+    GetRootMeshes() {
         return this.root_meshes;
     }
 
@@ -395,7 +395,7 @@ export class Scene {
             }
         }
     }
-    PrintRootMesheBuffer() {
+    PrintRootMeshBuffer() {
         console.log(this.root_meshes)
     }
 };
@@ -426,9 +426,9 @@ class Scenes extends M_Buffer {
 const _scenes = new Scenes();
 _scenes.Init(1);
 
-export function Scenes_get_scene_by_idx(idx) { return _scenes.buffer[idx]; }
+export function Scenes_get_scene_by_idx(sceneidx) { return _scenes.buffer[sceneidx]; }
 export function Scenes_create_scene() { return _scenes.Create(); }
-export function Scenes_get_root_meshes(idx) { return _scenes.GetRootMeshes(sceneidx); }
+export function Scenes_get_root_meshes(sceneidx) { return _scenes.GetRootMeshes(sceneidx); }
 export function Scenes_get_count() { return _scenes.active_count; }
 export function Scenes_remove_mesh(mesh) { 
     _scenes.buffer[mesh.sceneidx].RemoveMesh(mesh);
@@ -520,7 +520,7 @@ export function ScenesPrintAllMeshes(children, count) {
             for (let j = 0; j < count; j++) r += '->';
 
             // console.log(i, r, child.id, GetMeshHighOrderNameFromType(child.type))
-            console.log(i, r, child.name, FloorArr3(child.geom.pos));
+            console.log(i, r, child.name, ' idx:', child.idx, FloorArr3(child.geom.pos));
             total_count++;
 
             if (child.children.boundary) {

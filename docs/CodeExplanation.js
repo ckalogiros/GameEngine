@@ -75,24 +75,51 @@
 
  */
 
+/****************************************************************************** */
+// Widgets An Meshes
+
 /**
- * Widget Drop down menu.
- * 
- * Widget is comprised of a section with a button widget as the trigger (expansion/contraction).
- * The expanded mesh is called 'menu' (type of section). The 'menu exists as a class variable,
- * so that it can be activated and deactivated from the drop down mesh (as child) but also
- * from the graphics buffers.
- * 
- * GFX:
- * The drop down is split into 2 conceptual categories.
- * 1. the drop down section mesh with the trigger button,
- * 2. the menu section mesh.
- * In that sense the menu gfx must be separate from the drop down gfx, for the reason of 
- * show/hide the menu upon drop down trigger.
- * The children meshes of the menu
- * 
- * OnClick():
- * Upon trigger 'On', the class variable 'menu' is coppied as a reference to the drop down children.
- * Then we call for gfx generation, to find private gfx buffers for the menu section mesh 
- * and its children (text, buttons and other drop downs).   
+   ### Widget Drop down menu.
+
+   Widget is comprised of a section with a button widget as the trigger 
+   (expansion/contraction). The expanded mesh is called 'menu' 
+   (with type of Section).
+
+   Any Mesh-Widget can be added to a dropdown's menu.
+   
+   When a dropdown is insertet to the menu of another dropdown,
+   it retains its state (expanded/contructed).
+   Example: If a dp2 was deactivated because a higher dp1 contracted, then 
+   upon higher dp1 expansion the current dp2 must retain its state. If its 
+   state was 'expanded' then it must expand its menu and also have the
+   expansion symbol. 
+
+   ## Dropdown Menu
+   The 'menu' variable is used to store the state of the dropdowns menu items.
+   Based on the 'menu' variable, we expand-activate the menu of a dropdown by
+   adding the 'menu' to the dropdown's children buffer.
+   For contracting-deactivating a dropdown's menu, we remove the menu from the 
+   children.buffer[menu] and from the gfx buffers, BUT the 'menu' var from the
+   class retains all state.
+
+   GFX:
+   The drop down is split into 2 conceptual categories.
+   1. the drop down section mesh with the trigger button,
+   2. the menu section mesh.
+   In that sense the menu gfx must be separate from the drop down gfx, for the 
+   reason of  show/hide the menu upon drop down trigger.
+
+
+   ## OnClick()
+      Upon trigger 'On', the class variable 'menu' is coppied as a reference to
+      the dropdown's children buffer. Then we call gfx generation, find private 
+      gfx buffers for the menu section mesh and all its children (any Mesh type).  
+      The menu's items may be on the same gfx buffers, as long their sid match,
+      because the activation/deactivation hapens on the menu level. 
+
+   ## ActivateMenu()
+      Activate a menu and all of its items.
+      Genarate gfx: Ask for a private vertex buffer for the menu and its items.
+      For the menu rendering and all its items, we build all gfx buffers from scratch.
+
  */

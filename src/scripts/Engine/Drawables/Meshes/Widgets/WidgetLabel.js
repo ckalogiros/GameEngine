@@ -6,14 +6,15 @@ import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../Operations/Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
-import { Gfx_generate_context } from "../../../Interfaces/Gfx/GfxContext.js";
+import { Gfx_deactivate, Gfx_generate_context } from "../../../Interfaces/Gfx/GfxContext.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { Scenes_remove_root_mesh } from "../../../Scenes.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals.js";
 import { MESH_ENABLE } from "../Base/Mesh.js";
 import { Rect } from "../Rect_Mesh.js";
-import { Text } from "../Text_Mesh.js";
+import { Text_Mesh } from "../Text_Mesh.js";
 import { Align } from "../../Operations/Alignment.js";
+import { GfxSetVbRender, GlResetIndexBuffer, GlResetVertexBuffer } from "../../../../Graphics/Buffers/GlBuffers.js";
 
 
 
@@ -57,82 +58,94 @@ function CalculateArea(text, _dim, pos, pad = [0, 0]) {
 }
 
 
-/**
- * The difference with plain text is that a label draws the text inside a rect mesh
- */
-// export class Widget_Label extends Rect {
-export class Widget_Label {
+export class Widget_Label extends Rect{
 
-    area_mesh;
     text_mesh;
     idx; // Stores the index of the scene's root_mesh buffer, that keeps all scene's root meshes. 
     pad = [0, 0];
 
     // text, Align, pos, col = GREY3, text_col = WHITE, pad = [0, 0], bold = .4, style = [2, 5, 2], font
-    constructor(text='null', Align = (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos = [200, 300, 0], fontSize = 8, col = GREY1, text_col = WHITE, pad = [10, 5], bold = .4, style = [0, 6, 2], font = TEXTURES.SDF_CONSOLAS_LARGE) {
+    constructor(text='null', Align = (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos = [200, 300, 0], fontSize = 4.4, col = GREY1, text_col = WHITE, pad = [10, 5], bold = .4, style = [0, 6, 2], font = TEXTURES.SDF_CONSOLAS_LARGE) {
 
         const sdfouter = CalculateSdfOuterFromDim(fontSize);
         if (sdfouter + bold > 1) bold = 1 - sdfouter;
         pos[2] += 1; // In essence we set as the left (start of text label) the label area and not the left of text.
 
         /** Label tex mesh */
-        this.text_mesh = new Text(text, pos, fontSize);
-
+        const text_mesh = new Text_Mesh(text, pos, fontSize);
+        
         pos[0] -= pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
         pos[2] -= 1; // Set z for area 'behind' this.text_mesh
-
-        const areaMetrics = CalculateArea(text, this.text_mesh.geom.dim, pos, pad)
-
+        
         /** Label area mesh */
-        this.area_mesh = new Rect(areaMetrics.pos, areaMetrics.dim, col);
+        const areaMetrics = CalculateArea(text, text_mesh.geom.dim, pos, pad)
+        // this.area_mes = new Rect(areaMetrics.pos, areaMetrics.dim, col);
+        super(areaMetrics.pos, areaMetrics.dim, col);
 
-        this.area_mesh.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
-        this.area_mesh.SetStyle(style);
+        // Must call super() befor using the 'this'
+        text_mesh.SetName('Text ' + text);
+        text_mesh.SetSceneIdx(this.sceneidx);
 
-        this.text_mesh.SetName('Text ' + text);
-        this.text_mesh.SetSceneIdx(this.area_mesh.sceneidx);
-
-        this.type |= MESH_TYPES_DBG.WIDGET_TEXT_LABEL | this.text_mesh.type | this.area_mesh.geom.type | this.area_mesh.mat.type;
-        this.area_mesh.SetName('label area ' + text);
+        this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
+        this.SetStyle(style);
+        this.type |= MESH_TYPES_DBG.WIDGET_TEXT_LABEL | text_mesh.type | this.geom.type | this.mat.type;
+        this.SetName('label area ' + text);
         this.pad = pad;
+
+        this.text_mesh = text_mesh;
     }
 
     Destroy() {
 
-        const sceneidx = this.area_mesh.sceneidx;
+        // Label's text destruction
+        const sceneidx = this.sceneidx;
         this.text_mesh.Destroy();
-        this.area_mesh.Destroy();
         Scenes_remove_root_mesh(this, sceneidx);
         this.text_mesh = null;
-        this.area_mesh = null;
+        
+        // Label's rect_area destruction
+        super.Destroy();
     }
 
     /*******************************************************************************************************************************************************/
     // Graphics
     GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
 
-        this.area_mesh.gfx = Gfx_generate_context(this.area_mesh.sid, this.area_mesh.sceneidx, this.area_mesh.mat.num_faces, FLAGS, gfxidx);
+        this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.mat.num_faces, FLAGS, gfxidx);
         this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.mat.num_faces, FLAGS, gfxidx);
-        return this.area_mesh.gfx;
+        return this.gfx;
     }
 
     Render() {
 
-        if(!this.area_mesh.is_gfx_inserted) {this.area_mesh.AddToGfx(); this.area_mesh.is_gfx_inserted = true}
+        if(!this.is_gfx_inserted) {this.AddToGfx(); this.is_gfx_inserted = true}
         if(!this.text_mesh.is_gfx_inserted) {this.text_mesh.AddToGfx(); this.text_mesh.is_gfx_inserted = true}
+    }
+
+    DeactivateGfx(){
+        
+        // Deactivate label's area
+        Gfx_deactivate(this.gfx);
+        this.is_gfx_inserted = false;
+        // Deactivate for label's text 
+        Gfx_deactivate(this.text_mesh.gfx);
+        this.text_mesh.is_gfx_inserted = false;
     }
 
     /*******************************************************************************************************************************************************/
     // Setters-Getters
     SetSceneIdx(sceneidx) {
-        this.area_mesh.sceneidx = sceneidx;
+        this.sceneidx = sceneidx;
         this.text_mesh.sceneidx = sceneidx;
     }
 
     /** Return type: Array. Returns an array of all widgets meshes */
-    GetAllMeshes() {
+    GetAllMeshes(parent_meshes_buf) {
 
-        return [this.area_mesh, this.text_mesh];
+        const all_meshes = parent_meshes_buf ? parent_meshes_buf : [];
+        all_meshes.push(this);
+        all_meshes.push(this.text_mesh);
+        return all_meshes;
     }
     
     /*******************************************************************************************************************************************************/
@@ -140,10 +153,10 @@ export class Widget_Label {
     Align(flags, pad=[0,0]) { // Align pre-added to the vertexBuffers
 
 
-        Align(flags, this.area_mesh.geom, this.text_mesh.geom, pad);
+        Align(flags, this.geom, this.text_mesh.geom, pad);
 
         // Update vertex buffers
-        if(this.area_mesh.is_gfx_inserted){
+        if(this.is_gfx_inserted){
             /**
              * If the alignment happens after the widgets insertion to 
              * the vertex buffers, we must update the vertex buffers too.
@@ -168,49 +181,47 @@ export class Widget_Label {
      * @param {*} event_type typeof 'LISTEN_EVENT_TYPES'
      * @param {*} Clbk User may choose the callback for the listen event.
      */
-    CreateListenEvent(event_type, Clbk = null) {
+    CreateListenEvent(event_type, Clbk = null, params=null) {
 
         const target_params = {
             EventClbk: null,
             targetBindingFunctions: null,
             // clicked_mesh: this.area_mesh,
             target_mesh: this,
-            params: null,
+            params: params,
         }
 
-        if (Clbk) this.area_mesh.AddEventListener(event_type, Clbk, target_params);
-        else this.area_mesh.AddEventListener(event_type, this.OnClick, target_params);
+        if (Clbk) this.AddEventListener(event_type, Clbk, target_params);
+        else this.AddEventListener(event_type, this.OnClick, target_params);
     }
 
     OnClick(params) {
 
         const mesh = params.target_params.target_mesh;
-        const area_mesh = mesh.area_mesh;
-        const text_mesh = mesh.text_mesh;
         const OnMoveFn  = mesh.OnMove;
 
         const point = MouseGetPos();
-        const g = area_mesh.geom;
+        const g = mesh.geom;
         if (Check_intersection_point_rect(g.pos, g.dim, point, [0, 8])) {
 
-            STATE.mesh.SetClicked(area_mesh);
-            console.log('Clicked:', area_mesh.name)
+            STATE.mesh.SetClicked(mesh);
+            console.log('Clicked:', mesh.name)
 
-            if (area_mesh.timeIntervalsIdxBuffer.boundary <= 0) {
+            if (mesh.timeIntervalsIdxBuffer.boundary <= 0) {
 
                 /**
                  * Create Move event.
                  * The Move event runs only when the mesh is GRABED. That means that the timeInterval 
                  * is created and destroyed upon 'onClickDown' and 'onClickUp' respectively.
                  */
-                // const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, OnMoveFn, { area_mesh: area_mesh, text_mesh: text_mesh });
+                // const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, OnMoveFn, { mesh: mesh, text_mesh: text_mesh });
                 const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, OnMoveFn, mesh);
-                area_mesh.timeIntervalsIdxBuffer.Add(idx);
+                mesh.timeIntervalsIdxBuffer.Add(idx);
 
-                if (area_mesh.StateCheck(MESH_STATE.IS_GRABABLE)) {
+                if (mesh.StateCheck(MESH_STATE.IS_GRABABLE)) {
 
-                    STATE.mesh.SetGrabed(area_mesh);
-                    area_mesh.StateEnable(MESH_STATE.IN_GRAB);
+                    STATE.mesh.SetGrabed(mesh);
+                    mesh.StateEnable(MESH_STATE.IN_GRAB);
                 }
 
             }
@@ -223,19 +234,19 @@ export class Widget_Label {
 
         // The 'OnMove' function is called by the timeInterval.
         // The timeInterval has been set by the 'OnClick' event.
-        const widget = params.params;
-        const area_mesh = widget.area_mesh;
-        const text_mesh = widget.text_mesh;
+        const mesh = params.params;
+        // const mesh = widget.mesh;
+        const text_mesh = mesh.text_mesh;
 
         // Destroy the time interval and the Move operation, if the mesh is not grabed
         // MESH_STATE.IN_GRAB is deactivated upon mouse click up in Events.js.
-        if (area_mesh.StateCheck(MESH_STATE.IN_GRAB) === 0) {
+        if (mesh.StateCheck(MESH_STATE.IN_GRAB) === 0) {
 
-            if(area_mesh.timeIntervalsIdxBuffer.boundary) {
+            if(mesh.timeIntervalsIdxBuffer.boundary) {
 
-                const intervalIdx = area_mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
+                const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
                 TimeIntervalsDestroyByIdx(intervalIdx);
-                area_mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+                mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
     
                 return;
             }
@@ -243,7 +254,7 @@ export class Widget_Label {
 
         // Move 
         const mouse_pos = MouseGetPosDif();
-        area_mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, area_mesh.gfx);
+        mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, mesh.gfx);
         text_mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, text_mesh.gfx);
 
     }
@@ -272,17 +283,6 @@ export class Widget_Label_Dynamic_Text extends Widget_Label {
 
         this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | dynamicText.geom.type | dynamicText.mat.type;
         this.SetName('Dynamic Text area ' + text1.slice(0, 7));
-    }
-
-    GenGfxCtx(FLAGS, gfxidx) {
-
-        const gfx = super.GenGfxCtx(FLAGS, gfxidx);
-        return gfx;
-    }
-
-    AddToGfx() {
-
-        super.AddToGfx()
     }
 
     /**
@@ -341,17 +341,6 @@ export class Widget_Label_Text_Mesh_Menu_Options extends Widget_Label {
 
         super(text, Align, pos, fontSize, col, textCol, scale, pad, bold, font, style)
         this.type |= MESH_TYPES_DBG.WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS;
-    }
-
-    GenGfxCtx(FLAGS, gfxidx) {
-
-        const gfx = super.GenGfxCtx(FLAGS, gfxidx);
-        return gfx;
-    }
-
-    AddToGfx() {
-
-        super.AddToGfx()
     }
 
     SetPos(pos) {

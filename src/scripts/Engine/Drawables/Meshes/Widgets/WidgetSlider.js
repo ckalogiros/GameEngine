@@ -6,7 +6,7 @@ import { MouseGetPos, MouseGetPosDif } from '../../../Controls/Input/Mouse.js';
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from '../../../Timers/TimeIntervals.js';
 import { MESH_ENABLE } from '../Base/Mesh.js';
 import { Rect } from '../Rect_Mesh.js';
-import { Text } from '../Text_Mesh.js';
+import { Text_Mesh } from '../Text_Mesh.js';
 
 import { Widget_popup_handler_onclick_event } from './WidgetPopup.js';
 import { Widget_Label } from './WidgetLabel.js';
@@ -33,7 +33,10 @@ import { Gfx_generate_context } from '../../../Interfaces/Gfx/GfxContext.js';
 
 let BAR_IDX = INT_NULL;
 
-export class Widget_Slider extends Widget_Label {
+// export class Widget_Slider extends Widget_Label {
+export class Widget_Slider extends Rect {
+
+   text_mesh;
 
    constructor(pos, dim, col = TRANSPARENCY(GREY1, .6), hover_margin = [0, 0]) {
 
@@ -43,7 +46,6 @@ export class Widget_Slider extends Widget_Label {
       const pad = [dim[0] * 0.5, dim[1] / 2.8];
       pad[0] /= ratio;
 
-
       // Calculate the font size of the sliders texts, base on the sliders dimentions
       const min_font_size = 4, max_font_size = 10;
       const r = 3;
@@ -51,18 +53,15 @@ export class Widget_Slider extends Widget_Label {
 
 
       // Create slider_name_text (it is the text_mesh of the extended Widget_Label class)
-      // const name_text = new Text('Slider', pos, fontSize, [1, 1], WHITE, .4);
+      const name_text = new Text_Mesh('Slider', pos, fontSize, [1, 1], WHITE, .4);
 
-      super('Slider', ALIGN.HOR_CENTER, pos, 4, col, WHITE, pad);
-      // name_text.SetName(this.name + ' - name_text')
-      const name_text = this.text_mesh;
 
       /** Label area mesh */
-      this.area_mesh = new Rect(pos, dim, col);
-      this.area_mesh.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
-      this.area_mesh.SetStyle([0, 6, 2]);
-      this.area_mesh.SetName('Widget_Slider');
-      this.area_mesh.StateEnable(MESH_STATE.HAS_POPUP);
+      super(pos, dim, col);
+      this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
+      this.SetStyle([0, 6, 2]);
+      this.SetName('Widget_Slider');
+      this.StateEnable(MESH_STATE.HAS_POPUP);
       this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick)
       this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
 
@@ -71,7 +70,7 @@ export class Widget_Slider extends Widget_Label {
       // Slider Bar: Bar is child of the slider mesh
 
       // Calculate bar's dimentions and position.
-      const barpos = [pos[0], pos[1] + this.area_mesh.geom.dim[1], pos[2]]
+      const barpos = [pos[0], pos[1] + this.geom.dim[1], pos[2]]
       const barMetrics = this.#CalculateBarArea(barpos, dim, pad)
 
       const bar = new Rect(barMetrics.pos, barMetrics.dim, GREY3);
@@ -100,7 +99,7 @@ export class Widget_Slider extends Widget_Label {
 
 
       // Create value_text
-      const value_text = new Text('0000', pos, fontSize, [1, 1], WHITE, .4);
+      const value_text = new Text_Mesh('0000', pos, fontSize, [1, 1], WHITE, .4);
       value_text.SetName(this.name + ' - value_text');
 
 
@@ -111,10 +110,10 @@ export class Widget_Slider extends Widget_Label {
       /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
       // Align
       const totalheight = (handle.geom.dim[1] + name_text.geom.dim[1] + value_text.geom.dim[1]);
-      this.area_mesh.geom.dim[1] = totalheight;
+      this.geom.dim[1] = totalheight;
 
-      bar.geom.pos[0] = this.area_mesh.geom.pos[0];
-      bar.geom.pos[1] = this.area_mesh.geom.pos[1] + this.area_mesh.geom.dim[1] - handle.geom.dim[1] - pad[1];
+      bar.geom.pos[0] = this.geom.pos[0];
+      bar.geom.pos[1] = this.geom.pos[1] + this.geom.dim[1] - handle.geom.dim[1] - pad[1];
 
       handle.geom.pos[0] = bar.geom.pos[0];
       handle.geom.pos[1] = bar.geom.pos[1];
@@ -125,40 +124,58 @@ export class Widget_Slider extends Widget_Label {
 
       name_text.geom.pos[1] = handle.geom.pos[1] - handle.geom.dim[1] - name_text.geom.dim[1]
       name_text.geom.pos[0] = bar.geom.pos[0] - bar.geom.dim[0] + name_text.geom.dim[0];
-      name_text.geom.pos[2] = this.area_mesh.geom.pos[2] + 1;
+      name_text.geom.pos[2] = this.geom.pos[2] + 1;
 
-      BAR_IDX = this.area_mesh.AddChild(bar)
-      this.area_mesh.AddChild(name_text)
+      BAR_IDX = this.AddChild(bar)
+      this.AddChild(name_text)
       bar.AddChild(handle)
       bar.AddChild(value_text)
 
+      this.text_mesh = name_text;
+
+   }
+
+   Destroy() {
+
+      const bar = this.children.buffer[BAR_IDX];
+      const name_text = this.text_mesh;
+      const handle = bar.children.buffer[0];
+      const value_text = bar.children.buffer[1];
+
+      value_text.Destroy();
+      handle.Destroy();
+      name_text.Destroy();
+      bar.Destroy();
+
+      // Sliders's rect_mesh destruction
+      super.Destroy();
    }
 
    /*******************************************************************************************************************************************************/
    // Graphics
    GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
 
-      this.area_mesh.gfx = Gfx_generate_context(this.area_mesh.sid, this.area_mesh.sceneidx, this.area_mesh.mat.num_faces, FLAGS, gfxidx);
+      this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.mat.num_faces, FLAGS, gfxidx);
       this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.mat.num_faces, FLAGS, gfxidx);
-      
-      const bar = this.area_mesh.children.buffer[BAR_IDX];
+
+      const bar = this.children.buffer[BAR_IDX];
       bar.gfx = Gfx_generate_context(bar.sid, bar.sceneidx, bar.mat.num_faces, FLAGS, gfxidx);
-      
+
       const handle = bar.children.buffer[0];
       handle.gfx = Gfx_generate_context(bar.sid, bar.sceneidx, bar.mat.num_faces, FLAGS, gfxidx);
-      
+
       const value_text = bar.children.buffer[1];
       value_text.gfx = Gfx_generate_context(value_text.sid, value_text.sceneidx, value_text.mat.num_faces, FLAGS, gfxidx);
-      
-      return this.area_mesh.gfx;
+
+      return this.gfx;
    }
-   
+
    Render() {
-      
-      if (!this.area_mesh.is_gfx_inserted) { this.area_mesh.AddToGfx(); this.area_mesh.is_gfx_inserted = true }
+
+      if (!this.is_gfx_inserted) { this.AddToGfx(); this.is_gfx_inserted = true }
       if (!this.text_mesh.is_gfx_inserted) { this.text_mesh.AddToGfx(); this.text_mesh.is_gfx_inserted = true }
-      
-      const bar = this.area_mesh.children.buffer[BAR_IDX];
+
+      const bar = this.children.buffer[BAR_IDX];
       if (!bar.is_gfx_inserted) { bar.AddToGfx(); bar.is_gfx_inserted = true }
 
       const handle = bar.children.buffer[0];
@@ -168,6 +185,42 @@ export class Widget_Slider extends Widget_Label {
       if (!value_text.is_gfx_inserted) { value_text.AddToGfx(); value_text.is_gfx_inserted = true }
    }
 
+   DeactivateGfx() {
+
+      const bar = this.children.buffer[BAR_IDX];
+      const name_text = this.text_mesh;
+      const handle = bar.children.buffer[0];
+      const value_text = bar.children.buffer[1];
+
+      bar.DeactivateGfx();
+      name_text.DeactivateGfx();
+      handle.DeactivateGfx();
+      value_text.DeactivateGfx();
+      super.DeactivateGfx()
+
+   }
+
+   /*******************************************************************************************************************************************************/
+   // Setters-Getters
+
+   /** Return type: Array. Returns an array of all widgets meshes */
+   GetAllMeshes(parent_meshes_buf) {
+
+      // If a parent mesh called this method, all_meshes buffer should include the parents all_meshes (put at the start of the buffer)
+      const all_meshes = parent_meshes_buf ? parent_meshes_buf : [];
+
+      all_meshes.push(this);
+      all_meshes.push(this.text_mesh);
+
+      const bar = this.children.buffer[BAR_IDX];
+      all_meshes.push(bar);
+      const handle = bar.children.buffer[0];
+      all_meshes.push(handle);
+      const value_text = bar.children.buffer[1];
+      all_meshes.push(value_text);
+
+      return all_meshes;
+   }
 
    SetMenuOptionsClbk(ClbkFunction) {
 
@@ -175,7 +228,8 @@ export class Widget_Slider extends Widget_Label {
       bar.menu_options.Clbk = ClbkFunction;
    }
 
-
+   /*******************************************************************************************************************************************************/
+   // Alignment
    Reposition_post(dif_pos) {
 
       this.MoveXYZ(dif_pos);
@@ -216,8 +270,8 @@ export class Widget_Slider extends Widget_Label {
    // TODO!!!: the widget is passed in 'params.target_params.target_mesh', so REMOVE the 'params.source_params' tha has the slider.area_mesh is not needed. 
    OnClick(params) {
 
-      const widget_slider = params.target_params.target_mesh;
-      const mesh = widget_slider.area_mesh;
+      const mesh = params.target_params.target_mesh;
+      // const mesh = widg.area_mesh;
       const point = MouseGetPos();
       const g = mesh.geom;
 

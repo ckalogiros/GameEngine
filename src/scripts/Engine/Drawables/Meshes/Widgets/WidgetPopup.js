@@ -6,7 +6,7 @@ import { MESH_ENABLE } from '../Base/Mesh.js';
 import { CopyArr2 } from '../../../../Helpers/Math/MathOperations.js';
 import { Menu_options_create } from '../../Operations/MenuOptionsBuilder.js';
 import { Section } from '../Section.js';
-import { Gfx_activate, Gfx_deactivate, Gfx_end_session } from '../../../Interfaces/Gfx/GfxContext.js';
+import { Gfx_activate, Gfx_deactivate_recursive, Gfx_end_session } from '../../../Interfaces/Gfx/GfxContext.js';
 
 
 class Widget_PopUp extends Section {
@@ -73,7 +73,7 @@ class Widget_PopUp extends Section {
 
       // Recursive_deactivate_secondary_popups(this);
 
-      Gfx_deactivate(this); // Recursively deactivates the private buffers of popup and all its options 
+      Gfx_deactivate_recursive(this); // Recursively deactivates the private buffers of popup and all its options 
       this.RemoveChildren(); // Remove from the childrens buffer.
       this.isActive = false;
    }
@@ -160,7 +160,7 @@ export function Widget_popup_handler_onclick_event(clicked_mesh, clickedButtonId
 
       popup.GenGfxCtx(GFX.PRIVATE);
       Gfx_end_session(true);
-      popup.AddToGfx();
+      popup.Render();
 
       popup.Activate();
 

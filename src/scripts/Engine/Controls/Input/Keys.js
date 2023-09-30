@@ -118,7 +118,7 @@ export const DEBUG_PRINT_KEYS = [
       func: (e)=>{
          let cnt = 0;
          console.log('-- Scene\'s All meshes (recursive) --')
-         const count = ScenesPrintAllMeshes(STATE.scene.active.children, cnt);
+         const count = ScenesPrintAllMeshes(STATE.scene.active.root_meshes, cnt);
          console.log('Count: ', count)
       },
    },
@@ -127,7 +127,7 @@ export const DEBUG_PRINT_KEYS = [
       discr: 'ScenesPrintSceneMeshes',
       func: (e)=>{
          console.log('-- Scene\'s direct children meshes --')
-         const count = ScenesPrintSceneMeshes(STATE.scene.active.children);
+         const count = ScenesPrintSceneMeshes(STATE.scene.active.root_meshes);
          console.log('Count: ', count)
       },
    },
@@ -149,11 +149,11 @@ export const DEBUG_PRINT_KEYS = [
    },
    {
       key: 's4',
-      discr: 'Scene:PrintRootMesheBuffer()',
+      discr: 'Scene:PrintRootMeshBuffer()',
       func: (e)=>{
-         console.log('-- Scene:PrintRootMesheBuffer() --');
+         console.log('-- Scene:PrintRootMeshBuffer() --');
          const scene = Scenes_get_scene_by_idx(STATE.scene.active_idx);
-         scene.PrintRootMesheBuffer();
+         scene.PrintRootMeshBuffer();
       },
    },
    {

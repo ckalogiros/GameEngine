@@ -7,7 +7,7 @@ import { Widget_Switch } from "../Meshes/Widgets/WidgetButton";
 import { Widget_Label_Text_Mesh_Menu_Options } from "../Meshes/Widgets/WidgetLabel";
 import { Widget_Dynamic_Text_Mesh } from "../Meshes/Widgets/WidgetText";
 import { Gfx_end_session } from "../../Interfaces/Gfx/GfxContext";
-// import { Scenes_get_children } from "../Scenes";
+import {Scenes_get_root_meshes } from "../../Scenes.js";
 import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _pt_fps } from "../../Timers/PerformanceTimers";
 import { PerformanceTimerGetFps1sAvg, _fps_1s_avg, _fps_500ms_avg } from "../../Timers/Time";
 import { Info_listener_create_event, Info_listener_destroy_event } from "./InfoListeners";
@@ -91,7 +91,7 @@ export function Debug_info_create_ui_performance_timers(params) {
 
    if (DEBUG_INFO.UI_TIMERS.IS_ON) {
 
-      const meshes = Scenes_get_children(scene.sceneidx);
+      const meshes = Scenes_get_root_meshes(scene.sceneidx);
       const mesh = meshes.buffer[DEBUG_INFO.UI_TIMERS.IDX];
 
       DEBUG_INFO.UI_TIMERS.POS = mesh.geom.defPos; // Remember the info's position.
@@ -149,7 +149,7 @@ export function Debug_info_create_ui_performance_timers(params) {
 
    scene.AddMesh(section, GFX.PRIVATE);
    section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
-   section.AddToGfx()
+   section.Render()
    DEBUG_INFO.UI_TIMERS.IDX = section.idx;
    Gfx_end_session(true);
 
@@ -165,7 +165,7 @@ export function Debug_info_create_ui_mouse_coords(params) {
 
    if (DEBUG_INFO.UI_MOUSE.IS_ON) {
 
-      const meshes = Scenes_get_children(scene.sceneidx);
+      const meshes = Scenes_get_root_meshes(scene.sceneidx);
       const mesh = meshes.buffer[DEBUG_INFO.UI_MOUSE.IDX];
 
       Info_listener_destroy_event(mesh.debug_info.evtidx);
@@ -194,7 +194,7 @@ export function Debug_info_create_ui_mouse_coords(params) {
 
    scene.AddMesh(section, GFX.PRIVATE);
    section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
-   section.AddToGfx()
+   section.Render()
    DEBUG_INFO.UI_MOUSE.IDX = section.idx;
    Gfx_end_session(true);
 
@@ -227,7 +227,7 @@ export function Debug_info_create_gfx_info(params) {
 
    if (DEBUG_INFO.UI_GFX.IS_ON) {
 
-      const meshes = Scenes_get_children(scene.sceneidx);
+      const meshes = Scenes_get_root_meshes(scene.sceneidx);
       const mesh = meshes.buffer[DEBUG_INFO.UI_GFX.IDX];
 
       Info_listener_destroy_event(mesh.debug_info.evtidx);
@@ -277,7 +277,7 @@ export function Debug_info_create_gfx_info(params) {
 
    scene.AddMesh(section, GFX.PRIVATE);
    section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
-   section.AddToGfx()
+   section.Render()
    DEBUG_INFO.UI_GFX.IDX = section.idx;
    Gfx_end_session(true);
 

@@ -24,7 +24,7 @@ export class Section extends Rect {
    padding;  // [1,1] Stores padding for the meshes in-between space.
    max_size; // [1,1] Stores the max x-y size of all children meshes (not accumulative).
 
-   constructor(options = (SECTION.VERTICAL), margin = [4, 4], pos = [200, 400, 0], dim = [40, 40], col = TRANSPARENCY(BLUE, .6), name='') {
+   constructor(options = (SECTION.VERTICAL), margin = [4, 4], pos = [200, 400, 0], dim = [40, 40], col = TRANSPARENCY(BLUE, .6), name = '') {
 
       super(pos, dim, col)
 
@@ -36,11 +36,24 @@ export class Section extends Rect {
 
       this.type |= MESH_TYPES_DBG.SECTION_MESH;
 
-      if(name !== '') this.SetName(name)
+      if (name !== '') this.SetName(name)
       else this.SetName(this.name);
 
       this.SetStyle([0, 3.5, 2.]);
    }
+
+   Destroy() {
+
+      // Any children destruction
+      for (let i = 0; i < this.children.boundary; i++) {
+
+         const child = this.children.buffer[i];
+         if (child) child.Destroy(child);
+      }
+      
+      // Label's rect_area destruction
+      super.Destroy();
+  }
 
    AddItem(mesh, options) {
 
@@ -59,7 +72,7 @@ export class Section extends Rect {
          }
       }
       else { // Handle Items 
-         
+
          // CopyArr3(mesh.geom.pos, this.geom.pos);
          // CopyArr2(this.geom.pos, mesh.geom.pos);
       }
@@ -72,15 +85,15 @@ export class Section extends Rect {
       let top = section.geom.pos[1]; // Top starting position
       let left = section.geom.pos[0]; // Left starting position
 
-      const total_size = [0, 0],  total_margin = [0, 0]
+      const total_size = [0, 0], total_margin = [0, 0]
       const old_sizey = section.geom.dim[1];
       const old_sizex = section.geom.dim[0];
       const s = Calculate_sizes_recursive(section, top, left, options, total_margin, total_size)
       CopyArr2(section.geom.dim, section.max_size); // Set size for the root.
-      
-      if(options & SECTION.TOP_DOWN){
-         const y = section.geom.pos[1]+(section.max_size[1]-old_sizey);
-         const x = section.geom.pos[0]+(section.max_size[0]-old_sizex);
+
+      if (options & SECTION.TOP_DOWN) {
+         const y = section.geom.pos[1] + (section.max_size[1] - old_sizey);
+         const x = section.geom.pos[0] + (section.max_size[0] - old_sizex);
          section.SetPosXY([x, y]);
       }
 
@@ -133,7 +146,7 @@ export class Section extends Rect {
    // }
 
    UpdateGfxPosDimRecursive(mesh) {
-      
+
       for (let i = 0; i < mesh.children.boundary; i++) {
 
          const child = mesh.children.buffer[i];
@@ -148,14 +161,53 @@ export class Section extends Rect {
       }
    }
 
+   /*******************************************************************************************************************************************************/
+   // Graphics
    GenGfxCtx(FLAGS, gfxidx) {
 
-      return super.GenGfxCtx(FLAGS, gfxidx);
+      const gfx = super.GenGfxCtx(FLAGS, gfxidx);
+
+      for (let i = 0; i < this.children.boundary; i++) {
+
+         const child = this.children.buffer[i];
+         if (child) child.GenGfxCtx(FLAGS, gfxidx);
+      }
+
+      return gfx;
    }
 
-   AddToGfx() {
+   Render() {
 
       super.AddToGfx();
+
+      for (let i = 0; i < this.children.boundary; i++) {
+
+         const child = this.children.buffer[i];
+         if (child)child.Render();
+      }
+
+   }
+
+   /*******************************************************************************************************************************************************/
+   // Setters-Getters
+   SetSceneIdx(sceneidx) {
+      this.sceneidx = sceneidx;
+   }
+
+   /** Return type: Array. Returns an array of all widgets meshes */
+   GetAllMeshes(parent_meshes_buf) {
+
+      let all_meshes = parent_meshes_buf ? parent_meshes_buf : [];
+      all_meshes.push(this)
+
+      for (let i = 0; i < this.children.boundary; i++) {
+
+         const child = this.children.buffer[i];
+         if (child) all_meshes = child.GetAllMeshes(all_meshes);
+      }
+
+      // return [this];
+      return all_meshes;
    }
 
    SetMargin() {
@@ -257,7 +309,7 @@ function Expand2(section, options) {
 }
 
 
-function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum_pos = [parent.geom.pos[1], 0] ) {
+function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum_pos = [parent.geom.pos[1], 0]) {
 
    const padding = [0, 0]
    const cur_pos = [parent.geom.pos[0], parent.geom.pos[1]];
@@ -274,19 +326,19 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
 
       if (parent.type & MESH_TYPES_DBG.SECTION_MESH) { // For meshes with a parent of type Section
 
-         const c_x = cur_pos[0];          const c_y = cur_pos[1];
+         const c_x = cur_pos[0]; const c_y = cur_pos[1];
          const p_dx = parent.geom.dim[0]; const p_dy = parent.geom.dim[1];
-         const p_mx = parent.margin[0];   const p_my = parent.margin[1];
+         const p_mx = parent.margin[0]; const p_my = parent.margin[1];
 
-         const new_pos = [ c_x - p_dx + mesh.geom.dim[0] + p_mx,
-                           c_y - p_dy + mesh.geom.dim[1] + p_my,
-                           parent.geom.pos[2] + 1, ];
+         const new_pos = [c_x - p_dx + mesh.geom.dim[0] + p_mx,
+         c_y - p_dy + mesh.geom.dim[1] + p_my,
+         parent.geom.pos[2] + 1,];
 
          if ((mesh.type & MESH_TYPES_DBG.SECTION_MESH) === 0) { // Case mesh not of type section, have it update it's new pos-dim on a later when it's gfx exists.
-            
+
             const pos_dif = [new_pos[0] - mesh.geom.pos[0], new_pos[1] - mesh.geom.pos[1], new_pos[2] + 1];
             UpdaterAdd(mesh, 0, null, pos_dif);
-            
+
             continue_recur = false; // Stop recursion for meshe's children. Let the mesh deal with it's children.
          }
          else { // Case  mesh is of type section  
@@ -329,7 +381,7 @@ function Calculate_sizes_recursive(section, top, left, options, total_margin = [
       const mesh = section.children.buffer[i];
       if (mesh.children.active_count && mesh.type & MESH_TYPES_DBG.SECTION_MESH) {
 
-         margin[1] += mesh.margin[1]*2;
+         margin[1] += mesh.margin[1] * 2;
          margin[0] += mesh.margin[0];
          const temp = Calculate_sizes_recursive(mesh, top, left, SECTION.INHERIT, margin, total_size);
          total_size[0] += temp[0];
@@ -355,14 +407,14 @@ function Calculate_sizes_recursive(section, top, left, options, total_margin = [
             accum_size[1] += mesh.geom.dim[1];
             accum_size[0] = mesh.geom.dim[0] * mesh.mat.num_faces;
             section.max_size[1] += mesh.geom.dim[1];
-            if (section.max_size[0] < accum_size[0]) 
+            if (section.max_size[0] < accum_size[0])
                section.max_size[0] = mesh.geom.dim[0] * mesh.mat.num_faces;  // Keep the max width of all meshes in Vertical mode.
          }
          else if (opt & SECTION.HORIZONTAL) {
             accum_size[0] += mesh.geom.dim[0] * mesh.mat.num_faces;
             accum_size[1] = mesh.geom.dim[1];
             section.max_size[0] += mesh.geom.dim[0] * mesh.mat.num_faces;
-            if (section.max_size[1] < accum_size[1]) 
+            if (section.max_size[1] < accum_size[1])
                section.max_size[1] = mesh.geom.dim[1];  // Keep the max height of all meshes in Horizontal mode.
          }
       }
@@ -375,7 +427,7 @@ function Calculate_sizes_recursive(section, top, left, options, total_margin = [
             if (section.max_size[0] < accum_size[0]) section.max_size[0] = mesh.geom.dim[0]; // Keep the max width of all meshes
          }
          else if (opt & SECTION.HORIZONTAL) {
-            accum_size[0] += mesh.geom.dim[0] 
+            accum_size[0] += mesh.geom.dim[0]
             accum_size[1] = mesh.geom.dim[1]
             section.max_size[0] += mesh.geom.dim[0]
             if (section.max_size[1] < accum_size[1]) section.max_size[1] = mesh.geom.dim[1];  // Keep the max height of all meshes

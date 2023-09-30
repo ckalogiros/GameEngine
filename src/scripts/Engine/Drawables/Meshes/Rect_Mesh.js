@@ -1,6 +1,7 @@
 "use strict";
 
-import { Gl_remove_geometry } from "../../../Graphics/Buffers/GlBuffers.js";
+import { GfxSetVbRender, GlResetIndexBuffer, GlResetVertexBuffer, Gl_remove_geometry } from "../../../Graphics/Buffers/GlBuffers.js";
+import { Gfx_deactivate, Gfx_generate_context } from "../../Interfaces/Gfx/GfxContext.js";
 import { Scenes_remove_mesh, Scenes_update_all_gfx_starts } from "../../Scenes.js";
 import { TimeIntervalsDestroyByIdx } from "../../Timers/TimeIntervals.js";
 import { Geometry2D } from "../Geometry/Base/Geometry.js";
@@ -25,11 +26,11 @@ export class Rect extends Mesh {
       mesh.idx = this.children.Add(mesh);
       mesh.parent = this;
       return mesh.idx;
-  }
+   }
 
    Destroy() {
 
-      console.log('text_mesh destroy');
+      console.log('rect_mesh destroy:', this.name);
 
       // Remove from gfx buffers.
       const ret = Gl_remove_geometry(this.gfx, this.geom.num_faces)
@@ -58,17 +59,36 @@ export class Rect extends Mesh {
 
    /*******************************************************************************************************************************************************/
    // Graphics
+   GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
 
-   GenGfxCtx(FLAGS, gfxidx) {
-
-      super.GenGfxCtx(FLAGS, gfxidx);
-
+      this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.mat.num_faces, FLAGS, gfxidx);
       return this.gfx;
    }
 
    AddToGfx() {
+      
+      this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
+      const start = this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
+      return start;
+   }
 
-      super.AddToGfx();
+	DeactivateGfx(){
+
+      Gfx_deactivate(this.gfx);
+      this.is_gfx_inserted = false;
+   }   
+
+
+   /*******************************************************************************************************************************************************/
+   // Setters-Getters
+   SetSceneIdx(sceneidx) {
+      this.sceneidx = sceneidx;
+   }
+
+   /** Return type: Array. Returns an array of all widgets meshes */
+   GetAllMeshes() {
+
+      return [this];
    }
 
    /*******************************************************************************************************************************************************/

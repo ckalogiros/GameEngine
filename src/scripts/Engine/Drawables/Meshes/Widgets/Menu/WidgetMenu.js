@@ -11,7 +11,7 @@ import { Widget_Button } from "../WidgetButton.js";
 import { Widget_Label } from "../WidgetLabel.js";
 import { Align } from "../../../Operations/Alignment.js";
 import { TimeIntervalsDestroyByIdx } from "../../../../Timers/TimeIntervals.js";
-import { Scenes_remove_root_mesh } from "../../../../Scenes.js";
+// import { Scenes_remove_root_mesh } from "../../../../Scenes.js";
 
 
 
@@ -22,9 +22,9 @@ export class Widget_Menu_Bar extends Widget_Label {
       // text, Align, pos, col = GREY3, text_col = WHITE, pad = [0, 0], bold = .4, style = [2, 5, 2], font
       super(text, Align, pos, 4, col, text_col, pad, bold, font, style);
 
-      this.area_mesh.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
-      this.area_mesh.SetStyle(style);
-      this.area_mesh.SetName('Widget_Menu_Bar');
+      this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
+      this.SetStyle(style);
+      this.SetName('Widget_Menu_Bar');
       this.type |= MESH_TYPES_DBG.WIDGET_MENU_BAR;
 
    }
@@ -34,16 +34,16 @@ export class Widget_Menu_Bar extends Widget_Label {
       if (!fontsize) fontsize = this.text_mesh.geom.dim[0];
 
       const pos = [0, 0, 0];
-      CopyArr3(pos, this.area_mesh.geom.pos)
+      CopyArr3(pos, this.geom.pos)
       pos[2] += 1; // Put close button in front of the parent widget.
 
       const close_btn = new Close_Button(root, text, pos, fontsize, col, text_col, pad, bold, style, font);
-      close_btn.area_mesh.SetName('close_btn')
+      close_btn.SetName('close_btn')
 
-      this.area_mesh.geom.dim[0] += close_btn.area_mesh.geom.dim[0];
-      this.area_mesh.geom.dim[1] = (this.area_mesh.geom.dim[1] < close_btn.area_mesh.geom.dim[1]) ? close_btn.area_mesh.geom.dim[1] + this.pad[1] : this.area_mesh.geom.dim[1];
+      this.geom.dim[0] += close_btn.geom.dim[0];
+      this.geom.dim[1] = (this.geom.dim[1] < close_btn.geom.dim[1]) ? close_btn.geom.dim[1] + this.pad[1] : this.geom.dim[1];
 
-      this.area_mesh.AddChild(close_btn);
+      this.AddChild(close_btn);
 
       // Realign menu's children
       this.ReAlign();
@@ -51,14 +51,14 @@ export class Widget_Menu_Bar extends Widget_Label {
 
    AddMinimizeButton(root, pos, fontsize, col = GREY3, text_col = WHITE, scale = [1, 1], pad = [4, 2], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [6, 5, 3]) {
 
-      CopyArr3(pos, this.area_mesh.geom.pos);
+      CopyArr3(pos, this.geom.pos);
       pos[2] += 1; // Put close button in front of the parent widget.
 
       const minimize_btn = new Widget_Minimize(root, pos, fontsize, col, text_col, scale, pad, bold);
-      minimize_btn.area_mesh.SetName('minimize_btn')
+      minimize_btn.SetName('minimize_btn')
 
-      this.area_mesh.geom.dim[0] += minimize_btn.area_mesh.geom.dim[0];
-      this.area_mesh.geom.dim[1] = (this.area_mesh.geom.dim[1] < minimize_btn.area_mesh.geom.dim[1]) ? minimize_btn.area_mesh.geom.dim[1] + this.pad[1] : this.area_mesh.geom.dim[1];
+      this.geom.dim[0] += minimize_btn.geom.dim[0];
+      this.geom.dim[1] = (this.geom.dim[1] < minimize_btn.geom.dim[1]) ? minimize_btn.geom.dim[1] + this.pad[1] : this.geom.dim[1];
 
       this.AddChild(minimize_btn);
 
@@ -68,18 +68,20 @@ export class Widget_Menu_Bar extends Widget_Label {
 
    Destroy(_this) {
 
-      for(let i=0; i<_this.area_mesh.children.boundary; i++){
+      // Menu's children(close/minimize etc) destruction
+      for (let i = 0; i < _this.children.boundary; i++) {
 
-         const widget_child = _this.area_mesh.children.buffer[i];
-         widget_child.Destroy();
+         const child = _this.children.buffer[i];
+         child.Destroy();
       }
-      // _this.Destroy();
-      const sceneidx = this.area_mesh.sceneidx;
-      _this.text_mesh.Destroy();
-      _this.area_mesh.Destroy();
-      Scenes_remove_root_mesh(_this, sceneidx);
-      _this.text_mesh = null;
-      _this.area_mesh = null;
+
+      // Label's text destruction
+      // const sceneidx = this.sceneidx;
+      // _this.text_mesh.Destroy();
+      // Scenes_remove_root_mesh(_this, sceneidx);
+
+      // Menus's destruction
+      super.Destroy();
    }
 
    /*******************************************************************************************************************************************************/
@@ -88,8 +90,8 @@ export class Widget_Menu_Bar extends Widget_Label {
 
       const gfx = super.GenGfxCtx(FLAGS, gfxidx); // For the menu meshes
 
-      for (let i = 0; i < this.area_mesh.children.boundary; i++) { // For the children meshes
-         const child = this.area_mesh.children.buffer[i];
+      for (let i = 0; i < this.children.boundary; i++) { // For the children meshes
+         const child = this.children.buffer[i];
          child.GenGfxCtx(FLAGS, gfxidx)
       }
       return gfx;
@@ -99,12 +101,26 @@ export class Widget_Menu_Bar extends Widget_Label {
 
       super.Render(); // For the menu meshes
 
-      for (let i = 0; i < this.area_mesh.children.boundary; i++) { // For the children meshes
+      for (let i = 0; i < this.children.boundary; i++) { // For the children meshes
 
-         const child = this.area_mesh.children.buffer[i];
-         if (!child.area_mesh.is_gfx_inserted) { child.area_mesh.AddToGfx(); child.area_mesh.is_gfx_inserted = true }
-         if (!child.text_mesh.is_gfx_inserted) { child.text_mesh.AddToGfx(); child.text_mesh.is_gfx_inserted = true }
+         const child = this.children.buffer[i];
+         if (!child.is_gfx_inserted) { child.Render(); child.is_gfx_inserted = true }
+         if (!child.text_mesh.is_gfx_inserted) { child.text_mesh.Render(); child.text_mesh.is_gfx_inserted = true }
       }
+   }
+
+   /*******************************************************************************************************************************************************/
+   // Setters-Getters
+
+   /** Return type: Array. Returns an array of all widgets meshes */
+   GetAllMeshes() {
+
+      let all_meshes = [this, this.text_mesh];
+      for(let i=0; i<this.children.boundary; i++){
+         const child = this.children.buffer[i]
+         all_meshes = child.GetAllMeshes(all_meshes)
+      }
+      return all_meshes;
    }
 
    /*******************************************************************************************************************************************************/
@@ -113,40 +129,38 @@ export class Widget_Menu_Bar extends Widget_Label {
 
       // The 'OnMove' function is called by the timeInterval.
       // The timeInterval has been set by the 'OnClick' event.
-      const widget_menu = params.params;
-      const area_mesh = widget_menu.area_mesh;
-      const text_mesh = widget_menu.text_mesh;
+      const menu = params.params;
+      const text_mesh = menu.text_mesh;
 
       // Destroy the time interval and the Move operation, if the mesh is not grabed
       // MESH_STATE.IN_GRAB is deactivated upon mouse click up in Events.js.
-      if (area_mesh.StateCheck(MESH_STATE.IN_GRAB) === 0) {
+      if (menu.StateCheck(MESH_STATE.IN_GRAB) === 0) {
 
-         const intervalIdx = area_mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
+         const intervalIdx = menu.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
          TimeIntervalsDestroyByIdx(intervalIdx);
-         area_mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+         menu.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
 
          return;
       }
 
       // Move menu widget
       const mouse_pos = MouseGetPosDif();
-      area_mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, area_mesh.gfx);
+      menu.geom.MoveXY(mouse_pos.x, -mouse_pos.y, menu.gfx);
       text_mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, text_mesh.gfx);
 
 
       // Move menu children widgets(close/minimize buttons)
-      for (let i = 0; i < area_mesh.children.boundary; i++) {
+      for (let i = 0; i < menu.children.boundary; i++) {
 
-         const widget_child = area_mesh.children.buffer[i];
-         widget_child.area_mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, widget_child.area_mesh.gfx);
+         const widget_child = menu.children.buffer[i];
+         widget_child.geom.MoveXY(mouse_pos.x, -mouse_pos.y, widget_child.gfx);
          widget_child.text_mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, widget_child.text_mesh.gfx);
       }
 
    }
 
-
    /*******************************************************************************************************************************************************/
-   // Helpers
+   // Alignment
    ReAlign() {
 
       // Realign menu's text
@@ -154,14 +168,27 @@ export class Widget_Menu_Bar extends Widget_Label {
 
       let pad = [this.pad[0], this.pad[1]];
 
-      for (let i = 0; i < this.area_mesh.children.boundary; i++) {
+      for (let i = 0; i < this.children.boundary; i++) {
 
-         const c = this.area_mesh.children.buffer[i];
-         Align(ALIGN.RIGHT, this.area_mesh.geom, c.area_mesh.geom, pad); // Align the close/minimize buttons area_mesh to the menu area mesh.
+         const c = this.children.buffer[i];
+         Align(ALIGN.RIGHT, this.geom, c.geom, pad); // Align the close/minimize buttons area_mesh to the menu area mesh.
          c.Align(ALIGN.HOR_CENTER, pad); // Also we need to update the close/minimize buttons text_mesh position(by aligning)
-         pad[0] += this.area_mesh.children.buffer[i].area_mesh.geom.dim[0] * 2; // Each child widget of the menu is positioned relative to the previous child.
+         pad[0] += this.children.buffer[i].geom.dim[0] * 2; // Each child widget of the menu is positioned relative to the previous child.
       }
 
+   }
+
+   Reposition_post(dif_pos) {
+
+      this.MoveXYZ(dif_pos);
+      this.text_mesh.MoveXYZ(dif_pos);
+
+      // Menu's children(close/minimize etc) destruction
+      for (let i = 0; i < this.children.boundary; i++) {
+
+         const child = this.children.buffer[i];
+         child.Reposition_post(dif_pos);
+      }
    }
 
 }
@@ -176,16 +203,16 @@ export class Close_Button extends Widget_Button {
       super(text, ALIGN.RIGHT, pos, fontsize, col, text_col, pad, bold, style, font);
 
       this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-      this.area_mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+      this.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
       this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick)
-      
+
       // Set a callback function for the destruction of the menu and its window on clicking the close button.
       const params = {
          source_params: this,
          target_params: root, // root should be the root widget from which the recursive destruction should start.
          Clbk: root.OnCloseButtonClick, // The callback tha will destroy the root and all of its children(recursive)
       }
-      this.area_mesh.eventCallbacks.Add(params); // Pass the root and the callback for destroying the parent widget
+      this.eventCallbacks.Add(params); // Pass the root and the callback for destroying the parent widget
 
    }
 
@@ -204,8 +231,8 @@ export class Close_Button extends Widget_Button {
          params: null,
       }
 
-      if (Clbk) this.area_mesh.AddEventListener(event_type, Clbk, target_params);
-      else this.area_mesh.AddEventListener(event_type, this.OnClick, target_params);
+      if (Clbk) this.AddEventListener(event_type, Clbk, target_params);
+      else this.AddEventListener(event_type, this.OnClick, target_params);
    }
 
    OnClick(params) {
@@ -213,9 +240,9 @@ export class Close_Button extends Widget_Button {
       const widget_close_btn = params.target_params.target_mesh;
       widget_close_btn.OnClose();
    }
-   
+
    OnClose() {
-      
+
       console.log('OnClose', this);
 
       /** The Scema of the 'params', constructed for the 'eventCallbacks'
@@ -223,7 +250,7 @@ export class Close_Button extends Widget_Button {
          target_params: root,
          Clbk: this.OnDestroy,
        */
-      const params = this.area_mesh.eventCallbacks.buffer[0]; // TODO: HACK: We must set up an index clarification for eventCallbacks buffer. 
+      const params = this.eventCallbacks.buffer[0]; // TODO: HACK: We must set up an index clarification for eventCallbacks buffer. 
       // const OnCloseClbk = params.Clbk;
       // // OnCloseClbk(params.target_params);
       const root = params.target_params
@@ -248,7 +275,7 @@ export class Widget_Minimize extends Widget_Button {
       this.store_children_meshes = null;
       this.stored_children_events = new Array(LISTEN_EVENT_TYPES_INDEX.SIZE); // Store the 'children' buffer of the roots EventListeners (class). 
 
-      this.area_mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+      this.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
       this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
       this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick)
@@ -258,7 +285,7 @@ export class Widget_Minimize extends Widget_Button {
          Clbk: this.OnMinimize,
       }
       // The eventCallbacks are going to run from the OnClick() in Widget_Button class.
-      this.area_mesh.eventCallbacks.Add(params); // Pass the root and the callback for destroying the parent widget
+      this.eventCallbacks.Add(params); // Pass the root and the callback for destroying the parent widget
 
    }
 
@@ -321,7 +348,7 @@ export class Widget_Minimize extends Widget_Button {
 
                   // Set Graphics
                   root.GenGfxCtx(GFX.PRIVATE);
-                  root.AddToGfx();
+                  root.Render();
                   Gfx_end_session(true);
                   Gfx_activate(root); // Re-enable the rendering of the vertex buffers.
                }
@@ -358,7 +385,7 @@ export class Widget_Minimize extends Widget_Button {
 
                   // Add to gfx
                   root.GenGfxCtx(GFX.PRIVATE);
-                  root.AddToGfx();
+                  root.Render();
                   Gfx_end_session(true);
                   Gfx_activate(root); // Re-enable the rendering of the vertex buffers.
                }

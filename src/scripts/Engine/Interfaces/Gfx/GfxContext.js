@@ -190,7 +190,7 @@ export class Gfx_Pool extends M_Buffer {
       return idx;
    }
 
-   #ActDeactFromPool(progidx, vbidx, flag) {
+   #SetGfxActiveFromPool(progidx, vbidx, flag) {
       for (let i = 0; i < this.boundary; i++) {
          if (this.buffer[i].progidx === progidx && this.buffer[i].vbidx === vbidx) {
             this.buffer[i].isActive = flag;
@@ -265,60 +265,86 @@ export class Gfx_Pool extends M_Buffer {
          const progidx = mesh.gfx.prog.idx;
          const vbidx = mesh.gfx.vb.idx;
 
-         this.#ActDeactFromPool(progidx, vbidx, true);
+         this.#SetGfxActiveFromPool(progidx, vbidx, true);
          GfxSetVbRender(progidx, vbidx, true);
       }
 
    }
 
    /** */
-   DeactivateRecursive(mesh) {
+   DeactivateGfxRecursive(mesh) {
 
-      for (let i = 0; i < mesh.children.boundary; i++) {
+   //    for (let i = 0; i < mesh.children.boundary; i++) {
 
-         const child = mesh.children.buffer[i];
-         if (child) 
-            this.DeactivateRecursive(child)
-      }
+   //       const child = mesh.children.buffer[i];
+   //       if (child) 
+   //          this.DeactivateGfxRecursive(child)
+   //    }
 
-      if(!mesh.gfx) console.log(mesh.name, mesh)
-      // else
-      {
+   //    if(!mesh.gfx) console.error(mesh.name, mesh) {
 
-         const progidx = mesh.gfx.prog.idx;
-         const vbidx = mesh.gfx.vb.idx;
+   //       const progidx = mesh.gfx.prog.idx;
+   //       const vbidx = mesh.gfx.vb.idx;
 
-         this.#ActDeactFromPool(progidx, vbidx, false);
-         GlResetVertexBuffer(mesh.gfx);
-         GlResetIndexBuffer(mesh.gfx);
-         GfxSetVbRender(progidx, vbidx, false);
+   //       this.#SetGfxActiveFromPool(progidx, vbidx, false);
+   //       GlResetVertexBuffer(mesh.gfx);
+   //       GlResetIndexBuffer(mesh.gfx);
+   //       GfxSetVbRender(progidx, vbidx, false);
 
-         mesh.RemoveAllListenEvents();
-      }
+   //       mesh.RemoveAllListenEvents();
+   //    }
 
-   }
+   // }
 
-   DeactivateRecursive_no_listeners_touch(mesh) {
+   // DeactivateRecursive_no_listeners_touch(mesh) {
 
       for (let i = 0; i < mesh.children.boundary; i++) {
 
          const child = mesh.children.buffer[i];
          if (child) 
             this.DeactivateRecursive_no_listeners_touch(child)
+
+         if(!child.gfx) console.error(child.name, ' parent:', child.parent.name)
+         else
+         {
+            const progidx = child.gfx.prog.idx;
+            const vbidx = child.gfx.vb.idx;
+      
+            this.#SetGfxActiveFromPool(progidx, vbidx, false);
+            
+            GlResetVertexBuffer(child.gfx);
+            GlResetIndexBuffer(child.gfx);
+            GfxSetVbRender(progidx, vbidx, false);
+   
+            console.log(child.name)
+         }
       }
 
-      // if(mesh.gfx)
-      if(!mesh.gfx) console.log(mesh.name, mesh)
-      else
-      {
-         const progidx = mesh.gfx.prog.idx;
-         const vbidx = mesh.gfx.vb.idx;
+      // if(!mesh.gfx) console.error(mesh.name, ' parent:', mesh.parent.name)
+      // else
+      // {
+      //    const progidx = mesh.gfx.prog.idx;
+      //    const vbidx = mesh.gfx.vb.idx;
    
-         this.#ActDeactFromPool(progidx, vbidx, false);
-         GlResetVertexBuffer(mesh.gfx);
-         GlResetIndexBuffer(mesh.gfx);
-         GfxSetVbRender(progidx, vbidx, false);
-      }
+      //    this.#SetGfxActiveFromPool(progidx, vbidx, false);
+         
+      //    GlResetVertexBuffer(mesh.gfx);
+      //    GlResetIndexBuffer(mesh.gfx);
+      //    GfxSetVbRender(progidx, vbidx, false);
+
+      //    console.log(mesh.name)
+      // }
+   }
+
+   DeactivateGfx(gfx){
+
+      const progidx = gfx.prog.idx;
+      const vbidx = gfx.vb.idx;
+      this.#SetGfxActiveFromPool(progidx, vbidx, false);
+      GlResetVertexBuffer(gfx);
+      GlResetIndexBuffer(gfx);
+      GfxSetVbRender(progidx, vbidx, false);
+      // console.log('Deactivating:', menu.name, ' progidx:',progidx,' vbidx:',vbidx)
    }
 };
 
@@ -337,8 +363,9 @@ export function Gfx_generate_context(sid, sceneidx, mesh_count, FLAGS, gfxidx) {
 
 /** Activates the gfx buffers recursively for all the children meshes. */
 export function Gfx_activate(mesh) { _gfx_pool.ActivateRecursive(mesh); }
-export function Gfx_deactivate(mesh) { _gfx_pool.DeactivateRecursive(mesh); }
+export function Gfx_deactivate_recursive(mesh) { _gfx_pool.DeactivateGfxRecursive(mesh); }
 export function Gfx_deactivate_no_listeners_touch(mesh) { _gfx_pool.DeactivateRecursive_no_listeners_touch(mesh); }
+export function Gfx_deactivate(gfx) { _gfx_pool.DeactivateGfx(gfx); }
 
 export function Gfx_is_private_vb(progidx, vbidx){
    

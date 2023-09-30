@@ -6,7 +6,7 @@ import { Section } from "../Meshes/Section.js";
 import { Widget_Switch } from "../Meshes/Widgets/WidgetButton.js";
 import { Widget_Label_Text_Mesh_Menu_Options } from "../Meshes/Widgets/WidgetLabel.js";
 import { Slider_connect } from "../Meshes/Widgets/WidgetSlider.js";
-// import { Scenes_get_children } from "../Scenes.js";
+import { Scenes_get_root_meshes } from "../../Scenes.js";
 
 
 const _menu_options = [];
@@ -93,7 +93,7 @@ function Menu_options_create_slider_popup_menu_options(clicked_mesh, _pos) {
    const pos = [0, 0, 0];
    CopyArr3(pos, _pos)
 
-   const meshes = Scenes_get_children(STATE.scene.active_idx);
+   const meshes = Scenes_get_root_meshes(STATE.scene.active_idx);
 
    const section_menu = new Section(SECTION.VERTICAL, [2, 2], pos, [20, 40], TRANSPARENCY(GREY7, .8));
    section_menu.SetName('section_menu' + clicked_mesh.menu_options_idx)
@@ -102,7 +102,6 @@ function Menu_options_create_slider_popup_menu_options(clicked_mesh, _pos) {
    section_menu.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
    
    for (let i = 0; i < meshes.count-1; i++) {
-   // for (let i = 0; i < 1; i++) {
       
       const mesh = meshes.buffer[i];
       ERROR_NULL(mesh)
