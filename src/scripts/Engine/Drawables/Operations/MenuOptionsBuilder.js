@@ -66,7 +66,7 @@ export function Menu_options_create(clicked_mesh, pos) {
          }
 
          // Listeners have been removed(on popup deactivate), so we need to re-create them.
-         option_switch.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, option_switch.OnClick, target_params)
+         option_switch.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, option_switch.OnClick, target_params)
          option_switch.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
 
       }
@@ -127,7 +127,7 @@ function Menu_options_create_slider_popup_menu_options(clicked_mesh, _pos) {
       }
       
       ERROR_NULL(option_switch.OnClick); // Make sure the option mesh has an OnClick method
-      option_switch.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, option_switch.OnClick, target_params)
+      option_switch.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, option_switch.OnClick, target_params)
       option_switch.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
       option_switch.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 

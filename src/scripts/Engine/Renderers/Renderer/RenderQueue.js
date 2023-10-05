@@ -1,4 +1,4 @@
-import { GlGetPrograms, GlGetProgramsCnt } from "../../../Graphics/GlProgram.js";
+import { Gl_progs_get, Gl_progs_get_programs_count } from "../../../Graphics/GlProgram.js";
 
 const MAX_DRAWQUEUE_COUNT = 32; // Number of Gl programs for the queue  
 
@@ -53,8 +53,8 @@ class RenderQueue {
 
    Create(){
 
-      const progs = GlGetPrograms();
-      const progCount = GlGetProgramsCnt();
+      const progs = Gl_progs_get();
+      const progCount = Gl_progs_get_programs_count();
       for (let i = 0; i < progCount; i++) {
          for (let j = 0; j < progs[i].vertexBufferCount; j++) {
             const isActive = progs[i].vertexBuffer[j].show; 
@@ -158,7 +158,7 @@ class RenderQueue {
 
          const idxs = this.FindAllBuffersFromProgram(progIdx);
 
-         for(let k=0; k<idxs.length; KeyframeEffect++){
+         for(let k=0; k<idxs.length; k++){
 
             if(flag === 'first' && idxs[k] > 0){
 
@@ -211,7 +211,7 @@ class RenderQueue {
    /**
     * INEFFICIENT.
     * But we do not care for now.
-    * TODO: Implement correct bubble? sort 
+    * TODO: Implement correctly: using bubble sort? 
     */
    SetPriorityProgram(flag, progIdx){
 
@@ -252,12 +252,12 @@ class RenderQueue {
 
 const renderQueue = new RenderQueue;
 
-export function RenderQueueGet() { return renderQueue; }
+export function Renderqueue_get() { return renderQueue; }
 
-export function RenderQueueGetActive() { return renderQueue.active; }
-export function RenderQueueGetActiveCount() { return renderQueue.activeCount; }
+export function Renderqueue_get_active() { return renderQueue.active; }
+export function Renderqueue_active_get_count() { return renderQueue.activeCount; }
 
-export function RenderQueueSetPriority(flag, progIdx, vbIdx) { renderQueue.SetPriority(flag, progIdx, vbIdx); }
+export function Renderqueue_set_priority(flag, progIdx, vbIdx) { renderQueue.SetPriority(flag, progIdx, vbIdx); }
 
 /**
  * Enable and Disable programs and vertex buffers from the draw queue.
@@ -265,7 +265,7 @@ export function RenderQueueSetPriority(flag, progIdx, vbIdx) { renderQueue.SetPr
  * changed(enabled or disabled for drawing), we must add or remove
  * these programs-vertex buffers from the draw queue.
  */
-export function RenderQueueUpdate(progIdx, vbIdx, flag){ 
+export function Renderqueue_set_active(progIdx, vbIdx, flag){ 
 
    const idx = renderQueue.Find(progIdx, vbIdx);
    if(idx !== INT_NULL){
@@ -276,7 +276,7 @@ export function RenderQueueUpdate(progIdx, vbIdx, flag){
 }
 
 
-export function RenderQueueInit() {
+export function Renderqueue_init() {
    renderQueue.Init(); // One time initialization(creates an empty buffer...)
 }
 // export function RenderQueueCreate() {

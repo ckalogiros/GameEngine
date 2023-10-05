@@ -1,13 +1,13 @@
 "use strict";
 import { GlSetAttrTime } from "../../../../Graphics/Buffers/GlBufferOps.js";
-import { GfxSetVbRender, Gl_remove_geometry } from "../../../../Graphics/Buffers/GlBuffers.js";
 import { Int8Buffer, Int8Buffer2, M_Buffer } from "../../../Core/Buffers.js";
 import { TimerGetGlobalTimer } from "../../../Timers/Timers.js";
 import { Listener_create_event, Listener_remove_event_by_idx, Listener_remove_event_by_idx2, Listener_set_event_active_by_idx } from "../../../Events/EventListeners.js";
 import { CopyArr4 } from "../../../../Helpers/Math/MathOperations.js";
-import { Scenes_get_count, Scenes_update_all_gfx_starts, Scenes_get_root_meshes } from "../../../Scenes.js";
-import { Gfx_deactivate_recursive } from "../../../Interfaces/Gfx/GfxContext.js";
+import { Scenes_get_count, Scenes_update_all_gfx_starts, Scenes_get_root_meshes, Scenes_remove_mesh_from_gfx } from "../../../Scenes.js";
+import { Gfx_deactivate_recursive, Gfx_remove_geometry } from "../../../Interfaces/Gfx/GfxContext.js";
 import { TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals.js";
+import { Gfx_set_vb_show } from "../../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 
 
 
@@ -27,6 +27,7 @@ export const MESH_ENABLE = {
         PASS_DIM2: _cnt <<= 1,
         PASS_TIME1: _cnt <<= 1,
         PASS_RES2: _cnt <<= 1,
+
 
         NONE: 0,
     },
@@ -66,7 +67,7 @@ export class Mesh {
     gfx;
     is_gfx_inserted; // A way to tell if the mesh has been inserted to the graphics pipeline;
     uniforms;
-    sceneidx; // A refference to the scene that the mesh belongs to(index only).
+    sceneidx; // A reference to the scene that the mesh belongs to(index only).
     type; // A bit masked large integer to 'name' all different types of a mesh. 
     listeners; // Indexes to the EventListeners class.
     eventCallbacks; // A buffer to store all callback for any event enabled for the mesh.
@@ -118,7 +119,6 @@ export class Mesh {
         // Add the type 'Mesh'
         this.type |= MESH_TYPES_DBG.MESH;
 
-        // this.listeners = new Int8Buffer2(LISTEN_EVENT_TYPES_INDEX.SIZE);
         this.listeners = new Int8Buffer2();
         this.listeners.Init(LISTEN_EVENT_TYPES_INDEX.SIZE, INT_NULL);
 
@@ -287,12 +287,12 @@ export class Mesh {
             Reconstruct_listeners_recursive(this, this);
     }
 
-   /*******************************************************************************************************************************************************/
-   // Graphics
+    /*******************************************************************************************************************************************************/
+    // Graphics
 
     Set_graphics_vertex_buffer_render(flag) {
 
-        GfxSetVbRender(this.gfx.prog.idx, this.gfx.vb.idx, flag);
+        Gfx_set_vb_show(this.gfx.prog.idx, this.gfx.vb.idx, flag);
         if (flag) this.StateEnable(MESH_STATE.IS_HOVERABLE);
         else this.StateDisable(MESH_STATE.IS_HOVERABLE);
 
@@ -317,7 +317,7 @@ export class Mesh {
     AddEventListener(event_type, Clbk = null, params = null) {
 
 
-        if (event_type & LISTEN_EVENT_TYPES.CLICK_DOWN) {
+        if (event_type & LISTEN_EVENT_TYPES.CLICK_UP) {
             if (ERROR_NULL(Clbk)) console.error('Passing null parmeters. @  CreateListenEvent(), Mesh.js')
             // Case we accidentaly re-creating the same event(Avoiding duplicate events in the EventListeners buffer).
             if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] !== INT_NULL) alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js')
@@ -349,31 +349,45 @@ export class Mesh {
 
     RemoveAllListenEvents() {
 
+        for (let etype = 0; etype < this.listeners.boundary; etype++) {
 
-        if (this.listeners.active_count) {
+            if (this.listeners.buffer[etype] !== INT_NULL) { // If this type of listen event is enabled 
 
-            if (DEBUG.LISTENERS) console.log('--- Removing Events from mesh: ', this.name)
-            const count = this.listeners.size;
-
-            for (let i = 0; i < count; i++) {
-
-                const idx = 0;
-                const gathered = Gather_all_listen_events_recursive(this, i, idx);
-                // console.log(i, this.name,  '00000000000000000 ', gathered.idxs)
-
-                if (this.listeners.buffer[i] !== INT_NULL) { // If this type of listen event is enabled 
-
-                    Listener_remove_event_by_idx2(i, gathered.idxs);
-                    this.listeners.RemoveByIdx(i);
-                }
-
+                console.log('Removing Event etype:', etype, this.listeners.buffer)
+                Listener_remove_event_by_idx(etype, this.listeners.buffer[etype]);
+                this.listeners.RemoveByIdx(etype);
             }
         }
     }
+    /** SAVE */
+    // RemoveAllListenEvents() {
+
+    //     // console.log(i, this.name,  'FUNCTION DEACTIVATED \n000000000000000000000000000000000000000000 ')
+
+    //     if (this.listeners.active_count) {
+
+    //         if (DEBUG.LISTENERS) console.log('--- Removing Events from mesh: ', this.name)
+    //         const count = this.listeners.size;
+
+    //         for (let i = 0; i < count; i++) {
+
+    //             const idx = 0;
+    //             const gathered = Gather_all_listen_events_recursive(this.children, i, idx, gathered);
+    //             if (DEBUG.LISTENERS) console.log(i, this.name,  ' children listeners: ', gathered.idxs)
+
+    //             if (this.listeners.buffer[i] !== INT_NULL) { // If this type of listen event is enabled 
+
+    //                 Listener_remove_event_by_idx2(i, gathered.idxs);
+    //                 this.listeners.RemoveByIdx(i);
+    //             }
+
+    //         }
+    //     }
+    // }
 
     RemoveListenEvent(event_type) {
 
-        if (event_type & LISTEN_EVENT_TYPES.CLICK_DOWN) {
+        if (event_type & LISTEN_EVENT_TYPES.CLICK_UP) {
 
             const idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
             if (this.listeners.buffer[idx])
@@ -394,9 +408,9 @@ export class Mesh {
         if (this.StateCheck(MESH_STATE.IS_FAKE_HOVERABLE | MESH_STATE.IS_HOVERABLE))
             this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
         if (this.StateCheck(MESH_STATE.IS_FAKE_CLICKABLE) && (this.StateCheck(MESH_STATE.IS_CLICKABLE) === 0))
-            this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnFakeClick)
+            this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnFakeClick)
         else if (this.StateCheck(MESH_STATE.IS_CLICKABLE))
-            this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick)
+            this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick)
     }
 
     CreateEvent(params = null) {
@@ -580,7 +594,7 @@ function Reconstruct_listeners_recursive(mesh, root) {
 
             // Create a Fake event for the root, if the root does not have an event (of same type)
             if (root.listeners.buffer[type] === INT_NULL)
-                root.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, root.OnFakeClick);
+                root.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, root.OnFakeClick);
 
             root.StateEnable(MESH_STATE.IS_FAKE_CLICKABLE);
 
@@ -591,9 +605,28 @@ function Reconstruct_listeners_recursive(mesh, root) {
     }
 }
 
-function Gather_all_listen_events_recursive(mesh, event_type, idx = 0) {
+function Gather_all_listen_events_recursive(mesh, event_type, idx = 0, gathered) {
 
-    // let gathered.idxs = [];
+    // Gather for current mesh
+    if (mesh.listeners.active_count) {
+        gathered.idxs[idx] = mesh.listeners.buffer[event_type]
+    }
+
+    // Gather for meshh's children
+    if (mesh.children.boundary) {
+
+        for (let i = 0; i < mesh.children.boundary; i++) {
+
+            const child = mesh.children.buffer[i];
+            if (child)
+                Gather_all_listen_events_recursive(mesh, event_type, idx = 0, gathered)
+        }
+    }
+
+    return gathered;
+}
+function Gather_all_listen_events_recursive_to_parent(mesh, event_type, idx = 0) {
+
     let gathered = {
         idxs: [],
         count: 0,
@@ -602,7 +635,7 @@ function Gather_all_listen_events_recursive(mesh, event_type, idx = 0) {
     if (mesh.parent && (mesh.parent.type & MESH_TYPES_DBG.SCENE) === 0) {
 
         gathered = Gather_all_listen_events_recursive(mesh.parent, event_type, idx);
-        gathered.boundary++;
+        gathered.count++;
     }
 
     if (mesh.listeners.active_count) {
@@ -612,132 +645,43 @@ function Gather_all_listen_events_recursive(mesh, event_type, idx = 0) {
     return gathered;
 }
 
-export class Text_Mesh extends Mesh {
-
-    // constructor(geom, mat) {
-
-    //     super(geom, mat);
-
-    //     this.sceneidx = STATE.scene.active_idx;
-    //     this.type |= MESH_TYPES_DBG.TEXT_MESH;
-    // }
-
-    // GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
-
-    //     this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.mat.num_faces, FLAGS, gfxidx);
-    //     return this.gfx;
-    // }
-
-    // Render() {
-
-    //     this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
-    //     const start = this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
-    //     return start;
-    // }
-
-    // UpdateTextFromVal(_val) {
-
-    //     var text = '';
-
-    //     if (typeof (_val) === 'number') text = `${_val}`;
-    //     else text = _val;
-    //     const geom = this.geom;
-    //     const gfx = this.gfx;
-    //     const mat = this.mat;
-
-    //     let gfxInfoCopy = new GfxInfoMesh(gfx);
-
-    //     const textLen = text.length;
-    //     const len = geom.num_faces > textLen ? geom.num_faces : (textLen > geom.num_faces ? geom.num_faces : textLen);
-
-    //     // Update text faces
-    //     for (let j = 0; j < len; j++) {
-
-    //         let uvs = [0, 0, 0, 0];
-    //         if (text[j] !== undefined) {
-    //             uvs = FontGetUvCoords(mat.uvIdx, text[j]);
-    //         }
-    //         GlSetTex(gfxInfoCopy, uvs);
-    //         gfxInfoCopy.vb.start += gfxInfoCopy.vb.boundary
-    //     }
-    // }
-
-    // SetZindex(z) {
-    //     this.geom.SetZindex(z, this.gfx, this.mat.num_faces)
-    // }
-
-    // CalcTextWidth() {
-    //     let width = this.geom.CalcTextWidth();
-    //     for (let i = 0; i < this.children.boundary; i++) {
-    //         if (this.children.buffer[i])
-    //             width += this.children.buffer[i].geom.CalcTextWidth();
-    //     }
-    //     return width;
-    // }
-
-    // UpdatePosXYZ() {
-
-    //     const text = this.mat.text;
-
-    //     const textLen = text.length;
-    //     const len = this.geom.num_faces > textLen ? this.geom.num_faces : textLen;
-
-    //     const charPos = [0, 0, 0];
-    //     CopyArr3(charPos, this.geom.pos)
-
-    //     // Copy gfx, to pass new start for each character
-    //     let gfxCopy = new GfxInfoMesh(this.gfx);
-
-    //     for (let i = 0; i < len; i++) {
-
-    //         this.geom.UpdateFromPosXYZ(gfxCopy, charPos); // For text we need to give a 'next' position for every characters
-    //         // console.log(this.geom.pos[0])
-    //         gfxCopy.vb.start += gfxCopy.vb.boundary;
-    //         gfxCopy.ib.start += gfxCopy.ib.boundary;
-    //         charPos[0] += this.geom.dim[0] * 2;
-    //     }
-    // }
-
-    // SetColorRGB(col) { 
-    //     this.mat.SetColorRGB(col, this.gfx, this.geom.num_faces) 
-    // }
-}
 
 
 /** Helper Recursive Functions */
 function Mesh_recursive_destroy(parent) {
 
-    for (let i = 0; i < parent.children.boundary; i++) {
+    // for (let i = 0; i < parent.children.boundary; i++) {
 
-        const mesh = parent.children.buffer[i];
+    //     const mesh = parent.children.buffer[i];
 
-        if (mesh) {
+    //     if (mesh) {
 
-            /** Recursive Part */
-            if (mesh.children.boundary)
-                Mesh_recursive_destroy(mesh)
+    //         /** Recursive Part */
+    //         if (mesh.children.boundary)
+    //             Mesh_recursive_destroy(mesh)
 
-            if (DEBUG.GFX.REMOVE_MESH) console.log('Remove:', mesh.name)
-            const ret = Gl_remove_geometry(mesh.gfx, mesh.geom.num_faces);
+    //         if (DEBUG.GFX.REMOVE_MESH) console.log('Remove:', mesh.name)
+    //         const ret = Gfx_remove_geometry(mesh.gfx, mesh.geom.num_faces); // Update the gfx.start of all meshes that are inserted in the same vertex buffer.
+    //         Scenes_remove_mesh_from_gfx(mesh.sceneidx, mesh.gfx.prog.idx, mesh.gfx.vb.idx, mesh.scene_gfx_mesh_idx); // Remove mesh from the scene's gfx buffer
 
-            // Remove event listeners
-            // mesh.RemoveAllListenEvents();
+    //         // Remove event listeners
+    //         // mesh.RemoveAllListenEvents();
 
-            // Remove time intervals
-            if (mesh.timeIntervalsIdxBuffer.active_count) {
+    //         // Remove time intervals
+    //         if (mesh.timeIntervalsIdxBuffer.active_count) {
 
-                const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// TODO!!!: HACK We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
-                TimeIntervalsDestroyByIdx(intervalIdx);
-                mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
-            }
+    //             const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// TODO!!!: HACK We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
+    //             TimeIntervalsDestroyByIdx(intervalIdx);
+    //             mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+    //         }
 
-            mesh.RemoveChildren(); // TODO: Do we need to strip down all meshes??? Only if they are shared pointers to some mesh of the appliction
+    //         mesh.RemoveChildren(); // TODO: Do we need to strip down all meshes??? Only if they are shared pointers to some mesh of the appliction
 
-            if (!ret.last) Scenes_update_all_gfx_starts(mesh.sceneidx, mesh.gfx.prog.idx, mesh.gfx.vb.idx, ret);
+    //         if (!ret.last) Scenes_update_all_gfx_starts(mesh.sceneidx, mesh.gfx.prog.idx, mesh.gfx.vb.idx, ret);
 
-            parent.RemoveChildByIdx(i); // Remove the current mesh from the parent
-        }
-    }
+    //         parent.RemoveChildByIdx(i); // Remove the current mesh from the parent
+    //     }
+    // }
 }
 
 function Mesh_destroy_private_recursive(parent) {
@@ -794,7 +738,7 @@ function Set_graphics_vertex_buffer_render(mesh, flag) {
 
     const progidx = mesh.gfx.prog.idx;
     const vbidx = mesh.gfx.vb.idx;
-    GfxSetVbRender(progidx, vbidx, flag)
+    Gfx_set_vb_show(progidx, vbidx, flag)
 }
 
 function Recursive_mesh_move(buffer, x, y) {

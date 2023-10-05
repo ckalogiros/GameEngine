@@ -1,13 +1,13 @@
 "use strict";
 import { Scenes_create_scene, Scenes_debug_info_create } from '../Engine/Scenes.js'
-import { RenderQueueGet, RenderQueueInit } from '../Engine/Renderers/Renderer/RenderQueue.js';
+import { Renderqueue_get, Renderqueue_init } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { WebGlRenderer } from '../Engine/Renderers/WebGlRenderer.js';
 import { CameraOrthographic } from '../Engine/Renderers/Renderer/Camera.js';
 import { TextureInitBuffers } from '../Engine/Loaders/Textures/Texture.js';
 import { PerformanceTimerGetFps1sAvg, TimeGetDeltaAvg, TimeGetFps, TimeGetTimer, _fps_100ms_avg, _fps_1s_avg, _fps_200ms_avg, _fps_500ms_avg } from '../Engine/Timers/Time.js';
 import { Widget_Label_Dynamic_Text, Widget_Label, Widget_Label_Text_Mesh_Menu_Options } from '../Engine/Drawables/Meshes/Widgets/WidgetLabel.js';
 import { Widget_Button, Widget_Switch } from '../Engine/Drawables/Meshes/Widgets/WidgetButton.js';
-import { Widget_Text, Widget_Dynamic_Text_Mesh, Widget_Dynamic_Text_Mesh_Only } from '../Engine/Drawables/Meshes/Widgets/WidgetText.js';
+import { Widget_Text, Widget_Dynamic_Text_Mesh } from '../Engine/Drawables/Meshes/Widgets/WidgetText.js';
 import { CubeGeometry } from '../Engine/Drawables/Geometry/Geometry3DCube.js';
 // import { PerformanceTimerCreate, PerformanceTimerInit, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _Tm1GetFps, _Tm1GetMilisec, _Tm1GetNanosec, _Tm2GetFps, _Tm2GetMilisec, _Tm3GetFps, _Tm3GetMilisec, _Tm5GetFps, _Tm5GetMilisec, _Tm6GetFps, _Tm6GetMilisec } from '../Engine/Timers/PerformanceTimers.js';
 import { PerformanceTimerCreate, PerformanceTimerInit, PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec } from '../Engine/Timers/PerformanceTimers.js';
@@ -33,14 +33,12 @@ import { MouseGetArea, MouseGetPos, MouseGetPosDif } from '../Engine/Controls/In
 // import { Buffer } from 'buffer';
 // import { Buffer } from 'buffer';
 import { Debug_get_event_listeners, Listeners_debug_info_create, Listeners_get_event } from '../Engine/Events/EventListeners.js';
-import { Gl_remove_geometry } from '../Graphics/Buffers/GlBuffers.js';
-import { Drop_down_set_root, Widget_Drop_Down } from '../Engine/Drawables/Meshes/Widgets/Menu/Widget_Drop_Down.js';
+import { Drop_down_set_root, Widget_Dropdown } from '../Engine/Drawables/Meshes/Widgets/Menu/Widget_Dropdown.js';
 import { Info_listener_create_event, Info_listener_dispatch_event } from '../Engine/Drawables/DebugInfo/InfoListeners.js';
-import { GlGetPrograms } from '../Graphics/GlProgram.js';
+import { Gl_progs_get } from '../Graphics/GlProgram.js';
 import { Input_create_user_input_listeners } from '../Engine/Controls/Input/Input.js';
 import { Debug_info_create_ui_performance_timers, Debug_info_ui_performance } from '../Engine/Drawables/DebugInfo/DebugInfoUi.js';
 import { Destroy_mesh } from '../Engine/Global/Functions.js';
-import { Text_Mesh } from '../Engine/Drawables/Meshes/Text_Mesh.js';
 
 
 // var osu = require('node-os-utils')
@@ -78,7 +76,7 @@ export function AppInit() {
     renderer = new WebGlRenderer(scene, camera);
 
     Input_create_user_input_listeners();
-    RenderQueueInit();
+    Renderqueue_init();
     // Initializer_popup_initialization();
 
 
@@ -86,7 +84,7 @@ export function AppInit() {
      * Create meshes
      */
 
-    // Debug_info_ui_performance(scene);
+    Debug_info_ui_performance(scene);
 
 
     // const label = CreateLabel(scene);
@@ -98,18 +96,18 @@ export function AppInit() {
     // const menu = CreateMenu(scene)
 
     // CreateDropDownWidget(scene)
-    CreateDropDownWidgetWithWidgetsInside(scene)
+    // CreateDropDownWidgetWithWidgetsInside(scene)
     
     // CreateSlider(scene);
     // CreateSliderWithMenuBar(scene)
-    // CreateSlidersSectioned(scene)
-    // CreateMenuBar(scene, 3)
-    // CreateAndAddMenuBarSectioned(scene, 4);
-    // CreateMinimizer(scene);
-    // Test_drop_down_widget(scene)
+
+    // CreatDynamicText(scene)
+    // CreatDynamicTextSectioned(scene)
+    
+    // CreatSectionedMixWidgets(scene)
+    // CreateSectionSectioned(scene)
 
     // Help(scene)
-    // CreateSection(scene)
     // CreateSectionedWidgets(scene)
 
     // CreateManySection(scene);
@@ -130,12 +128,12 @@ export function AppInit() {
     camera.UpdateProjectionUniform(renderer.gl);
     scene.Render();
 
-    const progs = GlGetPrograms();
+    const progs = Gl_progs_get();
     console.log(progs)
 
 
-    RenderQueueGet().SetPriorityProgram('last', 1, 0);
-    RenderQueueGet().UpdateActiveQueue();
+    Renderqueue_get().SetPriorityProgram('last', 1, 0);
+    Renderqueue_get().UpdateActiveQueue();
 
     { // PERFORMANCE OBJECTS
         var performance = window.performance || window.mozPerformance || window.msPerformance || window.webkitPerformance || {};
@@ -209,7 +207,7 @@ function CreateButton(scene) {
     let ypos = 100
     const btn = new Widget_Button('Button', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [160, ypos, 0], 5, GREY1, WHITE, [4, 4], .5);
     // btn1.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
-    btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN)
+    btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP)
     btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
     btn.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
     btn.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE, { style: [6, 6, 3] })
@@ -231,8 +229,8 @@ function DestroyMeshTest(scene, widget) {
         }
         else console.log('Widget does not exist')
     }
-    const btn1 = new Widget_Button('Destroy', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [160, 140, 0], 5, GREY1, WHITE, [4, 4], .5);
-    btn1.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, customCallback)
+    const btn1 = new Widget_Button('Destroy', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [160, 240, 0], 5, GREY1, WHITE, [4, 4], .5);
+    btn1.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, customCallback)
     btn1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
     btn1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
     btn1.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE, { style: [6, 6, 3] })
@@ -255,6 +253,31 @@ function CreateSwitch(scene) {
     return switch1;
 }
 
+function CreatDynamicText(scene){
+
+    const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000',  [100, 300, 0], 4, BLUE_10_120_220, PINK_240_60_160);
+    scene.AddWidget(dt)
+}
+
+function CreatDynamicTextSectioned(scene){
+
+    const section = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREY1, .9))
+    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
+    section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+
+    {
+        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '000000',  [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
+        section.AddItem(dt);
+    }
+    {
+        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '00',  [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
+        section.AddItem(dt);
+    }
+    
+    scene.AddWidget(section);
+    section.Calc();
+}
+
 function CreateMenu(scene) {
 
     const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [60, 200, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
@@ -264,17 +287,15 @@ function CreateMenu(scene) {
     scene.AddWidget(menu)
 }
 
-/***********************************************************************/
-
 function CreateDropDownWidget(scene) {
 
     const pad = [10, 2.5]
-    const drop_down = new Widget_Drop_Down('DP1', [200, 200, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [1, 1], pad);
+    const drop_down = new Widget_Dropdown('DP1', [200, 200, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, pad);
     drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
     // drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
 
     { // Add another dropdown in dropdown
-        const drop_down2 = new Widget_Drop_Down('DP2', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1, 1], pad);
+        const drop_down2 = new Widget_Dropdown('DP2', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, pad);
         drop_down2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
         Drop_down_set_root(drop_down, drop_down2);
         drop_down.AddToMenu(drop_down2);
@@ -288,24 +309,24 @@ function CreateDropDownWidget(scene) {
         drop_down2.AddToMenu(text);
         Drop_down_set_root(drop_down, drop_down2);
         {
-            const drop_down3 = new Widget_Drop_Down('DP3 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, [1, 1], pad);
+            const drop_down3 = new Widget_Dropdown('DP3 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
             drop_down3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
             drop_down2.AddToMenu(drop_down3);
             Drop_down_set_root(drop_down, drop_down3);
             {
-                const drop_down4 = new Widget_Drop_Down('DP4 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, GREEN_140_240_10, WHITE, [1, 1], pad);
+                const drop_down4 = new Widget_Dropdown('DP4 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, GREEN_140_240_10, WHITE, pad);
                 drop_down4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
                 drop_down3.AddToMenu(drop_down4);
                 Drop_down_set_root(drop_down, drop_down4);
 
                 {
-                    const drop_down5 = new Widget_Drop_Down('DP5 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, PINK_240_60_200, WHITE, [1, 1], pad);
+                    const drop_down5 = new Widget_Dropdown('DP5 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, PINK_240_60_200, WHITE, pad);
                     drop_down5.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down5.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
                     drop_down4.AddToMenu(drop_down5);
                     Drop_down_set_root(drop_down, drop_down5);
 
                     {
-                        const drop_down6 = new Widget_Drop_Down('DP6 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, RED_200_10_10, WHITE, [1, 1], pad);
+                        const drop_down6 = new Widget_Dropdown('DP6 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, RED_200_10_10, WHITE, pad);
                         drop_down6.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down6.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
                         drop_down5.AddToMenu(drop_down6);
                         Drop_down_set_root(drop_down, drop_down6);
@@ -332,12 +353,12 @@ function CreateDropDownWidget(scene) {
 function CreateDropDownWidgetWithWidgetsInside(scene) {
 
     const pad = [10, 2.5]
-    const drop_down = new Widget_Drop_Down('DP1', [200, 200, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [1, 1], pad);
+    const drop_down = new Widget_Dropdown('DP1', [260, 200, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, pad);
     drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-    // drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
+    drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
 
     { // Add another dropdown in dropdown
-        const drop_down2 = new Widget_Drop_Down('DP2', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [1, 1], pad);
+        const drop_down2 = new Widget_Dropdown('DP2', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, pad);
         drop_down2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
         Drop_down_set_root(drop_down, drop_down2);
         drop_down.AddToMenu(drop_down2);
@@ -370,24 +391,24 @@ function CreateDropDownWidgetWithWidgetsInside(scene) {
         Drop_down_set_root(drop_down, drop_down2);
 
         {
-            const drop_down3 = new Widget_Drop_Down('DP3 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, [1, 1], pad);
+            const drop_down3 = new Widget_Dropdown('DP3 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
             drop_down3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
             drop_down2.AddToMenu(drop_down3);
             Drop_down_set_root(drop_down, drop_down3);
             {
-                const drop_down4 = new Widget_Drop_Down('DP4 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, GREEN_140_240_10, WHITE, [1, 1], pad);
+                const drop_down4 = new Widget_Dropdown('DP4 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, GREEN_140_240_10, WHITE, pad);
                 drop_down4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
                 drop_down3.AddToMenu(drop_down4);
                 Drop_down_set_root(drop_down, drop_down4);
 
                 {
-                    const drop_down5 = new Widget_Drop_Down('DP5 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, PINK_240_60_200, WHITE, [1, 1], pad);
+                    const drop_down5 = new Widget_Dropdown('DP5 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, PINK_240_60_200, WHITE, pad);
                     drop_down5.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down5.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
                     drop_down4.AddToMenu(drop_down5);
                     Drop_down_set_root(drop_down, drop_down5);
 
                     {
-                        const drop_down6 = new Widget_Drop_Down('DP6 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, RED_200_10_10, WHITE, [1, 1], pad);
+                        const drop_down6 = new Widget_Dropdown('DP6 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, RED_200_10_10, WHITE, pad);
                         drop_down6.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down6.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
                         drop_down5.AddToMenu(drop_down6);
                         Drop_down_set_root(drop_down, drop_down6);
@@ -411,27 +432,65 @@ function CreateDropDownWidgetWithWidgetsInside(scene) {
 
 }
 
-function CreateMinimizer(scene) {
+function CreatSectionedMixWidgets(scene){
 
-    const section = new Section(SECTION.HORIZONTAL, [10, 10], [200, 450, 0], [0, 0], TRANSPARENCY(BLUE_10_120_220, .3))
-    section.SetName('Minimizer section')
-    section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
+    const section = new Section(SECTION.VERTICAL, [10, 10], [250, 400, 0], [0, 0], TRANSPARENCY(GREY1, .5))
+    // section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
+    section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
 
-    const min = new Widget_Minimize(section, [200, 450, 0]);
-    min.SetName('minimizer button')
-    min.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, min.OnClick, min);
-    min.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    min.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+    {
+        const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [60, 200, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
+        menu.AddCloseButton(menu, 'x');
+        menu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+        section.AddItem(menu)
+    }
+    {
+        const lb = new Widget_Label('Label', ALIGN.BOTTOM,  [0, 0, 0], 4, BLUE_10_120_220);
+        section.AddItem(lb);
+    }
+    {
+        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000000',  [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
+        section.AddItem(dt);
+    }
+    {
+        const slider = new Widget_Slider([0, 0, 0], [60, 10], PINK_240_60_160, [2,4]);
+        section.AddItem(slider);
+    }
+    {
+        const s2 = new Section(SECTION.VERTICAL, [10, 10], [0, 0, 0], [0, 0], TRANSPARENCY(ORANGE_240_200_10, .5))
+        // const s2 = new Section(SECTION.HORIZONTAL, [10, 10], [0, 0, 0], [0, 0], TRANSPARENCY(WHITE, .7))
+        s2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    
+        const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [0, 0, 0], TRANSPARENCY(ORANGE_240_200_10, .5), WHITE, [10, 6]);
+        menu.AddCloseButton(s2, 'x');
+        menu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+        s2.AddItem(menu);
+        
+        const slider = new Widget_Slider([0, 0, 0], [80, 10], BLUE_10_160_220);
+        s2.AddItem(slider);
 
-    section.AddItem(min);
-    scene.AddMesh(section, GFX.PRIVATE);
-    Gfx_end_session(true);
-    section.Recalc(); // Reset pos-dim and re-calculate.
+        {
+            // const s2 = new Section(SECTION.VERTICAL, [10, 10], [0, 0, 0], [0, 0], TRANSPARENCY(WHITE, .7))
+            const s3 = new Section(SECTION.HORIZONTAL, [10, 10], [0, 0, 0], [0, 0], TRANSPARENCY(GREEN_140_240_10, .5))
+            s3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        
+            const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [0, 0, 0], TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [10, 6]);
+            menu.AddCloseButton(s3, 'x');
+            menu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+            s3.AddItem(menu);
+            
+            const slider = new Widget_Slider([0, 0, 0], [80, 10], GREEN_33_208_40);
+            s3.AddItem(slider);
+            s2.AddItem(s3);
+        }
 
-    section.Reconstruct_listeners_recursive();
-    // section.ReconstructHoverListenersRecursive();
+        section.AddItem(s2);
+    }
+    
+    scene.AddWidget(section);
+    section.Calc();
 }
+
 
 function CreateSlider(scene) {
 
@@ -460,182 +519,6 @@ function CreateSliderWithMenuBar(scene) {
     console.log('section:', section)
 }
 
-// function CreateSliders(scene) {
-
-//     let posy = 200, height = 10, pad = 25;
-//     posy += height * 2 + pad;
-
-//     {
-//         const section = new Section(SECTION.VERTICAL, [10,10], [250,600,0], [0,0], GREY1)
-//         section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
-//         section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-
-//         const menu_bar = new Widget_Menu_Bar('Sliders Menu Bar', ALIGN.LEFT, [0, 0, 0], [130, 20], TRANSPARENCY(GREY1, .2), WHITE, [1, 1], [12, 8], .3);
-//         menu_bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-//         menu_bar.SetName('Sectioned Menu Bar')
-//         menu_bar.AddCloseButton(section, 'x', [0, 0, 0], 6, GREY1, WHITE, [1, 1], [4, 2], .8, undefined, [1, 4, 2]);
-//         menu_bar.AddMinimizeButton(section, [0, 0, 0], 6, GREY1, WHITE, [1, 1], [4, 2], .8, undefined, [1, 4, 2]);
-
-//         section.AddItem(menu_bar)
-
-//         const slider = new Widget_Slider([0, 0, 0], [150, height]);
-//         section.AddItem(slider)
-
-//         posy += height * 2 + pad;
-//         const slider2 = new Widget_Slider([200, posy, 0], [150, height]);
-//         section.AddItem(slider2)
-
-//         posy += height * 2 + pad;
-//         const slider3 = new Widget_Slider([200, posy, 0], [150, height]);
-//         section.AddItem(slider3)
-
-//         posy += height * 2 + pad;
-//         const slider4 = new Widget_Slider([200, posy, 0], [150, height]);
-//         section.AddItem(slider4)
-
-//         scene.AddMesh(section, GFX.PRIVATE);
-//         Gfx_end_session(true, true);
-
-//         // section.Calc(SECTION.NO_ITEMS_CALC)
-//         section.Calc()
-//         section.Reconstruct_listeners_recursive();
-//     }
-
-// }
-
-function CreateSlidersSectioned(scene) {
-
-    let posy = 200, height = 10, pad = 25;
-    posy += height * 2 + pad;
-
-    {
-        // const section = new Section(SECTION.VERTICAL, [10,5], [400,200,0], [0,0], TRANSPARENCY(GREY1, 1.))
-        const section = new Section(SECTION.VERTICAL, [0, 5], [400, 200, 0], [0, 0], GREY1)
-        section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
-        section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-
-        const menu_bar = new Widget_Menu_Bar('Sliders Menu Bar', ALIGN.LEFT, [0, 0, 0], [130, 20], TRANSPARENCY(GREY1, .2), WHITE, [1, 1], [12, 8], .3);
-        menu_bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-        menu_bar.SetName('Sectioned Menu Bar')
-        menu_bar.AddCloseButton(section, 'x', [0, 0, 0], 6, GREY1, WHITE, [1, 1], [6, 4], .8, undefined, [1, 4, 2]);
-        menu_bar.AddMinimizeButton(section, [0, 0, 0], 6, GREY1, WHITE, [1, 1], [6, 4], .8, undefined, [1, 4, 2]);
-        section.AddItem(menu_bar)
-
-        {
-            const s1 = new Section(SECTION.VERTICAL, [5, 5], [400, 200, 0], [0, 0], GREY1);
-
-            {
-                const s2 = new Section(SECTION.VERTICAL, [2, 2], [0, 0, 0], [0, 0], GREY1);
-                const slider = new Widget_Slider([0, posy, 0], [150, height]);
-                s2.AddItem(slider)
-
-                posy += height * 2 + pad;
-                const slider2 = new Widget_Slider([200, posy, 0], [150, height]);
-                s2.AddItem(slider2)
-
-                posy += height * 2 + pad;
-                const slider3 = new Widget_Slider([200, posy, 0], [150, height]);
-                s2.AddItem(slider3)
-
-                posy += height * 2 + pad;
-                const slider4 = new Widget_Slider([200, posy, 0], [150, height]);
-                s2.AddItem(slider4)
-
-                s1.AddItem(s2);
-            }
-            {
-                const s2 = new Section(SECTION.VERTICAL, [2, 2], [400, 200, 0], [0, 0], GREY2);
-                const slider = new Widget_Slider([400, posy, 0], [150, height]);
-                s2.AddItem(slider)
-
-                posy += height * 2 + pad;
-                const slider2 = new Widget_Slider([200, posy, 0], [150, height]);
-                s2.AddItem(slider2)
-
-                posy += height * 2 + pad;
-                const slider3 = new Widget_Slider([200, posy, 0], [150, height]);
-                s2.AddItem(slider3)
-
-                posy += height * 2 + pad;
-                const slider4 = new Widget_Slider([200, posy, 0], [150, height]);
-                s2.AddItem(slider4)
-
-                s1.AddItem(s2);
-            }
-            {
-                const s2 = new Section(SECTION.VERTICAL, [2, 2], [400, 200, 0], [0, 0], GREY2);
-                const slider = new Widget_Slider([400, posy, 0], [150, height]);
-                s2.AddItem(slider)
-
-                posy += height * 2 + pad;
-                const slider2 = new Widget_Slider([200, posy, 0], [150, height]);
-                s2.AddItem(slider2)
-
-                posy += height * 2 + pad;
-                const slider3 = new Widget_Slider([200, posy, 0], [150, height]);
-                s2.AddItem(slider3)
-
-                posy += height * 2 + pad;
-                const slider4 = new Widget_Slider([200, posy, 0], [150, height]);
-                s2.AddItem(slider4)
-
-                s1.AddItem(s2);
-            }
-            {
-                const s2 = new Section(SECTION.VERTICAL, [2, 2], [400, 200, 0], [0, 0], GREY2);
-                const slider = new Widget_Slider([400, posy, 0], [150, height]);
-                s2.AddItem(slider)
-
-                posy += height * 2 + pad;
-                const slider2 = new Widget_Slider([200, posy, 0], [150, height]);
-                s2.AddItem(slider2)
-
-                posy += height * 2 + pad;
-                const slider3 = new Widget_Slider([200, posy, 0], [150, height]);
-                s2.AddItem(slider3)
-
-                posy += height * 2 + pad;
-                const slider4 = new Widget_Slider([200, posy, 0], [150, height]);
-                s2.AddItem(slider4)
-
-                s1.AddItem(s2);
-            }
-
-            section.AddItem(s1);
-        }
-
-
-        scene.AddMesh(section, GFX.PRIVATE);
-        Gfx_end_session(true, true);
-
-        section.Calc(SECTION.NO_ITEMS_CALC)
-        section.Reconstruct_listeners_recursive();
-    }
-
-}
-
-function CreateMenuBar(scene, count) {
-
-    const h = 40;
-    let cnt = 1;
-    let posy = Viewport.bottom - h, fontSize = 10;
-
-    const section = new Section(SECTION.VERTICAL, [300, 500], [0, 0, 0], [10, 10], ORANGE);
-    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
-
-    for (let i = 0; i < count; i++) {
-        const menu_bar = new Widget_Menu_Bar(`Menu ${cnt}`, ALIGN.LEFT, [120, posy, 0], [100, 20], BLUE_10_120_220, WHITE, [1, 1], [3, 3], .3);
-        menu_bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-        menu_bar.SetName(`Menu ${cnt}`)
-        menu_bar.AddCloseButton(menu_bar, 'x', [120, posy, 0], 6, GREY1, WHITE, [1, 1], [8, 4], .8, undefined, [1, 4, 2]);
-        scene.AddMesh(menu_bar, GFX.PRIVATE);
-        posy -= h; cnt++;
-    }
-
-    Gfx_end_session(true);
-
-}
-
 function CreateMenuBarSectioned(count) {
 
     const h = 40;
@@ -645,10 +528,10 @@ function CreateMenuBarSectioned(count) {
     const section = new Section(SECTION.VERTICAL, [10, 10], [0, 0, 0], [10, 10], ORANGE);
 
     for (let i = 0; i < count; i++) {
-        const menu_bar = new Widget_Menu_Bar(`Menu ${cnt}`, ALIGN.LEFT, [120, posy, 0], [60, 20], BLUE_10_120_220, WHITE, [1, 1], [2, 2], .3);
+        const menu_bar = new Widget_Menu_Bar(`Menu ${cnt}`, ALIGN.LEFT, [120, posy, 0], [60, 20], BLUE_10_120_220, WHITE, [2, 2], .3);
         menu_bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
         menu_bar.SetName(`Menu ${cnt}`)
-        menu_bar.AddCloseButton(menu_bar, 'x', [120, posy, 0], 6, GREY1, WHITE, [1, 1], [6, 4], .8, undefined, [1, 4, 2]);
+        menu_bar.AddCloseButton(menu_bar, 'x', [120, posy, 0], 6, GREY1, WHITE, [6, 4], .8, undefined, [1, 4, 2]);
         section.AddItem(menu_bar)
         posy -= h; cnt++;
     }
@@ -656,32 +539,7 @@ function CreateMenuBarSectioned(count) {
     return section;
 }
 
-function CreateAndAddMenuBarSectioned(scene, count) {
-
-    const h = 40;
-    let cnt = 1;
-    let posy = Viewport.bottom - h, fontSize = 10;
-
-    const section = new Section(SECTION.VERTICAL, [10, 10], [200, 650, 0], [10, 10], ORANGE);
-    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
-
-    for (let i = 0; i < count; i++) {
-        const menu_bar = new Widget_Menu_Bar(`Menu ${cnt}`, ALIGN.LEFT, [0, 0, 0], [100, 20], BLUE_10_120_220, WHITE, [1, 1], [2, 2], .3);
-        menu_bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-        menu_bar.SetName(`Menu ${cnt}`)
-        menu_bar.AddCloseButton(menu_bar, 'x', [120, posy, 0], 6, GREY1, WHITE, [1, 1], [8, 4], .8, undefined, [1, 4, 2]);
-        section.AddItem(menu_bar)
-        posy -= h; cnt++;
-    }
-
-    // return section;
-    scene.AddMesh(section)
-    Gfx_end_session(true);
-    section.Calc()
-    section.Reconstruct_listeners_recursive();
-}
-
-function CreateSection(scene) {
+function CreateSectionSectioned(scene) {
 
     const flags = (SECTION.ITEM_FIT | SECTION.EXPAND);
 
@@ -784,7 +642,7 @@ function CreateSection(scene) {
 
     const minimizer = new Widget_Minimize(blu, blu.geom.pos);
     minimizer.SetName('minimizer')
-    minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, minimizer.OnClick, minimizer);
+    // minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, minimizer.OnClick, minimizer);
     minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
     minimizer.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
@@ -793,154 +651,13 @@ function CreateSection(scene) {
     yel.AddItem(gre, flags);
     blu.AddItem(red, flags);
 
-    scene.AddMesh(blu, GFX.PRIVATE);
+    scene.AddWidget(blu, GFX.PRIVATE);
     Gfx_end_session(true);
     blu.Calc();
     // const l = Debug_get_event_listeners();
     // l.PrintAll()
     blu.Reconstruct_listeners_recursive();
 
-}
-
-function CreateSectionedWidgets(scene) {
-
-    const flags = (SECTION.ITEM_FIT | SECTION.EXPAND);
-
-    const blu = new Section(SECTION.VERTICAL, [15, 15], [720, 830, 0], [10, 0], TRANSPARENCY(BLUE, .2));
-
-    const menu_bar = new Widget_Menu_Bar('Sectioned Menu Bar', ALIGN.LEFT, [720, 500, 0], [130, 20], BLUE_10_120_220, WHITE, [1, 1], [2, 2], .3);
-    menu_bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-    menu_bar.SetName('Sectioned Menu Bar')
-    menu_bar.AddCloseButton(blu, 'x', [0, 0, 0], 6, GREY1, WHITE, [1, 1], [6, 4], .8, undefined, [1, 4, 2]);
-    menu_bar.AddMinimizeButton(blu, [0, 0, 0], 6, GREY1, WHITE, [1, 1], [6, 4], .8, undefined, [1, 4, 2]);
-
-    blu.AddItem(menu_bar)
-
-    const red = new Section(SECTION.VERTICAL, [15, 15], [100, 100, 0], [20, 20], TRANSPARENCY(PURPLE, .2));
-    const gre = new Section(SECTION.VERTICAL, [12, 12], [100, 100, 0], [20, 20], TRANSPARENCY(GREEN, .4));
-    const yel = new Section(SECTION.HORIZONTAL, [12, 12], [200, 400, 0], [20, 20], TRANSPARENCY(YELLOW, .4));
-    const ora = new Section(SECTION.HORIZONTAL, [12, 12], [200, 400, 0], [20, 20], TRANSPARENCY(ORANGE, .4));
-    const cie = new Section(SECTION.HORIZONTAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLUE_LIGHT, .4));
-    const bla = new Section(SECTION.VERTICAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLACK, .4));
-
-    { // Construct sub-sections
-        var bla_1 = new Section(SECTION.HORIZONTAL, [15, 15], [200, 400, 0], [20, 20], TRANSPARENCY(BLACK, .3));
-        var pin_1 = new Section(SECTION.VERTICAL, [25, 10], [100, 100, 0], [20, 20], TRANSPARENCY(PINK_240_60_160, .3));
-        var blu_1 = new Section(SECTION.VERTICAL, [25, 10], [100, 100, 0], [20, 20], TRANSPARENCY(BLUE, .3));
-        var pur_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(PURPLE, .8));
-        var red_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(RED, .8));
-        var yel_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
-        var yel_2 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
-        var red_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(RED, .8));
-        var yel_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
-        var gre_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREEN, .8));
-        var red_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(RED, .8));
-        var yel_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
-        var gre_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREEN, .8));
-        var ora_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(ORANGE, .8));
-        var gry1_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY3, .8));
-        var gry1_2 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY5, .8));
-        var gry1_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY7, .8));
-        var gry2_1 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY1, .9));
-        var gry2_2 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY1, .9));
-        var gry2_3 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY1, .9));
-        var gry2_4 = new Section(SECTION.VERTICAL, [5, 5], [100, 100, 0], [20, 20], TRANSPARENCY(GREY1, .9));
-        var vert_0 = new Section(SECTION.VERTICAL, [20, 20], [100, 100, 0], [20, 20], TRANSPARENCY(GREY2, .4));
-
-    }
-
-    // Construct widgets
-    // const label = new Widget_Label('label', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [200, 100, 0]);
-    const label = new Widget_Label('label', ALIGN.RIGHT, [200, 100, 0]);
-    // const btn = new Widget_Button('btnl', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [200, 100, 0]);
-    const btn = new Widget_Button('btnl', ALIGN.LEFT, [200, 100, 0]);
-    { // Set widgets parameters
-        label.SetName('Sectioned btn1')
-        label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-        label.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-        blu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, blu.OnClick, blu, null);
-
-        btn.SetName('Sectioned btn1')
-        btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-        btn.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-        btn.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, btn.OnClick);
-    }
-
-    { // Set naming and listeners
-
-        red.SetName('red'); red.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); red.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gre.SetName('gre'); gre.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gre.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        yel.SetName('yel'); yel.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        ora.SetName('ora'); ora.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); ora.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        cie.SetName('cie'); cie.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); cie.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        bla.SetName('bla'); bla.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); bla.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        bla_1.SetName('bla_1'); bla_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); bla_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        pin_1.SetName('pin_1'); pin_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); pin_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        blu_1.SetName('blu_1'); blu_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); blu_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        pur_1.SetName('pur_1'); pur_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); pur_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        red_1.SetName('red_1'); red_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); red_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        yel_1.SetName('yel_1'); yel_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        yel_2.SetName('yel_2'); yel_2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel_2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        red_3.SetName('red_3'); red_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); red_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        yel_3.SetName('yel_3'); yel_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gre_3.SetName('gre_3'); gre_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gre_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        red_4.SetName('red_4'); red_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); red_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        yel_4.SetName('yel_4'); yel_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gre_4.SetName('gre_4'); gre_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gre_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        ora_4.SetName('ora_4'); ora_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); ora_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gry1_1.SetName('gry1_1'); gry1_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry1_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gry1_2.SetName('gry1_2'); gry1_2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry1_2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gry1_3.SetName('gry1_3'); gry1_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry1_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gry2_1.SetName('gry2_1'); gry2_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry2_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gry2_2.SetName('gry2_2'); gry2_2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry2_2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gry2_3.SetName('gry2_3'); gry2_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry2_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gry2_4.SetName('gry2_4'); gry2_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry2_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        vert_0.SetName('vert_0'); vert_0.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); vert_0.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-
-    }
-
-    { // Set hierarchy
-        pin_1.AddItem(gry2_1, flags); pin_1.AddItem(gry2_2, flags);
-        blu_1.AddItem(gry2_3, flags); blu_1.AddItem(gry2_4, flags);
-        const s3 = CreateMenuBarSectioned(2)
-        bla_1.AddItem(pin_1, flags); bla_1.AddItem(blu_1, flags); bla_1.AddItem(s3, flags);
-        red.AddItem(bla_1); red.AddItem(yel, flags); red.AddItem(ora, flags); red.AddItem(cie, flags);
-        yel.AddItem(gre_4, flags); yel.AddItem(pur_1, flags); yel.AddItem(red_3, flags);
-        ora.AddItem(yel_4, flags); ora.AddItem(red_4, flags); ora.AddItem(yel_2, flags); ora.AddItem(ora_4, flags);
-        cie.AddItem(gre_3, flags); cie.AddItem(yel_3, flags); cie.AddItem(bla, flags);
-        bla.AddItem(gry1_1, flags); bla.AddItem(gry1_2, flags); bla.AddItem(gry1_3, flags);
-        const s1 = CreateMenuBarSectioned(1)
-        gry1_1.AddItem(label, flags); gry1_1.AddItem(btn, flags); gry1_1.AddItem(s1, flags); gry1_1.AddItem(vert_0, flags);
-        gre.AddItem(yel_1, flags); gre.AddItem(red_1, flags);
-    }
-
-    const s2 = CreateMenuBarSectioned(2)
-
-    yel.AddItem(gre, flags);
-    yel.AddItem(s2, flags);
-    blu.AddItem(red, flags);
-
-    scene.AddMesh(blu, GFX.PRIVATE);
-    Gfx_end_session(true);
-    blu.Calc();
-    // const l = Debug_get_event_listeners();
-    // l.PrintAll()
-    blu.Reconstruct_listeners_recursive();
-
-}
-
-function CreateManySection(scene) {
-
-    const btn = new Widget_Button('btn1', [200, 200, 0], 5)
-
-    const gr = new Section(SECTION.HORIZONTAL, [10, 10], [100, 200, 0], [20, 20], TRANSPARENCY(GREY3, .3));
-
-    gr.AddItem(btn);
-
-    scene.AddMesh(gr, GFX.PRIVATE);
-    Gfx_end_session(true);
-
-    gr.Calc(SECTION.NO_ITEMS_CALC);
 }
 
 function Help(scene) {
@@ -970,19 +687,19 @@ function Help(scene) {
     // const s2 = new Section(SECTION.HORIZONTAL, [15, 10], [220, 400, 0], [0, 0], TRANSPARENCY(BLUE_10_120_220, .2))
     const minimizer = new Widget_Minimize(section, section.geom.pos);
     minimizer.SetName('minimizer')
-    minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, minimizer.OnClick, minimizer);
-    minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    minimizer.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+    // minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, minimizer.OnClick, minimizer);
+    // minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    // minimizer.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
     section.AddItem(minimizer);
     section.AddItem(s1, flags)
 
-    scene.AddMesh(section, GFX.PRIVATE);
+    scene.AddWidget(section, GFX.PRIVATE);
     Gfx_end_session(true);
 
     section.Calc(flags)
     // section.Recalc(flags)
-    section.Reconstruct_listeners_recursive();
+    // section.Reconstruct_listeners_recursive();
 
 
 }
@@ -991,7 +708,7 @@ function MeshInfo(scene) {
 
     const fontsize = 4.3;
 
-    const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 0000000000000000', 'id:000', [10, 140, 0], fontsize, [1, 1], GREEN_140_240_10, YELLOW_240_220_10, .4);
+    const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 0000000000000000', 'id:000', [10, 140, 0], fontsize, GREEN_140_240_10, YELLOW_240_220_10, .4);
     infomesh.CreateNewText('pos: 00000,00000,0', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('defpos: 00000,00000,0', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('dim: 00000,00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
@@ -1208,3 +925,613 @@ function Create3DCubes(scene) {
     }
 }
 
+/**
+ * [ESM-HMR] listening for file changes... hmr-client.js:9:11
+Array(20) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
+Keys.js:206:9
+Device width:  437  height:  889 WebGlRenderer.js:151:15
+Initializing Graphics. WebGlRenderer.js:106:15
+WebGl version:  WebGL GLSL ES 3.00 WebGlRenderer.js:118:15
+WebGl renderer info:  ANGLE (NVIDIA, NVIDIA GeForce GTX 980 Direct3D11 vs_5_0 ps_5_0) WebGlRenderer.js:119:15
+Navigator { permissions: Permissions, mimeTypes: MimeTypeArray, plugins: PluginArray, pdfViewerEnabled: true, doNotTrack: "1", maxTouchPoints: 1, mediaCapabilities: MediaCapabilities, oscpu: "Windows NT 10.0; Win64; x64", vendor: "", vendorSub: "" }
+WebGlRenderer.js:188:12
+Maximum Texture Size: 16384 WebGlRenderer.js:144:15
+Creating new event type events buffer EventListeners.js:83:18
+Shader Compiled Successfully! GlShaders.js:79:11
+Shader Compiled Successfully! GlShaders.js:79:11
+Validate program undefined GlShaders.js:49:10
+Shaders Linked Successfully!
+ status: undefined GlShaders.js:59:11
+Uniform: 'uniforms_buffer' located successfully! GlUniformBuffer.js:99:18
+Shader Compiled Successfully! 2 GlShaders.js:79:11
+Validate program undefined GlShaders.js:49:10
+Shaders Linked Successfully!
+ status: undefined GlShaders.js:59:11
+Array [ {…}, {…} ]
+App.js:132:13
+PERFORMANCE: 
+Performance { timeOrigin: 1696434571223, timing: PerformanceTiming, navigation: PerformanceNavigation, onresourcetimingbufferfull: null, eventCounts: EventCounts }
+App.js:140:17
+Shader Compiled Successfully! 2 GlShaders.js:79:11
+Validate program undefined GlShaders.js:49:10
+Shaders Linked Successfully!
+ status: undefined GlShaders.js:59:11
+Uniform: 'uniforms_buffer' located successfully! GlUniformBuffer.js:99:18
+Switch:  off WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+No elesments in gfx session buffer. Something went wrong GfxContext.js:143:38
+Switch:  on WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+text_mesh destroy: Text-mesh [+ InfoUi Gfx DP] id:21 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ InfoUi Gfx DP] id:22 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 4 ]
+Mesh.js:356:25
+rect_mesh destroy: InfoUi Gfx DP id:20 Rect_Mesh.js:34:15
+rect_mesh destroy: InfoUi Gfx section 100 id:19 Rect_Mesh.js:34:15
+Switch:  off WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+No elesments in gfx session buffer. Something went wrong GfxContext.js:143:38
+Switch:  on WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+text_mesh destroy: Text-mesh [+ InfoUi Gfx DP] id:62 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ InfoUi Gfx DP] id:63 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 4 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ prog:0] id:66 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:0] id:67 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 5 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:70 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:71 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 8 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:0 id:69 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:1 | count:56] id:74 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:1 | count:56] id:75 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 9 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:1 id:73 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:2 | count:504] id:78 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:2 | count:504] id:79 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 10 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:2 id:77 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:82 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:83 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 11 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:3 id:81 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 68 Rect_Mesh.js:34:15
+rect_mesh destroy: Program DP:0 id:65 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ prog:1] id:86 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:1] id:87 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 6 ]
+Mesh.js:356:25
+rect_mesh destroy: Program DP:1 id:85 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ prog:2] id:102 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:2] id:103 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 7 ]
+Mesh.js:356:25
+rect_mesh destroy: Program DP:2 id:101 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 64 Rect_Mesh.js:34:15
+rect_mesh destroy: InfoUi Gfx DP id:61 Rect_Mesh.js:34:15
+rect_mesh destroy: InfoUi Gfx section 100 id:60 Rect_Mesh.js:34:15
+Switch:  off WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+No elesments in gfx session buffer. Something went wrong GfxContext.js:143:38
+Switch:  on WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+text_mesh destroy: Text-mesh [+ InfoUi Gfx DP] id:111 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ InfoUi Gfx DP] id:112 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 4 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ prog:0] id:115 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:0] id:116 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 5 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:119 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:120 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 8 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:0 id:118 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:1 | count:56] id:123 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:1 | count:56] id:124 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 9 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:1 id:122 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:2 | count:504] id:127 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:2 | count:504] id:128 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 10 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:2 id:126 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:131 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:132 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 11 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:3 id:130 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:4 | count:0] id:135 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:4 | count:0] id:136 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 12 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:4 id:134 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:5 | count:0] id:139 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:5 | count:0] id:140 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 13 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:5 id:138 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 117 Rect_Mesh.js:34:15
+rect_mesh destroy: Program DP:0 id:114 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ prog:1] id:143 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:1] id:144 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 6 ]
+Mesh.js:356:25
+rect_mesh destroy: Program DP:1 id:142 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ prog:2] id:167 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:2] id:168 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 7 ]
+Mesh.js:356:25
+rect_mesh destroy: Program DP:2 id:166 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 113 Rect_Mesh.js:34:15
+rect_mesh destroy: InfoUi Gfx DP id:110 Rect_Mesh.js:34:15
+rect_mesh destroy: InfoUi Gfx section 100 id:109 Rect_Mesh.js:34:15
+Switch:  off WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+No elesments in gfx session buffer. Something went wrong GfxContext.js:143:38
+x Keys.js:56:18
+-[Gl Vertex Buffer]- GfxDebug.js:180:13
+ progidx: 0 GfxDebug.js:182:17
+vb: 
+Array(8) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
+GfxDebug.js:183:17
+ progidx: 1 GfxDebug.js:182:17
+vb: 
+Array(7) [ {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
+GfxDebug.js:183:17
+ progidx: 2 GfxDebug.js:182:17
+vb: 
+Array [ {…} ]
+GfxDebug.js:183:17
+Switch:  on WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+text_mesh destroy: Text-mesh [+ InfoUi Gfx DP] id:176 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ InfoUi Gfx DP] id:177 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 4 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ prog:0] id:180 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:0] id:181 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 5 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:184 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:185 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 8 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:0 id:183 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:1 | count:56] id:188 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:1 | count:56] id:189 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 9 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:1 id:187 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:2 | count:504] id:192 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:2 | count:504] id:193 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 10 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:2 id:191 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:196 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:197 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 11 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:3 id:195 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:4 | count:0] id:200 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:4 | count:0] id:201 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 12 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:4 id:199 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:5 | count:0] id:204 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:5 | count:0] id:205 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 13 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:5 id:203 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 182 Rect_Mesh.js:34:15
+rect_mesh destroy: Program DP:0 id:179 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ prog:1] id:208 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:1] id:209 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 6 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ vb:0 | count:1288] id:212 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:0 | count:1288] id:213 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 14 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:0 id:211 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:1 | count:2912] id:216 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:1 | count:2912] id:217 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 15 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:1 id:215 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:2 | count:0] id:220 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:2 | count:0] id:221 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 16 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:2 id:219 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:224 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:225 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 17 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:3 id:223 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:4 | count:0] id:228 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:4 | count:0] id:229 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 18 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:4 id:227 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 210 Rect_Mesh.js:34:15
+rect_mesh destroy: Program DP:1 id:207 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ prog:2] id:232 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:2] id:233 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 7 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:236 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:237 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 19 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:0 id:235 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 234 Rect_Mesh.js:34:15
+rect_mesh destroy: Program DP:2 id:231 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 178 Rect_Mesh.js:34:15
+rect_mesh destroy: InfoUi Gfx DP id:175 Rect_Mesh.js:34:15
+rect_mesh destroy: InfoUi Gfx section 100 id:174 Rect_Mesh.js:34:15
+Switch:  off WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+No elesments in gfx session buffer. Something went wrong GfxContext.js:143:38
+x Keys.js:56:18
+-[Gl Vertex Buffer]- GfxDebug.js:180:13
+ progidx: 0 GfxDebug.js:182:17
+vb: 
+Array(8) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
+GfxDebug.js:183:17
+ progidx: 1 GfxDebug.js:182:17
+vb: 
+Array(7) [ {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
+GfxDebug.js:183:17
+ progidx: 2 GfxDebug.js:182:17
+vb: 
+Array [ {…} ]
+GfxDebug.js:183:17
+Switch:  off WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+Switch:  off WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+Switch:  on WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+text_mesh destroy: Text-mesh [+ InfoUi Gfx DP] id:241 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ InfoUi Gfx DP] id:242 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 4 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ prog:0] id:245 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:0] id:246 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 5 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:249 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:250 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 8 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:0 id:248 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:1 | count:56] id:253 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:1 | count:56] id:254 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 9 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:1 id:252 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:2 | count:504] id:257 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:2 | count:504] id:258 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 10 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:2 id:256 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:261 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:262 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 11 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:3 id:260 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:4 | count:0] id:265 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:4 | count:0] id:266 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 12 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:4 id:264 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:5 | count:0] id:269 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:5 | count:0] id:270 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 13 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:5 id:268 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:6 | count:0] id:273 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:6 | count:0] id:274 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 14 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:6 id:272 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:7 | count:0] id:277 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:7 | count:0] id:278 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 15 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:7 id:276 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 247 Rect_Mesh.js:34:15
+rect_mesh destroy: Program DP:0 id:244 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ prog:1] id:281 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:1] id:282 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 6 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ vb:0 | count:1288] id:285 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:0 | count:1288] id:286 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 16 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:0 id:284 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:1 | count:2912] id:289 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:1 | count:2912] id:290 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 17 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:1 id:288 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:2 | count:0] id:293 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:2 | count:0] id:294 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 18 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:2 id:292 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:297 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:298 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 19 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:3 id:296 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:4 | count:0] id:301 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:4 | count:0] id:302 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 20 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:4 id:300 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:5 | count:0] id:305 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:5 | count:0] id:306 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 21 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:5 id:304 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:6 | count:0] id:309 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:6 | count:0] id:310 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 22 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:6 id:308 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 283 Rect_Mesh.js:34:15
+rect_mesh destroy: Program DP:1 id:280 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ prog:2] id:313 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:2] id:314 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 7 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:317 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:318 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 23 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:0 id:316 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 315 Rect_Mesh.js:34:15
+rect_mesh destroy: Program DP:2 id:312 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 243 Rect_Mesh.js:34:15
+rect_mesh destroy: InfoUi Gfx DP id:240 Rect_Mesh.js:34:15
+rect_mesh destroy: InfoUi Gfx section 100 id:239 Rect_Mesh.js:34:15
+Switch:  off WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+No elesments in gfx session buffer. Something went wrong GfxContext.js:143:38
+x Keys.js:56:18
+-[Gl Vertex Buffer]- GfxDebug.js:180:13
+ progidx: 0 GfxDebug.js:182:17
+vb: 
+Array(10) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
+GfxDebug.js:183:17
+ progidx: 1 GfxDebug.js:182:17
+vb: 
+Array(9) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
+GfxDebug.js:183:17
+ progidx: 2 GfxDebug.js:182:17
+vb: 
+Array [ {…} ]
+GfxDebug.js:183:17
+Switch:  on WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+text_mesh destroy: Text-mesh [+ InfoUi Gfx DP] id:341 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ InfoUi Gfx DP] id:342 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 4 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ prog:0] id:345 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:0] id:346 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 5 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:349 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:350 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 8 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:0 id:348 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:1 | count:56] id:353 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:1 | count:56] id:354 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 9 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:1 id:352 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:2 | count:504] id:357 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:2 | count:504] id:358 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 10 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:2 id:356 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:361 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:362 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 11 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:3 id:360 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:4 | count:0] id:365 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:4 | count:0] id:366 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 12 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:4 id:364 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:5 | count:0] id:369 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:5 | count:0] id:370 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 13 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:5 id:368 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:6 | count:0] id:373 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:6 | count:0] id:374 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 14 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:6 id:372 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:7 | count:0] id:377 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:7 | count:0] id:378 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 15 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:7 id:376 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:8 | count:56] id:381 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:8 | count:56] id:382 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 16 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:8 id:380 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:9 | count:56] id:385 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:9 | count:56] id:386 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 17 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:9 id:384 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 347 Rect_Mesh.js:34:15
+rect_mesh destroy: Program DP:0 id:344 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ prog:1] id:389 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:1] id:390 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 6 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ vb:0 | count:1288] id:393 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:0 | count:1288] id:394 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 18 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:0 id:392 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:1 | count:2912] id:397 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:1 | count:2912] id:398 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 19 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:1 id:396 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:2 | count:0] id:401 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:2 | count:0] id:402 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 20 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:2 id:400 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:405 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:406 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 21 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:3 id:404 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:4 | count:0] id:409 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:4 | count:0] id:410 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 22 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:4 id:408 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:5 | count:0] id:413 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:5 | count:0] id:414 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 23 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:5 id:412 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:6 | count:0] id:417 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:6 | count:0] id:418 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 26 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:6 id:416 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:7 | count:2688] id:421 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:7 | count:2688] id:422 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 27 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:7 id:420 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ vb:8 | count:6496] id:425 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:8 | count:6496] id:426 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 28 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:8 id:424 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 391 Rect_Mesh.js:34:15
+rect_mesh destroy: Program DP:1 id:388 Rect_Mesh.js:34:15
+text_mesh destroy: Text-mesh [+ prog:2] id:429 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ prog:2] id:430 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 7 ]
+Mesh.js:356:25
+text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:433 Text_Mesh.js:35:15
+rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:434 Rect_Mesh.js:34:15
+Removing Event etype: 1 
+Int8Array [ -1, 29 ]
+Mesh.js:356:25
+rect_mesh destroy: VB DP:0 id:432 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 431 Rect_Mesh.js:34:15
+rect_mesh destroy: Program DP:2 id:428 Rect_Mesh.js:34:15
+rect_mesh destroy: SECTION_MESH id: 343 Rect_Mesh.js:34:15
+rect_mesh destroy: InfoUi Gfx DP id:340 Rect_Mesh.js:34:15
+rect_mesh destroy: InfoUi Gfx section 100 id:339 Rect_Mesh.js:34:15
+Switch:  off WidgetButton.js:52:15
+Widget_Switch-OnClick() WidgetButton.js:66:18
+No elesments in gfx session buffer. Something went wrong GfxContext.js:143:38
+Clicked: ui performance timers panel id:324 Section.js:239:18
+
+ */

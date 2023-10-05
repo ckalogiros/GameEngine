@@ -39,6 +39,7 @@ const GFX_CTX_FLAGS = {
 
 let BIT1 = 0x1, BIT2 = 0x1, BIT3 = 0x1, BIT4 = 0x1;
 const SID = {
+    
     SHAD: {
         INDEXED: BIT1 <<= 1,
         TEXT_SDF: BIT1 <<= 1,
@@ -224,7 +225,7 @@ const UNIFORM_PARAMS = {
         heightIdx: 1,
         timeIdx: 2,
         count: 3,
-        progIdx: INT_NULL,  // Refference to the program
+        progIdx: INT_NULL,  // reference to the program
     },
     defaultVertex: { // Uniform buffer indexes to pass default vertex shader params
         widthIdx: cnt1++,
@@ -233,7 +234,7 @@ const UNIFORM_PARAMS = {
         mouseXPosIdx: cnt1++,
         mouseYPosIdx: cnt1++,
         count: cnt1,
-        progIdx: INT_NULL,  // Refference to the program
+        progIdx: INT_NULL,  // reference to the program
     },
     sdf: { // Uniform buffer indexes to pass sdf params
         innerIdx: cnt2++,
@@ -247,21 +248,21 @@ const UNIFORM_PARAMS = {
         timeIdx: 1,
         dirIdx: 1,
         count: 2,
-        progIdx: INT_NULL,  // Refference to the program
+        progIdx: INT_NULL,  // reference to the program
     },
     GLOW: {
         widthIdx: 0,
         heightIdx: 1,
         glowSize: 2,
         count: 3,
-        progIdx: INT_NULL,  // Refference to the program
+        progIdx: INT_NULL,  // reference to the program
     },
     VORTEX: {
         widthIdx: 0,
         heightIdx: 1,
         radiusIdx: 2,
         count: 3,
-        progIdx: INT_NULL,  // Refference to the program
+        progIdx: INT_NULL,  // reference to the program
     },
     TWIST: {
         widthIdx: 0,
@@ -269,28 +270,28 @@ const UNIFORM_PARAMS = {
         timeIdx: 2,
         dirIdx: 3,
         count: 4,
-        progIdx: INT_NULL,  // Refference to the program
+        progIdx: INT_NULL,  // reference to the program
     },
     particles: { // Uniform buffer indexes to pass default vertex shader params
         widthIdx: cntPart++,
         heightIdx: cntPart++,
         speedIdx: cntPart++,
         count: cntPart,
-        progIdx: INT_NULL,  // Refference to the program
+        progIdx: INT_NULL,  // reference to the program
     },
     CRAMBLE: {
         widthIdx: 0,
         heightIdx: 1,
         timeIdx: 2,
         count: 3,
-        progIdx: INT_NULL,  // Refference to the program
+        progIdx: INT_NULL,  // reference to the program
     },
     VORONOI_EXPLOSION: {
         widthIdx: 0,
         heightIdx: 1,
         timeIdx: 2,
         count: 3,
-        progIdx: INT_NULL,  // Refference to the program
+        progIdx: INT_NULL,  // reference to the program
     },
 
 };

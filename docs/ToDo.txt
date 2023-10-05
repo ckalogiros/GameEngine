@@ -49,6 +49,12 @@ redrawing the meshes to it's self
 
 --------------------------------------------------- TODO
 
+. Batch activate/deactivate buffers. Use a indexed by prog and vb buffer.
+  Example: StoreForUpdate(arr); arr = prog[progidx].vb[vbidx]
+           StoreForUpdate(arr){
+              GfxSetVbShow(progs[arr[i]], progs[arr[i]].vertexBuffer[arr[i].vb[j]])
+           }
+
 . Implement second popup menu(from the main popup menu)
 
 . Maybe we should implement timeIntervals for the GlDraw function. 

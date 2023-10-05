@@ -18,6 +18,7 @@ export class Geometry2D {
     zIndex = 0;
     time = 0;
     type = 0;
+    num_faces;
 
     constructor(pos = [0, 0, 0], dim = [0, 0], scale = [1, 1]) {
 
@@ -38,6 +39,7 @@ export class Geometry2D {
         math.CopyArr3(this.defPos, pos);
         this.zIndex = this.pos[2];  // Store default z index value. 
 
+        this.num_faces = 1;
         this.type |= MESH_TYPES_DBG.GEOMETRY2D;
 
         /** Debug properties */

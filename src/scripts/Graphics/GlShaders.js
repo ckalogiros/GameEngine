@@ -13,7 +13,7 @@ import { GlFragmentShaderConstruct, GlVertexShaderConstruct } from './Shaders/Co
  * 	. Add a loc and offset variables in I_GlProgram object
  * 
  * 	. Add the attribute to the vertex shader
- * 	. Get the attribut location in GlCreateShaderInfo(), also add the loc to the shaderInfo variable of the same function
+ * 	. Get the attribut location in GlCreateShaderInfo(), also add the loc to the shaderinfo variable of the same function
  * 	. Enable the attribute location with GlEnableAttribsLocations()
  * 
  */

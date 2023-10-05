@@ -85,7 +85,7 @@ export function AtlasTextureGetCoords(index) {
 export function TextureLoadTexture(texId) {
 
 	const ret = {
-		texIdx: INT_NULL, // The index of the texture, that is stored(upon texture creation) in a buffer.
+		textidx: INT_NULL, // The index of the texture, that is stored(upon texture creation) in a buffer.
 		uvIdx: INT_NULL, // The index of the uv coordinates. All coordinates for all , 
 	};
 
@@ -99,7 +99,7 @@ export function TextureLoadTexture(texId) {
 				// Load the font image
 				const img = ImageLoader.Load('fonts/consolas_sdf', FONT_CONSOLAS_SDF_LARGE, 'png');
 				_activeTextures[texId] = TextureCreateTexture(gfxCtx.gl, img, FONT_CONSOLAS_SDF_LARGE);
-				ret.texIdx = _activeTextures[texId];
+				ret.textidx = _activeTextures[texId];
 				ret.uvIdx = FontLoadUvs(texId);
 				
 				break;
@@ -108,7 +108,7 @@ export function TextureLoadTexture(texId) {
 				// Load the font image
 				const img = ImageLoader.Load('fonts/consolas_sdf', FONT_CONSOLAS_SDF_SMALL, 'png');
 				_activeTextures[texId] = TextureCreateTexture(gfxCtx.gl, img, FONT_CONSOLAS_SDF_SMALL);
-				ret.texIdx = _activeTextures[texId];
+				ret.textidx = _activeTextures[texId];
 				ret.uvIdx = FontLoadUvs(texId);
 				break;
 			}
@@ -116,14 +116,14 @@ export function TextureLoadTexture(texId) {
 				// Load the texture image
 				const img = ImageLoader.Load('textures', TEXTURE_TEST, 'png');
 				_activeTextures[texId] = TextureCreateTexture(gfxCtx.gl, img, TEXTURE_TEST);
-				ret.texIdx = _activeTextures[texId];
+				ret.textidx = _activeTextures[texId];
 				ret.uvIdx = TextureLoadUvs(); // If uvs not found, fallback to [0,1] coordinates
 				break;
 			}
 		}
 	}
 	else {
-		ret.texIdx = TextureRetrieveTextureIdx(texId), // The index for the texture
+		ret.textidx = TextureRetrieveTextureIdx(texId), // The index for the texture
 		ret.uvIdx = TextureRetrieveUvMapIdx(texId) // the index for the texture coordinates
 	}
 

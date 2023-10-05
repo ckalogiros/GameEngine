@@ -11,7 +11,7 @@ import { Geometry2D } from "./Base/Geometry.js";
 
 export class Geometry2D_Text extends Geometry2D {
 
-   num_faces;
+   // num_faces;
    text;
    char_ratio;
 

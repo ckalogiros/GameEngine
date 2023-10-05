@@ -1,9 +1,11 @@
 "use strict";
 
-import { GfxSetVbRender, GlGenerateContext, GlResetIndexBuffer, GlResetVertexBuffer, GlSetVertexBufferPrivate } from "../../../Graphics/Buffers/GlBuffers.js";
+import { GlGenerateContext, GlResetIndexBuffer, GlResetVertexBuffer, GlSetVertexBufferPrivate } from "../../../Graphics/Buffers/GlBuffers.js";
 import { GlCheckSid } from "../../../Graphics/GlProgram.js";
 import { M_Buffer } from "../../Core/Buffers.js";
 import { Info_listener_dispatch_event } from "../../Drawables/DebugInfo/InfoListeners.js";
+import { Renderqueue_set_active } from "../../Renderers/Renderer/RenderQueue.js";
+import { Gfx_remove_geometry_from_buffers, Gfx_set_vb_show } from "./GfxInterfaceFunctions.js";
 
 
 let _sessionId = 0;
@@ -30,6 +32,7 @@ export class Gfx_Pool extends M_Buffer {
 
          const gfx = GlGenerateContext(sid, sceneidx, FLAGS, NO_SPECIFIC_GL_BUFFER, mesh_count);
          gfx.gfx_ctx.idx = this.#StoreGfx(gfx);
+         // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.CREATE_PROG, {added_gfx:this.buffer[gfx.gfx_ctx.idx]});
          return gfx;
       }
       else { // ... case specific or any gfx buffer is acceptable ...
@@ -41,12 +44,14 @@ export class Gfx_Pool extends M_Buffer {
             if (found) {
 
                const gfx = GlGenerateContext(sid, sceneidx, GFX.SPECIFIC, found.vbidx, mesh_count);
+               // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB, {added_gfx:this.buffer[gfx.gfx_ctx.idx]});
                return gfx;
             }
             else { // ... else if pool didn't find any buffer, create a new one ...
 
                const gfx = GlGenerateContext(sid, sceneidx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh_count);
                gfx.gfx_ctx.idx = this.#StoreGfx(gfx, FLAGS & GFX.PRIVATE);
+               // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.CREATE_PROG, {added_gfx:this.buffer[gfx.gfx_ctx.idx]});
                return gfx;
             }
          }
@@ -62,6 +67,7 @@ export class Gfx_Pool extends M_Buffer {
                
                const gfx = GlGenerateContext(sid, sceneidx, GFX.SPECIFIC, gfx_idx.vbidx, mesh_count);
                gfx.gfx_ctx.idx = this.#StoreGfx(gfx);
+               // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.CREATE_PROG, {added_gfx:this.buffer[gfx.gfx_ctx.idx]});
                return gfx;
             }
             /*DEBUG:Wrong use of gfxidx.*/
@@ -75,6 +81,7 @@ export class Gfx_Pool extends M_Buffer {
 
                const vbidx = this.buffer[foundIdx].vbidx
                const gfx = GlGenerateContext(sid, sceneidx, GFX.SPECIFIC, vbidx, mesh_count);
+               // console.log('Mesh count: ', mesh_count)
                gfx.gfx_ctx.idx = foundIdx;
                // Add this gfx to the session
                const idx = this.FindGfxIdx(gfx.prog.idx, gfx.vb.idx)
@@ -83,7 +90,7 @@ export class Gfx_Pool extends M_Buffer {
                
                gfx.gfx_ctx.sessionId = this.buffer[idx].sessionId;
 
-               GfxSetVbRender(gfx.prog.idx, gfx.vb.idx, true); // Corrects the none rendering of the deactivated popup's [0] vertex buffer
+               Gfx_set_vb_show(gfx.prog.idx, gfx.vb.idx, true); // Corrects the none rendering of the deactivated popup's [0] vertex buffer
 
                return gfx;
             }
@@ -92,7 +99,7 @@ export class Gfx_Pool extends M_Buffer {
                const gfx = GlGenerateContext(sid, sceneidx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh_count);
                gfx.gfx_ctx.idx = this.#StoreGfx(gfx, FLAGS & GFX.PRIVATE);
                gfx.gfx_ctx.sessionId = _sessionId; // MAYBE BUG. Better to extract sessionId from 'this.buffer[gfx.gfx_ctx.idx].sessionId'
-               // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX, {added_gfx:this.buffer[gfx.gfx_ctx.idx]});
+               // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.CREATE_PROG, {added_gfx:this.buffer[gfx.gfx_ctx.idx]});
                return gfx;
             }
          }
@@ -120,7 +127,7 @@ export class Gfx_Pool extends M_Buffer {
       const count = idxs.length;
       for(let i=0; i<count; i++){
 
-         const idx = this.FindGfxIdx(idxs.progidx, idxs.vbidx);
+         const idx = this.FindGfxIdx(idxs[i].progidx, idxs[i].vbidx);
          if(idx !== INT_NULL){ // If the progidx-vbidx is not found, that probably means that the new vertex buffer is not yet added, and that the dispatch event to the debug_info_ui hapened first(before the gfx generation) 
 
             this.buffer[idx].isActive = false;
@@ -145,8 +152,6 @@ export class Gfx_Pool extends M_Buffer {
          
          const progidx = this.buffer[idx].progidx,
          vbidx = this.buffer[idx].vbidx;
-         if(progidx === 0 && vbidx === 6)
-            console.log()
          if (setPrivate)
             GlSetVertexBufferPrivate(progidx, vbidx);
 
@@ -163,6 +168,10 @@ export class Gfx_Pool extends M_Buffer {
          const idx = this.#Store(gfx.prog.idx, gfx.vb.idx, gfx.sceneidx, true, isPrivate);
          return idx;
       }
+
+      // Create an ui-info-gfx-update dispatch, since the prog and vb buffer exist.
+      // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB, {added_gfx:this.buffer[gfx.gfx_ctx.idx]});
+
    }
 
    /** This function is called only if progidx and vbidx have not been added. i.e. Does not run for duplicates  */
@@ -185,15 +194,27 @@ export class Gfx_Pool extends M_Buffer {
          this.sessionId = _sessionId; // It remains the same id until SessionEnd() is called by the caller.
       }
 
-      Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX, {added_gfx:obj});
+      /**
+         const obj = {
+         progidx: progidx,
+         vbidx: vbidx,
+         sceneidx: sceneidx,
+         isActive: (isPrivate > 0) ? false : true,
+         isPrivate: (isPrivate > 0) ? true : false,
+         sessionId:  INT_NULL,
+      }
+       */
+      // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX, {added_gfx:obj});
 
       return idx;
    }
 
-   #SetGfxActiveFromPool(progidx, vbidx, flag) {
+   SetGfxActiveFromPool(progidx, vbidx, flag) {
       for (let i = 0; i < this.boundary; i++) {
          if (this.buffer[i].progidx === progidx && this.buffer[i].vbidx === vbidx) {
             this.buffer[i].isActive = flag;
+            // if(flag) console.log('Gfx pool activate. prog:', progidx, ' vb:', vbidx)
+            // else console.log('Gfx pool deactivate. prog:', progidx, ' vb:', vbidx)
             return true;
          }
       }
@@ -260,91 +281,52 @@ export class Gfx_Pool extends M_Buffer {
          if (child) this.ActivateRecursive(child)
       }
 
-      if(!mesh.gfx) console.log(mesh.name, mesh)
+      if(!mesh.gfx) console.log('DEACTIVATING MESH - GFX NOT FOUND:', mesh.name, mesh)
       else{
          const progidx = mesh.gfx.prog.idx;
          const vbidx = mesh.gfx.vb.idx;
 
-         this.#SetGfxActiveFromPool(progidx, vbidx, true);
-         GfxSetVbRender(progidx, vbidx, true);
+         this.SetGfxActiveFromPool(progidx, vbidx, true);
+         Gfx_set_vb_show(progidx, vbidx, true);
       }
 
    }
 
    /** */
-   DeactivateGfxRecursive(mesh) {
+   // DeactivateGfxRecursive(mesh) {
 
    //    for (let i = 0; i < mesh.children.boundary; i++) {
 
    //       const child = mesh.children.buffer[i];
    //       if (child) 
-   //          this.DeactivateGfxRecursive(child)
-   //    }
+   //          this.DeactivateRecursive_no_listeners_touch(child)
 
-   //    if(!mesh.gfx) console.error(mesh.name, mesh) {
-
-   //       const progidx = mesh.gfx.prog.idx;
-   //       const vbidx = mesh.gfx.vb.idx;
-
-   //       this.#SetGfxActiveFromPool(progidx, vbidx, false);
-   //       GlResetVertexBuffer(mesh.gfx);
-   //       GlResetIndexBuffer(mesh.gfx);
-   //       GfxSetVbRender(progidx, vbidx, false);
-
-   //       mesh.RemoveAllListenEvents();
-   //    }
-
-   // }
-
-   // DeactivateRecursive_no_listeners_touch(mesh) {
-
-      for (let i = 0; i < mesh.children.boundary; i++) {
-
-         const child = mesh.children.buffer[i];
-         if (child) 
-            this.DeactivateRecursive_no_listeners_touch(child)
-
-         if(!child.gfx) console.error(child.name, ' parent:', child.parent.name)
-         else
-         {
-            const progidx = child.gfx.prog.idx;
-            const vbidx = child.gfx.vb.idx;
+   //       if(!child.gfx) console.error(child.name, ' parent:', child.parent.name)
+   //       else
+   //       {
+   //          const progidx = child.gfx.prog.idx;
+   //          const vbidx = child.gfx.vb.idx;
       
-            this.#SetGfxActiveFromPool(progidx, vbidx, false);
+   //          this.SetGfxActiveFromPool(progidx, vbidx, false);
             
-            GlResetVertexBuffer(child.gfx);
-            GlResetIndexBuffer(child.gfx);
-            GfxSetVbRender(progidx, vbidx, false);
+   //          GlResetVertexBuffer(child.gfx);
+   //          GlResetIndexBuffer(child.gfx);
+   //          Gfx_set_vb_show(progidx, vbidx, false);
    
-            console.log(child.name)
-         }
-      }
-
-      // if(!mesh.gfx) console.error(mesh.name, ' parent:', mesh.parent.name)
-      // else
-      // {
-      //    const progidx = mesh.gfx.prog.idx;
-      //    const vbidx = mesh.gfx.vb.idx;
-   
-      //    this.#SetGfxActiveFromPool(progidx, vbidx, false);
-         
-      //    GlResetVertexBuffer(mesh.gfx);
-      //    GlResetIndexBuffer(mesh.gfx);
-      //    GfxSetVbRender(progidx, vbidx, false);
-
-      //    console.log(mesh.name)
-      // }
-   }
+   //          // console.log(child.name)
+   //       }
+   //    }
+   // }
 
    DeactivateGfx(gfx){
 
       const progidx = gfx.prog.idx;
       const vbidx = gfx.vb.idx;
-      this.#SetGfxActiveFromPool(progidx, vbidx, false);
+      this.SetGfxActiveFromPool(progidx, vbidx, false);
       GlResetVertexBuffer(gfx);
       GlResetIndexBuffer(gfx);
-      GfxSetVbRender(progidx, vbidx, false);
-      // console.log('Deactivating:', menu.name, ' progidx:',progidx,' vbidx:',vbidx)
+      Gfx_set_vb_show(progidx, vbidx, false);
+      // console.log('Deactivating: progidx:',progidx,' vbidx:',vbidx)
    }
 };
 
@@ -361,6 +343,16 @@ export function Gfx_generate_context(sid, sceneidx, mesh_count, FLAGS, gfxidx) {
    return _gfx_pool.GenerateGfxCtx(sid, sceneidx, mesh_count, FLAGS, gfxidx);
 }
 
+export function Gfx_remove_geometry(gfx, num_faces){
+   const ret = Gfx_remove_geometry_from_buffers(gfx, num_faces);
+   if(ret.empty){ // If the vertex buffer is empty, then set it as not active, so it can be used by other gfx demands.
+      _gfx_pool.SetGfxActiveFromPool(gfx.prog.idx, gfx.vb.idx, false);
+      // Renderqueue_set_active(gfx.prog.idx, gfx.vb.idx, false);
+      Gfx_set_vb_show(gfx.prog.idx, gfx.vb.idx, false);
+   }
+   return ret;
+}
+
 /** Activates the gfx buffers recursively for all the children meshes. */
 export function Gfx_activate(mesh) { _gfx_pool.ActivateRecursive(mesh); }
 export function Gfx_deactivate_recursive(mesh) { _gfx_pool.DeactivateGfxRecursive(mesh); }
@@ -374,12 +366,12 @@ export function Gfx_is_private_vb(progidx, vbidx){
    return false;
 }
 
-
 /** DEBUG PRINT */
 export function Gfx_pool_print() {
 
+   console.log('Gfx Pool: ');
    for (let i = 0; i < _gfx_pool.boundary; i++) {
 
-      console.log('Gfx Pool: ', _gfx_pool.buffer[i]);
+      console.log( `${i}: prog:${_gfx_pool.buffer[i].progidx} vb:${_gfx_pool.buffer[i].vbidx} active:${_gfx_pool.buffer[i].isActive} priv:${_gfx_pool.buffer[i].isPrivate} `);
    }
 }

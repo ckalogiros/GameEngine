@@ -1,6 +1,6 @@
 // import { Rect2D } from "../Geometry/Rect2D.js";
 import { TimerGetGlobalTimer } from "../../Timers/Timers.js";
-import { GlGetProgram } from "../../../Graphics/GlProgram.js";
+import { Gl_progs_get_prog_byidx } from "../../../Graphics/GlProgram.js";
 import { Geometry2D } from "../Geometry/Base/Geometry.js";
 
 // For readability of the attribute params1 array vector
@@ -22,7 +22,7 @@ class VortexMesh extends Geometry2D {
       this.timer.t = this.mesh.time;
    }
    SetUniformRadius(val) {
-      const prog = GlGetProgram(this.gfxInfo.prog.idx);
+      const prog = Gl_progs_get_prog_byidx(this.gfxInfo.prog.idx);
       prog.UniformsSetBufferUniform(val, UNIFORM_PARAMS.VORTEX.radiusIdx);
    }
    SetAttribParams1_Count(count) {

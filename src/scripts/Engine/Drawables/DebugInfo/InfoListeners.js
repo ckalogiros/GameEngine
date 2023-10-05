@@ -31,6 +31,17 @@ export class Info_Listeners {
       this.events.RemoveByIdx(idx);
    }
 
+   GetEvent(TYPE_IDX){
+
+      for(let i=0; i<this.events.boundary; i++){
+
+         if(this.events.buffer[i].event_type === TYPE_IDX){
+            return this.events.buffer[i];
+         }
+      }
+      return null;
+   }
+
    DispatchEvents(EVENT_TYPE, trigger_params) {
 
       for (let i = 0; i < this.events.boundary; i++) {
@@ -67,6 +78,11 @@ export function Info_listener_dispatch_event(TYPE_IDX, trigger_params) {
 }
 
 export function Info_listener_destroy_event(event_idx) {
+   if(event_idx !== INT_NULL)
+      _info_listeners.DestroyEvent(event_idx);
+}
 
-   _info_listeners.DestroyEvent(event_idx);
+export function Info_listener_get_event(TYPE_IDX) {
+
+   return _info_listeners.GetEvent(TYPE_IDX);
 }

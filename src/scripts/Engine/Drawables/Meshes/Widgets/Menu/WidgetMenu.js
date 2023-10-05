@@ -4,7 +4,7 @@ import { CopyArr3 } from "../../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../../Operations/Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../../../Controls/Input/Mouse.js";
 import { M_Buffer } from "../../../../Core/Buffers.js";
-import { Debug_get_event_listeners, Listener_deactivate_children_events_buffer, Listener_recover_children_buffer, Listener_reset_children_buffer, Listeners_copy_event_children_buffer } from "../../../../Events/EventListeners.js";
+import { Debug_get_event_listeners, Listener_events_set_mesh_events_active, Listener_recover_children_buffer, Listener_reset_children_buffer, Listeners_copy_event_children_buffer } from "../../../../Events/EventListeners.js";
 import { Gfx_activate, Gfx_deactivate_no_listeners_touch, Gfx_end_session } from "../../../../Interfaces/Gfx/GfxContext.js";
 import { MESH_ENABLE } from "../../Base/Mesh.js";
 import { Widget_Button } from "../WidgetButton.js";
@@ -49,12 +49,12 @@ export class Widget_Menu_Bar extends Widget_Label {
       this.ReAlign();
    }
 
-   AddMinimizeButton(root, pos, fontsize, col = GREY3, text_col = WHITE, scale = [1, 1], pad = [4, 2], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [6, 5, 3]) {
+   AddMinimizeButton(root, pos, fontsize, col = GREY3, text_col = WHITE, pad = [4, 2], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [6, 5, 3]) {
 
       CopyArr3(pos, this.geom.pos);
       pos[2] += 1; // Put close button in front of the parent widget.
 
-      const minimize_btn = new Widget_Minimize(root, pos, fontsize, col, text_col, scale, pad, bold);
+      const minimize_btn = new Widget_Minimize(root, pos, fontsize, col, text_col, pad, bold);
       minimize_btn.SetName('minimize_btn')
 
       this.geom.dim[0] += minimize_btn.geom.dim[0];
@@ -134,7 +134,7 @@ export class Widget_Menu_Bar extends Widget_Label {
 
       // Destroy the time interval and the Move operation, if the mesh is not grabed
       // MESH_STATE.IN_GRAB is deactivated upon mouse click up in Events.js.
-      if (menu.StateCheck(MESH_STATE.IN_GRAB) === 0) {
+      if (menu.StateCheck(MESH_STATE.IN_GRAB) === 0 && menu.timeIntervalsIdxBuffer.boundary) {
 
          const intervalIdx = menu.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
          TimeIntervalsDestroyByIdx(intervalIdx);
@@ -204,7 +204,7 @@ export class Close_Button extends Widget_Button {
 
       this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
       this.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick)
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick)
 
       // Set a callback function for the destruction of the menu and its window on clicking the close button.
       const params = {
@@ -251,8 +251,6 @@ export class Close_Button extends Widget_Button {
          Clbk: this.OnDestroy,
        */
       const params = this.eventCallbacks.buffer[0]; // TODO: HACK: We must set up an index clarification for eventCallbacks buffer. 
-      // const OnCloseClbk = params.Clbk;
-      // // OnCloseClbk(params.target_params);
       const root = params.target_params
       root.Destroy(root);
 
@@ -278,7 +276,7 @@ export class Widget_Minimize extends Widget_Button {
       this.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
       this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick)
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick)
       const params = {
          source_params: this,
          target_params: root,
@@ -320,9 +318,9 @@ export class Widget_Minimize extends Widget_Button {
                   // Delete all children events of the root's EventListener.
                   Listener_reset_children_buffer(click_event_type, click_event_idx);
                   minim_mesh.stored_children_events[hover_event_type] = Listeners_copy_event_children_buffer(hover_event_type, hover_event_idx);
-                  // Delete all children events of the root's EventListener.
+                  // Deactivate all children events of the root's EventListener.
                   Listener_reset_children_buffer(hover_event_type, hover_event_idx);
-                  Listener_deactivate_children_events_buffer(LISTENERS_FLAGS.ALL, root.listeners);
+                  Listener_events_set_mesh_events_active(LISTENERS_FLAGS.ALL, root.listeners, false);
                }
 
                { // Create new minimized widget and add to the root
@@ -335,7 +333,7 @@ export class Widget_Minimize extends Widget_Button {
                   minim_mesh.UpdateText('+')
                   // Set click event, back to the minimizer.
                   minim_mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                  minim_mesh.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, minim_mesh.OnClick);
+                  minim_mesh.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, minim_mesh.OnClick);
                   minim_mesh.toggle = true;
 
                   root.Reconstruct_listeners_recursive();

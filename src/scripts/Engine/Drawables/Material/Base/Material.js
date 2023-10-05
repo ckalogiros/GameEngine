@@ -4,7 +4,7 @@ import * as math from '../../../../Helpers/Math/MathOperations.js'
 import { GlSetColor, GlSetColorAlpha } from "../../../../Graphics/Buffers/GlBufferOps.js";
 import { GlAddMaterial, GlHandlerAddMaterialBuffer } from '../../../../Graphics/Buffers/GlBuffers.js';
 import { FontGetUvCoords } from '../../../Loaders/Font/Font.js';
-import { GfxInfoMesh, GlSetTextureIdx } from '../../../../Graphics/GlProgram.js';
+import { GfxInfoMesh, Gl_progs_set_vb_texidx } from '../../../../Graphics/GlProgram.js';
 import { TextureLoadTexture } from '../../../Loaders/Textures/Texture.js';
 
 let _materialId = 0;
@@ -20,8 +20,8 @@ export const MAT_ENABLE = {
 }
 
 function TEMP_checkIfFontTexture(id){
-   for(let texIdx in FONTS){
-      if(id === FONTS[texIdx] && texIdx !== 'COUNT') return true;
+   for(let textidx in FONTS){
+      if(id === FONTS[textidx] && textidx !== 'COUNT') return true;
    }
    return false;
 }
@@ -33,7 +33,7 @@ export class Material {
    defCol;
    uv;
    texId;
-   texIdx;
+   textidx;
    uvIdx;
    hasFontTex;
    type = 0;
@@ -56,7 +56,7 @@ export class Material {
   
       this.uv = [0, 1, 0, 1];
 
-      this.texIdx = INT_NULL;
+      this.textidx = INT_NULL;
       this.uvIdx  = INT_NULL;
 
       this.hasFontTex = false;
@@ -92,7 +92,7 @@ export class Material {
    ////////////////////////////////////////////////////////////////////////////////////////////////////////
    AddToGraphicsBuffer(sid, gfx) {
 
-      GlAddMaterial(sid, gfx, this.col, this.uv, this.style);
+      GlAddMaterial(sid, gfx, this.col, this.uv, this.style, this.num_faces);
       this.alreadyAdded = true;
       
    }
@@ -144,6 +144,8 @@ export class Material {
    CheckCase(which, params = {}) {
       switch (which) {
          case MAT_ENABLE.ATTR_VERTEX_COLOR: {
+            // this.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
+            this.sid.attr &= ~ SID.ATTR.COL4;
             this.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
             
             if(DEBUG.CORE && !Object.hasOwn(params, 'color')){
@@ -180,9 +182,9 @@ export class FontMaterial extends Material {
       // Create texture
       const indexes = TextureLoadTexture(this.texId);
 
-      this.texIdx = indexes.texIdx;
+      this.textidx = indexes.textidx;
       this.uvIdx = indexes.uvIdx;
-      if(this.texIdx === INT_NULL) console.error('2222222 Texture Index is NULL')
+      if(this.textidx === INT_NULL) console.error('2222222 Texture Index is NULL')
 
       this.type |= MESH_TYPES_DBG.FONT_MATERIAL;
    }
@@ -201,19 +203,19 @@ export class FontMaterial extends Material {
          if(this.text[i])
             uv = FontGetUvCoords(this.uvIdx, this.text[i]);
             
-            GlAddMaterial(sid, gfxCopy, this.col, uv, this.style, this.sdf_params);
+            GlAddMaterial(sid, gfxCopy, this.col, uv, this.style, this.sdf_params, 1);
             gfxCopy.vb.start += gfxCopy.vb.count;
             
             // If texture exists, store texture index, else if font texture exists, store font texture index, else store null
-            gfx.tb.idx = this.texIdx !== INT_NULL ? this.texIdx : (this.uvIdx !== INT_NULL ? this.uvIdx : INT_NULL);
+            gfx.tb.idx = this.textidx !== INT_NULL ? this.textidx : (this.uvIdx !== INT_NULL ? this.uvIdx : INT_NULL);
             
-            if(this.texIdx === INT_NULL) 
+            if(this.textidx === INT_NULL) 
                console.error('Texture Index is NULL')
 
          if(DEBUG.MESH_ALL_UVS) console.log('uv:', uv)
             
       }
-      GlSetTextureIdx(gfx.prog.idx, gfx.vb.idx, gfx.tb.idx); // Update the vertex buffer to store the texture index
+      Gl_progs_set_vb_texidx(gfx.prog.idx, gfx.vb.idx, gfx.tb.idx); // Update the vertex buffer to store the texture index
       
       return gfxCopy.vb.start;
    }

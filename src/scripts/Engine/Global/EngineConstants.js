@@ -15,10 +15,10 @@ const Rename_evtClbk_elem0 = 0; // The first element in the eventCallbacks buffe
 const Rename_evtClbk_elem1 = 1; // The first element in the eventCallbacks buffer of every Mesh.
 
 function ERROR_NULL(obj, msg) {
-	if (obj === null || obj === undefined || obj === INT_NULL) {
-		console.error('Null ERROR. object:', obj, msg)
-		return true;
-	}
+	// if (obj === null || obj === undefined || obj === INT_NULL) {
+	// 	console.error('Null ERROR. object:', obj, msg)
+	// 	return true;
+	// }
 }
 
 function ERROR_TYPE(obj, type, msg) {
@@ -48,7 +48,7 @@ const PLATFORM = {
 const Device = {
 	MAX_WIDTH: 1200,
 	MAX_HEIGHT: 800,
-	width:  0,
+	width: 0,
 	height: 0,
 	ratio: 1, // Create same proportions throughout any device. It measures the ratio of the game's build device width and the current device width
 }
@@ -60,13 +60,13 @@ const Viewport = {
 	top: 0,
 	bottom: 0,
 	ratio: 0,
-	leftMargin:0,
-	topMargin:0,
+	leftMargin: 0,
+	topMargin: 0,
 };
 
 const STATE = {
 
-	scene:{
+	scene: {
 		active: null,
 		active_idx: null,
 	},
@@ -74,7 +74,7 @@ const STATE = {
 	loop: {
 		paused: false,
 	},
-	
+
 	mesh: {
 		hovered: null,
 		hoveredId: INT_NULL,
@@ -87,47 +87,47 @@ const STATE = {
 		grabed: null,
 		grabedId: INT_NULL,
 		grabedIdx: INT_NULL,
-		
+
 		selected: null,
 		selectedId: INT_NULL,
 		selectedIdx: INT_NULL,
 
-		SetHovered(mesh){
+		SetHovered(mesh) {
 			this.hovered = mesh;
-			if(!mesh){
+			if (!mesh) {
 				this.hoveredId = INT_NULL;
 				this.hoveredIdx = INT_NULL;
-			}else{
+			} else {
 				this.hoveredId = mesh.id;
 				this.hoveredIdx = mesh.idx;
 			}
 		},
-		SetGrabed(mesh){
+		SetGrabed(mesh) {
 			this.grabed = mesh;
-			if(!mesh){
+			if (!mesh) {
 				this.grabedId = INT_NULL;
 				this.grabedIdx = INT_NULL;
-			}else{
+			} else {
 				this.grabedId = mesh.id;
 				this.grabedIdx = mesh.idx;
 			}
 		},
-		SetClicked(mesh){
+		SetClicked(mesh) {
 			this.clicked = mesh;
-			if(!mesh){
+			if (!mesh) {
 				this.clickedId = INT_NULL;
 				this.clickedIdx = INT_NULL;
-			}else{
+			} else {
 				this.clickedId = mesh.id;
 				this.clickedIdx = mesh.idx;
 			}
 		},
-		SetSelected(mesh){
+		SetSelected(mesh) {
 			this.selected = mesh;
-			if(!mesh){
+			if (!mesh) {
 				this.selectedId = INT_NULL;
 				this.selectedIdx = INT_NULL;
-			}else{
+			} else {
 				this.selectedId = mesh.id;
 				this.selectedIdx = mesh.idx;
 			}
@@ -144,18 +144,18 @@ _cnt = 0x1;
 let _cnt2 = 0x1;
 const SECTION = {
 
-   VERTICAL: _cnt<<=0x1,
-   HORIZONTAL: _cnt<<=0x1,
-   INHERIT: _cnt<<=0x1,
-	EXPAND: _cnt<<=0x1,
-	FIT: _cnt<<=0x1,
-	FOLLOW: _cnt<<=0x1,
-	
-	ITEM_FIT: _cnt<<=0x1,
-	ITEM_RESTRICT: _cnt<<=0x1,
+	VERTICAL: _cnt <<= 0x1,
+	HORIZONTAL: _cnt <<= 0x1,
+	INHERIT: _cnt <<= 0x1,
+	EXPAND: _cnt <<= 0x1,
+	FIT: _cnt <<= 0x1,
+	FOLLOW: _cnt <<= 0x1,
 
-	NO_ITEMS_CALC: _cnt<<=0x1,
-	TOP_DOWN: _cnt<<=0x1,
+	ITEM_FIT: _cnt <<= 0x1,
+	ITEM_RESTRICT: _cnt <<= 0x1,
+
+	NO_ITEMS_CALC: _cnt <<= 0x1,
+	TOP_DOWN: _cnt <<= 0x1,
 
 };
 
@@ -168,7 +168,7 @@ const MESH_STATE = {
 	IN_MOVE: _cnt <<= 1,
 	IN_GRAB: _cnt <<= 1,
 	IN_HOVER_COLOR: _cnt <<= 1,
-	
+
 	IS_HOVERABLE: _cnt <<= 1,
 	IS_CLICKABLE: _cnt <<= 1,
 	IS_MOVABLE: _cnt <<= 1,
@@ -176,66 +176,66 @@ const MESH_STATE = {
 	IS_FAKE_HOVERABLE: _cnt <<= 1,
 	IS_FAKE_CLICKABLE: _cnt <<= 1,
 	IS_HOVER_COLORABLE: _cnt <<= 1,
-	
+
 	CLICKED_MOUSE_L: _cnt <<= 1,
 	CLICKED_MOUSE_M: _cnt <<= 1,
 	CLICKED_MOUSE_R: _cnt <<= 1,
-	
+
 	HAS_POPUP: _cnt <<= 1,
-	
+
 	CHILDREN_HAVE_CLICK_EVENT: _cnt <<= 1,
 	CHILDREN_HAVE_HOVER_EVENT: _cnt <<= 1,
 
 
-	Print(mask){
+	Print(mask) {
 
 		let str = '';
-		if(mask & this.IN_FOCUS) str+='IN_FOCUS,' 
-		if(mask & this.IN_HOVER) str+='IN_HOVER,' 
-		if(mask & this.IN_SCALE) str+='IN_SCALE,' 
-		if(mask & this.IN_MOVE) str+='IN_MOVE,' 
-		if(mask & this.IN_GRAB) str+='IN_GRAB,' 
-		if(mask & this.IN_HOVER_COLOR) str+='IN_HOVER_COLOR,' 
+		if (mask & this.IN_FOCUS) str += 'IN_FOCUS,'
+		if (mask & this.IN_HOVER) str += 'IN_HOVER,'
+		if (mask & this.IN_SCALE) str += 'IN_SCALE,'
+		if (mask & this.IN_MOVE) str += 'IN_MOVE,'
+		if (mask & this.IN_GRAB) str += 'IN_GRAB,'
+		if (mask & this.IN_HOVER_COLOR) str += 'IN_HOVER_COLOR,'
 
-		if(mask & this.IS_MOVABLE) str+='IS_MOVABLE,' 
-		if(mask & this.IS_GRABABLE) str+='IS_GRABABLE,' 
+		if (mask & this.IS_MOVABLE) str += 'IS_MOVABLE,'
+		if (mask & this.IS_GRABABLE) str += 'IS_GRABABLE,'
 
-		if(mask & this.CLICKED_MOUSE_L) str+='CLICKED_MOUSE_L,' 
-		if(mask & this.CLICKED_MOUSE_M) str+='CLICKED_MOUSE_M,' 
-		if(mask & this.CLICKED_MOUSE_R) str+='CLICKED_MOUSE_R,' 
+		if (mask & this.CLICKED_MOUSE_L) str += 'CLICKED_MOUSE_L,'
+		if (mask & this.CLICKED_MOUSE_M) str += 'CLICKED_MOUSE_M,'
+		if (mask & this.CLICKED_MOUSE_R) str += 'CLICKED_MOUSE_R,'
 
-		if(mask & this.IS_HOVERABLE) str+='IS_HOVERABLE,' 
-		if(mask & this.HAS_POPUP) str+='HAS_POPUP,' 
-		if(mask & this.IS_HOVER_COLORABLE) str+='IS_HOVER_COLORABLE,' 
+		if (mask & this.IS_HOVERABLE) str += 'IS_HOVERABLE,'
+		if (mask & this.HAS_POPUP) str += 'HAS_POPUP,'
+		if (mask & this.IS_HOVER_COLORABLE) str += 'IS_HOVER_COLORABLE,'
 		// console.info(str)
 	}
 };
 
 const MOUSE = {
 
-	BTN_ID:{
+	BTN_ID: {
 
-		LEFT: 	0,
-		MIDDLE: 	1,
-		RIGHT: 	2,
+		LEFT: 0,
+		MIDDLE: 1,
+		RIGHT: 2,
 	},
 };
 
 _cnt = 0x1;
 const ALIGN = {
 
-   LEFT: _cnt <<= 0x1,
-   RIGHT: _cnt <<= 0x1,
-   TOP: _cnt <<= 0x1,
-   BOTTOM: _cnt <<= 0x1,
-   VERT_CENTER: _cnt <<= 0x1,
-   HOR_CENTER: _cnt <<= 0x1,
+	LEFT: _cnt <<= 0x1,
+	RIGHT: _cnt <<= 0x1,
+	TOP: _cnt <<= 0x1,
+	BOTTOM: _cnt <<= 0x1,
+	VERT_CENTER: _cnt <<= 0x1,
+	HOR_CENTER: _cnt <<= 0x1,
 
-   VERTICAL: _cnt <<= 0x1,
-   HORIZONTAL: _cnt <<= 0x1,
+	VERTICAL: _cnt <<= 0x1,
+	HORIZONTAL: _cnt <<= 0x1,
 }
 
-const POSITION_CENTER = [0,0,0]
+const POSITION_CENTER = [0, 0, 0]
 
 
 _cnt = 0x1;
@@ -243,7 +243,7 @@ const FLAGS = {
 
 	FALSE: 0,
 	TRUE: 1,
-	DESTROY: _cnt<<=0x1,
+	DESTROY: _cnt <<= 0x1,
 }
 
 
@@ -284,12 +284,12 @@ const OUT_OF_VIEW = 1000; // Out of screen view in pixels
 const STYLE = {
 
 	BORDER: 0,
-	R_CORNERS:1,
-	FEATHER:2,
+	R_CORNERS: 1,
+	FEATHER: 2,
 }
 
-function TRANSPARENCY(col, transparency){
-	return [col[0],col[1],col[2],transparency]
+function TRANSPARENCY(col, transparency) {
+	return [col[0], col[1], col[2], transparency]
 }
 const TRANSPARENT = [0.0, 0.0, 0.0, 0.0];
 const WHITE = [1.0, 1.0, 1.0, 1.0];
@@ -311,7 +311,7 @@ const GREENL2 = [0.1, 0.8, 0.0, 1.0];
 const GREENL3 = [0.1, 0.6, 0.0, 1.0];
 const GREENL4 = [0.08, 0.2, 0.0, 1.0];
 const BLUE = [0.0, 0.0, 1.0, 1.0];
-	const BLUE_TRANS = [0.0, 0.0, 1.0, .3];
+const BLUE_TRANS = [0.0, 0.0, 1.0, .3];
 const BLUER1 = [0.0, 0.2, 88.0, 1.0];
 const BLUER2 = [0.0, 0.2, 75.0, 1.0];
 const BLUER3 = [0.0, 0.2, 6.0, 1.0];
@@ -417,38 +417,39 @@ const MENU_FONT_SIZE = 4;
  */
 _cnt = 0x1;
 const MESH_TYPES_DBG = {
-	GEOMETRY2D: 		_cnt <<= 1,
-	TEXT_GEOMETRY2D:	_cnt <<= 1,
-	GEOMETRY3D: 		_cnt <<= 1,
-	CUBE_GEOMETRY: 	_cnt <<= 1,
+	GEOMETRY2D: _cnt <<= 1,
+	TEXT_GEOMETRY2D: _cnt <<= 1,
+	GEOMETRY3D: _cnt <<= 1,
+	CUBE_GEOMETRY: _cnt <<= 1,
 
-	MATERIAL:		_cnt <<= 1,
-	FONT_MATERIAL:	_cnt <<= 1,
+	MATERIAL: _cnt <<= 1,
+	FONT_MATERIAL: _cnt <<= 1,
 
-	MESH: 			_cnt <<= 1,
-	TEXT_MESH: 		_cnt <<= 1,
-	RECT_MESH: 		_cnt <<= 1,
-	PANEL_MESH: 	_cnt <<= 1,
-	
-	SECTION_MESH: 	_cnt <<= 1,
+	MESH: _cnt <<= 1,
+	TEXT_MESH: _cnt <<= 1,
+	RECT_MESH: _cnt <<= 1,
+	PANEL_MESH: _cnt <<= 1,
 
-	WIDGET_GENERIC: 			_cnt <<= 1,
-	WIDGET_TEXT_LABEL: 		_cnt <<= 1,
-	WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS: 		_cnt <<= 1,
-	WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS: 		_cnt <<= 1,
-	WIDGET_BUTTON: 			_cnt <<= 1,
-	WIDGET_SWITCH: 			_cnt <<= 1,
-	WIDGET_TEXT: 				_cnt <<= 1,
-	WIDGET_TEXT_DYNAMIC: 	_cnt <<= 1,
-	WIDGET_SLIDER: 			_cnt <<= 1,
-	WIDGET_SLIDER_BAR: 		_cnt <<= 1,
-	WIDGET_SLIDER_HANDLE: 	_cnt <<= 1,
-	WIDGET_POP_UP: 			_cnt <<= 1,
-	WIDGET_MENU_BAR: 			_cnt <<= 1,
-	WIDGET_DROP_DOWN:			_cnt <<= 1,
-	DROP_DOWN_MENU: 			_cnt <<= 1,
-	
-	SCENE: 			_cnt <<= 1,
+	SECTION_MESH: _cnt <<= 1,
+
+	WIDGET_GENERIC: _cnt <<= 1,
+	WIDGET_TEXT_LABEL: _cnt <<= 1,
+	WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS: _cnt <<= 1,
+	WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS: _cnt <<= 1,
+	WIDGET_BUTTON: _cnt <<= 1,
+	WIDGET_SWITCH: _cnt <<= 1,
+	WIDGET_TEXT: _cnt <<= 1,
+	WIDGET_TEXT_DYNAMIC: _cnt <<= 1,
+	WIDGET_SLIDER: _cnt <<= 1,
+	WIDGET_SLIDER_BAR: _cnt <<= 1,
+	WIDGET_SLIDER_HANDLE: _cnt <<= 1,
+	WIDGET_POP_UP: _cnt <<= 1,
+	WIDGET_MENU_BAR: _cnt <<= 1,
+	WIDGET_DROP_DOWN: _cnt <<= 1,
+	DROP_DOWN_MENU: _cnt <<= 1,
+
+	UI_INFO_GFX: _cnt <<= 1,
+	SCENE: _cnt <<= 1,
 };
 
 function GetMeshNameFromType(type) {
@@ -462,13 +463,13 @@ function GetMeshNameFromType(type) {
 
 	if (type & MESH_TYPES_DBG.MATERIAL) { meshType.push('Material'); }
 	if (type & MESH_TYPES_DBG.FONT_MATERIAL) { meshType.push('FontMaterial'); }
-	
+
 	if (type & MESH_TYPES_DBG.MESH) { meshType.push('Mesh'); }
 	if (type & MESH_TYPES_DBG.TEXT_MESH) { meshType.push('Text_Mesh'); }
 	if (type & MESH_TYPES_DBG.RECT_MESH) { meshType.push('RECT_MESH'); }
-	
+
 	if (type & MESH_TYPES_DBG.SECTION_MESH) { meshType.push('SECTION_MESH'); }
-	
+
 	if (type & MESH_TYPES_DBG.WIDGET_GENERIC) { meshType.push('WIDGET_GENERIC'); }
 	if (type & MESH_TYPES_DBG.WIDGET_TEXT_LABEL) { meshType.push('Widget_Label'); }
 	if (type & MESH_TYPES_DBG.Widget_Label_Text_Mesh_Menu_Options) { meshType = 'Widget_Label_Text_Mesh_Menu_Options'; }
@@ -480,28 +481,28 @@ function GetMeshNameFromType(type) {
 	if (type & MESH_TYPES_DBG.WIDGET_SLIDER_BAR) { meshType.push('WIDGET_SLIDER_BAR'); }
 	if (type & MESH_TYPES_DBG.WIDGET_SLIDER_HANDLE) { meshType.push('WIDGET_SLIDER_HANDLE'); }
 	if (type & MESH_TYPES_DBG.WIDGET_POP_UP) { meshType.push('WIDGET_POP_UP'); }
-	
+
 	return meshType;
 }
 
 function GetMeshHighOrderNameFromType(type) {
-	
+
 	let meshType = ''
-	
+
 	if (type & MESH_TYPES_DBG.GEOMETRY2D) { meshType = 'GEOMETRY2D'; }
 	if (type & MESH_TYPES_DBG.TEXT_GEOMETRY2D) { meshType = 'TEXT_GEOMETRY2D'; }
 	if (type & MESH_TYPES_DBG.GEOMETRY3D) { meshType = 'GEOMETRY3D'; }
 	if (type & MESH_TYPES_DBG.CUBE_GEOMETRY) { meshType = 'CUBE_GEOMETRY'; }
-	
+
 	if (type & MESH_TYPES_DBG.MATERIAL) { meshType = 'MATERIAL'; }
 	if (type & MESH_TYPES_DBG.FONT_MATERIAL) { meshType = 'FONT_MATERIAL'; }
-	
+
 	if (type & MESH_TYPES_DBG.MESH) { meshType = 'MESH'; }
 	if (type & MESH_TYPES_DBG.TEXT_MESH) { meshType = 'TEXT_MESH'; }
 	if (type & MESH_TYPES_DBG.RECT_MESH) { meshType = 'RECT_MESH'; }
-	
+
 	if (type & MESH_TYPES_DBG.SECTION_MESH) { meshType = 'SECTION_MESH'; }
-	
+
 	if (type & MESH_TYPES_DBG.WIDGET_GENERIC) { meshType = 'WIDGET_GENERIC'; }
 	if (type & MESH_TYPES_DBG.WIDGET_TEXT_LABEL) { meshType = 'WIDGET_TEXT_LABEL'; }
 	if (type & MESH_TYPES_DBG.WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS) { meshType = 'WIDGET_LABEL_TEXT_MESH_MENU_OPTIONS'; }
@@ -522,24 +523,24 @@ function GetMeshHighOrderNameFromType(type) {
  */
 _cnt = 0x1;
 const LISTENERS_FLAGS = {
-	ANY_HOVER:  _cnt<<=0x1,
-	ANY_CLICK:  _cnt<<=0x1,
-	ANY:  _cnt<<=0x1,
+	ANY_HOVER: _cnt <<= 0x1,
+	ANY_CLICK: _cnt <<= 0x1,
+	ANY: _cnt <<= 0x1,
 
-	HOVER: _cnt<<=0x1,
-	CLICK: _cnt<<=0x1,
-	ALL: _cnt<<=0x1,
+	HOVER: _cnt <<= 0x1,
+	CLICK: _cnt <<= 0x1,
+	ALL: _cnt <<= 0x1,
 
 
-	mask:0x0, // the variable to sto
+	mask: 0x0, // the variable to sto
 };
 
 _cnt = 0x1;
 const LISTEN_EVENT_TYPES = {
 	HOVER: _cnt <<= 1,
-	CLICK_DOWN: _cnt <<= 1,
+	CLICK_UP: _cnt <<= 1,
 	MOVE: _cnt <<= 1, // MOVE event registers with the CLICK event, no need to create new event in the ListenEvents buffer
-	
+
 	NULL: _cnt <<= 1,
 };
 
@@ -552,8 +553,8 @@ const LISTEN_EVENT_TYPES_INDEX = {
 	SIZE: _cnt,
 };
 
-function Listeners_get_event_type_string(event_type_idx){
-	switch(event_type_idx){
+function Listeners_get_event_type_string(event_type_idx) {
+	switch (event_type_idx) {
 		case LISTEN_EVENT_TYPES_INDEX.HOVER: return 'Hover';
 		case LISTEN_EVENT_TYPES_INDEX.CLICK: return 'Click';
 	}
@@ -562,15 +563,17 @@ function Listeners_get_event_type_string(event_type_idx){
 _cnt = 0x1;
 const INFO_LISTEN_EVENT_TYPE = {
 
-   GFX:_cnt<<=0x1,
-   GFX_EVT_TYPE: {
-		VB: _cnt<<=0x1,
-
+	GFX: {
+		UPDATE: 		 _cnt <<= 0x1,
+		CREATE_PROG: _cnt <<= 0x1,
+		CREATE_VB:   _cnt <<= 0x1,
+		UPDATE_VB:   _cnt <<= 0x1,
 	},
-	LISTENERS:_cnt<<=0x1,
-	ALL_MESHES:_cnt<<=0x1,
-	MOUSE:_cnt<<=0x1,
-	GFX:_cnt<<=0x1,
+
+	LISTENERS:  _cnt <<= 0x1,
+	ALL_MESHES: _cnt <<= 0x1,
+	MOUSE: 		_cnt <<= 0x1,
+	// GFX: 			_cnt <<= 0x1,
 
 }
 const DEBUG_INFO = {
@@ -578,17 +581,17 @@ const DEBUG_INFO = {
 	UI_TIMERS: {
 		IS_ON: false,
 		IDX: INT_NULL,
-		POS: [60,860,0]
+		POS: [60, 860, 0]
 	},
 	UI_MOUSE: {
 		IS_ON: false,
 		IDX: INT_NULL,
-		POS: [30,820,0]
+		POS: [30, 820, 0]
 	},
 	UI_GFX: {
 		IS_ON: false,
 		IDX: INT_NULL,
-		POS: [400,13,0]
+		POS: [300, 13, 0]
 	},
 }
 
@@ -616,7 +619,7 @@ const DEBUG = {
 
 	BINDING_FUNCTIONS: true,
 
-	LISTENERS: false,
+	LISTENERS: true,
 
 	SET_HOVER_TO_ALL_MESHES: false,
 

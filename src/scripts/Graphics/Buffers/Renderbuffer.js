@@ -1,12 +1,13 @@
 "use=strict";
 
-import { GfxSetVbRender, GlBindTexture, GlBindVAO, GlUpdateIndexBufferData, GlUpdateVertexBufferData, GlUseProgram } from "./GlBuffers.js";
-import { GlGetPrograms, GlGetVB } from "../GlProgram.js";
+import { GlBindTexture, GlBindVAO, GlUpdateIndexBufferData, GlUpdateVertexBufferData, GlUseProgram } from "./GlBuffers.js";
+import { Gl_progs_get, Gl_progs_get_vb_byidx } from "../GlProgram.js";
 import { GlCreateTexture } from "../GlTextures.js";
 import { AnimationsGet } from "../../Engine/Animations/Animations.js";
 import { Min3 } from "../../Helpers/Math/MathOperations.js";
 import { ShowTotalScore } from "../../Engine/Events/SceneEvents.js";
 import { MeshBuffer, TempMesh } from "../../Engine/Drawables/MeshBuffer_OLD.js";
+import { Gfx_set_vb_show } from "../../Engine/Interfaces/Gfx/GfxInterfaceFunctions.js";
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -152,9 +153,9 @@ class Framebuffers extends MeshBuffer {
       if (pos !== null) this.buffer[idx].SetPosXY(pos);
       if (dim !== null) this.buffer[idx].SetDim(dim);
       // Connect the texture with the vertex buffer for text rendering. 
-      const vb = GlGetVB(this.buffer[idx].gfxInfo.prog.idx, this.buffer[idx].gfxInfo.vb.idx);
+      const vb = Gl_progs_get_vb_byidx(this.buffer[idx].gfxInfo.prog.idx, this.buffer[idx].gfxInfo.vb.idx);
       // Do not render the vertex buffer data of the rect that is to render the frame buffer texture
-      vb.texIdx = this.buffer[idx].texture.idx; // Bind of the texture to the vertexbuffer
+      vb.textidx = this.buffer[idx].texture.idx; // Bind of the texture to the vertexbuffer
       return idx;
    }
    SetActive(idx, flag) {
@@ -215,7 +216,7 @@ function FramebuffersDimColorAnimStop() {
 
 export function FramebuffersDraw(fbidx) {
    const gl = gfxCtx.gl;
-   const progs = GlGetPrograms();
+   const progs = Gl_progs_get();
    const fb = FramebuffersGet(fbidx);
 
    const progIdx = fb.gfxInfo.prog.idx;
@@ -236,10 +237,10 @@ export function FramebuffersDraw(fbidx) {
 
    
    if (progs[progIdx].sid.attr & SID.ATTR.TEX2) {
-       if (vb.texIdx >= 0) {
-           const texture = TextureGetTextureByIdx(vb.texIdx);
+       if (vb.textidx >= 0) {
+           const texture = TextureGetTextureByIdx(vb.textidx);
            GlBindTexture(texture);
-           gl.uniform1i(progs[progIdx].shaderInfo.uniforms.sampler, texture.idx);
+           gl.uniform1i(progs[progIdx].shaderinfo.uniforms.sampler, texture.idx);
        }
    }
 
@@ -254,7 +255,7 @@ export function FramebuffersDraw(fbidx) {
 export function FramebufferRenderToFramebuffer(drawQueue, drawQueueCount) {
 
    const gl = gfxCtx.gl;
-   const progs = GlGetPrograms();
+   const progs = Gl_progs_get();
    const fb = FramebuffersGet(FRAMEBUFFERS_IDX.buffer0);
 
    gl.bindFramebuffer(gl.FRAMEBUFFER, fb.glfb);
@@ -269,7 +270,7 @@ export function FramebufferRenderToFramebuffer(drawQueue, drawQueueCount) {
    gl.enable(gl.DEPTH_TEST);
    gl.depthMask(false);
 
-   GfxSetVbRender(fb.gfxInfo.prog.idx, fb.gfxInfo.vb.idx, false); // Disable rendering the rect that the texture of the frameBuffer will be rendered to 
+   Gfx_set_vb_show(fb.gfxInfo.prog.idx, fb.gfxInfo.vb.idx, false); // Disable rendering the rect that the texture of the frameBuffer will be rendered to 
 
    for (let i = 0; i < drawQueueCount; i++) {
 
@@ -290,10 +291,10 @@ export function FramebufferRenderToFramebuffer(drawQueue, drawQueueCount) {
    
           
           if (progs[progIdx].info.sid & SID.ATTR.TEX2) {
-              if (vb.texIdx >= 0) {
-                  const texture = TextureGetTextureByIdx(vb.texIdx);
+              if (vb.textidx >= 0) {
+                  const texture = TextureGetTextureByIdx(vb.textidx);
                   GlBindTexture(texture);
-                  gl.uniform1i(progs[progIdx].shaderInfo.uniforms.sampler, texture.idx);
+                  gl.uniform1i(progs[progIdx].shaderinfo.uniforms.sampler, texture.idx);
               }
           }
    
@@ -303,7 +304,7 @@ export function FramebufferRenderToFramebuffer(drawQueue, drawQueueCount) {
           gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
        }
    }
-   GfxSetVbRender(fb.gfxInfo.prog.idx, fb.gfxInfo.vb.idx, true); // Enable rendering FrameBuffer's rect
+   Gfx_set_vb_show(fb.gfxInfo.prog.idx, fb.gfxInfo.vb.idx, true); // Enable rendering FrameBuffer's rect
 
    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
    gl.bindTexture(gl.TEXTURE_2D, null);

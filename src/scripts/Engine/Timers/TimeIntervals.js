@@ -12,7 +12,7 @@ import { TimeGet } from "./Time.js";
  * @interval The time interval (in miliseconds) to which the timer will reset and start over. 
  * @clbk The callback to call every time the timer updates.
  * @clbkParams The callback to call every time the timer updates.
- * @idx Self refference index.The index of 'this' object inside the buffer that is stored to. 
+ * @idx Self reference index.The index of 'this' object inside the buffer that is stored to. 
  * @name A name for debugging 
  * @repeat How many times the timer will repeat before destruction. If set to 0, repeates forever.
  */

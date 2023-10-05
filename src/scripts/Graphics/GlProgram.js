@@ -4,30 +4,31 @@ import { LoadShaderProgram } from './GlShaders.js';
 import { GlUseProgram } from './Buffers/GlBuffers.js';
 import { Uniform, UniformsBuffer } from './Buffers/GlUniformBuffer.js';
 import { SHADER_CONSTANTS } from './Shaders/ConstructShader.js';
+import { Renderqueue_set_active } from '../Engine/Renderers/Renderer/RenderQueue.js';
 
 // Scoped global Gl Program object
 const _glPrograms = [];
 let _glProgramsCount = 0;
 
 
-export function GlIncrProgramsCnt() { _glProgramsCount++; }
-export function GlGetProgramsCnt() { return _glProgramsCount; }
-export function GlGetPrograms() { return _glPrograms; }
-export function GlGetProgram(progIdx) { return _glPrograms[progIdx]; }
-export function GlStoreProgram(progIdx, program) { _glPrograms[progIdx] = program; }
-export function GlGetVB(progIdx, vbIdx) { return _glPrograms[progIdx].vertexBuffer[vbIdx]; }
-export function GlGetIB(progIdx, ibIdx) { return _glPrograms[progIdx].indexBuffer[ibIdx]; }
+function Gl_progs_increment_count() { _glProgramsCount++; }
+function Gl_progs_store_program(progIdx, program) { _glPrograms[progIdx] = program; }
+export function Gl_progs_get_programs_count() { return _glProgramsCount; }
+export function Gl_progs_get() { return _glPrograms; }
+export function Gl_progs_get_prog_byidx(progIdx) { return _glPrograms[progIdx]; }
+export function Gl_progs_get_vb_byidx(progIdx, vbIdx) { return _glPrograms[progIdx].vertexBuffer[vbIdx]; }
+export function Gl_progs_get_ib_byidx(progIdx, ibIdx) { return _glPrograms[progIdx].indexBuffer[ibIdx]; }
+export function Gl_progs_get_shaderinfo(progIdx) { return _glPrograms[progIdx].shaderinfo; }
+export function Gl_progs_get_shaderinfo_uniforms(progIdx) { return _glPrograms[progIdx].shaderinfo.uniforms; }
 
-export function GlGetProgramShaderInfo(progIdx) { return _glPrograms[progIdx].shaderInfo; }
-export function GlGetProgramUniformLocations(progIdx) { return _glPrograms[progIdx].shaderInfo.uniforms; }
-
-export function GlSetTextureIdx(progIdx, vbIdx, texIdx){ _glPrograms[progIdx].vertexBuffer[vbIdx].texIdx = texIdx; }
+export function Gl_progs_set_vb_texidx(progIdx, vbIdx, textidx){ _glPrograms[progIdx].vertexBuffer[vbIdx].textidx = textidx; }
 
 
 export class GfxInfoMesh {
 
 	sid = INT_NULL;
 	sceneidx = INT_NULL;
+	scene_gfx_mesh_idx = INT_NULL; // The index of the mesh inside the scenes gfx buffer.
 	isPrivate = false;
 	sessionId = INT_NULL;
 	numFaces = 0;
@@ -38,7 +39,7 @@ export class GfxInfoMesh {
 	
 	gfx_ctx = { // This refers to the GfxCtx2 class interface. GfxCtx2 is used to connect Engine system with application's Graphic System. 
 		sessionId: INT_NULL, // If the vertex buffer has private use, the sessionid 'categorizes' all the vertex buffers belonging to a session. 
-		idx: INT_NULL // The index of the GfxCtx2 buffer. 
+		idx: INT_NULL // The index of the GfxCtx buffer. 
 	}
 	prog = {
 		idx: INT_NULL,
@@ -124,8 +125,8 @@ export class GlProgram {
 	constructor(gl, sid) {
 
 		this.sid = sid; // Shader Type ID (E.g. ATTR_COL4 | ATTR_POS2 | INDEXED)
-		this.idx = GlGetProgramsCnt();
-		GlIncrProgramsCnt();
+		this.idx = Gl_progs_get_programs_count();
+		Gl_progs_increment_count();
 
 		this.webgl_program = null;
 		this.isActive = false;
@@ -142,7 +143,7 @@ export class GlProgram {
 
 		PrintShaderInfo(this);
 
-		this.shaderInfo = {
+		this.shaderinfo = {
 
 			attributes: {
 				
@@ -197,7 +198,7 @@ export class GlProgram {
 			isActive: false,
 		};
 
-		GlStoreProgram(this.idx, this);
+		Gl_progs_store_program(this.idx, this);
 
 		this.#PrivateCreateAttribsOffsets();
 	}
@@ -222,7 +223,7 @@ export class GlProgram {
 	#PrivateCreateAttribsOffsets() {
 		{
 			// Sort the attributes by their location in the shader
-			const obj = this.shaderInfo.attributes.loc;
+			const obj = this.shaderinfo.attributes.loc;
 			const sortedAttribLocations = Object.entries(obj)
 				.sort(([, v1], [, v2]) => v1 - v2)
 				.reduce((obj, [k, v]) => ({
@@ -239,7 +240,7 @@ export class GlProgram {
 			// }
 
 			// Store back the sorted version
-			this.shaderInfo.attributes.loc = sortedAttribLocations;
+			this.shaderinfo.attributes.loc = sortedAttribLocations;
 
 
 			/**
@@ -252,48 +253,48 @@ export class GlProgram {
 				if (sortedAttribLocations[prop] > INT_NULL) {
 
 					if (prop === 'col') {
-						this.shaderInfo.attributes.offset.col = attribsOffset;
-						attribsOffset += this.shaderInfo.attributes.size.col;
+						this.shaderinfo.attributes.offset.col = attribsOffset;
+						attribsOffset += this.shaderinfo.attributes.size.col;
 					}
 					else if (prop === 'pos') {
-						this.shaderInfo.attributes.offset.pos = attribsOffset;
-						attribsOffset += this.shaderInfo.attributes.size.pos;
+						this.shaderinfo.attributes.offset.pos = attribsOffset;
+						attribsOffset += this.shaderinfo.attributes.size.pos;
 					}
 					else if (prop === 'wposTime') {
-						this.shaderInfo.attributes.offset.wposTime = attribsOffset;
-						attribsOffset += this.shaderInfo.attributes.size.wposTime - 1;
+						this.shaderinfo.attributes.offset.wposTime = attribsOffset;
+						attribsOffset += this.shaderinfo.attributes.size.wposTime - 1;
 						// HACK. TODO, correct
-						this.shaderInfo.attributes.offset.time = attribsOffset;
+						this.shaderinfo.attributes.offset.time = attribsOffset;
 						attribsOffset += 1;
 					}
 					else if (prop === 'tex') {
-						this.shaderInfo.attributes.offset.tex = attribsOffset;
-						attribsOffset += this.shaderInfo.attributes.size.tex;
+						this.shaderinfo.attributes.offset.tex = attribsOffset;
+						attribsOffset += this.shaderinfo.attributes.size.tex;
 					}
 					else if (prop === 'params1') {
-						this.shaderInfo.attributes.offset.params1 = attribsOffset;
-						attribsOffset += this.shaderInfo.attributes.size.params1;
+						this.shaderinfo.attributes.offset.params1 = attribsOffset;
+						attribsOffset += this.shaderinfo.attributes.size.params1;
 					}
 					// else if (prop === 'style') {
-					// 	this.shaderInfo.attributes.offset.style = attribsOffset;
-					// 	attribsOffset += this.shaderInfo.attributes.size.style;
+					// 	this.shaderinfo.attributes.offset.style = attribsOffset;
+					// 	attribsOffset += this.shaderinfo.attributes.size.style;
 					// }
 					else if (prop === 'sdf') {
-						this.shaderInfo.attributes.offset.sdf = attribsOffset;
-						attribsOffset += this.shaderInfo.attributes.size.sdf;
+						this.shaderinfo.attributes.offset.sdf = attribsOffset;
+						attribsOffset += this.shaderinfo.attributes.size.sdf;
 					}
 				}
 			}
 
 			// Store the total attributes count
-			this.shaderInfo.attribsPerVertex = attribsOffset;
+			this.shaderinfo.attribsPerVertex = attribsOffset;
 			// Store the total vertices per rectangle mesh based on Indexed geometry or not
 			if (this.sid.shad & SID.SHAD.INDEXED)
-				this.shaderInfo.verticesPerRect = VERTS_PER_RECT_INDEXED;
+				this.shaderinfo.verticesPerRect = VERTS_PER_RECT_INDEXED;
 			else
-				this.shaderInfo.verticesPerRect = VERTS_PER_RECT;
+				this.shaderinfo.verticesPerRect = VERTS_PER_RECT;
 
-				if(DEBUG.SHADER_INFO) console.log('ShaderInfo:', this.shaderInfo)
+				if(DEBUG.SHADER_INFO) console.log('ShaderInfo:', this.shaderinfo)
 
 		}
 	}
@@ -302,7 +303,7 @@ export class GlProgram {
 	UpdateUniforms(gl){
 
 		if (this.timer.isActive) this,UniformsUpdateTimer();
-		if (this.shaderInfo.uniforms.buffer.needsUpdate) {
+		if (this.shaderinfo.uniforms.buffer.needsUpdate) {
 			this.UniformsUpdateBufferUniforms(gl);
 		}
 	}
@@ -311,21 +312,21 @@ export class GlProgram {
 	 * Uniforms Buffer
 	 */
 	UniformsCreateBufferUniform(name) {
-		this.shaderInfo.uniforms.buffer.CreateUniform(name);
+		this.shaderinfo.uniforms.buffer.CreateUniform(name);
 	}
 	UniformsSetBufferUniform(val, index) {
-		this.shaderInfo.uniforms.buffer.Set(val, index);
+		this.shaderinfo.uniforms.buffer.Set(val, index);
 	}
 	UniformsCreateSetBufferUniform(name, val) {
-		const idx = this.shaderInfo.uniforms.buffer.CreateUniform(name);
-		this.shaderInfo.uniforms.buffer.Set(val, idx);
+		const idx = this.shaderinfo.uniforms.buffer.CreateUniform(name);
+		this.shaderinfo.uniforms.buffer.Set(val, idx);
 	}
 	UniformsUpdateBufferUniforms(gl) {
-			this.shaderInfo.uniforms.buffer.Update(gl);
+			this.shaderinfo.uniforms.buffer.Update(gl);
 	}
 	UniformsSetUpdateBufferUniform(gl, val, index) {
-		this.shaderInfo.uniforms.buffer.Set(val, index);
-		this.shaderInfo.uniforms.buffer.Update(gl);
+		this.shaderinfo.uniforms.buffer.Set(val, index);
+		this.shaderinfo.uniforms.buffer.Update(gl);
 	}
 
 	/**
@@ -337,12 +338,12 @@ export class GlProgram {
 		// 'Activates' 1 array element of the uniforms buffer array.
 		this.timer.isActive = true;
 		this.timer.step = step;
-		this.timer.index = this.shaderInfo.uniforms.buffer.CreateUniform('Timer');
+		this.timer.index = this.shaderinfo.uniforms.buffer.CreateUniform('Timer');
 	}
 
 	UniformsUpdateTimer() {
 
-		this.shaderInfo.uniforms.buffer.Set(this.timer.val, this.timer.index);
+		this.shaderinfo.uniforms.buffer.Set(this.timer.val, this.timer.index);
 		this.uniformsNeedUpdate = true;
 		this.timer.val += this.timer.step;
 	}
@@ -352,8 +353,8 @@ export class GlProgram {
 		 * 'Activates' 2 array elements of the uniforms buffer array, and returns the 2 indexes
 		 *  so the caller can 'Set' the uniforms value at it's site.
 		 */
-		const resXidx = this.shaderInfo.uniforms.buffer.CreateUniform('ScreenResX');
-		const resYidx = this.shaderInfo.uniforms.buffer.CreateUniform('ScreenResY');
+		const resXidx = this.shaderinfo.uniforms.buffer.CreateUniform('ScreenResX');
+		const resYidx = this.shaderinfo.uniforms.buffer.CreateUniform('ScreenResY');
 
 		return {
 			resXidx: resXidx,
@@ -366,14 +367,14 @@ export class GlProgram {
 	 * Uniforms that are used in every new program.
 	 */
 	UniformsSetProjectionMatrix(val) {
-		this.shaderInfo.uniforms.projection.Set(val);
+		this.shaderinfo.uniforms.projection.Set(val);
 	}
 	UniformsUpdateProjectionMatrix(gl) {
-		this.shaderInfo.uniforms.projection.Update(gl);
+		this.shaderinfo.uniforms.projection.Update(gl);
 	}
 	UniformsSetUpdateProjectionMatrix(gl, val) {
-		this.shaderInfo.uniforms.projection.Set(val);
-		this.shaderInfo.uniforms.projection.Update(gl);
+		this.shaderinfo.uniforms.projection.Set(val);
+		this.shaderinfo.uniforms.projection.Update(gl);
 	}
 
 	/**
@@ -381,11 +382,11 @@ export class GlProgram {
 	 * Not neccesary cause it needs a lot of conditional statements
 	 */
 	UniformsUpdate(gl) {
-		if (this.shaderInfo.uniforms.buffer.needsUpdate) {
-			this.shaderInfo.uniforms.buffer.Update(gl);
+		if (this.shaderinfo.uniforms.buffer.needsUpdate) {
+			this.shaderinfo.uniforms.buffer.Update(gl);
 		}
-		if (this.shaderInfo.uniforms.projection.needsUpdate) {
-			this.shaderInfo.uniforms.projection.Update(gl, val);
+		if (this.shaderinfo.uniforms.projection.needsUpdate) {
+			this.shaderinfo.uniforms.projection.Update(gl, val);
 		}
 		this.uniformsNeedUpdate = false;
 	}
@@ -396,11 +397,16 @@ export class GlProgram {
 /*
  * Generalized Program Web Gl Creation 
  */
-export function GlCreateProgram(sid) {
+export function Gl_create_program(sid) {
 	const prog = new GlProgram(gfxCtx.gl, sid);
-	// // Initialize attribute locations of the shader for every newly created program
-	// GlEnableAttribsLocations(gfxCtx.gl,prog);
 	return prog.idx;
+}
+
+export function Gl_set_vb_show(progIdx, vbIdx, flag) {
+
+	_glPrograms[progIdx].vertexBuffer[vbIdx].show = flag;
+	_glPrograms[progIdx].indexBuffer[vbIdx].show = flag;
+	Renderqueue_set_active(progIdx, vbIdx, flag); // Update the draw buffer
 }
 
 
@@ -415,10 +421,10 @@ export function GlCreateProgram(sid) {
  */
 export function GlEnableAttribsLocations(gl, prog) {
 
-	const attribsPerVertex = prog.shaderInfo.attribsPerVertex;
-	const loc = prog.shaderInfo.attributes.loc;
-	const size = prog.shaderInfo.attributes.size;
-	const offset = prog.shaderInfo.attributes.offset;
+	const attribsPerVertex = prog.shaderinfo.attribsPerVertex;
+	const loc = prog.shaderinfo.attributes.loc;
+	const size = prog.shaderinfo.attributes.size;
+	const offset = prog.shaderinfo.attributes.offset;
 
 
 	// For Uniforms
@@ -466,7 +472,7 @@ export function GlProgramUpdateUniformProjectionMatrix(gl, progIdx, mat4) {
 
 export function GlCheckSid(sid, progidx){
 
-	const prog = GlGetProgram(progidx);
+	const prog = Gl_progs_get_prog_byidx(progidx);
 	
 	if (SID.CheckSidMatch(sid, prog.sid)) return true;
 	return false;

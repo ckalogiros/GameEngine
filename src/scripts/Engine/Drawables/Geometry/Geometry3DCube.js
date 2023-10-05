@@ -82,16 +82,10 @@ export class CubeGeometry extends Geometry3D {
             vertexPos[i] = this.faces[i++] * z;
         }
 
-        
-        
         let counters = {
             cntPos:0, cntNorm:0, cntUv:0, indicesStart: gfx.ib.count,
         };
 
-        // counters = this.CreateFace( 0, 2, 1, 1, 1, this.dim[0], this.dim[2], this.dim[1], 1, 1, {vertexPos:vertexPos, normal:null, uv:null, index:indexBuffer}, counters); // Front face
-        // counters = this.CreateFace( 0, 1, 2, 1, 1, this.dim[2], this.dim[1], this.dim[0], 1, 1, {vertexPos:vertexPos, normal:null, uv:null, index:indexBuffer}, counters ); // Front face
-        // counters = this.CreateFace( 0, 1, 2, 1, 1, this.dim[1], this.dim[0], this.dim[2], 1, 1, {vertexPos:vertexPos, normal:null, uv:null, index:indexBuffer}, counters); // Front face
-        // counters = this.CreateFace( 0, 1, 2, 1, 1, this.dim[1], this.dim[2], this.dim[0], 1, 1, {vertexPos:vertexPos, normal:null, uv:null, index:indexBuffer}, counters ); // Front face
         gfx.numFaces++;
         gfx.numFaces++;
         gfx.numFaces++;
@@ -227,139 +221,4 @@ export class CubeGeometry extends Geometry3D {
         return {cntPos:cntPos, cntNorm:cntNorm, cntUv:cntUv, indicesStart:indicesStart,}
     }
 
-    // CreateFace( udir, vdir, width, height, depth, gridX, gridY ) {
-
-    //     /** */ // From THREE.js
-    //     const segmentWidth = width / gridX;
-    //     const segmentHeight = height / gridY;
-
-    //     const widthHalf = width / 2;
-    //     const heightHalf = height / 2;
-    //     const depthHalf = depth / 2;
-
-    //     const gridX1 = gridX + 1;
-    //     const gridY1 = gridY + 1;
-
-    //     let vertexCounter = 0;
-
-    //     const vertexPos = new Float32Array(gridY1 * gridX1 * 3);
-    //     const normals = new Float32Array(gridY1 * gridX1 * 3);
-    //     const uvs = new Float32Array(gridY1 * gridX1 * 2);
-
-
-    //     // generate vertices, normals and uvs
-    //     for ( let iy = 0; iy < gridY1; iy ++ ) {
-
-    //         const y = iy * segmentHeight - heightHalf;
-
-    //         for ( let ix = 0; ix < gridX1; ix ++ ) {
-
-    //             const x = ix * segmentWidth - widthHalf;
-
-    //             // set values to correct vertexPos component
-    //             vertexPos[ iy+ix ]   = x * udir;
-    //             vertexPos[ iy+ix+1 ] = y * vdir;
-    //             vertexPos[ iy+ix+2 ] = depthHalf;
-
-    //             // set values to correct vertexPos component
-    //             normals[ iy+ix ]   = 0;
-    //             normals[ iy+ix+1 ] = 0;
-    //             normals[ iy+ix+2 ] = depth > 0 ? 1 : - 1;
-
-    //             // uvs
-    //             uvs[iy+ix] = ix / gridX;
-    //             uvs[iy+ix+1] = 1 - ( iy / gridY );iy+ix+
-    //             // counters
-    //             vertexCounter ++;
-
-    //         }
-
-    //     }
-
-    //     console.log('vertexPos', vertexPos)
-    //     console.log('normals', normals)
-    //     console.log('uvs', uvs)
-
-    //     // indices
-    //     // 1. you need three indices to draw a single face
-    //     // 2. a single segment consists of two faces
-    //     // 3. so we need to generate six (2*3) indices per segment
-    //     // for ( let iy = 0; iy < gridY; iy ++ ) {
-
-    //     //     for ( let ix = 0; ix < gridX; ix ++ ) {
-
-    //     //         const a = numberOfVertices + ix + gridX1 * iy;
-    //     //         const b = numberOfVertices + ix + gridX1 * ( iy + 1 );
-    //     //         const c = numberOfVertices + ( ix + 1 ) + gridX1 * ( iy + 1 );
-    //     //         const d = numberOfVertices + ( ix + 1 ) + gridX1 * iy;
-    //     //         // faces
-    //     //         indices.push( a, b, d );
-    //     //         indices.push( b, c, d );
-    //     //         // increase counter
-    //     //         groupCount += 6;
-    //     //     }
-    //     // }
-
-    //     // // add a group to the geometry. this will ensure multi material support
-    //     // scope.addGroup( groupStart, groupCount, materialIndex );
-    //     // // calculate new start value for groups
-    //     // groupStart += groupCount;
-    //     // // update total number of vertices
-    //     // numberOfVertices += vertexCounter;
-
-    // }
-
 }
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-        // {
-        //     i=0;
-        //     // Face Front
-        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v1
-        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v2
-        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
-        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v4
-            
-        //     // Face Right
-        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
-        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
-        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
-        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
-            
-        //     // Face Back
-        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v1
-        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
-        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v3
-        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v4
-            
-        //     // Face Left
-        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
-        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
-        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
-        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
-            
-        //     // Face Top
-        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v1
-        //     vertexPos[i++] = -x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v2
-        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] =  z; // v3
-        //     vertexPos[i++] =  x; vertexPos[i++] =  y; vertexPos[i++] = -z; // v4
-            
-        //     // Face Bottom
-        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v1
-        //     vertexPos[i++] = -x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v2
-        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] =  z; // v3
-        //     vertexPos[i++] =  x; vertexPos[i++] = -y; vertexPos[i++] = -z; // v4
-    // }
-
-    /**
-     'x', 'z', 'y',  1,  1, width, depth,   height, 
-        'x', 'y', 'z', -1, -1, width, height, -depth,  
-        'x', 'z', 'y',  1, -1, width, depth,  -height, 
-        'x', 'y', 'z',  1, -1, width, height,  depth,  
-        'z', 'y', 'x', -1, -1, depth, height,  width, 
-        'z', 'y', 'x',  1, -1, depth, height, -width, 
-        */

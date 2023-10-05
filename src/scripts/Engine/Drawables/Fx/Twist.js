@@ -1,4 +1,4 @@
-import { GlGetProgram } from "../../../Graphics/GlProgram.js";
+import { Gl_progs_get_prog_byidx } from "../../../Graphics/GlProgram.js";
 import { MeshBuffer, TempMesh } from "../MeshBuffer_OLD.js";
 
 class TwistMesh extends TempMesh {
@@ -38,17 +38,17 @@ export class Twist extends MeshBuffer{
       for (let i = 0; i < this.size; i++) {
          if (this.buffer[i].isActive) {
             this.buffer[i].Move(this.buffer[i].translation.xAdvance, this.buffer[i].translation.yAdvance);
-            const prog = GlGetProgram(this.buffer[i].gfxInfo.prog.idx);
+            const prog = Gl_progs_get_prog_byidx(this.buffer[i].gfxInfo.prog.idx);
             prog.SetTimer(0.1, UNIFORM_PARAMS.TWIST.timeIdx);
          }
       }
    }
    SetTimer() {
-      const prog = GlGetProgram(this.buffer[i].gfx.prog.idx);
+      const prog = Gl_progs_get_prog_byidx(this.buffer[i].gfx.prog.idx);
       prog.SetTimer(0.1, UNIFORM_PARAMS.TWIST.timeIdx);
    }
    SetAmtxSpeed(val) {
-      const prog = GlGetProgram(this.buffer[0].gfxInfo.prog.idx);
+      const prog = Gl_progs_get_prog_byidx(this.buffer[0].gfxInfo.prog.idx);
       prog.UniformsSetBufferUniform(val, UNIFORM_PARAMS.TWIST.dirIdx);
    }
 };

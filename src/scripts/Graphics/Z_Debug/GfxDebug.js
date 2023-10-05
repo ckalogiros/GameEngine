@@ -1,6 +1,6 @@
 "use strict";
 
-import { GlGetPrograms } from "../GlProgram.js";
+import { Gl_progs_get } from "../GlProgram.js";
 
 
 /**
@@ -65,67 +65,67 @@ export function PrintAttributes() {
     if(!GL_DEBUG_ATTRIBUTES) return;
 
     
-    const progs = GlGetPrograms();
+    const progs = Gl_progs_get();
     
     for(let i = 0; i < progs.length; i++){
         
         const prog = progs[i];        
         console.log('\n-[GL Enabled Attributes]-\nFor Shader Program: ', GetShaderTypeId(prog.sid))
-        const attribsPerVertex = prog.shaderInfo.attribsPerVertex;
+        const attribsPerVertex = prog.shaderinfo.attribsPerVertex;
     
         // For Uniforms
-        if (prog.shaderInfo.attributes.loc.col >= 0) {
-            console.log('   COLOR: loc:', prog.shaderInfo.attributes.loc.col,
+        if (prog.shaderinfo.attributes.loc.col >= 0) {
+            console.log('   COLOR: loc:', prog.shaderinfo.attributes.loc.col,
                 ' count:', V_COL_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.attributes.offset.col)
+                ' offset:', prog.shaderinfo.attributes.offset.col)
         }
-        if (prog.shaderInfo.attributes.loc.wposTime >= 0) {
-            console.log('   WPOS_TIME: loc:', prog.shaderInfo.attributes.loc.wposTime,
+        if (prog.shaderinfo.attributes.loc.wposTime >= 0) {
+            console.log('   WPOS_TIME: loc:', prog.shaderinfo.attributes.loc.wposTime,
                 ' count:', V_WPOS_TIME_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.attributes.offset.wposTime)
+                ' offset:', prog.shaderinfo.attributes.offset.wposTime)
         }
-        if (prog.shaderInfo.attributes.loc.pos >= 0) {
-            console.log('   POS: loc:', prog.shaderInfo.attributes.loc.pos,
+        if (prog.shaderinfo.attributes.loc.pos >= 0) {
+            console.log('   POS: loc:', prog.shaderinfo.attributes.loc.pos,
                 ' count:', V_POS_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.attributes.offset.pos)
+                ' offset:', prog.shaderinfo.attributes.offset.pos)
         }
-        if (prog.shaderInfo.attributes.loc.tex >= 0) {
-            console.log('   TEX: loc:', prog.shaderInfo.attributes.loc.tex,
+        if (prog.shaderinfo.attributes.loc.tex >= 0) {
+            console.log('   TEX: loc:', prog.shaderinfo.attributes.loc.tex,
                 ' count:', V_TEX_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.attributes.offset.tex)
+                ' offset:', prog.shaderinfo.attributes.offset.tex)
         }
-        if (prog.shaderInfo.attributes.loc.params1 >= 0) {
-            console.log('   PARAMS1: loc:', prog.shaderInfo.attributes.loc.params1,
+        if (prog.shaderinfo.attributes.loc.params1 >= 0) {
+            console.log('   PARAMS1: loc:', prog.shaderinfo.attributes.loc.params1,
                 ' count:', V_PARAMS1_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.attributes.offset.params1)
+                ' offset:', prog.shaderinfo.attributes.offset.params1)
         }
-        if (prog.shaderInfo.attributes.loc.sdf >= 0) {
-            console.log('   Sdf: loc:', prog.shaderInfo.attributes.loc.sdf,
+        if (prog.shaderinfo.attributes.loc.sdf >= 0) {
+            console.log('   Sdf: loc:', prog.shaderinfo.attributes.loc.sdf,
                 ' count:', V_SDF_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.attributes.offset.sdf)
+                ' offset:', prog.shaderinfo.attributes.offset.sdf)
         }
-        if (prog.shaderInfo.attributes.loc.style >= 0) {
-            console.log('   RADIUS: loc:', prog.shaderInfo.attributes.roundLoc,
+        if (prog.shaderinfo.attributes.loc.style >= 0) {
+            console.log('   RADIUS: loc:', prog.shaderinfo.attributes.roundLoc,
                 ' count:', V_STYLE_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.attributes.offset.style)
+                ' offset:', prog.shaderinfo.attributes.offset.style)
         }
-        if (prog.shaderInfo.attributes.loc.time >= 0) {
-            console.log('   TIME: loc:', prog.shaderInfo.attributes.loc.time,
+        if (prog.shaderinfo.attributes.loc.time >= 0) {
+            console.log('   TIME: loc:', prog.shaderinfo.attributes.loc.time,
                 ' count:', V_TIME_COUNT, ' stride:', attribsPerVertex, 
-                ' offset:', prog.shaderInfo.attributes.offset.time)
+                ' offset:', prog.shaderinfo.attributes.offset.time)
         }
     
         console.log('\n')
         console.log('\nGL Enable Uniforms:')
     
-        if (prog.shaderInfo.uniforms.projection) {
-            console.log('   Orthographic Projection: ', prog.shaderInfo.uniforms.projection)
+        if (prog.shaderinfo.uniforms.projection) {
+            console.log('   Orthographic Projection: ', prog.shaderinfo.uniforms.projection)
         }
-        if (prog.shaderInfo.uniforms.sampler) {
-            console.log('   Texture Sampler: ', prog.shaderInfo.uniforms.sampler)
+        if (prog.shaderinfo.uniforms.sampler) {
+            console.log('   Texture Sampler: ', prog.shaderinfo.uniforms.sampler)
         }
-        if (prog.shaderInfo.uniforms.uniformsBufferLoc) {
-            console.log('   Sdf Font Params: ', prog.shaderInfo.uniforms.uniformsBufferLoc)
+        if (prog.shaderinfo.uniforms.uniformsBufferLoc) {
+            console.log('   Sdf Font Params: ', prog.shaderinfo.uniforms.uniformsBufferLoc)
         }
 
     }
@@ -151,7 +151,7 @@ export function PrintProgram(prog, idx){
  */
 export function PrintShaderInfo(prog){
     if(!GL_DEBUG_SHADER_INFO) return;
-    console.log('-[Gl Shader Info]-\n', prog.shaderInfo, ' sid:', GetShaderTypeId(prog.info.sid))
+    console.log('-[Gl Shader Info]-\n', prog.shaderinfo, ' sid:', GetShaderTypeId(prog.info.sid))
 }
 export function PrintVertexBuffer(vb){
     if(!GL_DEBUG_VERTEX_BUFFER) return;
@@ -160,7 +160,7 @@ export function PrintVertexBuffer(vb){
 export function PrintVertexBufferDataAndNames(){
     if(!GL_DEBUG_VERTEX_BUFFER) return;
     
-    const progs = GlGetPrograms();
+    const progs = Gl_progs_get();
     console.log('-[Gl Vertex Buffer]')
     for(let i=0; i<progs.length; i++){
         console.log('prog:', i)
@@ -176,7 +176,7 @@ export function PrintVertexBufferDataAndNames(){
 export function PrintVertexDataAll(){
     if(!GL_DEBUG_VERTEX_BUFFER) return;
     
-    const progs = GlGetPrograms();
+    const progs = Gl_progs_get();
     console.log('-[Gl Vertex Buffer]-')
     for(let i=0; i<progs.length; i++){
         console.log(' progidx:', i)
@@ -187,7 +187,7 @@ export function PrintVertexDataAll(){
 export function PrintVertexBufferAllPretty(){
     if(!GL_DEBUG_VERTEX_BUFFER) return;
     
-    const progs = GlGetPrograms();
+    const progs = Gl_progs_get();
     for(let i=0; i<progs.length; i++){
         console.log('-[Gl Vertex Buffer]-')
         for(let j=0; j<progs[i].vertexBufferCount; j++){
@@ -205,12 +205,18 @@ export function PrintVertexBufferAllPretty(){
 }
 export function PrintIndexBuffer(ib){
     if(!GL_DEBUG_INDEX_BUFFER) return;
+    
+    const progs = Gl_progs_get();
     console.log('-[Gl Index Buffer]-\n', ib)
+    for(let i=0; i<progs.length; i++){
+        console.log('prog:', i)
+        console.log('Index buffers:', progs[i].indexBuffer)
+    }
 }
 export function PrintIndexBufferAll(){
     if(!GL_DEBUG_INDEX_BUFFER) return;
     
-    const progs = GlGetPrograms();
+    const progs = Gl_progs_get();
     console.log('-[Gl Index Buffer]')
     for(let i=0; i<progs.length; i++){
         console.log('prog:', i)
@@ -230,7 +236,7 @@ export function PrintBuffersAll(){
     if(!GL_DEBUG_BUFFERS_ALL) return;
     
     console.log('-[Gl Print All GL Buffers]-')
-    const progs = GlGetPrograms();
+    const progs = Gl_progs_get();
     for(let i=0; i<progs.length; i++){
         
         for(let j=0; j<progs[i].vertexBuffer.length; j++){
@@ -244,7 +250,7 @@ export function PrintBuffersMeshesNames(){
     if(!GL_DEBUG_BUFFERS_ALL) return;
     
     console.log('-[Gl Print All GL Buffers Meshes Names]-')
-    const progs = GlGetPrograms();
+    const progs = Gl_progs_get();
     for(let i=0; i<progs.length; i++){
         console.log('progIdx:', i, ': ')
         for(let j=0; j<progs[i].vertexBuffer.length; j++){
@@ -258,7 +264,7 @@ export function PrintBuffersAttribsCount(){
     if(!GL_DEBUG_BUFFERS_ALL) return;
     
     console.log('-[Gl Print All GL Buffers Attribs Count]-')
-    const progs = GlGetPrograms();
+    const progs = Gl_progs_get();
     for(let i=0; i<progs.length; i++){
         for(let j=0; j<progs[i].vertexBuffer.length; j++){
             console.log('prog:', i, ' vb:', j, ' count:', progs[i].vertexBuffer[j].count, ' size:', progs[i].vertexBuffer[j].size)

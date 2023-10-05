@@ -4,6 +4,7 @@ import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
 import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
+import { MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx, TimeIntervalsGetByIdx } from "../../../Timers/TimeIntervals.js";
 import { Text_Mesh } from "../Text_Mesh.js";
@@ -19,12 +20,12 @@ export class Widget_Text extends Text_Mesh {
 
 	pad = [0, 0];
 
-	constructor(text, pos, fontSize = 5,  color = WHITE, bold = 4, font, scale) {
+	constructor(text, pos, fontSize = 5, col = WHITE, bold = 4, font, scale) {
 
 		const sdfouter = CalculateSdfOuterFromDim(fontSize);
 		if (sdfouter + bold > 1) bold = 1 - sdfouter;
 
-		super(text, pos, fontSize, scale, color)
+		super(text, pos, fontSize, scale, col)
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT | this.type;
 
 		this.SetName('Text ' + text.slice(0, 7))
@@ -32,9 +33,9 @@ export class Widget_Text extends Text_Mesh {
 	}
 
 	/*******************************************************************************************************************************************************/
-   // Graphics
+	// Graphics
 	GenGfxCtx(FLAGS, gfxidx) {
-		
+
 		const gfx = super.GenGfxCtx(FLAGS, gfxidx);
 		return gfx;
 	}
@@ -139,7 +140,7 @@ export class Widget_Text extends Text_Mesh {
 	// 	 */
 
 	// 	const mesh = params.params;
-		
+
 	// 	// Destroy the time interval calling this function if the mesh is not grabed.
 	// 	if (mesh.StateCheck(MESH_STATE.IN_GRAB) === 0) {
 
@@ -167,7 +168,7 @@ export class Widget_Text extends Text_Mesh {
 	// 	if(textMesh.geom.num_faces < textLen){
 
 	// 		const dif_num_faces = textLen - textMesh.geom.num_faces;
-			
+
 	// 		// If the text to be update is larger than the text allready in the vertex buffer, 
 	// 		// shift all next elements of the buffer to the start of the curent text, 
 	// 		// and re-add the text mesh at the end of the vertex buffer.
@@ -179,7 +180,7 @@ export class Widget_Text extends Text_Mesh {
 	// 		textMesh.mat.text = new_text; 
 	// 		textMesh.geom.num_faces = textLen;
 	// 		textMesh.mat.num_faces = textLen;
-			
+
 	// 		textMesh.geom.AddToGraphicsBuffer(textMesh.sid, textMesh.gfx, textMesh.name);
 	// 		textMesh.mat.AddToGraphicsBuffer(textMesh.sid, textMesh.gfx);
 	// 		return;
@@ -207,50 +208,122 @@ export class Widget_Text extends Text_Mesh {
 	// 	}
 	// }
 
-	Reposition_post(dif_pos){
+	Reposition_post(dif_pos) {
 
 		this.MoveXYZ(dif_pos)
-		for(let i=0; i<this.children.boundary; i++){
+		for (let i = 0; i < this.children.boundary; i++) {
 
 			const child = this.children.buffer[i];
 			child.MoveXYZ(dif_pos)
 		}
-   }
+	}
 
 }
 
-let DYN_TEXT_UPDATE_INTERVAL_IDX = INT_NULL;
 
-export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
+/**
+ * A widget of rendering static text 
+ * in combination with dynamic text.
+ */
+// export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
+export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 
+	/** Set the max number of characters for the dynamic text, 
+	 * by passing any text as 'dynamic_text' of length= dynamic text number of characters*/
+	constructor(text, dynamic_text, pos, fontSize, text_col1, text_col2, bold) {
 
-	/** The 'maxDynamicTextChars' sets the max number of characters for the dynamic text.
-	 * If the text changes to a lesser number of chars, the update function just adds empty spaces*/
-	constructor(maxDynamicTextChars, pos, fontSize, scale, color1, bold) {
+		super(text, pos, fontSize, text_col1, bold);
 
-		super(maxDynamicTextChars, pos, fontSize, color1, bold, scale);
+		// Translate the dynamic text by the width of the constant text's width
+		pos[0] += this.geom.CalcTextWidth();
+		const dynamicText = new Widget_Text(dynamic_text, pos, fontSize, text_col2, bold);
 
-		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | this.geom.type | this.mat.type;
+		this.AddChild(dynamicText)
 
-		this.SetName('Dynamic Text ' + this.mat.text.slice(0, 7));
-
+		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | dynamicText.geom.type | dynamicText.mat.type;
 
 	}
 
+	Destroy() {
+
+		for (let i = 0; i < this.children.boundary; i++) {
+
+			if (this.children.buffer[i]) {
+				this.children.buffer[i].Destroy();
+			}
+		}
+
+		super.Destroy();
+	}
+
+	/*******************************************************************************************************************************************************/
+	// GFX
+
 	GenGfxCtx(FLAGS, gfxidx) {
 
-		const gfx = super.GenGfxCtx(FLAGS, gfxidx);
-		return gfx;
+		super.GenGfxCtx(FLAGS, gfxidx);
+		for (let i = 0; i < this.children.boundary; i++) {
+
+			const child = this.children.buffer[i];
+			if (child) child.GenGfxCtx(FLAGS, gfxidx);
+		}
+		return this.gfx;
 	}
 
 	Render() {
 
-		super.Render()
+		super.Render();
+		for (let i = 0; i < this.children.boundary; i++) {
+
+			const child = this.children.buffer[i];
+			if (child) child.Render();
+		}
 	}
 
-	CreateNewText(maxDynamicTextChars, fontSize, color2, pad=this.pad, bold=this.bold) {
+	AddChild(text_mesh) {
 
-		 /** DEBUG */ if (!Array.isArray(pad)) console.error('Pad is not of type array');
+		text_mesh.idx = this.children.Add(text_mesh);
+		text_mesh.parent = this;
+		return text_mesh.idx;
+	}
+
+
+	/*******************************************************************************************************************************************************/
+	// Setters-Getters
+
+	/** Return type: Array. Returns an array of all widgets meshes */
+	GetAllMeshes(parent_meshes_buf) {
+
+		const all_meshes = parent_meshes_buf ? parent_meshes_buf : [];
+		all_meshes.push(this);
+		for (let i = 0; i < this.children.boundary; i++) {
+
+			const child = this.children.buffer[i];
+			if (child) all_meshes.push(child);
+		}
+		return all_meshes;
+	}
+
+	GetTotalWidth() {
+		let total_width = super.GetTotalWidth();
+		for (let i = 0; i < this.children.boundary; i++) {
+			// total_width += this.children.buffer[i].geom.dim[0] * this.children.buffer[i].geom.num_faces;
+			total_width += this.children.buffer[i].GetTotalWidth();
+		}
+
+		return total_width;
+	}
+
+	GetTotalHeight() {
+		return this.geom.dim[1];
+	}
+
+
+	/*******************************************************************************************************************************************************/
+	// 
+	CreateNewText(dynamic_text, fontSize, text_col2, pad = this.pad, bold = this.bold) {
+
+		/** DEBUG */ if (!Array.isArray(pad)) console.error('Pad is not of type array');
 		this.pad = pad;
 
 		let pos = [0, 0, 0];
@@ -259,7 +332,7 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 
 			const lastChild = this.children.buffer[this.children.boundary - 1];
 			ERROR_NULL(lastChild, ' @ Widget_Dynamic_Text_Mesh.CreateNewText(). WidgetText.js');
-			
+
 			// console.log(lastChild.geom.pos)
 			// Translate to right after the previous dynamicText.
 			pos = [0, 0, 0];
@@ -273,9 +346,9 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 			pos[0] += this.geom.CalcTextWidth()
 		}
 
-		const dynamicText = new Widget_Text(maxDynamicTextChars, pos, fontSize, color2, bold);
+		const dynamicText = new Widget_Text(dynamic_text, pos, fontSize, text_col2, bold);
 		dynamicText.type = MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC;
-		
+
 		// Add the new dynamicText as a child of 'this'.
 		const idx = this.AddChild(dynamicText);
 		dynamicText.SetName(idx, ' Dynamic Text ' + this.mat.text.slice(0, 7));
@@ -285,212 +358,6 @@ export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | dynamicText.geom.type | dynamicText.mat.type;
 
 		return idx;
-	}
-
-	/**
-	  * ##SetDynamicText
-	  * @param {integer} msInterval The time interval in ms the dynamic text will be updated
-	  * @param {callbackfunction} func The function to call upon time interval
-	  * 
-	  * This function sets up the update of the dynamic text part of this class.
-	  * The function sets up a timeInterval that will call back the this.Update() method.
-	  * The Update method must have 'params' parameter and the params must have: 
-	  * 	1. A 'func' field: that is the callback (set by the caller to this.SetDynamicText() call).
-	  * 		The 'func' is a function responsible for returning a string, that will be used to
-	  * 		update the curent dynamicText.
-	  * 		The 'func' field is an array, even if there is only one callback (for one dynamicText).
-	  * 		This is because we may create additional dynamicTexts that will need their own 
-	  * 		text creation callback.
-	  * 	2. A 'meshes' field: that is an array of 'dynamicText' meshes. We prefer an array, 
-	  * 		in case we need to pass more than one 'dynamicText' meshes to the update function
-	  * 		for execution. 
-	  * In the update method we loop through all characters of the new text and update the 
-	  * graphics buffers.
-	  */
-	SetDynamicText(msInterval, func, name, idx = INT_NULL, func_params = null, flag) {
-
-
-		if (idx !== INT_NULL || this.children.boundary <= 0 || flag) {
-			/**
-			 * The this.children.boundary takes a snapshot of the children count upon this function call.
-			 * The idea is: for example uppon function call for the first time
-			 * with one dynamic text mesh, the count=1. At this time the idx param is null,
-			 * because it is the first call to the SetDynamicText() for this object instantiation.
-			 * so we pass as param to the interval function, the whole buffer of children
-			 * that currently has one mesh, that is the dynamicText mesh.
-			 * 
-			 * When the CreateNewText() is called to add a second dynamicText to 'this',
-			 * we make a choise:
-			 * 	1. Either we  create a new timeInterval for the new dynamicText.
-			 * 	2. We use the same timeInterval from the first dynamicText (class instantiation).
-			 * For the first case procedure is pretty much straight forward.
-			 * For the second approach we destroy the timeInterval created by 
-			 * the instantiation of the class and create a new one, passing the 2 dynamicTexts 
-			 * as an array to the params parameter of the timeInterval call.
-			 * Doing so, when the callback of the timeInterval is called, that is the this.Update() method,
-			 * we will have 2 dynamicTexts to update with 2 different callbacks each,
-			 * for the their text manipulation.
-			 * 
-			 */
-
-			const params = {
-				func: [func], // Array in case we expand to have more dynamic texts
-				func_params: [func_params],
-				meshes: null,
-			};
-
-			const meshes = [];
-			if (flag) meshes.push(this.children.buffer[0]); // At first call we deal with the first child mesh at index 0
-			else if (idx === INT_NULL) meshes.push(this); // At first call we deal with the first child mesh at index 0
-			else meshes.push(this.children.buffer[idx]);
-			params.meshes = meshes;
-
-			const tIdx = TimeIntervalsCreate(msInterval, name, TIME_INTERVAL_REPEAT_ALWAYS, this.Update, params);
-			this.timeIntervalsIdxBuffer.Add(tIdx);
-		}
-		else { // Update dynamicText via one timeInterval Update().
-
-			// The 'new' params to be passed to the new timeInterval.
-			const params = {
-				func: [], // All timeInterval's callbacks here
-				func_params: [], /* These are the parameters NOT for the timeInterval and the 'this.Update()' 
-										function callback, rather for the callback the 'this.Update()' 
-										will call, to create the text for the dynamicText update. */
-				meshes: [], // all the dynamicTexts here. They wiil be Updated() by one timeInterval.
-			};
-
-
-			/**
-			 * MAYBE BUG: Getting the 0 index timeInterval from timeIntervalsIdxBuffer assuming the bellow explanation.
-			 *	If the same interval and update is going to be used, then we want the first timeInterval 
-			 *	that was created which is the 0-th element of the this.timeIntervalsIdxBuffer.buffer[].
-			 * What happens if the this.timeIntervalsIdxBuffer.buffer[] gets another timeInterval???
-			 * How we distinguish which index we have to remove???
-			 */
-			const interval = TimeIntervalsGetByIdx(this.timeIntervalsIdxBuffer.buffer[0]);
-			const oldFuncs = interval.clbkParams.params.func;
-			const oldFuncsParams = interval.clbkParams.params.func_params;
-			const oldMeshBuffer = interval.clbkParams.params.meshes;
-
-			let i = 0;
-
-			// Copy all callback functions found in the timeInterval to pass them to the new timeInterval.
-			for (i = 0; i < oldFuncs.length; i++) {
-
-				// Copy all callback functions found in the timeInterval to pass them to the new timeInterval.
-				params.func[i] = oldFuncs[i];
-
-				// Copy all callback's_params.
-				if (oldFuncsParams) params.func_params[i] = oldFuncsParams[i];
-				else params.func_params[i] = null;
-
-				// Copy all meshes.
-				params.meshes[i] = oldMeshBuffer[i];
-			}
-
-			/**
-			 * Substitute interval_time_value or leave the same??
-			 * Use initial interval time if user passes INT_NULL for 'msInterval' param, 
-			 * else use the new interval time.
-			 */
-			if (msInterval === INT_NULL) msInterval = interval.interval;
-
-			/** Destroy old timeInterval and create a new one with all the previous meshes and their callbacks and callback_params */
-			TimeIntervalsDestroyByIdx(interval.idx);
-			const tIdx = TimeIntervalsCreate(msInterval, name, TIME_INTERVAL_REPEAT_ALWAYS, this.Update, params);
-			this.timeIntervalsIdxBuffer[0] = tIdx;
-
-		}
-	}
-
-	Update(params) { // TODO!!!: Runs on every timeInterval. Make as efficient as possible
-
-		if (!Array.isArray(params.params.meshes)) alert('Array must be passed as param.meshes to TimeInterval instantiation.')
-
-		const meshes = params.params.meshes;
-		const mesheslen = meshes.length
-
-		
-		for (let i = 0; i < mesheslen; i++) {
-			
-			let val = 0;
-			if(params.params.func[i]){
-
-				if(params.params.func_params[i])
-					val = params.params.func[i](params.params.func_params[i]); // Callback with parameters
-					
-				else val = params.params.func[i](); // Callback with no parameters
-			}
-			else if(params.params.func_params[i]){
-				val = params.params.func_params[i].delta_avg; // No callback, just a value
-			}
-
-			const text = `${val}`;
-			const geom = meshes[i].geom;
-			const gfx = meshes[i].gfx;
-			const mat = meshes[i].mat;
-
-			let gfxInfoCopy = new GfxInfoMesh(gfx);
-
-			const textLen = text.length;
-			const len = geom.num_faces > textLen ? geom.num_faces :
-				(textLen > geom.num_faces ? geom.num_faces : textLen);
-
-			// Update text faces
-			for (let j = 0; j < len; j++) {
-
-				let uvs = [0, 0, 0, 0];
-				if (text[j] !== undefined) {
-					uvs = FontGetUvCoords(mat.uvIdx, text[j]);
-				}
-				GlSetTex(gfxInfoCopy, uvs);
-				gfxInfoCopy.vb.start += gfxInfoCopy.vb.count
-			}
-		}
-	}
-
-
-	SetColorRGB(col) { 
-
-		let num_faces = this.geom.num_faces;
-		for(let i=0; i<this.children.boundary; i++){
-			num_faces += this.children.buffer[i].geom.num_faces;
-		}
-		this.mat.SetColorRGB(col, this.gfx, num_faces) 
-  }
-}
-
-/**
- * A widget of rendering static text 
- * in combination with dynamic text.
- */
-export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
-
-	/** Set the max number of characters for the dynamic text, 
-	 * by passing any text as 'maxDynamicTextChars' of length= dynamic text number of characters*/
-	constructor(text, maxDynamicTextChars, pos, fontSize, scale, color1, color2, bold) {
-
-		super(text, pos, fontSize, scale, color1, bold);
-
-		// Translate the dynamic text by the width of the constant text's width
-		pos[0] += this.geom.CalcTextWidth();
-		const dynamicText = new Widget_Text(maxDynamicTextChars, pos, fontSize, color2, bold);
-
-		this.AddChild(dynamicText)
-
-		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | dynamicText.geom.type | dynamicText.mat.type;
-
-	}
-
-	GenGfxCtx(FLAGS, gfxidx) {
-
-		super.GenGfxCtx(FLAGS, gfxidx);
-		return this.gfx;
-	}
-
-	Render() {
-
-		super.Render();
 	}
 
 	/**
@@ -556,7 +423,6 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 			 * What happens if the this.timeIntervalsIdxBuffer.buffer[] gets another timeInterval???
 			 * How we distinguish which index we have to remove???
 			 */
-			// const interval = TimeIntervalsGetByIdx(this.timeIntervalsIdxBuffer.buffer[DYN_TEXT_UPDATE_INTERVAL_IDX]);
 			const interval = TimeIntervalsGetByIdx(this.timeIntervalsIdxBuffer.buffer[0]);
 			const prevFuncs = interval.clbkParams.params.func;
 			const prevFuncsParams = interval.clbkParams.params.func_params;
@@ -594,7 +460,326 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 			this.timeIntervalsIdxBuffer[0] = tIdx;
 		}
 	}
+
+	Update(params) { // TODO!!!: Runs on every timeInterval. Make as efficient as possible
+
+		if (!Array.isArray(params.params.meshes)) alert('Array must be passed as param.meshes to TimeInterval instantiation.')
+
+		const meshes = params.params.meshes;
+		const mesheslen = meshes.length
+
+
+		for (let i = 0; i < mesheslen; i++) {
+
+			let val = 0;
+			if (params.params.func[i]) {
+
+				if (params.params.func_params[i])
+					val = params.params.func[i](params.params.func_params[i]); // Callback with parameters
+
+				else val = params.params.func[i](); // Callback with no parameters
+			}
+			else if (params.params.func_params[i]) {
+				val = params.params.func_params[i].delta_avg; // No callback, just a value
+			}
+
+			const text = `${val}`;
+			const geom = meshes[i].geom;
+			const gfx = meshes[i].gfx;
+			const mat = meshes[i].mat;
+
+			let gfxInfoCopy = new GfxInfoMesh(gfx);
+
+			const textLen = text.length;
+			const len = geom.num_faces > textLen ? geom.num_faces :
+				(textLen > geom.num_faces ? geom.num_faces : textLen);
+
+			// Update text faces
+			for (let j = 0; j < len; j++) {
+
+				let uvs = [0, 0, 0, 0];
+				if (text[j] !== undefined) {
+					uvs = FontGetUvCoords(mat.uvIdx, text[j]);
+				}
+				GlSetTex(gfxInfoCopy, uvs);
+				gfxInfoCopy.vb.start += gfxInfoCopy.vb.count
+			}
+		}
+	}
+
+	OnMove(params) {
+
+		// The 'OnMove' function is called by the timeInterval.
+		// The timeInterval has been set by the 'OnClick' event.
+		const mesh = params.params;
+		// const mesh = widget.mesh;
+		const text_mesh = mesh.text_mesh;
+
+		/** DISABLED because the ui_info_timers must handle the move interval deactivation */
+		// Destroy the time interval and the Move operation, if the mesh is not grabed
+		// MESH_STATE.IN_GRAB is deactivated upon mouse click up in Events.js.
+		// if (mesh.StateCheck(MESH_STATE.IN_GRAB) === 0 && mesh.timeIntervalsIdxBuffer.boundary) {
+
+		// 	const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
+		// 	TimeIntervalsDestroyByIdx(intervalIdx);
+		// 	mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+
+		// 	return;
+		// }
+
+		const mouse_pos = MouseGetPosDif();
+
+		// Move 'this' text
+		mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, mesh.gfx);
+		// Move children text
+		for (let i = 0; i < this.children.boundary; i++) {
+
+			const child = this.children.buffer[i];
+			if (child) child.MoveXY(mouse_pos.x, -mouse_pos.y, child.gfx);
+		}
+	}
 }
+
+/**Save */
+
+// export class Widget_Dynamic_Text_Mesh_Only extends Widget_Text {
+
+
+// 	/** The 'dynamic_text' sets the max number of characters for the dynamic text.
+// 	 * If the text changes to a lesser number of chars, the update function just adds empty spaces*/
+// 	constructor(dynamic_text, pos, fontSize, scale, text_col1, bold) {
+
+// 		super(dynamic_text, pos, fontSize, text_col1, bold, scale);
+
+// 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | this.geom.type | this.mat.type;
+
+// 		this.SetName('Dynamic Text ' + this.mat.text.slice(0, 7));
+
+
+// 	}
+
+// 	GenGfxCtx(FLAGS, gfxidx) {
+
+// 		const gfx = super.GenGfxCtx(FLAGS, gfxidx);
+// 		return gfx;
+// 	}
+
+// 	Render() {
+
+// 		super.Render()
+// 	}
+
+// 	CreateNewText(dynamic_text, fontSize, text_col2, pad = this.pad, bold = this.bold) {
+
+// 		 /** DEBUG */ if (!Array.isArray(pad)) console.error('Pad is not of type array');
+// 		this.pad = pad;
+
+// 		let pos = [0, 0, 0];
+// 		// Get the last child mesh (suppose to be dynamicText).
+// 		if (this.children.buffer !== null) {
+
+// 			const lastChild = this.children.buffer[this.children.boundary - 1];
+// 			ERROR_NULL(lastChild, ' @ Widget_Dynamic_Text_Mesh.CreateNewText(). WidgetText.js');
+
+// 			// console.log(lastChild.geom.pos)
+// 			// Translate to right after the previous dynamicText.
+// 			pos = [0, 0, 0];
+// 			CopyArr3(pos, lastChild.geom.pos); // Copy the dynamic's text mesh pos
+// 			const prevXdim = ((lastChild.geom.dim[0] * 2 * lastChild.mat.text.length) - lastChild.geom.dim[0]);
+// 			pos[0] += prevXdim + this.geom.dim[0] + pad[0];
+// 		}
+// 		else {
+
+// 			CopyArr3(pos, this.geom.pos); // Copy the dynamic's text mesh pos
+// 			pos[0] += this.geom.CalcTextWidth()
+// 		}
+
+// 		const dynamicText = new Widget_Text(dynamic_text, pos, fontSize, text_col2, bold);
+// 		dynamicText.type = MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC;
+
+// 		// Add the new dynamicText as a child of 'this'.
+// 		const idx = this.AddChild(dynamicText);
+// 		dynamicText.SetName(idx, ' Dynamic Text ' + this.mat.text.slice(0, 7));
+
+// 		// console.log('dynamicText:', dynamicText.mat.text,  dynamicText.geom.pos)
+
+// 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | dynamicText.geom.type | dynamicText.mat.type;
+
+// 		return idx;
+// 	}
+
+// 	/**
+// 	  * ##SetDynamicText
+// 	  * @param {integer} msInterval The time interval in ms the dynamic text will be updated
+// 	  * @param {callbackfunction} func The function to call upon time interval
+// 	  *
+// 	  * This function sets up the update of the dynamic text part of this class.
+// 	  * The function sets up a timeInterval that will call back the this.Update() method.
+// 	  * The Update method must have 'params' parameter and the params must have:
+// 	  * 	1. A 'func' field: that is the callback (set by the caller to this.SetDynamicText() call).
+// 	  * 		The 'func' is a function responsible for returning a string, that will be used to
+// 	  * 		update the curent dynamicText.
+// 	  * 		The 'func' field is an array, even if there is only one callback (for one dynamicText).
+// 	  * 		This is because we may create additional dynamicTexts that will need their own
+// 	  * 		text creation callback.
+// 	  * 	2. A 'meshes' field: that is an array of 'dynamicText' meshes. We prefer an array,
+// 	  * 		in case we need to pass more than one 'dynamicText' meshes to the update function
+// 	  * 		for execution.
+// 	  * In the update method we loop through all characters of the new text and update the
+// 	  * graphics buffers.
+// 	  */
+// 	SetDynamicText(msInterval, func, name, idx = INT_NULL, func_params = null, flag) {
+
+
+// 		if (idx !== INT_NULL || this.children.boundary <= 0 || flag) {
+// 			/**
+// 			 * The this.children.boundary takes a snapshot of the children count upon this function call.
+// 			 * The idea is: for example uppon function call for the first time
+// 			 * with one dynamic text mesh, the count=1. At this time the idx param is null,
+// 			 * because it is the first call to the SetDynamicText() for this object instantiation.
+// 			 * so we pass as param to the interval function, the whole buffer of children
+// 			 * that currently has one mesh, that is the dynamicText mesh.
+// 			 *
+// 			 * When the CreateNewText() is called to add a second dynamicText to 'this',
+// 			 * we make a choise:
+// 			 * 	1. Either we  create a new timeInterval for the new dynamicText.
+// 			 * 	2. We use the same timeInterval from the first dynamicText (class instantiation).
+// 			 * For the first case procedure is pretty much straight forward.
+// 			 * For the second approach we destroy the timeInterval created by
+// 			 * the instantiation of the class and create a new one, passing the 2 dynamicTexts
+// 			 * as an array to the params parameter of the timeInterval call.
+// 			 * Doing so, when the callback of the timeInterval is called, that is the this.Update() method,
+// 			 * we will have 2 dynamicTexts to update with 2 different callbacks each,
+// 			 * for the their text manipulation.
+// 			 *
+// 			 */
+
+// 			const params = {
+// 				func: [func], // Array in case we expand to have more dynamic texts
+// 				func_params: [func_params],
+// 				meshes: null,
+// 			};
+
+// 			const meshes = [];
+// 			if (flag) meshes.push(this.children.buffer[0]); // At first call we deal with the first child mesh at index 0
+// 			else if (idx === INT_NULL) meshes.push(this); // At first call we deal with the first child mesh at index 0
+// 			else meshes.push(this.children.buffer[idx]);
+// 			params.meshes = meshes;
+
+// 			const tIdx = TimeIntervalsCreate(msInterval, name, TIME_INTERVAL_REPEAT_ALWAYS, this.Update, params);
+// 			this.timeIntervalsIdxBuffer.Add(tIdx);
+// 		}
+// 		else { // Update dynamicText via one timeInterval Update().
+
+// 			// The 'new' params to be passed to the new timeInterval.
+// 			const params = {
+// 				func: [], // All timeInterval's callbacks here
+// 				func_params: [], /* These are the parameters NOT for the timeInterval and the 'this.Update()'
+// 										function callback, rather for the callback the 'this.Update()'
+// 										will call, to create the text for the dynamicText update. */
+// 				meshes: [], // all the dynamicTexts here. They wiil be Updated() by one timeInterval.
+// 			};
+
+
+// 			/**
+// 			 * MAYBE BUG: Getting the 0 index timeInterval from timeIntervalsIdxBuffer assuming the bellow explanation.
+// 			 *	If the same interval and update is going to be used, then we want the first timeInterval
+// 			 *	that was created which is the 0-th element of the this.timeIntervalsIdxBuffer.buffer[].
+// 			 * What happens if the this.timeIntervalsIdxBuffer.buffer[] gets another timeInterval???
+// 			 * How we distinguish which index we have to remove???
+// 			 */
+// 			const interval = TimeIntervalsGetByIdx(this.timeIntervalsIdxBuffer.buffer[0]);
+// 			const oldFuncs = interval.clbkParams.params.func;
+// 			const oldFuncsParams = interval.clbkParams.params.func_params;
+// 			const oldMeshBuffer = interval.clbkParams.params.meshes;
+
+// 			let i = 0;
+
+// 			// Copy all callback functions found in the timeInterval to pass them to the new timeInterval.
+// 			for (i = 0; i < oldFuncs.length; i++) {
+
+// 				// Copy all callback functions found in the timeInterval to pass them to the new timeInterval.
+// 				params.func[i] = oldFuncs[i];
+
+// 				// Copy all callback's_params.
+// 				if (oldFuncsParams) params.func_params[i] = oldFuncsParams[i];
+// 				else params.func_params[i] = null;
+
+// 				// Copy all meshes.
+// 				params.meshes[i] = oldMeshBuffer[i];
+// 			}
+
+// 			/**
+// 			 * Substitute interval_time_value or leave the same??
+// 			 * Use initial interval time if user passes INT_NULL for 'msInterval' param,
+// 			 * else use the new interval time.
+// 			 */
+// 			if (msInterval === INT_NULL) msInterval = interval.interval;
+
+// 			/** Destroy old timeInterval and create a new one with all the previous meshes and their callbacks and callback_params */
+// 			TimeIntervalsDestroyByIdx(interval.idx);
+// 			const tIdx = TimeIntervalsCreate(msInterval, name, TIME_INTERVAL_REPEAT_ALWAYS, this.Update, params);
+// 			this.timeIntervalsIdxBuffer[0] = tIdx;
+
+// 		}
+// 	}
+
+// 	Update(params) { // TODO!!!: Runs on every timeInterval. Make as efficient as possible
+
+// 		if (!Array.isArray(params.params.meshes)) alert('Array must be passed as param.meshes to TimeInterval instantiation.')
+
+// 		const meshes = params.params.meshes;
+// 		const mesheslen = meshes.length
+
+
+// 		for (let i = 0; i < mesheslen; i++) {
+
+// 			let val = 0;
+// 			if (params.params.func[i]) {
+
+// 				if (params.params.func_params[i])
+// 					val = params.params.func[i](params.params.func_params[i]); // Callback with parameters
+
+// 				else val = params.params.func[i](); // Callback with no parameters
+// 			}
+// 			else if (params.params.func_params[i]) {
+// 				val = params.params.func_params[i].delta_avg; // No callback, just a value
+// 			}
+
+// 			const text = `${val}`;
+// 			const geom = meshes[i].geom;
+// 			const gfx = meshes[i].gfx;
+// 			const mat = meshes[i].mat;
+
+// 			let gfxInfoCopy = new GfxInfoMesh(gfx);
+
+// 			const textLen = text.length;
+// 			const len = geom.num_faces > textLen ? geom.num_faces :
+// 				(textLen > geom.num_faces ? geom.num_faces : textLen);
+
+// 			// Update text faces
+// 			for (let j = 0; j < len; j++) {
+
+// 				let uvs = [0, 0, 0, 0];
+// 				if (text[j] !== undefined) {
+// 					uvs = FontGetUvCoords(mat.uvIdx, text[j]);
+// 				}
+// 				GlSetTex(gfxInfoCopy, uvs);
+// 				gfxInfoCopy.vb.start += gfxInfoCopy.vb.count
+// 			}
+// 		}
+// 	}
+
+
+// 	SetColorRGB(col) {
+
+// 		let num_faces = this.geom.num_faces;
+// 		for (let i = 0; i < this.children.boundary; i++) {
+// 			num_faces += this.children.buffer[i].geom.num_faces;
+// 		}
+// 		this.mat.SetColorRGB(col, this.gfx, num_faces)
+// 	}
+// }
 
 
 

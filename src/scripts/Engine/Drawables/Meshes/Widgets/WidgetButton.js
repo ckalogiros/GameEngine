@@ -81,7 +81,7 @@ export class Widget_Switch extends Widget_Button {
          params: params,
       }
 
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick, target_params)
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick, target_params)
    }
 }
 

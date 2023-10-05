@@ -4,7 +4,7 @@ import { Intersection_point_rect } from "../Drawables/Operations/Collisions.js";
 import { MouseGetPos } from "../Controls/Input/Mouse.js";
 import { M_Buffer } from "../Core/Buffers.js";
 import { Info_listener_dispatch_event } from "../Drawables/DebugInfo/InfoListeners.js";
-import { Drop_down_set_root, Widget_Drop_Down } from "../Drawables/Meshes/Widgets/Menu/Widget_Drop_Down.js";
+import { Drop_down_set_root, Widget_Dropdown } from "../Drawables/Meshes/Widgets/Menu/Widget_Dropdown.js";
 import { Widget_Text } from "../Drawables/Meshes/Widgets/WidgetText.js";
 import { _pt5, _pt6 } from "../Timers/PerformanceTimers.js";
 import { Events_handle_immidiate } from "./Events.js";
@@ -94,11 +94,8 @@ export class Event_Listener {
          anyChildrenActive: false, // This is to check if the current event has any children events(eficient since we do not have to check every child event if 'isActive')
       }
 
-      // const trigger_params = { progidx: gfx.prog.idx,  vbidx: gfx.vb.idx }
-      const info_event_type = INFO_LISTEN_EVENT_TYPE.LISTENERS;
-      Info_listener_dispatch_event(info_event_type, event_params);
-
-      // Listeners_debug_info_update(params)
+      // const info_event_type = INFO_LISTEN_EVENT_TYPE.LISTENERS;
+      // Info_listener_dispatch_event(info_event_type, event_params);
 
       LISTENERS_FLAGS[TYPE_IDX] = true;
       return this.event_type[TYPE_IDX].Add(event_params);
@@ -119,7 +116,7 @@ export class Event_Listener {
          const evt = this.event_type[TYPE_IDX].buffer[i]; 
 
          // Case the EventListeners has nulled elements in the buffer (E.g EventListeners.buffer[null, evt1, evt2, ...])
-         if(evt) {
+         if(evt && evt.isActive) {
 
             const mesh = evt.source_params;
             const point = MouseGetPos();
@@ -153,7 +150,6 @@ export class Event_Listener {
                         ret = Intersection_point_rect(point, child_rect);
                         if(ret){
 
-   
                            const dispatch_params = {
                               source_params: child_event.source_params,
                               target_params: child_event.target_params,
@@ -227,7 +223,7 @@ export class Event_Listener {
                   if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
                      Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
                   }
-                  if (event.children) {
+                  if (event.anyChildrenActive && event.children) {
                      // console.log(point)
                      if(Check_hover_recursive(event, point)) return;
                   }
@@ -275,32 +271,6 @@ export class Event_Listener {
    }
 }
 
-function Print_all_recursive(children_buffer, count=0) {
-
-   // let hover_cnt = 0, click_cnt = 0;
-   
-   for (let i = 0; i < children_buffer.boundary; i++) {
-      let r = '   ';
-      // console.log(`Childen Event Type: ${Listeners_get_event_type_string(i)}`);
-      
-      const event = children_buffer.buffer[i];
-      if (event) {
-
-         for (let j = 0; j < count; j++) r += '->';
-         console.log(`${r} ${count} `, event.source_params.name);
-         
-         if(event.children){
-            
-            count++;
-            console.log(`Children Events:`);
-            this.PrintAll(event.children.buffer, count)
-            count--;
-         } 
-            
-      }
-   }
-}
-
 function Check_hover_recursive(events, point) {
 
    for(let i=0; i<events.children.boundary; i++){
@@ -321,9 +291,7 @@ function Check_hover_recursive(events, point) {
             [(d.pos[1] - d.dim[1]), (d.pos[1] + d.dim[1])], // Top  Bottom
          ];
          
-         // console.log(mesh.name, evt.isActive, point, rect)
          if (evt.isActive && Intersection_point_rect(point, rect)) {
-            // console.log('', mesh.name)
    
             if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
                Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
@@ -343,11 +311,8 @@ function Check_hover_recursive(events, point) {
 
 }
 
-
 const _listener = new Event_Listener();
 
-
-export function Debug_get_event_listeners(){ return _listener; }
 
 export function Listeners_get_event(TYPE_IDX, event_idx){ return _listener.event_type[TYPE_IDX].buffer[event_idx]; }
 
@@ -410,7 +375,7 @@ export function Listener_remove_children_event_by_idx(TYPE_IDX, event_idx, child
    _listener.event_type[TYPE_IDX].buffer[event_idx].children.buffer.RemoveByIdx(child_event_idx);
 }
 
-export function Listener_deactivate_children_events_buffer(FLAGS, mesh_listeners){
+export function Listener_events_set_mesh_events_active(FLAGS, mesh_listeners, bool_activate){
 
    const hover_type_idx = LISTEN_EVENT_TYPES_INDEX.HOVER;
    const click_type_idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
@@ -419,7 +384,8 @@ export function Listener_deactivate_children_events_buffer(FLAGS, mesh_listeners
 
       if(mesh_listeners.buffer[hover_type_idx] !== INT_NULL){
          
-         _listener.event_type[hover_type_idx].buffer[mesh_listeners.buffer[hover_type_idx]].anyChildrenActive = false;
+         _listener.event_type[hover_type_idx].buffer[mesh_listeners.buffer[hover_type_idx]].anyChildrenActive = bool_activate;
+         _listener.event_type[hover_type_idx].buffer[mesh_listeners.buffer[hover_type_idx]].isActive = bool_activate;
       }
    }
    
@@ -427,7 +393,8 @@ export function Listener_deactivate_children_events_buffer(FLAGS, mesh_listeners
 
       if(mesh_listeners.buffer[click_type_idx] !== INT_NULL){
          
-         _listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx]].anyChildrenActive = false;
+         _listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx]].anyChildrenActive = bool_activate;
+         _listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx]].isActive = bool_activate;
       }
    }
 }
@@ -477,10 +444,59 @@ export function Listener_get_event(TYPE_IDX, event_idx) {
    return _listener.event_type[TYPE_IDX].buffer[event_idx];
 }
 
+
+/** DEBUG-PRINT */
+export function Debug_get_event_listeners(){ return _listener; }
+
 export function Listener_debug_print_all() {
 
    _listener.PrintAll();
 }
+
+export function Listener_debug_print_info() {
+
+   const count = _listener.event_type.length;
+   for(let i=0; i<count; i++){
+      
+      console.log('---- Event type:', i);
+      const e = _listener.event_type[i];
+      if(e){
+
+         for(let j=0; j<e.boundary; j++){
+            
+            if(e.buffer[j]){
+   
+               const msg = `${j} active:${e.buffer[j].isActive} childen:${e.buffer[j].anyChildrenActive} meshname:${e.buffer[j].source_params.name}`;
+               console.log(msg);
+            }
+         }
+      }
+   }
+}
+
+// function Print_all_recursive(children_buffer, count=0) {
+
+//    for (let i = 0; i < children_buffer.boundary; i++) {
+//       let r = '   ';
+      
+//       const event = children_buffer.buffer[i];
+//       if (event) {
+
+//          for (let j = 0; j < count; j++) r += '->';
+//          console.log(`${r} ${count} `, event.source_params.name);
+         
+//          if(event.children){
+            
+//             count++;
+//             console.log(`Children Events:`);
+//             this.PrintAll(event.children.buffer, count)
+//             count--;
+//          } 
+            
+//       }
+//    }
+// }
+
 
 /**************************************************************************************************************************/
 // Debug Info Drop Down
@@ -488,7 +504,7 @@ export function Listener_debug_print_all() {
 export function Listeners_debug_info_create(scene){
 
    const dp_btn_pad = [10, 2]
-   const dropdown = new Widget_Drop_Down('Listeners Dropdown Section Panel', ALIGN.LEFT, [300, 20, 0], [60, 20], GREY1, TRANSPARENCY(GREY5, .8), WHITE, [1,1], dp_btn_pad);
+   const dropdown = new Widget_Dropdown('Listeners Dropdown Section Panel', [300, 20, 0], [60, 20], GREY1, TRANSPARENCY(GREY5, .8), WHITE, dp_btn_pad);
    dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dropdown.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
    // dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, dropdown.SetOnMove);
 
@@ -499,7 +515,7 @@ export function Listeners_debug_info_create(scene){
 
       let count = evt_type.boundary;
       
-      const drop_down_evt_type = new Widget_Drop_Down(`buffer type:${type} | count:${evt_type.boundary}`, ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(BLACK, 1.1), WHITE, [1,1], dp_btn_pad);
+      const drop_down_evt_type = new Widget_Dropdown(`buffer type:${type} | count:${evt_type.boundary}`, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(BLACK, 1.1), WHITE, dp_btn_pad);
       drop_down_evt_type.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down_evt_type.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
       
       for(let j=0; j<evt_type.boundary; j++){
@@ -536,7 +552,7 @@ function Listeners_debug_info_create_recursive(scene, dropdown_root, evt_childre
 
    // if children events exist, put them in a new drop down.
    const dp_btn_pad = [0, 0]
-   const drop_down_evt_type = new Widget_Drop_Down(`children of: ${parent_discription}`, ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [1,1], dp_btn_pad);
+   const drop_down_evt_type = new Widget_Dropdown(`children of: ${parent_discription}`, [200, 400, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, dp_btn_pad);
    drop_down_evt_type.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down_evt_type.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
 

@@ -1,15 +1,15 @@
 import { TextureGetTextureByIdx } from '../Engine/Loaders/Textures/Texture.js';
 import { GlUpdateVertexBufferData, GlUpdateIndexBufferData, GlUseProgram, GlBindVAO, GlBindTexture } from './Buffers/GlBuffers.js'
-import { RenderQueueGetActive, RenderQueueGetActiveCount } from '../Engine/Renderers/Renderer/RenderQueue.js';
-import { GlGetPrograms } from './GlProgram.js';
+import { Renderqueue_get_active, Renderqueue_active_get_count } from '../Engine/Renderers/Renderer/RenderQueue.js';
+import { Gl_progs_get } from './GlProgram.js';
 
 
 
 export function GlDraw(gl) {
 
-    const progs = GlGetPrograms();
-    const drawQueue = RenderQueueGetActive();
-    const drawQueueCount = RenderQueueGetActiveCount();
+    const progs = Gl_progs_get();
+    const drawQueue = Renderqueue_get_active();
+    const drawQueueCount = Renderqueue_active_get_count();
 
     // const fb = FramebuffersGet();
     // if (fb.isActive) {
@@ -19,8 +19,8 @@ export function GlDraw(gl) {
     //     gl.viewport(0, 0, fb.fb.texture.width, fb.fb.texture.height);
     // }
     
-    // GfxSetVbRender(fb.fb.gfxInfo.prog.idx, fb.fb.gfxInfo.vb.idx, false);
-    // const drQ = RenderQueueGet();
+    // Gfx_set_vb_show(fb.fb.gfxInfo.prog.idx, fb.fb.gfxInfo.vb.idx, false);
+    // const drQ = Renderqueue_get();
     // drQ.Update();
 
     gl.clearColor(0.18, 0.18, 0.18, 1.0);
@@ -45,10 +45,10 @@ export function GlDraw(gl) {
         GlBindVAO(ib.vao)
         
         if (progs[progIdx].sid.attr & SID.ATTR.TEX2) {
-            if (vb.texIdx !== INT_NULL) {
-                const texture = TextureGetTextureByIdx(vb.texIdx);
+            if (vb.textidx !== INT_NULL) {
+                const texture = TextureGetTextureByIdx(vb.textidx);
                 GlBindTexture(texture);
-                gl.uniform1i(progs[progIdx].shaderInfo.uniforms.sampler, texture.idx);
+                gl.uniform1i(progs[progIdx].shaderinfo.uniforms.sampler, texture.idx);
             }
         }
 

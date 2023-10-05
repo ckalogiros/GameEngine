@@ -30,7 +30,7 @@ class Widget_PopUp extends Section {
       this.SetStyle([6, 4, 3]);
       this.SetName('Root popup');
 
-      // this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick)
+      // this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick)
       this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
       this.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
@@ -47,7 +47,7 @@ class Widget_PopUp extends Section {
    Activate() {
 
       Gfx_activate(this);
-      // this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick)
+      // this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick)
       // this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
       this.isActive = true;
    }
@@ -62,7 +62,7 @@ class Widget_PopUp extends Section {
 
       //    if(mesh){
 
-      //       Listener_remove_events_all(LISTEN_EVENT_TYPES.CLICK_DOWN, mesh.listeners);
+      //       Listener_remove_events_all(LISTEN_EVENT_TYPES.CLICK_UP, mesh.listeners);
       //       Listener_hover_remove_by_idx(mesh.listen_hover_idx);
             
       //       GlResetVertexBuffer(mesh.gfx, 1);

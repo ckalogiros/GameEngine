@@ -11,6 +11,7 @@ import { Text_Mesh } from '../Text_Mesh.js';
 import { Widget_popup_handler_onclick_event } from './WidgetPopup.js';
 import { Widget_Label } from './WidgetLabel.js';
 import { Gfx_generate_context } from '../../../Interfaces/Gfx/GfxContext.js';
+import { Scenes_store_gfx_to_buffer } from '../../../Scenes.js';
 
 
 /**
@@ -62,7 +63,7 @@ export class Widget_Slider extends Rect {
       this.SetStyle([0, 6, 2]);
       this.SetName('Widget_Slider');
       this.StateEnable(MESH_STATE.HAS_POPUP);
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, this.OnClick)
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick)
       this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
 
 
@@ -155,17 +156,21 @@ export class Widget_Slider extends Rect {
    // Graphics
    GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
 
-      this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.mat.num_faces, FLAGS, gfxidx);
-      this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.mat.num_faces, FLAGS, gfxidx);
+      this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
+      this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, FLAGS, gfxidx);
+      Scenes_store_gfx_to_buffer(this.sceneidx, this);
 
       const bar = this.children.buffer[BAR_IDX];
-      bar.gfx = Gfx_generate_context(bar.sid, bar.sceneidx, bar.mat.num_faces, FLAGS, gfxidx);
-
+      bar.gfx = Gfx_generate_context(bar.sid, bar.sceneidx, bar.geom.num_faces, FLAGS, gfxidx);
+      Scenes_store_gfx_to_buffer(bar.sceneidx, bar);
+      
       const handle = bar.children.buffer[0];
-      handle.gfx = Gfx_generate_context(bar.sid, bar.sceneidx, bar.mat.num_faces, FLAGS, gfxidx);
-
+      handle.gfx = Gfx_generate_context(handle.sid, handle.sceneidx, handle.geom.num_faces, FLAGS, gfxidx);
+      Scenes_store_gfx_to_buffer(handle.sceneidx, handle);
+      
       const value_text = bar.children.buffer[1];
-      value_text.gfx = Gfx_generate_context(value_text.sid, value_text.sceneidx, value_text.mat.num_faces, FLAGS, gfxidx);
+      value_text.gfx = Gfx_generate_context(value_text.sid, value_text.sceneidx, value_text.geom.num_faces, FLAGS, gfxidx);
+      Scenes_store_gfx_to_buffer(value_text.sceneidx, value_text);
 
       return this.gfx;
    }
@@ -199,6 +204,40 @@ export class Widget_Slider extends Rect {
       super.DeactivateGfx()
 
    }
+
+   /*******************************************************************************************************************************************************/
+   // Events
+	OnMove(params) {
+
+		const mesh = params.params;
+
+		// Destroy the time interval and the Move operation, if the mesh is not grabed
+		// MESH_STATE.IN_GRAB is deactivated upon mouse click up in Events.js.
+		if (mesh.StateCheck(MESH_STATE.IN_GRAB) === 0 && mesh.timeIntervalsIdxBuffer.boundary) {
+
+			const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
+			TimeIntervalsDestroyByIdx(intervalIdx);
+			mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+
+			return;
+		}
+
+		const mouse_pos = MouseGetPosDif();
+		
+		// Move 'this' text
+		mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, mesh.gfx);
+      
+      const bar = mesh.children.buffer[BAR_IDX];
+		bar.geom.MoveXY(mouse_pos.x, -mouse_pos.y, bar.gfx);
+      const name_text = mesh.text_mesh;
+		name_text.geom.MoveXY(mouse_pos.x, -mouse_pos.y, name_text.gfx);
+      const handle = bar.children.buffer[0];
+		handle.geom.MoveXY(mouse_pos.x, -mouse_pos.y, handle.gfx);
+      const value_text = bar.children.buffer[1];
+		value_text.geom.MoveXY(mouse_pos.x, -mouse_pos.y, value_text.gfx);
+
+	}
+
 
    /*******************************************************************************************************************************************************/
    // Setters-Getters
@@ -331,7 +370,7 @@ function Slider_move_event(params) {
    const slider = params.params;
 
    // Destroy the time interval calling this function if the mesh is not grabed.
-   if (slider.StateCheck(MESH_STATE.IN_GRAB) === 0) {
+   if (slider.StateCheck(MESH_STATE.IN_GRAB) === 0 && slider.timeIntervalsIdxBuffer.boundary) {
 
       const intervalIdx = slider.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
       TimeIntervalsDestroyByIdx(intervalIdx);
@@ -415,7 +454,7 @@ export function Slider_on_update_handle(_params) {
    const handle = bar.children.buffer[0];
    const slider_val = bar.children.buffer[1];
 
-   if (bar.StateCheck(MESH_STATE.IN_GRAB) === 0) {
+   if (bar.StateCheck(MESH_STATE.IN_GRAB) === 0 && bar.timeIntervalsIdxBuffer.boundary) {
 
       // If bar out of hover, delete the timeInterval for moving the handle
       const intervalIdx = bar.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 

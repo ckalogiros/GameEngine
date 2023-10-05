@@ -4,9 +4,11 @@ import { GetRandomColor } from '../Helpers/Helpers.js';
 import { AddArr2, AddArr3, FloorArr3 } from '../Helpers/Math/MathOperations.js';
 import { AnimationsGet } from './Animations/Animations.js';
 import { M_Buffer } from './Core/Buffers.js';
-import { Drop_down_set_root, Widget_Drop_Down } from './Drawables/Meshes/Widgets/Menu/Widget_Drop_Down.js';
+import { Drop_down_set_root, Widget_Dropdown } from './Drawables/Meshes/Widgets/Menu/Widget_Dropdown.js';
 import { Widget_Text } from './Drawables/Meshes/Widgets/WidgetText.js';
 import { HandleEvents } from './Events/Events.js';
+import { Debug_info_render_gfx_info } from './Drawables/DebugInfo/DebugInfoUi.js';
+import { Info_listener_get_event } from './Drawables/DebugInfo/InfoListeners.js';
 
 class Update_Meshes_buffer {
     mesh;
@@ -91,7 +93,6 @@ export class Scene {
 
     }
 
-    // OnUpdate should handle all meshes requirements. E.x. uniform update, etc...
     OnUpdate() {
 
         const animations = AnimationsGet();
@@ -103,21 +104,11 @@ export class Scene {
 
         /** Handle Events */
         HandleEvents();
+
+        /** Special case for DebugInfoUi for the GFX, must update its rendering from main loop */
+        // const event_params = Info_listener_get_event(INFO_LISTEN_EVENT_TYPE.GFX);
+        // if(event_params) Debug_info_render_gfx_info(event_params);
     }
-
-    // AddMesh(mesh, FLAGS = GFX.ANY, gfxidx) {
-
-    //     if (!mesh || mesh === undefined) {
-    //         console.error('Mesh shouldn\'t be undefined. @ class Scene.AddMesh().');
-    //         return;
-    //     }
-
-    //     mesh.sceneidx = this.sceneidx;
-    //     const gfx = mesh.GenGfxCtx(FLAGS, gfxidx);
-    //     this.StoreGfxInfo(gfx);
-    //     this.StoreMesh(mesh);
-    //     return mesh.gfx;
-    // }
 
     AddWidget(widget, FLAGS = GFX.ANY, gfxidx) {
 
@@ -128,15 +119,13 @@ export class Scene {
 
         widget.SetSceneIdx(this.sceneidx); // Set the sceneidx for all widgets meshes
         widget.GenGfxCtx(FLAGS, gfxidx);
-        const widget_meshes = widget.GetAllMeshes();
-        this.StoreGfxCtx(widget_meshes);
         this.StoreRootMesh(widget);
 
     }
 
     /*******************************************************************************************************************************************************/
     // Graphics
-    StoreGfxCtx(mesh_buf) {
+    StoreGfxCtx(mesh) {
         /** 
          * Store all scene's meshes by the gfx vertex buffer they belong.
          * and all vertex buffer indexes by the gfx program they belong.
@@ -147,26 +136,66 @@ export class Scene {
          *      create: this.gfx = new M_Buffer()
          *      store the meshes progidx to:  this.gfx.Add({ vb: new M_Buffer(), progidx: mesh_gfx.prog.idx })
          *      store the meshes vbidx to:  this.gfx[i].vb.Add({ mesh: new M_Buffer(), vbidx: mesh_gfx.vb.idx })
-         *      store the ref of the mesh to: this.gfx.buffer[j].vb[k].Add(mesh_buf[i])
+         *      store the ref of the mesh to: this.gfx.buffer[j].vb[k].Add(mesh)
          * #Case 2 : Meshe's vbidx does not exist
          *      create: this.gfx.buf[j] = new M_Buffer()
          *      store the meshes vbidx to:  this.gfx[i].vb.Add({ mesh: new M_Buffer(), vbidx: mesh_gfx.vb.idx })
-         *      store the ref of the mesh to: this.gfx.buffer[j].vb[k].Add(mesh_buf[i])
+         *      store the ref of the mesh to: this.gfx.buffer[j].vb[k].Add(mesh)
          * #Case 3 : Both progidx and vbidx exist
-         *      store the ref of the mesh to: this.gfx.buffer[j].vb[k].Add(mesh_buf[i])
+         *      store the ref of the mesh to: this.gfx.buffer[j].vb[k].Add(mesh)
          * #Edge Case: The 'this.gfx' is not initialized.  
          *      Do like #Case 1
          */
 
-        const mesh_count = mesh_buf.length;
-        for (let i = 0; i < mesh_count; i++) {
-            
-            
-            const mesh_gfx = mesh_buf[i].gfx;
-            let handled = false;
+        const mesh_gfx = mesh.gfx;
+        let handled = false;
 
-            if (!this.gfx) { // #Edge Case
-                this.gfx = new M_Buffer();
+        if (!this.gfx) { // #Edge Case
+            this.gfx = new M_Buffer();
+            const idx_prog = this.gfx.Add({
+                progidx: mesh_gfx.prog.idx,
+                vb: new M_Buffer(),
+            });
+            const idx_vb = this.gfx.buffer[idx_prog].vb.Add({
+                vbidx: mesh_gfx.vb.idx,
+                mesh: new M_Buffer(),
+            });
+
+            this.camera.StoreProgIdx(mesh_gfx.prog.idx); // Store the new program to the cameras progidx buffer for the program's matrix uniform update. 
+
+        }
+        else {
+
+            // Must loop through all existing 'gfx' to conclude if the current meshes gfx buffers exist or not.
+            for (let j = 0; j < this.gfx.boundary; j++) { // loop for all gfx program buffer indexes
+
+                if (this.gfx.buffer[j].progidx === mesh_gfx.prog.idx) {
+
+                    for (let k = 0; k < this.gfx.buffer[j].vb.boundary; k++) { // loop for all stored vertex buffer indexes
+
+                        if (this.gfx.buffer[j].vb.buffer[k].vbidx === mesh_gfx.vb.idx) {
+
+                            // #Case 3
+                            handled = true;
+                            break; // Break when gfx already stored.
+                        }
+                    }
+
+                    if(!handled){  // #Case 2
+                            
+                        const idx_vb = this.gfx.buffer[j].vb.Add({
+                            vbidx: mesh_gfx.vb.idx,
+                            mesh: new M_Buffer(),
+                        });
+                        handled = true;
+                    }
+
+                }
+                if (handled) break; // We broke the inner loop, but we need to break this one too and continue with the next mesh.
+            }
+
+            if (!handled) { // #Case 1. Program index not found.
+
                 const idx_prog = this.gfx.Add({
                     progidx: mesh_gfx.prog.idx,
                     vb: new M_Buffer(),
@@ -175,64 +204,24 @@ export class Scene {
                     vbidx: mesh_gfx.vb.idx,
                     mesh: new M_Buffer(),
                 });
-                this.gfx.buffer[idx_prog].vb.buffer[idx_vb].mesh.Add(mesh_buf[i]);
 
                 this.camera.StoreProgIdx(mesh_gfx.prog.idx); // Store the new program to the cameras progidx buffer for the program's matrix uniform update. 
-
-            }
-            else {
-
-                // Must loop through all existing 'gfx' to conclude if the current meshes gfx buffers are exist or not.
-                for (let j = 0; j < this.gfx.boundary; j++) { // loop for all gfx program buffer indexes
-
-                    if (this.gfx.buffer[j].progidx === mesh_gfx.prog.idx) {
-
-                        for (let k = 0; k < this.gfx.buffer[j].vb.boundary; k++) { // loop for all stored vertex buffer indexes
-
-                            if (this.gfx.buffer[j].vb.buffer[k].vbidx === mesh_gfx.vb.idx) {
-
-                                // #Case 3
-                                this.gfx.buffer[j].vb.buffer[k].mesh.Add(mesh_buf[i]);
-                                handled = true;
-                                break; // Break when gfx already stored.
-                            }
-                        }
-
-                        if(!handled){  // #Case 2
-                                
-                            const idx_vb = this.gfx.buffer[j].vb.Add({
-                                vbidx: mesh_gfx.vb.idx,
-                                mesh: new M_Buffer(),
-                            });
-                            this.gfx.buffer[j].vb.buffer[idx_vb].mesh.Add(mesh_buf[i]);
-                            handled = true;
-                        }
-
-                    }
-                    if (handled) break; // We broke the inner loop, but we need to break this one too and continue with the next mesh.
-                }
-
-                if (!handled) { // #Case 1. Program index not found.
-
-                    const idx_prog = this.gfx.Add({
-                        progidx: mesh_gfx.prog.idx,
-                        vb: new M_Buffer(),
-                    });
-                    const idx_vb = this.gfx.buffer[idx_prog].vb.Add({
-                        vbidx: mesh_gfx.vb.idx,
-                        mesh: new M_Buffer(),
-                    });
-                    mesh_buf[i].idx =this.gfx.buffer[idx_prog].vb.buffer[idx_vb].mesh.Add(mesh_buf[i]);
-
-                    this.camera.StoreProgIdx(mesh_gfx.prog.idx); // Store the new program to the cameras progidx buffer for the program's matrix uniform update. 
-                    handled = true;
-                }
+                handled = true;
             }
         }
+
+        // Store the mesh based on the its gfx buffers, if the buffers are already stored.
+        // IMPORTANT!!!: Supose the function is called only for newly created meshes, not meshes that alredy been stored;
+        const progidx = mesh.gfx.prog.idx;
+        const vbidx = mesh.gfx.vb.idx;
+        mesh.gfx.scene_gfx_mesh_idx = this.gfx.buffer[progidx].vb.buffer[vbidx].mesh.Add(mesh);
+        // console.log('--- Added:', mesh.name, ' prog:', progidx, ' vb:', vbidx, ' idx:', mesh.gfx.scene_gfx_mesh_idx)
+
     }
 
     StoreRootMesh(widget) {
         widget.scene_rootidx = this.root_meshes.Add(widget);
+        widget.idx = widget.scene_rootidx;
     }
 
     Render() {
@@ -251,18 +240,11 @@ export class Scene {
         }
     }
 
-    RemoveMesh(mesh) {
-
-        ERROR_NULL(mesh.idx);
-        const progidx = mesh.gfx.prog.idx;
-        const vbidx = mesh.gfx.vb.idx;
-        this.gfx.buffer[progidx].vb.buffer[vbidx].mesh.RemoveByIdx(mesh.idx);
-    }
-
     RemoveRootMesh(widget) {
 
-        ERROR_NULL(widget.idx);
-        this.root_meshes.RemoveByIdx(widget.idx);
+        ERROR_NULL(widget.scene_rootidx);
+        if(widget.scene_rootidx !== INT_NULL)
+            this.root_meshes.RemoveByIdx(widget.scene_rootidx);
     }
 
     /*******************************************************************************************************************************************************/
@@ -339,7 +321,7 @@ export class Scene {
     //     this.mesh_in_gfx[idx].Add(mesh);
     // }
 
-    // Store a refference to the camera object
+    // Store a reference to the camera object
     SetCamera(camera) {
         if (this.camera) alert('Camera already existas for scene:', this.sceneidx)
         this.camera = camera;
@@ -359,11 +341,24 @@ export class Scene {
         return this.root_meshes;
     }
 
+    RemoveMeshFromGfx(progidx, vbidx, scene_gfx_mesh_idx){
+
+        if(scene_gfx_mesh_idx === undefined){
+            console.error('UNDEFINED scene_gfx_mesh_idx. returning witout removing mesh from buffer.');
+            return true;
+        }
+        // const mesh = this.gfx.buffer[progidx].vb.buffer[vbidx].mesh.buffer[scene_gfx_mesh_idx];
+        // console.log(mesh)
+        this.gfx.buffer[progidx].vb.buffer[vbidx].mesh.RemoveByIdx(scene_gfx_mesh_idx);
+        return false;
+    }
+
     /*******************************************************************************************************************************************************/
     /** DEBUG PRINT */
     Print() {
-        ScenesPrintSceneMeshes(this.children, 0)
+        ScenesPrintRootMeshes(this.children, 0)
     }
+
     PrintMeshInGfx() {
         console.log('PrintMeshInGfx:')
         for (let i = 0; i < this.mesh_in_gfx.length; i++) {
@@ -376,6 +371,7 @@ export class Scene {
             }
         }
     }
+
     PrintGfxStorageBuffer() {
         // console.log(this.gfx)
         
@@ -384,17 +380,18 @@ export class Scene {
             console.log('progidx:', this.gfx.buffer[i].progidx);
             for (let j = 0; j < this.gfx.buffer[i].vb.boundary; j++){
                 
-                console.log(' vbidx:', this.gfx.buffer[i].vb.buffer[j].vbidx);
+                console.log('  vbidx:', this.gfx.buffer[i].vb.buffer[j].vbidx);
                 for (let k = 0; k < this.gfx.buffer[i].vb.buffer[j].mesh.boundary; k++) { 
                     if(this.gfx.buffer[i].vb.buffer[j].mesh.buffer[k]){
 
                         const mesh = this.gfx.buffer[i].vb.buffer[j].mesh.buffer[k];
-                        console.log('mesh:', mesh.name)
+                        console.log(`    name:${mesh.name}, gfxmesh: ${mesh.gfx.scene_gfx_mesh_idx} mesh: ${mesh.idx} root: ${mesh.scene_rootidx}`)
                     } 
                 }
             }
         }
     }
+
     PrintRootMeshBuffer() {
         console.log(this.root_meshes)
     }
@@ -430,11 +427,17 @@ export function Scenes_get_scene_by_idx(sceneidx) { return _scenes.buffer[scenei
 export function Scenes_create_scene() { return _scenes.Create(); }
 export function Scenes_get_root_meshes(sceneidx) { return _scenes.GetRootMeshes(sceneidx); }
 export function Scenes_get_count() { return _scenes.active_count; }
-export function Scenes_remove_mesh(mesh) { 
-    _scenes.buffer[mesh.sceneidx].RemoveMesh(mesh);
-}
+// export function Scenes_remove_mesh(mesh) { 
+//     _scenes.buffer[mesh.sceneidx].RemoveMesh(mesh);
+// }
 export function Scenes_remove_root_mesh(widget, sceneidx) { 
     _scenes.buffer[sceneidx].RemoveRootMesh(widget);
+}
+export function Scenes_store_gfx_to_buffer(sceneidx, mesh) { 
+    _scenes.buffer[sceneidx].StoreGfxCtx(mesh);
+}
+export function Scenes_remove_mesh_from_gfx(sceneidx, progidx, vbidx, scene_gfx_mesh_idx) { 
+    return _scenes.buffer[sceneidx].RemoveMeshFromGfx(progidx, vbidx, scene_gfx_mesh_idx);
 }
 
 /**
@@ -487,7 +490,7 @@ export function Scenes_update_all_gfx_starts2(sceneidx, progidx, vbidx, ret) {
 /**
  * Debug
  */
-export function ScenesPrintSceneMeshes(array) {
+export function ScenesPrintRootMeshes(array) {
 
     let total_count = 0;
 
@@ -560,8 +563,8 @@ function Gather_mesh_children_names(mesh) {
 function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children, parent_discription) {
 
     // if children events exist, put them in a new drop down.
-    // const dropdown = new Widget_Drop_Down(`${parent_discription}`, ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GetRandomColor(), temp_transparency), WHITE, [1, 1], pad);
-    const dropdown = new Widget_Drop_Down(`${parent_discription}`, ALIGN.LEFT, [200, 400, 0], [60, 20], TRANSPARENCY(BLUE_10_120_220, .7), TRANSPARENCY(GREY1, .8), WHITE, [1, 1], pad);
+    // const dropdown = new Widget_Dropdown(`${parent_discription}`, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GetRandomColor(), temp_transparency), WHITE, pad);
+    const dropdown = new Widget_Dropdown(`${parent_discription}`, [200, 400, 0], [60, 20], TRANSPARENCY(BLUE_10_120_220, .7), TRANSPARENCY(GREY1, .8), WHITE, pad);
     // dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dropdown.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
 
@@ -580,7 +583,7 @@ function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children,
         { // Mesh's Gfx info
             const gfx = mesh.gfx;
             const dp_info = `prog:${gfx.prog.idx} | vb:${gfx.vb.idx}, start:${gfx.vb.start}, count:${gfx.vb.boundary}`;
-            const dp_gfx = new Widget_Drop_Down(`Gfx: ${dp_info}`, ALIGN.LEFT, [200, 400, 0], [60, 20], GREY6, TRANSPARENCY(RED, .05), WHITE, [1, 1], pad);
+            const dp_gfx = new Widget_Dropdown(`Gfx: ${dp_info}`, [200, 400, 0], [60, 20], GREY6, TRANSPARENCY(RED, .05), WHITE, pad);
             // dp_gfx.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dp_gfx.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
 
@@ -591,7 +594,7 @@ function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children,
         }
         { // Geometry info
             const dp_info = `geom: pos:${mesh.geom.pos} dim:${mesh.geom.dim}`;
-            const dp = new Widget_Drop_Down(dp_info, ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GREY1, 1), WHITE, [1, 1], pad);
+            const dp = new Widget_Dropdown(dp_info, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GREY1, 1), WHITE, pad);
             // dp.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dp.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
             const info = `defPos:${mesh.geom.defPos} | defDim:${mesh.geom.defDim}, numFaces:${mesh.geom.num_face}`;
@@ -601,7 +604,7 @@ function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children,
             dropdown.AddToMenu(dp)
         }
         { // Miscelaneus info
-            const dp = new Widget_Drop_Down('Misc', ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GREY1, 1), WHITE, [1, 1], pad);
+            const dp = new Widget_Dropdown('Misc', [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GREY1, 1), WHITE, pad);
             // dp.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dp.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
             {// Children buffer
@@ -633,8 +636,8 @@ function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children,
 
 export function Scenes_debug_info_create(scene) {
 
-    // const dropdown = new Widget_Drop_Down('Scene Meshes Dropdown Section Panel', ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GetRandomColor(), temp_transparency), WHITE, [1, 1], pad);
-    const dropdown = new Widget_Drop_Down('Scene Meshes Dropdown Section Panel', ALIGN.LEFT, [600, 20, 0], [60, 20], GREY1, TRANSPARENCY(GREY7, temp_transparency), WHITE, [1, 1], pad);
+    // const dropdown = new Widget_Dropdown('Scene Meshes Dropdown Section Panel', ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GetRandomColor(), temp_transparency), WHITE, pad);
+    const dropdown = new Widget_Dropdown('Scene Meshes Dropdown Section Panel', [600, 20, 0], [60, 20], GREY1, TRANSPARENCY(GREY7, temp_transparency), WHITE, pad);
     // dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dropdown.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
     // dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, dropdown.SetOnMove);
     // Drop_down_set_root(dropdown, dropdown);
@@ -645,8 +648,8 @@ export function Scenes_debug_info_create(scene) {
         const scene = _scenes.buffer[i];
         //    const type = Listeners_get_event_type_string(i);
 
-        // const drop_down_mesh = new Widget_Drop_Down(`${scene.name}`, ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GetRandomColor(), temp_transparency), WHITE, [1, 1], pad);
-        const drop_down_mesh = new Widget_Drop_Down(`${scene.name}`, ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(BLUE, temp_transparency), WHITE, [1, 1], pad);
+        // const drop_down_mesh = new Widget_Dropdown(`${scene.name}`, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GetRandomColor(), temp_transparency), WHITE, pad);
+        const drop_down_mesh = new Widget_Dropdown(`${scene.name}`, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(BLUE, temp_transparency), WHITE, pad);
         // drop_down_mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down_mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
         const meshes_buffer = scene.children;
@@ -701,3 +704,81 @@ export function Scenes_debug_info_update(params) {
         }
     }
 } 
+
+
+    /**SAVE */
+    // StoreGfxCtx(mesh) {
+
+    //     const mesh_count = mesh.length;
+    //     for (let i = 0; i < mesh_count; i++) {
+            
+            
+    //         const mesh_gfx = mesh[i].gfx;
+    //         let handled = false;
+
+    //         if (!this.gfx) { // #Edge Case
+    //             this.gfx = new M_Buffer();
+    //             const idx_prog = this.gfx.Add({
+    //                 progidx: mesh_gfx.prog.idx,
+    //                 vb: new M_Buffer(),
+    //             });
+    //             const idx_vb = this.gfx.buffer[idx_prog].vb.Add({
+    //                 vbidx: mesh_gfx.vb.idx,
+    //                 mesh: new M_Buffer(),
+    //             });
+    //             mesh[i].gfx.scene_gfx_mesh_idx = this.gfx.buffer[idx_prog].vb.buffer[idx_vb].mesh.Add(mesh[i]);
+
+    //             this.camera.StoreProgIdx(mesh_gfx.prog.idx); // Store the new program to the cameras progidx buffer for the program's matrix uniform update. 
+
+    //         }
+    //         else {
+
+    //             // Must loop through all existing 'gfx' to conclude if the current meshes gfx buffers exist or not.
+    //             for (let j = 0; j < this.gfx.boundary; j++) { // loop for all gfx program buffer indexes
+
+    //                 if (this.gfx.buffer[j].progidx === mesh_gfx.prog.idx) {
+
+    //                     for (let k = 0; k < this.gfx.buffer[j].vb.boundary; k++) { // loop for all stored vertex buffer indexes
+
+    //                         if (this.gfx.buffer[j].vb.buffer[k].vbidx === mesh_gfx.vb.idx) {
+
+    //                             // #Case 3
+    //                             mesh[i].gfx.scene_gfx_mesh_idx = this.gfx.buffer[j].vb.buffer[k].mesh.Add(mesh[i]);
+    //                             handled = true;
+    //                             break; // Break when gfx already stored.
+    //                         }
+    //                     }
+
+    //                     if(!handled){  // #Case 2
+                                
+    //                         const idx_vb = this.gfx.buffer[j].vb.Add({
+    //                             vbidx: mesh_gfx.vb.idx,
+    //                             mesh: new M_Buffer(),
+    //                         });
+    //                         mesh[i].gfx.scene_gfx_mesh_idx = this.gfx.buffer[j].vb.buffer[idx_vb].mesh.Add(mesh[i]);
+    //                         handled = true;
+    //                     }
+
+    //                 }
+    //                 if (handled) break; // We broke the inner loop, but we need to break this one too and continue with the next mesh.
+    //             }
+
+    //             if (!handled) { // #Case 1. Program index not found.
+
+    //                 const idx_prog = this.gfx.Add({
+    //                     progidx: mesh_gfx.prog.idx,
+    //                     vb: new M_Buffer(),
+    //                 });
+    //                 const idx_vb = this.gfx.buffer[idx_prog].vb.Add({
+    //                     vbidx: mesh_gfx.vb.idx,
+    //                     mesh: new M_Buffer(),
+    //                 });
+    //                 // mesh[i].idx = this.gfx.buffer[idx_prog].vb.buffer[idx_vb].mesh.Add(mesh[i]);
+    //                 mesh[i].gfx.scene_gfx_mesh_idx = this.gfx.buffer[idx_prog].vb.buffer[idx_vb].mesh.Add(mesh[i]);
+
+    //                 this.camera.StoreProgIdx(mesh_gfx.prog.idx); // Store the new program to the cameras progidx buffer for the program's matrix uniform update. 
+    //                 handled = true;
+    //             }
+    //         }
+    //     }
+    // }
