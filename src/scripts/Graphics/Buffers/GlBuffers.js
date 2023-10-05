@@ -533,6 +533,10 @@ export function GlGenerateContext(sid, sceneidx, GL_BUFFER, addToSpecificGlBuffe
     return gfxInfo;
 }
 
+export function Gl_add_geom_mat_to_vb(gfx, geom, mat){
+    
+}
+
 export function GlAddGeometry(sid, pos, dim, time, gfx, meshName, num_faces) {
 
     const progIdx = gfx.prog.idx;

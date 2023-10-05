@@ -74,17 +74,6 @@ export class Rect extends Mesh {
       this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
       const start = this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
 
-      // if((this.type & MESH_TYPES_DBG.UI_INFO_GFX) === 0){
-      //    const params = {
-      //       progidx: this.gfx.prog.idx,
-      //       vbidx: this.gfx.vb.idx,
-      //       sceneidx: this.sceneidx,
-      //       isActive: true,
-      //       isPrivate: (FLAGS & GFX.PRIVATE) ? true : false,
-      //       type: INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB,
-      //    }
-      //    Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE, params);
-      // }
       const params = {
             progidx: this.gfx.prog.idx,
             vbidx: this.gfx.vb.idx,
