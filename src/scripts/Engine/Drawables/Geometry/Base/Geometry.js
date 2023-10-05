@@ -54,7 +54,7 @@ export class Geometry2D {
         GlAddGeometry(sid, this.pos, this.dim, this.time, gfx, meshName, 1);
     }
 
-    SetPosXYZ(pos, gfx, numFaces=1) {
+    SetPosXYZ(pos, gfx, numFaces = 1) {
         math.CopyArr3(this.pos, pos);
         glBufferOps.GlSetWpos(gfx, pos, numFaces);
     }
@@ -79,7 +79,7 @@ export class Geometry2D {
     UpdatePosXY(gfx) {
         glBufferOps.GlSetWposXY(gfx, this.pos);
     }
-    SetDefaultPosXY(gfx){
+    SetDefaultPosXY(gfx) {
         math.CopyArr2(this.pos, this.defPos)
         glBufferOps.GlSetWposXY(gfx, this.defPos);
     }
@@ -88,7 +88,7 @@ export class Geometry2D {
         glBufferOps.GlSetWposZ(gfx, z, numFaces);
     }
     MoveXYZ(pos, gfx, num_faces) {
-        /** DEBUG */ if(pos.length !== 3) console.error('Wrong array dimention for position xyz. @ class Geometry2D, Geometry.js')
+        /** DEBUG */ if (pos.length !== 3) console.error('Wrong array dimention for position xyz. @ class Geometry2D, Geometry.js')
         math.AddArr3(this.pos, pos);
         glBufferOps.GlMoveXYZ(gfx, pos, num_faces);
     }
@@ -132,16 +132,38 @@ export class Geometry2D {
     StoreDefPos(pos) {
         math.CopyArr2(this.defPos, pos);
     }
+
+    Copy(geom = {}) {
+
+        if (geom instanceof Geometry2D) {
+
+            this.shad = geom.sid.shad; 
+            this.attr = geom.sid.attr; 
+            this.unif = geom.sid.unif; 
+            this.pass = geom.sid.pass;  
+            this.pos = geom.pos;
+            this.dim = geom.dim;
+            this.scale = geom.scale;
+            this.defPos = geom.defPos;
+            this.defDim = geom.defDim;
+            this.defScale = geom.defScale;
+            this.zIndex = geom.zIndex;
+            this.time = geom.time;
+            this.type = geom.type;
+            this.num_faces = geom.num_faces;
+
+        }
+    }
 }
 
 
 export class Geometry3D {
 
     sid;
-    pos   = [0, 0, 0];
-    dim   = [0, 0, 0];
+    pos = [0, 0, 0];
+    dim = [0, 0, 0];
     scale = [0, 0, 0];
-    time  = 0;
+    time = 0;
     zIndex = 0;
     type;
 

@@ -11,11 +11,10 @@ import { Geometry2D } from "./Base/Geometry.js";
 
 export class Geometry2D_Text extends Geometry2D {
 
-   // num_faces;
    text;
    char_ratio;
 
-   constructor(pos, fontSize, scale, text, texId = INT_NULL) {
+   constructor(pos=[0,0,0], fontSize=4, scale=[0,0], text='', texId = INT_NULL) {
 
       let dim = [0, 0]
       dim = [fontSize, fontSize];
@@ -102,5 +101,18 @@ export class Geometry2D_Text extends Geometry2D {
    Reposition_pre(pos) {
       CopyArr2(this.pos, pos)
       CopyArr2(this.defPos, pos)
+   }
+
+
+   Copy(geom = {}) {
+
+      if (geom instanceof Geometry2D) {
+
+         super.Copy(geom);
+
+         this.text = geom.text;
+         this.char_ratio = geom.char_ratio;
+
+      }
    }
 }

@@ -11,6 +11,7 @@ import { Scenes_get_root_meshes, Scenes_store_gfx_to_buffer } from "../../Scenes
 import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _pt_fps } from "../../Timers/PerformanceTimers";
 import { PerformanceTimerGetFps1sAvg, _fps_1s_avg, _fps_500ms_avg } from "../../Timers/Time";
 import { Info_listener_create_event, Info_listener_destroy_event } from "./InfoListeners";
+import { Gfx_add_geom_mat_to_vb } from "../../Interfaces/Gfx/GfxInterfaceFunctions";
 
 
 export function Debug_info_ui_performance(scene) {
@@ -251,12 +252,17 @@ export function Debug_info_create_gfx_info(params) {
    dp.SetName('InfoUi Gfx DP');
    dp.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
    dp.CreateClickEvent();
+
+   // Create the dropdown for the self-reference gfx buffers info
+   const dp_self_gfx = new Widget_Dropdown(`self-gfx`, [200, 400, 0], [10, 10], YELLOW, TRANSPARENCY(PINK_240_60_160, tr), WHITE, [8, 3]);
+   dp_self_gfx.SetName(`self-gfx`)
+   dp_self_gfx.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
    
    const progs = Gl_progs_get();
    const count = progs.length;
    for (let i = 0; i < count; i++) {
       
-      const dp_pr = new Widget_Dropdown(`prog:${i}`, [200, 400, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
+      const dp_pr = new Widget_Dropdown(`prog:${i}`, [200, 400, 0], [10, 10], BLUE_10_120_220, TRANSPARENCY(RED, tr), WHITE, [8, 3]);
       dp_pr.SetName(`Program DP:${i}`);
       Object.defineProperty(dp_pr, 'gfxidx', { value: i });
       dp_pr.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
@@ -264,33 +270,125 @@ export function Debug_info_create_gfx_info(params) {
       for (let j = 0; j < progs[i].vertexBufferCount; j++) {
          
          const vb = progs[i].vertexBuffer[j];
-         const dp_vb = new Widget_Dropdown(`vb:${j} | count:${vb.count}`, [200, 400, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
-         dp_vb.SetName(`VB DP:${j}`)
-         Object.defineProperty(dp_vb, 'gfxidx', { value: j });
-         dp_vb.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
-         dp_vb.debug_info.data = {
-            progidx: i,
-            vbidx: j,
-         };
-         dp_pr.AddToMenu(dp_vb);
-      }
+         if((vb.type & MESH_TYPES_DBG.UI_INFO_GFX) === 0){ // Add as regular vertex buffers all exept the buffers storing the ui_gfx_ dropdowns.
 
+            const dp_vb = new Widget_Dropdown(`vb:${j} | count:${vb.count}`, [200, 400, 0], [10, 10], ORANGE_240_130_10, TRANSPARENCY(GREY3, tr), WHITE, [8, 3]);
+            dp_vb.SetName(`VB DP:${j}`)
+            Object.defineProperty(dp_vb, 'gfxidx', { value: j });
+            dp_vb.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
+            dp_vb.debug_info.data = { progidx: i, vbidx: j, };
+            dp_pr.AddToMenu(dp_vb);
+         }else{
+            const dp_vb = new Widget_Dropdown(`vb:${j} | count:${vb.count}`, [200, 400, 0], [10, 10], PINK_240_60_160, TRANSPARENCY(GREY3, tr), WHITE, [8, 3]);
+            dp_vb.SetName(`VB DP:${j}`)
+            Object.defineProperty(dp_vb, 'gfxidx', { value: j });
+            dp_vb.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
+            dp_vb.debug_info.data = { progidx: i, vbidx: j, };
+            dp_self_gfx.AddToMenu(dp_vb);
+            
+         }
+      }
+      
       dp.AddToMenu(dp_pr);
    }
+   dp.AddToMenu(dp_self_gfx);
+
+
+
    Drop_down_set_root(dp, dp);
    section.AddItem(dp);
 
-   scene.AddWidget(section, GFX.PRIVATE);
-   section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
    // Create an Info listener to update the mouse position ui text
-   section.debug_info.evtidx = Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE, Debug_info_gfx_update, params, section);
-   section.Render()
+   // section.debug_info.evtidx = Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE, Debug_info_gfx_update, params, section);
+   section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
+   scene.AddWidget(section, GFX.PRIVATE);
+   section.Render(MESH_TYPES_DBG.UI_INFO_GFX);
+
+   
+   
    DEBUG_INFO.UI_GFX.IDX = section.idx;
    Gfx_end_session(true);
 
    DEBUG_INFO.UI_GFX.IS_ON = true;
 
 }
+
+/**SAVE */
+// export function Debug_info_create_gfx_info(params) {
+
+//    const scene = params.params;
+
+//    if (DEBUG_INFO.UI_GFX.IS_ON) {
+
+//       const meshes = Scenes_get_root_meshes(scene.sceneidx);
+//       const section = meshes.buffer[DEBUG_INFO.UI_GFX.IDX];
+
+//       Info_listener_destroy_event(section.debug_info.evtidx);
+//       DEBUG_INFO.UI_GFX.POS = section.geom.pos; // Remember the ui's position.
+
+//       section.Destroy();
+
+//       DEBUG_INFO.UI_GFX.IDX = INT_NULL; // reference to the scene's mesh buffer
+//       DEBUG_INFO.UI_GFX.IS_ON = false;
+//       return;
+//    }
+
+
+//    const tr = .6;
+//    const section = new Section(SECTION.VERTICAL, [43, 13], DEBUG_INFO.UI_GFX.POS, [0, 0], TRANSPARENCY(GREY1, .4), 'InfoUi Gfx section');
+//    section.SetName('InfoUi Gfx section 100')
+
+//    const dp = new Widget_Dropdown(`InfoUi Gfx DP`, [0, 0, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
+//    dp.SetName('InfoUi Gfx DP');
+//    dp.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
+//    dp.CreateClickEvent();
+   
+//    const progs = Gl_progs_get();
+//    const count = progs.length;
+//    for (let i = 0; i < count; i++) {
+      
+//       const dp_pr = new Widget_Dropdown(`prog:${i}`, [200, 400, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
+//       dp_pr.SetName(`Program DP:${i}`);
+//       Object.defineProperty(dp_pr, 'gfxidx', { value: i });
+//       dp_pr.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
+      
+//       for (let j = 0; j < progs[i].vertexBufferCount; j++) {
+         
+//          const vb = progs[i].vertexBuffer[j];
+//          const dp_vb = new Widget_Dropdown(`vb:${j} | count:${vb.count}`, [200, 400, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
+//          dp_vb.SetName(`VB DP:${j}`)
+//          Object.defineProperty(dp_vb, 'gfxidx', { value: j });
+//          dp_vb.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
+//          dp_vb.debug_info.data = {
+//             progidx: i,
+//             vbidx: j,
+//          };
+//          dp_pr.AddToMenu(dp_vb);
+//       }
+
+//       dp.AddToMenu(dp_pr);
+//    }
+
+//    // Create the dropdown for the self-reference gfx buffers info
+//    const dp_self_gfx = new Widget_Dropdown(`self-gfx`, [200, 400, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
+//    dp_self_gfx.SetName(`self-gfx`)
+//    dp_self_gfx.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
+//    dp.AddToMenu(dp_self_gfx);
+
+//    Drop_down_set_root(dp, dp);
+//    section.AddItem(dp);
+
+//    scene.AddWidget(section, GFX.PRIVATE);
+//    section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
+//    // Create an Info listener to update the mouse position ui text
+//    section.debug_info.evtidx = Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE, Debug_info_gfx_update, params, section);
+//    section.Render()
+//    DEBUG_INFO.UI_GFX.IDX = section.idx;
+//    Gfx_end_session(true);
+
+//    DEBUG_INFO.UI_GFX.IS_ON = true;
+
+// }
 
 function Debug_info_gfx_update(params) {
 
@@ -355,19 +453,19 @@ function Debug_info_gfx_update(params) {
       // const dp_vb = dp_prog.menu.children.buffer[vbidx];
       if(!dp_vb){
          // Create vb dropdown
-         const new_dp_vb = new Widget_Dropdown(`vb:${vbidx} | count:${vb.count}`, [0, 0, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
-         new_dp_vb.SetName(`vb:${vbidx}`);
-         Object.defineProperty(new_dp_vb, 'gfxidx', { value: vbidx });
-         new_dp_vb.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
-         dp_prog.AddToMenu(new_dp_vb);
-         // new_dp_vb.GenGfxCtx(GFX.PRIVATE);
+         // const new_dp_vb = new Widget_Dropdown(`vb:${vbidx} | count:${vb.count}`, [0, 0, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
+         // new_dp_vb.SetName(`vb:${vbidx}`);
+         // Object.defineProperty(new_dp_vb, 'gfxidx', { value: vbidx });
+         // new_dp_vb.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
+         // dp_prog.AddToMenu(new_dp_vb);
+         // // new_dp_vb.GenGfxCtx(GFX.PRIVATE);
          
-         console.log(`================== Create vb dropdown. prog:${progidx} vb:${vbidx} mesh:${new_dp_vb.name}`);
-         for(let i=0; i<dp_prog.menu.children.boundary; i++){
-            console.log(dp_prog.menu.children.buffer[i].name)
-         }
+         // console.log(`================== Create vb dropdown. prog:${progidx} vb:${vbidx} mesh:${new_dp_vb.name}`);
+         // for(let i=0; i<dp_prog.menu.children.boundary; i++){
+         //    console.log(dp_prog.menu.children.buffer[i].name)
+         // }
          
-         Temp_render(new_dp_vb)
+         // Temp_render(new_dp_vb)
 
       }else{
          // Update existing prog-vb text info
@@ -381,15 +479,15 @@ function Temp_render(dp){
 
    dp.gfx = Gfx_generate_context(dp.sid, dp.sceneidx, dp.geom.num_faces, GFX.PRIVATE);
    Scenes_store_gfx_to_buffer(dp.sceneidx, dp);
-   dp.geom.AddToGraphicsBuffer(dp.sid, dp.gfx, dp.name);
-   dp.mat.AddToGraphicsBuffer(dp.sid, dp.gfx);
+   // dp.geom.AddToGraphicsBuffer(dp.sid, dp.gfx, dp.name);
+   // dp.mat.AddToGraphicsBuffer(dp.sid, dp.gfx);
+   Gfx_add_geom_mat_to_vb(dp.sid, dp.gfx, dp.geom, dp.mat)
    
    const btn = dp.children.buffer[0];
    btn.GenGfxCtx(GFX.PRIVATE)
-   // btn.gfx = Gfx_generate_context(btn.sid, btn.sceneidx, btn.geom.num_faces, GFX.PRIVATE);
-   // Scenes_store_gfx_to_buffer(btn.sceneidx, btn);
-   btn.geom.AddToGraphicsBuffer(btn.sid, btn.gfx, btn.name);
-   btn.mat.AddToGraphicsBuffer(btn.sid, btn.gfx);
+   // btn.geom.AddToGraphicsBuffer(btn.sid, btn.gfx, btn.name);
+   // btn.mat.AddToGraphicsBuffer(btn.sid, btn.gfx);
+   Gfx_add_geom_mat_to_vb(btn.sid, btn.gfx, btn.geom, btn.mat)
    
    const menu = dp.menu;
    for(let i=0; i<menu.children.boundary; i++){
@@ -397,8 +495,9 @@ function Temp_render(dp){
       const child = menu.children.buffer[i];
       child.gfx = Gfx_generate_context(child.sid, child.sceneidx, child.geom.num_faces, GFX.PRIVATE);
       Scenes_store_gfx_to_buffer(child.sceneidx, child);
-      child.geom.AddToGraphicsBuffer(child.sid, child.gfx, child.name);
-      child.mat.AddToGraphicsBuffer(child.sid, child.gfx);
+      // child.geom.AddToGraphicsBuffer(child.sid, child.gfx, child.name);
+      // child.mat.AddToGraphicsBuffer(child.sid, child.gfx);
+      Gfx_add_geom_mat_to_vb(child.sid, child.gfx, child.geom, child.mat)
 
    }
 }

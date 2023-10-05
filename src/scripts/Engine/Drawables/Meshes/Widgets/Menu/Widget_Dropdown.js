@@ -269,7 +269,7 @@ export class Widget_Dropdown extends Section {
           * What we want is to regenerate gfx, find a private buffer from scratch,
           * NOT reuse the prog and vb that pre-exists in the menu mesh.
           */
-         menu.Render(); // Add to the vertex buffers
+         menu.Render(MESH_TYPES_DBG.UI_INFO_GFX); // Add to the vertex buffers
          Gfx_end_session(true, true);
 
          const root = Dropdown_get_root_by_idx(dropdown_mesh.rootidx);

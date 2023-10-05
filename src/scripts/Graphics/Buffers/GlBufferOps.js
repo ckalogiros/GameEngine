@@ -4,15 +4,15 @@ import { RotateZ, Matrix3x3_3x3Mult } from "../../Helpers/Math/Matrix.js";
 import { Gl_progs_get_ib_byidx, Gl_progs_get, Gl_progs_get_vb_byidx } from "../GlProgram.js";
 
 
-export function Gl_remove_geometry(gfx, num_faces=1) {
+export function Gl_remove_geometry(gfx, num_faces = 1) {
 
     const vb = Gl_progs_get_vb_byidx(gfx.prog.idx, gfx.vb.idx);
     const ib = Gl_progs_get_ib_byidx(gfx.prog.idx, gfx.ib.idx);
 
     const ret = {
-        counts:[0,0],
+        counts: [0, 0],
         start: gfx.vb.start,
-        last: (gfx.vb.start+gfx.vb.count*num_faces >= vb.count) ? true : false,
+        last: (gfx.vb.start + gfx.vb.count * num_faces >= vb.count) ? true : false,
         empty: false,
     };
     // if(DEBUG.GFX.REMOVE_MESH) console.log('idx:', gfx.prog.idx, gfx.vb.idx, 'vb count:', vb.count, ' attributes from start:', gfx.vb.start, ' to:', gfx.vb.start+gfx.vb.count*num_faces)
@@ -20,7 +20,7 @@ export function Gl_remove_geometry(gfx, num_faces=1) {
     // if(DEBUG.GFX.REMOVE_MESH) console.log('vb count:', vb.count, ' remove:', ret.counts[0], ' attributes from start:', gfx.vb.start)
     ret.counts[1] = ib.Remove_geometry(num_faces);
 
-    if(vb.count <= 0) ret.empty = true;
+    if (vb.count <= 0) ret.empty = true;
     return ret;
 }
 
@@ -42,7 +42,7 @@ export function Gl_set_vb_mesh_priority(progIdx, vbIdx, meshIdx, meshCount) {
         }
     }
 
-    
+
     // 'Slide' all other meshes to the left by one mesh
     let start = vb.meshes[meshIdx].vb.start;
     let k = start;
@@ -125,7 +125,7 @@ export function VbSetAttribCol(vb, start, count, stride, col, num_faces) {
     }
 }
 export function VbSetAttribPos(vb, start, count, stride, dim, num_faces) {
-    if(dim[0] === NaN || dim[1] === NaN) console.log('NaN value')
+    if (dim[0] === NaN || dim[1] === NaN) console.log('NaN value')
 
     let index = start;
     const end = start + (count * num_faces);
@@ -178,8 +178,8 @@ export function VbSetAttribTex(vb, start, count, stride, tex, num_faces) {
     }
 }
 export function VbSetAttribWpos(vb, start, count, stride, pos, num_faces) {
-if(pos[0] === NaN || pos[1] === NaN || pos[2] === NaN)
-console.log('NaN value')
+    if (pos[0] === NaN || pos[1] === NaN || pos[2] === NaN)
+        console.log('NaN value')
     let index = start;
     const end = start + (count * num_faces);
 
@@ -337,7 +337,7 @@ export function GlSetColor(gfxInfo, color, num_faces = 1) {
 
     const progs = Gl_progs_get();
 
-    if(gfxInfo === null){
+    if (gfxInfo === null) {
         return
     }
     const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
@@ -953,21 +953,21 @@ export function GlRotateX3D(mesh, angle) {
 
     const c = Math.cos(angle);
     const s = Math.sin(angle);
-    const r = [ c, -s, s, c, ];
+    const r = [c, -s, s, c,];
 
 
     const y = 1, z = 2;
-    let   ii = 0;
+    let ii = 0;
 
     const r1 = r[0] * dim[y],
-          r2 = r[2] * dim[z],
-          r3 = r[1] * dim[y],
-          r4 = r[3] * dim[z];
+        r2 = r[2] * dim[z],
+        r3 = r[1] * dim[y],
+        r4 = r[3] * dim[z];
 
-    for(let i=0; i<fLen; i++){
-        vb.data[index + y] = faces[ii+y] * r1 + faces[ii+z] * r2;
-        vb.data[index + z] = faces[ii+y] * r3 + faces[ii+z] * r4;
-        ii+=3;
+    for (let i = 0; i < fLen; i++) {
+        vb.data[index + y] = faces[ii + y] * r1 + faces[ii + z] * r2;
+        vb.data[index + z] = faces[ii + y] * r3 + faces[ii + z] * r4;
+        ii += 3;
         index += stride;
     }
 
@@ -990,23 +990,23 @@ export function GlRotateY3D(mesh, angle) {
 
     const c = Math.cos(angle);
     const s = Math.sin(angle);
-    const r = [ c, s, -s, c, ];
+    const r = [c, s, -s, c,];
 
 
     const x = 0, z = 2;
-    let  ii = 0;
+    let ii = 0;
 
     const r1 = r[0] * dim[x],
-          r2 = r[2] * dim[z],
-          r3 = r[1] * dim[x],
-          r4 = r[3] * dim[z];
+        r2 = r[2] * dim[z],
+        r3 = r[1] * dim[x],
+        r4 = r[3] * dim[z];
 
-    for(let i=0; i<fLen; i+=3){
-        vb.data[index + x] = faces[ii+x] * r1 + faces[ii+z] * r2;
-        vb.data[index + z] = faces[ii+x] * r3 + faces[ii+z] * r4;
+    for (let i = 0; i < fLen; i += 3) {
+        vb.data[index + x] = faces[ii + x] * r1 + faces[ii + z] * r2;
+        vb.data[index + z] = faces[ii + x] * r3 + faces[ii + z] * r4;
         // vb.data[index + x] = faces[xi+x] * r[0] * dim[x] + faces[zi+z] * r[2] * dim[z];
         // vb.data[index + z] = faces[xi+x] * r[1] * dim[x] + faces[zi+z] * r[3] * dim[z];
-        ii+=3;
+        ii += 3;
         index += stride;
     }
 
@@ -1030,22 +1030,22 @@ export function GlRotateZ3D(mesh, angle) {
 
     const c = Math.cos(angle);
     const s = Math.sin(angle);
-    const r = [ c, -s, s, c, ];
+    const r = [c, -s, s, c,];
 
     const x = 0, y = 1;
-    let   ii = 0;
+    let ii = 0;
 
     const r1 = r[0] * dim[x],
-          r2 = r[2] * dim[y],
-          r3 = r[1] * dim[x],
-          r4 = r[3] * dim[y];
+        r2 = r[2] * dim[y],
+        r3 = r[1] * dim[x],
+        r4 = r[3] * dim[y];
 
     vertices = 4;
-    for(let i=0; i<fLen; i++){
-        
-        vb.data[index + x] = faces[ii+x] * r1 + faces[ii+y] * r2;
-        vb.data[index + y] = faces[ii+x] * r3 + faces[ii+y] * r4;
-        ii+=3;
+    for (let i = 0; i < fLen; i++) {
+
+        vb.data[index + x] = faces[ii + x] * r1 + faces[ii + y] * r2;
+        vb.data[index + y] = faces[ii + x] * r3 + faces[ii + y] * r4;
+        ii += 3;
         index += stride;
     }
 
@@ -1055,16 +1055,16 @@ export function GlRotateZ3D(mesh, angle) {
 /** TODO: Store the new pos and dim to the mesh for collision detection */
 export function GlRotateXY3D(mesh, angle) {
 
-    const gfxInfo   = mesh.gfx;
-    const dim       = mesh.geom.dim;
-    const faces     = mesh.geom.faces;
-    let fLen        = faces.length;
+    const gfxInfo = mesh.gfx;
+    const dim = mesh.geom.dim;
+    const faces = mesh.geom.faces;
+    let fLen = faces.length;
 
     const progs = Gl_progs_get();
-    const vb    = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
+    const vb = progs[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
 
-    let index   = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderinfo.attributes.offset.pos;
-    let stride  = gfxInfo.attribsPerVertex;
+    let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderinfo.attributes.offset.pos;
+    let stride = gfxInfo.attribsPerVertex;
     let vertices = num_faces * gfxInfo.vertsPerRect;
 
     const cos = Math.cos(angle);
@@ -1078,14 +1078,14 @@ export function GlRotateXY3D(mesh, angle) {
     const mat2 = mat1;
 
     const x = 0, y = 1, z = 2;
-    let ii  = 0;
+    let ii = 0;
 
     vertices = 4;
-    for(let i=0; i<fLen; i++){
-        vb.data[index + x] = faces[ii+x] * mat2[0] * dim[x] + faces[ii+y] * mat2[3] * dim[y] + faces[ii+z] * mat2[6] * dim[z];
-        vb.data[index + y] = faces[ii+x] * mat2[1] * dim[x] + faces[ii+y] * mat2[4] * dim[y] + faces[ii+z] * mat2[7] * dim[z];
-        vb.data[index + z] = faces[ii+x] * mat2[2] * dim[x] + faces[ii+y] * mat2[5] * dim[y] + faces[ii+z] * mat2[8] * dim[z];
-        ii+=3;
+    for (let i = 0; i < fLen; i++) {
+        vb.data[index + x] = faces[ii + x] * mat2[0] * dim[x] + faces[ii + y] * mat2[3] * dim[y] + faces[ii + z] * mat2[6] * dim[z];
+        vb.data[index + y] = faces[ii + x] * mat2[1] * dim[x] + faces[ii + y] * mat2[4] * dim[y] + faces[ii + z] * mat2[7] * dim[z];
+        vb.data[index + z] = faces[ii + x] * mat2[2] * dim[x] + faces[ii + y] * mat2[5] * dim[y] + faces[ii + z] * mat2[8] * dim[z];
+        ii += 3;
         index += stride;
     }
 

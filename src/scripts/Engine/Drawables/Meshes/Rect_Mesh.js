@@ -2,6 +2,7 @@
 
 import { Listener_events_set_mesh_events_active } from "../../Events/EventListeners.js";
 import { Gfx_deactivate, Gfx_generate_context, Gfx_remove_geometry } from "../../Interfaces/Gfx/GfxContext.js";
+import { Gfx_add_geom_mat_to_vb } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 import { Scenes_remove_mesh_from_gfx, Scenes_remove_root_mesh, Scenes_store_gfx_to_buffer, Scenes_update_all_gfx_starts } from "../../Scenes.js";
 import { TimeIntervalsDestroyByIdx } from "../../Timers/TimeIntervals.js";
 import { Info_listener_dispatch_event } from "../DebugInfo/InfoListeners.js";
@@ -33,7 +34,7 @@ export class Rect extends Mesh {
 
       // console.log('rect_mesh destroy:', this.name);
 
-      
+
       // Remove event listeners
       this.RemoveAllListenEvents();
 
@@ -52,7 +53,7 @@ export class Rect extends Mesh {
       // Remove from scene
       Scenes_remove_root_mesh(this, this.sceneidx);
       const error = Scenes_remove_mesh_from_gfx(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.scene_gfx_mesh_idx); // Remove mesh from the scene's gfx buffer
-      if(error){ console.error('ERROR REMOVING RECT_MESH: ', this.name); }
+      if (error) { console.error('ERROR REMOVING RECT_MESH: ', this.name); }
       const ret = Gfx_remove_geometry(this.gfx, this.geom.num_faces)
       Scenes_update_all_gfx_starts(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, ret); // Update the gfx.start of all meshes that are inserted in the same vertex buffer.
 
@@ -70,44 +71,45 @@ export class Rect extends Mesh {
    }
 
    AddToGfx() {
-      
-      this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
-      const start = this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
+
+      // this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
+      // const start = this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
+      Gfx_add_geom_mat_to_vb(this.sid, this.gfx, this.geom, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX);
 
       const params = {
-            progidx: this.gfx.prog.idx,
-            vbidx: this.gfx.vb.idx,
-            sceneidx: this.sceneidx,
-            isActive: true,
-            isPrivate: (FLAGS & GFX.PRIVATE) ? true : false,
-            type: INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB,
-         }
+         progidx: this.gfx.prog.idx,
+         vbidx: this.gfx.vb.idx,
+         sceneidx: this.sceneidx,
+         isActive: true,
+         isPrivate: (FLAGS & GFX.PRIVATE) ? true : false,
+         type: INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB,
+      }
       Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE, params);
 
-      return start;
+      // return start;
    }
 
-	DeactivateGfx(){
+   DeactivateGfx() {
 
       if (this.listeners.active_count) {
          Listener_events_set_mesh_events_active(LISTENERS_FLAGS.ALL, this.listeners, false);
       }
       Gfx_deactivate(this.gfx);
       this.is_gfx_inserted = false;
-   }   
+   }
 
 
    /*******************************************************************************************************************************************************/
    // Setters-Getters
    SetSceneIdx(sceneidx) { this.sceneidx = sceneidx; }
 
-   GetTotalWidth(){ return this.geom.dim[0]; }
+   GetTotalWidth() { return this.geom.dim[0]; }
 
-   GetTotalHeight(){ return this.geom.dim[1]; }
-   
-   GetCenterPosX(){ return this.geom.pos[0]; }
+   GetTotalHeight() { return this.geom.dim[1]; }
 
-   GetCenterPosY(){ return this.geom.pos[1]; }
+   GetCenterPosX() { return this.geom.pos[0]; }
+
+   GetCenterPosY() { return this.geom.pos[1]; }
 
    /** Return type: Array. Returns an array of all widgets meshes */
    GetAllMeshes() { return [this]; }

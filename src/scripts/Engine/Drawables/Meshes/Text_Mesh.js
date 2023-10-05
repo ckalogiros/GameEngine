@@ -1,10 +1,10 @@
 "use strict";
 
-import { GfxInfoMesh } from "../../../Graphics/GlProgram.js";
+import { GfxInfoMesh, Gl_progs_set_vb_texidx } from "../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../Helpers/Helpers.js";
 import { CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
 import { Gfx_deactivate, Gfx_generate_context, Gfx_remove_geometry } from "../../Interfaces/Gfx/GfxContext.js";
-import { GfxSetTex } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
+import { GfxSetTex, Gfx_add_geom_mat_to_vb, Gfx_progs_set_vb_texidx } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 import { FontGetUvCoords } from "../../Loaders/Font/Font.js";
 import { Scenes_remove_mesh_from_gfx, Scenes_remove_root_mesh, Scenes_store_gfx_to_buffer, Scenes_update_all_gfx_starts } from "../../Scenes.js";
 import { TimeIntervalsDestroyByIdx } from "../../Timers/TimeIntervals.js";
@@ -24,13 +24,13 @@ export class Text_Mesh extends Mesh {
       const mat = new FontMaterial(color, font, text, [bold, sdfouter])
       const geom = new Geometry2D_Text(pos, fontSize, scale, text, font);
 
-      
+
       super(geom, mat);
       this.SetName(text);
       this.type |= MESH_TYPES_DBG.TEXT_MESH;
    }
 
-   Destroy(){
+   Destroy() {
 
       // console.log('text_mesh destroy:', this.name);
 
@@ -40,7 +40,7 @@ export class Text_Mesh extends Mesh {
       // Remove time intervals
       if (this.timeIntervalsIdxBuffer.active_count) {
 
-         for(let i=0; i<this.timeIntervalsIdxBuffer.boundary; i++){
+         for (let i = 0; i < this.timeIntervalsIdxBuffer.boundary; i++) {
 
             const intervalIdx = this.timeIntervalsIdxBuffer.buffer[i];
             TimeIntervalsDestroyByIdx(intervalIdx);
@@ -54,12 +54,12 @@ export class Text_Mesh extends Mesh {
       // Remove from scene
       Scenes_remove_root_mesh(this, this.sceneidx);
       const error = Scenes_remove_mesh_from_gfx(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.scene_gfx_mesh_idx); // Remove mesh from the scene's gfx buffer
-      if(error){
+      if (error) {
          console.error('Mesh:', this.name)
       }
 
 
-      if(this.parent) this.parent.RemoveChildByIdx(this.idx); // Remove the current mesh from the parent
+      if (this.parent) this.parent.RemoveChildByIdx(this.idx); // Remove the current mesh from the parent
 
    }
 
@@ -74,28 +74,43 @@ export class Text_Mesh extends Mesh {
 
    AddToGfx() {
 
-      this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
-      const start = this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
+      // this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
+      // const start = this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
 
-      // const params = {
-      //    progidx: this.gfx.prog.idx,
-      //    vbidx: this.gfx.vb.idx,
-      //    sceneidx: this.sceneidx,
-      //    isActive: true,
-      //    isPrivate: (FLAGS & GFX.PRIVATE) ? true : false,
-      //    type: INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB,
-      // }
-      // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE, {added_gfx:params});
+      // Copy gfx, to pass new start for each character
+      let gfxCopy = new GfxInfoMesh(this.gfx);
+      let geomCopy = new Geometry2D_Text();
+      geomCopy.Copy(this.geom)
+      let matCopy = new FontMaterial();
+      matCopy.Copy(this.mat)
 
-      return start;
+      for (let i = 0; i < geomCopy.num_faces; i++) {
+         // for (let i = 0; i < 0; i++) {
+
+         matCopy.uv = FontGetUvCoords(matCopy.uvIdx, ' ');
+         if (matCopy.text[i])
+            matCopy.uv = FontGetUvCoords(matCopy.uvIdx, matCopy.text[i]);
+
+         // If texture exists, store texture index, else if font texture exists, store font texture index, else store null
+         gfxCopy.tb.idx = matCopy.textidx !== INT_NULL ? matCopy.textidx : (matCopy.uvIdx !== INT_NULL ? matCopy.uvIdx : INT_NULL);
+
+         Gfx_add_geom_mat_to_vb(this.sid, gfxCopy, geomCopy, matCopy);
+         geomCopy.pos[0] += geomCopy.dim[0] * 2;
+         gfxCopy.vb.start += gfxCopy.vb.count;
+         gfxCopy.ib.start += gfxCopy.ib.count;
+      }
+
+      Gfx_progs_set_vb_texidx(gfxCopy.prog.idx, gfxCopy.vb.idx, gfxCopy.tb.idx); // Update the vertex buffer to store the texture index
+
+
    }
 
-   DeactivateGfx(){
+   DeactivateGfx() {
 
       Gfx_deactivate(this.gfx);
       this.is_gfx_inserted = false;
    }
-   
+
 
    SetZindex(z) {
       this.geom.SetZindex(z, this.gfx, this.geom.num_faces)      // const params = {
@@ -133,7 +148,7 @@ export class Text_Mesh extends Mesh {
 
    UpdateText(val) {
 
-      if(!this.gfx) return; // Case replace text before insert to gfx buffers;
+      if (!this.gfx) return; // Case replace text before insert to gfx buffers;
 
       var text = '';
 
@@ -141,10 +156,10 @@ export class Text_Mesh extends Mesh {
       else text = val;
 
       let gfxInfoCopy = new GfxInfoMesh(this.gfx);
-      
+
       const textLen = text.length;
-      const len = (this.geom.num_faces > textLen) ? this.geom.num_faces : 
-      (textLen > this.geom.num_faces ? this.geom.num_faces : textLen);
+      const len = (this.geom.num_faces > textLen) ? this.geom.num_faces :
+         (textLen > this.geom.num_faces ? this.geom.num_faces : textLen);
 
       // Update text faces
       for (let j = 0; j < len; j++) {
@@ -162,7 +177,7 @@ export class Text_Mesh extends Mesh {
    /** Update a specific character in text char array */
    UpdateTextCharacter(char, idx) {
 
-      if(!this.gfx) return; // Case replace text before insert to gfx buffers;
+      if (!this.gfx) return; // Case replace text before insert to gfx buffers;
 
       var text = '';
 
@@ -170,7 +185,7 @@ export class Text_Mesh extends Mesh {
       else text = char;
 
       let gfxInfoCopy = new GfxInfoMesh(this.gfx);
-      gfxInfoCopy.vb.start += gfxInfoCopy.vb.count * idx;  
+      gfxInfoCopy.vb.start += gfxInfoCopy.vb.count * idx;
 
       const uvs = FontGetUvCoords(this.mat.uvIdx, char);
 
@@ -185,13 +200,13 @@ export class Text_Mesh extends Mesh {
    /*******************************************************************************************************************************************************/
    // Setters-Getters
 
-   GetTotalWidth(){ return this.geom.dim[0] * (this.geom.num_faces) + 1; }
-   
-   GetTotalHeight(){ return this.geom.dim[1]; }
+   GetTotalWidth() { return this.geom.dim[0] * (this.geom.num_faces) + 1; }
 
-   GetCenterPosX(){ return this.geom.pos[0] + this.GetTotalWidth() - this.geom.dim[0]; }
-   
-   GetCenterPosY(){ return this.geom.pos[1] - this.GetTotalHeight() + this.geom.dim[1]; }
+   GetTotalHeight() { return this.geom.dim[1]; }
+
+   GetCenterPosX() { return this.geom.pos[0] + this.GetTotalWidth() - this.geom.dim[0]; }
+
+   GetCenterPosY() { return this.geom.pos[1] - this.GetTotalHeight() + this.geom.dim[1]; }
 
 
    /*******************************************************************************************************************************************************/

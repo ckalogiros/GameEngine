@@ -17,14 +17,14 @@ class VertexBuffer {
 
     webgl_buffer = null;
     data = [];
-    meshes = [];        // An array of pointers to all vertexBuffer's meshes. Has the type of 'GfxInfoMesh'
+    /*DEBUG*/meshes = [];        // An array of pointers to all vertexBuffer's meshes. Has the type of 'GfxInfoMesh'
 
     idx = INT_NULL;	    // The vertex buffer (float*) idx that this Mesh is stored to.
     count = 0;			// Current size of the attributes in data buffer (in floats)
     size = 0;			// Total   size of the float buffer (in floats)
-    start = 0;			// The current meshe's starting idx in the vertex buffer. 
+    /*DELETE*/start = 0;			// The current meshe's starting idx in the vertex buffer. 
     vCount = 0;			// Number of vertices
-    mesh_count = 0;
+    /*NO_NEED_TO_EXIST*/mesh_count = 0;
 
     vao = null;		    // Vertex Array 
     vboId = INT_NULL;	// Vertex Buffer Gl-Id
@@ -32,9 +32,10 @@ class VertexBuffer {
     tboId = INT_NULL;	// Texture Buffer Gl-Id
     textidx = INT_NULL;	// Stores the index of the texture's location in the texture array
 
+    type = 0; // Some flags to interpet the type of the vertex buffer(Example: type:INFO_UI_GFX)
 
-    scissorBox = [];
-    free_vertex_buffer;
+    /*NOT_USED*/scissorBox = [];
+    /*NOT_USED*/free_vertex_buffer;
 
     show = false;
     needsUpdate = false;
@@ -533,8 +534,138 @@ export function GlGenerateContext(sid, sceneidx, GL_BUFFER, addToSpecificGlBuffe
     return gfxInfo;
 }
 
-export function Gl_add_geom_mat_to_vb(gfx, geom, mat){
+export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag){
+
+    const progIdx = gfx.prog.idx;
+    const vbIdx = gfx.vb.idx;
+    const ibIdx = gfx.ib.idx;
+    const prog = Gl_progs_get_prog_byidx(progIdx);
+    const vb = Gl_progs_get_vb_byidx(progIdx, vbIdx);
+    const ib = Gl_progs_get_ib_byidx(progIdx, ibIdx);
+    // const num_faces = geom.num_faces;
+    const num_faces = 1;
+    const start = gfx.vb.start;
+    const count = gfx.vb.count;
+
+    if (GL.BOUND_PROG_IDX !== progIdx) {
+        GlUseProgram(prog.webgl_program, progIdx);
+        GL.BOUND_PROG_IDX = progIdx;
+        gfxCtx.gl.bindVertexArray(vb.vao);
+        gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
+        GL.BOUND_VBO_IDX = vbIdx;
+    }
+    if (GL.BOUND_VBO_IDX !== vbIdx) {
+        gfxCtx.gl.bindVertexArray(vb.vao);
+        gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
+        GL.BOUND_VBO_IDX = vbIdx;
+    }
     
+    // Reallocate vertex buffer if it has no more space
+    const meshSize = gfx.attribsPerVertex * gfx.vertsPerRect * num_faces;
+    if (vb.count + meshSize >= vb.size) vb.Realloc();
+    // console.log(`vbcount:${vb.count} meshsize:${meshSize} vb.size:${vb.size}`);
+
+    /**********************************************************************************************************************/
+    // Add Geometry
+    if (sid.attr & SID.ATTR.POS2) { // Add Position, if the program has such an attribute 
+        GlOps.VbSetAttribPos(vb, start + prog.shaderinfo.attributes.offset.pos,
+            count, prog.shaderinfo.attribsPerVertex - prog.shaderinfo.attributes.size.pos, geom.dim, num_faces);
+    }
+    if (sid.attr & SID.ATTR.WPOS_TIME4) { // Add World Position, if the program has such an attribute 
+        if (sid.attr & SID.ATTR.POS3) {
+            GlOps.VbSetAttribWpos(vb, start + prog.shaderinfo.attributes.offset.wposTime,
+                count, prog.shaderinfo.attribsPerVertex - 3, geom.pos, 2);
+        }
+        else {
+            GlOps.VbSetAttribWpos(vb, start + prog.shaderinfo.attributes.offset.wposTime,
+                count, prog.shaderinfo.attribsPerVertex - prog.shaderinfo.attributes.size.wpos, geom.pos, num_faces);
+        }
+    }
+    if (sid.attr & SID.ATTR.TIME) { // Per Vertex Timer (meant to be per mesh, 4 vertices) 
+        GlOps.VbSetAttrTime(vb, start + prog.shaderinfo.attributes.offset.time,
+            count, prog.shaderinfo.attribsPerVertex - prog.shaderinfo.attributes.size.wpos, geom.time, num_faces);
+    }
+
+    
+    /**********************************************************************************************************************/
+    // Add Material
+    if (sid.attr & SID.ATTR.COL4 && mat.col) { // Add Color, if the program has such an attribute
+
+        if (!mat.col && DEBUG.WEB_GL) console.error('Style hasn\'t being set. @AddMaterial(), GlBuffers.js')
+
+        // 4 color vertex
+        if (sid.attr & SID.ATTR.COL4_PER_VERTEX) {
+            GlOps.VbSetAttribColPerVertex(vb, start + prog.shaderinfo.attributes.offset.col,
+                count, prog.shaderinfo.attribsPerVertex - prog.shaderinfo.attributes.size.col, mat.col, num_faces);
+        }
+        else { // Regular color. 1 color for all vertices
+            GlOps.VbSetAttribCol(vb, start + prog.shaderinfo.attributes.offset.col,
+                count, prog.shaderinfo.attribsPerVertex - prog.shaderinfo.attributes.size.col, mat.col, num_faces);
+        }
+    }
+    if (sid.attr & SID.ATTR.TEX2 && mat.uv) { // Add Texture, if the program has such an attribute 
+        if (!mat.uv && DEBUG.WEB_GL) console.error('Style hasn\'t being set. @AddMaterial(), GlBuffers.js')
+        GlOps.VbSetAttribTex(vb, start + prog.shaderinfo.attributes.offset.tex,
+            count, prog.shaderinfo.attribsPerVertex - prog.shaderinfo.attributes.size.tex, mat.uv, num_faces);
+    }
+    if (sid.attr & SID.ATTR.SDF && mat.sdf_params) { // Add Texture, if the program has such an attribute 
+        if (!mat.sdf_params && DEBUG.WEB_GL) console.error('Sdf hasn\'t being set. @AddMaterial(), GlBuffers.js')
+        // (vb, start, count, stride, sdf_params)
+        GlOps.VbSetAttrSdf(vb, start + prog.shaderinfo.attributes.offset.sdf,
+            count, prog.shaderinfo.attribsPerVertex - prog.shaderinfo.attributes.size.sdf, mat.sdf_params, num_faces);
+    }
+
+    let params1Index = 0; //  Handles any unused attributes of the vec4 params1 shader attribute.  
+    if (sid.attr & SID.ATTR.BORDER) {
+        if (!mat.style && DEBUG.WEB_GL) console.error('Style.border hasn\'t being set. @AddMaterial(), GlBuffers.js')
+        else {
+            GlOps.VbSetAttrBorderWidth(vb, start + prog.shaderinfo.attributes.offset.params1 + params1Index,
+                count, prog.shaderinfo.attribsPerVertex - V_BORDER_WIDTH, mat.style[STYLE.BORDER], num_faces)
+            params1Index++;
+        }
+    }
+    if (sid.attr & SID.ATTR.R_CORNERS) {
+        if (!mat.style && DEBUG.WEB_GL) console.error('Style.rCorners hasn\'t being set. @AddMaterial(), GlBuffers.js')
+        else {
+            GlOps.VbSetAttrRoundCorner(vb, start + prog.shaderinfo.attributes.offset.params1 + params1Index,
+                count, prog.shaderinfo.attribsPerVertex - V_ROUND_CORNERS, mat.style[STYLE.R_CORNERS], num_faces)
+            params1Index++;
+        }
+    }
+    if (sid.attr & SID.ATTR.FEATHER) {
+        if (!mat.style && DEBUG.WEB_GL) console.error('Style.feather hasn\'t being set. @AddMaterial(), GlBuffers.js')
+        else {
+            GlOps.VbSetAttrBorderFeather(vb, start + prog.shaderinfo.attributes.offset.params1 + params1Index,
+                count, prog.shaderinfo.attribsPerVertex - V_BORDER_FEATHER, mat.style[STYLE.FEATHER], num_faces)
+            params1Index++;
+        }
+    }
+    /** IMPORTANT! The stayle attributes(counts 3 attributes) use the attrParams vector4 to be passed.
+     * Therefore, in order to count the totaol attributes we must take into consideration the empty attribute
+     */
+    if (sid.attr & SID.ATTR.EMPTY) { // Increment vertex count for unused vector elements
+        vb.count += prog.shaderinfo.verticesPerRect * num_faces;
+    }
+
+    /**********************************************************************************************************************/
+    // Create indices
+    if (sid.shad & SID.SHAD.INDEXED) {
+
+        // Check for buffer realloc
+        if (ib.count + num_faces * INDICES_PER_RECT > ib.size) {
+            ib.Realloc();
+        }
+
+        gfx.ib.start = ib.count;
+        ib.Add(num_faces)
+        gfx.ib.count = ib.count;
+    }
+
+    
+    prog.isActive = true; // Sets a program to 'active', only if there are meshes in the program's vb
+    vb.needsUpdate = true;
+    // console.log('VB count:', vb.count)
+    if(vb_type_flag) vb.type |= vb_type_flag;
 }
 
 export function GlAddGeometry(sid, pos, dim, time, gfx, meshName, num_faces) {

@@ -48,7 +48,7 @@ export class Info_Listeners {
             
          const evt = this.events.buffer[i]; 
 
-         if(evt.event_type & EVENT_TYPE){
+         if(evt && (evt.event_type & EVENT_TYPE)){
 
             // Handle event via callback
             const dispatch_params = {

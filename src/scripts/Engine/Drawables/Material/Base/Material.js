@@ -165,13 +165,35 @@ export class Material {
    SetNewAttribute(attribName = null,) { }
    SetNewUniform() { }
 
+   Copy(mat = {}){
+
+		if (mat instanceof Material) {
+
+         this.shad = mat.sid.shad; 
+         this.attr = mat.sid.attr; 
+         this.unif = mat.sid.unif; 
+         this.pass = mat.sid.pass;  
+         this.col = mat.col;
+         this.defCol = mat.defCol;
+         this.uv = mat.uv;
+         this.texId = mat.texId;
+         this.textidx = mat.textidx;
+         this.uvIdx = mat.uvIdx;
+         this.hasFontTex = mat.hasFontTex;
+         this.type = mat.type;
+         this.style = mat.style;
+         this.num_faces = mat.num_faces;
+
+		}
+	}
+
 }
 export class FontMaterial extends Material {
 
    text;
    sdf_params;
 
-   constructor(col = [1,1,1,1], texId, text, sdf_params = [.5,.5]) {
+   constructor(col = [1,1,1,1], texId=INT_NULL, text='', sdf_params = [.5,.5]) {
 
       super(col, texId);
       this.text = text;
@@ -219,6 +241,17 @@ export class FontMaterial extends Material {
       
       return gfxCopy.vb.start;
    }
+
+   Copy(mat = {}){
+
+		if (mat instanceof FontMaterial) {
+
+			super.Copy(mat);
+         this.text = mat.text;
+         this.sdf_params = mat.sdf_params;
+
+		}
+	}
 
 }
 
