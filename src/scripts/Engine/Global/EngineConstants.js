@@ -573,7 +573,7 @@ const INFO_LISTEN_EVENT_TYPE = {
 	LISTENERS:  _cnt <<= 0x1,
 	ALL_MESHES: _cnt <<= 0x1,
 	MOUSE: 		_cnt <<= 0x1,
-	// GFX: 			_cnt <<= 0x1,
+	MESH:			_cnt <<= 0x1,
 
 }
 const DEBUG_INFO = {
@@ -581,17 +581,22 @@ const DEBUG_INFO = {
 	UI_TIMERS: {
 		IS_ON: false,
 		IDX: INT_NULL,
-		POS: [60, 860, 0]
+		POS: [100, 860, 0]
 	},
 	UI_MOUSE: {
 		IS_ON: false,
 		IDX: INT_NULL,
-		POS: [30, 820, 0]
+		POS: [80, 820, 0]
 	},
 	UI_GFX: {
 		IS_ON: false,
 		IDX: INT_NULL,
-		POS: [300, 13, 0]
+		POS: [340, 13, 0]
+	},
+	UI_MESH: {
+		IS_ON: false,
+		IDX: INT_NULL,
+		POS: [340, 100, 0]
 	},
 }
 

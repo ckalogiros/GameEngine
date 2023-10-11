@@ -16,7 +16,7 @@ redrawing the meshes to it's self
   on each frame the new delta time but
   subtracting the 'oldest' one, with a constant counter.
   The 'oldest' value is up to dicision. For example
-  we could set 100 samples, so the oldest will be the -100 delta. 
+  we could set 1000 samples, so the oldest will be the -100 delta. 
 --------------------------------------------------- TESTING!
 
 --------------------------------------------------- IMIDIATE!
@@ -49,7 +49,7 @@ redrawing the meshes to it's self
 
 --------------------------------------------------- TODO
 
-. Batch activate/deactivate buffers. Use a indexed by prog and vb buffer.
+. Batch activate/deactivate buffers. Use an indexed  by prog and vb buffer.
   Example: StoreForUpdate(arr); arr = prog[progidx].vb[vbidx]
            StoreForUpdate(arr){
               GfxSetVbShow(progs[arr[i]], progs[arr[i]].vertexBuffer[arr[i].vb[j]])

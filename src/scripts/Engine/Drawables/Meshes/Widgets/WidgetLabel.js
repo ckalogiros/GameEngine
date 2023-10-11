@@ -14,6 +14,7 @@ import { MESH_ENABLE } from "../Base/Mesh.js";
 import { Rect } from "../Rect_Mesh.js";
 import { Text_Mesh } from "../Text_Mesh.js";
 import { Align } from "../../Operations/Alignment.js";
+import { Info_listener_dispatch_event } from "../../DebugInfo/InfoListeners.js";
 
 
 
@@ -83,7 +84,7 @@ export class Widget_Label extends Rect {
         // Must call super() before using the 'this'
         text_mesh.SetSceneIdx(this.sceneidx);
         text_mesh.SetName(`Text-mesh [${text}]`);
-        
+
         this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
         this.SetStyle(style);
         this.type |= MESH_TYPES_DBG.WIDGET_TEXT_LABEL | text_mesh.type | this.geom.type | this.mat.type;
@@ -126,20 +127,14 @@ export class Widget_Label extends Rect {
     DeactivateGfx() {
 
         // Deactivate label's area
-        // Gfx_deactivate(this.gfx);
-        super.DeactivateGfx(this.gfx);
-        this.is_gfx_inserted = false;
+        super.DeactivateGfx();
+
         // Deactivate for label's text 
-        Gfx_deactivate(this.text_mesh.gfx);
-        this.text_mesh.is_gfx_inserted = false;
-    }
+        this.text_mesh.DeactivateGfx();
+}
 
     /*******************************************************************************************************************************************************/
     // Setters-Getters
-    SetSceneIdx(sceneidx) {
-        this.sceneidx = sceneidx;
-        this.text_mesh.sceneidx = sceneidx;
-    }
 
     /** Return type: Array. Returns an array of all widgets meshes */
     GetAllMeshes(parent_meshes_buf) {
@@ -183,7 +178,7 @@ export class Widget_Label extends Rect {
      * @param {*} event_type typeof 'LISTEN_EVENT_TYPES'
      * @param {*} Clbk User may choose the callback for the listen event.
      */
-    CreateListenEvent(event_type, Clbk = null, params = null) {
+    CreateListenEvent(event_type, Clbk = null, params = null, parent_event = null) {
 
         const target_params = {
             EventClbk: null,
@@ -193,8 +188,8 @@ export class Widget_Label extends Rect {
             params: params,
         }
 
-        if (Clbk) this.AddEventListener(event_type, Clbk, target_params);
-        else this.AddEventListener(event_type, this.OnClick, target_params);
+        if (Clbk) this.AddEventListener(event_type, Clbk, target_params, parent_event);
+        else this.AddEventListener(event_type, this.OnClick, target_params, parent_event);
     }
 
     OnClick(params) {

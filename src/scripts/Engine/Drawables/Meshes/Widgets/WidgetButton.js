@@ -49,7 +49,7 @@ export class Widget_Switch extends Widget_Button {
 
       const mesh = params.target_params.target_mesh;
       const text_mesh = mesh.text_mesh;
-      console.log('Switch: ', mesh.state_text[mesh.isOn])
+      // console.log('Switch: ', mesh.state_text[mesh.isOn])
 
       mesh.isOn ^= 0x1;
       text_mesh.UpdateText(mesh.state_text[mesh.isOn]);
@@ -63,7 +63,7 @@ export class Widget_Switch extends Widget_Button {
       if (params.target_params.EventClbk) {
 
          const EventClbk = params.target_params.EventClbk;
-         console.log('Widget_Switch-OnClick()');
+         // console.log('Widget_Switch-OnClick()');
          EventClbk(params.target_params);
       }
 

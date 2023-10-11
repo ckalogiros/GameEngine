@@ -89,16 +89,37 @@ export class Event_Listener {
          Clbk: Clbk,
          source_params: source_params,
          target_params: target_params,
+         isActive: false,
+         children: null, // current mesh may have children with events. This is the buffer to store them, but only after 'ReconstructEvents' function call.
+         anyChildrenActive: false, // This is to check if the current event has any children events(eficient since we do not have to check every child event if 'isActive')
+      }
+
+      LISTENERS_FLAGS[TYPE_IDX] = true;
+      return this.event_type[TYPE_IDX].Add(event_params);
+   }
+   AddChildEvent(TYPE_IDX, parent_event, Clbk = null, source_params = null, target_params = null) {
+
+      const event_params = {
+         type: TYPE_IDX,
+         Clbk: Clbk,
+         source_params: source_params,
+         target_params: target_params,
          isActive: true,
          children: null, // current mesh may have children with events. This is the buffer to store them, but only after 'ReconstructEvents' function call.
          anyChildrenActive: false, // This is to check if the current event has any children events(eficient since we do not have to check every child event if 'isActive')
       }
 
-      // const info_event_type = INFO_LISTEN_EVENT_TYPE.LISTENERS;
-      // Info_listener_dispatch_event(info_event_type, event_params);
-
       LISTENERS_FLAGS[TYPE_IDX] = true;
-      return this.event_type[TYPE_IDX].Add(event_params);
+      const event = this.event_type[parent_event[0]].buffer[parent_event[1]];
+      /*DEBUG*/ if (!event) { console.error('Parent event not found. Parent event listeners:', parent_event); return; }
+
+      if(!event.children){
+         event.children = new M_Buffer();
+      }
+
+      const idx = event.children.Add(event_params);
+      event.anyChildrenActive = true;
+      return idx;
    }
 
    DispatchEvents(TYPE_IDX, trigger_params) {
@@ -322,6 +343,10 @@ export function Listener_create_event(TYPE_IDX, Clbk, source_params, target_para
 
    return _listener.AddEvent(TYPE_IDX, Clbk, source_params, target_params);
 }
+export function Listener_create_child_event(TYPE_IDX, parent_event, Clbk = null, source_params = null, target_params = null) {
+
+   return _listener.AddChildEvent(TYPE_IDX, parent_event, Clbk, source_params, target_params);
+}
 
 export function Listener_dispatch_event(TYPE_IDX, trigger_params) {
 
@@ -380,7 +405,7 @@ export function Listener_events_set_mesh_events_active(FLAGS, mesh_listeners, bo
    const hover_type_idx = LISTEN_EVENT_TYPES_INDEX.HOVER;
    const click_type_idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
 
-   if(FLAGS & LISTENERS_FLAGS.HOVER || FLAGS & LISTENERS_FLAGS.ALL){
+   if((FLAGS & LISTENERS_FLAGS.HOVER) || (FLAGS & LISTENERS_FLAGS.ALL)){
 
       if(mesh_listeners.buffer[hover_type_idx] !== INT_NULL){
          
@@ -389,10 +414,14 @@ export function Listener_events_set_mesh_events_active(FLAGS, mesh_listeners, bo
       }
    }
    
-   if(FLAGS & LISTENERS_FLAGS.CLICK || FLAGS & LISTENERS_FLAGS.ALL){
+   if((FLAGS & LISTENERS_FLAGS.CLICK) || (FLAGS & LISTENERS_FLAGS.ALL)){
 
       if(mesh_listeners.buffer[click_type_idx] !== INT_NULL){
-         
+         /**DEBUG*/ if(_listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx]] === undefined) 
+            console.error('Undefined listen event:', mesh_listeners.buffer[click_type_idx], ' type:', click_type_idx)
+            // if(_listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx]].anyChildrenActive === undefined)
+            if(_listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx]] === undefined)
+            console.log()
          _listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx]].anyChildrenActive = bool_activate;
          _listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx]].isActive = bool_activate;
       }
@@ -459,6 +488,8 @@ export function Listener_debug_print_info() {
    for(let i=0; i<count; i++){
       
       console.log('---- Event type:', i);
+
+      let events_count = 0;
       const e = _listener.event_type[i];
       if(e){
 
@@ -468,10 +499,13 @@ export function Listener_debug_print_info() {
    
                const msg = `${j} active:${e.buffer[j].isActive} childen:${e.buffer[j].anyChildrenActive} meshname:${e.buffer[j].source_params.name}`;
                console.log(msg);
+               events_count++;
             }
          }
       }
+      console.log(`Total count: type:${i}=${events_count}`)
    }
+
 }
 
 // function Print_all_recursive(children_buffer, count=0) {

@@ -34,7 +34,6 @@ import { MouseGetArea, MouseGetPos, MouseGetPosDif } from '../Engine/Controls/In
 // import { Buffer } from 'buffer';
 import { Debug_get_event_listeners, Listeners_debug_info_create, Listeners_get_event } from '../Engine/Events/EventListeners.js';
 import { Drop_down_set_root, Widget_Dropdown } from '../Engine/Drawables/Meshes/Widgets/Menu/Widget_Dropdown.js';
-import { Info_listener_create_event, Info_listener_dispatch_event } from '../Engine/Drawables/DebugInfo/InfoListeners.js';
 import { Gl_progs_get } from '../Graphics/GlProgram.js';
 import { Input_create_user_input_listeners } from '../Engine/Controls/Input/Input.js';
 import { Debug_info_create_ui_performance_timers, Debug_info_ui_performance } from '../Engine/Drawables/DebugInfo/DebugInfoUi.js';
@@ -87,19 +86,18 @@ export function AppInit() {
     Debug_info_ui_performance(scene);
 
 
-    // const label = CreateLabel(scene);
-    // DestroyMeshTest(scene, label)
+    const label = CreateLabel(scene);
+    DestroyMeshTest(scene, label)
     
-    // const button = CreateButton(scene); // DestroyMeshTest(scene, button)
-    // const switch1 = CreateSwitch(scene) // DestroyMeshTest(scene, switch1)
+    const button = CreateButton(scene); // DestroyMeshTest(scene, button)
+    const switch1 = CreateSwitch(scene) // DestroyMeshTest(scene, switch1)
 
-    // const menu = CreateMenu(scene)
+    const menu = CreateMenu(scene)
 
-    // CreateDropDownWidget(scene)
-    // CreateDropDownWidgetWithWidgetsInside(scene)
+    CreateDropDownWidgetWithWidgetsInside(scene)
     
-    // CreateSlider(scene);
-    // CreateSliderWithMenuBar(scene)
+    CreateSlider(scene);
+    CreateSliderWithMenuBar(scene)
 
     // CreatDynamicText(scene)
     // CreatDynamicTextSectioned(scene)
@@ -281,73 +279,10 @@ function CreatDynamicTextSectioned(scene){
 function CreateMenu(scene) {
 
     const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [60, 200, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
-    menu.AddCloseButton(menu, 'x');
     menu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    menu.AddCloseButton(menu, 'x');
 
     scene.AddWidget(menu)
-}
-
-function CreateDropDownWidget(scene) {
-
-    const pad = [10, 2.5]
-    const drop_down = new Widget_Dropdown('DP1', [200, 200, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, pad);
-    drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-    // drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
-
-    { // Add another dropdown in dropdown
-        const drop_down2 = new Widget_Dropdown('DP2', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, pad);
-        drop_down2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-        Drop_down_set_root(drop_down, drop_down2);
-        drop_down.AddToMenu(drop_down2);
-
-        const text = new Widget_Text('DP2 TEXT ->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-        {// Create debug info event
-            text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-            const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-        }
-        // text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-        drop_down2.AddToMenu(text);
-        Drop_down_set_root(drop_down, drop_down2);
-        {
-            const drop_down3 = new Widget_Dropdown('DP3 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
-            drop_down3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-            drop_down2.AddToMenu(drop_down3);
-            Drop_down_set_root(drop_down, drop_down3);
-            {
-                const drop_down4 = new Widget_Dropdown('DP4 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, GREEN_140_240_10, WHITE, pad);
-                drop_down4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-                drop_down3.AddToMenu(drop_down4);
-                Drop_down_set_root(drop_down, drop_down4);
-
-                {
-                    const drop_down5 = new Widget_Dropdown('DP5 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, PINK_240_60_200, WHITE, pad);
-                    drop_down5.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down5.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-                    drop_down4.AddToMenu(drop_down5);
-                    Drop_down_set_root(drop_down, drop_down5);
-
-                    {
-                        const drop_down6 = new Widget_Dropdown('DP6 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, RED_200_10_10, WHITE, pad);
-                        drop_down6.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down6.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-                        drop_down5.AddToMenu(drop_down6);
-                        Drop_down_set_root(drop_down, drop_down6);
-
-                        {
-                            const text = new Widget_Text('DP5 -->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-                            // text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-                            // text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); text.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-
-                            drop_down6.AddToMenu(text);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    scene.AddWidget(drop_down);
-    drop_down.Calc();
-    Drop_down_set_root(drop_down, drop_down);
-
 }
 
 function CreateDropDownWidgetWithWidgetsInside(scene) {
@@ -355,7 +290,8 @@ function CreateDropDownWidgetWithWidgetsInside(scene) {
     const pad = [10, 2.5]
     const drop_down = new Widget_Dropdown('DP1', [260, 200, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, pad);
     drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-    drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
+    drop_down.CreateClickEvent();
+    // drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
 
     { // Add another dropdown in dropdown
         const drop_down2 = new Widget_Dropdown('DP2', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, pad);
@@ -367,14 +303,14 @@ function CreateDropDownWidgetWithWidgetsInside(scene) {
             const text = new Widget_Text('DP2 TEXT ->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
             drop_down2.AddToMenu(text);
             // Create debug info event
-            text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-            const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+            // text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+            // const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
         }
         { // Add text to DP2's menu
             const text = new Widget_Text('DP2 TEXT ->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-            text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+            // text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
             // Create debug info event
-            const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+            // const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
             drop_down2.AddToMenu(text);
         }
         
@@ -495,6 +431,7 @@ function CreatSectionedMixWidgets(scene){
 function CreateSlider(scene) {
 
     const slider = new Widget_Slider([200, 300, 0], [150, 10]);
+    slider.CreateMoveSliderEvent();
     scene.AddWidget(slider);
 
 }
@@ -502,15 +439,16 @@ function CreateSlider(scene) {
 function CreateSliderWithMenuBar(scene) {
 
     const section = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREY1, .9))
-    // section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
+    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
     section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
 
     const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
-    menu.AddCloseButton(section, 'x');
     menu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    menu.AddCloseButton(section, 'x');
     section.AddItem(menu);
     
     const slider = new Widget_Slider([200, 100, 0], [150, 10]);
+    slider.CreateMoveHandleEvent(section.listeners.buffer)
     section.AddItem(slider);
     
     scene.AddWidget(section);
@@ -926,612 +864,40 @@ function Create3DCubes(scene) {
 }
 
 /**
- * [ESM-HMR] listening for file changes... hmr-client.js:9:11
-Array(20) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
-Keys.js:206:9
-Device width:  437  height:  889 WebGlRenderer.js:151:15
-Initializing Graphics. WebGlRenderer.js:106:15
-WebGl version:  WebGL GLSL ES 3.00 WebGlRenderer.js:118:15
-WebGl renderer info:  ANGLE (NVIDIA, NVIDIA GeForce GTX 980 Direct3D11 vs_5_0 ps_5_0) WebGlRenderer.js:119:15
-Navigator { permissions: Permissions, mimeTypes: MimeTypeArray, plugins: PluginArray, pdfViewerEnabled: true, doNotTrack: "1", maxTouchPoints: 1, mediaCapabilities: MediaCapabilities, oscpu: "Windows NT 10.0; Win64; x64", vendor: "", vendorSub: "" }
-WebGlRenderer.js:188:12
-Maximum Texture Size: 16384 WebGlRenderer.js:144:15
-Creating new event type events buffer EventListeners.js:83:18
-Shader Compiled Successfully! GlShaders.js:79:11
-Shader Compiled Successfully! GlShaders.js:79:11
-Validate program undefined GlShaders.js:49:10
-Shaders Linked Successfully!
- status: undefined GlShaders.js:59:11
-Uniform: 'uniforms_buffer' located successfully! GlUniformBuffer.js:99:18
-Shader Compiled Successfully! 2 GlShaders.js:79:11
-Validate program undefined GlShaders.js:49:10
-Shaders Linked Successfully!
- status: undefined GlShaders.js:59:11
-Array [ {…}, {…} ]
-App.js:132:13
-PERFORMANCE: 
-Performance { timeOrigin: 1696434571223, timing: PerformanceTiming, navigation: PerformanceNavigation, onresourcetimingbufferfull: null, eventCounts: EventCounts }
-App.js:140:17
-Shader Compiled Successfully! 2 GlShaders.js:79:11
-Validate program undefined GlShaders.js:49:10
-Shaders Linked Successfully!
- status: undefined GlShaders.js:59:11
-Uniform: 'uniforms_buffer' located successfully! GlUniformBuffer.js:99:18
-Switch:  off WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-No elesments in gfx session buffer. Something went wrong GfxContext.js:143:38
-Switch:  on WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-text_mesh destroy: Text-mesh [+ InfoUi Gfx DP] id:21 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ InfoUi Gfx DP] id:22 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 4 ]
-Mesh.js:356:25
-rect_mesh destroy: InfoUi Gfx DP id:20 Rect_Mesh.js:34:15
-rect_mesh destroy: InfoUi Gfx section 100 id:19 Rect_Mesh.js:34:15
-Switch:  off WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-No elesments in gfx session buffer. Something went wrong GfxContext.js:143:38
-Switch:  on WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-text_mesh destroy: Text-mesh [+ InfoUi Gfx DP] id:62 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ InfoUi Gfx DP] id:63 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 4 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ prog:0] id:66 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:0] id:67 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 5 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:70 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:71 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 8 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:0 id:69 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:1 | count:56] id:74 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:1 | count:56] id:75 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 9 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:1 id:73 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:2 | count:504] id:78 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:2 | count:504] id:79 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 10 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:2 id:77 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:82 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:83 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 11 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:3 id:81 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 68 Rect_Mesh.js:34:15
-rect_mesh destroy: Program DP:0 id:65 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ prog:1] id:86 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:1] id:87 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 6 ]
-Mesh.js:356:25
-rect_mesh destroy: Program DP:1 id:85 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ prog:2] id:102 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:2] id:103 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 7 ]
-Mesh.js:356:25
-rect_mesh destroy: Program DP:2 id:101 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 64 Rect_Mesh.js:34:15
-rect_mesh destroy: InfoUi Gfx DP id:61 Rect_Mesh.js:34:15
-rect_mesh destroy: InfoUi Gfx section 100 id:60 Rect_Mesh.js:34:15
-Switch:  off WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-No elesments in gfx session buffer. Something went wrong GfxContext.js:143:38
-Switch:  on WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-text_mesh destroy: Text-mesh [+ InfoUi Gfx DP] id:111 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ InfoUi Gfx DP] id:112 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 4 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ prog:0] id:115 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:0] id:116 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 5 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:119 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:120 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 8 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:0 id:118 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:1 | count:56] id:123 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:1 | count:56] id:124 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 9 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:1 id:122 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:2 | count:504] id:127 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:2 | count:504] id:128 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 10 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:2 id:126 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:131 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:132 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 11 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:3 id:130 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:4 | count:0] id:135 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:4 | count:0] id:136 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 12 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:4 id:134 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:5 | count:0] id:139 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:5 | count:0] id:140 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 13 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:5 id:138 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 117 Rect_Mesh.js:34:15
-rect_mesh destroy: Program DP:0 id:114 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ prog:1] id:143 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:1] id:144 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 6 ]
-Mesh.js:356:25
-rect_mesh destroy: Program DP:1 id:142 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ prog:2] id:167 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:2] id:168 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 7 ]
-Mesh.js:356:25
-rect_mesh destroy: Program DP:2 id:166 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 113 Rect_Mesh.js:34:15
-rect_mesh destroy: InfoUi Gfx DP id:110 Rect_Mesh.js:34:15
-rect_mesh destroy: InfoUi Gfx section 100 id:109 Rect_Mesh.js:34:15
-Switch:  off WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-No elesments in gfx session buffer. Something went wrong GfxContext.js:143:38
-x Keys.js:56:18
--[Gl Vertex Buffer]- GfxDebug.js:180:13
- progidx: 0 GfxDebug.js:182:17
-vb: 
-Array(8) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
-GfxDebug.js:183:17
- progidx: 1 GfxDebug.js:182:17
-vb: 
-Array(7) [ {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
-GfxDebug.js:183:17
- progidx: 2 GfxDebug.js:182:17
-vb: 
-Array [ {…} ]
-GfxDebug.js:183:17
-Switch:  on WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-text_mesh destroy: Text-mesh [+ InfoUi Gfx DP] id:176 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ InfoUi Gfx DP] id:177 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 4 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ prog:0] id:180 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:0] id:181 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 5 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:184 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:185 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 8 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:0 id:183 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:1 | count:56] id:188 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:1 | count:56] id:189 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 9 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:1 id:187 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:2 | count:504] id:192 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:2 | count:504] id:193 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 10 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:2 id:191 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:196 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:197 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 11 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:3 id:195 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:4 | count:0] id:200 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:4 | count:0] id:201 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 12 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:4 id:199 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:5 | count:0] id:204 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:5 | count:0] id:205 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 13 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:5 id:203 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 182 Rect_Mesh.js:34:15
-rect_mesh destroy: Program DP:0 id:179 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ prog:1] id:208 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:1] id:209 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 6 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ vb:0 | count:1288] id:212 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:0 | count:1288] id:213 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 14 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:0 id:211 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:1 | count:2912] id:216 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:1 | count:2912] id:217 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 15 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:1 id:215 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:2 | count:0] id:220 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:2 | count:0] id:221 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 16 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:2 id:219 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:224 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:225 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 17 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:3 id:223 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:4 | count:0] id:228 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:4 | count:0] id:229 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 18 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:4 id:227 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 210 Rect_Mesh.js:34:15
-rect_mesh destroy: Program DP:1 id:207 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ prog:2] id:232 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:2] id:233 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 7 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:236 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:237 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 19 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:0 id:235 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 234 Rect_Mesh.js:34:15
-rect_mesh destroy: Program DP:2 id:231 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 178 Rect_Mesh.js:34:15
-rect_mesh destroy: InfoUi Gfx DP id:175 Rect_Mesh.js:34:15
-rect_mesh destroy: InfoUi Gfx section 100 id:174 Rect_Mesh.js:34:15
-Switch:  off WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-No elesments in gfx session buffer. Something went wrong GfxContext.js:143:38
-x Keys.js:56:18
--[Gl Vertex Buffer]- GfxDebug.js:180:13
- progidx: 0 GfxDebug.js:182:17
-vb: 
-Array(8) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
-GfxDebug.js:183:17
- progidx: 1 GfxDebug.js:182:17
-vb: 
-Array(7) [ {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
-GfxDebug.js:183:17
- progidx: 2 GfxDebug.js:182:17
-vb: 
-Array [ {…} ]
-GfxDebug.js:183:17
-Switch:  off WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-Switch:  off WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-Switch:  on WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-text_mesh destroy: Text-mesh [+ InfoUi Gfx DP] id:241 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ InfoUi Gfx DP] id:242 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 4 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ prog:0] id:245 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:0] id:246 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 5 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:249 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:250 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 8 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:0 id:248 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:1 | count:56] id:253 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:1 | count:56] id:254 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 9 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:1 id:252 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:2 | count:504] id:257 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:2 | count:504] id:258 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 10 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:2 id:256 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:261 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:262 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 11 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:3 id:260 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:4 | count:0] id:265 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:4 | count:0] id:266 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 12 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:4 id:264 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:5 | count:0] id:269 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:5 | count:0] id:270 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 13 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:5 id:268 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:6 | count:0] id:273 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:6 | count:0] id:274 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 14 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:6 id:272 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:7 | count:0] id:277 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:7 | count:0] id:278 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 15 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:7 id:276 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 247 Rect_Mesh.js:34:15
-rect_mesh destroy: Program DP:0 id:244 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ prog:1] id:281 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:1] id:282 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 6 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ vb:0 | count:1288] id:285 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:0 | count:1288] id:286 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 16 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:0 id:284 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:1 | count:2912] id:289 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:1 | count:2912] id:290 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 17 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:1 id:288 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:2 | count:0] id:293 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:2 | count:0] id:294 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 18 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:2 id:292 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:297 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:298 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 19 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:3 id:296 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:4 | count:0] id:301 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:4 | count:0] id:302 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 20 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:4 id:300 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:5 | count:0] id:305 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:5 | count:0] id:306 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 21 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:5 id:304 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:6 | count:0] id:309 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:6 | count:0] id:310 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 22 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:6 id:308 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 283 Rect_Mesh.js:34:15
-rect_mesh destroy: Program DP:1 id:280 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ prog:2] id:313 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:2] id:314 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 7 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:317 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:318 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 23 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:0 id:316 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 315 Rect_Mesh.js:34:15
-rect_mesh destroy: Program DP:2 id:312 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 243 Rect_Mesh.js:34:15
-rect_mesh destroy: InfoUi Gfx DP id:240 Rect_Mesh.js:34:15
-rect_mesh destroy: InfoUi Gfx section 100 id:239 Rect_Mesh.js:34:15
-Switch:  off WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-No elesments in gfx session buffer. Something went wrong GfxContext.js:143:38
-x Keys.js:56:18
--[Gl Vertex Buffer]- GfxDebug.js:180:13
- progidx: 0 GfxDebug.js:182:17
-vb: 
-Array(10) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
-GfxDebug.js:183:17
- progidx: 1 GfxDebug.js:182:17
-vb: 
-Array(9) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
-GfxDebug.js:183:17
- progidx: 2 GfxDebug.js:182:17
-vb: 
-Array [ {…} ]
-GfxDebug.js:183:17
-Switch:  on WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-text_mesh destroy: Text-mesh [+ InfoUi Gfx DP] id:341 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ InfoUi Gfx DP] id:342 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 4 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ prog:0] id:345 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:0] id:346 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 5 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:349 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:350 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 8 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:0 id:348 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:1 | count:56] id:353 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:1 | count:56] id:354 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 9 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:1 id:352 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:2 | count:504] id:357 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:2 | count:504] id:358 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 10 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:2 id:356 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:361 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:362 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 11 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:3 id:360 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:4 | count:0] id:365 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:4 | count:0] id:366 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 12 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:4 id:364 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:5 | count:0] id:369 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:5 | count:0] id:370 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 13 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:5 id:368 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:6 | count:0] id:373 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:6 | count:0] id:374 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 14 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:6 id:372 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:7 | count:0] id:377 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:7 | count:0] id:378 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 15 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:7 id:376 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:8 | count:56] id:381 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:8 | count:56] id:382 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 16 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:8 id:380 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:9 | count:56] id:385 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:9 | count:56] id:386 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 17 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:9 id:384 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 347 Rect_Mesh.js:34:15
-rect_mesh destroy: Program DP:0 id:344 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ prog:1] id:389 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:1] id:390 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 6 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ vb:0 | count:1288] id:393 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:0 | count:1288] id:394 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 18 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:0 id:392 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:1 | count:2912] id:397 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:1 | count:2912] id:398 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 19 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:1 id:396 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:2 | count:0] id:401 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:2 | count:0] id:402 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 20 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:2 id:400 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:3 | count:0] id:405 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:3 | count:0] id:406 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 21 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:3 id:404 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:4 | count:0] id:409 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:4 | count:0] id:410 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 22 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:4 id:408 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:5 | count:0] id:413 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:5 | count:0] id:414 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 23 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:5 id:412 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:6 | count:0] id:417 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:6 | count:0] id:418 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 26 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:6 id:416 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:7 | count:2688] id:421 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:7 | count:2688] id:422 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 27 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:7 id:420 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ vb:8 | count:6496] id:425 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:8 | count:6496] id:426 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 28 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:8 id:424 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 391 Rect_Mesh.js:34:15
-rect_mesh destroy: Program DP:1 id:388 Rect_Mesh.js:34:15
-text_mesh destroy: Text-mesh [+ prog:2] id:429 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ prog:2] id:430 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 7 ]
-Mesh.js:356:25
-text_mesh destroy: Text-mesh [+ vb:0 | count:56] id:433 Text_Mesh.js:35:15
-rect_mesh destroy: Lebel-text [+ vb:0 | count:56] id:434 Rect_Mesh.js:34:15
-Removing Event etype: 1 
-Int8Array [ -1, 29 ]
-Mesh.js:356:25
-rect_mesh destroy: VB DP:0 id:432 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 431 Rect_Mesh.js:34:15
-rect_mesh destroy: Program DP:2 id:428 Rect_Mesh.js:34:15
-rect_mesh destroy: SECTION_MESH id: 343 Rect_Mesh.js:34:15
-rect_mesh destroy: InfoUi Gfx DP id:340 Rect_Mesh.js:34:15
-rect_mesh destroy: InfoUi Gfx section 100 id:339 Rect_Mesh.js:34:15
-Switch:  off WidgetButton.js:52:15
-Widget_Switch-OnClick() WidgetButton.js:66:18
-No elesments in gfx session buffer. Something went wrong GfxContext.js:143:38
-Clicked: ui performance timers panel id:324 Section.js:239:18
+ * 0 active:true childen:true meshname:Lebel-text [Label] id:25 EventListeners.js:496:24
+1 active:true childen:true meshname:Lebel-text [Destroy] id:27 EventListeners.js:496:24
+2 active:true childen:true meshname:Lebel-text [Button] id:29 EventListeners.js:496:24
+4 active:true childen:true meshname:Widget_Dropdown id:36 EventListeners.js:496:24
+5 active:false childen:false meshname:Widget_Dropdown id:40 EventListeners.js:496:24
+6 active:false childen:false meshname:Widget_Slider id:51 EventListeners.js:496:24
+7 active:false childen:false meshname:Bar id:52 EventListeners.js:496:24
+8 active:false childen:false meshname:Widget_Dropdown id:55 EventListeners.js:496:24
+9 active:false childen:false meshname:Widget_Dropdown id:59 EventListeners.js:496:24
+10 active:false childen:false meshname:Widget_Dropdown id:63 EventListeners.js:496:24
+11 active:false childen:false meshname:Widget_Dropdown id:67 EventListeners.js:496:24
+12 active:true childen:true meshname:Widget_Slider id:73 EventListeners.js:496:24
+13 active:true childen:true meshname:Bar id:74 EventListeners.js:496:24
+14 active:true childen:true meshname:SECTION_MESH id: 77 EventListeners.js:496:24
+15 active:true childen:true meshname:close_btn id:81 EventListeners.js:496:24
+16 active:true childen:true meshname:Widget_Slider id:83 EventListeners.js:496:24
+17 active:true childen:true meshname:Bar id:84
 
+0 active:true childen:true meshname:Lebel-text [Label] id:25 EventListeners.js:496:24
+1 active:true childen:true meshname:Lebel-text [Destroy] id:27 EventListeners.js:496:24
+2 active:true childen:true meshname:Lebel-text [Button] id:29 EventListeners.js:496:24
+3 active:true childen:true meshname:close_btn id:35 EventListeners.js:496:24
+4 active:true childen:true meshname:Widget_Dropdown id:36 EventListeners.js:496:24
+5 active:false childen:false meshname:Widget_Dropdown id:40 EventListeners.js:496:24
+6 active:false childen:false meshname:Widget_Slider id:51 EventListeners.js:496:24
+7 active:false childen:false meshname:Bar id:52 EventListeners.js:496:24
+8 active:false childen:false meshname:Widget_Dropdown id:55 EventListeners.js:496:24
+9 active:false childen:false meshname:Widget_Dropdown id:59 EventListeners.js:496:24
+10 active:false childen:false meshname:Widget_Dropdown id:63 EventListeners.js:496:24
+11 active:false childen:false meshname:Widget_Dropdown id:67 EventListeners.js:496:24
+12 active:true childen:true meshname:Widget_Slider id:73 EventListeners.js:496:24
+13 active:true childen:true meshname:Bar id:74 EventListeners.js:496:24
+14 active:true childen:true meshname:SECTION_MESH id: 77 EventListeners.js:496:24
+15 active:true childen:true meshname:close_btn id:81 EventListeners.js:496:24
+16 active:true childen:true meshname:Widget_Slider id:83 EventListeners.js:496:24
+17 active:true childen:true meshname:Bar id:84
  */

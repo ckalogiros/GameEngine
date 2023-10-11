@@ -138,6 +138,7 @@ class Buffer_Interface {
       }
    }
 }
+
 export class M_Buffer extends Buffer_Interface {
 
    constructor(m_buffer) {
@@ -164,6 +165,15 @@ export class M_Buffer extends Buffer_Interface {
 
       if (oldData) this.CopyBufferElements(oldData)
       console.warn('Resizing M_Buffer!', this.size)
+   }
+
+   AddAtIndex(idx, elem) {
+      if (idx < 0 || idx > this.size) console.error('WRONG Index. Adding item at: ', idx, ' with size:', this.size)
+
+      this.buffer[idx] = elem;
+      this.active_count++;
+
+      return idx;
    }
 
 }

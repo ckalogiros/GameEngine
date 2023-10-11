@@ -20,12 +20,13 @@ export class Widget_Text extends Text_Mesh {
 
 	pad = [0, 0];
 
-	constructor(text, pos, fontSize = 5, col = WHITE, bold = 4, font, scale) {
+	constructor(text, pos, fontSize = 5, col = WHITE, bold = 4) {
 
 		const sdfouter = CalculateSdfOuterFromDim(fontSize);
 		if (sdfouter + bold > 1) bold = 1 - sdfouter;
 
-		super(text, pos, fontSize, scale, col)
+		// text, pos = [0, 0, 0], fontSize = 4, scale = [1, 1], color = WHITE, bold = 4, font = TEXTURES.SDF_CONSOLAS_LARGE
+		super(text, pos, fontSize, col)
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT | this.type;
 
 		this.SetName('Text ' + text.slice(0, 7))
@@ -42,7 +43,7 @@ export class Widget_Text extends Text_Mesh {
 
 	Render() {
 
-		this.AddToGfx()
+		this.AddToGfx();
 	}
 
 	/*******************************************************************************************************************************************************/
@@ -510,23 +511,8 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 	OnMove(params) {
 
 		// The 'OnMove' function is called by the timeInterval.
-		// The timeInterval has been set by the 'OnClick' event.
+		// The timeInterval has been set by an 'OnClick' event.
 		const mesh = params.params;
-		// const mesh = widget.mesh;
-		const text_mesh = mesh.text_mesh;
-
-		/** DISABLED because the ui_info_timers must handle the move interval deactivation */
-		// Destroy the time interval and the Move operation, if the mesh is not grabed
-		// MESH_STATE.IN_GRAB is deactivated upon mouse click up in Events.js.
-		// if (mesh.StateCheck(MESH_STATE.IN_GRAB) === 0 && mesh.timeIntervalsIdxBuffer.boundary) {
-
-		// 	const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
-		// 	TimeIntervalsDestroyByIdx(intervalIdx);
-		// 	mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
-
-		// 	return;
-		// }
-
 		const mouse_pos = MouseGetPosDif();
 
 		// Move 'this' text
@@ -539,6 +525,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 		}
 	}
 }
+
 
 /**Save */
 

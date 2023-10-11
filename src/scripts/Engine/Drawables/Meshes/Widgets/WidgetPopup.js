@@ -97,6 +97,7 @@ class Widget_PopUp extends Section {
                // Recursive_deactivate_secondary_popups(mesh);
                mesh.RemoveChildren(); // TODO: Do we need to strip down all meshes??? Only if they are shared pointers to some mesh of the appliction
                mesh.Set_graphics_vertex_buffer_render(false);
+               // Gfx_set_vb_show()
                this.RemoveChildByIdx(i); // Remove from the childrens buffer.
                _popUpGfx.secondary_popups.Deactivate(mesh.gfx.prog.idx, mesh.gfx.vb.idx);
             }

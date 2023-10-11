@@ -17,6 +17,7 @@ export function Gl_remove_geometry(gfx, num_faces = 1) {
     };
     // if(DEBUG.GFX.REMOVE_MESH) console.log('idx:', gfx.prog.idx, gfx.vb.idx, 'vb count:', vb.count, ' attributes from start:', gfx.vb.start, ' to:', gfx.vb.start+gfx.vb.count*num_faces)
     ret.counts[0] = vb.Remove_geometry(gfx, num_faces);
+    // if (DEBUG.GFX.REMOVE_MESH) console.log('idx:', gfx.prog.idx, gfx.vb.idx, 'vb count:', vb.count)
     // if(DEBUG.GFX.REMOVE_MESH) console.log('vb count:', vb.count, ' remove:', ret.counts[0], ' attributes from start:', gfx.vb.start)
     ret.counts[1] = ib.Remove_geometry(num_faces);
 

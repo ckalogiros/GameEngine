@@ -29,26 +29,26 @@ export function GlDraw(gl) {
 
     for (let i = 0; i < drawQueueCount; i++) {
 
-        const progIdx = drawQueue[i].progIdx;
-        const vbIdx = drawQueue[i].vbIdx;
+        const progidx = drawQueue[i].progIdx;
+        const vbidx = drawQueue[i].vbIdx;
 
-        if(GL.BOUND_PROG_IDX !== progIdx)
-            GlUseProgram(progs[progIdx].webgl_program, progIdx)
+        if(GL.BOUND_PROG_IDX !== progidx)
+            GlUseProgram(progs[progidx].webgl_program, progidx)
         
         // Update all program uniforms
-        progs[progIdx].UniformsUpdate(gl);
+        progs[progidx].UniformsUpdate(gl);
         
-        const vb = progs[progIdx].vertexBuffer[vbIdx];
-        const ib = progs[progIdx].indexBuffer[vbIdx];
+        const vb = progs[progidx].vertexBuffer[vbidx];
+        const ib = progs[progidx].indexBuffer[vbidx];
         
         if(GL.BOUND_VAO !== ib.vao) 
         GlBindVAO(ib.vao)
         
-        if (progs[progIdx].sid.attr & SID.ATTR.TEX2) {
+        if (progs[progidx].sid.attr & SID.ATTR.TEX2) {
             if (vb.textidx !== INT_NULL) {
                 const texture = TextureGetTextureByIdx(vb.textidx);
                 GlBindTexture(texture);
-                gl.uniform1i(progs[progIdx].shaderinfo.uniforms.sampler, texture.idx);
+                gl.uniform1i(progs[progidx].shaderinfo.uniforms.sampler, texture.idx);
             }
         }
 

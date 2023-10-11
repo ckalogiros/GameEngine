@@ -51,7 +51,7 @@ export class Section extends Rect {
          if (child) child.Destroy(child);
       }
 
-      // Label's rect_area destruction
+      // section's destruction
       super.Destroy();
    }
 
@@ -88,18 +88,17 @@ export class Section extends Rect {
       const total_size = [0, 0], total_margin = [0, 0]
       const old_sizey = section.geom.dim[1];
       const old_sizex = section.geom.dim[0];
-      // const max_size = Calculate_sizes_recursiveNEW(section, top, left, options, total_margin, total_size)
-      const max_size = Calculate_sizes_recursive(section, top, left, options, total_margin, total_size)
+      Calculate_sizes_recursive(section, top, left, options, total_margin, total_size)
       CopyArr2(section.geom.dim, section.max_size); // Set size for the root.
-
+      
       if (options & SECTION.TOP_DOWN) {
          const y = section.geom.pos[1] + (section.max_size[1] - old_sizey);
          const x = section.geom.pos[0] + (section.max_size[0] - old_sizex);
          section.SetPosXY([x, y]);
       }
-
+      
       section.SetMargin()
-      const accum_pos = Calculate_positions_recursive(section, options);
+      Calculate_positions_recursive(section, options);
 
    }
 
@@ -179,7 +178,6 @@ export class Section extends Rect {
 
    Render() {
 
-      
       super.AddToGfx();
       for (let i = 0; i < this.children.boundary; i++) {
 
@@ -202,9 +200,6 @@ export class Section extends Rect {
 
    /*******************************************************************************************************************************************************/
    // Setters-Getters
-   SetSceneIdx(sceneidx) {
-      this.sceneidx = sceneidx;
-   }
 
    /** Return type: Array. Returns an array of all widgets meshes */
    GetAllMeshes(parent_meshes_buf) {
@@ -300,7 +295,7 @@ function Section_move_section(params) {
    }
    
    const mouse_pos = MouseGetPosDif();
-   console.log(mouse_pos)
+   // console.log(mouse_pos)
    if (mouse_pos.x === 0 && mouse_pos.y === 0) return;
 
    // Move section
@@ -373,14 +368,21 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
          const p_dx = parent.GetTotalWidth(); const p_dy = parent.GetTotalHeight();
          const p_mx = parent.margin[0]; const p_my = parent.margin[1];
 
-         const new_pos = [c_x - p_dx + mesh.GetTotalWidth() + p_mx,
-         c_y - p_dy + mesh.GetTotalHeight() + p_my,
-         parent.geom.pos[2] + 1,];
+         const new_pos = [ c_x - p_dx + mesh.GetTotalWidth() + p_mx,
+                           c_y - p_dy + mesh.GetTotalHeight() + p_my,
+                           parent.geom.pos[2] + 1,];
 
          if ((mesh.type & MESH_TYPES_DBG.SECTION_MESH) === 0) { // Case mesh not of type section, have it update it's new pos-dim on a later when it's gfx exists.
 
             const pos_dif = [new_pos[0] - mesh.GetCenterPosX(), new_pos[1] - mesh.GetCenterPosY(), new_pos[2] + 1];
+
+            // console.log(`name:${mesh.name} meshpos:${mesh.geom.pos} new:${new_pos} dif:${pos_dif}`)
             UpdaterAdd(mesh, 0, null, pos_dif);
+            // if(!mesh.gfx) UpdaterAdd(mesh, 0, null, pos_dif);
+            // else mesh.Reposition_post(pos_dif);
+            // console.log('pos_dif:', pos_dif, mesh.geom.pos)
+            // CopyArr3(mesh.geom.pos, new_pos);
+            // if(mesh.gfx) mesh.Reposition_post(pos_dif);
 
             continue_recur = false; // Stop recursion for meshe's children. Let the mesh deal with it's children.
          }

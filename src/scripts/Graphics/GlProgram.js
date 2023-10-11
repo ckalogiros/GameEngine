@@ -397,6 +397,7 @@ export class GlProgram {
 /*
  * Generalized Program Web Gl Creation 
  */
+export function Gl_get_progams_count() { return _glProgramsCount; }
 export function Gl_create_program(sid) {
 	const prog = new GlProgram(gfxCtx.gl, sid);
 	return prog.idx;

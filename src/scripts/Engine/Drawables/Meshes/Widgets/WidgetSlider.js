@@ -54,7 +54,7 @@ export class Widget_Slider extends Rect {
 
 
       // Create slider_name_text (it is the text_mesh of the extended Widget_Label class)
-      const name_text = new Text_Mesh('Slider', pos, fontSize, [1, 1], WHITE, .4);
+      const name_text = new Text_Mesh('Slider', pos, fontSize, WHITE, .4);
 
 
       /** Label area mesh */
@@ -63,8 +63,9 @@ export class Widget_Slider extends Rect {
       this.SetStyle([0, 6, 2]);
       this.SetName('Widget_Slider');
       this.StateEnable(MESH_STATE.HAS_POPUP);
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick)
+      // this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick)
       this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+      this.type |= MESH_TYPES_DBG.WIDGET_SLIDER;
 
 
       /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -100,7 +101,7 @@ export class Widget_Slider extends Rect {
 
 
       // Create value_text
-      const value_text = new Text_Mesh('0000', pos, fontSize, [1, 1], WHITE, .4);
+      const value_text = new Text_Mesh('0000', pos, fontSize, WHITE, .4);
       value_text.SetName(this.name + ' - value_text');
 
 
@@ -238,6 +239,21 @@ export class Widget_Slider extends Rect {
 
 	}
 
+   CreateMoveHandleEvent(parent_event) {
+
+      const handle = this.children.buffer[0];
+
+      if(handle.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] === INT_NULL)
+         this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick, parent_event);
+
+   }
+   CreateMoveSliderEvent() {
+
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick);
+      this.StateEnable(MESH_STATE.IS_GRABABLE);
+
+   }
+
 
    /*******************************************************************************************************************************************************/
    // Setters-Getters
@@ -263,7 +279,7 @@ export class Widget_Slider extends Rect {
 
    SetMenuOptionsClbk(ClbkFunction) {
 
-      const bar = this.children.buffer[BAR_IDX];
+      const bar = this.children.buffer[BAR_IDX].children.buffer[0];
       bar.menu_options.Clbk = ClbkFunction;
    }
 
@@ -318,7 +334,7 @@ export class Widget_Slider extends Rect {
 
          // Check if the click happened on bar
          const bar = mesh.children.buffer[BAR_IDX];
-         if (point[1] > bar.geom.pos[1] - bar.hover_margin) {
+         if (point[1] > bar.geom.pos[1] - bar.hover_margin) { // TODO!!! The only thing currently that seperates handle-move from slider-move is the fact that this if fails for 'hover_margin=0'. Create a more apropriate check.
 
             STATE.mesh.SetClicked(bar);
 
@@ -338,8 +354,8 @@ export class Widget_Slider extends Rect {
 
             STATE.mesh.SetClicked(bar);
 
-            // Move Slider
-            if (mesh.type & MESH_TYPES_DBG.WIDGET_SLIDER && mesh.StateCheck(MESH_STATE.IS_GRABABLE) && mesh.timeIntervalsIdxBuffer.boundary <= 0) {
+            // Move Slider 
+            if ((mesh.type & MESH_TYPES_DBG.WIDGET_SLIDER) && mesh.StateCheck(MESH_STATE.IS_GRABABLE) && mesh.timeIntervalsIdxBuffer.boundary <= 0) {
 
                const idx = TimeIntervalsCreate(10, 'Move Slider', TIME_INTERVAL_REPEAT_ALWAYS, Slider_move_event, mesh);
                mesh.timeIntervalsIdxBuffer.Add(idx);
@@ -385,7 +401,16 @@ function Slider_move_event(params) {
 
    // console.log('MOVING SECTION', slider.name, mouse_pos)
    console.log('MOVING SLIDER', slider.name)
-   slider.MoveRecursive(mouse_pos.x, -mouse_pos.y);
+
+   slider.MoveXY(mouse_pos.x, -mouse_pos.y);
+   const bar = slider.children.buffer[0];
+   bar.MoveXY(mouse_pos.x, -mouse_pos.y);
+   const handle = bar.children.buffer[0];
+   handle.MoveXY(mouse_pos.x, -mouse_pos.y);
+   const value = bar.children.buffer[1];
+   value.MoveXY(mouse_pos.x, -mouse_pos.y);
+   const name = slider.children.buffer[1];
+   name.MoveXY(mouse_pos.x, -mouse_pos.y);
 
 }
 

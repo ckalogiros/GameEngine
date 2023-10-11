@@ -2,7 +2,7 @@
 
 import * as math from '../../../../Helpers/Math/MathOperations.js'
 import * as glBufferOps from '../../../../Graphics/Buffers/GlBufferOps.js'
-import { GlAddGeometry } from '../../../../Graphics/Buffers/GlBuffers.js';
+// import { GlAddGeometry } from '../../../../Graphics/Buffers/GlBuffers.js';
 
 let _geometryId = 0;
 
@@ -50,9 +50,9 @@ export class Geometry2D {
 
     /*******************************************************************************************************************************************************/
     // Graphics
-    AddToGraphicsBuffer(sid, gfx, meshName) {
-        GlAddGeometry(sid, this.pos, this.dim, this.time, gfx, meshName, 1);
-    }
+    // AddToGraphicsBuffer(sid, gfx, meshName) {
+    //     GlAddGeometry(sid, this.pos, this.dim, this.time, gfx, meshName, 1);
+    // }
 
     SetPosXYZ(pos, gfx, numFaces = 1) {
         math.CopyArr3(this.pos, pos);
@@ -137,16 +137,16 @@ export class Geometry2D {
 
         if (geom instanceof Geometry2D) {
 
-            this.shad = geom.sid.shad; 
-            this.attr = geom.sid.attr; 
-            this.unif = geom.sid.unif; 
-            this.pass = geom.sid.pass;  
-            this.pos = geom.pos;
-            this.dim = geom.dim;
-            this.scale = geom.scale;
-            this.defPos = geom.defPos;
-            this.defDim = geom.defDim;
-            this.defScale = geom.defScale;
+            this.shad = geom.sid.shad;
+            this.attr = geom.sid.attr;
+            this.unif = geom.sid.unif;
+            this.pass = geom.sid.pass;
+            math.CopyArr3(this.pos, geom.pos);
+            math.CopyArr2(this.dim, geom.dim);
+            math.CopyArr2(this.scale, geom.scale);
+            math.CopyArr3(this.defPos, geom.defPos);
+            math.CopyArr2(this.defDim, geom.defDim);
+            math.CopyArr2(this.defScale, geom.defScale);
             this.zIndex = geom.zIndex;
             this.time = geom.time;
             this.type = geom.type;

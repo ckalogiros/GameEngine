@@ -2,7 +2,7 @@
 
 import * as math from '../../../../Helpers/Math/MathOperations.js'
 import { GlSetColor, GlSetColorAlpha } from "../../../../Graphics/Buffers/GlBufferOps.js";
-import { GlAddMaterial, GlHandlerAddMaterialBuffer } from '../../../../Graphics/Buffers/GlBuffers.js';
+import { GlHandlerAddMaterialBuffer } from '../../../../Graphics/Buffers/GlBuffers.js';
 import { FontGetUvCoords } from '../../../Loaders/Font/Font.js';
 import { GfxInfoMesh, Gl_progs_set_vb_texidx } from '../../../../Graphics/GlProgram.js';
 import { TextureLoadTexture } from '../../../Loaders/Textures/Texture.js';
@@ -173,15 +173,15 @@ export class Material {
          this.attr = mat.sid.attr; 
          this.unif = mat.sid.unif; 
          this.pass = mat.sid.pass;  
-         this.col = mat.col;
-         this.defCol = mat.defCol;
-         this.uv = mat.uv;
+         math.CopyArr4(this.col, mat.col);
+         math.CopyArr4(this.defCol, mat.defCol);
+         math.CopyArr4(this.uv, mat.uv);
+         math.CopyArr3(this.style, mat.style);
          this.texId = mat.texId;
          this.textidx = mat.textidx;
          this.uvIdx = mat.uvIdx;
          this.hasFontTex = mat.hasFontTex;
          this.type = mat.type;
-         this.style = mat.style;
          this.num_faces = mat.num_faces;
 
 		}
@@ -248,7 +248,7 @@ export class FontMaterial extends Material {
 
 			super.Copy(mat);
          this.text = mat.text;
-         this.sdf_params = mat.sdf_params;
+         math.CopyArr2(this.sdf_params, mat.sdf_params);
 
 		}
 	}

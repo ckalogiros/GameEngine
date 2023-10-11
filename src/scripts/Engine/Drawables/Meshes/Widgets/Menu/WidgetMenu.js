@@ -17,16 +17,21 @@ import { TimeIntervalsDestroyByIdx } from "../../../../Timers/TimeIntervals.js";
 
 export class Widget_Menu_Bar extends Widget_Label {
 
+   close_btn_idx;
+   minimize_btn_idx;
+   
    constructor(text, Align, pos, col = GREY3, text_col = WHITE, pad = [14, 6], bold = .4, style = [2, 5, 2], font = TEXTURES.SDF_CONSOLAS_LARGE) {
-
+      
       // text, Align, pos, col = GREY3, text_col = WHITE, pad = [0, 0], bold = .4, style = [2, 5, 2], font
       super(text, Align, pos, 4, col, text_col, pad, bold, font, style);
-
+      
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       this.SetStyle(style);
       this.SetName('Widget_Menu_Bar');
       this.type |= MESH_TYPES_DBG.WIDGET_MENU_BAR;
-
+      
+      this.close_btn_idx = INT_NULL;
+      this.minimize_btn_idx = INT_NULL;
    }
 
    AddCloseButton(root, text, fontsize = 0, col = GREY3, text_col = WHITE, pad = [4, 2], bold = .4, style = [6, 5, 3], font = TEXTURES.SDF_CONSOLAS_LARGE) {
@@ -43,7 +48,7 @@ export class Widget_Menu_Bar extends Widget_Label {
       this.geom.dim[0] += close_btn.geom.dim[0];
       this.geom.dim[1] = (this.geom.dim[1] < close_btn.geom.dim[1]) ? close_btn.geom.dim[1] + this.pad[1] : this.geom.dim[1];
 
-      this.AddChild(close_btn);
+      this.close_btn_idx = this.AddChild(close_btn);
 
       // Realign menu's children
       this.ReAlign();
@@ -60,7 +65,7 @@ export class Widget_Menu_Bar extends Widget_Label {
       this.geom.dim[0] += minimize_btn.geom.dim[0];
       this.geom.dim[1] = (this.geom.dim[1] < minimize_btn.geom.dim[1]) ? minimize_btn.geom.dim[1] + this.pad[1] : this.geom.dim[1];
 
-      this.AddChild(minimize_btn);
+      this.minimize_btn_idx = this.AddChild(minimize_btn);
 
       // Realign menu's children
       // this.ReAlign();
@@ -74,11 +79,6 @@ export class Widget_Menu_Bar extends Widget_Label {
          const child = _this.children.buffer[i];
          child.Destroy();
       }
-
-      // Label's text destruction
-      // const sceneidx = this.sceneidx;
-      // _this.text_mesh.Destroy();
-      // Scenes_remove_root_mesh(_this, sceneidx);
 
       // Menus's destruction
       super.Destroy();
@@ -159,6 +159,14 @@ export class Widget_Menu_Bar extends Widget_Label {
 
    }
 
+   // CreateCloseButtonClickEvent(){
+
+   //    const close_btn = this.children.buffer[this.close_btn_idx];
+   //    if(close_btn){
+   //       close_btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, close_btn.OnClick, this.listeners.buffer)
+   //    }
+   // }
+
    /*******************************************************************************************************************************************************/
    // Alignment
    ReAlign() {
@@ -204,7 +212,7 @@ export class Close_Button extends Widget_Button {
 
       this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
       this.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick)
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick, root.listeners.buffer)
 
       // Set a callback function for the destruction of the menu and its window on clicking the close button.
       const params = {
@@ -222,7 +230,7 @@ export class Close_Button extends Widget_Button {
     * @param {*} event_type typeof 'LISTEN_EVENT_TYPES'
     * @param {*} Clbk User may choose the callback for the listen event.
     */
-   CreateListenEvent(event_type, Clbk = null, root) {
+   CreateListenEvent(event_type, Clbk = null, parent_event) {
 
       const target_params = {
          EventClbk: null,
@@ -231,14 +239,15 @@ export class Close_Button extends Widget_Button {
          params: null,
       }
 
-      if (Clbk) this.AddEventListener(event_type, Clbk, target_params);
-      else this.AddEventListener(event_type, this.OnClick, target_params);
+      if (Clbk) this.AddEventListener(event_type, Clbk, target_params, parent_event);
+      else this.AddEventListener(event_type, this.OnClick, target_params, parent_event);
    }
 
    OnClick(params) {
 
       const widget_close_btn = params.target_params.target_mesh;
       widget_close_btn.OnClose();
+      return true; // Needed for the listen event not to propagate further, after widget destruction
    }
 
    OnClose() {

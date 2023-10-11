@@ -66,7 +66,8 @@ export class Widget_Dropdown extends Section {
 
       this.menu.AddItem(mesh);
       if (mesh.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN)
-         Drop_down_set_root(Dropdown_get_root_by_idx(this.rootidx), mesh);
+         mesh.rootidx = this.rootidx;
+         // Drop_down_set_root(Dropdown_get_root_by_idx(this.rootidx), mesh);
    }
 
 
@@ -154,11 +155,6 @@ export class Widget_Dropdown extends Section {
 
             // Deactivate the dropdown's button
             const btn = menu_child.children.buffer[0];
-            if (btn.listeners.active_count) {
-
-               // btn.RemoveAllListenEvents();
-               Listener_events_set_mesh_events_active(LISTENERS_FLAGS.ALL, btn.listeners, false);
-            }
             
             if (btn.gfx) btn.DeactivateGfx();
          }
@@ -173,8 +169,17 @@ export class Widget_Dropdown extends Section {
 
    }
 
-   DeactivateGfx() {
-      if (this.gfx) Gfx_deactivate(this.gfx);
+   DestroyRecursive(mesh){
+
+      for (let i = 0; i < mesh.children.boundary; i++) {
+
+         const child = mesh.children.buffer[i];
+         if(child.children.active_count)
+            this.DestroyRecursive(child)
+
+      }
+
+      mesh.Destroy();
    }
 
    Destroy() {
@@ -182,12 +187,43 @@ export class Widget_Dropdown extends Section {
       for (let i = 0; i < this.children.boundary; i++) {
 
          const child = this.children.buffer[i];
-         child.Destroy();
+         if(child && child.children.active_count)
+            this.DestroyRecursive(child)
       }
+
+      // Case the menu is deactivated but listeners of its buttons still exist.
+      // Must run RemoveAllListeners seperately from the Destroy because there may be listeners in a deactivated menu. 
+      this.RemoveAllListeners(this.menu)
+
       super.Destroy();
    }
 
-   CreateClickEvent() {
+   RemoveAllListeners(dp_menu) { // Mainly used to destroy listen events of any deactivated menus that have deactivated listen events.
+
+      const menu = dp_menu;
+
+      for (let j = 0; j < menu.children.boundary; j++) {
+
+         const child_menu = menu.children.buffer[j];
+
+         // If the menu's child mesh is of type dropdown, run recursively all menus.
+         if (child_menu.type) {
+
+            this.RemoveAllListeners(child_menu); // Run recursive for every dropdown in every menu
+         }
+
+         // It is the button that may have any listen events.
+         const btn = menu.children.buffer[0];
+         if (btn && btn.listeners.boundary) {
+            btn.RemoveAllListenEvents();
+         }
+      }
+   }
+
+   /*******************************************************************************************************************************************************/
+   // Events
+   
+   CreateClickEvent(parent_event) {
 
       const btn = this.children.buffer[0];
       const params = { // Build the parameters for the OnClick callback function.
@@ -195,18 +231,12 @@ export class Widget_Dropdown extends Section {
          menu: this.menu,
       }
 
-      // Case listener already been set but deactivated
-      if(btn.listeners.active_count){
-         Listener_events_set_mesh_events_active(LISTENERS_FLAGS.ALL, btn.listeners, true);
-      }else{
-         btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick, params);
+      if(!btn.listeners.active_count){
+         btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick, params, parent_event);
+         
       }
 
    }
-
-
-   /*******************************************************************************************************************************************************/
-   // Events
 
    // SEE: ## OnClick()
    OnClick(params) {
@@ -262,6 +292,8 @@ export class Widget_Dropdown extends Section {
             else { // Case: Generate gfx for any other children meshes 
 
                child.GenGfxCtx(GFX.PRIVATE);
+               // console.log(child.name)
+
             }
 
          }
@@ -273,6 +305,7 @@ export class Widget_Dropdown extends Section {
          Gfx_end_session(true, true);
 
          const root = Dropdown_get_root_by_idx(dropdown_mesh.rootidx);
+         if(!root) {console.error('Dropdown root is null. mesh:', dropdown_mesh.name); return; }
          root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
          root.UpdateGfxPosDimRecursive(root);
 
@@ -370,7 +403,21 @@ export class Widget_Dropdown extends Section {
 
    }
 
+   /*******************************************************************************************************************************************************/
+   // Setters_Getters
+   SetType(type_flag){
 
+      this.type |= type_flag;
+      const btn = this.children.buffer[0];
+      btn.type |= type_flag;
+      btn.text_mesh.type |= type_flag;
+
+   }
+
+   SetText(text){
+      const btn = this.children.buffer[0];
+      btn.text_mesh.UpdateText(text);
+   }
 }
 
 
