@@ -4,12 +4,12 @@ import { Section } from "../../Section.js";
 import { GetRandomColor } from "../../../../../Helpers/Helpers.js";
 import { MouseGetPosDif } from "../../../../Controls/Input/Mouse.js";
 import { M_Buffer } from "../../../../Core/Buffers.js";
-import { Gfx_activate, Gfx_deactivate, Gfx_end_session, Gfx_generate_context } from "../../../../Interfaces/Gfx/GfxContext.js";
+import { Gfx_activate, Gfx_end_session, Gfx_generate_context } from "../../../../Interfaces/Gfx/GfxContext.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../../../Timers/TimeIntervals.js";
 import { MESH_ENABLE } from "../../Base/Mesh.js";
 import { Widget_Button } from "../WidgetButton.js";
 import { Scenes_store_gfx_to_buffer } from "../../../../Scenes.js";
-import { Listener_events_set_mesh_events_active } from "../../../../Events/EventListeners.js";
+import { Listener_remove_children_event_by_idx, Listener_remove_event_by_idx } from "../../../../Events/EventListeners.js";
 
 /**
  * SEE: ### Widget_Dropdown
@@ -47,7 +47,7 @@ export class Widget_Dropdown extends Section {
       this.isOn = 0x0;
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       this.SetStyle(style);
-      this.SetName('Widget_Dropdown');
+      this.SetName(`DP-${text}`);
       this.type |= MESH_TYPES_DBG.WIDGET_DROP_DOWN;
       this.menu = null;
       this.rootidx = INT_NULL;
@@ -59,6 +59,8 @@ export class Widget_Dropdown extends Section {
 
       this.menu = new Section(SECTION.VERTICAL, [10, 2], [OUT_OF_VIEW, OUT_OF_VIEW, 0], [1, 1], TRANSPARENCY(GetRandomColor(), temp_transparency));
       this.menu.type |= MESH_TYPES_DBG.DROP_DOWN_MENU;
+      this.menu.parent = this;
+      this.menu.SetName(`menu:${this.name}`)
 
    }
 
@@ -67,7 +69,6 @@ export class Widget_Dropdown extends Section {
       this.menu.AddItem(mesh);
       if (mesh.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN)
          mesh.rootidx = this.rootidx;
-         // Drop_down_set_root(Dropdown_get_root_by_idx(this.rootidx), mesh);
    }
 
 
@@ -92,7 +93,7 @@ export class Widget_Dropdown extends Section {
    }
 
    // SEE: ## ActivateMenu() 
-   ActivateMenu() {
+   ActivateMenu(root) {
 
       const menu = this.menu;
       const btn = this.children.buffer[0];
@@ -114,12 +115,13 @@ export class Widget_Dropdown extends Section {
 
                child.gfx = Gfx_generate_context(child.sid, child.sceneidx, child.geom.num_faces, GFX.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
                Scenes_store_gfx_to_buffer(child.sceneidx, child);
-               
+
                const btn = child.children.buffer[0];
                btn.GenGfxCtx(GFX.PRIVATE);
 
                // Create Click events for any meshes of type Dropdown
-               child.CreateClickEvent();
+               child.CreateClickEvent(root.menu.listeners.buffer);
+               child.CreateHoverEvent();
 
                console.log(btn.text_mesh.mat.text)
                if (child.isOn) {
@@ -128,7 +130,8 @@ export class Widget_Dropdown extends Section {
                   console.log(child_btn.text_mesh.mat.text)
                   child_btn.text_mesh.mat.text = `${this.dp_symbols[1]} ${child_btn.text_mesh.mat.text.slice(2)}`;
                   Gfx_end_session(true, true); // Must call end gfx private session for each next dropdown menu gfx activation
-                  child.ActivateMenu();
+
+                  child.ActivateMenu(root); // Run recursive for all dropdown's (as items of a dropdown).
                }
             }
             else { // Case: Generate gfx for children widget meshes 
@@ -141,40 +144,54 @@ export class Widget_Dropdown extends Section {
    }
 
    DeactivateMenu(dp) {
+      /**
+       * Deactivate all dp's menu items gfx.
+       * Remove all dp's menu items listeners.
+       * If item's listeners are child events, do nothing, the events will be winked from the parent event.
+       */
 
       const menu = dp.menu;
 
       for (let j = 0; j < menu.children.boundary; j++) {
 
-         const menu_child = menu.children.buffer[j];
+         const item_dp = menu.children.buffer[j];
 
-         // If the menu's child mesh is of type dropdown, run recursively to deactivate mesh's menu.
-         if (menu_child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN && dp.isOn) {
+         // If the menu's item_dp mesh is of type dropdown, run recursively to deactivate mesh's menu.
+         if (item_dp.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN && dp.isOn) {
 
-            this.DeactivateMenu(menu_child); // Run recursive for every dropdown in every menu
+            this.DeactivateMenu(item_dp); // Run recursive for every dropdown in every menu
 
             // Deactivate the dropdown's button
-            const btn = menu_child.children.buffer[0];
-            
-            if (btn.gfx) btn.DeactivateGfx();
+            const btn_dp = item_dp.children.buffer[0];
+
+            btn_dp.DeactivateGfx();
+            // TODO: 'If it is not a item_dp event'. Check it here
+            btn_dp.RemoveAllListenEvents(); console.log('Remove Listeners:btn_dp:', btn_dp.name, btn_dp.listeners.buffer);
+
+            // Deactivate gfx for menu's children meshes.
+            if (item_dp.gfx) {
+               item_dp.DeactivateGfx();
+            }
+            item_dp.RemoveAllListenEvents(); console.log('Remove Listeners:item_dp:', item_dp.name, item_dp.listeners.buffer);
          }
 
-         // Deactivate gfx for menu's children meshes.
-         if (menu_child.gfx) menu_child.DeactivateGfx();
 
       }
 
-      // Deactivate gfx for menu mesh.
-      if (menu.gfx) menu.DeactivateGfx();
+      if (menu.gfx) // TODO: Shouldn't we check if(menu.isOn)???
+         menu.DeactivateGfx();
+
+      // Remove menu's Fake listen events
+      menu.RemoveAllListenEvents();
 
    }
 
-   DestroyRecursive(mesh){
+   DestroyRecursive(mesh) {
 
       for (let i = 0; i < mesh.children.boundary; i++) {
 
          const child = mesh.children.buffer[i];
-         if(child.children.active_count)
+         if (child.children.active_count)
             this.DestroyRecursive(child)
 
       }
@@ -187,42 +204,19 @@ export class Widget_Dropdown extends Section {
       for (let i = 0; i < this.children.boundary; i++) {
 
          const child = this.children.buffer[i];
-         if(child && child.children.active_count)
+         if (child && child.children.active_count)
             this.DestroyRecursive(child)
       }
 
-      // Case the menu is deactivated but listeners of its buttons still exist.
-      // Must run RemoveAllListeners seperately from the Destroy because there may be listeners in a deactivated menu. 
-      this.RemoveAllListeners(this.menu)
+      this.RemoveAllListenEvents();
 
       super.Destroy();
    }
 
-   RemoveAllListeners(dp_menu) { // Mainly used to destroy listen events of any deactivated menus that have deactivated listen events.
-
-      const menu = dp_menu;
-
-      for (let j = 0; j < menu.children.boundary; j++) {
-
-         const child_menu = menu.children.buffer[j];
-
-         // If the menu's child mesh is of type dropdown, run recursively all menus.
-         if (child_menu.type) {
-
-            this.RemoveAllListeners(child_menu); // Run recursive for every dropdown in every menu
-         }
-
-         // It is the button that may have any listen events.
-         const btn = menu.children.buffer[0];
-         if (btn && btn.listeners.boundary) {
-            btn.RemoveAllListenEvents();
-         }
-      }
-   }
 
    /*******************************************************************************************************************************************************/
    // Events
-   
+
    CreateClickEvent(parent_event) {
 
       const btn = this.children.buffer[0];
@@ -231,35 +225,110 @@ export class Widget_Dropdown extends Section {
          menu: this.menu,
       }
 
-      if(!btn.listeners.active_count){
-         btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick, params, parent_event);
-         
-      }
+      // if (!btn.listeners.active_count) 
+      btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick, params, parent_event);
+   }
+   CreateHoverEvent() {
+
+      const btn = this.children.buffer[0];
+      btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+      btn.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
    }
+
+   RemoveAllListenersFromDpMenuItems(dp_menu) { // Mainly used to destroy listen events of any deactivated menus that have 'isActive=fale' listen events.
+
+      const menu = dp_menu;
+
+      for (let j = 0; j < menu.children.boundary; j++) {
+
+         const child = menu.children.buffer[j];
+
+         // If the menu's child mesh is of type dropdown, run recursively all menus.
+         if (child.type)
+            this.RemoveAllListenersFromDpMenuItems(child); // Run recursive for every dropdown in every menu
+
+         // It is the button that may have any listen events.
+         const btn = menu.children.buffer[0];
+         if (btn && btn.listeners.boundary)
+            btn.RemoveAllListenEvents();
+
+      }
+   }
+   RemoveAllListenersFromDP(_dp=null, parent_event) { // Mainly used to destroy listen events of any deactivated menus that have 'isActive=fale' listen events.
+
+      const dp = (_dp) ? _dp : this;
+
+      /**DEBUG */ if(!dp || !(dp.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN)){
+         console.error('ERROR: in RemoveAllListenersFromDP(). dp is null or not a Dropdown type. dp:', dp);
+         return;
+      }
+
+      const btn = dp.children.buffer[0]; // The button of any dropdown should always be the 0-th child .
+      
+      // Remove dropdown button's listen events.
+      for (let etype = 0; etype < LISTEN_EVENT_TYPES_INDEX.SIZE; etype++) {
+         if (btn.listeners.buffer[etype]){
+            Listener_remove_children_event_by_idx(etype, parent_event[etype].idx, btn.listeners.buffer[etype].idx);
+            btn.listeners.RemoveByIdx(etype);
+            // btn.RemoveAllListenEvents();
+         }
+      }
+   }
+
+/**
+ * CONTINUE:
+ * Do a thorough debuging on the pathways for dropdown create-remove listen events for any anecessary function calls.
+ */
 
    // SEE: ## OnClick()
    OnClick(params) {
 
-      if (!params.target_params.params){
+      if (!params.target_params.params) {
 
-         console.error('Target_params.params is null. mesh:', params.target_params);
+         console.error('Target_params.params is null, in a OnClick() event. target_params:', params.target_params);
          return;
       }
       const dropdown_mesh = params.target_params.params.drop_down;
-      /*DEBUG*/if (dropdown_mesh.rootidx === INT_NULL) alert('Root for dropdown must be set. ', dropdown_mesh.name)
+      /*DEBUG*/if (dropdown_mesh.rootidx === INT_NULL) {
+         alert('Root for dropdown must be set. ', dropdown_mesh.name);
+         // return;
+      }
 
       const menu = params.target_params.params.menu;
       const btn = params.source_params;
-      const dp_symbols = dropdown_mesh.dp_symbols;
+      // const dp_symbols = dropdown_mesh.dp_symbols;
+
+      const root = Dropdown_get_root_by_idx(dropdown_mesh.rootidx);
+      console.log('rootname:', root.name, 'root menu:', root.menu.name, ' root listeners:', root.listeners, 'root menu listeners:', root.menu.listeners);
 
       /** If the menu for the clicked dropdown is not activated, activate it and add it to the gfx buffers  */
       if (!dropdown_mesh.isOn) {
 
-         btn.text_mesh.UpdateTextCharacter(dp_symbols[1], 0); // Update the symbol text.
+         /**
+          * If dropdown menu is not active:
+          * ->Add the menu as a child of the dropdown(in the dropdown's children buffer).
+          * -->Generate gfx context for the menu.
+          * -->Create Fake click event for the menu(so all its items will have a parent event in the 'EventListeners' buffer).
+          * --->Generate gfx context for all menu's items(menu's children buffer).
+          * --->Create listen events for all menu's items that are of type 'Dropdown'.(btn click event, menus fake click(if menu isOn)).
+          * --->Any othe meshes should handle any listen events in their classes. << Must call for create event from here? >>
+          * 
+          * We have 2 cases of implementing the listeners of all dropdown type items of the root dropdown.
+          * 1. Set all event listeners as a child of the root menu's Fake click.
+          * 2. Set all event listeners as a child of each dropdown menu's Fake click.
+          * The decision is made uppon efficiency measures, like the number of child events of a specific dropdown menu's items.
+          * More than 2-3-4 child events should be added to it's menu event, so a Fake event for the menu must be created also.
+          */
+
+         btn.text_mesh.UpdateTextCharacter(dropdown_mesh.dp_symbols[1], 0); // Update the symbol text.
          dropdown_mesh.AddItem(menu); // Add the menu, which is a storage of Widget_Dropdown only, as a child to the drop_down
          menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.geom.num_faces, GFX.PRIVATE);
          Scenes_store_gfx_to_buffer(menu.sceneidx, menu);
+
+         // Create Fake click event in the menu mesh, so that any items that have listen events, they will be registered as children events.
+         if (root.menu.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] === null)
+            root.menu.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, root.menu.OnFakeClick, root.menu.listeners.buffer);
 
 
          // Add any menu children items(in private gfx buffers)
@@ -268,65 +337,91 @@ export class Widget_Dropdown extends Section {
             const child = menu.children.buffer[i];
             if (child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) { // Case child is another dropdown
 
-               // child.GenGfxCtx(GFX.PRIVATE);
                child.gfx = Gfx_generate_context(child.sid, child.sceneidx, child.geom.num_faces, GFX.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
                Scenes_store_gfx_to_buffer(child.sceneidx, child);
-               
+
                const child_btn = child.children.buffer[0];
                child_btn.GenGfxCtx(GFX.PRIVATE);
 
-
                // Create Click events for any meshes of type Dropdown
-               child.CreateClickEvent();
+               child.CreateClickEvent(root.menu.listeners.buffer); console.log('Creat click:', child.name);
 
-
-               if (child.isOn) { // Case the dropdown has an 'active' menu.
+               if (child.isOn) { // Case the child dropdown has an 'active' menu.
 
                   // If the menu was deactivated while open, then on activation keep its '-' symbol
                   child_btn.text_mesh.mat.text = `${dropdown_mesh.dp_symbols[1]} ${child_btn.text_mesh.mat.text.slice(2)}`;
-                  Gfx_end_session(true, true); // Must call end gfx private session for each next dropdown menu gfx activation
-                  child.ActivateMenu();
+                  Gfx_end_session(true, true); // Must call end gfx private session before activating child dp's menu to new private gfx buffers.
+                  child.ActivateMenu(root);
                }
 
             }
-            else { // Case: Generate gfx for any other children meshes 
+            else { // Case: Generate gfx for any other children meshes (exept dropdowns).
 
                child.GenGfxCtx(GFX.PRIVATE);
-               // console.log(child.name)
-
             }
 
          }
+
+
          /**
+          * After creating/activating all dp menu's items(including any dps inside each of any menus(recursive)),
+          * we .Render() that is adding all mesh data to the gfx buffers,
+          * we call Recalc() to recalculate the any dimentions and positions change in the master section mesh(dropdown_mesh),
+          * and we update the dim and pos gfx buffers via the Mesh class update functions.
+          * 
           * What we want is to regenerate gfx, find a private buffer from scratch,
-          * NOT reuse the prog and vb that pre-exists in the menu mesh.
+          * NOT reuse the prog and vb that pre-exists in the menu mesh, maybe it is used for another private gfx initialization.
           */
          menu.Render(MESH_TYPES_DBG.UI_INFO_GFX); // Add to the vertex buffers
          Gfx_end_session(true, true);
 
-         const root = Dropdown_get_root_by_idx(dropdown_mesh.rootidx);
-         if(!root) {console.error('Dropdown root is null. mesh:', dropdown_mesh.name); return; }
          root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
          root.UpdateGfxPosDimRecursive(root);
 
          Gfx_activate(dropdown_mesh); // activate the gfx buffers
 
-      }
-      /** Else dropdown button click and it's menu is active, deactivate it */
-      else {
 
-         btn.text_mesh.UpdateTextCharacter(dp_symbols[0], 0);
-         // Need to update the symbol of the text(not only the gfx buffers), 
-         // because when the btn will be activated it will be re-inserted in the gfx buffers 
-         // and it will use the text_mesh's  string (wich is currently the '-' synmbol).
-         btn.text_mesh.mat.text = `${dp_symbols[0]} ${btn.text_mesh.mat.text.slice(2)}`;
+         // root.Reconstruct_listeners_recursive();
+
+      }
+      else { /** DEACTIVATE: Else dropdown button click and it's menu is active, so deactivate the menu and its items. */
+
+         btn.text_mesh.UpdateTextCharacter(dropdown_mesh.dp_symbols[0], 0);
+
+         /* Need to update the symbol of the text(not only the gfx buffers), 
+            because when the btn will be activated it will be re-inserted in the gfx buffers 
+            and it will use the text_mesh's  string (wich is currently the '-' synmbol). */
+         btn.text_mesh.mat.text = `${dropdown_mesh.dp_symbols[0]} ${btn.text_mesh.mat.text.slice(2)}`;
 
          if (menu) {
 
-            dropdown_mesh.DeactivateMenu(dropdown_mesh);
-            dropdown_mesh.RemoveChildByIdx(menu.idx); // Remove menu from drop down
+            const clickidx = LISTEN_EVENT_TYPES_INDEX.CLICK;
+            // Case we have stored this menu's items events to the root menu Fake event,
+            // Remove all listen events of this menu's items from EventListeners buffer.(one by one, based on the root menu event(parent_event)).
+            if (menu.listeners.buffer[clickidx] === null) {
 
-            const root = Dropdown_get_root_by_idx(dropdown_mesh.rootidx);
+               /**
+                * Here we remove all listen events(registered as children events of a root menu).
+                * IMPORTANT! The listen events may exist in any nested child widget-mesh, 
+                * so not only recursion is required but we must visit all nested meshes to check for listen events.
+                * NOTE: For widgets, let their class handle all the listen events removal,
+                * for the structures that may have arbitary meshes, we must check and remove for listen events.
+                */
+               for (let i = 0; i < menu.children.boundary; i++) {
+
+                  const child = menu.children.buffer[i];
+
+                  if((child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) && child.children.active_count) // If child is of type Dropdown...
+                     child.RemoveAllListenersFromDP(child, root.menu.listeners.buffer); // ...remove it's button click listener.
+
+                  if (child.listeners.buffer[clickidx] && child.listeners.buffer[clickidx].is_child_event) // In any other case, if the child has a listener, remove it.
+                     Listener_remove_children_event_by_idx(clickidx, root.menu.listeners.buffer[clickidx], child.listeners.buffer[clickidx]);
+               }
+            }
+
+            dropdown_mesh.DeactivateMenu(dropdown_mesh);
+            dropdown_mesh.RemoveChildByIdx(menu.idx); // Rememove menu from drop down
+
             root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
             root.UpdateGfxPosDimRecursive(root);
          }
@@ -405,7 +500,7 @@ export class Widget_Dropdown extends Section {
 
    /*******************************************************************************************************************************************************/
    // Setters_Getters
-   SetType(type_flag){
+   SetType(type_flag) {
 
       this.type |= type_flag;
       const btn = this.children.buffer[0];
@@ -414,7 +509,7 @@ export class Widget_Dropdown extends Section {
 
    }
 
-   SetText(text){
+   SetText(text) {
       const btn = this.children.buffer[0];
       btn.text_mesh.UpdateText(text);
    }

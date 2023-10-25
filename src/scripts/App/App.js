@@ -86,18 +86,18 @@ export function AppInit() {
     Debug_info_ui_performance(scene);
 
 
-    const label = CreateLabel(scene);
-    DestroyMeshTest(scene, label)
+    // const label = CreateLabel(scene);
+    // DestroyMeshTest(scene, label)
     
-    const button = CreateButton(scene); // DestroyMeshTest(scene, button)
-    const switch1 = CreateSwitch(scene) // DestroyMeshTest(scene, switch1)
+    // const button = CreateButton(scene); // DestroyMeshTest(scene, button)
+    // const switch1 = CreateSwitch(scene) // DestroyMeshTest(scene, switch1)
 
-    const menu = CreateMenu(scene)
+    // const menu = CreateMenu(scene)
 
-    CreateDropDownWidgetWithWidgetsInside(scene)
+    // CreateDropDownWidgetWithWidgetsInside(scene)
     
-    CreateSlider(scene);
-    CreateSliderWithMenuBar(scene)
+    // CreateSlider(scene);
+    // CreateSliderWithMenuBar(scene)
 
     // CreatDynamicText(scene)
     // CreatDynamicTextSectioned(scene)
@@ -864,40 +864,137 @@ function Create3DCubes(scene) {
 }
 
 /**
- * 0 active:true childen:true meshname:Lebel-text [Label] id:25 EventListeners.js:496:24
-1 active:true childen:true meshname:Lebel-text [Destroy] id:27 EventListeners.js:496:24
-2 active:true childen:true meshname:Lebel-text [Button] id:29 EventListeners.js:496:24
-4 active:true childen:true meshname:Widget_Dropdown id:36 EventListeners.js:496:24
-5 active:false childen:false meshname:Widget_Dropdown id:40 EventListeners.js:496:24
-6 active:false childen:false meshname:Widget_Slider id:51 EventListeners.js:496:24
-7 active:false childen:false meshname:Bar id:52 EventListeners.js:496:24
-8 active:false childen:false meshname:Widget_Dropdown id:55 EventListeners.js:496:24
-9 active:false childen:false meshname:Widget_Dropdown id:59 EventListeners.js:496:24
-10 active:false childen:false meshname:Widget_Dropdown id:63 EventListeners.js:496:24
-11 active:false childen:false meshname:Widget_Dropdown id:67 EventListeners.js:496:24
-12 active:true childen:true meshname:Widget_Slider id:73 EventListeners.js:496:24
-13 active:true childen:true meshname:Bar id:74 EventListeners.js:496:24
-14 active:true childen:true meshname:SECTION_MESH id: 77 EventListeners.js:496:24
-15 active:true childen:true meshname:close_btn id:81 EventListeners.js:496:24
-16 active:true childen:true meshname:Widget_Slider id:83 EventListeners.js:496:24
-17 active:true childen:true meshname:Bar id:84
 
-0 active:true childen:true meshname:Lebel-text [Label] id:25 EventListeners.js:496:24
-1 active:true childen:true meshname:Lebel-text [Destroy] id:27 EventListeners.js:496:24
-2 active:true childen:true meshname:Lebel-text [Button] id:29 EventListeners.js:496:24
-3 active:true childen:true meshname:close_btn id:35 EventListeners.js:496:24
-4 active:true childen:true meshname:Widget_Dropdown id:36 EventListeners.js:496:24
-5 active:false childen:false meshname:Widget_Dropdown id:40 EventListeners.js:496:24
-6 active:false childen:false meshname:Widget_Slider id:51 EventListeners.js:496:24
-7 active:false childen:false meshname:Bar id:52 EventListeners.js:496:24
-8 active:false childen:false meshname:Widget_Dropdown id:55 EventListeners.js:496:24
-9 active:false childen:false meshname:Widget_Dropdown id:59 EventListeners.js:496:24
-10 active:false childen:false meshname:Widget_Dropdown id:63 EventListeners.js:496:24
-11 active:false childen:false meshname:Widget_Dropdown id:67 EventListeners.js:496:24
-12 active:true childen:true meshname:Widget_Slider id:73 EventListeners.js:496:24
-13 active:true childen:true meshname:Bar id:74 EventListeners.js:496:24
-14 active:true childen:true meshname:SECTION_MESH id: 77 EventListeners.js:496:24
-15 active:true childen:true meshname:close_btn id:81 EventListeners.js:496:24
-16 active:true childen:true meshname:Widget_Slider id:83 EventListeners.js:496:24
-17 active:true childen:true meshname:Bar id:84
+------------------ Mesh_print_all_mesh_listeners ------------------ Keys.js:40:18
+id:2 name:Lebel-text [+ Generic Ui Debug Info] id:2 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+id:6 name:InfoUi-Timers label id:6 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:8 name:InfoUi-Timers switch id:8 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+id:4 name:InfoUi-Timers section id:4 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:11 name:InfoUi-Mouse label id:11 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:13 name:InfoUi-Mouse switch id:13 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+id:9 name:InfoUi-Mouse section id:9 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:16 name:InfoUi-Gfx label id:16 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:18 name:InfoUi-Gfx switch id:18 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+id:14 name:InfoUi-Gfx section id:14 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:21 name:InfoUi-Mesh label id:21 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:23 name:InfoUi-Mesh switch id:23 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+id:19 name:InfoUi-Mesh section id:19 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:3 name:SECTION_MESH id: 3 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:0 name:InfoUi Root-DP id:0 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+id:27 name:Lebel-text [+ InfoUi Gfx DP] id:27 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+id:35 name:Lebel-text [+ prog:0 | Vb count:3] id:35 boundary:2 
+Array [ {…}, {…} ]
+Mesh.js:882:25
+id:33 name:Program DP:0 id:33 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:57 name:Lebel-text [+ prog:1 | Vb count:2] id:57 boundary:2 
+Array [ {…}, {…} ]
+Mesh.js:882:25
+id:55 name:Program DP:1 id:55 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:31 name:Lebel-text [+ self-gfx] id:31 boundary:2 
+Array [ {…}, {…} ]
+Mesh.js:882:25
+id:29 name:self-gfx id:29 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:28 name:SECTION_MESH id: 28 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:25 name:InfoUi Gfx DP id:25 boundary:2 
+Array [ {…}, {…} ]
+Mesh.js:882:25
+id:24 name:InfoUi Gfx section 100 id:24 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+------------------ Mesh_print_all_mesh_listeners ------------------ Keys.js:40:18
+id:2 name:Lebel-text [+ Generic Ui Debug Info] id:2 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+id:6 name:InfoUi-Timers label id:6 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:8 name:InfoUi-Timers switch id:8 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+id:4 name:InfoUi-Timers section id:4 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:11 name:InfoUi-Mouse label id:11 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:13 name:InfoUi-Mouse switch id:13 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+id:9 name:InfoUi-Mouse section id:9 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:16 name:InfoUi-Gfx label id:16 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:18 name:InfoUi-Gfx switch id:18 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+id:14 name:InfoUi-Gfx section id:14 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:21 name:InfoUi-Mesh label id:21 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:23 name:InfoUi-Mesh switch id:23 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+id:19 name:InfoUi-Mesh section id:19 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:3 name:SECTION_MESH id: 3 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:0 name:InfoUi Root-DP id:0 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+id:27 name:Lebel-text [+ InfoUi Gfx DP] id:27 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+id:25 name:InfoUi Gfx DP id:25 boundary:0 
+Array [ null, null ]
+Mesh.js:882:25
+id:24 name:InfoUi Gfx section 100 id:24 boundary:2 
+Array [ null, {…} ]
+Mesh.js:882:25
+
  */

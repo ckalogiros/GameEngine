@@ -150,6 +150,10 @@ export class M_Buffer extends Buffer_Interface {
 
       this.size = size;
       this.buffer = new Array(size);
+
+      for(let i=0; i<size; i++){
+         this.buffer[i] = null;
+      }
    }
 
 
@@ -172,6 +176,7 @@ export class M_Buffer extends Buffer_Interface {
 
       this.buffer[idx] = elem;
       this.active_count++;
+      if (idx > this.boundary) this.boundary = idx+1;
 
       return idx;
    }

@@ -37,6 +37,7 @@ export const DEBUG_PRINT_KEYS = [
       key: 'em',
       discr: 'Mesh_print_all_mesh_listeners',
       func: (e)=>{
+         console.log('------------------ Mesh_print_all_mesh_listeners ------------------')
          Mesh_print_all_mesh_listeners();
       },
    },
@@ -124,7 +125,7 @@ export const DEBUG_PRINT_KEYS = [
       key: 'e',
       discr: 'Listener_debug_print_all',
       func: (e)=>{
-         console.log('-- Listener_debug_print_all --')
+         console.log('------------------ Listener_debug_print_all ------------------')
          Listener_debug_print_all();
       },
    },
@@ -132,7 +133,7 @@ export const DEBUG_PRINT_KEYS = [
       key: 'E',
       discr: '-- Listener_debug_print_info--',
       func: (e)=>{
-         console.log('-- Listener_debug_print_all --')
+         console.log('------------------ Listener_debug_print_all ------------------')
          Listener_debug_print_info();
 
       },
@@ -142,7 +143,7 @@ export const DEBUG_PRINT_KEYS = [
       discr: 'ScenesPrintAllMeshes',
       func: (e)=>{
          let cnt = 0;
-         console.log('-- Scene\'s All meshes (recursive) --')
+         console.log('------------------ Scene\'s All meshes (recursive) ------------------')
          const count = ScenesPrintAllMeshes(STATE.scene.active.root_meshes, cnt);
          console.log('Count: ', count)
       },
@@ -151,7 +152,7 @@ export const DEBUG_PRINT_KEYS = [
       key: 'M',
       discr: 'ScenesPrintRootMeshes',
       func: (e)=>{
-         console.log('-- Scene\'s root children meshes --')
+         console.log('------------------ Scene\'s root children meshes ------------------')
          const count = ScenesPrintRootMeshes(STATE.scene.active.root_meshes);
          console.log('Count: ', count)
       },
@@ -167,7 +168,7 @@ export const DEBUG_PRINT_KEYS = [
       key: 's3',
       discr: 'Scene:PrintGfxStorageBuffer()',
       func: (e)=>{
-         console.log('-- Scene:PrintGfxStorageBuffer() --');
+         console.log('------------------ Scene:PrintGfxStorageBuffer() ------------------');
          const scene = Scenes_get_scene_by_idx(STATE.scene.active_idx);
          scene.PrintGfxStorageBuffer();
       },
@@ -176,7 +177,7 @@ export const DEBUG_PRINT_KEYS = [
       key: 's4',
       discr: 'Scene:PrintRootMeshBuffer()',
       func: (e)=>{
-         console.log('-- Scene:PrintRootMeshBuffer() --');
+         console.log('------------------ Scene:PrintRootMeshBuffer() ------------------');
          const scene = Scenes_get_scene_by_idx(STATE.scene.active_idx);
          scene.PrintRootMeshBuffer();
       },
@@ -185,7 +186,7 @@ export const DEBUG_PRINT_KEYS = [
       key: 'L',
       discr: 'NULL',
       func: (e)=>{
-         console.log('-- UN-ASSIGNED --');
+         console.log('------------------ UN-ASSIGNED ------------------');
          // Listener_hover_Print();
       },
    },

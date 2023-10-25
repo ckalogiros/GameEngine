@@ -91,14 +91,15 @@ export class Event_Listener {
          target_params: target_params,
          isActive: false,
          children: null, // current mesh may have children with events. This is the buffer to store them, but only after 'ReconstructEvents' function call.
-         anyChildrenActive: false, // This is to check if the current event has any children events(eficient since we do not have to check every child event if 'isActive')
+         has_child_events: false, // This is to check if the current event has any children events(eficient since we do not have to check every child event if 'isActive')
       }
-
+      
       LISTENERS_FLAGS[TYPE_IDX] = true;
       return this.event_type[TYPE_IDX].Add(event_params);
    }
-   AddChildEvent(TYPE_IDX, parent_event, Clbk = null, source_params = null, target_params = null) {
-
+   
+   AddChildEvent(TYPE_IDX, parent_eventidx, Clbk = null, source_params = null, target_params = null) {
+      
       const event_params = {
          type: TYPE_IDX,
          Clbk: Clbk,
@@ -106,24 +107,24 @@ export class Event_Listener {
          target_params: target_params,
          isActive: true,
          children: null, // current mesh may have children with events. This is the buffer to store them, but only after 'ReconstructEvents' function call.
-         anyChildrenActive: false, // This is to check if the current event has any children events(eficient since we do not have to check every child event if 'isActive')
+         has_child_events: false, // This is to check if the current event has any children events(eficient since we do not have to check every child event if 'isActive')
       }
 
       LISTENERS_FLAGS[TYPE_IDX] = true;
-      const event = this.event_type[parent_event[0]].buffer[parent_event[1]];
-      /*DEBUG*/ if (!event) { console.error('Parent event not found. Parent event listeners:', parent_event); return; }
+      const event = this.event_type[TYPE_IDX].buffer[parent_eventidx];
+      /*DEBUG*/ if (!event) { console.error('Parent event not found. Parent event listeners:', parent_eventidx); return; }
 
       if(!event.children){
          event.children = new M_Buffer();
       }
 
       const idx = event.children.Add(event_params);
-      event.anyChildrenActive = true;
+      event.has_child_events = true; // Set parent event.
       return idx;
    }
-
+   
    DispatchEvents(TYPE_IDX, trigger_params) {
-
+      
       _pt5.Start(); /* Performance measure */
 
       if (this.event_type[TYPE_IDX] === undefined) return;
@@ -137,7 +138,8 @@ export class Event_Listener {
          const evt = this.event_type[TYPE_IDX].buffer[i]; 
 
          // Case the EventListeners has nulled elements in the buffer (E.g EventListeners.buffer[null, evt1, evt2, ...])
-         if(evt && evt.isActive) {
+         // if(evt && evt.isActive) {
+         if(evt) {
 
             const mesh = evt.source_params;
             const point = MouseGetPos();
@@ -154,7 +156,7 @@ export class Event_Listener {
             // ... see if any of it's children  have the same event type, check them and dispatch thei event first.
             if(ret){ // If we have an event on the parent, check if children have too.
    
-               if(evt.anyChildrenActive && evt.children !== null){ // Check if has children events.
+               if(evt.has_child_events && evt.children !== null){ // Check if has children events.
    
                   ret = false; // Use ret to test the children events intersection
                   for(let j=0; j<evt.children.boundary; j++){
@@ -220,8 +222,8 @@ export class Event_Listener {
       const TYPE_IDX = LISTEN_EVENT_TYPES_INDEX.HOVER;
 
       if (this.event_type[TYPE_IDX] === undefined) return;
-      if (TYPE_IDX < 0 || TYPE_IDX >= LISTEN_EVENT_TYPES_INDEX.SIZE) 
-      console.error('Event type index does not exist.');
+      /*DEBUG*/if (TYPE_IDX < 0 || TYPE_IDX >= LISTEN_EVENT_TYPES_INDEX.SIZE) 
+         console.error('Event type index does not exist.');
    
    
       for (let i = 0; i < this.event_type[TYPE_IDX].boundary; i++) {
@@ -244,7 +246,7 @@ export class Event_Listener {
                   if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
                      Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
                   }
-                  if (event.anyChildrenActive && event.children) {
+                  if (event.has_child_events && event.children) {
                      // console.log(point)
                      if(Check_hover_recursive(event, point)) return;
                   }
@@ -278,7 +280,7 @@ export class Event_Listener {
             target_params: evt.target_params,
             isActive: evt.isActive,
             children: null, // TODO: MUST COPY ALL CHILDRENS BUFFER RECURSIVELY???
-            anyChildrenActive: evt.anyChildrenActive, 
+            has_child_events: evt.has_child_events, 
          }
 
          temp.Add(event_params); 
@@ -312,7 +314,8 @@ function Check_hover_recursive(events, point) {
             [(d.pos[1] - d.dim[1]), (d.pos[1] + d.dim[1])], // Top  Bottom
          ];
          
-         if (evt.isActive && Intersection_point_rect(point, rect)) {
+         // if (evt.isActive && Intersection_point_rect(point, rect)) {
+         if (Intersection_point_rect(point, rect)) {
    
             if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
                Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
@@ -343,9 +346,23 @@ export function Listener_create_event(TYPE_IDX, Clbk, source_params, target_para
 
    return _listener.AddEvent(TYPE_IDX, Clbk, source_params, target_params);
 }
-export function Listener_create_child_event(TYPE_IDX, parent_event, Clbk = null, source_params = null, target_params = null) {
 
-   return _listener.AddChildEvent(TYPE_IDX, parent_event, Clbk, source_params, target_params);
+export function Listener_create_child_event(TYPE_IDX, parent_eventidx, Clbk = null, source_params = null, target_params = null) {
+
+   return _listener.AddChildEvent(TYPE_IDX, parent_eventidx, Clbk, source_params, target_params);
+}
+
+export function Listener_remove_event_by_idx(TYPE_IDX, idx) {
+
+   _listener.event_type[TYPE_IDX].RemoveByIdx(idx);
+
+   if (_listener.event_type[TYPE_IDX].active_count === 0)
+      LISTENERS_FLAGS[TYPE_IDX] = false;
+}
+
+export function Listener_remove_children_event_by_idx(TYPE_IDX, event_idx, child_event_idx) {
+
+   _listener.event_type[TYPE_IDX].buffer[event_idx].children.RemoveByIdx(child_event_idx);
 }
 
 export function Listener_dispatch_event(TYPE_IDX, trigger_params) {
@@ -358,47 +375,34 @@ export function Listener_dispatch_check_hover_event() {
    _listener.CheckHover();
 }
 
-export function Listener_remove_event_by_idx(TYPE_IDX, idx) {
+// export function Listener_remove_event_by_idx2(TYPE_IDX, gatheredIdxs) {
 
-   _listener.event_type[TYPE_IDX].RemoveByIdx(idx);
+//    const i = gatheredIdxs;
+//    const count = i.length;
+//    switch(count){
 
-   if (_listener.event_type[TYPE_IDX].active_count === 0)
-      LISTENERS_FLAGS[TYPE_IDX] = false;
-}
+//       case 1:{
 
-export function Listener_remove_event_by_idx2(TYPE_IDX, gatheredIdxs) {
-
-   const i = gatheredIdxs;
-   const count = i.length;
-   switch(count){
-
-      case 1:{
-
-         _listener.event_type[TYPE_IDX].RemoveByIdx(gatheredIdxs[0]);
-         break;
-      }
-      case 2:{
+//          _listener.event_type[TYPE_IDX].RemoveByIdx(gatheredIdxs[0]);
+//          break;
+//       }
+//       case 2:{
          
-         _listener.event_type[TYPE_IDX].buffer[i[0]].children.RemoveByIdx([i[1]]);
-         break;
-      }
-      case 3:{
+//          _listener.event_type[TYPE_IDX].buffer[i[0]].children.RemoveByIdx([i[1]]);
+//          break;
+//       }
+//       case 3:{
          
-         _listener.event_type[TYPE_IDX].buffer[i[0]].children.buffer[i[1]].children.RemoveByIdx(i[2]);
-         break;
-      }
-      default: alert('No depth fount. @ Listener_remove_event_by_idx2()')
-   }
+//          _listener.event_type[TYPE_IDX].buffer[i[0]].children.buffer[i[1]].children.RemoveByIdx(i[2]);
+//          break;
+//       }
+//       default: alert('No depth fount. @ Listener_remove_event_by_idx2()')
+//    }
 
-   // A way of not bothering dispatching this type of event (if none exist), from the Events.js
-   if (_listener.event_type[TYPE_IDX].active_count === 0)
-      LISTENERS_FLAGS[TYPE_IDX] = false;
-}
-
-export function Listener_remove_children_event_by_idx(TYPE_IDX, event_idx, child_event_idx) {
-
-   _listener.event_type[TYPE_IDX].buffer[event_idx].children.buffer.RemoveByIdx(child_event_idx);
-}
+//    // A way of not bothering dispatching this type of event (if none exist), from the Events.js
+//    if (_listener.event_type[TYPE_IDX].active_count === 0)
+//       LISTENERS_FLAGS[TYPE_IDX] = false;
+// }
 
 export function Listener_events_set_mesh_events_active(FLAGS, mesh_listeners, bool_activate){
 
@@ -407,23 +411,21 @@ export function Listener_events_set_mesh_events_active(FLAGS, mesh_listeners, bo
 
    if((FLAGS & LISTENERS_FLAGS.HOVER) || (FLAGS & LISTENERS_FLAGS.ALL)){
 
-      if(mesh_listeners.buffer[hover_type_idx] !== INT_NULL){
+      if(mesh_listeners.buffer[hover_type_idx]){
          
-         _listener.event_type[hover_type_idx].buffer[mesh_listeners.buffer[hover_type_idx]].anyChildrenActive = bool_activate;
-         _listener.event_type[hover_type_idx].buffer[mesh_listeners.buffer[hover_type_idx]].isActive = bool_activate;
+         // _listener.event_type[hover_type_idx].buffer[mesh_listeners.buffer[hover_type_idx].idx].has_child_events = bool_activate;
+         _listener.event_type[hover_type_idx].buffer[mesh_listeners.buffer[hover_type_idx].idx].isActive = bool_activate;
       }
    }
    
    if((FLAGS & LISTENERS_FLAGS.CLICK) || (FLAGS & LISTENERS_FLAGS.ALL)){
 
-      if(mesh_listeners.buffer[click_type_idx] !== INT_NULL){
-         /**DEBUG*/ if(_listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx]] === undefined) 
-            console.error('Undefined listen event:', mesh_listeners.buffer[click_type_idx], ' type:', click_type_idx)
-            // if(_listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx]].anyChildrenActive === undefined)
-            if(_listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx]] === undefined)
-            console.log()
-         _listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx]].anyChildrenActive = bool_activate;
-         _listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx]].isActive = bool_activate;
+      if(mesh_listeners.buffer[click_type_idx]){
+         /**DEBUG*/ if(_listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx].idx] === undefined) 
+               console.error('Undefined listen event:', mesh_listeners.buffer[click_type_idx].idx, ' type:', click_type_idx)
+
+         // _listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx].idx].has_child_events = bool_activate;
+         _listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx].idx].isActive = bool_activate;
       }
    }
 }
@@ -434,16 +436,16 @@ export function Listener_reset_children_buffer(TYPE_IDX, event_idx){
 
 export function Listener_recover_children_buffer(TYPE_IDX, event_idx, children_buffer){
    _listener.event_type[TYPE_IDX].buffer[event_idx].children = children_buffer;
-   _listener.event_type[TYPE_IDX].buffer[event_idx].anyChildrenActive = true;
+   _listener.event_type[TYPE_IDX].buffer[event_idx].has_child_events = true;
 }
 
 export function Listener_set_event_active_by_idx(TYPE_IDX, root, childs_evt_idx) {
    // SEE ### docs/ScemeDraws/HoveListenEvents.drawio
 
-   const parent_event_idx = root.listeners.buffer[TYPE_IDX]; // Get the parents event from the EventListener's buffer
+   const parent_event_idx = root.listeners.buffer[TYPE_IDX].idx; // Get the parents event from the EventListener's buffer
    if (parent_event_idx === INT_NULL)  alert('Root does not have a FAKE event')
    
-   // Cache.
+   // Get the root's event.
    const evt = _listener.event_type[TYPE_IDX].buffer[parent_event_idx];
 
    if(evt === null){
@@ -451,22 +453,57 @@ export function Listener_set_event_active_by_idx(TYPE_IDX, root, childs_evt_idx)
       console.error('evt is null');
       return;
    }
-
+   
    if (evt.children === null){
-
+      
       evt.children = new M_Buffer; // Create new buffer as a children's events buffer
-      evt.anyChildrenActive = true;
+      evt.has_child_events = true;
    }
-
+   
    // Copy the child's event params 
    const event_params = _listener.event_type[TYPE_IDX].buffer[childs_evt_idx];
 
+   // _listener.AddChildEvent(TYPE_IDX, root.listeners.buffer[TYPE_IDX], event_params.Clbk, event_params.source_params, event_params.target_params)
+   // if(TYPE_IDX === LISTEN_EVENT_TYPES_INDEX.HOVER) _listener.AddChildEvent(TYPE_IDX, root.listeners.buffer, event_params.Clbk, event_params.source_params, event_params.target_params)
+   // else if(TYPE_IDX === LISTEN_EVENT_TYPES_INDEX.CLICK) _listener.AddChildEvent(TYPE_IDX, root.listeners.buffer, event_params.Clbk, event_params.source_params, event_params.target_params)
+
+   _listener.event_type[TYPE_IDX].RemoveByIdx(childs_evt_idx); // Remove the child's event from the root eventListeners buffer
    // Store them to the parents children event buffer
    const idx = evt.children.Add(event_params);
-   _listener.event_type[TYPE_IDX].RemoveByIdx(childs_evt_idx); // Remove the child's event from the root eventListeners buffer
 
    return idx;
 }
+
+// export function Listener_set_event_active_by_idx(TYPE_IDX, root, childs_evt_idx) {
+//    // SEE ### docs/ScemeDraws/HoveListenEvents.drawio
+
+//    const parent_event_idx = root.listeners.buffer[TYPE_IDX].idx; // Get the parents event from the EventListener's buffer
+//    if (parent_event_idx === INT_NULL)  alert('Root does not have a FAKE event')
+   
+//    // Get the root's event.
+//    const evt = _listener.event_type[TYPE_IDX].buffer[parent_event_idx];
+
+//    if(evt === null){
+
+//       console.error('evt is null');
+//       return;
+//    }
+
+//    if (evt.children === null){
+
+//       evt.children = new M_Buffer; // Create new buffer as a children's events buffer
+//       evt.has_child_events = true;
+//    }
+
+//    // Copy the child's event params 
+//    const event_params = _listener.event_type[TYPE_IDX].buffer[childs_evt_idx];
+
+//    // Store them to the parents children event buffer
+//    const idx = evt.children.Add(event_params);
+//    _listener.event_type[TYPE_IDX].RemoveByIdx(childs_evt_idx); // Remove the child's event from the root eventListeners buffer
+
+//    return idx;
+// }
 
 export function Listener_get_event(TYPE_IDX, event_idx) {
 
@@ -487,7 +524,7 @@ export function Listener_debug_print_info() {
    const count = _listener.event_type.length;
    for(let i=0; i<count; i++){
       
-      console.log('---- Event type:', i);
+      console.log('-Event type:', i);
 
       let events_count = 0;
       const e = _listener.event_type[i];
@@ -496,14 +533,29 @@ export function Listener_debug_print_info() {
          for(let j=0; j<e.boundary; j++){
             
             if(e.buffer[j]){
-   
-               const msg = `${j} active:${e.buffer[j].isActive} childen:${e.buffer[j].anyChildrenActive} meshname:${e.buffer[j].source_params.name}`;
+               
+               const msg = `${j} active:${e.buffer[j].isActive} childen:${e.buffer[j].has_child_events} meshname:${e.buffer[j].source_params.name}`;
                console.log(msg);
+               
+               if(e.buffer[j].has_child_events){
+                  
+                  for(let k=0; k<e.buffer[j].children.boundary; k++){
+                     const e_c = e.buffer[j].children.buffer[k];
+                     if(e_c){
+
+                        const is_child_event = (e_c.source_params.listeners.buffer[1]) ? e_c.source_params.listeners.buffer[1].is_child_event : false;
+                        const msg = `  ->${j}-${k} active:${e_c.isActive} childen:${e_c.has_child_events} meshname:${e_c.source_params.name} is_child_event:${is_child_event}`;
+                        console.log(msg);
+                        events_count++;
+                     }
+                  }
+               }
+               
                events_count++;
             }
          }
       }
-      console.log(`Total count: type:${i}=${events_count}`)
+      console.log(`+++ Total count:${events_count}`)
    }
 
 }
@@ -556,7 +608,7 @@ export function Listeners_debug_info_create(scene){
          
          const evt = evt_type.buffer[j];
    
-         if(evt.anyChildrenActive)
+         if(evt.has_child_events)
             count += Listeners_debug_info_create_recursive(scene, drop_down_evt_type, evt.children, evt.source_params.name);
          
          if(evt) {
@@ -594,7 +646,7 @@ function Listeners_debug_info_create_recursive(scene, dropdown_root, evt_childre
       
       const evt = evt_children.buffer[j];
 
-      if(evt.anyChildrenActive) // Pass as new root for the recursion the current dropdown menu
+      if(evt.has_child_events) // Pass as new root for the recursion the current dropdown menu
          Listeners_debug_info_create_recursive(scene, drop_down_evt_type, evt.children);
 
       const type = Listeners_get_event_type_string(evt.type);

@@ -8,7 +8,7 @@ import { Widget_Label } from "../Meshes/Widgets/WidgetLabel";
 import { Widget_Dynamic_Text_Mesh, Widget_Text } from "../Meshes/Widgets/WidgetText";
 import { Gfx_end_session, Gfx_generate_context } from "../../Interfaces/Gfx/GfxContext";
 import { Scenes_get_all_scene_meshes, Scenes_get_root_mesh_by_idx, Scenes_get_root_meshes, Scenes_store_gfx_to_buffer } from "../../Scenes.js";
-import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _pt_fps } from "../../Timers/PerformanceTimers";
+import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _pt2, _pt3, _pt4, _pt5, _pt6, _pt_fps } from "../../Timers/PerformanceTimers";
 import { PerformanceTimerGetFps1sAvg, _fps_1s_avg, _fps_500ms_avg } from "../../Timers/Time";
 import { Info_listener_create_event, Info_listener_destroy_event } from "./InfoListeners";
 import { Gfx_add_geom_mat_to_vb, Gfx_get_progams_count } from "../../Interfaces/Gfx/GfxInterfaceFunctions";
@@ -142,41 +142,106 @@ export function Debug_info_create_ui_performance_timers(params) {
    let pad = 0;
    let ms = 200;
 
-   const timer = new Widget_Dynamic_Text_Mesh('Fps: | Avg:', '00000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
-   timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimersGetFps, _pt_fps); // idx is for use in creating separate time intervals for each dynamic text.
-
-   timer.CreateNewText('| deltaAvg ms:', fontsize, BLUE_10_160_220, [pad * 3, 0], .9);
-   timer.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .9);
-   timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetDeltaAvg`, ms, PerformanceTimersGetMilisec, _pt_fps)
-
-   timer.CreateNewText('| curTime ms:', fontsize, BLUE_10_160_220, [pad * 3, 0], .9);
-   timer.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
-   timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, PerformanceTimersGetCurTime, _pt_fps);
-
-   section.AddItem(timer);
-
-   /********************************************************************************************************************************************************************************************************** */
-
-   ms = 1000;
-   const fps1sAvg = new Widget_Dynamic_Text_Mesh('Fps 1sec: | avg:', '00000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
-   fps1sAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_1s_avg); // idx is for use in creating separate time intervals for each dynamic text.
-   fps1sAvg.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-
-   fps1sAvg.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
-   fps1sAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_1s_avg); // no need for callback, the '_fps_1s_avg' is already in milisec. 
-
-   section.AddItem(fps1sAvg);
+   { // FPS average
+      const timer = new Widget_Dynamic_Text_Mesh('Fps: | Avg:', '00000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimersGetFps, _pt_fps); // idx is for use in creating separate time intervals for each dynamic text.
+   
+      timer.CreateNewText('| deltaAvg ms:', fontsize, BLUE_10_160_220, [pad * 3, 0], .9);
+      timer.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .9);
+      timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetDeltaAvg`, ms, PerformanceTimersGetMilisec, _pt_fps)
+   
+      timer.CreateNewText('| curTime ms:', fontsize, BLUE_10_160_220, [pad * 3, 0], .9);
+      timer.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, PerformanceTimersGetCurTime, _pt_fps);
+   
+      section.AddItem(timer);
+   }
 
    /********************************************************************************************************************************************************************************************************** */
 
-   ms = 500;
-   const fps500msAvg = new Widget_Dynamic_Text_Mesh('Fps 500ms: | avg:', '00000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
-   fps500msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_500ms_avg); // idx is for use in creating separate time intervals for each dynamic text.
-   fps500msAvg.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
+   { // FPS average 1 second
+      ms = 1000;
+      const fps1sAvg = new Widget_Dynamic_Text_Mesh('Fps 1sec: | avg:', '00000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      fps1sAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_1s_avg); // idx is for use in creating separate time intervals for each dynamic text.
+      fps1sAvg.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
+   
+      fps1sAvg.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      fps1sAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_1s_avg); // no need for callback, the '_fps_1s_avg' is already in milisec. 
+   
+      section.AddItem(fps1sAvg);
+   }
 
-   fps500msAvg.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
-   fps500msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_500ms_avg);
-   section.AddItem(fps500msAvg);
+   /********************************************************************************************************************************************************************************************************** */
+
+   { // FPS average 500 miliseconds
+      ms = 500;
+      const fps500msAvg = new Widget_Dynamic_Text_Mesh('Fps 500ms: | avg:', '00000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      fps500msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_500ms_avg); // idx is for use in creating separate time intervals for each dynamic text.
+      fps500msAvg.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
+   
+      fps500msAvg.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      fps500msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_500ms_avg);
+      section.AddItem(fps500msAvg);
+   }
+
+   /********************************************************************************************************************************************************************************************************** */
+
+   { // All Timers Update timer
+      ms = 500;
+      const t = new Widget_Dynamic_Text_Mesh(`All timers(${ms}ms):`, '0000000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      t.SetDynamicText(`DynamicText ${ms} AllTimersUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt2); // idx is for use in creating separate time intervals for each dynamic text.
+
+      t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
+      t.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      t.SetDynamicText(`DynamicText ${ms} AllTimersUpdate PerformanceTimersGetMilisec`, ms, PerformanceTimersGetMilisec, _pt2); // idx is for use in creating separate time intervals for each dynamic text.
+
+      section.AddItem(t);
+   }
+   { // Scene Update timer
+      ms = 500;
+      const t = new Widget_Dynamic_Text_Mesh(`Scene Update(${ms}ms):`, '000000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      t.SetDynamicText(`DynamicText ${ms} SceneUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt3); // idx is for use in creating separate time intervals for each dynamic text.
+
+      t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
+      t.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      t.SetDynamicText(`DynamicText ${ms} SceneUpdate PerformanceTimersGetMilisec`, ms, PerformanceTimersGetMilisec, _pt3); // idx is for use in creating separate time intervals for each dynamic text.
+
+      section.AddItem(t);
+   }
+   { // GlDraw timer
+      ms = 500;
+      const t = new Widget_Dynamic_Text_Mesh(`GlDraw Update(${ms}ms):`, '000000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      t.SetDynamicText(`DynamicText ${ms} GlDrawUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt4); // idx is for use in creating separate time intervals for each dynamic text.
+
+      t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
+      t.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      t.SetDynamicText(`DynamicText ${ms} GlDraw PerformanceTimersGetMilisec`, ms, PerformanceTimersGetMilisec, _pt4); // idx is for use in creating separate time intervals for each dynamic text.
+
+      section.AddItem(t);
+   }
+   { // Event Listener timer
+      ms = 500;
+      const t = new Widget_Dynamic_Text_Mesh(`HoverListener Update(${ms}ms):`, '000000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      t.SetDynamicText(`DynamicText ${ms} HoverListenerUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt6); // idx is for use in creating separate time intervals for each dynamic text.
+
+      t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
+      t.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      t.SetDynamicText(`DynamicText ${ms} HoverListener PerformanceTimersGetMilisec`, ms, PerformanceTimersGetMilisec, _pt6); // idx is for use in creating separate time intervals for each dynamic text.
+
+      section.AddItem(t);
+   }
+   { // Event Listener timer
+      ms = 500;
+      const t = new Widget_Dynamic_Text_Mesh(`EventListener Update(${ms}ms):`, '000000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      t.SetDynamicText(`DynamicText ${ms} EventListenerUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt5); // idx is for use in creating separate time intervals for each dynamic text.
+
+      t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
+      t.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      t.SetDynamicText(`DynamicText ${ms} EventListener PerformanceTimersGetMilisec`, ms, PerformanceTimersGetMilisec, _pt5); // idx is for use in creating separate time intervals for each dynamic text.
+
+      section.AddItem(t);
+   }
+
 
    scene.AddWidget(section, GFX.PRIVATE);
    section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
@@ -308,16 +373,12 @@ export function Debug_info_create_gfx_info(params) {
    dp.SetName('InfoUi Gfx DP');
    dp.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
    dp.CreateClickEvent(section.listeners.buffer);
+   // dp.CreateClickEvent();
    Drop_down_set_root(dp, dp);
 
    ui_gfx_self_state.dp = new Widget_Dropdown(`self-gfx`, [0, 0, 0], [10, 10], TRANSPARENCY(YELLOW_240_220_10, tr), TRANSPARENCY(GREEN_140_240_10, tr), WHITE, [8, 3]);
    ui_gfx_self_state.dp.SetName(`self-gfx`)
    ui_gfx_self_state.dp.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
-
-   // {
-   //    dp.AddToMenu(new Widget_Dynamic_Text_Mesh('Programs:', `${Gfx_get_progams_count()}`, [0, 0, 0], 4, YELLOW_240_220_10, GREEN_140_240_10, .4));
-   //    dp.AddToMenu(new Widget_Dynamic_Text_Mesh('Vertex buffers:', `0`, [0, 0, 0], 4, YELLOW_240_220_10, GREEN_140_240_10, .4));
-   // }
 
    const progs = Gl_progs_get();
    const count = progs.length;
@@ -328,6 +389,7 @@ export function Debug_info_create_gfx_info(params) {
       dp_pr.SetName(`Program DP:${i}`);
       dp_pr._gfxidx = i;
       dp_pr.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
+      dp.AddToMenu(dp_pr);
 
       ui_gfx_self_state.progs.push({ // Store all self prog-vb indexes for updating its text info on every gfx buffer changes
          idx:i,
@@ -347,10 +409,9 @@ export function Debug_info_create_gfx_info(params) {
             
             // Create more info to display
             const infomesh = new Widget_Dynamic_Text_Mesh('isPrivate:', `${vb.isPrivate}`, [0, 0, 0], 4, YELLOW_240_220_10, GREEN_140_240_10, .4);
-            // infomesh.CreateNewText('| area: x:0000, y:0000', fontsize, GREEN_140_240_10, [10, 10], .9);
             dp_vb.AddToMenu(infomesh);
-            
             dp_pr.AddToMenu(dp_vb);
+            
          }
          else {
             
@@ -368,7 +429,6 @@ export function Debug_info_create_gfx_info(params) {
 
       }
       
-      dp.AddToMenu(dp_pr);
    }
    ui_gfx_self_state.dp._gfxidx = j;
    dp.AddToMenu(ui_gfx_self_state.dp);
@@ -484,7 +544,6 @@ function Debug_info_gfx_update(params) {
 
 }
 
-
 function UpdateUiGfxSelfText(){
 
    const dp_self = ui_gfx_self_state.dp; 
@@ -503,7 +562,6 @@ function UpdateUiGfxSelfText(){
       stride+=vbidxs.length;
    }
 }
-
 
 function Temp_render(dp){
 
@@ -567,14 +625,13 @@ function Debug_info_create_mesh_info(params){
 
    // Create dropdown info for each mesh in scene
    const meshes = Scenes_get_all_scene_meshes(STATE.scene.active_idx);
-   // console.log(meshes);
    const fontsize = 4;
    
    for (let i=0; i<meshes.length; i++){
 
       const dp_mesh = new Widget_Dropdown(`${meshes[i].name}`, [0, 0, 0], [10, 10], TRANSPARENCY(GREEN_140_240_10, tr), GREY1, WHITE, [8, 3]);
       dp_mesh.SetName(`${meshes[i].name}`);
-      dp_mesh.CreateClickEvent(section.listeners.buffer);
+      // dp_mesh.CreateClickEvent(section.listeners.buffer);
 
       /**
          alreadyAdded: false
@@ -625,22 +682,7 @@ function Debug_info_create_mesh_info(params){
          idx: -1
          val: 0
        */
-      // Create more info to display
-      // id: 0
-      // idx: 0
-      // isOn: 1
-      // is_gfx_inserted: false
-      //         padding: undefined
-      // parent: undefined
-      // rootidx: 0
-      // scene_rootidx: 0
-      // sceneidx: 0
-
-      // const infomesh = new Widget_Dynamic_Text_Mesh('id:', `${meshes[i].id}`, [0, 0, 0], fontsize, YELLOW_240_220_10, GREEN_140_240_10, .4);
-      // infomesh.CreateNewText(`idx: ${meshes[i].idx}`, fontsize, GREEN_140_240_10, [10, 10], .9);
-      // infomesh.CreateNewText(`isOn: ${meshes[i].isOn}`, fontsize, GREEN_140_240_10, [10, 10], .9);
-      // infomesh.CreateNewText(`is_gfx_inserted: ${meshes[i].is_gfx_inserted}`, fontsize, GREEN_140_240_10, [10, 10], .9);
-      
+ 
       dp_mesh.AddToMenu(new Widget_Text(`id: ${meshes[i].id}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
       dp_mesh.AddToMenu(new Widget_Text(`isOn: ${meshes[i].isOn}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
       dp_mesh.AddToMenu(new Widget_Text(`is_gfx_inserted: ${meshes[i].is_gfx_inserted}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));

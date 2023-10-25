@@ -2,7 +2,7 @@
 import { GlSetAttrTime } from "../../../../Graphics/Buffers/GlBufferOps.js";
 import { Int8Buffer, Int8Buffer2, M_Buffer } from "../../../Core/Buffers.js";
 import { TimerGetGlobalTimer } from "../../../Timers/Timers.js";
-import { Listener_create_child_event, Listener_create_event, Listener_events_set_mesh_events_active, Listener_remove_event_by_idx, Listener_remove_event_by_idx2, Listener_set_event_active_by_idx } from "../../../Events/EventListeners.js";
+import { Listener_create_child_event, Listener_create_event, Listener_events_set_mesh_events_active, Listener_remove_event_by_idx, Listener_set_event_active_by_idx } from "../../../Events/EventListeners.js";
 import { CopyArr4 } from "../../../../Helpers/Math/MathOperations.js";
 import { Scenes_get_count, Scenes_update_all_gfx_starts, Scenes_get_root_meshes, Scenes_remove_mesh_from_gfx, Scenes_remove_root_mesh } from "../../../Scenes.js";
 import { Gfx_deactivate, Gfx_deactivate_recursive, Gfx_remove_geometry } from "../../../Interfaces/Gfx/GfxContext.js";
@@ -160,11 +160,12 @@ export class Mesh {
 
         // Add the type 'Mesh'
         this.type |= MESH_TYPES_DBG.MESH;
+        this.state = { mask: 0 }; // Unfortunately js cannot create a pointer for integers, so we have to wrap the mask to a class;
 
-        this.listeners = new Int8Buffer2();
-        this.listeners.Init(LISTEN_EVENT_TYPES_INDEX.SIZE, INT_NULL);
-        // this.listeners = new M_Buffer();
-        // this.listeners.Init(LISTEN_EVENT_TYPES_INDEX.SIZE);
+        // this.listeners = new Int8Buffer2();
+        // this.listeners.Init(LISTEN_EVENT_TYPES_INDEX.SIZE, INT_NULL);
+        this.listeners = new M_Buffer();
+        this.listeners.Init(LISTEN_EVENT_TYPES_INDEX.SIZE);
 
         this.eventCallbacks = new M_Buffer();
 
@@ -174,14 +175,6 @@ export class Mesh {
 
         this.timeIntervalsIdxBuffer = new Int8Buffer();
 
-        this.state = {
-            inHover: false,
-            inScale: false,
-            inDimColor: false,
-            inBrightColor: false,
-        };
-
-        this.state = { mask: 0 }; // Unfortunately js cannot create a pointer for integers, so we have to wrap the mask to a class;
 
         this.hover_margin = [0, 0];
 
@@ -366,10 +359,10 @@ export class Mesh {
 
     DeactivateGfx() {
 
-        // if (this.listeners.active_count) {
-        if (this.listeners.boundary) {
-            Listener_events_set_mesh_events_active(LISTENERS_FLAGS.ALL, this.listeners, false);
-        }
+        // if (this.listeners.boundary) {
+        //     Listener_events_set_mesh_events_active(LISTENERS_FLAGS.ALL, this.listeners, false);
+        // }
+
         Gfx_deactivate(this.gfx);
         this.is_gfx_inserted = false;
 
@@ -392,8 +385,8 @@ export class Mesh {
         if (flag) this.StateEnable(MESH_STATE.IS_HOVERABLE);
         else this.StateDisable(MESH_STATE.IS_HOVERABLE);
 
-        if (this.children.boundary)
-            Recursive_gfx_operations(this, Set_graphics_vertex_buffer_render, flag)
+        // if (this.children.boundary)
+        //     Recursive_gfx_operations(this, Set_graphics_vertex_buffer_render, flag)
 
     }
 
@@ -412,43 +405,62 @@ export class Mesh {
 
     AddEventListener(event_type, Clbk = null, params = null, parent_event=null) {
 
-
         if (event_type & LISTEN_EVENT_TYPES.CLICK_UP) {
-            if (ERROR_NULL(Clbk)) console.error('Passing null parmeters. @  CreateListenEvent(), Mesh.js')
 
             // Case we accidentaly re-creating the same event(Avoiding duplicate events in the EventListeners buffer).
-            if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] !== INT_NULL) alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js')
+            // /*DEBUG*/if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] && this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK].idx !== INT_NULL) 
+            //     alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js');
 
-            if (parent_event) {
-                const idx = Listener_create_child_event(LISTEN_EVENT_TYPES_INDEX.CLICK, [1, parent_event[1]], Clbk, this, params)
-                this.listeners.AddAtIndex(LISTEN_EVENT_TYPES_INDEX.CLICK, idx);
-                this.StateEnable(MESH_STATE.IS_CLICKABLE);
+                const click_idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
+                
+                if (parent_event && parent_event[click_idx]) {
+                    // const idx = Listener_create_child_event(click_idx, [1, parent_event[click_idx].idx], Clbk, this, params);
+                    const idx = Listener_create_child_event(click_idx, parent_event[click_idx].idx, Clbk, this, params);
+                    this.listeners.AddAtIndex(click_idx, {idx:idx, is_child_event:true});
+                    this.StateEnable(MESH_STATE.IS_CLICKABLE);
+                }
+                
+                else {
+                    const idx = Listener_create_event(click_idx, Clbk, this, params);
+                    this.listeners.AddAtIndex(click_idx, {idx:idx, is_child_event:false});
+                    this.StateEnable(MESH_STATE.IS_CLICKABLE);
+                }
+                
             }
+            else if (event_type & LISTEN_EVENT_TYPES.HOVER) {
+                // Case we accidentaly re-creating the same event(Avoiding duplicate events in the EventListeners buffer).
+                // /*DEBUG*/if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER] && this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER].idx !== INT_NULL) 
+                // alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js')
 
-            else {
-                const idx = Listener_create_event(LISTEN_EVENT_TYPES_INDEX.CLICK, Clbk, this, params);
-                this.listeners.AddAtIndex(LISTEN_EVENT_TYPES_INDEX.CLICK, idx);
-                this.StateEnable(MESH_STATE.IS_CLICKABLE);
+                const hover_idx = LISTEN_EVENT_TYPES_INDEX.HOVER;
+                
+                if (parent_event && parent_event[hover_idx]) {
+                    const idx = Listener_create_child_event(hover_idx, parent_event[hover_idx].idx, Clbk, this, params);
+                    this.listeners.AddAtIndex(hover_idx, {idx:idx, is_child_event:true});
+                    this.StateEnable(MESH_STATE.IS_HOVERABLE);
+                }
+                
+                else {
+                    const idx = Listener_create_event(hover_idx, Clbk, this, params);
+                    this.listeners.AddAtIndex(hover_idx, {idx:idx, is_child_event:false});
+                    this.StateEnable(MESH_STATE.IS_HOVERABLE);
+                }
+                
+                // const idx = Listener_create_event(hover_idx, null, this, null);
+                // this.listeners.AddAtIndex(hover_idx, {idx:idx, is_child_event:false});
+                // this.StateEnable(MESH_STATE.IS_HOVERABLE);
             }
-
-        }
-        else if (event_type & LISTEN_EVENT_TYPES.HOVER) {
-            // Case we accidentaly re-creating the same event(Avoiding duplicate events in the EventListeners buffer).
-            if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER] !== INT_NULL) alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js')
-
-            const idx = Listener_create_event(LISTEN_EVENT_TYPES_INDEX.HOVER, null, this, null);
-            this.listeners.AddAtIndex(LISTEN_EVENT_TYPES_INDEX.HOVER, idx);
-            this.StateEnable(MESH_STATE.IS_HOVERABLE);
-        }
-        else if (event_type & LISTEN_EVENT_TYPES.MOVE) {
-            // Case we accidentaly re-creating the same event(Avoiding duplicate events in the EventListeners buffer).
-            if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] !== INT_NULL) alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js')
-
+            else if (event_type & LISTEN_EVENT_TYPES.MOVE) {
+                // Case we accidentaly re-creating the same event(Avoiding duplicate events in the EventListeners buffer).
+                /*DEBUG*/if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] && this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK].idx !== INT_NULL) 
+                alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js')
+                
+                const click_idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
+            // We use a click event because the operation its base on the mouse click and hold
+            const idx = Listener_create_event(click_idx, Clbk, this, params);
+            this.listeners.AddAtIndex(click_idx, {idx:idx, is_child_event:false});
             // Necessary to activate in order for the mesh to be able to move by a 'Click' event
             this.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_MOVABLE | MESH_STATE.IS_CLICKABLE);
-            // We use a click event because the operation its base on the mouse click and hold
-            const idx = Listener_create_event(LISTEN_EVENT_TYPES_INDEX.CLICK, Clbk, this, params);
-            this.listeners.AddAtIndex(LISTEN_EVENT_TYPES_INDEX.CLICK, idx);
         }
     }
 
@@ -456,12 +468,12 @@ export class Mesh {
 
         for (let etype = 0; etype < this.listeners.boundary; etype++) {
 
-            if (this.listeners.buffer[etype] !== INT_NULL) { // If this type of listen event is enabled 
-
-                // console.log('Removing Event etype:', etype, this.listeners.buffer, this.name)
-                // If this.listeners.buffer[etype] is a child event, do not destroy, it will be winked by the parent's listen event destruction
-                Listener_remove_event_by_idx(etype, this.listeners.buffer[etype]);
+            if (this.listeners.buffer[etype] && !this.listeners.buffer[etype].is_child_event){
+                    
+                Listener_remove_event_by_idx(etype, this.listeners.buffer[etype].idx);
                 this.listeners.RemoveByIdx(etype);
+                // this.listeners.buffer[etype].idx = INT_NULL;
+                // this.listeners.buffer[etype].is_child_event = false;
             }
         }
     }
@@ -471,28 +483,36 @@ export class Mesh {
         if (event_type & LISTEN_EVENT_TYPES.CLICK_UP) {
 
             const idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
-            if (this.listeners.buffer[idx])
-                Listener_remove_event_by_idx(idx, this.listeners.buffer[idx]);
-            this.listeners.buffer[idx] = INT_NULL;
+            if(!this.listeners.buffer[idx].is_child_event){
+                    
+                Listener_remove_event_by_idx(idx, this.listeners.buffer[idx].idx);
+                this.listeners.RemoveByIdx(idx)
+                // this.listeners.buffer[idx].idx = INT_NULL;
+                // this.listeners.buffer[idx].is_child_event = false;
+            }
         }
         else if (event_type & LISTEN_EVENT_TYPES.HOVER) {
-
+            
             const idx = LISTEN_EVENT_TYPES_INDEX.HOVER;
-            if (this.listeners.buffer[idx])
-                Listener_remove_event_by_idx(idx, this.listeners.buffer[idx]);
-            this.listeners.buffer[idx] = INT_NULL;
+            if(!this.listeners.buffer[idx].is_child_event){
+                
+                Listener_remove_event_by_idx(idx, this.listeners.buffer[idx].idx);
+                this.listeners.RemoveByIdx(idx)
+                // this.listeners.buffer[idx].idx = INT_NULL;
+                // this.listeners.buffer[idx].is_child_event = false;
+            }
         }
     }
 
-    RecreateListenEvents() {
+    // RecreateListenEvents() {
 
-        if (this.StateCheck(MESH_STATE.IS_FAKE_HOVERABLE | MESH_STATE.IS_HOVERABLE))
-            this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-        if (this.StateCheck(MESH_STATE.IS_FAKE_CLICKABLE) && (this.StateCheck(MESH_STATE.IS_CLICKABLE) === 0))
-            this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnFakeClick)
-        else if (this.StateCheck(MESH_STATE.IS_CLICKABLE))
-            this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick)
-    }
+    //     if (this.StateCheck(MESH_STATE.IS_FAKE_HOVERABLE | MESH_STATE.IS_HOVERABLE))
+    //         this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+    //     if (this.StateCheck(MESH_STATE.IS_FAKE_CLICKABLE) && (this.StateCheck(MESH_STATE.IS_CLICKABLE) === 0))
+    //         this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnFakeClick)
+    //     else if (this.StateCheck(MESH_STATE.IS_CLICKABLE))
+    //         this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick)
+    // }
 
     CreateEventCallback(params = null) {
 
@@ -515,19 +535,19 @@ export class Mesh {
 
     /*******************************************************************************************************************************************************/
     // Setters-Getters
-    SetColor(col) { this.mat.SetColor(col, this.gfx) }
-    SetDefaultColor() { this.mat.SetDefaultColor(this.gfx) }
-    SetDefaultPosXY() { this.geom.SetDefaultPosXY(this.gfx) }
-    SetColorRGB(col) { this.mat.SetColorRGB(col, this.gfx) }
-    SetColorAlpha(alpha) { this.mat.SetColorAlpha(alpha, this.gfx) }
+    SetColor(col) { this.mat.SetColor(col, this.gfx); }
+    SetDefaultColor() { this.mat.SetDefaultColor(this.gfx); }
+    SetDefaultPosXY() { this.geom.SetDefaultPosXY(this.gfx); }
+    SetColorRGB(col) { this.mat.SetColorRGB(col, this.gfx); }
+    SetColorAlpha(alpha) { this.mat.SetColorAlpha(alpha, this.gfx); }
     SetPosXYZ(pos) { this.geom.SetPosXYZ(pos, this.gfx); }
     SetPosXY(pos) { this.geom.SetPosXY(pos, this.gfx); }
     SetPosX(x) { this.geom.SetPosX(x, this.gfx); }
     SetPosY(y) { this.geom.SetPosY(y, this.gfx); }
-    UpdatePosXY() { this.geom.UpdatePosXY(this.gfx) }
-    UpdatePosXYZ() { this.geom.UpdatePosXYZ(this.gfx) }
-    UpdateDim() { this.geom.UpdateDim(this.gfx) }
-    UpdateZindex(z) { this.geom.SetZindex(z, this.gfx) }
+    UpdatePosXY() { this.geom.UpdatePosXY(this.gfx); }
+    UpdatePosXYZ() { this.geom.UpdatePosXYZ(this.gfx); }
+    UpdateDim() { this.geom.UpdateDim(this.gfx); }
+    UpdateZindex(z) { this.geom.SetZindex(z, this.gfx); }
     SetStyle(style) { this.mat.SetStyle(style); }
     MoveXY(x, y) { this.geom.MoveXY(x, y, this.gfx); }
     MoveXYZ(pos) { this.geom.MoveXYZ(pos, this.gfx); }
@@ -620,7 +640,7 @@ export class Mesh {
         }
     }
 
-    OnFakeClick() { console.log('FAKE CLICK!'); }
+    OnFakeClick() { console.log('FAKE CLICK! : ', this.source_params.name); }
 
     /*******************************************************************************************************************************************************
     /** Debug */
@@ -647,32 +667,34 @@ function Reconstruct_listeners_recursive(mesh, root) {
         if (child)
             Reconstruct_listeners_recursive(child, root);
 
-        if (child.StateCheck(MESH_STATE.IS_HOVERABLE)) {
+        if (child.StateCheck(MESH_STATE.IS_HOVERABLE) && child.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER] && !child.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER].is_child_event) {
 
             const type = LISTEN_EVENT_TYPES_INDEX.HOVER;
 
             // Create a Fake event for the root, if the root does not have an event (of same type)
-            if (root.listeners.buffer[type] === INT_NULL)
+            if (!root.listeners.buffer[type])
                 root.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
 
             root.StateEnable(MESH_STATE.IS_FAKE_HOVERABLE);
 
-            const evt_idx = child.listeners.buffer[type];
-            child.listeners.buffer[type] = Listener_set_event_active_by_idx(type, root, evt_idx);
+            const evt_idx = child.listeners.buffer[type].idx;
+            child.listeners.buffer[type].idx = Listener_set_event_active_by_idx(type, root, evt_idx);
+            child.listeners.buffer[type].is_child_event = true;
             // console.log('Remove Hover event:', type, child.name, child.listeners.buffer, ' parent:', mesh.name, ' root:', root.name)
         }
-        if (child.StateCheck(MESH_STATE.IS_CLICKABLE)) {
+        if (child.StateCheck(MESH_STATE.IS_CLICKABLE) && child.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] && !child.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK].is_child_event) {
 
             const type = LISTEN_EVENT_TYPES_INDEX.CLICK;
 
             // Create a Fake event for the root, if the root does not have an event (of same type)
-            if (root.listeners.buffer[type] === INT_NULL)
+            if (!root.listeners.buffer[type])
                 root.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, root.OnFakeClick);
 
             root.StateEnable(MESH_STATE.IS_FAKE_CLICKABLE);
 
-            const evt_idx = child.listeners.buffer[type];
-            child.listeners.buffer[type] = Listener_set_event_active_by_idx(type, root, evt_idx)
+            const evt_idx = child.listeners.buffer[type].idx;
+            child.listeners.buffer[type].idx = Listener_set_event_active_by_idx(type, root, evt_idx);
+            child.listeners.buffer[type].is_child_event = true;
             // console.log('Remove click event:', type, child.name, child.listeners.buffer, ' parent:', mesh.name, ' root:', root.name)
         }
     }
@@ -682,7 +704,7 @@ function Gather_all_listen_events_recursive(mesh, event_type, idx = 0, gathered)
 
     // Gather for current mesh
     if (mesh.listeners.active_count) {
-        gathered.idxs[idx] = mesh.listeners.buffer[event_type]
+        gathered.idxs[idx] = mesh.listeners.buffer[event_type].idx;
     }
 
     // Gather for meshh's children
@@ -713,7 +735,7 @@ function Gather_all_listen_events_recursive_to_parent(mesh, event_type, idx = 0)
     }
 
     if (mesh.listeners.active_count) {
-        gathered.idxs[idx] = mesh.listeners.buffer[event_type]
+        gathered.idxs[idx] = mesh.listeners.buffer[event_type].idx;
     }
 
     return gathered;
@@ -796,18 +818,18 @@ function Gather_all_listen_events_recursive_to_parent(mesh, event_type, idx = 0)
 // }
 
 /** */
-// export function Recursive_gfx_operations(_mesh, Clbk, params) {
+export function Recursive_gfx_operations(_mesh, Clbk, params) {
 
-//     const children = _mesh.children;
-//     for (let i = 0; i < children.boundary; i++) {
+    const children = _mesh.children;
+    for (let i = 0; i < children.boundary; i++) {
 
-//         const mesh = children.buffer[i];
-//         if (mesh.children.active_count)
-//             Recursive_gfx_operations(mesh, Clbk, params)
+        const mesh = children.buffer[i];
+        if (mesh.children.active_count)
+            Recursive_gfx_operations(mesh, Clbk, params)
 
-//         Clbk(mesh, params);
-//     }
-// }
+        Clbk(mesh, params);
+    }
+}
 
 
 function Set_graphics_vertex_buffer_render(mesh, flag) {
@@ -855,8 +877,9 @@ function Mesh_print_all_mesh_listeners_recursive(meshes) {
             if (mesh.children)
                 Mesh_print_all_mesh_listeners_recursive(mesh.children);
 
-            if (mesh.listeners.buffer[0] !== INT_NULL || mesh.listeners.buffer[1] !== INT_NULL)
-                console.log(mesh.id, mesh.name, mesh.listeners.buffer)
+            // if (mesh.listeners.buffer[0].idx !== INT_NULL || mesh.listeners.buffer[1].idx !== INT_NULL)
+            if (mesh.listeners.buffer)
+                console.log(`id:${mesh.id} name:${mesh.name} boundary:${mesh.listeners.boundary}`, mesh.listeners.buffer);
         }
     }
 }

@@ -49,6 +49,17 @@ redrawing the meshes to it's self
 
 --------------------------------------------------- TODO
 
+.IMPORTANT!: Ineficiency problem with the creation ao too many private vertex buffers, considering the case of Dropdown creation.
+  Currently we use separate vertex buffers(private gfx) for each and every mesh of a dropdown
+  that needs to be drawn/Undrawn on a a basis of activated/deactivated dp's menu.
+  This is rather ineficient, if for example we need to have a huge list of dropdowns with their own dropdowns inside.
+  We are talking about tens even hundrents of vertex buffers created.
+  In addition all these vertex buffers remain as private-Unused in the buffer of GfxContext class, even if all dropdowns are closed.
+  SOLUTION: The only reasonable solution is to implement a system where SOME menus and its items, selected not randomly but by reasoning,
+  being stored at one vertx generic buffer and for stop rendering them is done by setting the alpha value of the meshes color to 0.
+  Then when the vertex buffer is empty, empty by the definition of all its alpha color attributes are 0, we can give back the 
+  vertex buffer as unused for further use.  
+
 . Batch activate/deactivate buffers. Use an indexed  by prog and vb buffer.
   Example: StoreForUpdate(arr); arr = prog[progidx].vb[vbidx]
            StoreForUpdate(arr){

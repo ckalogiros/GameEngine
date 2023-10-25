@@ -243,7 +243,8 @@ export class Widget_Slider extends Rect {
 
       const handle = this.children.buffer[0];
 
-      if(handle.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] === INT_NULL)
+      // if(handle.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK].idx === INT_NULL)
+      if(handle.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK])
          this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick, parent_event);
 
    }

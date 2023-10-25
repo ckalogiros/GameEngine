@@ -40,13 +40,11 @@ export class Rect extends Mesh {
 
    AddToGfx() {
 
-      // this.geom.AddToGraphicsBuffer(this.sid, this.gfx, this.name);
-      // const start = this.mat.AddToGraphicsBuffer(this.sid, this.gfx);
       this.gfx.vb.start = Gfx_add_geom_mat_to_vb(this.sid, this.gfx, this.geom, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name);
 
-      if (this.listeners.active_count) {
-         Listener_events_set_mesh_events_active(LISTENERS_FLAGS.ALL, this.listeners, true);
-      }
+      // if (this.listeners.active_count) {
+      //    Listener_events_set_mesh_events_active(LISTENERS_FLAGS.ALL, this.listeners, true);
+      // }
 
       const params = {
          progidx: this.gfx.prog.idx,

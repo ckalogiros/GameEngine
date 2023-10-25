@@ -153,8 +153,8 @@ export class Scene {
         }
         { /**DEBUG */
             const mesh = this.gfx.buffer[progidx].vb.buffer[vbidx].mesh.buffer[scene_gfx_mesh_idx];
-            console.log(`Removing mesh: prog:${progidx} vb:${vbidx} idx:${scene_gfx_mesh_idx}`)
-            if(mesh) console.log(`name:${mesh.name}`)
+            // console.log(`Removing mesh: prog:${progidx} vb:${vbidx} idx:${scene_gfx_mesh_idx}`)
+            // if(mesh) console.log(`name:${mesh.name}`)
         }
         this.gfx.buffer[progidx].vb.buffer[vbidx].mesh.RemoveByIdx(scene_gfx_mesh_idx);
         return false;
@@ -278,11 +278,8 @@ export class Scene {
         else{ // Mesh does not
 
             mesh.gfx.scene_gfx_mesh_idx = this.gfx.buffer[progidx].vb.buffer[vbidx].mesh.Add(mesh);
-            { /**DEBUG */
-            console.log(`Adding mesh: prog:${progidx} vb:${vbidx} name:${mesh.name} idx:${mesh.scene_gfx_mesh_idx}`)
+            // /**DEBUG */console.log(`Adding mesh: prog:${progidx} vb:${vbidx} name:${mesh.name} idx:${mesh.scene_gfx_mesh_idx}`)
         }
-
-    }
         // console.log('--- Added:', mesh.name, ' prog:', progidx, ' vb:', vbidx, ' idx:', mesh.gfx.scene_gfx_mesh_idx)
 
     }

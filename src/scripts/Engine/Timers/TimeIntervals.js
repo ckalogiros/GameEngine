@@ -156,6 +156,7 @@ class TimeIntervals {
 
       this.#Destroy(idx);
       this.count--;
+      if(this.count < 0) console.error('Time interval index is:', this.count)
    }
 
    #Destroy(idx){

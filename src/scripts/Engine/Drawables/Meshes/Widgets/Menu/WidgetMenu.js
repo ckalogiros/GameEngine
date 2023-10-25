@@ -319,9 +319,9 @@ export class Widget_Minimize extends Widget_Button {
 
                { // Store widget's children events(for recovering widgets children events on maximize)
                   const click_event_type = LISTEN_EVENT_TYPES_INDEX.CLICK;
-                  const click_event_idx = root.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK];
+                  const click_event_idx = root.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK].idx;
                   const hover_event_type = LISTEN_EVENT_TYPES_INDEX.HOVER;
-                  const hover_event_idx = root.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER];
+                  const hover_event_idx = root.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER].idx;
 
                   minim_mesh.stored_children_events[click_event_type] = Listeners_copy_event_children_buffer(click_event_type, click_event_idx);
                   // Delete all children events of the root's EventListener.
@@ -375,9 +375,9 @@ export class Widget_Minimize extends Widget_Button {
 
                { // Recover widget's events
                   const click_event_type = LISTEN_EVENT_TYPES_INDEX.CLICK;
-                  const click_event_idx = root.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK];
+                  const click_event_idx = root.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK].idx;
                   const hover_event_type = LISTEN_EVENT_TYPES_INDEX.HOVER;
-                  const hover_event_idx = root.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER];
+                  const hover_event_idx = root.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER].idx;
                   Listener_recover_children_buffer(click_event_type, click_event_idx, minim_mesh.stored_children_events[click_event_type]);
                   Listener_recover_children_buffer(hover_event_type, hover_event_idx, minim_mesh.stored_children_events[hover_event_type]);
                }
