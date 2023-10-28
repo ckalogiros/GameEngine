@@ -41,7 +41,6 @@ export class Widget_Slider extends Rect {
 
    constructor(pos, dim, col = TRANSPARENCY(GREY1, .6), hover_margin = [0, 0]) {
 
-
       // Calculate the bar's and handle's horizontal pading.
       const ratio = dim[0] / dim[1];
       const pad = [dim[0] * 0.5, dim[1] / 2.8];
@@ -255,10 +254,27 @@ export class Widget_Slider extends Rect {
 
    }
 
+   
+   /*******************************************************************************************************************************************************/
+	// Transformations
+	Move(x, y) {
+
+      this.geom.MoveXY(x, y, this.gfx);
+      
+      const bar = this.children.buffer[BAR_IDX];
+		bar.geom.MoveXY(x, y, bar.gfx);
+      const name_text = this.text_mesh;
+		name_text.geom.MoveXY(x, y, name_text.gfx);
+      const handle = bar.children.buffer[0];
+		handle.geom.MoveXY(x, y, handle.gfx);
+      const value_text = bar.children.buffer[1];
+		value_text.geom.MoveXY(x, y, value_text.gfx);
+
+	}
+
 
    /*******************************************************************************************************************************************************/
    // Setters-Getters
-
    /** Return type: Array. Returns an array of all widgets meshes */
    GetAllMeshes(parent_meshes_buf) {
 
@@ -299,7 +315,8 @@ export class Widget_Slider extends Rect {
       name.MoveXYZ(dif_pos);
    }
 
-   /** Private Methods */
+   /*******************************************************************************************************************************************************/
+   // Private Methods 
    #CalculateBarArea(_pos, _dim, pad) {
 
       const dim = [_dim[0] - (pad[0] * 2), _dim[1] - (pad[1] * 2)];
@@ -311,6 +328,7 @@ export class Widget_Slider extends Rect {
          dim, dim,
       };
    }
+
    #CalculateHandleArea(_pos, _dim, pad) {
 
       const dim = [0, _dim[1] - (pad[1] * 2)];
@@ -323,6 +341,8 @@ export class Widget_Slider extends Rect {
       };
    }
 
+      /*******************************************************************************************************************************************************/
+   // Events
    // TODO!!!: the widget is passed in 'params.target_params.target_mesh', so REMOVE the 'params.source_params' tha has the slider.area_mesh is not needed. 
    OnClick(params) {
 
@@ -376,6 +396,7 @@ export class Widget_Slider extends Rect {
       }
       return false;
    }
+   
 }
 
 function Slider_move_event(params) {

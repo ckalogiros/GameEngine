@@ -7,8 +7,6 @@ import { Gl_create_program } from '../GlProgram.js'
 import { Gl_progs_get_ib_byidx, Gl_progs_get_prog_byidx, Gl_progs_get, Gl_progs_get_vb_byidx } from '../GlProgram.js';
 import { Renderqueue_get } from '../../Engine/Renderers/Renderer/RenderQueue.js';
 import { M_Buffer } from '../../Engine/Core/Buffers.js';
-// import { TimerGetGlobalTimerCycle } from '../../Engine/Timers/Timers.js';
-import { Info_listener_dispatch_event } from '../../Engine/Drawables/DebugInfo/InfoListeners.js';
 
 
 class VertexBuffer {
@@ -539,6 +537,11 @@ export function GlGenerateContext(sid, sceneidx, GL_BUFFER, addToSpecificGlBuffe
 }
 
 export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_name){
+
+    /**DEBUG */ if(geom.pos[0] === undefined){ console.error('Pos is UNDEFINED. mesh:', mesh_name)}
+    /**DEBUG */ if(geom.dim[0] === undefined){ console.error('Dim is UNDEFINED. mesh:', mesh_name)}
+    /**DEBUG */ if(mat.col[0] === undefined){ console.error('Col is UNDEFINED. mesh:', mesh_name)}
+    /**DEBUG */ if(mat.style[0] === undefined){ console.error('Style is UNDEFINED. mesh:', mesh_name)}
 
     const progIdx = gfx.prog.idx;
     const vbIdx = gfx.vb.idx;

@@ -38,6 +38,7 @@ import { Gl_progs_get } from '../Graphics/GlProgram.js';
 import { Input_create_user_input_listeners } from '../Engine/Controls/Input/Input.js';
 import { Debug_info_create_ui_performance_timers, Debug_info_ui_performance } from '../Engine/Drawables/DebugInfo/DebugInfoUi.js';
 import { Destroy_mesh } from '../Engine/Global/Functions.js';
+import { Widget_Scroller } from '../Engine/Drawables/Meshes/Widgets/WidgetScroller.js';
 
 
 // var osu = require('node-os-utils')
@@ -83,7 +84,7 @@ export function AppInit() {
      * Create meshes
      */
 
-    Debug_info_ui_performance(scene);
+    // Debug_info_ui_performance(scene);
 
 
     // const label = CreateLabel(scene);
@@ -96,14 +97,16 @@ export function AppInit() {
 
     // CreateDropDownWidgetWithWidgetsInside(scene)
     
-    // CreateSlider(scene);
-    // CreateSliderWithMenuBar(scene)
+    CreateSlider(scene);
+    CreateSliderWithMenuBar(scene)
 
     // CreatDynamicText(scene)
     // CreatDynamicTextSectioned(scene)
     
     // CreatSectionedMixWidgets(scene)
     // CreateSectionSectioned(scene)
+
+    // CreateScroller(scene);
 
     // Help(scene)
     // CreateSectionedWidgets(scene)
@@ -115,8 +118,8 @@ export function AppInit() {
     // const section = MeshInfo(scene)
     // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
 
-    // const section = MeshInfo(scene)
-    // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
+    const section = MeshInfo(scene)
+    TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
 
     // Listeners_debug_info_create(scene);
     // Scenes_debug_info_create(scene);
@@ -209,7 +212,8 @@ function CreateButton(scene) {
     btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
     btn.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
     btn.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE, { style: [6, 6, 3] })
-    scene.AddWidget(btn, GFX.PRIVATE);
+    // scene.AddWidget(btn, GFX.PRIVATE);
+    scene.AddWidget(btn);
     btn.text_mesh.SetColorRGB(BLUE_10_120_220);
 
     btn.Align(ALIGN.LEFT|ALIGN.TOP, [0, 0]);
@@ -427,27 +431,28 @@ function CreatSectionedMixWidgets(scene){
     section.Calc();
 }
 
-
 function CreateSlider(scene) {
 
     const slider = new Widget_Slider([200, 300, 0], [150, 10]);
     slider.CreateMoveSliderEvent();
+    // slider.CreateMoveHandleEvent(slider.listeners.buffer)
     scene.AddWidget(slider);
-
+    
 }
 
 function CreateSliderWithMenuBar(scene) {
-
+    
     const section = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREY1, .9))
     section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
     section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-
+    
     const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
     menu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
     menu.AddCloseButton(section, 'x');
     section.AddItem(menu);
     
     const slider = new Widget_Slider([200, 100, 0], [150, 10]);
+    // slider.CreateMoveSliderEvent();
     slider.CreateMoveHandleEvent(section.listeners.buffer)
     section.AddItem(slider);
     
@@ -598,6 +603,40 @@ function CreateSectionSectioned(scene) {
 
 }
 
+function CreateScroller(scene) {
+
+    const fontsize = 4.3;
+
+    // const text = new Widget_Dynamic_Text_Mesh('Hi', 'this is tex', [300, 300, 0], fontsize, WHITE, WHITE, .4);
+    const section = new Section(SECTION.VERTICAL, [10, 10], [280, 650, 0], [0, 0], TRANSPARENCY(GREY1, .6));
+    
+    for (let i = 0; i < 3; i++) {
+        
+        const s = new Section(SECTION.VERTICAL, [6, 3], [280, 650, 0], [0, 0], TRANSPARENCY(GREEN_140_240_10, .6));
+        s.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+        s.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+
+        const label = new Widget_Label('Label', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3])
+        // label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+        // label.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
+        
+        s.AddItem(label);
+        section.AddItem(s);
+        // section.AddItem(label);
+    }
+    
+    section.Calc();
+    
+    // const scroller = new Widget_Scroller(section, [20, 50]);
+    const scroller = new Widget_Scroller(section);
+    scroller.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    
+    scene.AddWidget(scroller, GFX.PRIVATE);
+    Gfx_end_session(true);
+    scroller.Recalc();
+
+}
+
 function Help(scene) {
 
 
@@ -652,9 +691,9 @@ function MeshInfo(scene) {
     infomesh.CreateNewText('dim: 00000,00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('gfx: prog:0, vb:0, start:000000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
 
-    infomesh.Align_pre(infomesh, ALIGN.VERTICAL)
-    infomesh.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, infomesh.OnClick);
-    scene.AddMesh(infomesh, GFX.PRIVATE);
+    // infomesh.Align_pre(infomesh, ALIGN.VERTICAL)
+    // infomesh.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, infomesh.OnClick);
+    scene.AddWidget(infomesh, GFX.PRIVATE);
     Gfx_end_session(true);
 
     return infomesh;
@@ -667,7 +706,7 @@ function MeshInfoUpdate(params) {
 
     if (infoMesh) {
 
-        textMesh.UpdateTextFromVal(infoMesh.name);
+        textMesh.UpdateText(infoMesh.name);
 
         const gfx = (infoMesh.gfx !== null) ? `gfx: prog:${infoMesh.gfx.prog.idx}, vb:${infoMesh.gfx.vb.idx}, vb:${infoMesh.gfx.vb.start}`
             : 'null'
@@ -684,7 +723,7 @@ function MeshInfoUpdate(params) {
         for (let i = 0; i < textMesh.children.count; i++) {
 
             const childText = textMesh.children.buffer[i];
-            childText.UpdateTextFromVal(msgs[i])
+            childText.UpdateText(msgs[i])
         }
 
     }

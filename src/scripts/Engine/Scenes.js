@@ -34,6 +34,8 @@ export function UpdaterRun() {
 
             if (mesh.gfx) {
 
+                /**DEBUG */ if(!mesh.Reposition_post) {console.log('+++++++++++++++', mesh.name); break;}
+
                 // console.log('Update positions: PREV', mesh.geom.pos)
                 mesh.Reposition_post(params);
                 // console.log('Update positions:', mesh.geom.pos)
@@ -548,7 +550,6 @@ function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children,
     // if children events exist, put them in a new drop down.
     // const dropdown = new Widget_Dropdown(`${parent_discription}`, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GetRandomColor(), temp_transparency), WHITE, pad);
     const dropdown = new Widget_Dropdown(`${parent_discription}`, [200, 400, 0], [60, 20], TRANSPARENCY(BLUE_10_120_220, .7), TRANSPARENCY(GREY1, .8), WHITE, pad);
-    // dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dropdown.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
 
     for (let j = 0; j < mesh_children.boundary; j++) {
@@ -567,7 +568,6 @@ function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children,
             const gfx = mesh.gfx;
             const dp_info = `prog:${gfx.prog.idx} | vb:${gfx.vb.idx}, start:${gfx.vb.start}, count:${gfx.vb.boundary}`;
             const dp_gfx = new Widget_Dropdown(`Gfx: ${dp_info}`, [200, 400, 0], [60, 20], GREY6, TRANSPARENCY(RED, .05), WHITE, pad);
-            // dp_gfx.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dp_gfx.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
 
             const info = `prog:${gfx.prog.idx} | vb:${gfx.vb.idx}, start:${gfx.vb.start}, count:${gfx.vb.boundary}`;
@@ -578,7 +578,6 @@ function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children,
         { // Geometry info
             const dp_info = `geom: pos:${mesh.geom.pos} dim:${mesh.geom.dim}`;
             const dp = new Widget_Dropdown(dp_info, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GREY1, 1), WHITE, pad);
-            // dp.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dp.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
             const info = `defPos:${mesh.geom.defPos} | defDim:${mesh.geom.defDim}, numFaces:${mesh.geom.num_face}`;
             const gfx_text = new Widget_Text(info, [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, TRANSPARENCY(GREEN_140_240_10, 1));
@@ -588,7 +587,6 @@ function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children,
         }
         { // Miscelaneus info
             const dp = new Widget_Dropdown('Misc', [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GREY1, 1), WHITE, pad);
-            // dp.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dp.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
             {// Children buffer
                 // const info = `children:${mesh.children.buffer}`;
@@ -621,10 +619,6 @@ export function Scenes_debug_info_create(scene) {
 
     // const dropdown = new Widget_Dropdown('Scene Meshes Dropdown Section Panel', ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GetRandomColor(), temp_transparency), WHITE, pad);
     const dropdown = new Widget_Dropdown('Scene Meshes Dropdown Section Panel', [600, 20, 0], [60, 20], GREY1, TRANSPARENCY(GREY7, temp_transparency), WHITE, pad);
-    // dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dropdown.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-    // dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, dropdown.SetOnMove);
-    // Drop_down_set_root(dropdown, dropdown);
-
 
     for (let i = 0; i < _scenes.boundary; i++) {
 
@@ -633,7 +627,6 @@ export function Scenes_debug_info_create(scene) {
 
         // const drop_down_mesh = new Widget_Dropdown(`${scene.name}`, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GetRandomColor(), temp_transparency), WHITE, pad);
         const drop_down_mesh = new Widget_Dropdown(`${scene.name}`, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(BLUE, temp_transparency), WHITE, pad);
-        // drop_down_mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down_mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
         const meshes_buffer = scene.children;
 
@@ -655,15 +648,9 @@ export function Scenes_debug_info_create(scene) {
         dropdown.AddToMenu(drop_down_mesh)
     }
 
-    // const info_event_type = INFO_LISTEN_EVENT_TYPE.ALL_MESHES;
-    // Info_listener_create_event(info_event_type, Scenes_debug_info_update, dropdown, null)
-
-
     scene.AddMesh(dropdown);
     dropdown.Init();
-    // dropdown.Reconstruct_listeners_recursive();
     dropdown.Calc();
-    // Drop_down_set_root_for_debug(dropdown);
     Drop_down_set_root(dropdown, dropdown);
 }
 

@@ -216,6 +216,14 @@ export class Widget_Dropdown extends Section {
 
    /*******************************************************************************************************************************************************/
    // Events
+   
+   CreateHoverEvent() {
+
+      const btn = this.children.buffer[0];
+      btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+      btn.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+
+   }
 
    CreateClickEvent(parent_event) {
 
@@ -227,13 +235,6 @@ export class Widget_Dropdown extends Section {
 
       // if (!btn.listeners.active_count) 
       btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick, params, parent_event);
-   }
-   CreateHoverEvent() {
-
-      const btn = this.children.buffer[0];
-      btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-      btn.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-
    }
 
    RemoveAllListenersFromDpMenuItems(dp_menu) { // Mainly used to destroy listen events of any deactivated menus that have 'isActive=fale' listen events.
@@ -292,7 +293,7 @@ export class Widget_Dropdown extends Section {
       const dropdown_mesh = params.target_params.params.drop_down;
       /*DEBUG*/if (dropdown_mesh.rootidx === INT_NULL) {
          alert('Root for dropdown must be set. ', dropdown_mesh.name);
-         // return;
+         return;
       }
 
       const menu = params.target_params.params.menu;

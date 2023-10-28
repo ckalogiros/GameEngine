@@ -32,7 +32,6 @@ export class Gfx_Pool extends M_Buffer {
 
          const gfx = GlGenerateContext(sid, sceneidx, FLAGS, NO_SPECIFIC_GL_BUFFER, mesh_count);
          gfx.gfx_ctx.idx = this.#StoreGfx(gfx);
-         // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.CREATE_PROG, {added_gfx:this.buffer[gfx.gfx_ctx.idx]});
          return gfx;
       }
       else { // ... case specific or any gfx buffer is acceptable ...
@@ -44,14 +43,12 @@ export class Gfx_Pool extends M_Buffer {
             if (found) {
 
                const gfx = GlGenerateContext(sid, sceneidx, GFX.SPECIFIC, found.vbidx, mesh_count);
-               // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB, {added_gfx:this.buffer[gfx.gfx_ctx.idx]});
                return gfx;
             }
             else { // ... else if pool didn't find any buffer, create a new one ...
 
                const gfx = GlGenerateContext(sid, sceneidx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh_count);
                gfx.gfx_ctx.idx = this.#StoreGfx(gfx, FLAGS & GFX.PRIVATE);
-               // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.CREATE_PROG, {added_gfx:this.buffer[gfx.gfx_ctx.idx]});
                return gfx;
             }
          }
@@ -67,7 +64,6 @@ export class Gfx_Pool extends M_Buffer {
                
                const gfx = GlGenerateContext(sid, sceneidx, GFX.SPECIFIC, gfx_idx.vbidx, mesh_count);
                gfx.gfx_ctx.idx = this.#StoreGfx(gfx);
-               // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.CREATE_PROG, {added_gfx:this.buffer[gfx.gfx_ctx.idx]});
                return gfx;
             }
             /*DEBUG:Wrong use of gfxidx.*/
@@ -99,7 +95,6 @@ export class Gfx_Pool extends M_Buffer {
                const gfx = GlGenerateContext(sid, sceneidx, GFX.NEW, NO_SPECIFIC_GL_BUFFER, mesh_count);
                gfx.gfx_ctx.idx = this.#StoreGfx(gfx, FLAGS & GFX.PRIVATE);
                gfx.gfx_ctx.sessionId = _sessionId; // MAYBE BUG. Better to extract sessionId from 'this.buffer[gfx.gfx_ctx.idx].sessionId'
-               // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.CREATE_PROG, {added_gfx:this.buffer[gfx.gfx_ctx.idx]});
                return gfx;
             }
          }
@@ -168,10 +163,6 @@ export class Gfx_Pool extends M_Buffer {
          const idx = this.#Store(gfx.prog.idx, gfx.vb.idx, gfx.sceneidx, true, isPrivate);
          return idx;
       }
-
-      // Create an ui-info-gfx-update dispatch, since the prog and vb buffer exist.
-      // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB, {added_gfx:this.buffer[gfx.gfx_ctx.idx]});
-
    }
 
    /** This function is called only if progidx and vbidx have not been added. i.e. Does not run for duplicates  */
@@ -193,18 +184,6 @@ export class Gfx_Pool extends M_Buffer {
          this.session.push(idx);
          this.sessionId = _sessionId; // It remains the same id until SessionEnd() is called by the caller.
       }
-
-      /**
-         const obj = {
-         progidx: progidx,
-         vbidx: vbidx,
-         sceneidx: sceneidx,
-         isActive: (isPrivate > 0) ? false : true,
-         isPrivate: (isPrivate > 0) ? true : false,
-         sessionId:  INT_NULL,
-      }
-       */
-      // Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX, {added_gfx:obj});
 
       return idx;
    }

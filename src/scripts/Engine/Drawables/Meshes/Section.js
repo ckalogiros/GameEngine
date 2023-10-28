@@ -58,7 +58,7 @@ export class Section extends Rect {
    AddItem(mesh, options) {
 
       this.options |= options;
-      this.AddChild(mesh);
+      const idx = this.AddChild(mesh);
 
       if (mesh.type & MESH_TYPES_DBG.SECTION_MESH) { // Handle other sections
 
@@ -76,6 +76,8 @@ export class Section extends Rect {
          // CopyArr3(mesh.geom.pos, this.geom.pos);
          // CopyArr2(this.geom.pos, mesh.geom.pos);
       }
+
+      return idx;
    }
 
    Calc(options = SECTION.INHERIT) {
@@ -240,7 +242,7 @@ export class Section extends Rect {
              * The Move event runs only when the mesh is GRABED. That means that the timeInterval 
              * is created and destroyed upon 'onClickDown' and 'onClickUp' respectively.
              */
-            const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, Section_move_section, section);
+            const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, Section_on_move_section, section);
             section.timeIntervalsIdxBuffer.Add(idx);
 
             if (section.StateCheck(MESH_STATE.IS_GRABABLE)) {
@@ -268,15 +270,41 @@ export class Section extends Rect {
 
    //       return;
    //    }
+   //    console.error('CALING SECTIONS\'S OnMove FUNCTION')
 
    //    // Move 
    //    const mouse_pos = MouseGetPosDif();
    //    section.geom.MoveXY(mouse_pos.x, -mouse_pos.y, section.gfx);
 
    // }
+
+   /*******************************************************************************************************************************************************/
+   // Transformations
+   Move(x, y){ Section_move_children_recursive(x, y, this); }
 }
 
-function Section_move_section(params) {
+function Section_move_children_recursive(x, y, mesh){
+
+   for (let i=0; i<mesh.children.boundary; i++){
+
+      const child = mesh.children.buffer[i];
+      
+      if (child.type & MESH_TYPES_DBG.SECTION_MESH) { // Case anothe section, run recursively
+         const params = { params: child, };
+         Section_move_children_recursive(x, y, child);
+      }
+      else{ // To avoid moving section twice (as a child and as a section from recursion)
+
+         /**DEBUG*/ if(!child.Move) { console.error('OnMove function is missing. @ Section.Move(), mesh:', child.name, child); return;}
+         child.Move(x, y);
+      }
+   }
+   
+   mesh.geom.MoveXY(x, y, mesh.gfx);
+
+}
+
+function Section_on_move_section(params) {
    /**
     * The function is called by the timeInterval.
     * The timeInterval has been set by the 'OnClick' event.
@@ -307,14 +335,16 @@ function Section_move_section(params) {
       const child = section.children.buffer[i];
       if (child) { // Check for null children element
 
-         if (child.type & MESH_TYPES_DBG.SECTION_MESH) { // Case anothe section, run recursively
+         if (child.type & MESH_TYPES_DBG.SECTION_MESH) { // Case another section, run recursively
             const params = { params: child, };
-            Section_move_section(params);
+            Section_on_move_section(params);
          }
          else{ // To avoid moving section twice (as a child and as a section from recursion)
 
-            const params = { params: child, };
-            child.OnMove(params);
+            /**DEBUG*/ if(!child.Move) { 
+               console.error('OnMove function is missing. @ Section.Move(), mesh:', child.name, child); 
+               return;}
+            child.Move(mouse_pos.x, -mouse_pos.y);
          }
 
       }
@@ -359,6 +389,7 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
       const mesh = parent.children.buffer[i];
       let continue_recur = true;
       let opt = options
+      // console.log('[', mesh.name, ']')
 
       if (options & SECTION.INHERIT) opt = parent.options
 
@@ -377,7 +408,9 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
             const pos_dif = [new_pos[0] - mesh.GetCenterPosX(), new_pos[1] - mesh.GetCenterPosY(), new_pos[2] + 1];
 
             // console.log(`name:${mesh.name} meshpos:${mesh.geom.pos} new:${new_pos} dif:${pos_dif}`)
-            UpdaterAdd(mesh, 0, null, pos_dif);
+            // UpdaterAdd(mesh, 0, null, pos_dif);
+            if(mesh.gfx)
+               mesh.Reposition_post(pos_dif);
             // if(!mesh.gfx) UpdaterAdd(mesh, 0, null, pos_dif);
             // else mesh.Reposition_post(pos_dif);
             // console.log('pos_dif:', pos_dif, mesh.geom.pos)

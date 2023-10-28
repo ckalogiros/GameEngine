@@ -3,7 +3,6 @@
 import { Intersection_point_rect } from "../Drawables/Operations/Collisions.js";
 import { MouseGetPos } from "../Controls/Input/Mouse.js";
 import { M_Buffer } from "../Core/Buffers.js";
-import { Info_listener_dispatch_event } from "../Drawables/DebugInfo/InfoListeners.js";
 import { Drop_down_set_root, Widget_Dropdown } from "../Drawables/Meshes/Widgets/Menu/Widget_Dropdown.js";
 import { Widget_Text } from "../Drawables/Meshes/Widgets/WidgetText.js";
 import { _pt5, _pt6 } from "../Timers/PerformanceTimers.js";
@@ -592,7 +591,6 @@ export function Listeners_debug_info_create(scene){
    const dp_btn_pad = [10, 2]
    const dropdown = new Widget_Dropdown('Listeners Dropdown Section Panel', [300, 20, 0], [60, 20], GREY1, TRANSPARENCY(GREY5, .8), WHITE, dp_btn_pad);
    dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dropdown.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-   // dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, dropdown.SetOnMove);
 
    for(let i=0; i<_listener.event_type.length; i++){
        

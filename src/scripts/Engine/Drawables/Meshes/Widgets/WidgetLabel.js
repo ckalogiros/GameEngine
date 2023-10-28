@@ -6,7 +6,7 @@ import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../Operations/Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
-import { Gfx_deactivate, Gfx_generate_context } from "../../../Interfaces/Gfx/GfxContext.js";
+import { Gfx_generate_context } from "../../../Interfaces/Gfx/GfxContext.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { Scenes_remove_root_mesh, Scenes_store_gfx_to_buffer } from "../../../Scenes.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals.js";
@@ -14,7 +14,6 @@ import { MESH_ENABLE } from "../Base/Mesh.js";
 import { Rect } from "../Rect_Mesh.js";
 import { Text_Mesh } from "../Text_Mesh.js";
 import { Align } from "../../Operations/Alignment.js";
-import { Info_listener_dispatch_event } from "../../DebugInfo/InfoListeners.js";
 
 
 
@@ -171,6 +170,16 @@ export class Widget_Label extends Rect {
         this.MoveXYZ(dif_pos)
         this.text_mesh.MoveXYZ(dif_pos)
     }
+
+	/*******************************************************************************************************************************************************/
+	// Transformations
+	Move(x, y) {
+
+		// Move 'this' text
+		this.geom.MoveXY(x, y, this.gfx);
+		this.text_mesh.geom.MoveXY(x, y, this.text_mesh.gfx);
+
+	}
 
     /*******************************************************************************************************************************************************/
     // Events

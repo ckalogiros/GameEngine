@@ -472,7 +472,7 @@ export function GlMoveXYZ(gfxInfo, wpos, num_faces = 1) {
 
     let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderinfo.attributes.offset.wposTime;
     let verts = num_faces * gfxInfo.vertsPerRect;
-    let stride = gfxInfo.attribsPerVertex - V_WPOS_COUNT;
+    const stride = gfxInfo.attribsPerVertex - V_WPOS_COUNT;
 
     while (verts) {
 

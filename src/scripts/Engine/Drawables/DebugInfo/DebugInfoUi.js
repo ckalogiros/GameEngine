@@ -373,7 +373,6 @@ export function Debug_info_create_gfx_info(params) {
    dp.SetName('InfoUi Gfx DP');
    dp.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
    dp.CreateClickEvent(section.listeners.buffer);
-   // dp.CreateClickEvent();
    Drop_down_set_root(dp, dp);
 
    ui_gfx_self_state.dp = new Widget_Dropdown(`self-gfx`, [0, 0, 0], [10, 10], TRANSPARENCY(YELLOW_240_220_10, tr), TRANSPARENCY(GREEN_140_240_10, tr), WHITE, [8, 3]);
@@ -391,10 +390,8 @@ export function Debug_info_create_gfx_info(params) {
       dp_pr.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
       dp.AddToMenu(dp_pr);
 
-      ui_gfx_self_state.progs.push({ // Store all self prog-vb indexes for updating its text info on every gfx buffer changes
-         idx:i,
-         vb:[]
-      });
+      // Store all self prog-vb indexes for updating its text info on every gfx buffer changes
+      ui_gfx_self_state.progs.push({  idx:i, vb:[], });
       
       for (j = 0; j < progs[i].vertexBufferCount; j++) {
          
@@ -408,9 +405,9 @@ export function Debug_info_create_gfx_info(params) {
             dp_vb.debug_info.data = { progidx: i, vbidx: j, };
             
             // Create more info to display
+            dp_pr.AddToMenu(dp_vb);
             const infomesh = new Widget_Dynamic_Text_Mesh('isPrivate:', `${vb.isPrivate}`, [0, 0, 0], 4, YELLOW_240_220_10, GREEN_140_240_10, .4);
             dp_vb.AddToMenu(infomesh);
-            dp_pr.AddToMenu(dp_vb);
             
          }
          else {
@@ -422,7 +419,6 @@ export function Debug_info_create_gfx_info(params) {
             dp_vb.debug_info.data = { progidx: i, vbidx: j, };
             ui_gfx_self_state.dp.AddToMenu(dp_vb);
             
-            // ui_gfx_self_state.vbidxs.push(j);
             ui_gfx_self_state.progs[i].vb.push(j); // We've just created the object for this program index and pushing the vertex buffer index.
             
          }
@@ -455,7 +451,7 @@ function Debug_info_gfx_update(params) {
    const section = params.target_params;
    const dp_ui_gfx = section.children.buffer[0]; 
    // const dp_self = dp_ui_gfx.menu.children.buffer[dp_ui_gfx.menu.children.boundary-1]; 
-   const dp_self = ui_gfx_self_state.dp; 
+   // const dp_self = ui_gfx_self_state.dp; 
    let dp_prog = null; 
    let dp_vb = null; 
    
@@ -488,8 +484,8 @@ function Debug_info_gfx_update(params) {
 
    if(!dp_prog) console.error('dropdown program not found')
    
-   /*DEBUG*/const progs = Gl_progs_get();
    const vb = Gl_progs_get_vb_byidx(progidx, vbidx);
+   // /*DEBUG*/const progs = Gl_progs_get();
    // console.log(`Debug_info_gfx_update prog:${progidx} vb:${vbidx} vb.count:${vb.count}`);
    if(foundvbidx !== INT_NULL) {
 
@@ -501,23 +497,31 @@ function Debug_info_gfx_update(params) {
 
       
    } 
-   else {
+   else { // Else no vertex buffer was found, so we create a new ui info dp for the new vertex buffer
       
       // // console.log(`================== Create vb dropdown. prog:${progidx} vb:${vbidx}`);
       // // const parent = (vb.type & MESH_TYPES_DBG.UI_INFO_GFX) ? dp_self : dp_prog;
-      // const parent = (vb.type & MESH_TYPES_DBG.UI_INFO_GFX) ? dp_self : dp_prog;
-      // // const parent = dp_prog;
+      // // const parent = (vb.type & MESH_TYPES_DBG.UI_INFO_GFX) ? dp_self : dp_prog;
+      // const parent = dp_prog;
       
       // // Create vb dropdown
-      // const new_dp_vb = new Widget_Dropdown(`UIDP-vb:${vbidx} | count:${vb.count}`, [0, 0, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
-      // new_dp_vb.SetName(`UIDP-vb:${vbidx}`);
-      // // Object.defineProperty(new_dp_vb, 'gfxidx', { value: vbidx });
-      // new_dp_vb._gfxidx = vbidx
-      // new_dp_vb.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
+      // const new_dp_vb = new Widget_Dropdown(`UIDP-vb:${vbidx} | count:${vb.count}`, [0, 0, 0], [10, 10], TRANSPARENCY(YELLOW, tr), TRANSPARENCY(YELLOW, tr), WHITE, [8, 3]);
+      // new_dp_vb.SetName(`VB DP:${vbidx}`)
+      // new_dp_vb._gfxidx = vbidx;
+      // new_dp_vb.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
+      // new_dp_vb.debug_info.data = { progidx: progidx, vbidx: vbidx, };
       // new_dp_vb.gfx = Gfx_generate_context(new_dp_vb.sid, new_dp_vb.sceneidx, new_dp_vb.geom.num_faces, GFX.PRIVATE);
       // Scenes_store_gfx_to_buffer(new_dp_vb.sceneidx, new_dp_vb);
-      // new_dp_vb.gfx.vb.start = Gfx_add_geom_mat_to_vb(new_dp_vb.sid, new_dp_vb.gfx, new_dp_vb.geom, new_dp_vb.mat, new_dp_vb.type & MESH_TYPES_DBG.UI_INFO_GFX, new_dp_vb.name)
-      // // new_dp_vb.Render();
+      // {
+      //    // new_dp_vb.SetName(`UIDP-vb:${vbidx}`);
+      //    // // Object.defineProperty(new_dp_vb, 'gfxidx', { value: vbidx });
+      //    // new_dp_vb._gfxidx = vbidx
+      //    // new_dp_vb.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
+      //    // new_dp_vb.gfx = Gfx_generate_context(new_dp_vb.sid, new_dp_vb.sceneidx, new_dp_vb.geom.num_faces, GFX.PRIVATE);
+      //    // Scenes_store_gfx_to_buffer(new_dp_vb.sceneidx, new_dp_vb);
+      //    // new_dp_vb.gfx.vb.start = Gfx_add_geom_mat_to_vb(new_dp_vb.sid, new_dp_vb.gfx, new_dp_vb.geom, new_dp_vb.mat, new_dp_vb.type & MESH_TYPES_DBG.UI_INFO_GFX, new_dp_vb.name)
+      //    // // new_dp_vb.Render();
+      // }
       
       // const btn = new_dp_vb.children.buffer[0];
       // btn.GenGfxCtx(GFX.PRIVATE)
@@ -529,12 +533,12 @@ function Debug_info_gfx_update(params) {
       
       // parent.AddToMenu(new_dp_vb);
 
-      // /**DEBUG*/temp_added.push({
-      //    mesh_name:new_dp_vb.name,
-      //    parent_name:parent.name,
-      //    parent_menu:parent.menu,
-      //    from_gfx:{progidx:progidx, vbidx:vbidx},
-      // });
+      // // /**DEBUG*/temp_added.push({
+      // //    mesh_name:new_dp_vb.name,
+      // //    parent_name:parent.name,
+      // //    parent_menu:parent.menu,
+      // //    from_gfx:{progidx:progidx, vbidx:vbidx},
+      // // });
       // // console.log('---------------- added info:', temp_added);
 
    }
@@ -683,6 +687,7 @@ function Debug_info_create_mesh_info(params){
          val: 0
        */
  
+      dp_mesh.AddToMenu(new Widget_Text(`name: ${meshes[i].name}`, [0, 0, 0], fontsize, BLUE_10_120_220, .4));
       dp_mesh.AddToMenu(new Widget_Text(`id: ${meshes[i].id}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
       dp_mesh.AddToMenu(new Widget_Text(`isOn: ${meshes[i].isOn}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
       dp_mesh.AddToMenu(new Widget_Text(`is_gfx_inserted: ${meshes[i].is_gfx_inserted}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));

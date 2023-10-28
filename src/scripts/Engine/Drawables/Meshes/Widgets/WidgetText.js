@@ -47,6 +47,12 @@ export class Widget_Text extends Text_Mesh {
 	}
 
 	/*******************************************************************************************************************************************************/
+	// Alignment
+	// Reposition_post(dif_pos) {
+
+	//    this.MoveXYZ(dif_pos);
+	// }
+
 	// Align_pre(target_mesh, flags, pad=[0,0]) { // Align pre-added to the vertexBuffers
 
 	// 	const pos = [0, 0];
@@ -217,6 +223,15 @@ export class Widget_Text extends Text_Mesh {
 			const child = this.children.buffer[i];
 			child.MoveXYZ(dif_pos)
 		}
+	}
+
+	/*******************************************************************************************************************************************************/
+	// Transformations
+	Move(x, y) {
+
+		// Move 'this' text
+		this.geom.MoveXY(x, y, this.gfx);
+
 	}
 
 }
@@ -523,6 +538,22 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 			const child = this.children.buffer[i];
 			if (child) child.MoveXY(mouse_pos.x, -mouse_pos.y, child.gfx);
 		}
+	}
+
+	/*******************************************************************************************************************************************************/
+	// Transformations
+	Move(x, y) {
+
+		// Move 'this' text
+		this.geom.MoveXY(x, y, this.gfx);
+		
+		// Move children text
+		for (let i = 0; i < this.children.boundary; i++) {
+
+			const child = this.children.buffer[i];
+			if (child) child.geom.MoveXY(x, y, child.gfx);
+		}
+
 	}
 }
 

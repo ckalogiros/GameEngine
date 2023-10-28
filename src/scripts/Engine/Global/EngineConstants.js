@@ -417,6 +417,7 @@ const MENU_FONT_SIZE = 4;
  */
 _cnt = 0x1;
 const MESH_TYPES_DBG = {
+
 	GEOMETRY2D: _cnt <<= 1,
 	TEXT_GEOMETRY2D: _cnt <<= 1,
 	GEOMETRY3D: _cnt <<= 1,
@@ -440,11 +441,18 @@ const MESH_TYPES_DBG = {
 	WIDGET_SWITCH: _cnt <<= 1,
 	WIDGET_TEXT: _cnt <<= 1,
 	WIDGET_TEXT_DYNAMIC: _cnt <<= 1,
+
 	WIDGET_SLIDER: _cnt <<= 1,
 	WIDGET_SLIDER_BAR: _cnt <<= 1,
 	WIDGET_SLIDER_HANDLE: _cnt <<= 1,
+	
+	// WIDGET_SCROLLER: _cnt <<= 1,
+	WIDGET_SCROLLER_BAR: _cnt <<= 1,
+	WIDGET_SCROLLER_HANDLE: _cnt <<= 1,
+	
 	WIDGET_POP_UP: _cnt <<= 1,
 	WIDGET_MENU_BAR: _cnt <<= 1,
+	
 	WIDGET_DROP_DOWN: _cnt <<= 1,
 	DROP_DOWN_MENU: _cnt <<= 1,
 

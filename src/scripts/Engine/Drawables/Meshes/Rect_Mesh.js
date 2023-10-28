@@ -58,6 +58,17 @@ export class Rect extends Mesh {
    }
 
    /*******************************************************************************************************************************************************/
+   // Alignment
+   Reposition_post(dif_pos) {
+
+      this.MoveXYZ(dif_pos);
+      
+      for(let i=0; i<this.children.boundary; i++){
+         this.children.buffer[i].MoveXYZ(dif_pos);
+      }
+   }
+
+   /*******************************************************************************************************************************************************/
    // Setters-Getters
    GetTotalWidth() { return this.geom.dim[0]; }
 

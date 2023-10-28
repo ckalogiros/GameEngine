@@ -403,7 +403,7 @@ export class Mesh {
     /*******************************************************************************************************************************************************/
     // Listeners
 
-    AddEventListener(event_type, Clbk = null, params = null, parent_event=null) {
+    AddEventListener(event_type, Clbk = null, params = null, parent_event = null) {
 
         if (event_type & LISTEN_EVENT_TYPES.CLICK_UP) {
 
@@ -411,54 +411,54 @@ export class Mesh {
             // /*DEBUG*/if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] && this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK].idx !== INT_NULL) 
             //     alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js');
 
-                const click_idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
-                
-                if (parent_event && parent_event[click_idx]) {
-                    // const idx = Listener_create_child_event(click_idx, [1, parent_event[click_idx].idx], Clbk, this, params);
-                    const idx = Listener_create_child_event(click_idx, parent_event[click_idx].idx, Clbk, this, params);
-                    this.listeners.AddAtIndex(click_idx, {idx:idx, is_child_event:true});
-                    this.StateEnable(MESH_STATE.IS_CLICKABLE);
-                }
-                
-                else {
-                    const idx = Listener_create_event(click_idx, Clbk, this, params);
-                    this.listeners.AddAtIndex(click_idx, {idx:idx, is_child_event:false});
-                    this.StateEnable(MESH_STATE.IS_CLICKABLE);
-                }
-                
-            }
-            else if (event_type & LISTEN_EVENT_TYPES.HOVER) {
-                // Case we accidentaly re-creating the same event(Avoiding duplicate events in the EventListeners buffer).
-                // /*DEBUG*/if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER] && this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER].idx !== INT_NULL) 
-                // alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js')
+            const click_idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
 
-                const hover_idx = LISTEN_EVENT_TYPES_INDEX.HOVER;
-                
-                if (parent_event && parent_event[hover_idx]) {
-                    const idx = Listener_create_child_event(hover_idx, parent_event[hover_idx].idx, Clbk, this, params);
-                    this.listeners.AddAtIndex(hover_idx, {idx:idx, is_child_event:true});
-                    this.StateEnable(MESH_STATE.IS_HOVERABLE);
-                }
-                
-                else {
-                    const idx = Listener_create_event(hover_idx, Clbk, this, params);
-                    this.listeners.AddAtIndex(hover_idx, {idx:idx, is_child_event:false});
-                    this.StateEnable(MESH_STATE.IS_HOVERABLE);
-                }
-                
-                // const idx = Listener_create_event(hover_idx, null, this, null);
-                // this.listeners.AddAtIndex(hover_idx, {idx:idx, is_child_event:false});
-                // this.StateEnable(MESH_STATE.IS_HOVERABLE);
+            if (parent_event && parent_event[click_idx]) {
+                // const idx = Listener_create_child_event(click_idx, [1, parent_event[click_idx].idx], Clbk, this, params);
+                const idx = Listener_create_child_event(click_idx, parent_event[click_idx].idx, Clbk, this, params);
+                this.listeners.AddAtIndex(click_idx, { idx: idx, is_child_event: true });
+                this.StateEnable(MESH_STATE.IS_CLICKABLE);
             }
-            else if (event_type & LISTEN_EVENT_TYPES.MOVE) {
-                // Case we accidentaly re-creating the same event(Avoiding duplicate events in the EventListeners buffer).
-                /*DEBUG*/if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] && this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK].idx !== INT_NULL) 
-                alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js')
-                
-                const click_idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
+
+            else {
+                const idx = Listener_create_event(click_idx, Clbk, this, params);
+                this.listeners.AddAtIndex(click_idx, { idx: idx, is_child_event: false });
+                this.StateEnable(MESH_STATE.IS_CLICKABLE);
+            }
+
+        }
+        else if (event_type & LISTEN_EVENT_TYPES.HOVER) {
+            // Case we accidentaly re-creating the same event(Avoiding duplicate events in the EventListeners buffer).
+            // /*DEBUG*/if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER] && this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER].idx !== INT_NULL) 
+            // alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js')
+
+            const hover_idx = LISTEN_EVENT_TYPES_INDEX.HOVER;
+
+            if (parent_event && parent_event[hover_idx]) {
+                const idx = Listener_create_child_event(hover_idx, parent_event[hover_idx].idx, Clbk, this, params);
+                this.listeners.AddAtIndex(hover_idx, { idx: idx, is_child_event: true });
+                this.StateEnable(MESH_STATE.IS_HOVERABLE);
+            }
+
+            else {
+                const idx = Listener_create_event(hover_idx, Clbk, this, params);
+                this.listeners.AddAtIndex(hover_idx, { idx: idx, is_child_event: false });
+                this.StateEnable(MESH_STATE.IS_HOVERABLE);
+            }
+
+            // const idx = Listener_create_event(hover_idx, null, this, null);
+            // this.listeners.AddAtIndex(hover_idx, {idx:idx, is_child_event:false});
+            // this.StateEnable(MESH_STATE.IS_HOVERABLE);
+        }
+        else if (event_type & LISTEN_EVENT_TYPES.MOVE) {
+            // Case we accidentaly re-creating the same event(Avoiding duplicate events in the EventListeners buffer).
+            /*DEBUG*/if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] && this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK].idx !== INT_NULL)
+            alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js')
+
+            const click_idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
             // We use a click event because the operation its base on the mouse click and hold
             const idx = Listener_create_event(click_idx, Clbk, this, params);
-            this.listeners.AddAtIndex(click_idx, {idx:idx, is_child_event:false});
+            this.listeners.AddAtIndex(click_idx, { idx: idx, is_child_event: false });
             // Necessary to activate in order for the mesh to be able to move by a 'Click' event
             this.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_MOVABLE | MESH_STATE.IS_CLICKABLE);
         }
@@ -468,8 +468,8 @@ export class Mesh {
 
         for (let etype = 0; etype < this.listeners.boundary; etype++) {
 
-            if (this.listeners.buffer[etype] && !this.listeners.buffer[etype].is_child_event){
-                    
+            if (this.listeners.buffer[etype] && !this.listeners.buffer[etype].is_child_event) {
+
                 Listener_remove_event_by_idx(etype, this.listeners.buffer[etype].idx);
                 this.listeners.RemoveByIdx(etype);
                 // this.listeners.buffer[etype].idx = INT_NULL;
@@ -483,8 +483,8 @@ export class Mesh {
         if (event_type & LISTEN_EVENT_TYPES.CLICK_UP) {
 
             const idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
-            if(!this.listeners.buffer[idx].is_child_event){
-                    
+            if (!this.listeners.buffer[idx].is_child_event) {
+
                 Listener_remove_event_by_idx(idx, this.listeners.buffer[idx].idx);
                 this.listeners.RemoveByIdx(idx)
                 // this.listeners.buffer[idx].idx = INT_NULL;
@@ -492,10 +492,10 @@ export class Mesh {
             }
         }
         else if (event_type & LISTEN_EVENT_TYPES.HOVER) {
-            
+
             const idx = LISTEN_EVENT_TYPES_INDEX.HOVER;
-            if(!this.listeners.buffer[idx].is_child_event){
-                
+            if (!this.listeners.buffer[idx].is_child_event) {
+
                 Listener_remove_event_by_idx(idx, this.listeners.buffer[idx].idx);
                 this.listeners.RemoveByIdx(idx)
                 // this.listeners.buffer[idx].idx = INT_NULL;
@@ -552,9 +552,9 @@ export class Mesh {
     MoveXY(x, y) { this.geom.MoveXY(x, y, this.gfx); }
     MoveXYZ(pos) { this.geom.MoveXYZ(pos, this.gfx); }
     MoveRecursive(x, y) {
-        
+
         this.geom.MoveXY(x, y, this.gfx);
-        
+
         if (this.children.boundary)
             Recursive_mesh_move(this.children, x, y)
     }
