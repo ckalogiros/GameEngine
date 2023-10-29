@@ -33,7 +33,7 @@ export class Widget_Switch extends Widget_Button {
    }
 
    /*******************************************************************************************************************************************************/
-   // Events
+   // Events Handling
    /**
      * @param {*} event_type typeof 'LISTEN_EVENT_TYPES'
      * @param {*} Clbk          User may choose the callback for the

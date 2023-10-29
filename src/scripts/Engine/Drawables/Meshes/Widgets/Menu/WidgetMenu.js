@@ -19,17 +19,16 @@ export class Widget_Menu_Bar extends Widget_Label {
 
    close_btn_idx;
    minimize_btn_idx;
-   
+
    constructor(text, Align, pos, col = GREY3, text_col = WHITE, pad = [14, 6], bold = .4, style = [2, 5, 2], font = TEXTURES.SDF_CONSOLAS_LARGE) {
-      
-      // text, Align, pos, col = GREY3, text_col = WHITE, pad = [0, 0], bold = .4, style = [2, 5, 2], font
+
       super(text, Align, pos, 4, col, text_col, pad, bold, font, style);
-      
+
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       this.SetStyle(style);
       this.SetName('Widget_Menu_Bar');
       this.type |= MESH_TYPES_DBG.WIDGET_MENU_BAR;
-      
+
       this.close_btn_idx = INT_NULL;
       this.minimize_btn_idx = INT_NULL;
    }
@@ -43,12 +42,13 @@ export class Widget_Menu_Bar extends Widget_Label {
       pos[2] += 1; // Put close button in front of the parent widget.
 
       const close_btn = new Close_Button(root, text, pos, fontsize, col, text_col, pad, bold, style, font);
-      close_btn.SetName('close_btn')
+      close_btn.SetName('close_btn');
 
       this.geom.dim[0] += close_btn.geom.dim[0];
       this.geom.dim[1] = (this.geom.dim[1] < close_btn.geom.dim[1]) ? close_btn.geom.dim[1] + this.pad[1] : this.geom.dim[1];
 
       this.close_btn_idx = this.AddChild(close_btn);
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, close_btn.OnClick, this.listeners.buffer);
 
       // Realign menu's children
       this.ReAlign();
@@ -116,7 +116,7 @@ export class Widget_Menu_Bar extends Widget_Label {
    GetAllMeshes() {
 
       let all_meshes = [this, this.text_mesh];
-      for(let i=0; i<this.children.boundary; i++){
+      for (let i = 0; i < this.children.boundary; i++) {
          const child = this.children.buffer[i]
          all_meshes = child.GetAllMeshes(all_meshes)
       }
@@ -124,7 +124,7 @@ export class Widget_Menu_Bar extends Widget_Label {
    }
 
    /*******************************************************************************************************************************************************/
-   // Events
+   // Events Handling
    OnMove(params) {
 
       // The 'OnMove' function is called by the timeInterval.
@@ -159,13 +159,35 @@ export class Widget_Menu_Bar extends Widget_Label {
 
    }
 
-   // CreateCloseButtonClickEvent(){
+   // Create all listen events recursively for all children, from each mesh's listeners buffer.
+   ConstructListeners(_root = null, _mesh = null) {
 
-   //    const close_btn = this.children.buffer[this.close_btn_idx];
-   //    if(close_btn){
-   //       close_btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, close_btn.OnClick, this.listeners.buffer)
-   //    }
-   // }
+      const mesh = (_mesh) ? _mesh : this; // If in recursion, use as the current mesh the passed param. 
+      const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
+      console.log('****', mesh.name, mesh.listeners.buffer)
+
+      const root_evt = root.listeners.buffer;
+
+      for (let etypeidx = 0; etypeidx < mesh.listeners.boundary; etypeidx++) {
+
+         for (let i = 0; i < mesh.children.boundary; i++) {
+
+            const child = mesh.children.buffer[i];
+            if (child) {
+               const evt = child.listeners.buffer[etypeidx];
+               if (evt) { // If event is not null
+                  const target_params = {
+                     EventClbk: null,
+                     targetBindingFunctions: null,
+                     target_mesh: child,
+                     params: null,
+                  }
+                  child.AddListenEvent(etypeidx, child.OnClick, target_params, root_evt);
+               }
+            }
+         }
+      }
+   }
 
    /*******************************************************************************************************************************************************/
    // Alignment
@@ -199,6 +221,23 @@ export class Widget_Menu_Bar extends Widget_Label {
       }
    }
 
+   /*******************************************************************************************************************************************************/
+   // Transformations
+   Move(x, y) {
+
+      // Move 'this' text
+      this.geom.MoveXY(x, y, this.gfx);
+      this.text_mesh.geom.MoveXY(x, y, this.text_mesh.gfx);
+
+      // Move menu children widgets(close/minimize buttons)
+      for (let i = 0; i < this.children.boundary; i++) {
+
+         const widget_child = this.children.buffer[i];
+         widget_child.geom.MoveXY(x, y, widget_child.gfx);
+         widget_child.text_mesh.geom.MoveXY(x, y, widget_child.text_mesh.gfx);
+      }
+   }
+
 }
 
 /**
@@ -225,23 +264,7 @@ export class Close_Button extends Widget_Button {
    }
 
    /*******************************************************************************************************************************************************/
-   // Events
-   /**
-    * @param {*} event_type typeof 'LISTEN_EVENT_TYPES'
-    * @param {*} Clbk User may choose the callback for the listen event.
-    */
-   CreateListenEvent(event_type, Clbk = null, parent_event) {
-
-      const target_params = {
-         EventClbk: null,
-         targetBindingFunctions: null,
-         target_mesh: this,
-         params: null,
-      }
-
-      if (Clbk) this.AddEventListener(event_type, Clbk, target_params, parent_event);
-      else this.AddEventListener(event_type, this.OnClick, target_params, parent_event);
-   }
+   // Events handling
 
    OnClick(params) {
 

@@ -82,23 +82,23 @@ export class Rect extends Mesh {
    GetAllMeshes() { return [this]; }
 
    /*******************************************************************************************************************************************************/
-   // Events
+   // Events Handling
    /**
     * @param {*} event_type typeof 'LISTEN_EVENT_TYPES'
     * @param {*} Clbk User may choose the callback for the listen event.
     */
-   CreateListenEvent(event_type, Clbk, parent_event) {
+   // CreateListenEvent(event_type, Clbk, parent_event) {
 
-      const target_params = {
-         EventClbk: null,
-         targetBindingFunctions: null,
-         // clicked_mesh: this.area_mesh,
-         target_mesh: this,
-         params: null,
-      }
+   //    const target_params = {
+   //       EventClbk: null,
+   //       targetBindingFunctions: null,
+   //       // clicked_mesh: this.area_mesh,
+   //       target_mesh: this,
+   //       params: null,
+   //    }
 
-      if (Clbk) this.AddEventListener(event_type, Clbk, target_params, parent_event);
-      else this.AddEventListener(event_type, this.OnClick, target_params, parent_event);
-   }
+   //    if (Clbk) this.AddEventListener(event_type, Clbk, target_params, parent_event);
+   //    else this.AddEventListener(event_type, this.OnClick, target_params, parent_event);
+   // }
 
 }

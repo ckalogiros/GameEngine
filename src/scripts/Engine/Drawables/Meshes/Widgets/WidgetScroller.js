@@ -83,7 +83,7 @@ export class Widget_Scroller extends Section{
 
 
       // Make the vertical area of the bar larger for hover and handle moving.
-      bar.hover_margin = handle.geom.dim[1] + 4;
+      bar.hover_margin = [0, handle.geom.dim[1] + 4];
 
 
       /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -169,7 +169,7 @@ export class Widget_Scroller extends Section{
    }
 
    /*******************************************************************************************************************************************************/
-   // Events
+   // Events Handling
    OnClick(params) {
 
       const scroller = params.target_params.target_mesh;

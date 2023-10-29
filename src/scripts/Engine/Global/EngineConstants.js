@@ -430,7 +430,6 @@ const MESH_TYPES_DBG = {
 	TEXT_MESH: _cnt <<= 1,
 	RECT_MESH: _cnt <<= 1,
 	PANEL_MESH: _cnt <<= 1,
-
 	SECTION_MESH: _cnt <<= 1,
 
 	WIDGET_GENERIC: _cnt <<= 1,
@@ -555,9 +554,9 @@ const LISTEN_EVENT_TYPES = {
 _cnt = 0;
 /** CAUTION: This is an enum for indexing the Listen_Events class buffer NOT the  Listener_Hover class buffer which is a separate class*/
 const LISTEN_EVENT_TYPES_INDEX = {
-	HOVER: _cnt++, // HOVER event belongs to another class, that is the Listener_Hover class
+	HOVER: _cnt++, // HOVER event belongs to another class, that is the Listener_Hover class.
 	CLICK: _cnt++,
-	// MOVE event registers with the CLICK event, no need to create new event in the ListeEvents buffer
+	// MOVE event registers with the CLICK event, no need to create new event in the ListeEvents buffer.
 	SIZE: _cnt,
 };
 

@@ -56,9 +56,12 @@ class Buffer_Interface {
 
    RemoveByIdx(idx) {
 
-      /**DEBUG */ if (idx < 0 || idx > this.size - 1)
+      /**DEBUG */ if (idx < 0 || idx > this.size - 1){
+
          console.error('Index Out of bounds. @ M_Buffer.RemoveByIdx().')
-      // alert('Index Out of bounds. @ M_Buffer.RemoveByIdx().')
+         // alert('Index Out of bounds. @ M_Buffer.RemoveByIdx().')
+         return;
+      }
 
       if (this.buffer[idx] !== null) {
 
@@ -176,7 +179,7 @@ export class M_Buffer extends Buffer_Interface {
 
       this.buffer[idx] = elem;
       this.active_count++;
-      if (idx > this.boundary) this.boundary = idx+1;
+      if (idx >= this.boundary) this.boundary = idx+1;
 
       return idx;
    }

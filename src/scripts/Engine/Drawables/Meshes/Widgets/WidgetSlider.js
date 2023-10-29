@@ -58,13 +58,12 @@ export class Widget_Slider extends Rect {
 
       /** Label area mesh */
       super(pos, dim, col);
+      this.type |= MESH_TYPES_DBG.WIDGET_SLIDER;
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       this.SetStyle([0, 6, 2]);
       this.SetName('Widget_Slider');
       this.StateEnable(MESH_STATE.HAS_POPUP);
-      // this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick)
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-      this.type |= MESH_TYPES_DBG.WIDGET_SLIDER;
+      // this.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_HOVER_COLORABLE);
 
 
       /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -79,23 +78,23 @@ export class Widget_Slider extends Rect {
       bar.type |= MESH_TYPES_DBG.WIDGET_SLIDER_BAR | bar.geom | bar.mat;
       bar.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       bar.SetStyle([0, 3, 2]);
-      bar.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_HOVER_COLORABLE);
       bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
       bar.SetName('Bar');
-
-
+      
+      
       /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
       // Slider Handle: Handle is a child of the bar mesh
-
+      
       pad[1] = dim[1] / 10;
       const handleMetrics = this.#CalculateHandleArea(bar.geom.pos, dim, pad)
-
+      
       const handle = new Rect(handleMetrics.pos, handleMetrics.dim, BLUE_10_120_220);
-
+      
       handle.type |= MESH_TYPES_DBG.WIDGET_SLIDER_HANDLE | handle.geom | handle.mat;
       handle.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       handle.SetStyle([5, 35, 3]);
-      handle.StateEnable(MESH_STATE.IS_MOVABLE);
+      handle.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+      // handle.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER, LISTEN_EVENT_TYPES.MOVE)
       handle.SetName('handle');
 
 
@@ -105,7 +104,7 @@ export class Widget_Slider extends Rect {
 
 
       // Make the vertical area of the bar larger for hover and handle moving.
-      bar.hover_margin = handle.geom.dim[1] + 4;
+      bar.hover_margin = [0, handle.geom.dim[1] + 4];
 
 
       /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -160,6 +159,10 @@ export class Widget_Slider extends Rect {
       this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, FLAGS, gfxidx);
       Scenes_store_gfx_to_buffer(this.sceneidx, this);
 
+      const name_text = this.text_mesh;
+      name_text.gfx = Gfx_generate_context(name_text.sid, name_text.sceneidx, name_text.geom.num_faces, FLAGS, gfxidx);
+      Scenes_store_gfx_to_buffer(name_text.sceneidx, name_text);
+
       const bar = this.children.buffer[BAR_IDX];
       bar.gfx = Gfx_generate_context(bar.sid, bar.sceneidx, bar.geom.num_faces, FLAGS, gfxidx);
       Scenes_store_gfx_to_buffer(bar.sceneidx, bar);
@@ -206,7 +209,9 @@ export class Widget_Slider extends Rect {
    }
 
    /*******************************************************************************************************************************************************/
-   // Events
+   // Events Handling
+
+
 	OnMove(params) {
 
 		const mesh = params.params;
@@ -238,20 +243,91 @@ export class Widget_Slider extends Rect {
 
 	}
 
-   CreateMoveHandleEvent(parent_event) {
+   // TODO!!!: the widget is passed in 'params.target_params.target_mesh', so REMOVE the 'params.source_params' tha has the slider.area_mesh is not needed. 
+   OnClick(params) {
 
-      const handle = this.children.buffer[0];
+      const mesh = params.target_params.target_mesh;
+      const point = MouseGetPos();
 
-      // if(handle.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK].idx === INT_NULL)
-      if(handle.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK])
-         this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick, parent_event);
+      // Check if the click happened on bar
+      const bar = mesh.children.buffer[BAR_IDX];
+      if (point[1] > bar.geom.pos[1] - bar.hover_margin[1]) { // TODO!!! The only thing currently that seperates handle-move from slider-move is the fact that this if fails for 'hover_margin=0'. Create a more apropriate check.
 
+         STATE.mesh.SetClicked(bar);
+
+         if ((bar.type & MESH_TYPES_DBG.WIDGET_SLIDER_BAR) && bar.timeIntervalsIdxBuffer.boundary <= 0) {
+
+            const idx = TimeIntervalsCreate(10, 'Move Slider Handle', TIME_INTERVAL_REPEAT_ALWAYS, Slider_on_update_handle, bar);
+            bar.timeIntervalsIdxBuffer.Add(idx);
+
+            STATE.mesh.SetGrabed(bar);
+            bar.StateEnable(MESH_STATE.IN_GRAB);
+         }
+
+         return true;
+      }
+      else {
+
+         STATE.mesh.SetClicked(bar);
+
+         // Move Slider 
+         if ((mesh.type & MESH_TYPES_DBG.WIDGET_SLIDER) && mesh.StateCheck(MESH_STATE.IS_GRABABLE) && mesh.timeIntervalsIdxBuffer.boundary <= 0) {
+
+            const idx = TimeIntervalsCreate(10, 'Move Slider', TIME_INTERVAL_REPEAT_ALWAYS, Slider_move_event, mesh);
+            mesh.timeIntervalsIdxBuffer.Add(idx);
+
+            STATE.mesh.SetGrabed(mesh);
+            mesh.StateEnable(MESH_STATE.IN_GRAB);
+         }
+
+         // Handle any menu (on leftClick only)
+         if (mesh.StateCheck(MESH_STATE.HAS_POPUP)) {
+
+            const btnId = params.trigger_params;
+            Widget_popup_handler_onclick_event(mesh, btnId)
+         }
+
+         return true;
+      }
+      return false;
    }
-   CreateMoveSliderEvent() {
+   
+   // Create all listen events recursively for all children, from each mesh's listeners buffer.
+   ConstructListeners(_root=null, _mesh=null){
+      
+      const mesh = (_mesh) ? _mesh : this; // If in recursion, use as the current mesh the passed param. 
+      const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
+      console.log('****',mesh.name, mesh.listeners.buffer)
 
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick);
-      this.StateEnable(MESH_STATE.IS_GRABABLE);
+      for(let i=0; i<mesh.children.boundary; i++){
+         const child = mesh.children.buffer[i];
+         if(child){
+            this.ConstructListeners(root, child)
+         }
+      }
+   
+      const root_evt = root.listeners.buffer;
 
+      for(let etypeidx=0; etypeidx<mesh.listeners.boundary; etypeidx++){
+
+         const evt = mesh.listeners.buffer[etypeidx];
+         
+         if(evt){ // If event is not null
+            const target_params = {
+               EventClbk: null,
+               targetBindingFunctions: null,
+               target_mesh: mesh,
+               params: null,
+            }
+            mesh.AddListenEvent(etypeidx, this.OnClick, target_params, root_evt);
+         }
+      }
+   }
+
+   CreateSliderHandleEvent() {
+
+      const slider = this;
+      slider.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP)
    }
 
    
@@ -341,62 +417,7 @@ export class Widget_Slider extends Rect {
       };
    }
 
-      /*******************************************************************************************************************************************************/
-   // Events
-   // TODO!!!: the widget is passed in 'params.target_params.target_mesh', so REMOVE the 'params.source_params' tha has the slider.area_mesh is not needed. 
-   OnClick(params) {
 
-      const mesh = params.target_params.target_mesh;
-      // const mesh = widg.area_mesh;
-      const point = MouseGetPos();
-      const g = mesh.geom;
-
-      if (Check_intersection_point_rect(g.pos, g.dim, point, [0, 0])) {
-
-         // Check if the click happened on bar
-         const bar = mesh.children.buffer[BAR_IDX];
-         if (point[1] > bar.geom.pos[1] - bar.hover_margin) { // TODO!!! The only thing currently that seperates handle-move from slider-move is the fact that this if fails for 'hover_margin=0'. Create a more apropriate check.
-
-            STATE.mesh.SetClicked(bar);
-
-            if (bar.type & MESH_TYPES_DBG.WIDGET_SLIDER_BAR && bar.StateCheck(MESH_STATE.IS_GRABABLE) && bar.timeIntervalsIdxBuffer.boundary <= 0) {
-
-               const idx = TimeIntervalsCreate(10, 'Move Slider Handle', TIME_INTERVAL_REPEAT_ALWAYS, Slider_on_update_handle, bar);
-               bar.timeIntervalsIdxBuffer.Add(idx);
-
-               STATE.mesh.SetGrabed(bar);
-               bar.StateEnable(MESH_STATE.IN_GRAB);
-            }
-
-            return true;
-
-         }
-         else {
-
-            STATE.mesh.SetClicked(bar);
-
-            // Move Slider 
-            if ((mesh.type & MESH_TYPES_DBG.WIDGET_SLIDER) && mesh.StateCheck(MESH_STATE.IS_GRABABLE) && mesh.timeIntervalsIdxBuffer.boundary <= 0) {
-
-               const idx = TimeIntervalsCreate(10, 'Move Slider', TIME_INTERVAL_REPEAT_ALWAYS, Slider_move_event, mesh);
-               mesh.timeIntervalsIdxBuffer.Add(idx);
-
-               STATE.mesh.SetGrabed(mesh);
-               mesh.StateEnable(MESH_STATE.IN_GRAB);
-            }
-
-            // Handle any menu (on leftClick only)
-            if (mesh.StateCheck(MESH_STATE.HAS_POPUP)) {
-
-               const btnId = params.trigger_params;
-               Widget_popup_handler_onclick_event(mesh, btnId)
-            }
-            return true;
-         }
-      }
-      return false;
-   }
-   
 }
 
 function Slider_move_event(params) {

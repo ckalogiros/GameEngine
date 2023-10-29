@@ -130,7 +130,7 @@ export class Widget_Label extends Rect {
 
         // Deactivate for label's text 
         this.text_mesh.DeactivateGfx();
-}
+    }
 
     /*******************************************************************************************************************************************************/
     // Setters-Getters
@@ -171,35 +171,38 @@ export class Widget_Label extends Rect {
         this.text_mesh.MoveXYZ(dif_pos)
     }
 
-	/*******************************************************************************************************************************************************/
-	// Transformations
-	Move(x, y) {
+    /*******************************************************************************************************************************************************/
+    // Transformations
+    Move(x, y) {
 
-		// Move 'this' text
-		this.geom.MoveXY(x, y, this.gfx);
-		this.text_mesh.geom.MoveXY(x, y, this.text_mesh.gfx);
+        // Move 'this' text
+        this.geom.MoveXY(x, y, this.gfx);
+        this.text_mesh.geom.MoveXY(x, y, this.text_mesh.gfx);
 
-	}
+    }
 
     /*******************************************************************************************************************************************************/
-    // Events
+    // Events Handling
     /**
      * @param {*} event_type typeof 'LISTEN_EVENT_TYPES'
      * @param {*} Clbk User may choose the callback for the listen event.
      */
-    CreateListenEvent(event_type, Clbk = null, params = null, parent_event = null) {
+    // CreateListenEvent(event_type, Clbk = null, params = null, parent_event = null) {
 
-        const target_params = {
-            EventClbk: null,
-            targetBindingFunctions: null,
-            // clicked_mesh: this.area_mesh,
-            target_mesh: this,
-            params: params,
-        }
+    //     const target_params = {
+    //         EventClbk: null,
+    //         targetBindingFunctions: null,
+    //         // clicked_mesh: this.area_mesh,
+    //         target_mesh: this,
+    //         params: params,
+    //     }
 
-        if (Clbk) this.AddEventListener(event_type, Clbk, target_params, parent_event);
-        else this.AddEventListener(event_type, this.OnClick, target_params, parent_event);
-    }
+
+    //     if (Clbk) this.AddListenEvent(event_type, Clbk, target_params, parent_event);
+    //     else this.AddListenEvent(event_type, this.OnClick, target_params, parent_event);
+    //     // if (Clbk) this.AddEventListener(event_type, Clbk, target_params, parent_event);
+    //     // else this.AddEventListener(event_type, this.OnClick, target_params, parent_event);
+    // }
 
     OnClick(params) {
 
@@ -219,8 +222,9 @@ export class Widget_Label extends Rect {
                  * Create Move event.
                  * The Move event runs only when the mesh is GRABED. That means that the timeInterval 
                  * is created and destroyed upon 'onClickDown' and 'onClickUp' respectively.
-                 */
+                */
                 const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, OnMoveFn, mesh);
+                console.log('Time interval idx:', idx)
                 mesh.timeIntervalsIdxBuffer.Add(idx);
 
                 if (mesh.StateCheck(MESH_STATE.IS_GRABABLE)) {

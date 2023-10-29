@@ -92,13 +92,13 @@ export class Section extends Rect {
       const old_sizex = section.geom.dim[0];
       Calculate_sizes_recursive(section, top, left, options, total_margin, total_size)
       CopyArr2(section.geom.dim, section.max_size); // Set size for the root.
-      
+
       if (options & SECTION.TOP_DOWN) {
          const y = section.geom.pos[1] + (section.max_size[1] - old_sizey);
          const x = section.geom.pos[0] + (section.max_size[0] - old_sizex);
          section.SetPosXY([x, y]);
       }
-      
+
       section.SetMargin()
       Calculate_positions_recursive(section, options);
 
@@ -257,6 +257,44 @@ export class Section extends Rect {
 
    }
 
+   // Create all listen events recursively for all children, from each mesh's listeners buffer.
+   ConstructListeners(_root = null, _mesh = null) {
+
+      const mesh = (_mesh) ? _mesh : this; // If in recursion, use as the current mesh the passed param. 
+      const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
+      console.log('****', mesh.name, mesh.listeners.buffer)
+
+      // Create listen events for the section
+      const root_evt = root.listeners.buffer;
+      for (let etypeidx = 0; etypeidx < mesh.listeners.boundary; etypeidx++) {
+
+         const evt = mesh.listeners.buffer[etypeidx];
+
+         if (evt) { // If event is not null
+            const target_params = {
+               EventClbk: null,
+               targetBindingFunctions: null,
+               target_mesh: mesh,
+               params: null,
+            }
+            mesh.AddListenEvent(etypeidx, mesh.OnClick, target_params, root_evt);
+         }
+      }
+
+      // Construct listen events for each section's item.
+      for (let i = 0; i < mesh.children.boundary; i++) {
+         const child = mesh.children.buffer[i];
+         if (child) {
+
+            // Case item is of type section, run recursively.
+            if(child.type & MESH_TYPES_DBG.SECTION_MESH){
+               this.ConstructListeners(root, child)
+            }
+            else child.ConstructListeners(root)
+         }
+      }
+   }
+
    // OnMove(params) {
 
    //    const section = params.params;
@@ -280,26 +318,27 @@ export class Section extends Rect {
 
    /*******************************************************************************************************************************************************/
    // Transformations
-   Move(x, y){ Section_move_children_recursive(x, y, this); }
+   Move(x, y) { Section_move_children_recursive(x, y, this); }
 }
 
-function Section_move_children_recursive(x, y, mesh){
 
-   for (let i=0; i<mesh.children.boundary; i++){
+function Section_move_children_recursive(x, y, mesh) {
+
+   for (let i = 0; i < mesh.children.boundary; i++) {
 
       const child = mesh.children.buffer[i];
-      
+
       if (child.type & MESH_TYPES_DBG.SECTION_MESH) { // Case anothe section, run recursively
          const params = { params: child, };
          Section_move_children_recursive(x, y, child);
       }
-      else{ // To avoid moving section twice (as a child and as a section from recursion)
+      else { // To avoid moving section twice (as a child and as a section from recursion)
 
-         /**DEBUG*/ if(!child.Move) { console.error('OnMove function is missing. @ Section.Move(), mesh:', child.name, child); return;}
+         /**DEBUG*/ if (!child.Move) { console.error('OnMove function is missing. @ Section.Move(), mesh:', child.name, child); return; }
          child.Move(x, y);
       }
    }
-   
+
    mesh.geom.MoveXY(x, y, mesh.gfx);
 
 }
@@ -311,17 +350,17 @@ function Section_on_move_section(params) {
     */
 
    const section = params.params;
-   
+
    // Destroy the time interval calling this function if the mesh is not grabed.
    if (section.StateCheck(MESH_STATE.IN_GRAB) === 0 && section.timeIntervalsIdxBuffer.boundary) {
-      
+
       const intervalIdx = section.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
       TimeIntervalsDestroyByIdx(intervalIdx);
       section.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
-      
+
       return;
    }
-   
+
    const mouse_pos = MouseGetPosDif();
    // console.log(mouse_pos)
    if (mouse_pos.x === 0 && mouse_pos.y === 0) return;
@@ -339,11 +378,12 @@ function Section_on_move_section(params) {
             const params = { params: child, };
             Section_on_move_section(params);
          }
-         else{ // To avoid moving section twice (as a child and as a section from recursion)
+         else { // To avoid moving section twice (as a child and as a section from recursion)
 
-            /**DEBUG*/ if(!child.Move) { 
-               console.error('OnMove function is missing. @ Section.Move(), mesh:', child.name, child); 
-               return;}
+            /**DEBUG*/ if (!child.Move) {
+               console.error('OnMove function is missing. @ Section.Move(), mesh:', child.name, child);
+               return;
+            }
             child.Move(mouse_pos.x, -mouse_pos.y);
          }
 
@@ -399,9 +439,9 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
          const p_dx = parent.GetTotalWidth(); const p_dy = parent.GetTotalHeight();
          const p_mx = parent.margin[0]; const p_my = parent.margin[1];
 
-         const new_pos = [ c_x - p_dx + mesh.GetTotalWidth() + p_mx,
-                           c_y - p_dy + mesh.GetTotalHeight() + p_my,
-                           parent.geom.pos[2] + 1,];
+         const new_pos = [c_x - p_dx + mesh.GetTotalWidth() + p_mx,
+         c_y - p_dy + mesh.GetTotalHeight() + p_my,
+         parent.geom.pos[2] + 1,];
 
          if ((mesh.type & MESH_TYPES_DBG.SECTION_MESH) === 0) { // Case mesh not of type section, have it update it's new pos-dim on a later when it's gfx exists.
 
@@ -409,7 +449,7 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
 
             // console.log(`name:${mesh.name} meshpos:${mesh.geom.pos} new:${new_pos} dif:${pos_dif}`)
             // UpdaterAdd(mesh, 0, null, pos_dif);
-            if(mesh.gfx)
+            if (mesh.gfx)
                mesh.Reposition_post(pos_dif);
             // if(!mesh.gfx) UpdaterAdd(mesh, 0, null, pos_dif);
             // else mesh.Reposition_post(pos_dif);
@@ -520,6 +560,8 @@ function Calculate_sizes_recursive(section, top, left, options, total_margin = [
    AddArr2(total_size, accum_size_per_section);
    return total_size;
 }
+
+
 
 
 /** Save */

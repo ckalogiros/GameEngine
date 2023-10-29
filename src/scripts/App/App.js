@@ -97,8 +97,9 @@ export function AppInit() {
 
     // CreateDropDownWidgetWithWidgetsInside(scene)
     
-    CreateSlider(scene);
-    CreateSliderWithMenuBar(scene)
+    // CreateSlider(scene);
+    // CreateSliderWithMenuEBar(scene);
+    CreateSectionWithNestedWidgetsWithListenEvents(scene);
 
     // CreatDynamicText(scene)
     // CreatDynamicTextSectioned(scene)
@@ -118,8 +119,8 @@ export function AppInit() {
     // const section = MeshInfo(scene)
     // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
 
-    const section = MeshInfo(scene)
-    TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
+    // const section = MeshInfo(scene)
+    // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
 
     // Listeners_debug_info_create(scene);
     // Scenes_debug_info_create(scene);
@@ -283,10 +284,11 @@ function CreatDynamicTextSectioned(scene){
 function CreateMenu(scene) {
 
     const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [60, 200, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
-    menu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    menu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
     menu.AddCloseButton(menu, 'x');
 
-    scene.AddWidget(menu)
+    scene.AddWidget(menu);
+    menu.ConstructListeners();
 }
 
 function CreateDropDownWidgetWithWidgetsInside(scene) {
@@ -434,30 +436,67 @@ function CreatSectionedMixWidgets(scene){
 function CreateSlider(scene) {
 
     const slider = new Widget_Slider([200, 300, 0], [150, 10]);
-    slider.CreateMoveSliderEvent();
-    // slider.CreateMoveHandleEvent(slider.listeners.buffer)
+    slider.CreateSliderHandleEvent();
+    slider.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
+
     scene.AddWidget(slider);
+    slider.ConstructListeners();
     
 }
 
 function CreateSliderWithMenuBar(scene) {
     
     const section = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREY1, .9))
-    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
-    section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
     
     const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
-    menu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
     menu.AddCloseButton(section, 'x');
     section.AddItem(menu);
     
     const slider = new Widget_Slider([200, 100, 0], [150, 10]);
-    // slider.CreateMoveSliderEvent();
-    slider.CreateMoveHandleEvent(section.listeners.buffer)
+    slider.CreateSliderHandleEvent();
     section.AddItem(slider);
     
     scene.AddWidget(section);
     section.Calc();
+    section.ConstructListeners();
+
+
+    console.log('section:', section)
+}
+
+function CreateSectionWithNestedWidgetsWithListenEvents(scene) {
+    
+    const section = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREY1, .9))
+    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    
+    const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
+    menu.AddCloseButton(section, 'x');
+    section.AddItem(menu);
+    
+    const slider = new Widget_Slider([200, 100, 0], [150, 10]);
+    slider.CreateSliderHandleEvent();
+    section.AddItem(slider);
+    
+    {
+        
+        const s = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREY1, .9))
+        // s.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+        
+        const m = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
+        m.AddCloseButton(s, 'x');
+        s.AddItem(m);
+        
+        const sl = new Widget_Slider([200, 100, 0], [150, 10]);
+        sl.CreateSliderHandleEvent();
+        s.AddItem(sl);
+        section.AddItem(s);
+    }
+    
+    scene.AddWidget(section);
+    section.Calc();
+    section.ConstructListeners();
+
 
     console.log('section:', section)
 }

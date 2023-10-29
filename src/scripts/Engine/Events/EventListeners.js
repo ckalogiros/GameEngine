@@ -95,6 +95,8 @@ export class Event_Listener {
       
       LISTENERS_FLAGS[TYPE_IDX] = true;
       return this.event_type[TYPE_IDX].Add(event_params);
+      // const idx = this.event_type[TYPE_IDX].Add(event_params);
+      // return this.event_type[TYPE_IDX].buffer[idx];
    }
    
    AddChildEvent(TYPE_IDX, parent_eventidx, Clbk = null, source_params = null, target_params = null) {
@@ -120,6 +122,7 @@ export class Event_Listener {
       const idx = event.children.Add(event_params);
       event.has_child_events = true; // Set parent event.
       return idx;
+      // return this.event_type[TYPE_IDX].buffer[idx];
    }
    
    DispatchEvents(TYPE_IDX, trigger_params) {
