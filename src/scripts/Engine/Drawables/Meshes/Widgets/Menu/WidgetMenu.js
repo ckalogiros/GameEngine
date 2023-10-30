@@ -48,7 +48,7 @@ export class Widget_Menu_Bar extends Widget_Label {
       this.geom.dim[1] = (this.geom.dim[1] < close_btn.geom.dim[1]) ? close_btn.geom.dim[1] + this.pad[1] : this.geom.dim[1];
 
       this.close_btn_idx = this.AddChild(close_btn);
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, close_btn.OnClick, this.listeners.buffer);
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP);
 
       // Realign menu's children
       this.ReAlign();
@@ -251,7 +251,7 @@ export class Close_Button extends Widget_Button {
 
       this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
       this.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick, root.listeners.buffer)
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP)
 
       // Set a callback function for the destruction of the menu and its window on clicking the close button.
       const params = {
@@ -307,7 +307,7 @@ export class Widget_Minimize extends Widget_Button {
 
       this.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+      // this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
       this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick)
       const params = {
          source_params: this,
@@ -365,10 +365,10 @@ export class Widget_Minimize extends Widget_Button {
                   minim_mesh.UpdateText('+')
                   // Set click event, back to the minimizer.
                   minim_mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                  minim_mesh.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, minim_mesh.OnClick);
+                  minim_mesh.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP);
                   minim_mesh.toggle = true;
 
-                  root.Reconstruct_listeners_recursive();
+                  // root.Reconstruct_listeners_recursive();
 
                   CopyArr3(root.geom.defPos, root.geom.pos); // Set current pos as the default pos.
                   // Reposition minimized widget

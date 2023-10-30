@@ -62,7 +62,7 @@ export class Widget_Slider extends Rect {
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       this.SetStyle([0, 6, 2]);
       this.SetName('Widget_Slider');
-      this.StateEnable(MESH_STATE.HAS_POPUP);
+      // this.StateEnable(MESH_STATE.HAS_POPUP);
       // this.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_HOVER_COLORABLE);
 
 
@@ -78,7 +78,7 @@ export class Widget_Slider extends Rect {
       bar.type |= MESH_TYPES_DBG.WIDGET_SLIDER_BAR | bar.geom | bar.mat;
       bar.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       bar.SetStyle([0, 3, 2]);
-      bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+      // bar.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
       bar.SetName('Bar');
       
       
@@ -93,8 +93,7 @@ export class Widget_Slider extends Rect {
       handle.type |= MESH_TYPES_DBG.WIDGET_SLIDER_HANDLE | handle.geom | handle.mat;
       handle.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       handle.SetStyle([5, 35, 3]);
-      handle.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-      // handle.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER, LISTEN_EVENT_TYPES.MOVE)
+      // handle.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
       handle.SetName('handle');
 
 
@@ -297,7 +296,7 @@ export class Widget_Slider extends Rect {
       
       const mesh = (_mesh) ? _mesh : this; // If in recursion, use as the current mesh the passed param. 
       const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
-      console.log('****',mesh.name, mesh.listeners.buffer)
+      // console.log('****',mesh.name, mesh.listeners.buffer)
 
       for(let i=0; i<mesh.children.boundary; i++){
          const child = mesh.children.buffer[i];

@@ -2,7 +2,7 @@
 import { GlSetAttrTime } from "../../../../Graphics/Buffers/GlBufferOps.js";
 import { Int8Buffer, Int8Buffer2, M_Buffer } from "../../../Core/Buffers.js";
 import { TimerGetGlobalTimer } from "../../../Timers/Timers.js";
-import { Listener_create_child_event, Listener_create_event, Listener_events_set_mesh_events_active, Listener_remove_event_by_idx, Listener_set_event_active_by_idx } from "../../../Events/EventListeners.js";
+import { Listener_create_child_event, Listener_create_event, Listener_events_set_mesh_events_active, Listener_remove_children_event_by_idx, Listener_remove_event_by_idx, Listener_set_event_active_by_idx } from "../../../Events/EventListeners.js";
 import { CopyArr4 } from "../../../../Helpers/Math/MathOperations.js";
 import { Scenes_get_count, Scenes_update_all_gfx_starts, Scenes_get_root_meshes, Scenes_remove_mesh_from_gfx, Scenes_remove_root_mesh } from "../../../Scenes.js";
 import { Gfx_deactivate, Gfx_deactivate_recursive, Gfx_remove_geometry } from "../../../Interfaces/Gfx/GfxContext.js";
@@ -256,113 +256,11 @@ export class Mesh {
 
     }
 
-    // RecursiveDestroy() {
-
-    //     /**
-    //      * Currently destroys the 'this' mesh, all of its listeners and the liste_hover event.
-    //      * Continues call destroy of any child recursively with the same destruction options.
-    //      * 
-    //      * TODO!!! Implement:
-    //      * 1.   If the curent mesh belongs to a Private vertex buffer, 
-    //      *          we should implement to destroy the vertex buffer to.
-    //      * 2.   Definetly we need an implementation of removing vertices from the gfx buffers.
-    //      *      One way would be to keep track of all the free attributes of a vertex buffer
-    //      *      and add to that free space when it is fit. Also we need a kind of combining
-    //      *      overlaping free space implementation
-    //      */
-
-    //     Mesh_recursive_destroy(this);
-
-    //     if (DEBUG.GFX.REMOVE_MESH) console.log('Remove Parrent:', this.name)
-
-    //     const ret = Gl_remove_geometry(this.gfx, this.geom.num_faces)
-
-    //     Scenes_update_all_gfx_starts(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, ret);
-
-    //     // Remove event listeners
-    //     this.RemoveAllListenEvents();
-
-    //     // Remove any time intervalse
-    //     if (this.timeIntervalsIdxBuffer.active_count) {
-
-    //         const intervalIdx = this.timeIntervalsIdxBuffer.buffer[0];// TODO!!!: HACK We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
-    //         TimeIntervalsDestroyByIdx(intervalIdx);
-    //         this.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
-    //     }
-
-    //     /** Case the mesh has parent, remove this mesh from the parent */
-    //     if (this.parent && (this.parent.type & MESH_TYPES_DBG.SCENE) === 0) {
-    //         this.parent.RemoveChildByIdx(this.idx)
-    //         return FLAGS.DESTROY;
-    //     }
-
-    //     /* Case the mesh is child of the scene.
-    //      * Remove all listen events for the mesh
-    //      * and remove the mesh from the scene
-    //      */
-    //     // Remove from scene's mesh buffer
-    //     const scene = Scenes_get_scene_by_idx(this.sceneidx);
-    //     ERROR_NULL(scene);
-    //     scene.RemoveMesh(this);
-
-    //     return FLAGS.DESTROY;
-    // }
-
-    // /**
-    //  * Destroy a mesh and all of its children.
-    //  * Also if the graphics buffers are private use, reset and deactivate them.  
-    //  */
-    // DestroyPrivateGfxRecursive() {
-
-    //     const progidx = this.gfx.prog.idx;
-    //     const vbidx = this.gfx.vb.idx;
-    //     /**DEBUG*/ if (!Gfx_is_private_vb(progidx, vbidx)) alert('Mesh has Not private gfx buffers. @DestroyPrivateGfxRecursive()')
-
-    //     // Reset gfx buffers
-    //     Gfx_deactivate_recursive(this);
-
-    //     Mesh_destroy_private_recursive(this);
-
-    //     // Remove event listeners
-    //     this.RemoveAllListenEvents();
-
-    //     // Remove any time intervals
-    //     if (this.timeIntervalsIdxBuffer.active_count) {
-
-    //         const intervalIdx = this.timeIntervalsIdxBuffer.buffer[0];// TODO!!!: HACK We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
-    //         TimeIntervalsDestroyByIdx(intervalIdx);
-    //         this.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
-    //     }
-
-    //     /** Case the mesh has parent, remove the this mesh from the parent */
-    //     if (this.parent && (this.parent.type & MESH_TYPES_DBG.SCENE) === 0) {
-    //         this.parent.RemoveChildByIdx(this.idx)
-    //         return FLAGS.DESTROY;
-    //     }
-
-
-    //     // Remove from scene's mesh buffer
-    //     const scene = Scenes_get_scene_by_idx(this.sceneidx);
-    //     ERROR_NULL(scene);
-    //     scene.RemoveMesh(this);
-
-    //     return FLAGS.DESTROY;
-    // }
-
-    Reconstruct_listeners_recursive() {
-
-        if (this.children.active_count)
-            Reconstruct_listeners_recursive(this, this);
-    }
 
     /*******************************************************************************************************************************************************/
     // Graphics
 
     DeactivateGfx() {
-
-        // if (this.listeners.boundary) {
-        //     Listener_events_set_mesh_events_active(LISTENERS_FLAGS.ALL, this.listeners, false);
-        // }
 
         Gfx_deactivate(this.gfx);
         this.is_gfx_inserted = false;
@@ -404,237 +302,67 @@ export class Mesh {
     /*******************************************************************************************************************************************************/
     // Listeners
 
-    // AddEventListener(event_type, Clbk = null, params = null, parent_event = null) {
-
-    //     if (event_type & LISTEN_EVENT_TYPES.CLICK_UP) {
-
-    //         // Case we accidentaly re-creating the same event(Avoiding duplicate events in the EventListeners buffer).
-    //         // /*DEBUG*/if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] && this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK].idx !== INT_NULL) 
-    //         //     alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js');
-
-    //         const click_idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
-
-    //         if (parent_event && parent_event[click_idx]) {
-    //             // const idx = Listener_create_child_event(click_idx, [1, parent_event[click_idx].idx], Clbk, this, params);
-    //             const idx = Listener_create_child_event(click_idx, parent_event[click_idx].idx, Clbk, this, params);
-    //             this.listeners.AddAtIndex(click_idx, { idx: idx, is_child_event: true });
-    //             this.StateEnable(MESH_STATE.IS_CLICKABLE);
-    //         }
-
-    //         else {
-    //             const idx = Listener_create_event(click_idx, Clbk, this, params);
-    //             this.listeners.AddAtIndex(click_idx, { idx: idx, is_child_event: false });
-    //             this.StateEnable(MESH_STATE.IS_CLICKABLE);
-    //         }
-
-    //     }
-    //     else if (event_type & LISTEN_EVENT_TYPES.HOVER) {
-    //         // Case we accidentaly re-creating the same event(Avoiding duplicate events in the EventListeners buffer).
-    //         // /*DEBUG*/if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER] && this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER].idx !== INT_NULL) 
-    //         // alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js')
-
-    //         const hover_idx = LISTEN_EVENT_TYPES_INDEX.HOVER;
-
-    //         if (parent_event && parent_event[hover_idx]) {
-    //             const idx = Listener_create_child_event(hover_idx, parent_event[hover_idx].idx, Clbk, this, params);
-    //             this.listeners.AddAtIndex(hover_idx, { idx: idx, is_child_event: true });
-    //             this.StateEnable(MESH_STATE.IS_HOVERABLE);
-    //         }
-
-    //         else {
-    //             const idx = Listener_create_event(hover_idx, Clbk, this, params);
-    //             this.listeners.AddAtIndex(hover_idx, { idx: idx, is_child_event: false });
-    //             this.StateEnable(MESH_STATE.IS_HOVERABLE);
-    //         }
-
-    //         // const idx = Listener_create_event(hover_idx, null, this, null);
-    //         // this.listeners.AddAtIndex(hover_idx, {idx:idx, is_child_event:false});
-    //         // this.StateEnable(MESH_STATE.IS_HOVERABLE);
-    //     }
-    //     else if (event_type & LISTEN_EVENT_TYPES.MOVE) {
-    //         // Case we accidentaly re-creating the same event(Avoiding duplicate events in the EventListeners buffer).
-    //         /*DEBUG*/if (this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] && this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK].idx !== INT_NULL)
-    //         alert('Listen Event already exists. @ CreateListenEvent(), Mesh.js')
-
-    //         const click_idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
-    //         // We use a click event because the operation its base on the mouse click and hold
-    //         const idx = Listener_create_event(click_idx, Clbk, this, params);
-    //         this.listeners.AddAtIndex(click_idx, { idx: idx, is_child_event: false });
-    //         // Necessary to activate in order for the mesh to be able to move by a 'Click' event
-    //         this.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_MOVABLE | MESH_STATE.IS_CLICKABLE);
-    //     }
-    // }
-
-    CreateListenEvent(etype) {
+    CreateListenEvent(etype, is_fake_event=false) {
 
         if (etype & LISTEN_EVENT_TYPES.HOVER) {
 
             this.listeners.AddAtIndex(LISTEN_EVENT_TYPES_INDEX.HOVER, {
-                idx: INT_NULL,
+                evt: null,
                 is_child_event: false,
             });
             this.StateEnable(MESH_STATE.IS_HOVERABLE | MESH_STATE.IS_HOVER_COLORABLE);
+            if(is_fake_event) this.StateEnable(MESH_STATE.IS_FAKE_EVENT | MESH_STATE.IS_FAKE_HOVERABLE);
         }
         if (etype & LISTEN_EVENT_TYPES.CLICK_UP) {
 
             this.listeners.AddAtIndex(LISTEN_EVENT_TYPES_INDEX.CLICK, {
-                idx: INT_NULL,
+                evt: null,
                 is_child_event: false,
             });
             this.StateEnable(MESH_STATE.IS_CLICKABLE);
+            if(is_fake_event) this.StateEnable(MESH_STATE.IS_FAKE_EVENT | MESH_STATE.IS_FAKE_CLICKABLE);
         }
         if (etype & LISTEN_EVENT_TYPES.MOVE) {
-
+            
             this.listeners.AddAtIndex(LISTEN_EVENT_TYPES_INDEX.CLICK, {
-                idx: INT_NULL,
+                evt: null,
                 is_child_event: false,
             });
             this.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_MOVABLE | MESH_STATE.IS_CLICKABLE);
+            if(is_fake_event) this.StateEnable(MESH_STATE.IS_FAKE_EVENT | MESH_STATE.IS_FAKE_CLICKABLE);
         }
+
     }
 
     AddListenEvent(etypeidx, Clbk = null, params = null, parent_event = null) {
 
-        let eidx = INT_NULL;
-
-        if (parent_event && parent_event[etypeidx] && parent_event[etypeidx].idx !== INT_NULL) {
-            eidx = Listener_create_child_event(etypeidx, parent_event[etypeidx].idx, Clbk, this, params);
+        if (parent_event && parent_event[etypeidx] && parent_event[etypeidx].evt) {
+            this.listeners.buffer[etypeidx].evt = Listener_create_child_event(etypeidx, parent_event[etypeidx].evt, Clbk, this, params);
             this.listeners.buffer[etypeidx].is_child_event = true;
         }
         else {
-            eidx = Listener_create_event(etypeidx, Clbk, this, params);
+            this.listeners.buffer[etypeidx].evt = Listener_create_event(etypeidx, Clbk, this, params);
         }
-
-        /**DEBUG */ if (eidx === INT_NULL) console.error('No event was created. @ Mesh.AddListenEvent(). mesh:', this.name);
-        this.listeners.buffer[etypeidx].idx = eidx;
-
-        // if (etypeidx === LISTEN_EVENT_TYPES_INDEX.CLICK) {
-
-        //     let eidx = INT_NULL;
-
-        //     if (parent_event && parent_event[etypeidx]) {
-        //         eidx = Listener_create_child_event(etypeidx, parent_event[etypeidx].idx, Clbk, this, params);
-        //         this.listeners.buffer[etypeidx].is_child_event = true;
-        //         this.StateEnable(MESH_STATE.IS_CLICKABLE);
-        //     }
-        //     else {
-        //         eidx = Listener_create_event(etypeidx, Clbk, this, params);
-        //         this.StateEnable(MESH_STATE.IS_CLICKABLE);
-        //     }
-
-        //     /**DEBUG */ if(eidx === INT_NULL) console.error('No event was created. @ Mesh.AddListenEvent(). mesh:', this.name);
-        //     this.listeners.buffer[etypeidx].idx = eidx;
-
-        // }
-        // else if (etypeidx === LISTEN_EVENT_TYPES_INDEX.HOVER) {
-
-        //     // const hover_idx = LISTEN_EVENT_TYPES_INDEX.HOVER;
-        //     let eidx = INT_NULL;
-
-        //     if (parent_event && parent_event[etypeidx]) {
-        //         eidx = Listener_create_child_event(etypeidx, parent_event[etypeidx].idx, Clbk, this, params);
-        //         this.StateEnable(MESH_STATE.IS_HOVERABLE);
-        //     }
-
-        //     else {
-        //         eidx = Listener_create_event(etypeidx, Clbk, this, params);
-        //         this.StateEnable(MESH_STATE.IS_HOVERABLE);
-        //     }
-
-        //     /**DEBUG */ if(eidx === INT_NULL) console.error('No event was created. @ Mesh.AddListenEvent(). mesh:', this.name);
-        //     this.listeners.buffer[etypeidx].idx = eidx;
-        // }
-        // else if (etypeidx === LISTEN_EVENT_TYPES_INDEX.MOVE) {
-
-        //     // const etypeidx = LISTEN_EVENT_TYPES_INDEX.CLICK;
-        //     let eidx = INT_NULL;
-
-        //     // We use a click event because the operation its base on the mouse click and hold
-        //     eidx = Listener_create_event(etypeidx, Clbk, this, params);
-        //     // Instead of having a generic Click event, we spesialize it to a Move event by setting some flags.
-        //     this.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_MOVABLE | MESH_STATE.IS_CLICKABLE);
-
-        //     /**DEBUG */ if(eidx === INT_NULL) console.error('No event was created. @ Mesh.AddListenEvent(). mesh:', this.name);
-        //     this.listeners.buffer[etypeidx].idx = eidx;
-        // }
     }
-
-    // // Create all listen events recursively for all children, from each mesh's listeners buffer.
-    // ConstructListeners(_root = null, _mesh = null) {
-
-    //     const mesh = (_mesh) ? _mesh : this; // If in recursion, use as the current mesh the passed param. 
-    //     const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
-    //     console.log('****', mesh.name, mesh.listeners.buffer)
-
-    //     const root_evt = root.listeners.buffer;
-
-    //     for (let etypeidx = 0; etypeidx < mesh.listeners.boundary; etypeidx++) {
-
-    //         const evt = mesh.listeners.buffer[etypeidx];
-
-    //         if (evt) { // If event is not null
-    //             const target_params = {
-    //                 EventClbk: null,
-    //                 targetBindingFunctions: null,
-    //                 target_mesh: mesh,
-    //                 params: null,
-    //             }
-    //             mesh.AddListenEvent(etypeidx, mesh.OnClick, target_params, root_evt);
-    //         }
-    //     }
-
-    //     for (let i = 0; i < mesh.children.boundary; i++) {
-    //         const child = mesh.children.buffer[i];
-    //         if (child) {
-    //             this.ConstructListeners(root, child)
-    //         }
-    //     }
-    // }
 
     RemoveAllListenEvents() {
-
+        /**
+         * TODO!!
+         * The if's maybe better implemented in EventListeners class RemoveEvent()???
+         */
         for (let etype = 0; etype < this.listeners.boundary; etype++) {
 
-            if (this.listeners.buffer[etype] && !this.listeners.buffer[etype].is_child_event) {
-
-                Listener_remove_event_by_idx(etype, this.listeners.buffer[etype].idx);
-                this.listeners.RemoveByIdx(etype);
-            }
-            /**DEBUG*/else if(this.listeners.buffer[etype] && this.listeners.buffer[etype].is_child_event) console.log('-------------- Removing child event from:', this.name)
-        }
-    }
-
-    RemoveListenEvent(event_type) {
-
-        if (event_type & LISTEN_EVENT_TYPES.CLICK_UP) {
-
-            const idx = LISTEN_EVENT_TYPES_INDEX.CLICK;
-            if (!this.listeners.buffer[idx].is_child_event) {
-
-                Listener_remove_event_by_idx(idx, this.listeners.buffer[idx].idx);
-                this.listeners.RemoveByIdx(idx)
-            }
-        }
-        else if (event_type & LISTEN_EVENT_TYPES.HOVER) {
-
-            const idx = LISTEN_EVENT_TYPES_INDEX.HOVER;
-            if (!this.listeners.buffer[idx].is_child_event) {
-
-                Listener_remove_event_by_idx(idx, this.listeners.buffer[idx].idx);
-                this.listeners.RemoveByIdx(idx)
+            if (this.listeners.buffer[etype] && this.listeners.buffer[etype].evt) {
+                if (!this.listeners.buffer[etype].is_child_event) {
+    
+                    Listener_remove_event_by_idx(etype, this.listeners.buffer[etype].evt);
+                }
+                else {
+                    Listener_remove_children_event_by_idx(etype, this.listeners.buffer[etype].evt);
+                }
             }
         }
     }
-
-    // RecreateListenEvents() {
-
-    //     if (this.StateCheck(MESH_STATE.IS_FAKE_HOVERABLE | MESH_STATE.IS_HOVERABLE))
-    //         this.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-    //     if (this.StateCheck(MESH_STATE.IS_FAKE_CLICKABLE) && (this.StateCheck(MESH_STATE.IS_CLICKABLE) === 0))
-    //         this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnFakeClick)
-    //     else if (this.StateCheck(MESH_STATE.IS_CLICKABLE))
-    //         this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick)
-    // }
 
     CreateEventCallback(params = null) {
 
@@ -643,6 +371,7 @@ export class Mesh {
         return eventIdx;
     }
 
+    
     /*******************************************************************************************************************************************************
      * Set mesh's menu options (on left mouse click).
      * If the callback that will create the menu options for this mesh
@@ -697,11 +426,6 @@ export class Mesh {
         }
         return false;
     }
-
-    // UpdateGfx() {
-    //     // console.log('UPDATE:', this.name)
-    //     this.UpdatePosXYZ();
-    // }
 
     /*******************************************************************************************************************************************************
      * Enable shader properties.
@@ -777,169 +501,7 @@ export class Mesh {
     }
 }
 
-/**
- * Deactivate all event listeners of meshe's children,
- * so that the parent mesh can check on demand for it's children events 
- */
-function Reconstruct_listeners_recursive(mesh, root) {
 
-    for (let i = 0; i < mesh.children.boundary; i++) {
-
-        const child = mesh.children.buffer[i];
-        if (child)
-            Reconstruct_listeners_recursive(child, root);
-
-        if (child.StateCheck(MESH_STATE.IS_HOVERABLE) && child.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER] && !child.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER].is_child_event) {
-
-            const type = LISTEN_EVENT_TYPES_INDEX.HOVER;
-
-            // Create a Fake event for the root, if the root does not have an event (of same type)
-            if (!root.listeners.buffer[type])
-                root.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-
-            root.StateEnable(MESH_STATE.IS_FAKE_HOVERABLE);
-
-            const evt_idx = child.listeners.buffer[type].idx;
-            child.listeners.buffer[type].idx = Listener_set_event_active_by_idx(type, root, evt_idx);
-            child.listeners.buffer[type].is_child_event = true;
-            // console.log('Remove Hover event:', type, child.name, child.listeners.buffer, ' parent:', mesh.name, ' root:', root.name)
-        }
-        if (child.StateCheck(MESH_STATE.IS_CLICKABLE) && child.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] && !child.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK].is_child_event) {
-
-            const type = LISTEN_EVENT_TYPES_INDEX.CLICK;
-
-            // Create a Fake event for the root, if the root does not have an event (of same type)
-            if (!root.listeners.buffer[type])
-                root.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, root.OnFakeClick);
-
-            root.StateEnable(MESH_STATE.IS_FAKE_CLICKABLE);
-
-            const evt_idx = child.listeners.buffer[type].idx;
-            child.listeners.buffer[type].idx = Listener_set_event_active_by_idx(type, root, evt_idx);
-            child.listeners.buffer[type].is_child_event = true;
-            // console.log('Remove click event:', type, child.name, child.listeners.buffer, ' parent:', mesh.name, ' root:', root.name)
-        }
-    }
-}
-
-function Gather_all_listen_events_recursive(mesh, event_type, idx = 0, gathered) {
-
-    // Gather for current mesh
-    if (mesh.listeners.active_count) {
-        gathered.idxs[idx] = mesh.listeners.buffer[event_type].idx;
-    }
-
-    // Gather for meshh's children
-    if (mesh.children.boundary) {
-
-        for (let i = 0; i < mesh.children.boundary; i++) {
-
-            const child = mesh.children.buffer[i];
-            if (child)
-                Gather_all_listen_events_recursive(mesh, event_type, idx = 0, gathered)
-        }
-    }
-
-    return gathered;
-}
-
-function Gather_all_listen_events_recursive_to_parent(mesh, event_type, idx = 0) {
-
-    let gathered = {
-        idxs: [],
-        count: 0,
-    };
-
-    if (mesh.parent && (mesh.parent.type & MESH_TYPES_DBG.SCENE) === 0) {
-
-        gathered = Gather_all_listen_events_recursive(mesh.parent, event_type, idx);
-        gathered.count++;
-    }
-
-    if (mesh.listeners.active_count) {
-        gathered.idxs[idx] = mesh.listeners.buffer[event_type].idx;
-    }
-
-    return gathered;
-}
-
-
-
-/** Helper Recursive Functions */
-// function Mesh_recursive_destroy(parent) {
-
-//     // for (let i = 0; i < parent.children.boundary; i++) {
-
-//     //     const mesh = parent.children.buffer[i];
-
-//     //     if (mesh) {
-
-//     //         /** Recursive Part */
-//     //         if (mesh.children.boundary)
-//     //             Mesh_recursive_destroy(mesh)
-
-//     //         if (DEBUG.GFX.REMOVE_MESH) console.log('Remove:', mesh.name)
-//     //         const ret = Gfx_remove_geometry(mesh.gfx, mesh.geom.num_faces); // Update the gfx.start of all meshes that are inserted in the same vertex buffer.
-//     //         Scenes_remove_mesh_from_gfx(mesh.sceneidx, mesh.gfx.prog.idx, mesh.gfx.vb.idx, mesh.scene_gfx_mesh_idx); // Remove mesh from the scene's gfx buffer
-
-//     //         // Remove event listeners
-//     //         // mesh.RemoveAllListenEvents();
-
-//     //         // Remove time intervals
-//     //         if (mesh.timeIntervalsIdxBuffer.active_count) {
-
-//     //             const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// TODO!!!: HACK We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
-//     //             TimeIntervalsDestroyByIdx(intervalIdx);
-//     //             mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
-//     //         }
-
-//     //         mesh.RemoveChildren(); // TODO: Do we need to strip down all meshes??? Only if they are shared pointers to some mesh of the appliction
-
-//     //         if (!ret.last) Scenes_update_all_gfx_starts(mesh.sceneidx, mesh.gfx.prog.idx, mesh.gfx.vb.idx, ret);
-
-//     //         parent.RemoveChildByIdx(i); // Remove the current mesh from the parent
-//     //     }
-//     // }
-// }
-
-/** */
-// function Mesh_destroy_private_recursive(parent) {
-
-//     for (let i = 0; i < parent.children.boundary; i++) {
-
-//         const mesh = parent.children.buffer[i];
-
-//         if (mesh) {
-
-//             /** Recursive Part */
-//             if (mesh.children.boundary)
-//                 Mesh_destroy_private_recursive(mesh)
-
-//             Gfx_deactivate_recursive(mesh);
-
-//             mesh.RemoveChildren(); // TODO: Do we need to strip down all meshes??? Only if they are shared pointers to some mesh of the appliction
-
-//             // Remove event listeners
-//             mesh.RemoveAllListenEvents();
-
-//             // Remove time intervals
-//             if (mesh.timeIntervalsIdxBuffer.active_count) {
-
-//                 const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// TODO!!!: HACK We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
-//                 TimeIntervalsDestroyByIdx(intervalIdx);
-//                 mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
-//             }
-
-//             if (mesh.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) {
-//                 mesh.DeactivateMenu();
-//             }
-
-//             parent.RemoveChildByIdx(i); // Remove the current mesh from the parent
-//         }
-//     }
-// }
-
-/** */
 export function Recursive_gfx_operations(_mesh, Clbk, params) {
 
     const children = _mesh.children;
@@ -954,33 +516,6 @@ export function Recursive_gfx_operations(_mesh, Clbk, params) {
 }
 
 
-function Set_graphics_vertex_buffer_render(mesh, flag) {
-
-    const progidx = mesh.gfx.prog.idx;
-    const vbidx = mesh.gfx.vb.idx;
-    Gfx_set_vb_show(progidx, vbidx, flag)
-}
-
-// function Recursive_mesh_move(buffer, x, y) {
-
-//     const meshes = buffer;
-
-//     for (let i = 0; i < meshes.boundary; i++) {
-
-//         if (meshes.buffer[i]) {
-//             if (meshes.buffer[i].children.boundary)
-//                 Recursive_mesh_move(meshes.buffer[i].children, x, y)
-
-//             const gfx = meshes.buffer[i].gfx;
-//             meshes.buffer[i].geom.MoveXY(x, y, gfx);
-//             // console.log(x,y, meshes.buffer[i].name)
-//         }
-
-//     }
-
-// }
-
-
 /*******************************************************************************************************************************************************
 /** DEBUG PRINT*/
 export function Mesh_print_all_mesh_listeners() {
@@ -989,6 +524,7 @@ export function Mesh_print_all_mesh_listeners() {
 
     if (children) Mesh_print_all_mesh_listeners_recursive(children);
 }
+
 function Mesh_print_all_mesh_listeners_recursive(meshes) {
 
     for (let i = 0; i < meshes.boundary; i++) {
@@ -1005,3 +541,47 @@ function Mesh_print_all_mesh_listeners_recursive(meshes) {
         }
     }
 }
+
+
+/**SAVES */
+
+/** function Reconstruct_listeners_recursive(mesh, root){
+
+    for(let i=0; i< mesh.children.count; i++){
+
+        const child = mesh.children.buffer[i];
+        if(child)
+            Reconstruct_listeners_recursive(child, root);
+
+        if(child.StateCheck(MESH_STATE.IS_HOVERABLE)){
+            
+            const type = LISTEN_EVENT_TYPES_INDEX.HOVER;
+
+            // Create a Fake event for the root, if the root does not have an event (of same type)
+            if(root.listeners.buffer[type] === INT_NULL)
+                root.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+
+            root.StateEnable(MESH_STATE.IS_FAKE_HOVERABLE);
+
+            const evt_idx = child.listeners.buffer[type];
+            child.listeners.buffer[type] = Listener_set_event_active_by_idx(type, root, evt_idx);
+            // console.log('Remove Hover event:', type, child.name, child.listeners.buffer, ' parent:', mesh.name, ' root:', root.name)
+        }
+        if(child.StateCheck(MESH_STATE.IS_CLICKABLE)){
+            
+            const type = LISTEN_EVENT_TYPES_INDEX.CLICK;
+            
+            // Create a Fake event for the root, if the root does not have an event (of same type)
+            if(root.listeners.buffer[type] === INT_NULL)
+                root.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, root.OnFakeClick);
+            
+            root.StateEnable(MESH_STATE.IS_FAKE_CLICKABLE);
+            
+            const evt_idx = child.listeners.buffer[type];
+            child.listeners.buffer[type] = Listener_set_event_active_by_idx(type, root, evt_idx)
+            // console.log('Remove click event:', type, child.name, child.listeners.buffer, ' parent:', mesh.name, ' root:', root.name)
+        }
+    }
+}
+ */
+

@@ -42,10 +42,6 @@ export class Rect extends Mesh {
 
       this.gfx.vb.start = Gfx_add_geom_mat_to_vb(this.sid, this.gfx, this.geom, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name);
 
-      // if (this.listeners.active_count) {
-      //    Listener_events_set_mesh_events_active(LISTENERS_FLAGS.ALL, this.listeners, true);
-      // }
-
       const params = {
          progidx: this.gfx.prog.idx,
          vbidx: this.gfx.vb.idx,
@@ -80,25 +76,5 @@ export class Rect extends Mesh {
 
    /** Return type: Array. Returns an array of all widgets meshes */
    GetAllMeshes() { return [this]; }
-
-   /*******************************************************************************************************************************************************/
-   // Events Handling
-   /**
-    * @param {*} event_type typeof 'LISTEN_EVENT_TYPES'
-    * @param {*} Clbk User may choose the callback for the listen event.
-    */
-   // CreateListenEvent(event_type, Clbk, parent_event) {
-
-   //    const target_params = {
-   //       EventClbk: null,
-   //       targetBindingFunctions: null,
-   //       // clicked_mesh: this.area_mesh,
-   //       target_mesh: this,
-   //       params: null,
-   //    }
-
-   //    if (Clbk) this.AddEventListener(event_type, Clbk, target_params, parent_event);
-   //    else this.AddEventListener(event_type, this.OnClick, target_params, parent_event);
-   // }
 
 }

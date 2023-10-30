@@ -87,23 +87,24 @@ export function AppInit() {
     // Debug_info_ui_performance(scene);
 
 
-    // const label = CreateLabel(scene);
-    // DestroyMeshTest(scene, label)
-    
-    // const button = CreateButton(scene); // DestroyMeshTest(scene, button)
-    // const switch1 = CreateSwitch(scene) // DestroyMeshTest(scene, switch1)
+    const label = CreateLabel(scene);
+    DestroyMeshTest(scene, label)
+
+    const button = CreateButton(scene); 
+    const switch1 = CreateSwitch(scene);
 
     // const menu = CreateMenu(scene)
 
     // CreateDropDownWidgetWithWidgetsInside(scene)
-    
+
     // CreateSlider(scene);
-    // CreateSliderWithMenuEBar(scene);
-    CreateSectionWithNestedWidgetsWithListenEvents(scene);
+    // CreateSliderWithMenuBar(scene);
+    // CreateSectionWithNestedWidgetsWithListenEvents(scene);
+    CreateSectionWithNestedWidgetsWithListenEvents2(scene);
 
     // CreatDynamicText(scene)
     // CreatDynamicTextSectioned(scene)
-    
+
     // CreatSectionedMixWidgets(scene)
     // CreateSectionSectioned(scene)
 
@@ -119,8 +120,8 @@ export function AppInit() {
     // const section = MeshInfo(scene)
     // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
 
-    // const section = MeshInfo(scene)
-    // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
+    const section = MeshInfo(scene)
+    TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
 
     // Listeners_debug_info_create(scene);
     // Scenes_debug_info_create(scene);
@@ -191,7 +192,7 @@ function CreateLabel(scene) {
     scene.AddWidget(label)
     label.text_mesh.SetColorRGB(RED);
     // label.text_mesh.UpdateText('RED');
-    
+
     label.Render()
     // label.Align(ALIGN.BOTTOM | ALIGN.LEFT, [0, 0]);
     // label.Align(ALIGN.BOTTOM | ALIGN.RIGHT, [0, 0]);
@@ -217,7 +218,7 @@ function CreateButton(scene) {
     scene.AddWidget(btn);
     btn.text_mesh.SetColorRGB(BLUE_10_120_220);
 
-    btn.Align(ALIGN.LEFT|ALIGN.TOP, [0, 0]);
+    btn.Align(ALIGN.LEFT | ALIGN.TOP, [0, 0]);
 
     return btn;
 }
@@ -226,15 +227,17 @@ function DestroyMeshTest(scene, widget) {
 
     const customCallback = function (params) {
 
-        if(widget) {
+        if (widget) {
             console.log('Destroy Text mesh test:', widget.name);
             widget = Destroy_mesh(widget);
         }
         else console.log('Widget does not exist')
     }
     const btn1 = new Widget_Button('Destroy', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [160, 240, 0], 5, GREY1, WHITE, [4, 4], .5);
-    btn1.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, customCallback)
+    btn1.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP)
+    btn1.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.CLICK, customCallback)
     btn1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+    btn1.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.HOVER)
     btn1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
     btn1.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE, { style: [6, 6, 3] })
     scene.AddWidget(btn1);
@@ -256,27 +259,27 @@ function CreateSwitch(scene) {
     return switch1;
 }
 
-function CreatDynamicText(scene){
+function CreatDynamicText(scene) {
 
-    const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000',  [100, 300, 0], 4, BLUE_10_120_220, PINK_240_60_160);
+    const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000', [100, 300, 0], 4, BLUE_10_120_220, PINK_240_60_160);
     scene.AddWidget(dt)
 }
 
-function CreatDynamicTextSectioned(scene){
+function CreatDynamicTextSectioned(scene) {
 
     const section = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREY1, .9))
     section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
     section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
 
     {
-        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '000000',  [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
+        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '000000', [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
         section.AddItem(dt);
     }
     {
-        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '00',  [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
+        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '00', [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
         section.AddItem(dt);
     }
-    
+
     scene.AddWidget(section);
     section.Calc();
 }
@@ -319,7 +322,7 @@ function CreateDropDownWidgetWithWidgetsInside(scene) {
             // const info_event_type = INFO_LISTEN_EVENT_TYPE.GFX | INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
             drop_down2.AddToMenu(text);
         }
-        
+
         // Add label to DP2
         const label = new Widget_Label('Labe 1', ALIGN.RIGHT);
         drop_down2.AddToMenu(label)
@@ -327,7 +330,7 @@ function CreateDropDownWidgetWithWidgetsInside(scene) {
         const btn = new Widget_Button('Button 1', ALIGN.RIGHT);
         drop_down2.AddToMenu(btn)
         // Add button to DP2
-        const slider = new Widget_Slider([0,0,0], [80,10]);
+        const slider = new Widget_Slider([0, 0, 0], [80, 10]);
         drop_down2.AddToMenu(slider)
 
         Drop_down_set_root(drop_down, drop_down2);
@@ -374,7 +377,7 @@ function CreateDropDownWidgetWithWidgetsInside(scene) {
 
 }
 
-function CreatSectionedMixWidgets(scene){
+function CreatSectionedMixWidgets(scene) {
 
     const section = new Section(SECTION.VERTICAL, [10, 10], [250, 400, 0], [0, 0], TRANSPARENCY(GREY1, .5))
     // section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
@@ -387,27 +390,27 @@ function CreatSectionedMixWidgets(scene){
         section.AddItem(menu)
     }
     {
-        const lb = new Widget_Label('Label', ALIGN.BOTTOM,  [0, 0, 0], 4, BLUE_10_120_220);
+        const lb = new Widget_Label('Label', ALIGN.BOTTOM, [0, 0, 0], 4, BLUE_10_120_220);
         section.AddItem(lb);
     }
     {
-        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000000',  [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
+        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000000', [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
         section.AddItem(dt);
     }
     {
-        const slider = new Widget_Slider([0, 0, 0], [60, 10], PINK_240_60_160, [2,4]);
+        const slider = new Widget_Slider([0, 0, 0], [60, 10], PINK_240_60_160, [2, 4]);
         section.AddItem(slider);
     }
     {
         const s2 = new Section(SECTION.VERTICAL, [10, 10], [0, 0, 0], [0, 0], TRANSPARENCY(ORANGE_240_200_10, .5))
         // const s2 = new Section(SECTION.HORIZONTAL, [10, 10], [0, 0, 0], [0, 0], TRANSPARENCY(WHITE, .7))
         s2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    
+
         const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [0, 0, 0], TRANSPARENCY(ORANGE_240_200_10, .5), WHITE, [10, 6]);
         menu.AddCloseButton(s2, 'x');
         menu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
         s2.AddItem(menu);
-        
+
         const slider = new Widget_Slider([0, 0, 0], [80, 10], BLUE_10_160_220);
         s2.AddItem(slider);
 
@@ -415,12 +418,12 @@ function CreatSectionedMixWidgets(scene){
             // const s2 = new Section(SECTION.VERTICAL, [10, 10], [0, 0, 0], [0, 0], TRANSPARENCY(WHITE, .7))
             const s3 = new Section(SECTION.HORIZONTAL, [10, 10], [0, 0, 0], [0, 0], TRANSPARENCY(GREEN_140_240_10, .5))
             s3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        
+
             const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [0, 0, 0], TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [10, 6]);
             menu.AddCloseButton(s3, 'x');
             menu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
             s3.AddItem(menu);
-            
+
             const slider = new Widget_Slider([0, 0, 0], [80, 10], GREEN_33_208_40);
             s3.AddItem(slider);
             s2.AddItem(s3);
@@ -428,7 +431,7 @@ function CreatSectionedMixWidgets(scene){
 
         section.AddItem(s2);
     }
-    
+
     scene.AddWidget(section);
     section.Calc();
 }
@@ -441,22 +444,22 @@ function CreateSlider(scene) {
 
     scene.AddWidget(slider);
     slider.ConstructListeners();
-    
+
 }
 
 function CreateSliderWithMenuBar(scene) {
-    
+
     const section = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREY1, .9))
     section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
-    
+
     const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
     menu.AddCloseButton(section, 'x');
     section.AddItem(menu);
-    
+
     const slider = new Widget_Slider([200, 100, 0], [150, 10]);
     slider.CreateSliderHandleEvent();
     section.AddItem(slider);
-    
+
     scene.AddWidget(section);
     section.Calc();
     section.ConstructListeners();
@@ -466,33 +469,110 @@ function CreateSliderWithMenuBar(scene) {
 }
 
 function CreateSectionWithNestedWidgetsWithListenEvents(scene) {
-    
+
     const section = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREY1, .9))
     section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
-    
-    const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
+
+    const menu = new Widget_Menu_Bar('Widget Menu bar 0', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
     menu.AddCloseButton(section, 'x');
     section.AddItem(menu);
-    
+
     const slider = new Widget_Slider([200, 100, 0], [150, 10]);
     slider.CreateSliderHandleEvent();
     section.AddItem(slider);
-    
+
     {
-        
-        const s = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREY1, .9))
+
+        const s = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREEN_140_240_10, .9))
         // s.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
-        
-        const m = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
+
+        const m = new Widget_Menu_Bar('Widget Menu bar 1', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
         m.AddCloseButton(s, 'x');
         s.AddItem(m);
-        
+
         const sl = new Widget_Slider([200, 100, 0], [150, 10]);
         sl.CreateSliderHandleEvent();
         s.AddItem(sl);
         section.AddItem(s);
+
+        {
+            const s2 = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(YELLOW_240_220_10, .9))
+            // s.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+
+            const m2 = new Widget_Menu_Bar('Widget Menu bar 2', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
+            m2.AddCloseButton(s2, 'x');
+            s2.AddItem(m2);
+
+            const sl = new Widget_Slider([200, 100, 0], [150, 10]);
+            sl.CreateSliderHandleEvent();
+            s2.AddItem(sl);
+            s.AddItem(s2);
+        }
     }
-    
+
+    scene.AddWidget(section);
+    section.Calc();
+    section.ConstructListeners();
+
+
+    console.log('section:', section)
+}
+
+function CreateSectionWithNestedWidgetsWithListenEvents2(scene) {
+
+    const section = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREY1, .9))
+    // section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+
+    const menu = new Widget_Menu_Bar('Widget Menu bar 0', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
+    menu.AddCloseButton(section, 'x');
+    section.AddItem(menu);
+
+    const slider = new Widget_Slider([200, 100, 0], [150, 10]);
+    slider.CreateSliderHandleEvent();
+    section.AddItem(slider);
+
+    {
+
+        const s = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREEN_140_240_10, .9))
+
+        const m = new Widget_Menu_Bar('Widget Menu bar 1', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
+        m.AddCloseButton(s, 'x');
+        s.AddItem(m);
+
+        const sl = new Widget_Slider([200, 100, 0], [150, 10]);
+        sl.CreateSliderHandleEvent();
+        s.AddItem(sl);
+
+        section.AddItem(s);
+
+        {
+            const s2 = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(YELLOW_240_220_10, .9))
+
+            const m2 = new Widget_Menu_Bar('Widget Menu bar 2', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
+            m2.AddCloseButton(s2, 'x');
+            s2.AddItem(m2);
+
+            const sl1 = new Widget_Slider([200, 100, 0], [150, 10]);
+            sl1.CreateSliderHandleEvent();
+            s2.AddItem(sl1);
+
+            s.AddItem(s2);
+            {
+                const s3 = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(YELLOW_240_220_10, .9))
+
+                const m3 = new Widget_Menu_Bar('Widget Menu bar 3', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
+                m3.AddCloseButton(s3, 'x');
+                s3.AddItem(m3);
+
+                const sl3 = new Widget_Slider([200, 100, 0], [150, 10]);
+                sl3.CreateSliderHandleEvent();
+                s3.AddItem(sl3);
+
+                s2.AddItem(s3);
+            }
+        }
+    }
+
     scene.AddWidget(section);
     section.Calc();
     section.ConstructListeners();
@@ -636,9 +716,7 @@ function CreateSectionSectioned(scene) {
     scene.AddWidget(blu, GFX.PRIVATE);
     Gfx_end_session(true);
     blu.Calc();
-    // const l = Debug_get_event_listeners();
-    // l.PrintAll()
-    blu.Reconstruct_listeners_recursive();
+    blu.ConstructListeners();
 
 }
 
@@ -648,9 +726,9 @@ function CreateScroller(scene) {
 
     // const text = new Widget_Dynamic_Text_Mesh('Hi', 'this is tex', [300, 300, 0], fontsize, WHITE, WHITE, .4);
     const section = new Section(SECTION.VERTICAL, [10, 10], [280, 650, 0], [0, 0], TRANSPARENCY(GREY1, .6));
-    
+
     for (let i = 0; i < 3; i++) {
-        
+
         const s = new Section(SECTION.VERTICAL, [6, 3], [280, 650, 0], [0, 0], TRANSPARENCY(GREEN_140_240_10, .6));
         s.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
         s.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
@@ -658,18 +736,18 @@ function CreateScroller(scene) {
         const label = new Widget_Label('Label', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3])
         // label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
         // label.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
-        
+
         s.AddItem(label);
         section.AddItem(s);
         // section.AddItem(label);
     }
-    
+
     section.Calc();
-    
+
     // const scroller = new Widget_Scroller(section, [20, 50]);
     const scroller = new Widget_Scroller(section);
     scroller.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
-    
+
     scene.AddWidget(scroller, GFX.PRIVATE);
     Gfx_end_session(true);
     scroller.Recalc();
@@ -714,10 +792,6 @@ function Help(scene) {
     Gfx_end_session(true);
 
     section.Calc(flags)
-    // section.Recalc(flags)
-    // section.Reconstruct_listeners_recursive();
-
-
 }
 
 function MeshInfo(scene) {

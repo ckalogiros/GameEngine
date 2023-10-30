@@ -183,26 +183,29 @@ export class Widget_Label extends Rect {
 
     /*******************************************************************************************************************************************************/
     // Events Handling
-    /**
-     * @param {*} event_type typeof 'LISTEN_EVENT_TYPES'
-     * @param {*} Clbk User may choose the callback for the listen event.
-     */
-    // CreateListenEvent(event_type, Clbk = null, params = null, parent_event = null) {
 
-    //     const target_params = {
-    //         EventClbk: null,
-    //         targetBindingFunctions: null,
-    //         // clicked_mesh: this.area_mesh,
-    //         target_mesh: this,
-    //         params: params,
-    //     }
+    ConstructListeners(_root = null, _mesh = null) {
 
+        const mesh = (_mesh) ? _mesh : this; // If in recursion, use as the current mesh the passed param. 
+        const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
+        // console.log('****', mesh.name, mesh.listeners.buffer)
 
-    //     if (Clbk) this.AddListenEvent(event_type, Clbk, target_params, parent_event);
-    //     else this.AddListenEvent(event_type, this.OnClick, target_params, parent_event);
-    //     // if (Clbk) this.AddEventListener(event_type, Clbk, target_params, parent_event);
-    //     // else this.AddEventListener(event_type, this.OnClick, target_params, parent_event);
-    // }
+        const root_evt = root.listeners.buffer;
+
+        for (let etypeidx = 0; etypeidx < mesh.listeners.boundary; etypeidx++) {
+
+            const evt = mesh.listeners.buffer[etypeidx];
+            if (evt) { // If event is not null
+                const target_params = {
+                    EventClbk: null,
+                    targetBindingFunctions: null,
+                    target_mesh: mesh,
+                    params: null,
+                }
+                mesh.AddListenEvent(etypeidx, mesh.OnClick, target_params, root_evt);
+            }
+        }
+    }
 
     OnClick(params) {
 

@@ -381,9 +381,6 @@ export class Widget_Dropdown extends Section {
 
          Gfx_activate(dropdown_mesh); // activate the gfx buffers
 
-
-         // root.Reconstruct_listeners_recursive();
-
       }
       else { /** DEACTIVATE: Else dropdown button click and it's menu is active, so deactivate the menu and its items. */
 

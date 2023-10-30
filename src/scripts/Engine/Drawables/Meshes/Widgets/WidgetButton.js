@@ -34,16 +34,13 @@ export class Widget_Switch extends Widget_Button {
 
    /*******************************************************************************************************************************************************/
    // Events Handling
-   /**
-     * @param {*} event_type typeof 'LISTEN_EVENT_TYPES'
-     * @param {*} Clbk          User may choose the callback for the
-     */
-   CreateListenEvent(event_type, Clbk = null, target_params = null) {
 
-      if (Clbk && target_params) { this.AddEventListener(event_type, Clbk, target_params); return; }
-      if (Clbk) {this.AddEventListener(event_type, Clbk, this); return;};
-      this.AddEventListener(event_type, this.OnClick, this); return;
-   }
+   // CreateListenEvent(event_type, Clbk = null, target_params = null) {
+
+   //    if (Clbk && target_params) { this.AddEventListener(event_type, Clbk, target_params); return; }
+   //    if (Clbk) {this.AddEventListener(event_type, Clbk, this); return;};
+   //    this.AddEventListener(event_type, this.OnClick, this); return;
+   // }
 
    OnClick(params) {
 

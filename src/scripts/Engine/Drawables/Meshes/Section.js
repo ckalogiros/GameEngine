@@ -262,10 +262,11 @@ export class Section extends Rect {
 
       const mesh = (_mesh) ? _mesh : this; // If in recursion, use as the current mesh the passed param. 
       const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
-      console.log('****', mesh.name, mesh.listeners.buffer)
+      // console.log('****', mesh.name, mesh.listeners.buffer)
 
       // Create listen events for the section
       const root_evt = root.listeners.buffer;
+      // for (let etypeidx = 0; etypeidx < LISTEN_EVENT_TYPES_INDEX.SIZE; etypeidx++) {
       for (let etypeidx = 0; etypeidx < mesh.listeners.boundary; etypeidx++) {
 
          const evt = mesh.listeners.buffer[etypeidx];
@@ -286,11 +287,30 @@ export class Section extends Rect {
          const child = mesh.children.buffer[i];
          if (child) {
 
-            // Case item is of type section, run recursively.
-            if(child.type & MESH_TYPES_DBG.SECTION_MESH){
-               this.ConstructListeners(root, child)
+            /**
+             * Create a Fake listen event as a parent event, if the section has no listen events,
+             * so that the actual listen events of the section's children meshes
+             * will be searched only if the fake event is triggered. 
+            */
+
+            const parent_root = root.parent ? root.parent : root
+
+            // If the root mesh does not have an event, create a fake event to store the children events to. 
+            if (root.listeners.buffer[1] === null) {
+
+               root.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, true);
+               root.AddListenEvent(1, null, null, parent_root.listeners.buffer);
             }
-            else child.ConstructListeners(root)
+            // Case item is of type section, run recursively.
+            if (child.type & MESH_TYPES_DBG.SECTION_MESH) {
+               child.ConstructListeners(child)
+            }
+            else if (child.ConstructListeners) // Call the widget's specific .ConstructListeners() to handle the widget's listen events creation
+               child.ConstructListeners(root)
+
+
+
+            else console.error('NO LISTEN EVENTS CONSTRUCTION OCCURED. mesh:', child.name, child)
          }
       }
    }
@@ -560,64 +580,3 @@ function Calculate_sizes_recursive(section, top, left, options, total_margin = [
    AddArr2(total_size, accum_size_per_section);
    return total_size;
 }
-
-
-
-
-/** Save */
-// function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum_pos = [parent.geom.pos[1], 0]) {
-
-//    const padding = [0, 0]
-//    const cur_pos = [parent.geom.pos[0], parent.geom.pos[1]];
-//    const accum_pos = _accum_pos;
-
-
-//    for (let i = 0; i < parent.children.boundary; i++) {
-
-//       const mesh = parent.children.buffer[i];
-//       let continue_recur = true;
-//       let opt = options
-
-//       if (options & SECTION.INHERIT) opt = parent.options
-
-//       if (parent.type & MESH_TYPES_DBG.SECTION_MESH) { // For meshes with a parent of type Section
-
-//          const c_x = cur_pos[0]; const c_y = cur_pos[1];
-//          const p_dx = parent.geom.dim[0]; const p_dy = parent.geom.dim[1];
-//          const p_mx = parent.margin[0]; const p_my = parent.margin[1];
-
-//          const new_pos = [c_x - p_dx + mesh.geom.dim[0] + p_mx,
-//          c_y - p_dy + mesh.geom.dim[1] + p_my,
-//          parent.geom.pos[2] + 1,];
-
-//          if ((mesh.type & MESH_TYPES_DBG.SECTION_MESH) === 0) { // Case mesh not of type section, have it update it's new pos-dim on a later when it's gfx exists.
-
-//             const pos_dif = [new_pos[0] - mesh.geom.pos[0], new_pos[1] - mesh.geom.pos[1], new_pos[2] + 1];
-//             UpdaterAdd(mesh, 0, null, pos_dif);
-
-//             continue_recur = false; // Stop recursion for meshe's children. Let the mesh deal with it's children.
-//          }
-//          else { // Case  mesh is of type section
-
-//             // CopyArr3(mesh.geom.pos, new_pos);
-//             CopyArr2(mesh.geom.pos, new_pos);
-//          }
-//       }
-
-
-//       if (continue_recur)
-//          Calculate_positions_recursive(mesh, options, accum_pos)
-
-//       if (opt & SECTION.VERTICAL) {
-//          cur_pos[1] += mesh.geom.dim[1] * 2;
-//          accum_pos[0] += mesh.geom.pos[0];
-//          accum_pos[1]++;
-//       }
-//       else if (opt & SECTION.HORIZONTAL) {
-//          cur_pos[0] += mesh.geom.dim[0] * 2;
-//          // parent.geom.dim[0] += mesh.geom.dim[0] * mesh.mat.num_faces
-//       }
-//    }
-
-//    return accum_pos;
-// }

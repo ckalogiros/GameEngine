@@ -173,18 +173,19 @@ const MESH_STATE = {
 	IS_CLICKABLE: _cnt <<= 1,
 	IS_MOVABLE: _cnt <<= 1,
 	IS_GRABABLE: _cnt <<= 1,
+	IS_FAKE_EVENT: _cnt <<= 1,
 	IS_FAKE_HOVERABLE: _cnt <<= 1,
 	IS_FAKE_CLICKABLE: _cnt <<= 1,
 	IS_HOVER_COLORABLE: _cnt <<= 1,
 
-	CLICKED_MOUSE_L: _cnt <<= 1,
-	CLICKED_MOUSE_M: _cnt <<= 1,
-	CLICKED_MOUSE_R: _cnt <<= 1,
+	// CLICKED_MOUSE_L: _cnt <<= 1,
+	// CLICKED_MOUSE_M: _cnt <<= 1,
+	// CLICKED_MOUSE_R: _cnt <<= 1,
 
 	HAS_POPUP: _cnt <<= 1,
 
-	CHILDREN_HAVE_CLICK_EVENT: _cnt <<= 1,
-	CHILDREN_HAVE_HOVER_EVENT: _cnt <<= 1,
+	// CHILDREN_HAVE_CLICK_EVENT: _cnt <<= 1,
+	// CHILDREN_HAVE_HOVER_EVENT: _cnt <<= 1,
 
 
 	Print(mask) {
