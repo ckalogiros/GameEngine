@@ -9,9 +9,8 @@ export class Widget_Button extends Widget_Label {
    constructor(text, Align = (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos = [200, 300, 0], fontSize = 4.4, col = GREY1, textCol = WHITE, pad = [10, 5], bold = .4, style = [0, 6, 2], font = TEXTURES.SDF_CONSOLAS_LARGE) {
 
       super(text, Align, pos, fontSize, col, textCol, pad, bold, style, font)
-
       this.type |= MESH_TYPES_DBG.WIDGET_BUTTON;
-
+      this.SetName('Button');
    }
 
 }
@@ -20,6 +19,7 @@ export class Widget_Switch extends Widget_Button {
 
    isOn;
    state_text;
+   evt_params;
 
    constructor(text_on, text_off, pos, fontSize = 5, color = GREY1, colorText = WHITE, pad = [fontSize, fontSize], bold, style = [3, 6, 2], font) {
 
@@ -27,6 +27,14 @@ export class Widget_Switch extends Widget_Button {
 
       this.isOn = 0x0;
       this.state_text = [text_off, text_on];
+      this.evt_clbk = {
+         // Binding function for the switch callback function and some params.
+         EventClbk: null,
+         targetBindingFunctions: null,
+         target_mesh: this,
+         params: null,
+      };
+
       this.type |= MESH_TYPES_DBG.WIDGET_BUTTON;
       this.SetName('Switch');
 
@@ -34,13 +42,6 @@ export class Widget_Switch extends Widget_Button {
 
    /*******************************************************************************************************************************************************/
    // Events Handling
-
-   // CreateListenEvent(event_type, Clbk = null, target_params = null) {
-
-   //    if (Clbk && target_params) { this.AddEventListener(event_type, Clbk, target_params); return; }
-   //    if (Clbk) {this.AddEventListener(event_type, Clbk, this); return;};
-   //    this.AddEventListener(event_type, this.OnClick, this); return;
-   // }
 
    OnClick(params) {
 
@@ -71,14 +72,28 @@ export class Widget_Switch extends Widget_Button {
    // Misc
    Bind(EventClbk, targetBindingFunctions, params) {
 
-      const target_params = {
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP);
+      this.evt_params = { // Create the parameters to pass for the switch's click event. 
          EventClbk: EventClbk,
          targetBindingFunctions: targetBindingFunctions,
          target_mesh: this,
          params: params,
-      }
+      };
+   }
 
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, this.OnClick, target_params)
+   ConstructListeners(_root = null) {
+
+      const mesh = this; // If in recursion, use as the current mesh the passed param. 
+      const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
+      const root_evt = root.listeners.buffer;
+
+      for (let etypeidx = 0; etypeidx < mesh.listeners.boundary; etypeidx++) {
+
+         const evt = mesh.listeners.buffer[etypeidx];
+         if (evt) { 
+            mesh.AddListenEvent(etypeidx, mesh.OnClick, this.evt_params, root_evt);
+         }
+      }
    }
 }
 

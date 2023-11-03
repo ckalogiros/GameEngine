@@ -336,6 +336,8 @@ export class Mesh {
 
     AddListenEvent(etypeidx, Clbk = null, params = null, parent_event = null) {
 
+        if(!this.listeners.buffer[etypeidx])
+            console.log()
         if (parent_event && parent_event[etypeidx] && parent_event[etypeidx].evt) {
             this.listeners.buffer[etypeidx].evt = Listener_create_child_event(etypeidx, parent_event[etypeidx].evt, Clbk, this, params);
             this.listeners.buffer[etypeidx].is_child_event = true;

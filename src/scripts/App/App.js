@@ -84,23 +84,25 @@ export function AppInit() {
      * Create meshes
      */
 
-    // Debug_info_ui_performance(scene);
+    Debug_info_ui_performance(scene);
 
 
-    const label = CreateLabel(scene);
-    DestroyMeshTest(scene, label)
+    // const label = CreateLabel(scene);
+    // DestroyMeshTest(scene, label)
 
-    const button = CreateButton(scene); 
-    const switch1 = CreateSwitch(scene);
+    // const button = CreateButton(scene); 
+    // const switch1 = CreateSwitch(scene);
 
     // const menu = CreateMenu(scene)
 
+
+    // CreateDropDownWithDropdownsInside(scene)
     // CreateDropDownWidgetWithWidgetsInside(scene)
 
     // CreateSlider(scene);
     // CreateSliderWithMenuBar(scene);
     // CreateSectionWithNestedWidgetsWithListenEvents(scene);
-    CreateSectionWithNestedWidgetsWithListenEvents2(scene);
+    // CreateSectionWithNestedWidgetsWithListenEvents2(scene);
 
     // CreatDynamicText(scene)
     // CreatDynamicTextSectioned(scene)
@@ -120,8 +122,8 @@ export function AppInit() {
     // const section = MeshInfo(scene)
     // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
 
-    const section = MeshInfo(scene)
-    TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
+    // const section = MeshInfo(scene)
+    // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
 
     // Listeners_debug_info_create(scene);
     // Scenes_debug_info_create(scene);
@@ -131,8 +133,8 @@ export function AppInit() {
     camera.UpdateProjectionUniform(renderer.gl);
     scene.Render();
 
-    const progs = Gl_progs_get();
-    console.log(progs)
+    // const progs = Gl_progs_get();
+    // console.log(progs)
 
 
     Renderqueue_get().SetPriorityProgram('last', 1, 0);
@@ -187,6 +189,7 @@ function CreateLabel(scene) {
     label.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
     label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
     label.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+    label.ConstructListeners();
 
 
     scene.AddWidget(label)
@@ -294,18 +297,68 @@ function CreateMenu(scene) {
     menu.ConstructListeners();
 }
 
+function CreateDropDownWithDropdownsInside(scene) {
+
+    const pad = [10, 2.5]
+    const drop_down = new Widget_Dropdown('DP1', [260, 200, 0], [60, 20], RED, BLUE_10_120_220, WHITE, pad);
+    drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); 
+    drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+    drop_down.CreateClickEvent();
+    drop_down.CreateMoveEvent(); 
+    
+    { // Add another dropdown in dropdown
+
+        {
+            const drop_down3 = new Widget_Dropdown('DP3 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
+            drop_down3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+            drop_down3.CreateClickEvent();
+            drop_down.AddToMenu(drop_down3);
+            {
+                const drop_down4 = new Widget_Dropdown('DP4 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, GREEN_140_240_10, WHITE, pad);
+                drop_down4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+                drop_down4.CreateClickEvent();
+                drop_down3.AddToMenu(drop_down4);
+                
+                {
+                    const drop_down5 = new Widget_Dropdown('DP5 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, PINK_240_60_200, WHITE, pad);
+                    drop_down5.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+                    drop_down5.CreateClickEvent();
+                    drop_down4.AddToMenu(drop_down5);
+                    
+                    {
+                        const drop_down6 = new Widget_Dropdown('DP6 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, RED_200_10_10, WHITE, pad);
+                        drop_down6.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+                        drop_down6.CreateClickEvent();
+                        drop_down5.AddToMenu(drop_down6);
+
+                        {
+                            const text = new Widget_Text('DP5 -->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
+                            // text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
+                            // text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); 
+
+                            drop_down6.AddToMenu(text);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    scene.AddWidget(drop_down);
+    drop_down.Calc();
+    drop_down.ConstructListeners();
+
+}
 function CreateDropDownWidgetWithWidgetsInside(scene) {
 
     const pad = [10, 2.5]
-    const drop_down = new Widget_Dropdown('DP1', [260, 200, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, pad);
-    drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+    const drop_down = new Widget_Dropdown('DP1', [260, 300, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, pad);
     drop_down.CreateClickEvent();
-    // drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, drop_down.SetOnMove);
-
+    drop_down.CreateMoveEvent();
+    
     { // Add another dropdown in dropdown
         const drop_down2 = new Widget_Dropdown('DP2', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, pad);
-        drop_down2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-        Drop_down_set_root(drop_down, drop_down2);
+        drop_down2.CreateClickEvent();
         drop_down.AddToMenu(drop_down2);
 
         { // Add text to DP2's menu
@@ -333,30 +386,33 @@ function CreateDropDownWidgetWithWidgetsInside(scene) {
         const slider = new Widget_Slider([0, 0, 0], [80, 10]);
         drop_down2.AddToMenu(slider)
 
-        Drop_down_set_root(drop_down, drop_down2);
 
         {
             const drop_down3 = new Widget_Dropdown('DP3 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
             drop_down3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+            drop_down3.CreateClickEvent();
             drop_down2.AddToMenu(drop_down3);
-            Drop_down_set_root(drop_down, drop_down3);
+            // Drop_down_set_root(drop_down, drop_down3);
             {
                 const drop_down4 = new Widget_Dropdown('DP4 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, GREEN_140_240_10, WHITE, pad);
                 drop_down4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+                drop_down4.CreateClickEvent();
                 drop_down3.AddToMenu(drop_down4);
-                Drop_down_set_root(drop_down, drop_down4);
-
+                // Drop_down_set_root(drop_down, drop_down4);
+                
                 {
                     const drop_down5 = new Widget_Dropdown('DP5 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, PINK_240_60_200, WHITE, pad);
                     drop_down5.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down5.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+                    drop_down5.CreateClickEvent();
                     drop_down4.AddToMenu(drop_down5);
-                    Drop_down_set_root(drop_down, drop_down5);
-
+                    // Drop_down_set_root(drop_down, drop_down5);
+                    
                     {
                         const drop_down6 = new Widget_Dropdown('DP6 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, RED_200_10_10, WHITE, pad);
                         drop_down6.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down6.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+                        drop_down6.CreateClickEvent();
                         drop_down5.AddToMenu(drop_down6);
-                        Drop_down_set_root(drop_down, drop_down6);
+                        // Drop_down_set_root(drop_down, drop_down6);
 
                         {
                             const text = new Widget_Text('DP5 -->', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
@@ -373,7 +429,8 @@ function CreateDropDownWidgetWithWidgetsInside(scene) {
 
     scene.AddWidget(drop_down);
     drop_down.Calc();
-    Drop_down_set_root(drop_down, drop_down);
+    // Drop_down_set_root(drop_down, drop_down);
+    drop_down.ConstructListeners();
 
 }
 
@@ -440,6 +497,7 @@ function CreateSlider(scene) {
 
     const slider = new Widget_Slider([200, 300, 0], [150, 10]);
     slider.CreateSliderHandleEvent();
+    slider.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
     slider.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
 
     scene.AddWidget(slider);

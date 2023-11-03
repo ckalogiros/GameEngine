@@ -258,15 +258,14 @@ export class Section extends Rect {
    }
 
    // Create all listen events recursively for all children, from each mesh's listeners buffer.
-   ConstructListeners(_root = null, _mesh = null) {
+   ConstructListeners(_root = null, _Clbk = null) {
 
-      const mesh = (_mesh) ? _mesh : this; // If in recursion, use as the current mesh the passed param. 
-      const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
+      const mesh = this; // If in recursion, use as the current mesh the passed param. 
+      const root = (_root) ? _root : this; // If in recursion, use as root the passed param. 
       // console.log('****', mesh.name, mesh.listeners.buffer)
 
       // Create listen events for the section
       const root_evt = root.listeners.buffer;
-      // for (let etypeidx = 0; etypeidx < LISTEN_EVENT_TYPES_INDEX.SIZE; etypeidx++) {
       for (let etypeidx = 0; etypeidx < mesh.listeners.boundary; etypeidx++) {
 
          const evt = mesh.listeners.buffer[etypeidx];
@@ -278,7 +277,8 @@ export class Section extends Rect {
                target_mesh: mesh,
                params: null,
             }
-            mesh.AddListenEvent(etypeidx, mesh.OnClick, target_params, root_evt);
+            const Clbk = (_Clbk) ? _Clbk : mesh.OnClick;
+            mesh.AddListenEvent(etypeidx, Clbk, target_params, root_evt);
          }
       }
 
@@ -289,28 +289,32 @@ export class Section extends Rect {
 
             /**
              * Create a Fake listen event as a parent event, if the section has no listen events,
-             * so that the actual listen events of the section's children meshes
-             * will be searched only if the fake event is triggered. 
-            */
+             * so that the actual listen events of the section's children meshes have a parent event to be grouped.
+             * 
+             * TODO!!: IMPORTANT!
+             * 1. We create Fake event only for click events.
+             * 2. We create Fake event despite the fact that there may not be any children events.
+             */
 
             const parent_root = root.parent ? root.parent : root
 
+            // Case item is of type section, run recursively.
             // If the root mesh does not have an event, create a fake event to store the children events to. 
             if (root.listeners.buffer[1] === null) {
 
                root.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, true);
                root.AddListenEvent(1, null, null, parent_root.listeners.buffer);
             }
-            // Case item is of type section, run recursively.
             if (child.type & MESH_TYPES_DBG.SECTION_MESH) {
-               child.ConstructListeners(child)
+               // child.ConstructListeners(child); // Recursive call. Passes the child section as the root for the parent event of the next recursion.
+               child.ConstructListeners(mesh); // Recursive call. Passes the child section as the root for the parent event of the next recursion.
             }
             else if (child.ConstructListeners) // Call the widget's specific .ConstructListeners() to handle the widget's listen events creation
-               child.ConstructListeners(root)
+               child.ConstructListeners(root);
 
 
 
-            else console.error('NO LISTEN EVENTS CONSTRUCTION OCCURED. mesh:', child.name, child)
+            else console.error('NO LISTEN EVENTS CONSTRUCTION OCCURED for mesh:', child.name, child)
          }
       }
    }
@@ -521,7 +525,7 @@ function Calculate_sizes_recursive(section, top, left, options, total_margin = [
          opt = section.options
 
       const mesh = section.children.buffer[i];
-      if (mesh.children.active_count && mesh.type & MESH_TYPES_DBG.SECTION_MESH) {
+      if (mesh.children.active_count && (mesh.type & MESH_TYPES_DBG.SECTION_MESH)) {
 
          margin[1] += mesh.margin[1] * 2;
          margin[0] += mesh.margin[0];

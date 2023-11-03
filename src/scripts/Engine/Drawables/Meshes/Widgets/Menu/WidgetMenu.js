@@ -160,7 +160,7 @@ export class Widget_Menu_Bar extends Widget_Label {
    }
 
    // Create all listen events recursively for all children, from each mesh's listeners buffer.
-   ConstructListeners(_root = null, _mesh = null) {
+   ConstructListeners(_root = null) {
 
       const mesh = (_mesh) ? _mesh : this; // If in recursion, use as the current mesh the passed param. 
       const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 

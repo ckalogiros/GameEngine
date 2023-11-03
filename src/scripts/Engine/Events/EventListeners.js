@@ -149,44 +149,49 @@ export class Event_Listener {
 
       let intersects = false;
       console.log('------------------------')
-
-
+      
+      
       for (let i = 0; i < this.event_type[TYPE_IDX].boundary; i++) {
-
+         
          const evt = this.event_type[TYPE_IDX].buffer[i];
-
+         
          // if(evt && evt.isActive) {
-         if (evt) {
+            if (evt) {
 
-            const mesh = evt.source_params;
-            const point = MouseGetPos();
-            const verticalMargin = mesh.hover_margin;
-
-            const rect = [ // The rect area to check for event(mouse hover)
+               const mesh = evt.source_params;
+               const point = MouseGetPos();
+               const verticalMargin = mesh.hover_margin;
+               
+               const rect = [ // The rect area to check for event(mouse hover)
                [mesh.geom.pos[0] - mesh.geom.dim[0] - verticalMargin[0], mesh.geom.pos[0] + mesh.geom.dim[0] + verticalMargin[0]], // Left  Right 
                [(mesh.geom.pos[1] - mesh.geom.dim[1]) - verticalMargin[1], (mesh.geom.pos[1] + mesh.geom.dim[1]) + verticalMargin[1]], // Top  Bottom
             ];
 
             // If and only if mouse is intersecting with the current mesh(mouse hover) ...
             intersects = Intersection_point_rect(point, rect);
+            if (intersects) {
+               console.log('  -- event mesh:', evt.source_params.name)
 
-            if (intersects && evt.has_child_events) { // Check all of its children(recursively)
-               const event_found = Check_child_events_recursive(evt, point);
-               if (event_found) {
+               if (evt.has_child_events) { // Check all of its children(recursively)
+                  const event_found = Check_child_events_recursive(evt, point);
+                  if (event_found) {
 
-                  const dispatch_params = {
-                     source_params: event_found.source_params,
-                     target_params: event_found.target_params,
-                     trigger_params: trigger_params,
-                     event_type: TYPE_IDX,
+                     const dispatch_params = {
+                        source_params: event_found.source_params,
+                        target_params: event_found.target_params,
+                        trigger_params: trigger_params,
+                        event_type: TYPE_IDX,
+                     }
+
+                     if (event_found.Clbk) {
+
+                        event_found.Clbk(dispatch_params);
+                        return; // Return if at least one event is handled. Also return so that any event of the main event will not run.
+                     }
                   }
-
-                  if (event_found.Clbk) 
-                     event_found.Clbk(dispatch_params);
-
                }
-            }
-            else if (intersects) {
+
+               // Else if no children event was triggered, run any events of the main event.
                const dispatch_params = {
                   source_params: evt.source_params,
                   target_params: evt.target_params,
@@ -195,7 +200,8 @@ export class Event_Listener {
                }
 
                if (evt.Clbk) {
-                  const ret = evt.Clbk(dispatch_params);
+                  evt.Clbk(dispatch_params);
+                  return;
                }
             }
          }
@@ -302,6 +308,7 @@ export class Event_Listener {
          console.error('Event type index does not exist.');
 
 
+         console.log('----- CHECK HOVER EVENTS -----')
       for (let i = 0; i < this.event_type[TYPE_IDX].boundary; i++) {
 
          const event = this.event_type[TYPE_IDX].buffer[i];
@@ -378,9 +385,14 @@ function Check_hover_recursive(events, point) {
 
          const evt = events.children.buffer[i];
 
-         const child_event = evt.children;
-         if (child_event)
-            Check_hover_recursive(child_event, point);
+         // const child_event = evt.children;
+         // if (child_event)
+         //    Check_hover_recursive(child_event, point);
+         if(evt.has_child_events){
+            // console.log(evt.source_params.name)
+            const ret = Check_hover_recursive(evt, point);
+            if(ret) return true; // If the most inner hovered found, return recursively so that we do not check annd set a hover of the parent meshes(that are obviusly hovered in the first place).
+         }
 
 
          const mesh = evt.source_params
@@ -394,6 +406,7 @@ function Check_hover_recursive(events, point) {
          if (Intersection_point_rect(point, rect)) {
 
             if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
+               console.log(mesh.name)
                Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
             }
 

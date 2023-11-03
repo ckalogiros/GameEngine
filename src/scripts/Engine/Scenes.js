@@ -508,7 +508,7 @@ export function ScenesPrintAllMeshes(children, count) {
             for (let j = 0; j < count; j++) r += '->';
 
             // console.log(i, r, child.id, GetMeshHighOrderNameFromType(child.type))
-            console.log(i, r, child.name, ' idx:', child.idx, FloorArr3(child.geom.pos));
+            console.log(i, r, child.name, ' idx:', child.idx, FloorArr3(child.geom.pos), ' gfx:', [child.gfx.prog.idx, child.gfx.vb.idx, child.gfx.vb.start]);
             total_count++;
 
             if (child.children.boundary) {

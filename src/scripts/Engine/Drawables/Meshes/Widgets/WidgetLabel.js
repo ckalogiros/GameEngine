@@ -184,9 +184,9 @@ export class Widget_Label extends Rect {
     /*******************************************************************************************************************************************************/
     // Events Handling
 
-    ConstructListeners(_root = null, _mesh = null) {
+    ConstructListeners(_root = null) {
 
-        const mesh = (_mesh) ? _mesh : this; // If in recursion, use as the current mesh the passed param. 
+        const mesh = this; // If in recursion, use as the current mesh the passed param. 
         const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
         // console.log('****', mesh.name, mesh.listeners.buffer)
 
