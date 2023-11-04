@@ -6,12 +6,11 @@ import { Drop_down_set_root, Widget_Dropdown } from "../Meshes/Widgets/Menu/Widg
 import { Widget_Switch } from "../Meshes/Widgets/WidgetButton";
 import { Widget_Label } from "../Meshes/Widgets/WidgetLabel";
 import { Widget_Dynamic_Text_Mesh, Widget_Text } from "../Meshes/Widgets/WidgetText";
-import { Gfx_end_session, Gfx_generate_context } from "../../Interfaces/Gfx/GfxContext";
-import { Scenes_get_all_scene_meshes, Scenes_get_root_meshes, Scenes_store_gfx_to_buffer } from "../../Scenes.js";
+import { Gfx_end_session } from "../../Interfaces/Gfx/GfxContext";
+import { Scenes_get_all_scene_meshes, Scenes_get_root_meshes } from "../../Scenes.js";
 import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _pt2, _pt3, _pt4, _pt5, _pt6, _pt_fps } from "../../Timers/PerformanceTimers";
 import { PerformanceTimerGetFps1sAvg, _fps_1s_avg, _fps_500ms_avg } from "../../Timers/Time";
 import { Info_listener_create_event, Info_listener_destroy_event } from "./InfoListeners";
-import { Gfx_add_geom_mat_to_vb, } from "../../Interfaces/Gfx/GfxInterfaceFunctions";
 
 
 export function Debug_info_ui_performance(scene) {
@@ -23,6 +22,9 @@ export function Debug_info_ui_performance(scene) {
    // the drop down menu to hold the enabling/disabling of the 
    const dp = new Widget_Dropdown('Generic Ui Debug Info', [110, 10, 0], [10, 10], GREY1, TRANSPARENCY(BLUE_10_120_220, tr), WHITE, [8, 3]);
    dp.SetName('InfoUi Root-DP');
+   dp.CreateClickEvent();
+   dp.CreateMoveEvent();
+   Drop_down_set_root(dp, dp);
 
    
    
@@ -67,13 +69,13 @@ export function Debug_info_ui_performance(scene) {
    /************************************************************************************************************************************************/
    // Gfx Info
    {
-      const section = new Section(SECTION.HORIZONTAL, [10, 10], [0, 0, 0], [0, 0], TRANSPARENCY(GREY6, .4), 'InfoUi-Gfx section');
+      const section = new Section(SECTION.HORIZONTAL, [4, 4], [0, 0, 0], [0, 0], TRANSPARENCY(GREY6, .6), 'InfoUi-Gfx section');
       section.SetName('InfoUi-Gfx section');
       // section.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
       // section.mat.col = [WHITE, RED, GREEN, BLUE];
       // section.geom.pos[2] = 2;
 
-      const label = new Widget_Label('Gfx Info', (ALIGN.BOTTOM | ALIGN.VERT_CENTER), [200, 300, 0], fontsize, TRANSPARENCY(GREEN_140_240_10, .9), WHITE, pad, .4, undefined, [2, 3, 2]);
+      const label = new Widget_Label('Gfx Info', (ALIGN.BOTTOM | ALIGN.VERT_CENTER), [200, 300, 0], fontsize, TRANSPARENCY(GREEN_140_240_10, .6), WHITE, pad, .4, undefined, [2, 3, 2]);
       label.SetName(`InfoUi-Gfx label`);
       section.AddItem(label);
 
@@ -88,13 +90,13 @@ export function Debug_info_ui_performance(scene) {
    /************************************************************************************************************************************************/
    // Mesh Info
    {
-      const section = new Section(SECTION.HORIZONTAL, [10, 10], [0, 0, 0], [0, 0], TRANSPARENCY(GREY6, .4), 'InfoUi-Mesh section');
+      const section = new Section(SECTION.HORIZONTAL, [4, 4], [0, 0, 0], [0, 0], TRANSPARENCY(GREY6, .6), 'InfoUi-Mesh section');
       section.SetName('InfoUi-Mesh section');
       // section.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
       // section.mat.col = [WHITE, RED, GREEN, BLUE];
       // section.geom.pos[2] = 2;
 
-      const label = new Widget_Label('Mesh Info', (ALIGN.BOTTOM | ALIGN.VERT_CENTER), [200, 300, 0], fontsize, TRANSPARENCY(GREEN_140_240_10, .9), WHITE, pad, .4, undefined, [2, 3, 2]);
+      const label = new Widget_Label('Mesh Info', (ALIGN.BOTTOM | ALIGN.VERT_CENTER), [200, 300, 0], fontsize, TRANSPARENCY(GREEN_140_240_10, .6), WHITE, pad, .4, undefined, [2, 3, 2]);
       label.SetName(`InfoUi-Mesh label`);
       section.AddItem(label);
 
@@ -107,10 +109,7 @@ export function Debug_info_ui_performance(scene) {
       dp.AddToMenu(section);
    }
    scene.AddWidget(dp);
-   // dp.Recalc(SECTION.TOP_DOWN);
    dp.Calc();
-   Drop_down_set_root(dp, dp);
-   dp.CreateClickEvent();
    dp.ConstructListeners();
 
 }
@@ -355,12 +354,12 @@ export function Debug_info_create_gfx_info(params) {
    if (DEBUG_INFO.UI_GFX.IS_ON) {
 
       const meshes = Scenes_get_root_meshes(scene.sceneidx);
-      const section = meshes.buffer[DEBUG_INFO.UI_GFX.IDX];
+      const dropdown = meshes.buffer[DEBUG_INFO.UI_GFX.IDX];
 
-      Info_listener_destroy_event(section.debug_info.evtidx);
-      DEBUG_INFO.UI_GFX.POS = section.geom.pos; // Remember the ui's position.
+      Info_listener_destroy_event(dropdown.debug_info.evtidx);
+      DEBUG_INFO.UI_GFX.POS = dropdown.geom.pos; // Remember the ui's position.
 
-      section.Destroy();
+      dropdown.Destroy();
 
       DEBUG_INFO.UI_GFX.IDX = INT_NULL; // reference to the scene's mesh buffer
       DEBUG_INFO.UI_GFX.IS_ON = false;
@@ -370,16 +369,13 @@ export function Debug_info_create_gfx_info(params) {
       return;
    }
 
-
    const tr = .85;
-   const section = new Section(SECTION.VERTICAL, [13, 13], DEBUG_INFO.UI_GFX.POS, [100, 0], TRANSPARENCY(ORANGE_240_130_10, .4), 'InfoUi Gfx section');
-   section.SetName('InfoUi Gfx section 100');
-   section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
 
-   const dp = new Widget_Dropdown(`InfoUi Gfx DP`, [0, 0, 0], [10, 10], GREY1, TRANSPARENCY(GREEN_60_240_100, tr), WHITE, [8, 3]);
+   const dp = new Widget_Dropdown(`InfoUi Gfx DP`, [350, 20, 0], [10, 10], GREY1, TRANSPARENCY(GREEN_60_240_100, tr), WHITE, [8, 3]);
    dp.SetName('InfoUi Gfx DP');
    dp.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
-   dp.CreateClickEvent(section.listeners.buffer);
+   dp.CreateClickEvent();
+   dp.CreateMoveEvent();
    Drop_down_set_root(dp, dp);
 
    ui_gfx_self_state.dp = new Widget_Dropdown(`self-gfx`, [0, 0, 0], [10, 10], TRANSPARENCY(RED_200_10_10, tr), TRANSPARENCY(GREEN_140_240_10, tr), WHITE, [8, 3]);
@@ -436,18 +432,13 @@ export function Debug_info_create_gfx_info(params) {
    ui_gfx_self_state.dp._gfxidx = j;
    dp.AddToMenu(ui_gfx_self_state.dp);
 
-   section.AddItem(dp);
-
-   scene.AddWidget(section, GFX.PRIVATE);
-   section.Render();
-   section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
-   // Create an Info listener to update the mouse position ui text
-   section.debug_info.evtidx = Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE, Debug_info_gfx_update, params, section);
-   
+   scene.AddWidget(dp, GFX.PRIVATE);
+   dp.Calc();
+   dp.Render();
    Gfx_end_session(true);
-   section.ConstructListeners();
+   dp.ConstructListeners();
    
-   DEBUG_INFO.UI_GFX.IDX = section.idx;
+   DEBUG_INFO.UI_GFX.IDX = dp.idx;
    DEBUG_INFO.UI_GFX.IS_ON = true;
 
 }
@@ -608,12 +599,12 @@ function Debug_info_create_mesh_info(params){
    if (DEBUG_INFO.UI_MESH.IS_ON) {
 
       const meshes = Scenes_get_root_meshes(scene.sceneidx);
-      const section = meshes.buffer[DEBUG_INFO.UI_MESH.IDX];
+      const dropdown = meshes.buffer[DEBUG_INFO.UI_MESH.IDX];
 
-      Info_listener_destroy_event(section.debug_info.evtidx);
-      DEBUG_INFO.UI_MESH.POS = section.geom.pos; // Remember the ui's position.
+      Info_listener_destroy_event(dropdown.debug_info.evtidx);
+      DEBUG_INFO.UI_MESH.POS = dropdown.geom.pos; // Remember the ui's position.
 
-      section.Destroy();
+      dropdown.Destroy();
 
       DEBUG_INFO.UI_MESH.IDX = INT_NULL; // reference to the scene's mesh buffer
       DEBUG_INFO.UI_MESH.IS_ON = false;
@@ -625,13 +616,11 @@ function Debug_info_create_mesh_info(params){
 
 
    const tr = .45;
-   const section = new Section(SECTION.VERTICAL, [13, 13], DEBUG_INFO.UI_MESH.POS, [0, 0], TRANSPARENCY(GREY1, .4), 'InfoUi Mesh section');
-   section.SetName('InfoUi Mesh section 101');
-   section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
 
-   const dp = new Widget_Dropdown(`InfoUi Mesh DP`, [0, 0, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
+   const dp = new Widget_Dropdown(`InfoUi Mesh DP`, [600, 20, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
    dp.SetName('InfoUi Mesh DP');
-   dp.CreateClickEvent(section.listeners.buffer);
+   dp.CreateClickEvent();
+   dp.CreateMoveEvent();
    Drop_down_set_root(dp, dp);
 
    // Create dropdown info for each mesh in scene
@@ -640,9 +629,8 @@ function Debug_info_create_mesh_info(params){
    
    for (let i=0; i<meshes.length; i++){
 
-      const dp_mesh = new Widget_Dropdown(`${meshes[i].name}`, [0, 0, 0], [10, 10], TRANSPARENCY(GREEN_140_240_10, tr), GREY1, WHITE, [8, 3]);
+      const dp_mesh = new Widget_Dropdown(`${i}: ${meshes[i].name}`, [0, 0, 0], [10, 10], TRANSPARENCY(GREEN_140_240_10, tr), GREY1, WHITE, [8, 3]);
       dp_mesh.SetName(`${meshes[i].name}`);
-      // dp_mesh.CreateClickEvent(section.listeners.buffer);
 
       /**
          alreadyAdded: false
@@ -706,20 +694,17 @@ function Debug_info_create_mesh_info(params){
       dp.AddToMenu(dp_mesh);
    }
 
-   section.AddItem(dp);
-
-   scene.AddWidget(section, GFX.PRIVATE);
-   section.Render();
-   section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
+   scene.AddWidget(dp, GFX.PRIVATE);
+   dp.Calc();
+   dp.Render();
+   Gfx_end_session(true);
+   dp.ConstructListeners();
+   
+   DEBUG_INFO.UI_MESH.IDX = dp.idx;
+   DEBUG_INFO.UI_MESH.IS_ON = true;
 
    // Create an Info listener to update the mouse position ui text
-   section.debug_info.evtidx = Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.MESH, Debug_info_mesh_update, params, section);
-   
-   Gfx_end_session(true);
-   section.ConstructListeners();
-   
-   DEBUG_INFO.UI_MESH.IDX = section.idx;
-   DEBUG_INFO.UI_MESH.IS_ON = true;
+   dp.debug_info.evtidx = Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.MESH, Debug_info_mesh_update, params, dp);
 
 }
 
