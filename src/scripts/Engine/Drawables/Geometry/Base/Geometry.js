@@ -88,7 +88,7 @@ export class Geometry2D {
         glBufferOps.GlSetWposZ(gfx, z, numFaces);
     }
     MoveXYZ(pos, gfx, num_faces) {
-        /** DEBUG */ if (pos.length !== 3) console.error('Wrong array dimention for position xyz. @ class Geometry2D, Geometry.js')
+        /**DEBUG ERROR*/ if (pos.length !== 3) console.error('Wrong array dimention for position xyz. @ class Geometry2D, Geometry.js')
         math.AddArr3(this.pos, pos);
         glBufferOps.GlMoveXYZ(gfx, pos, num_faces);
     }

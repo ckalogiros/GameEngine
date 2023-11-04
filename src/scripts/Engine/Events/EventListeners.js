@@ -97,7 +97,7 @@ export class Event_Listener {
 
       LISTENERS_FLAGS[TYPE_IDX] = true;
       event_params.evt_idx = this.event_type[TYPE_IDX].Add(event_params);
-      console.log(' === Add event:', event_params.source_params.name, ' parent event idx:', event_params.parent_evt)
+      // console.log(' === Add event:', event_params.source_params.name, ' parent event idx:', event_params.parent_evt)
       return this.event_type[TYPE_IDX].buffer[event_params.evt_idx];
    }
 
@@ -122,7 +122,6 @@ export class Event_Listener {
       }
 
       LISTENERS_FLAGS[TYPE_IDX] = true;
-      // const event = this.event_type[TYPE_IDX].buffer[parent_eventidx];
       const event = parent_eventidx;
       /*DEBUG*/ if (!event) {
          console.error('Parent event not found. Parent event listeners:', parent_eventidx); return;
@@ -133,10 +132,8 @@ export class Event_Listener {
       }
 
       event_params.evt_idx = event.children.Add(event_params);
-      // const idx = event.children.Add(event_params);
       event.has_child_events = true;
-      console.log(' = Add child event:', event_params.source_params.name, ' parent event:', event.source_params.name)
-      // return idx;
+      // console.log(' = Add child event:', event_params.source_params.name, ' parent event:', event.source_params.name)
       return event.children.buffer[event_params.evt_idx];
    }
 
@@ -145,10 +142,10 @@ export class Event_Listener {
       _pt5.Start(); /* Performance measure */
 
       /**DEBUG*/if (this.event_type[TYPE_IDX] === undefined) return;
-      /**DEBUG*/if (TYPE_IDX < 0 || TYPE_IDX >= LISTEN_EVENT_TYPES_INDEX.SIZE) alert('Event type index does not exist.');
+      /**DEBUG Alert*/if (TYPE_IDX < 0 || TYPE_IDX >= LISTEN_EVENT_TYPES_INDEX.SIZE) alert('Event type index does not exist.');
 
       let intersects = false;
-      console.log('------------------------')
+      // console.log('------------------------')
       
       
       for (let i = 0; i < this.event_type[TYPE_IDX].boundary; i++) {
@@ -170,7 +167,7 @@ export class Event_Listener {
             // If and only if mouse is intersecting with the current mesh(mouse hover) ...
             intersects = Intersection_point_rect(point, rect);
             if (intersects) {
-               console.log('  -- event mesh:', evt.source_params.name)
+               // console.log('  -- event mesh:', evt.source_params.name)
 
                if (evt.has_child_events) { // Check all of its children(recursively)
                   const event_found = Check_child_events_recursive(evt, point);
@@ -452,7 +449,7 @@ function Check_child_events_recursive(evt, point) {
             if (ret) return ret; // Because it a recursive procedure, when the mesh is found we must return it recursively immidiately after the return of the each recursion.
          }
          if (intersects && (!mesh.StateCheck(MESH_STATE.IS_FAKE_EVENT))) { // Check all of its children(recursively)
-            console.log(mesh.name)
+            // console.log(mesh.name)
             return child_evt;
          }
 
@@ -553,7 +550,7 @@ export function Listener_events_set_mesh_events_active(FLAGS, mesh_listeners, bo
    if ((FLAGS & LISTENERS_FLAGS.CLICK) || (FLAGS & LISTENERS_FLAGS.ALL)) {
 
       if (mesh_listeners.buffer[click_type_idx]) {
-         /**DEBUG*/ if (_listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx].idx] === undefined)
+         /**DEBUG ERROR*/ if (_listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx].idx] === undefined)
             console.error('Undefined listen event:', mesh_listeners.buffer[click_type_idx].idx, ' type:', click_type_idx)
 
          // _listener.event_type[click_type_idx].buffer[mesh_listeners.buffer[click_type_idx].idx].has_child_events = bool_activate;

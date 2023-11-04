@@ -339,7 +339,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 	// 
 	CreateNewText(dynamic_text, fontSize, text_col2, pad = this.pad, bold = this.bold) {
 
-		/** DEBUG */ if (!Array.isArray(pad)) console.error('Pad is not of type array');
+		/** DEBUG ERROR*/ if (!Array.isArray(pad)) console.error('Pad is not of type array');
 		this.pad = pad;
 
 		let pos = [0, 0, 0];

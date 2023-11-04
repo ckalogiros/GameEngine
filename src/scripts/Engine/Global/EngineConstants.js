@@ -640,4 +640,8 @@ const DEBUG = {
 		ADD_MESH: true,
 		REMOVE_MESH: true,
 	},
+
+	EVENTS_LISTENERS:{
+		WIDGET_DROP_DOWN: false,
+	}
 };

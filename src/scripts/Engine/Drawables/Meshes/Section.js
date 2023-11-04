@@ -275,6 +275,7 @@ export class Section extends Rect {
                EventClbk: null,
                targetBindingFunctions: null,
                target_mesh: mesh,
+               // target_mesh: root,
                params: null,
             }
             const Clbk = (_Clbk) ? _Clbk : mesh.OnClick;
@@ -358,7 +359,7 @@ function Section_move_children_recursive(x, y, mesh) {
       }
       else { // To avoid moving section twice (as a child and as a section from recursion)
 
-         /**DEBUG*/ if (!child.Move) { console.error('OnMove function is missing. @ Section.Move(), mesh:', child.name, child); return; }
+         /**DEBUG ERROR*/ if (!child.Move) { console.error('OnMove function is missing. @ Section.Move(), mesh:', child.name, child); return; }
          child.Move(x, y);
       }
    }
@@ -404,7 +405,7 @@ function Section_on_move_section(params) {
          }
          else { // To avoid moving section twice (as a child and as a section from recursion)
 
-            /**DEBUG*/ if (!child.Move) {
+            /**DEBUG ERROR*/ if (!child.Move) {
                console.error('OnMove function is missing. @ Section.Move(), mesh:', child.name, child);
                return;
             }

@@ -538,10 +538,10 @@ export function GlGenerateContext(sid, sceneidx, GL_BUFFER, addToSpecificGlBuffe
 
 export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_name){
 
-    /**DEBUG */ if(geom.pos[0] === undefined){ console.error('Pos is UNDEFINED. mesh:', mesh_name)}
-    /**DEBUG */ if(geom.dim[0] === undefined){ console.error('Dim is UNDEFINED. mesh:', mesh_name)}
-    /**DEBUG */ if(mat.col[0] === undefined){ console.error('Col is UNDEFINED. mesh:', mesh_name)}
-    /**DEBUG */ if(mat.style[0] === undefined){ console.error('Style is UNDEFINED. mesh:', mesh_name)}
+    /**DEBUG ERROR*/ if(geom.pos[0] === undefined){ console.error('Pos is UNDEFINED. mesh:', mesh_name)}
+    /**DEBUG ERROR*/ if(geom.dim[0] === undefined){ console.error('Dim is UNDEFINED. mesh:', mesh_name)}
+    /**DEBUG ERROR*/ if(mat.col[0] === undefined){ console.error('Col is UNDEFINED. mesh:', mesh_name)}
+    /**DEBUG ERROR*/ if(mat.style[0] === undefined){ console.error('Style is UNDEFINED. mesh:', mesh_name)}
 
     const progIdx = gfx.prog.idx;
     const vbIdx = gfx.vb.idx;

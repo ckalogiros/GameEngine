@@ -113,7 +113,7 @@ export class Gfx_Pool extends M_Buffer {
 
 
       // Must not run if session is already open.
-      /** DEBUG*/if(this.session[0]){
+      /** DEBUG ERROR*/if(this.session[0]){
          
          console.error('Gfx Session is already open')
          console.log('session:', this.session, this.buffer)

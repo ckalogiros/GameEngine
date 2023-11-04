@@ -43,7 +43,7 @@ export class Widget_Dropdown extends Section {
 
    constructor(text, pos, dim, col1 = GREY3, col2 = PINK_240_60_160, text_col = WHITE, btn_pad = [0, 0], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [2, 5, 2]) {
 
-      super(SECTION.VERTICAL, [0, 0], pos, [10, 10], col2);
+      super(SECTION.VERTICAL, [5, 5], pos, [10, 10], col2);
 
       this.isOn = 0x0;
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
@@ -136,11 +136,11 @@ export class Widget_Dropdown extends Section {
                child.CreateClickEvent(root.menu.listeners.buffer);
                child.CreateHoverEvent();
 
-               console.log(btn.text_mesh.mat.text)
+               console.log('  -- child:', child.name)
                if (child.isOn) {
                   // If the menu was deactivated while open, then on activation keep its '-' expansion symbol
                   const child_btn = child.children.buffer[0];
-                  console.log(child_btn.text_mesh.mat.text)
+                  console.log('  -- Menu is on! run for menu recursiv.')
                   child_btn.text_mesh.mat.text = `${this.dp_symbols[1]} ${child_btn.text_mesh.mat.text.slice(2)}`;
                   Gfx_end_session(true, true); // Must call end gfx private session for each next dropdown menu gfx activation
 
@@ -244,15 +244,9 @@ export class Widget_Dropdown extends Section {
 
    CreateMoveEvent() {
 
-      this.menu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
-      const params = { // Build the parameters for the OnClick callback function.
-         drop_down: this,
-         menu: this.menu,
-      }
-      // this.menu.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.CLICK, this.SetOnMove, params);
-      if (!this.menu.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK]) this.menu.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.CLICK, this.SetOnMove, this.menu);
-      this.menu.StateDisable(MESH_STATE.IS_FAKE_CLICKABLE);
-      this.menu.StateEnable(MESH_STATE.IS_CLICKABLE);
+      this.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
+      this.StateDisable(MESH_STATE.IS_FAKE_CLICKABLE);
+      this.StateEnable(MESH_STATE.IS_CLICKABLE);
    }
 
    // Create all listen events recursively for all children, from each mesh's listeners buffer.
@@ -260,28 +254,34 @@ export class Widget_Dropdown extends Section {
 
       const root = _root ? _root : this;
 
-      this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, true);
-      this.AddListenEvent(1, null, null, root.listeners.buffer);
+      if(this.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK]){ // If click exists on the dropdown, should be for moving event.
+
+         this.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.CLICK, this.SetOnMove, null, root.listeners.buffer);
+         /**DEBUG */ if(DEBUG.EVENTS_LISTENERS.WIDGET_DROP_DOWN) console.log(' ### Creating Moving event for dropdown:', this.name, ' root', root.name)
+      }
+      else{ // Create Fke click event for dropdown
+
+         this.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, true);
+         this.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.CLICK, null, null, root.listeners.buffer);
+      }
 
       const btn = this.children.buffer[0];
-      /**DEBUG */ if (!btn.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK]) console.error('Dropdown\'s button is missing the click event. Add a CreateClickEvent() to the dropdown');
-      const params = { // Build the parameters for the OnClick callback function.
+      /**DEBUG ERROR*/ if (!btn.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK]) console.error('Dropdown\'s button is missing the click event. Add a CreateClickEvent() to the dropdown');
+      
+      const params = { // Build the parameters for the OnClick callback function for the dp's button (menu expansion).
          drop_down: this,
          menu: this.menu,
       }
-      console.log(' ### Create btn click for dropdown:', this.name, ' root', root.name)
       btn.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.CLICK, this.OnClick, params, this.listeners.buffer);
+      /**DEBUG */ if(DEBUG.EVENTS_LISTENERS.WIDGET_DROP_DOWN) console.log(' ### Create btn click for dropdown:', this.name, ' root', root.name)
 
-      if (this.menu && this.isOn) {
-
-         console.log('   ### Create menu listen events for dropdown:', this.name)
-         this.menu.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, true);
-         this.menu.ConstructListeners(this, this.SetOnMove); // Calls Section's ConstructListeners().
+      if(this.isOn){
+         this.menu.ConstructListeners(this); // @@@ 1. pass this for creating the menu Fake event in its dropdown OR 2. pass the top root dropdown's menu for creating the event as child to to one menu only.
       }
 
    }
 
-   RemoveAllListenersFromDpMenuItems(dp_menu) { // Mainly used to destroy listen events of any deactivated menus that have 'isActive=fale' listen events.
+   RemoveAllListenersFromDpMenuItems(dp_menu) { // Mainly used to destroy listen events of any deactivated menus that have 'isActive=false' listen events.
 
       const menu = dp_menu;
 
@@ -305,7 +305,7 @@ export class Widget_Dropdown extends Section {
 
       const dp = (_dp) ? _dp : this;
 
-      /**DEBUG */ if (!dp || !(dp.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN)) {
+      /**DEBUG ERROR*/ if (!dp || !(dp.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN)) {
          console.error('ERROR: in RemoveAllListenersFromDP(). dp is null or not a Dropdown type. dp:', dp);
          return;
       }
@@ -320,7 +320,6 @@ export class Widget_Dropdown extends Section {
          }
       }
    }
-
 
    // SEE: ## OnClick()
    OnClick(params) {
@@ -340,7 +339,7 @@ export class Widget_Dropdown extends Section {
       const menu = params.target_params.menu;
       const btn = params.source_params;
       const root = Dropdown_get_root_by_idx(dropdown_mesh.rootidx);
-      console.log('rootname:', root.name, 'root menu:', root.menu.name, ' root listeners:', root.listeners, 'root menu listeners:', root.menu.listeners);
+      // console.log('rootname:', root.name, 'root menu:', root.menu.name, ' root listeners:', root.listeners, 'root menu listeners:', root.menu.listeners);
 
       /** If the menu for the clicked dropdown is not active, activate it and all of its items.
        * Do the same for each item of type dropdown widget that has its menu active/opened.
@@ -429,7 +428,9 @@ export class Widget_Dropdown extends Section {
          root.UpdateGfxPosDimRecursive(root);
 
          Gfx_activate(dropdown_mesh); // activate the gfx buffers
-         menu.ConstructListeners(dropdown_mesh, dropdown_mesh.SetOnMove);
+         // menu.ConstructListeners(dropdown_mesh, dropdown_mesh.SetOnMove);
+         menu.ConstructListeners(dropdown_mesh);
+         // dropdown_mesh.ConstructListeners(dropdown_mesh, dropdown_mesh.SetOnMove);
          // menu.geom.dim[1] += 40;
 
       }
@@ -488,7 +489,8 @@ export class Widget_Dropdown extends Section {
       STATE.mesh.SetClicked(mesh);
 
       // Suppose the clicked mesh to be moved is only a menu.
-      const MoveFn = mesh.parent.OnMove;
+      const MoveFn = mesh.OnMove;
+      // const MoveFn = mesh.parent.OnMove;
 
       if (mesh.timeIntervalsIdxBuffer.boundary <= 0) {
 

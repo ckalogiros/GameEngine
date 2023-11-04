@@ -56,7 +56,7 @@ class Buffer_Interface {
 
    RemoveByIdx(idx) {
 
-      /**DEBUG */ if (idx < 0 || idx > this.size - 1){
+      /**DEBUG ERROR*/ if (idx < 0 || idx > this.size - 1){
 
          console.error('Index Out of bounds. @ M_Buffer.RemoveByIdx().')
          // alert('Index Out of bounds. @ M_Buffer.RemoveByIdx().')
