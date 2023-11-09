@@ -546,7 +546,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 
 		// Move 'this' text
 		this.geom.MoveXY(x, y, this.gfx);
-		
+
 		// Move children text
 		for (let i = 0; i < this.children.boundary; i++) {
 

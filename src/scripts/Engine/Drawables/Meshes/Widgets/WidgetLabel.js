@@ -3,7 +3,7 @@
 import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
 import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
-import { CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
+import { AddArr3, CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../Operations/Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
 import { Gfx_generate_context } from "../../../Interfaces/Gfx/GfxContext.js";
@@ -163,7 +163,11 @@ export class Widget_Label extends Rect {
 
     }
 
-    Reposition_pre() { }
+    Reposition_pre(dif_pos) { 
+
+        AddArr3(this.geom.pos, dif_pos);
+        this.text_mesh.Reposition_pre(dif_pos);
+    }
 
     Reposition_post(dif_pos) {
 
@@ -178,6 +182,13 @@ export class Widget_Label extends Rect {
         // Move 'this' text
         this.geom.MoveXY(x, y, this.gfx);
         this.text_mesh.geom.MoveXY(x, y, this.text_mesh.gfx);
+
+    }
+    MoveY(y) {
+
+        // Move 'this' text
+        this.geom.MoveY(y, this.gfx);
+        this.text_mesh.geom.MoveY(y, this.text_mesh.gfx);
 
     }
 

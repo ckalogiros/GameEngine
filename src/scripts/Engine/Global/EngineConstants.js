@@ -11,14 +11,13 @@ const NANOSEC = 0.000001;
 
 const ALL = 0xffff;
 
-const Rename_evtClbk_elem0 = 0; // The first element in the eventCallbacks buffer of every Mesh.
-const Rename_evtClbk_elem1 = 1; // The first element in the eventCallbacks buffer of every Mesh.
+const UNCHANGED = 0xffff; // Just a flag, used for checking if a value should change or remain the same.
 
-function ERROR_NULL(obj, msg) {
-	// if (obj === null || obj === undefined || obj === INT_NULL) {
-	// 	console.error('Null ERROR. object:', obj, msg)
-	// 	return true;
-	// }
+function ERROR_NULL(obj) {
+	if (obj === null || obj === undefined || obj === INT_NULL) {
+		// console.error('Null ERROR. object:', obj, msg)
+		return true;
+	}
 }
 
 function ERROR_TYPE(obj, type, msg) {
@@ -446,7 +445,7 @@ const MESH_TYPES_DBG = {
 	WIDGET_SLIDER_BAR: _cnt <<= 1,
 	WIDGET_SLIDER_HANDLE: _cnt <<= 1,
 	
-	// WIDGET_SCROLLER: _cnt <<= 1,
+	WIDGET_SCROLLER: _cnt <<= 1,
 	WIDGET_SCROLLER_BAR: _cnt <<= 1,
 	WIDGET_SCROLLER_HANDLE: _cnt <<= 1,
 	
@@ -457,6 +456,7 @@ const MESH_TYPES_DBG = {
 	DROP_DOWN_MENU: _cnt <<= 1,
 
 	UI_INFO_GFX: _cnt <<= 1,
+	UI_INFO_MESH: _cnt <<= 1,
 	SCENE: _cnt <<= 1,
 };
 

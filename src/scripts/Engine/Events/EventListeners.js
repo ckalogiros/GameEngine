@@ -770,42 +770,48 @@ export function Listeners_debug_info_create(scene) {
 
    const dp_btn_pad = [10, 2]
    const dropdown = new Widget_Dropdown('Listeners Dropdown Section Panel', [300, 20, 0], [60, 20], GREY1, TRANSPARENCY(GREY5, .8), WHITE, dp_btn_pad);
-   dropdown.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); dropdown.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+   dropdown.CreateClickEvent();
+   dropdown.CreateMoveEvent();
+   Drop_down_set_root(dropdown, dropdown);
 
    for (let i = 0; i < _listener.event_type.length; i++) {
 
       const evt_type = _listener.event_type[i];
-      const type = Listeners_get_event_type_string(i);
+      
+      if(evt_type){
 
-      let count = evt_type.boundary;
-
-      const drop_down_evt_type = new Widget_Dropdown(`buffer type:${type} | count:${evt_type.boundary}`, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(BLACK, 1.1), WHITE, dp_btn_pad);
-      drop_down_evt_type.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down_evt_type.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-
-      for (let j = 0; j < evt_type.boundary; j++) {
-
-         const evt = evt_type.buffer[j];
-
-         if (evt.has_child_events)
-            count += Listeners_debug_info_create_recursive(scene, drop_down_evt_type, evt.children, evt.source_params.name);
-
-         if (evt) {
-            const info = `type: ${type} | idx: ${j} | ${evt.source_params.name}`;
-            const text = new Widget_Text(info, [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-            text.info_id = [i, j]
-            text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;
-            drop_down_evt_type.AddToMenu(text)
-
+         const type = Listeners_get_event_type_string(i);
+   
+         let count = evt_type.boundary;
+   
+         const drop_down_evt_type = new Widget_Dropdown(`buffer type:${type} | count:${evt_type.boundary}`, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(BLACK, 1.1), WHITE, dp_btn_pad);
+         drop_down_evt_type.CreateClickEvent();
+   
+         for (let j = 0; j < evt_type.boundary; j++) {
+   
+            const evt = evt_type.buffer[j];
+   
+            if (evt.has_child_events)
+               count += Listeners_debug_info_create_recursive(scene, drop_down_evt_type, evt.children, evt.source_params.name);
+   
+            if (evt) {
+               const info = `type: ${type} | idx: ${j} | ${evt.source_params.name}`;
+               const text = new Widget_Text(info, [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
+               text.info_id = [i, j]
+               text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;
+               drop_down_evt_type.AddToMenu(text)
+   
+            }
          }
-      }
 
-      dropdown.AddToMenu(drop_down_evt_type)
+         dropdown.AddToMenu(drop_down_evt_type)
+      }
    }
 
-   scene.AddMesh(dropdown);
-   dropdown.Init();
+   scene.AddWidget(dropdown);
    dropdown.Calc();
-   Drop_down_set_root(dropdown, dropdown);
+   dropdown.ConstructListeners();
+   
 }
 
 function Listeners_debug_info_create_recursive(scene, dropdown_root, evt_children, parent_discription) {

@@ -397,6 +397,7 @@ export class Mesh {
     SetPosXY(pos) { this.geom.SetPosXY(pos, this.gfx); }
     SetPosX(x) { this.geom.SetPosX(x, this.gfx); }
     SetPosY(y) { this.geom.SetPosY(y, this.gfx); }
+    SetDim(dim) { this.geom.SetDim(dim, this.gfx); }
     UpdatePosXY() { this.geom.UpdatePosXY(this.gfx); }
     UpdatePosXYZ() { this.geom.UpdatePosXYZ(this.gfx); }
     UpdateDim() { this.geom.UpdateDim(this.gfx); }

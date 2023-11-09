@@ -1,6 +1,6 @@
 "use strict";
 
-import { AddArr2, CopyArr2, CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
+import { AddArr2, AddArr3, CopyArr2, CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../Operations/Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../Controls/Input/Mouse.js";
 import { UpdaterAdd } from "../../Scenes.js";
@@ -102,14 +102,16 @@ export class Section extends Rect {
       section.SetMargin()
       Calculate_positions_recursive(section, options);
 
+      return section.max_size;
+
    }
 
    Recalc(options) {
 
       const section = this;
 
-      this.Reset(section)
-      this.Calc(options)
+      this.Reset(section);
+      return this.Calc(options);
 
    }
 
@@ -344,6 +346,8 @@ export class Section extends Rect {
    /*******************************************************************************************************************************************************/
    // Transformations
    Move(x, y) { Section_move_children_recursive(x, y, this); }
+   SetPosX(){} // TODO: IMPLEMENT
+   SetPosY(y){ Section_set_posy_children_recursive(y, this); }
 }
 
 
@@ -365,6 +369,28 @@ function Section_move_children_recursive(x, y, mesh) {
    }
 
    mesh.geom.MoveXY(x, y, mesh.gfx);
+
+}
+
+function Section_set_posy_children_recursive(y, mesh) {
+
+   for (let i = 0; i < mesh.children.boundary; i++) {
+
+      const child = mesh.children.buffer[i];
+
+      if (child.type & MESH_TYPES_DBG.SECTION_MESH) { // Case anothe section, run recursively
+         Section_set_posy_children_recursive(y, child);
+      }
+      else { // To avoid moving section twice (as a child and as a section from recursion)
+
+         // /**DEBUG ERROR*/ if (!child.Move) { console.error('OnMove function is missing. @ Section.Move(), mesh:', child.name, child); return; }
+         // child.SetPosY(y);
+         child.MoveY(y);
+         console.log()
+      }
+   }
+
+   mesh.geom.SetPosY(y, mesh.gfx);
 
 }
 
@@ -476,6 +502,10 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
             // UpdaterAdd(mesh, 0, null, pos_dif);
             if (mesh.gfx)
                mesh.Reposition_post(pos_dif);
+            else {
+               // AddArr3(mesh.geom.pos, pos_dif);
+               mesh.Reposition_pre(pos_dif);
+            }
             // if(!mesh.gfx) UpdaterAdd(mesh, 0, null, pos_dif);
             // else mesh.Reposition_post(pos_dif);
             // console.log('pos_dif:', pos_dif, mesh.geom.pos)

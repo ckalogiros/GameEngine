@@ -2,7 +2,7 @@
 
 import { GfxInfoMesh} from "../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../Helpers/Helpers.js";
-import { CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
+import { AddArr3, CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
 import { Gfx_generate_context } from "../../Interfaces/Gfx/GfxContext.js";``
 import { GfxSetTex, Gfx_add_geom_mat_to_vb, Gfx_progs_set_vb_texidx } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 import { FontGetUvCoords } from "../../Loaders/Font/Font.js";
@@ -166,6 +166,15 @@ export class Text_Mesh extends Mesh {
    GetCenterPosX() { return this.geom.pos[0] + this.GetTotalWidth() - this.geom.dim[0]; }
 
    GetCenterPosY() { return this.geom.pos[1] - this.GetTotalHeight() + this.geom.dim[1]; }
+
+
+   /*******************************************************************************************************************************************************/
+   // Alignment
+
+   Reposition_pre(pos_dif) {
+
+		AddArr3(this.geom.pos, pos_dif);
+	}
 
 
    /*******************************************************************************************************************************************************/

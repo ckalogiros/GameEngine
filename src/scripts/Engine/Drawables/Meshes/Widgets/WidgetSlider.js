@@ -250,7 +250,7 @@ export class Widget_Slider extends Rect {
 
       // Check if the click happened on bar
       const bar = mesh.children.buffer[BAR_IDX];
-      if (point[1] > bar.geom.pos[1] - bar.hover_margin[1]) { // TODO!!! The only thing currently that seperates handle-move from slider-move is the fact that this if fails for 'hover_margin=0'. Create a more apropriate check.
+      if (point[1] > bar.geom.pos[1] - bar.hover_margin[1]) { // TODO!!! The only thing currently that seperates handle-move from widget-move is the fact that this if fails for 'hover_margin=0'. Create a more apropriate check.
 
          STATE.mesh.SetClicked(bar);
 
@@ -272,7 +272,8 @@ export class Widget_Slider extends Rect {
          // Move Slider 
          if ((mesh.type & MESH_TYPES_DBG.WIDGET_SLIDER) && mesh.StateCheck(MESH_STATE.IS_GRABABLE) && mesh.timeIntervalsIdxBuffer.boundary <= 0) {
 
-            const idx = TimeIntervalsCreate(10, 'Move Slider', TIME_INTERVAL_REPEAT_ALWAYS, Slider_move_event, mesh);
+            // const idx = TimeIntervalsCreate(10, 'Move Slider', TIME_INTERVAL_REPEAT_ALWAYS, Slider_move_event, mesh);
+            const idx = TimeIntervalsCreate(10, 'Move Slider', TIME_INTERVAL_REPEAT_ALWAYS, mesh.OnMove, mesh);
             mesh.timeIntervalsIdxBuffer.Add(idx);
 
             STATE.mesh.SetGrabed(mesh);
@@ -323,13 +324,7 @@ export class Widget_Slider extends Rect {
       }
    }
 
-   CreateSliderHandleEvent() {
 
-      const slider = this;
-      slider.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP)
-   }
-
-   
    /*******************************************************************************************************************************************************/
 	// Transformations
 	Move(x, y) {
@@ -419,42 +414,42 @@ export class Widget_Slider extends Rect {
 
 }
 
-function Slider_move_event(params) {
-   /**
-    * The function is called by the timeInterval.
-    * The timeInterval has been set by the 'OnClick' event.
-    */
+// function Slider_move_event(params) {
+//    /**
+//     * The function is called by the timeInterval.
+//     * The timeInterval has been set by the 'OnClick' event.
+//     */
 
-   const slider = params.params;
+//    const slider = params.params;
 
-   // Destroy the time interval calling this function if the mesh is not grabed.
-   if (slider.StateCheck(MESH_STATE.IN_GRAB) === 0 && slider.timeIntervalsIdxBuffer.boundary) {
+//    // Destroy the time interval calling this function if the mesh is not grabed.
+//    if (slider.StateCheck(MESH_STATE.IN_GRAB) === 0 && slider.timeIntervalsIdxBuffer.boundary) {
 
-      const intervalIdx = slider.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
-      TimeIntervalsDestroyByIdx(intervalIdx);
-      slider.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+//       const intervalIdx = slider.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
+//       TimeIntervalsDestroyByIdx(intervalIdx);
+//       slider.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
 
-      return;
-   }
+//       return;
+//    }
 
-   // Move the mesh
-   const mouse_pos = MouseGetPosDif();
-   if (mouse_pos.x === 0 && mouse_pos.y === 0) return;
+//    // Move the mesh
+//    const mouse_pos = MouseGetPosDif();
+//    if (mouse_pos.x === 0 && mouse_pos.y === 0) return;
 
-   // console.log('MOVING SECTION', slider.name, mouse_pos)
-   console.log('MOVING SLIDER', slider.name)
+//    // console.log('MOVING SECTION', slider.name, mouse_pos)
+//    console.log('MOVING SLIDER', slider.name)
 
-   slider.MoveXY(mouse_pos.x, -mouse_pos.y);
-   const bar = slider.children.buffer[0];
-   bar.MoveXY(mouse_pos.x, -mouse_pos.y);
-   const handle = bar.children.buffer[0];
-   handle.MoveXY(mouse_pos.x, -mouse_pos.y);
-   const value = bar.children.buffer[1];
-   value.MoveXY(mouse_pos.x, -mouse_pos.y);
-   const name = slider.children.buffer[1];
-   name.MoveXY(mouse_pos.x, -mouse_pos.y);
+//    slider.MoveXY(mouse_pos.x, -mouse_pos.y);
+//    const bar = slider.children.buffer[0];
+//    bar.MoveXY(mouse_pos.x, -mouse_pos.y);
+//    const handle = bar.children.buffer[0];
+//    handle.MoveXY(mouse_pos.x, -mouse_pos.y);
+//    const value = bar.children.buffer[1];
+//    value.MoveXY(mouse_pos.x, -mouse_pos.y);
+//    const name = slider.children.buffer[1];
+//    name.MoveXY(mouse_pos.x, -mouse_pos.y);
 
-}
+// }
 
 export function Slider_connect(_params) {
 

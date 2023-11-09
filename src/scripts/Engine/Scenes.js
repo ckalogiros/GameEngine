@@ -2,6 +2,7 @@
 import { AddArr3, FloorArr3 } from '../Helpers/Math/MathOperations.js';
 import { AnimationsGet } from './Animations/Animations.js';
 import { M_Buffer } from './Core/Buffers.js';
+import { Info_listener_dispatch_event } from './Drawables/DebugInfo/InfoListeners.js';
 import { Drop_down_set_root, Widget_Dropdown } from './Drawables/Meshes/Widgets/Menu/Widget_Dropdown.js';
 import { Widget_Text } from './Drawables/Meshes/Widgets/WidgetText.js';
 import { HandleEvents } from './Events/Events.js';
@@ -420,6 +421,9 @@ export function Scenes_remove_root_mesh(widget, sceneidx) {
 }
 export function Scenes_store_gfx_to_buffer(sceneidx, mesh) { 
     _scenes.buffer[sceneidx].StoreGfxCtx(mesh);
+
+    if(!(mesh.type & MESH_TYPES_DBG.UI_INFO_MESH)) // Avoid infinite loops.
+        Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.MESH, mesh);
 }
 export function Scenes_remove_mesh_from_gfx(sceneidx, progidx, vbidx, scene_gfx_mesh_idx) { 
     return _scenes.buffer[sceneidx].RemoveMeshFromGfx(progidx, vbidx, scene_gfx_mesh_idx);
@@ -508,7 +512,8 @@ export function ScenesPrintAllMeshes(children, count) {
             for (let j = 0; j < count; j++) r += '->';
 
             // console.log(i, r, child.id, GetMeshHighOrderNameFromType(child.type))
-            console.log(i, r, child.name, ' idx:', child.idx, FloorArr3(child.geom.pos), ' gfx:', [child.gfx.prog.idx, child.gfx.vb.idx, child.gfx.vb.start]);
+            // console.log(i, r, child.name, ' idx:', child.idx, FloorArr3(child.geom.pos), ' gfx:', [child.gfx.prog.idx, child.gfx.vb.idx, child.gfx.vb.start]);
+            console.log(`${i} ${r} ${child.name} idx:${child.idx} pos:[${child.geom.pos[0]},${child.geom.pos[1]} dim:[${child.geom.dim[0]},${child.geom.dim[1]}] gfx:{prog:${child.gfx.prog.idx}, vb:${child.gfx.vb.idx}, start${child.gfx.vb.start}}`);
             total_count++;
 
             if (child.children.boundary) {
@@ -617,8 +622,10 @@ function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children,
 
 export function Scenes_debug_info_create(scene) {
 
-    // const dropdown = new Widget_Dropdown('Scene Meshes Dropdown Section Panel', ALIGN.LEFT, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GetRandomColor(), temp_transparency), WHITE, pad);
     const dropdown = new Widget_Dropdown('Scene Meshes Dropdown Section Panel', [600, 20, 0], [60, 20], GREY1, TRANSPARENCY(GREY7, temp_transparency), WHITE, pad);
+    dropdown.CreateClickEvent();
+    dropdown.CreateMoveEvent();
+    Drop_down_set_root(dropdown, dropdown);
 
     for (let i = 0; i < _scenes.boundary; i++) {
 
@@ -627,8 +634,9 @@ export function Scenes_debug_info_create(scene) {
 
         // const drop_down_mesh = new Widget_Dropdown(`${scene.name}`, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(GetRandomColor(), temp_transparency), WHITE, pad);
         const drop_down_mesh = new Widget_Dropdown(`${scene.name}`, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(BLUE, temp_transparency), WHITE, pad);
+        drop_down_mesh.CreateClickEvent();
 
-        const meshes_buffer = scene.children;
+        const meshes_buffer = scene.root_meshes;
 
         for (let j = 0; j < meshes_buffer.boundary; j++) {
 
@@ -648,10 +656,9 @@ export function Scenes_debug_info_create(scene) {
         dropdown.AddToMenu(drop_down_mesh)
     }
 
-    scene.AddMesh(dropdown);
-    dropdown.Init();
+    scene.AddWidget(dropdown);
     dropdown.Calc();
-    Drop_down_set_root(dropdown, dropdown);
+    dropdown.ConstructListeners();
 }
 
 export function Scenes_debug_info_update(params) {

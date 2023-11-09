@@ -11,6 +11,8 @@ import { Scenes_get_all_scene_meshes, Scenes_get_root_meshes } from "../../Scene
 import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _pt2, _pt3, _pt4, _pt5, _pt6, _pt_fps } from "../../Timers/PerformanceTimers";
 import { PerformanceTimerGetFps1sAvg, _fps_1s_avg, _fps_500ms_avg } from "../../Timers/Time";
 import { Info_listener_create_event, Info_listener_destroy_event } from "./InfoListeners";
+import { Gfx_add_geom_mat_to_vb } from "../../Interfaces/Gfx/GfxInterfaceFunctions";
+import { Widget_Scroller } from "../Meshes/Widgets/WidgetScroller";
 
 
 export function Debug_info_ui_performance(scene) {
@@ -619,96 +621,274 @@ function Debug_info_create_mesh_info(params){
 
    const dp = new Widget_Dropdown(`InfoUi Mesh DP`, [600, 20, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
    dp.SetName('InfoUi Mesh DP');
+   dp.SetType(MESH_TYPES_DBG.UI_INFO_MESH); // Special recognition of this type, so we skip any infinite loops
    dp.CreateClickEvent();
    dp.CreateMoveEvent();
    Drop_down_set_root(dp, dp);
 
-   // Create dropdown info for each mesh in scene
-   const meshes = Scenes_get_all_scene_meshes(STATE.scene.active_idx);
-   const fontsize = 4;
-   
-   for (let i=0; i<meshes.length; i++){
+   const root_meshes = Scenes_get_root_meshes(STATE.scene.active_idx);
 
-      const dp_mesh = new Widget_Dropdown(`${i}: ${meshes[i].name}`, [0, 0, 0], [10, 10], TRANSPARENCY(GREEN_140_240_10, tr), GREY1, WHITE, [8, 3]);
-      dp_mesh.SetName(`${meshes[i].name}`);
+   for (let i=0; i<root_meshes.boundary; i++){
 
-      /**
-         alreadyAdded: false
-         attrParams1: Array(4) [ 0, 0, 0, … ]
-         children: Object { boundary: 2, active_count: 2, size: 2, … }
-         debug_info: Object { type: 0, data: null, evtidx: -1 }
-         dp_symbols: Array [ "+", "-" ]
-         eventCallbacks: Object { boundary: 0, active_count: 0, size: -1, … }
-         geom: Object { zIndex: 0, time: 0, type: 2, … }
-         gfx: Object { sceneidx: 0, scene_gfx_mesh_idx: 0, isPrivate: false, … }
-         hover_margin: Array [ 0, 0 ]
-         id: 0
-         idx: 0
-         isOn: 1
-         is_gfx_inserted: false
-         listeners: Object { boundary: 0, active_count: 0, size: 2, … }
-         margin: Array [ 0, 0 ]
-         mat: Object { textidx: -1, uvIdx: -1, hasFontTex: false, … }
-         max_size: Array [ 131.2, 124.25 ]
-         menu: Object { idx: 1, is_gfx_inserted: false, sceneidx: 0, … }
-         menu_options: Object { Clbk: null, idx: -1 }
-         menu_options_idx: -1
-         minimized: undefined
-         name: "InfoUi Root-DP id:0"
-         options: 2
-         padding: undefined
-         parent: undefined
-         rootidx: 0
-         scene_rootidx: 0
-         sceneidx: 0
-         sid: Object { shad: 2, attr: 36646, unif: 7, … }
-         state: Object { mask: 0 }
-         time: undefined
-         timeIntervalsIdxBuffer: Object { boundary: 0, active_count: 0, size: -1, … }
-         active_count: 0
-         boundary: 0
-         buffer: null
-         size: -1
-         <prototype>: Object { … }
-         timedEvents: Object { boundary: 0, active_count: 0, size: -1, … }
-         active_count: 0
-         boundary: 0
-         buffer: null
-         size: -1
-         type: 33557120
-         uniforms: Object { time: {…} }
-         time: Object { val: 0, idx: -1 }
-         idx: -1
-         val: 0
-       */
- 
-      dp_mesh.AddToMenu(new Widget_Text(`name: ${meshes[i].name}`, [0, 0, 0], fontsize, BLUE_10_120_220, .4));
-      dp_mesh.AddToMenu(new Widget_Text(`id: ${meshes[i].id}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
-      dp_mesh.AddToMenu(new Widget_Text(`isOn: ${meshes[i].isOn}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
-      dp_mesh.AddToMenu(new Widget_Text(`is_gfx_inserted: ${meshes[i].is_gfx_inserted}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
-      dp_mesh.AddToMenu(new Widget_Text(`parent: ${meshes[i].parent}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
-      dp_mesh.AddToMenu(new Widget_Text(`rootidx: ${meshes[i].rootidx}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
-      dp_mesh.AddToMenu(new Widget_Text(`scene_rootidx: ${meshes[i].scene_rootidx}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
-      dp_mesh.AddToMenu(new Widget_Text(`sceneidx: ${meshes[i].sceneidx}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
-
-      dp.AddToMenu(dp_mesh);
+      if(root_meshes.buffer[i]) 
+         Debug_info_mesh_add_meshes_as_tree_struct(root_meshes.buffer[i], dp);
    }
 
-   scene.AddWidget(dp, GFX.PRIVATE);
+
+   /**
+      alreadyAdded: false
+      attrParams1: Array(4) [ 0, 0, 0, … ]
+      children: Object { boundary: 2, active_count: 2, size: 2, … }
+      debug_info: Object { type: 0, data: null, evtidx: -1 }
+      dp_symbols: Array [ "+", "-" ]
+      eventCallbacks: Object { boundary: 0, active_count: 0, size: -1, … }
+      geom: Object { zIndex: 0, time: 0, type: 2, … }
+      gfx: Object { sceneidx: 0, scene_gfx_mesh_idx: 0, isPrivate: false, … }
+      hover_margin: Array [ 0, 0 ]
+      id: 0
+      idx: 0
+      isOn: 1
+      is_gfx_inserted: false
+      listeners: Object { boundary: 0, active_count: 0, size: 2, … }
+      margin: Array [ 0, 0 ]
+      mat: Object { textidx: -1, uvIdx: -1, hasFontTex: false, … }
+      max_size: Array [ 131.2, 124.25 ]
+      menu: Object { idx: 1, is_gfx_inserted: false, sceneidx: 0, … }
+      menu_options: Object { Clbk: null, idx: -1 }
+      menu_options_idx: -1
+      minimized: undefined
+      name: "InfoUi Root-DP id:0"
+      options: 2
+      padding: undefined
+      parent: undefined
+      rootidx: 0
+      scene_rootidx: 0
+      sceneidx: 0
+      sid: Object { shad: 2, attr: 36646, unif: 7, … }
+      state: Object { mask: 0 }
+      time: undefined
+      timeIntervalsIdxBuffer: Object { boundary: 0, active_count: 0, size: -1, … }
+      active_count: 0
+      boundary: 0
+      buffer: null
+      size: -1
+      <prototype>: Object { … }
+      timedEvents: Object { boundary: 0, active_count: 0, size: -1, … }
+      active_count: 0
+      boundary: 0
+      buffer: null
+      size: -1
+      type: 33557120
+      uniforms: Object { time: {…} }
+      time: Object { val: 0, idx: -1 }
+      idx: -1
+      val: 0
+    */
+ 
+
+
    dp.Calc();
-   dp.Render();
+   // Create scroller for the ui-mesh info widget
+   const scroller = new Widget_Scroller(dp, [0, 100] );
+   scroller.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
+
+   scene.AddWidget(scroller, GFX.PRIVATE);
+   scroller.Render();
    Gfx_end_session(true);
-   dp.ConstructListeners();
+   scroller.ConstructListeners();
    
-   DEBUG_INFO.UI_MESH.IDX = dp.idx;
+   DEBUG_INFO.UI_MESH.IDX = scroller.idx;
    DEBUG_INFO.UI_MESH.IS_ON = true;
 
    // Create an Info listener to update the mouse position ui text
-   dp.debug_info.evtidx = Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.MESH, Debug_info_mesh_update, params, dp);
+   // dp.debug_info.evtidx = Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.MESH, Debug_info_mesh_update, params, dp);
 
 }
 
-function Debug_info_mesh_update(){
+/**SAVE */
+// function Debug_info_create_mesh_info(params){
+
+   
+//    const scene = params.params;
+
+//    if (DEBUG_INFO.UI_MESH.IS_ON) {
+
+//       const meshes = Scenes_get_root_meshes(scene.sceneidx);
+//       const dropdown = meshes.buffer[DEBUG_INFO.UI_MESH.IDX];
+
+//       Info_listener_destroy_event(dropdown.debug_info.evtidx);
+//       DEBUG_INFO.UI_MESH.POS = dropdown.geom.pos; // Remember the ui's position.
+
+//       dropdown.Destroy();
+
+//       DEBUG_INFO.UI_MESH.IDX = INT_NULL; // reference to the scene's mesh buffer
+//       DEBUG_INFO.UI_MESH.IS_ON = false;
+
+//       ui_gfx_self_state.progs = [];
+
+//       return;
+//    }
+
+
+//    const tr = .45;
+
+//    const dp = new Widget_Dropdown(`InfoUi Mesh DP`, [600, 20, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
+//    dp.SetName('InfoUi Mesh DP');
+//    dp.SetType(MESH_TYPES_DBG.UI_INFO_MESH); // Special recognition of this type, so we skip any infinite loops
+//    dp.CreateClickEvent();
+//    dp.CreateMoveEvent();
+//    Drop_down_set_root(dp, dp);
+
+//    const root_meshes = Scenes_get_root_meshes(STATE.scene.active_idx);
+
+//    for (let i=0; i<root_meshes.boundary; i++){
+
+//       if(root_meshes.buffer[i]) 
+//          Debug_info_mesh_add_meshes_as_tree_struct(root_meshes.buffer[i], dp);
+//    }
+
+//    // Create dropdown info for each mesh in scene
+//    // const meshes = Scenes_get_all_scene_meshes(STATE.scene.active_idx);
+//    // const fontsize = 4;
+   
+//    // for (let i=0; i<meshes.length; i++){
+
+//    //    const dp_mesh = new Widget_Dropdown(`${i}: ${meshes[i].name}`, [0, 0, 0], [10, 10], TRANSPARENCY(GREEN_140_240_10, tr), GREY1, WHITE, [8, 3]);
+//    //    dp_mesh.SetName(`${meshes[i].name}`);
+
+//    //    /**
+//    //       alreadyAdded: false
+//    //       attrParams1: Array(4) [ 0, 0, 0, … ]
+//    //       children: Object { boundary: 2, active_count: 2, size: 2, … }
+//    //       debug_info: Object { type: 0, data: null, evtidx: -1 }
+//    //       dp_symbols: Array [ "+", "-" ]
+//    //       eventCallbacks: Object { boundary: 0, active_count: 0, size: -1, … }
+//    //       geom: Object { zIndex: 0, time: 0, type: 2, … }
+//    //       gfx: Object { sceneidx: 0, scene_gfx_mesh_idx: 0, isPrivate: false, … }
+//    //       hover_margin: Array [ 0, 0 ]
+//    //       id: 0
+//    //       idx: 0
+//    //       isOn: 1
+//    //       is_gfx_inserted: false
+//    //       listeners: Object { boundary: 0, active_count: 0, size: 2, … }
+//    //       margin: Array [ 0, 0 ]
+//    //       mat: Object { textidx: -1, uvIdx: -1, hasFontTex: false, … }
+//    //       max_size: Array [ 131.2, 124.25 ]
+//    //       menu: Object { idx: 1, is_gfx_inserted: false, sceneidx: 0, … }
+//    //       menu_options: Object { Clbk: null, idx: -1 }
+//    //       menu_options_idx: -1
+//    //       minimized: undefined
+//    //       name: "InfoUi Root-DP id:0"
+//    //       options: 2
+//    //       padding: undefined
+//    //       parent: undefined
+//    //       rootidx: 0
+//    //       scene_rootidx: 0
+//    //       sceneidx: 0
+//    //       sid: Object { shad: 2, attr: 36646, unif: 7, … }
+//    //       state: Object { mask: 0 }
+//    //       time: undefined
+//    //       timeIntervalsIdxBuffer: Object { boundary: 0, active_count: 0, size: -1, … }
+//    //       active_count: 0
+//    //       boundary: 0
+//    //       buffer: null
+//    //       size: -1
+//    //       <prototype>: Object { … }
+//    //       timedEvents: Object { boundary: 0, active_count: 0, size: -1, … }
+//    //       active_count: 0
+//    //       boundary: 0
+//    //       buffer: null
+//    //       size: -1
+//    //       type: 33557120
+//    //       uniforms: Object { time: {…} }
+//    //       time: Object { val: 0, idx: -1 }
+//    //       idx: -1
+//    //       val: 0
+//    //     */
+ 
+//    //    dp_mesh.AddToMenu(new Widget_Text(`name: ${meshes[i].name}`, [0, 0, 0], fontsize, BLUE_10_120_220, .4));
+//    //    dp_mesh.AddToMenu(new Widget_Text(`id: ${meshes[i].id}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
+//    //    dp_mesh.AddToMenu(new Widget_Text(`isOn: ${meshes[i].isOn}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
+//    //    dp_mesh.AddToMenu(new Widget_Text(`is_gfx_inserted: ${meshes[i].is_gfx_inserted}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
+//    //    dp_mesh.AddToMenu(new Widget_Text(`parent: ${meshes[i].parent}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
+//    //    dp_mesh.AddToMenu(new Widget_Text(`rootidx: ${meshes[i].rootidx}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
+//    //    dp_mesh.AddToMenu(new Widget_Text(`scene_rootidx: ${meshes[i].scene_rootidx}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
+//    //    dp_mesh.AddToMenu(new Widget_Text(`sceneidx: ${meshes[i].sceneidx}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
+
+//    //    dp.AddToMenu(dp_mesh);
+//    // }
+
+//    scene.AddWidget(dp, GFX.PRIVATE);
+//    dp.Calc();
+//    dp.Render();
+//    Gfx_end_session(true);
+//    dp.ConstructListeners();
+   
+//    DEBUG_INFO.UI_MESH.IDX = dp.idx;
+//    DEBUG_INFO.UI_MESH.IS_ON = true;
+
+//    // Create an Info listener to update the mouse position ui text
+//    // dp.debug_info.evtidx = Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.MESH, Debug_info_mesh_update, params, dp);
+
+// }
+
+function Debug_info_mesh_add_meshes_as_tree_struct(mesh, parent){
+
+   const dp_mesh = new Widget_Dropdown(` ${mesh.name}`, [0, 0, 0], [10, 10], TRANSPARENCY(GREEN_140_240_10, .5), GREY1, WHITE, [8, 3]);
+   dp_mesh.SetName(`${mesh.name}`);
+   dp_mesh.SetType(MESH_TYPES_DBG.UI_INFO_MESH);
+   parent.AddToMenu(dp_mesh);
+
+   for (let i=0; i<mesh.children.boundary; i++){
+      
+      const child = mesh.children.buffer[i];
+      if(child) 
+         Debug_info_mesh_add_meshes_as_tree_struct(child, dp_mesh);
+   }
+
+}
+
+function Debug_info_mesh_update(params){
+
+   // const root_info_dp = params.target_params;
+   // const scene = params.source_params.params;
+   // const clicked_mesh = params.source_params.target_mesh;
+   // const added_mesh = params.trigger_params
+   // const parent = added_mesh.parent ? added_mesh.parent : null 
+
+
+   // /**
+   //  * 1. Find the newly added mesh's parent.
+   //  * 2. Find the parent's info mesh dropdown.
+   //  *    2.1. If no parent, create new dp at the level of the menu of the root_info_dp
+   //  *    2.2. If parent
+   //  *       2.2.1. Create new dropdown of the added mesh.
+   //  * 4. Add the mesh dp to the menu of the found parent dp
+   //  * DONE
+   //  */
+
+
+   // const parent_name = added_mesh.parent ? added_mesh.parent.name : 'null' 
+   // console.log( ' root_dp:', root_info_dp.name,  ' clicked_mesh:', clicked_mesh.name,' added mesh:', added_mesh.name)
+   // console.log(' Parent: ', parent_name, parent)
+   // console.log(' root_info_dp: ', root_info_dp)
+
+   // if(!parent && !(added_mesh.type & MESH_TYPES_DBG.UI_INFO_MESH)){
+
+   //    const dp_mesh = new Widget_Dropdown(` ${added_mesh.name}`, [0, 0, 0], [10, 10], TRANSPARENCY(GREEN_140_240_10, .5), GREY1, WHITE, [8, 3]);
+   //    dp_mesh.SetName(`${added_mesh.name}`);
+   //    dp_mesh.SetType(MESH_TYPES_DBG.UI_INFO_MESH);
+   //    root_info_dp.AddToMenu(dp_mesh);
+
+
+   //    // dp_mesh.GenGfxCtx(GFX.PRIVATE);
+   //    const gfx_idxs = [root_info_dp.menu.gfx.prog.idx, root_info_dp.menu.gfx.vb.idx];
+   //    dp_mesh.GenGfxCtx(GFX.PRIVATE, gfx_idxs);
+   //    // Gfx_add_geom_mat_to_vb(dp_mesh.sid, dp_mesh.gfx, dp_mesh.geom, dp_mesh.mat, dp_mesh.type & MESH_TYPES_DBG.MESH, dp_mesh.name);
+   //    dp_mesh.Render();
+   //    root_info_dp.Recalc();
+
+   // }
 
 }
 

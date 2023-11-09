@@ -107,8 +107,17 @@ export class Geometry2D {
     }
     //////////////////////////////////////////////////////////////
     SetDim(dim, gfx) {
-        math.CopyArr2(this.dim, dim);
-        glBufferOps.GlSetDim(gfx, dim);
+        
+        const dimentions = [0,0];
+        
+        if(dim[0] !== UNCHANGED) dimentions[0] = dim[0]; // Set x dimention
+        else dimentions[0] = this.dim[0]; // else use the same x dimention
+        
+        if(dim[1] !== UNCHANGED) dimentions[1] = dim[1];
+        else dimentions[1] = this.dim[1];
+        
+        math.CopyArr2(this.dim, dimentions);
+        glBufferOps.GlSetDim(gfx, dimentions);
     }
     UpdateDim(gfx) {
         glBufferOps.GlSetDim(gfx, this.dim);

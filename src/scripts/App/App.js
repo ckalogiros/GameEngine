@@ -96,7 +96,6 @@ export function AppInit() {
 
     // const menu = CreateMenu(scene)
 
-
     // CreateDropDownWithDropdownsInside(scene)
     // CreateDropDownWidgetWithWidgetsInside(scene)
 
@@ -253,11 +252,13 @@ function CreateSwitch(scene) {
     const switch1 = new Widget_Switch('switch on', 'switch off', [250, ypos, 0], 5, GREY1, WHITE, [4, 4], .5);
     switch1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
     switch1.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE, { style: [6, 6, 3] })
+    switch1.Bind(function () { console.log('CALLBACK FROM USER !!!!!!!!!!!!!!!!!!!!!!!!!!!') })
+    switch1.ConstructListeners();
+
     scene.AddWidget(switch1);
     switch1.text_mesh.SetColorRGB(BLUE_10_120_220);
     ypos += switch1.geom.dim[1] * 2 + 5;
 
-    switch1.Bind(function () { console.log('CALLBACK FROM USER !!!!!!!!!!!!!!!!!!!!!!!!!!!') })
 
     return switch1;
 }
@@ -497,12 +498,11 @@ function CreatSectionedMixWidgets(scene) {
 function CreateSlider(scene) {
 
     const slider = new Widget_Slider([200, 300, 0], [150, 10]);
-    slider.CreateSliderHandleEvent();
+    // slider.CreateSliderHandleEvent();
     slider.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
-    slider.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
+    slider.ConstructListeners();
 
     scene.AddWidget(slider);
-    slider.ConstructListeners();
 
 }
 
@@ -516,7 +516,7 @@ function CreateSliderWithMenuBar(scene) {
     section.AddItem(menu);
 
     const slider = new Widget_Slider([200, 100, 0], [150, 10]);
-    slider.CreateSliderHandleEvent();
+    // slider.CreateSliderHandleEvent();
     section.AddItem(slider);
 
     scene.AddWidget(section);
@@ -783,33 +783,51 @@ function CreateScroller(scene) {
 
     const fontsize = 4.3;
 
-    // const text = new Widget_Dynamic_Text_Mesh('Hi', 'this is tex', [300, 300, 0], fontsize, WHITE, WHITE, .4);
     const section = new Section(SECTION.VERTICAL, [10, 10], [280, 650, 0], [0, 0], TRANSPARENCY(GREY1, .6));
 
     for (let i = 0; i < 3; i++) {
 
         const s = new Section(SECTION.VERTICAL, [6, 3], [280, 650, 0], [0, 0], TRANSPARENCY(GREEN_140_240_10, .6));
-        s.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-        s.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-
         const label = new Widget_Label('Label', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3])
-        // label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-        // label.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
-
         s.AddItem(label);
         section.AddItem(s);
-        // section.AddItem(label);
     }
-
+    
     section.Calc();
 
-    // const scroller = new Widget_Scroller(section, [20, 50]);
     const scroller = new Widget_Scroller(section);
-    scroller.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    scroller.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
 
     scene.AddWidget(scroller, GFX.PRIVATE);
     Gfx_end_session(true);
-    scroller.Recalc();
+    // scroller.Recalc();
+    scroller.ConstructListeners();
+
+    { // Add more items to the scroller's scrolled section, to debug the correct behavior of the scroller's re-size and reposition.
+        const l = new Widget_Label('Label 123 DDSDSDSfsdsdsdsds', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3]);
+        l.GenGfxCtx();
+        scroller.AddToScrolledSection(l);
+    }
+    {
+        const l = new Widget_Label('Label 123 DDSDSDSfsdsdsdsds', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3]);
+        l.GenGfxCtx();
+        scroller.AddToScrolledSection(l);
+    }
+    {
+        const l = new Widget_Label('Label 123 DDSDSDSfsdsdsdsds', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3]);
+        l.GenGfxCtx();
+        scroller.AddToScrolledSection(l);
+    }
+    {
+        const l = new Widget_Label('Label 123 DDSDSDSfsdsdsdsds', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3]);
+        l.GenGfxCtx();
+        scroller.AddToScrolledSection(l);
+    }
+    {
+        const l = new Widget_Label('Label 123 DDSDSDSfsdsdsdsds', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3]);
+        l.GenGfxCtx();
+        scroller.AddToScrolledSection(l);
+    }
 
 }
 
