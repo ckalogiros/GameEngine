@@ -272,7 +272,7 @@ export class Section extends Rect {
 
          const evt = mesh.listeners.buffer[etypeidx];
 
-         if (evt) { // If event is not null
+         if (evt) { // If mesh has events to add...
             const target_params = {
                EventClbk: null,
                targetBindingFunctions: null,
@@ -315,13 +315,12 @@ export class Section extends Rect {
             else if (child.ConstructListeners) // Call the widget's specific .ConstructListeners() to handle the widget's listen events creation
                child.ConstructListeners(root);
 
-
-
-            else console.error('NO LISTEN EVENTS CONSTRUCTION OCCURED for mesh:', child.name, child)
+            // else console.error('NO LISTEN EVENTS CONSTRUCTION OCCURED for mesh:', child.name, child)
          }
       }
    }
 
+   // SEE ### OnMove Events Implementation Logic
    // OnMove(params) {
 
    //    const section = params.params;
@@ -417,7 +416,8 @@ function Section_on_move_section(params) {
    if (mouse_pos.x === 0 && mouse_pos.y === 0) return;
 
    // Move section
-   section.MoveXY(mouse_pos.x, -mouse_pos.y, section.gfx);
+   if(section.gfx) section.MoveXY(mouse_pos.x, -mouse_pos.y, section.gfx);
+   // if(section.gfx) section.MoveXY(mouse_pos.x, -mouse_pos.y);
 
    // Run children's OnMove event
    for (let i = 0; i < section.children.boundary; i++) {
@@ -435,7 +435,7 @@ function Section_on_move_section(params) {
                console.error('OnMove function is missing. @ Section.Move(), mesh:', child.name, child);
                return;
             }
-            child.Move(mouse_pos.x, -mouse_pos.y);
+            if(child.gfx)child.Move(mouse_pos.x, -mouse_pos.y);
          }
 
       }
@@ -467,7 +467,6 @@ function Expand2(section, options) {
    }
 }
 
-
 function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum_pos = [parent.geom.pos[1], 0]) {
 
    const padding = [0, 0]
@@ -490,27 +489,19 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
          const p_dx = parent.GetTotalWidth(); const p_dy = parent.GetTotalHeight();
          const p_mx = parent.margin[0]; const p_my = parent.margin[1];
 
-         const new_pos = [c_x - p_dx + mesh.GetTotalWidth() + p_mx,
-         c_y - p_dy + mesh.GetTotalHeight() + p_my,
-         parent.geom.pos[2] + 1,];
+         const new_pos = [c_x - p_dx + mesh.GetTotalWidth() + p_mx, c_y - p_dy + mesh.GetTotalHeight() + p_my, parent.geom.pos[2] + 1,];
 
          if ((mesh.type & MESH_TYPES_DBG.SECTION_MESH) === 0) { // Case mesh not of type section, have it update it's new pos-dim on a later when it's gfx exists.
 
             const pos_dif = [new_pos[0] - mesh.GetCenterPosX(), new_pos[1] - mesh.GetCenterPosY(), new_pos[2] + 1];
 
-            // console.log(`name:${mesh.name} meshpos:${mesh.geom.pos} new:${new_pos} dif:${pos_dif}`)
-            // UpdaterAdd(mesh, 0, null, pos_dif);
-            if (mesh.gfx)
+            // console.log('Reposition:', mesh.name, mesh.geom.pos,  pos_dif)
+            if (mesh.gfx){
                mesh.Reposition_post(pos_dif);
+            }
             else {
-               // AddArr3(mesh.geom.pos, pos_dif);
                mesh.Reposition_pre(pos_dif);
             }
-            // if(!mesh.gfx) UpdaterAdd(mesh, 0, null, pos_dif);
-            // else mesh.Reposition_post(pos_dif);
-            // console.log('pos_dif:', pos_dif, mesh.geom.pos)
-            // CopyArr3(mesh.geom.pos, new_pos);
-            // if(mesh.gfx) mesh.Reposition_post(pos_dif);
 
             continue_recur = false; // Stop recursion for meshe's children. Let the mesh deal with it's children.
          }
@@ -531,11 +522,8 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
       if (opt & SECTION.VERTICAL) {
          cur_pos[1] += mesh_height * 2;
          accum_pos[0] += mesh_width;
-         // accum_pos[1]++;
       }
       else if (opt & SECTION.HORIZONTAL) {
-         // accum_pos[0] += mesh.GetTotalWidth();
-         // cur_pos[0] += mesh.GetTotalWidth();
          cur_pos[0] += mesh_width * 2;
       }
    }
@@ -556,11 +544,31 @@ function Calculate_sizes_recursive(section, top, left, options, total_margin = [
          opt = section.options
 
       const mesh = section.children.buffer[i];
+      // if (mesh.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) { // Case the current item is of widget dropdown.
+
+      //    const dp_size = mesh.GetSize();
+
+      //    if (opt & SECTION.VERTICAL) {
+      //       accum_size_per_section[1] += dp_size[1];
+      //       accum_size_per_section[0] = dp_size[0];
+      //       section.max_size[1] += dp_size[1];
+      //       if (section.max_size[0] < accum_size_per_section[0])
+      //          section.max_size[0] = dp_size[0];
+      //    }
+      //    else if (opt & SECTION.HORIZONTAL) {
+      //       accum_size_per_section[0] += dp_size[0];
+      //       accum_size_per_section[1] = dp_size[1];
+      //       section.max_size[0] += dp_size[0];
+      //       if (section.max_size[1] < accum_size_per_section[1])
+      //          section.max_size[1] = dp_size[1];  // Keep the max height of all meshes in Horizontal mode.
+      //    }
+      // }
+      // else 
       if (mesh.children.active_count && (mesh.type & MESH_TYPES_DBG.SECTION_MESH)) {
 
          margin[1] += mesh.margin[1] * 2;
          margin[0] += mesh.margin[0];
-         const size = Calculate_sizes_recursive(mesh, top, left, SECTION.INHERIT, margin, total_size);
+         const size = Calculate_sizes_recursive(mesh, top, left, SECTION.INHERIT, margin, total_size); // Recurse if child mesh is of type of Section
          total_size[0] += size[0];
          total_size[1] += size[1];
 
@@ -601,13 +609,13 @@ function Calculate_sizes_recursive(section, top, left, options, total_margin = [
             accum_size_per_section[1] += mesh.geom.dim[1]
             accum_size_per_section[0] = mesh.geom.dim[0]
             section.max_size[1] += mesh.geom.dim[1];
-            if (section.max_size[0] < accum_size_per_section[0]) section.max_size[0] = mesh.geom.dim[0]; // Keep the max width of all meshes
+            if (section.max_size[0] < accum_size_per_section[0]) section.max_size[0] = mesh.geom.dim[0]; // For horizontal, grow to the max width of all meshes
          }
          else if (opt & SECTION.HORIZONTAL) {
             accum_size_per_section[0] += mesh.geom.dim[0]
             accum_size_per_section[1] = mesh.geom.dim[1]
             section.max_size[0] += mesh.geom.dim[0]
-            if (section.max_size[1] < accum_size_per_section[1]) section.max_size[1] = mesh.geom.dim[1];  // Keep the max height of all meshes
+            if (section.max_size[1] < accum_size_per_section[1]) section.max_size[1] = mesh.geom.dim[1];  // For horizontal, grow to the max height of all meshes
          }
       }
    }

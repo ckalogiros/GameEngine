@@ -194,7 +194,7 @@ class TimeIntervals {
 
       console.log('Num Interval timers: ', this.count);
       for (let i = 0; i < this.count; i++) {
-         console.log(i, ': name:', this.ti[i].name);
+         console.log(`${i}: name:${this.ti[i].name} | interval:${this.ti[i].interval}  | t:${this.ti[i].t}`);
       }
    }
 

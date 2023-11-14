@@ -3,8 +3,6 @@
 import { GlGenerateContext, GlResetIndexBuffer, GlResetVertexBuffer, GlSetVertexBufferPrivate } from "../../../Graphics/Buffers/GlBuffers.js";
 import { GlCheckSid } from "../../../Graphics/GlProgram.js";
 import { M_Buffer } from "../../Core/Buffers.js";
-import { Info_listener_dispatch_event } from "../../Drawables/DebugInfo/InfoListeners.js";
-import { Renderqueue_set_active } from "../../Renderers/Renderer/RenderQueue.js";
 import { Gfx_remove_geometry_from_buffers, Gfx_set_vb_show } from "./GfxInterfaceFunctions.js";
 
 
@@ -19,7 +17,7 @@ export class Gfx_Pool extends M_Buffer {
       this.session = []; // SEE ## Gfx_Pool.session
    }
 
-   GenerateGfxCtx(sid, sceneidx, mesh_count, FLAGS, gfxIdx=[INT_NULL, INT_NULL]) {
+   GenerateGfxCtx(sid, sceneidx, mesh_count, FLAGS, gfxIdx=null) {
 
       /** Case we have an open session and we dont want to pass any FLAGS 
        * to the rest of the mesh until the session is over. 
@@ -52,22 +50,28 @@ export class Gfx_Pool extends M_Buffer {
                return gfx;
             }
          }
-         /** TODO: We want the case that a specific buffer was rewuested but at the FLAGS is passed 'PRIVATE'
-          * Maybe re-implement by resolve the 'FLASGS' state at the begining of the function,
+         /** TODO: We want the case that a specific buffer was requested but at the FLAGS is passed 'PRIVATE'
+          * Maybe re-implement by resolve the 'FLAGS' state at the begining of the function,
           * and use a simpler flag in all if statements.
           */
-         else if((FLAGS & GFX.SPECIFIC) ||
-            (FLAGS & GFX.PRIVATE) && gfxIdx[0] !== INT_NULL && gfxIdx[1] !== INT_NULL){
+         else if(((FLAGS & GFX.SPECIFIC) || (FLAGS & GFX.PRIVATE)) && gfxIdx){
             
             const gfx_idx = this.FindGfx(gfxIdx[0], gfxIdx[1]);
             if(gfx_idx){
                
+               /**DEBUG*/{
+                  if( !GlCheckSid(sid, gfxIdx[0]) )  
+                     console.error('Request spesific gfx FAILED. Sid\'s do not match.')
+
+               }
                const gfx = GlGenerateContext(sid, sceneidx, GFX.SPECIFIC, gfx_idx.vbidx, mesh_count);
                gfx.gfx_ctx.idx = this.#StoreGfx(gfx);
+               Gfx_set_vb_show(gfx.prog.idx, gfx.vb.idx, true); 
                return gfx;
             }
             /*DEBUG:Wrong use of gfxidx.*/
-            else console.error('Could not locate specific buffer. gfxIdx:', gfxIdx, ' @ GenerateGfxCtx(), GfxCtx2.js')
+            else 
+               console.error('Could not locate specific buffer. gfxIdx:', gfxIdx, ' @ GenerateGfxCtx(), GfxCtx2.js')
          }
          else if(FLAGS & GFX.PRIVATE){
             
@@ -98,7 +102,10 @@ export class Gfx_Pool extends M_Buffer {
                return gfx;
             }
          }
+         else alert('NO GFX CONTEXT WAS CREATED')
       }
+
+
    }
 
    // Enable gfx generation (for new meshes) from existing private gfx buffers.
@@ -326,7 +333,6 @@ export function Gfx_remove_geometry(gfx, num_faces){
    const ret = Gfx_remove_geometry_from_buffers(gfx, num_faces);
    if(ret.empty){ // If the vertex buffer is empty, then set it as not active, so it can be used by other gfx demands.
       _gfx_pool.SetGfxActiveFromPool(gfx.prog.idx, gfx.vb.idx, false);
-      // Renderqueue_set_active(gfx.prog.idx, gfx.vb.idx, false);
       Gfx_set_vb_show(gfx.prog.idx, gfx.vb.idx, false);
    }
    return ret;

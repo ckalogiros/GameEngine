@@ -677,7 +677,8 @@ export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_na
     vb.needsUpdate = true;
     // console.log('VB count:', vb.count)
     if(vb_type_flag) vb.type |= vb_type_flag;
-
+    if(typeof mesh_name !== 'string')
+        console.log()
     /**DEBUG */CreateUniqueMesh(vb.debug.meshesNames, mesh_name);
 
     return start;

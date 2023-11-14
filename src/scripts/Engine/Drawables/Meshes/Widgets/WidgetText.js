@@ -3,7 +3,7 @@
 import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
 import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
-import { CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
+import { CopyArr2, CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
 import { MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx, TimeIntervalsGetByIdx } from "../../../Timers/TimeIntervals.js";
@@ -53,56 +53,56 @@ export class Widget_Text extends Text_Mesh {
 	//    this.MoveXYZ(dif_pos);
 	// }
 
-	// Align_pre(target_mesh, flags, pad=[0,0]) { // Align pre-added to the vertexBuffers
+	Align_pre(target_mesh, flags, pad=[0,0]) { // Align pre-added to the vertexBuffers
 
-	// 	const pos = [0, 0];
-	// 	const dim = this.geom.dim;
-	// 	CopyArr2(pos, this.geom.pos);
-	// 	let ypos = pos[1] + dim[1] * 2;
+		const pos = [0, 0];
+		const dim = this.geom.dim;
+		CopyArr2(pos, this.geom.pos);
+		let ypos = pos[1] + dim[1] * 2;
 
-	// 	if (flags & ALIGN.VERTICAL) {
+		if (flags & ALIGN.VERTICAL) {
 
-	// 		for (let i = 0; i < this.children.boundary; i++) {
+			for (let i = 0; i < this.children.boundary; i++) {
 
-	// 			const child = this.children.buffer[i];
-	// 			pos[1] = ypos;
+				const child = this.children.buffer[i];
+				pos[1] = ypos;
 
-	// 			child.geom.Reposition_pre(pos);
-	// 			ypos += child.geom.dim[1] * 2;
-	// 		}
-	// 	}
+				child.geom.Reposition_pre(pos);
+				ypos += child.geom.dim[1] * 2;
+			}
+		}
 
 
-	// 	if (flags & ALIGN.LEFT) {
+		if (flags & ALIGN.LEFT) {
 
-	// 		const pos = [0, 0];
-	// 		CopyArr2(pos, this.geom.pos);
+			const pos = [0, 0];
+			CopyArr2(pos, this.geom.pos);
 
-	// 		// Vertical allignment
-	// 		pos[1] = target_mesh.geom.pos[1];
+			// Vertical allignment
+			pos[1] = target_mesh.geom.pos[1];
 
-	// 		// Horizontal allignment
-	// 		pos[0] = (target_mesh.geom.pos[0] - target_mesh.geom.dim[0]) + (this.geom.dim[0]) + pad[0];
+			// Horizontal allignment
+			pos[0] = (target_mesh.geom.pos[0] - target_mesh.geom.dim[0]) + (this.geom.dim[0]) + pad[0];
 
-	// 		CopyArr2(this.geom.pos, pos);
+			CopyArr2(this.geom.pos, pos);
 
-	// 	}
-	// 	else if (flags & ALIGN.RIGHT) {
+		}
+		else if (flags & ALIGN.RIGHT) {
 
-	// 		const pos = [0, 0];
-	// 		CopyArr2(pos, this.geom.pos);
+			const pos = [0, 0];
+			CopyArr2(pos, this.geom.pos);
 
-	// 		// Vertical allignment
-	// 		pos[1] = target_mesh.geom.pos[1];
+			// Vertical allignment
+			pos[1] = target_mesh.geom.pos[1];
 
-	// 		// Horizontal allignment
-	// 		const num_faces = (this.geom.num_faces-1 > 1) ? this.geom.num_faces-1 : 1;
-	// 		pos[0] = (target_mesh.geom.pos[0] + target_mesh.geom.dim[0]) - (this.geom.dim[0]*2*num_faces) - pad[0];
+			// Horizontal allignment
+			const num_faces = (this.geom.num_faces-1 > 1) ? this.geom.num_faces-1 : 1;
+			pos[0] = (target_mesh.geom.pos[0] + target_mesh.geom.dim[0]) - (this.geom.dim[0]*2*num_faces) - pad[0];
 
-	// 		CopyArr2(this.geom.pos, pos);
+			CopyArr2(this.geom.pos, pos);
 
-	// 	}
-	// }
+		}
+	}
 
 	// OnClick(params) {
 
@@ -523,6 +523,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 		}
 	}
 
+   // SEE ### OnMove Events Implementation Logic
 	OnMove(params) {
 
 		// The 'OnMove' function is called by the timeInterval.

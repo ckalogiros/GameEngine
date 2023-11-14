@@ -31,7 +31,7 @@ export class Rect extends Mesh {
 
    /*******************************************************************************************************************************************************/
    // Graphics
-   GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
+   GenGfxCtx(FLAGS = GFX.ANY, gfxidx = null) {
 
       this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
       Scenes_store_gfx_to_buffer(this.sceneidx, this);

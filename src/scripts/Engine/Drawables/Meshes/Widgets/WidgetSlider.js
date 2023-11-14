@@ -63,7 +63,6 @@ export class Widget_Slider extends Rect {
       this.SetStyle([0, 6, 2]);
       this.SetName('Widget_Slider');
       // this.StateEnable(MESH_STATE.HAS_POPUP);
-      // this.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_HOVER_COLORABLE);
 
 
       /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -93,7 +92,7 @@ export class Widget_Slider extends Rect {
       handle.type |= MESH_TYPES_DBG.WIDGET_SLIDER_HANDLE | handle.geom | handle.mat;
       handle.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       handle.SetStyle([5, 35, 3]);
-      // handle.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+      handle.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
       handle.SetName('handle');
 
 
@@ -152,7 +151,7 @@ export class Widget_Slider extends Rect {
 
    /*******************************************************************************************************************************************************/
    // Graphics
-   GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
+   GenGfxCtx(FLAGS = GFX.ANY, gfxidx = null) {
 
       this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
       this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, FLAGS, gfxidx);
@@ -211,6 +210,7 @@ export class Widget_Slider extends Rect {
    // Events Handling
 
 
+   // SEE ### OnMove Events Implementation Logic
 	OnMove(params) {
 
 		const mesh = params.params;
@@ -292,36 +292,58 @@ export class Widget_Slider extends Rect {
       return false;
    }
    
-   // Create all listen events recursively for all children, from each mesh's listeners buffer.
-   ConstructListeners(_root=null, _mesh=null){
+   ConstructListeners(_root=null){
       
-      const mesh = (_mesh) ? _mesh : this; // If in recursion, use as the current mesh the passed param. 
-      const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
-      // console.log('****',mesh.name, mesh.listeners.buffer)
+      const slider = this;
+      const bar = slider.children.buffer[BAR_IDX];
+      const handle = bar.children.buffer[0]; 
 
-      for(let i=0; i<mesh.children.boundary; i++){
-         const child = mesh.children.buffer[i];
-         if(child){
-            this.ConstructListeners(root, child)
-         }
+      const root_evt = _root ? _root.listeners.buffer : null; 
+
+      // Create hover events
+      if(slider.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER]) slider.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.HOVER);
+      if(handle.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER]) handle.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.HOVER);
+      if(bar.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER]) bar.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.HOVER);
+
+      const target_params = {
+         EventClbk: null,
+         targetBindingFunctions: null,
+         target_mesh: slider,
+         params: null,
       }
-   
-      const root_evt = root.listeners.buffer;
+      if(slider.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK]){ // This is a check mainly if the user has activated the 'Move' event for the scroller.
 
-      for(let etypeidx=0; etypeidx<mesh.listeners.boundary; etypeidx++){
-
-         const evt = mesh.listeners.buffer[etypeidx];
+         slider.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, false);
+         slider.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.CLICK, slider.OnClick, target_params);
+      }
+      else{
          
-         if(evt){ // If event is not null
-            const target_params = {
-               EventClbk: null,
-               targetBindingFunctions: null,
-               target_mesh: mesh,
-               params: null,
-            }
-            mesh.AddListenEvent(etypeidx, this.OnClick, target_params, root_evt);
-         }
+         // Create a Fake click event with no callback and params, but any root events. 
+         slider.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, true);
+         slider.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.CLICK, null, null, root_evt);
       }
+      bar.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP);
+      bar.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.CLICK, slider.OnClick, target_params, slider.listeners.buffer);
+
+
+
+      // const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
+      // const root_evt = root.listeners.buffer;
+
+      // for(let etypeidx=0; etypeidx < handle.listeners.boundary; etypeidx++){
+
+      //    const evt = handle.listeners.buffer[etypeidx];
+         
+      //    if(evt){ // If event is not null
+      //       const target_params = {
+      //          EventClbk: null,
+      //          targetBindingFunctions: null,
+      //          target_mesh: bar,
+      //          params: null,
+      //       }
+      //       handle.AddListenEvent(etypeidx, this.OnClick, target_params, root_evt);
+      //    }
+      // }
    }
 
 

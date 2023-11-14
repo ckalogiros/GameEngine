@@ -257,7 +257,11 @@ export function Renderqueue_get() { return renderQueue; }
 export function Renderqueue_get_active() { return renderQueue.active; }
 export function Renderqueue_active_get_count() { return renderQueue.activeCount; }
 
+// Set priority to the render queue buffer, but need to update the active render queue buffer.
 export function Renderqueue_set_priority(flag, progIdx, vbIdx) { renderQueue.SetPriority(flag, progIdx, vbIdx); }
+
+// Set priority to the active render queue buffer, no need to update.
+export function Renderqueue_set_priority_to_active_queue(flag, progIdx, vbIdx) { /*TODO: IMPLEMENT*/ }
 
 /**
  * Enable and Disable programs and vertex buffers from the draw queue.
@@ -279,9 +283,6 @@ export function Renderqueue_set_active(progIdx, vbIdx, flag){
 export function Renderqueue_init() {
    renderQueue.Init(); // One time initialization(creates an empty buffer...)
 }
-// export function RenderQueueCreate() {
-//    renderQueue.Create();
-//    renderQueue.UpdateActiveQueue();
-// }
+
 
 

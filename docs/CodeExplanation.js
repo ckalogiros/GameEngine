@@ -44,8 +44,7 @@
  *          resize its self, tha means repositioning its children
  */
 
-/**
-   ### Event Listener
+/** ### Event Listener
 
    [CreateListenEvent(TYPE_IDX, Clbk, source_params, target_params)]
    Listener takes a callback, [source_params] and [target_params].
@@ -78,8 +77,7 @@
 /****************************************************************************** */
 // Widgets An Meshes
 
-/**
-   ### Widget Drop down menu.
+/** ### Widget Drop down menu.
 
    Widget is comprised of a section with a button widget as the trigger 
    (expansion/contraction). The expanded mesh is called 'menu' 
@@ -128,5 +126,27 @@
  */
 
 /** ### Fake Events TODO:IMPLEMENT DISCRIPTION
+ * 
+ */
+
+/** ### OnMove Events Implementation Logic
+ * 
+ * The OnMove() method is called from the 'TimeIntervals' class as a callback function,
+ * not directly from the EventListeners buffer. That is because of:
+ * 1. The move event must update on every frame, so a time interval is needed.
+ * 2. We need a function to initialize the time interval and what better place to do
+ *    if not in the object's OnClick() method, since it is only logical because the object was clicked(in order to be moved).
+ *
+ * The OnClick() method of the class is responsible for creating a interval timer
+ * and pass the this.OnMove() as a callback.
+ *  
+ * Logic: Uppon object click for moving:
+ * 1. The OnClick() is called, which is only natural, since the object was clicked (in order to be moved).
+ * 2. The OnClick() checks/decides if the object is movable and creates a time interval event, 
+ *    with the OnMove() method passed as a callback. 
+ *    The Update for the OnMove() will run independetly from the Event System, updating on a time interval.
+ * 3. The OnMove() checks if the user let go of the grabbed object, and if so
+ *    destroys the OnMove time interval and the moving operation for the object stops.
+ * 
  * 
  */

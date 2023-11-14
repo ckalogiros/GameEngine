@@ -37,6 +37,12 @@ export function GetRandomColor(){
     return COLOR_ARRAY[GetRandomInt(0, COLOR_ARRAY.length)];
 }
 
+let nextidx = 0;
+export function GetSequencedColor(){
+    if(nextidx >= COLORS1.length) nextidx = 0;
+    return COLORS1[nextidx++];
+}
+
 export function GetRandomPos(minPos, maxPos){
     const posx = GetRandomInt(minPos[0], maxPos[0]);
     const posy = GetRandomInt(minPos[1], maxPos[1]);

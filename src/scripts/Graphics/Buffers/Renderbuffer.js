@@ -7,7 +7,7 @@ import { AnimationsGet } from "../../Engine/Animations/Animations.js";
 import { Min3 } from "../../Helpers/Math/MathOperations.js";
 import { ShowTotalScore } from "../../Engine/Events/SceneEvents.js";
 import { MeshBuffer, TempMesh } from "../../Engine/Drawables/MeshBuffer_OLD.js";
-import { Gfx_set_vb_show } from "../../Engine/Interfaces/Gfx/GfxInterfaceFunctions.js";
+import { Gfx_progs_get_vb_byidx, Gfx_set_vb_show } from "../../Engine/Interfaces/Gfx/GfxInterfaceFunctions.js";
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -153,7 +153,7 @@ class Framebuffers extends MeshBuffer {
       if (pos !== null) this.buffer[idx].SetPosXY(pos);
       if (dim !== null) this.buffer[idx].SetDim(dim);
       // Connect the texture with the vertex buffer for text rendering. 
-      const vb = Gl_progs_get_vb_byidx(this.buffer[idx].gfxInfo.prog.idx, this.buffer[idx].gfxInfo.vb.idx);
+      const vb = Gfx_progs_get_vb_byidx(this.buffer[idx].gfxInfo.prog.idx, this.buffer[idx].gfxInfo.vb.idx);
       // Do not render the vertex buffer data of the rect that is to render the frame buffer texture
       vb.textidx = this.buffer[idx].texture.idx; // Bind of the texture to the vertexbuffer
       return idx;

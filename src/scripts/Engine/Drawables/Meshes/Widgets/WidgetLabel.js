@@ -108,12 +108,15 @@ export class Widget_Label extends Rect {
 
     /*******************************************************************************************************************************************************/
     // Graphics
-    GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
+    GenGfxCtx(FLAGS=GFX.ANY, area_gfx_specific=null, text_gfx_specific=null) {
 
-        this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
+        this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, area_gfx_specific);
         Scenes_store_gfx_to_buffer(this.sceneidx, this);
-        this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, FLAGS, gfxidx);
+
+        // TODO: We pass GFX.PRIVATE and not GFX>SPECIFIC becuase we need to implement a default case for .SPECIFIC where if the 'text_gfx_specific' is null, a new gfxCtx will be created
+        this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, GFX.PRIVATE, text_gfx_specific);
         Scenes_store_gfx_to_buffer(this.text_mesh.sceneidx, this.text_mesh);
+        
         return this.gfx;
     }
 
@@ -253,6 +256,7 @@ export class Widget_Label extends Rect {
         return false;
     }
 
+   // SEE ### OnMove Events Implementation Logic
     OnMove(params) {
 
         // The 'OnMove' function is called by the timeInterval.

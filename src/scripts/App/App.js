@@ -1,5 +1,5 @@
 "use strict";
-import { Scenes_create_scene, Scenes_debug_info_create } from '../Engine/Scenes.js'
+import { Scenes_create_scene, Scenes_debug_info_create, Scenes_store_gfx_to_buffer } from '../Engine/Scenes.js'
 import { Renderqueue_get, Renderqueue_init } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { WebGlRenderer } from '../Engine/Renderers/WebGlRenderer.js';
 import { CameraOrthographic } from '../Engine/Renderers/Renderer/Camera.js';
@@ -39,7 +39,8 @@ import { Input_create_user_input_listeners } from '../Engine/Controls/Input/Inpu
 import { Debug_info_create_ui_performance_timers, Debug_info_ui_performance } from '../Engine/Drawables/DebugInfo/DebugInfoUi.js';
 import { Destroy_mesh } from '../Engine/Global/Functions.js';
 import { Widget_Scroller } from '../Engine/Drawables/Meshes/Widgets/WidgetScroller.js';
-import { GetRandomColor } from '../Helpers/Helpers.js';
+import { GetRandomColor, GetSequencedColor } from '../Helpers/Helpers.js';
+import { Gfx_get_progams_count } from '../Engine/Interfaces/Gfx/GfxInterfaceFunctions.js';
 
 
 // var osu = require('node-os-utils')
@@ -85,7 +86,9 @@ export function AppInit() {
      * Create meshes
      */
 
-    Debug_info_ui_performance(scene);
+    // Listeners_debug_info_create(scene);
+
+    // Debug_info_ui_performancex(scene);
 
 
     // const label = CreateLabel(scene);
@@ -98,6 +101,11 @@ export function AppInit() {
 
     // CreateDropDownWithDropdownsInside(scene)
     // CreateDropDownWidgetWithWidgetsInside(scene)
+
+    TestDropdownsTextRendering(scene, [160, 200, 0], 0);
+    TestDropdownsTextRendering(scene, [300, 200, 0], 1);
+    // TestDropdownsTextRendering(scene, [460, 200, 0], 1);
+    // TestDropdownsTextRendering(scene, [600, 200, 0], 1);
 
     // CreateSlider(scene);
     // CreateSliderWithMenuBar(scene);
@@ -113,18 +121,14 @@ export function AppInit() {
     // CreateScroller(scene);
 
     // Help(scene)
-    // CreateSectionedWidgets(scene)
-
-    // CreateManySection(scene);
-    // Listeners_debug_info_create(scene);
 
 
-    // const section = MeshInfo(scene)
-    // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
+    // const meshinfo_mesh = MeshInfo(scene)
+    // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: meshinfo_mesh });
 
-    // const section = Mesm10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: section });
+    // const gfxinfo = GfxInfo(scene)
+    // TimeIntervalsCreate(100, 'Gfx info tip', TIME_INTERVAL_REPEAT_ALWAYS, GfxInfoUpdate, { gfxinfo: gfxinfo });
 
-    // Listeners_debug_info_create(scene);
     // Scenes_debug_info_create(scene);
 
 
@@ -136,8 +140,11 @@ export function AppInit() {
     // console.log(progs)
 
 
-    Renderqueue_get().SetPriorityProgram('last', 1, 0);
-    Renderqueue_get().UpdateActiveQueue();
+    TimeIntervalsCreate(500, 'RenderQueue set program 1 priority', TIME_INTERVAL_REPEAT_ALWAYS, function(){
+
+        Renderqueue_get().SetPriorityProgram('last', 1);
+        Renderqueue_get().UpdateActiveQueue();
+    });
 
     { // PERFORMANCE OBJECTS
         var performance = window.performance || window.mozPerformance || window.msPerformance || window.webkitPerformance || {};
@@ -302,11 +309,10 @@ function CreateDropDownWithDropdownsInside(scene) {
 
     const pad = [10, 2.5]
     const drop_down = new Widget_Dropdown('DP1', [260, 200, 0], [60, 20], RED, BLUE_10_120_220, WHITE, pad);
-    drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); 
-    drop_down.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+    drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
     drop_down.CreateClickEvent();
-    drop_down.CreateMoveEvent(); 
-    
+    drop_down.CreateMoveEvent();
+
     { // Add another dropdown in dropdown
 
         {
@@ -319,13 +325,13 @@ function CreateDropDownWithDropdownsInside(scene) {
                 drop_down4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
                 drop_down4.CreateClickEvent();
                 drop_down3.AddToMenu(drop_down4);
-                
+
                 {
                     const drop_down5 = new Widget_Dropdown('DP4', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, PINK_240_60_200, WHITE, pad);
                     drop_down5.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
                     drop_down5.CreateClickEvent();
                     drop_down4.AddToMenu(drop_down5);
-                    
+
                     {
                         const drop_down6 = new Widget_Dropdown('DP5', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, RED_200_10_10, WHITE, pad);
                         drop_down6.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
@@ -357,7 +363,7 @@ function CreateDropDownWidgetWithWidgetsInside(scene) {
     const drop_down = new Widget_Dropdown('DP1', [260, 300, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, pad);
     drop_down.CreateClickEvent();
     drop_down.CreateMoveEvent();
-    
+
     { // Add another dropdown in dropdown
         const drop_down2 = new Widget_Dropdown('DP2', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, pad);
         drop_down2.CreateClickEvent();
@@ -401,14 +407,14 @@ function CreateDropDownWidgetWithWidgetsInside(scene) {
                 drop_down4.CreateClickEvent();
                 drop_down3.AddToMenu(drop_down4);
                 // Drop_down_set_root(drop_down, drop_down4);
-                
+
                 {
                     const drop_down5 = new Widget_Dropdown('DP5 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, PINK_240_60_200, WHITE, pad);
                     drop_down5.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down5.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
                     drop_down5.CreateClickEvent();
                     drop_down4.AddToMenu(drop_down5);
                     // Drop_down_set_root(drop_down, drop_down5);
-                    
+
                     {
                         const drop_down6 = new Widget_Dropdown('DP6 DP1', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, RED_200_10_10, WHITE, pad);
                         drop_down6.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); drop_down6.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
@@ -436,11 +442,109 @@ function CreateDropDownWidgetWithWidgetsInside(scene) {
 
 }
 
+function TestDropdownsTextRendering(scene, pos, id) {
+
+    const pad = [10, 2.5]
+    const dp = new Widget_Dropdown(`DP${id}`, pos, [60, 20], RED, BLUE_10_120_220, WHITE, pad);
+    dp.CreateHoverEvent();
+    dp.CreateClickEvent();
+    dp.CreateMoveEvent();
+
+    const sub_dp1_count = 3;
+    const sub_dp2_count = 3;
+
+    for(let i=0; i<sub_dp1_count; i++){
+
+        const dpsub1 = new Widget_Dropdown(`DP${id} ${i}`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, GetSequencedColor(), WHITE, pad);
+        dpsub1.CreateHoverEvent();
+        dpsub1.CreateClickEvent();
+        dp.AddToMenu(dpsub1);
+
+        const col = GetRandomColor()
+        for(let j=0; j<sub_dp2_count; j++){
+
+            const dpsub2 = new Widget_Dropdown(`DP${id} ${i}${j}`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, col, WHITE, pad);
+            dpsub2.CreateHoverEvent();
+            dpsub2.CreateClickEvent();
+            dpsub1.AddToMenu(dpsub2);
+        }
+    }
+    // { // Add another dropdown in dropdown
+
+    //     const dp00 = new Widget_Dropdown(`DP${id} 0`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
+    //     dp00.CreateHoverEvent();
+    //     dp00.CreateClickEvent();
+    //     dp.AddToMenu(dp00);
+    //     {
+    //         const dp001 = new Widget_Dropdown(`DP${id} 01`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, MAGENTA_BLUE, WHITE, pad);
+    //         dp001.CreateHoverEvent();
+    //         dp001.CreateClickEvent();
+    //         dp00.AddToMenu(dp001);
+    //         const dp002 = new Widget_Dropdown(`DP${id} 02`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, MAGENTA_BLUE, WHITE, pad);
+    //         dp002.CreateHoverEvent();
+    //         dp002.CreateClickEvent();
+    //         dp00.AddToMenu(dp002);
+    //         const dp003 = new Widget_Dropdown(`DP${id} 03`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, MAGENTA_BLUE, WHITE, pad);
+    //         dp003.CreateHoverEvent();
+    //         dp003.CreateClickEvent();
+    //         dp00.AddToMenu(dp003);
+    //     }
+
+    //     const dp01 = new Widget_Dropdown(`DP${id} 1`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_160_220, WHITE, pad);
+    //     dp01.CreateHoverEvent();
+    //     dp01.CreateClickEvent();
+    //     dp.AddToMenu(dp01);
+    //     {
+    //         const dp011 = new Widget_Dropdown(`DP${id} 11`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
+    //         dp011.CreateHoverEvent();
+    //         dp011.CreateClickEvent();
+    //         dp01.AddToMenu(dp011);
+    //         const dp012 = new Widget_Dropdown(`DP${id} 12`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
+    //         dp012.CreateHoverEvent();
+    //         dp012.CreateClickEvent();
+    //         dp01.AddToMenu(dp012);
+    //         const dp013 = new Widget_Dropdown(`DP${id} 13`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
+    //         dp013.CreateHoverEvent();
+    //         dp013.CreateClickEvent();
+    //         dp01.AddToMenu(dp013);
+    //     }
+
+    //     const dp02 = new Widget_Dropdown(`DP${id} 0`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, MAGENTA_RED, WHITE, pad);
+    //     dp02.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    //     dp02.CreateClickEvent();
+    //     dp.AddToMenu(dp02);
+    //     {
+    //         const dp021 = new Widget_Dropdown(`DP${id} 21`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, ORANGE_240_160_10, WHITE, pad);
+    //         dp021.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    //         dp021.CreateClickEvent();
+    //         dp02.AddToMenu(dp021);
+    //         const dp022 = new Widget_Dropdown(`DP${id} 22`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, ORANGE_240_160_10, WHITE, pad);
+    //         dp022.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    //         dp022.CreateClickEvent();
+    //         dp02.AddToMenu(dp022);
+    //         const dp023 = new Widget_Dropdown(`DP${id} 23`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, ORANGE_240_160_10, WHITE, pad);
+    //         dp023.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    //         dp023.CreateClickEvent();
+    //         dp02.AddToMenu(dp023);
+    //     }
+
+    // }
+
+    // scene.AddWidget(dp);
+    dp.GenGfxCtx(GFX.PRIVATE);
+    // dp.Render()
+    dp.Calc();
+    dp.ConstructListeners();
+
+    scene.StoreRootMesh(dp)
+}
+
 function CreatSectionedMixWidgets(scene) {
 
     const section = new Section(SECTION.VERTICAL, [10, 10], [250, 400, 0], [0, 0], TRANSPARENCY(GREY1, .5))
     // section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
-    section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    // section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
 
     {
         const menu = new Widget_Menu_Bar('Widget Menu bar', ALIGN.LEFT, [60, 200, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
@@ -493,6 +597,7 @@ function CreatSectionedMixWidgets(scene) {
 
     scene.AddWidget(section);
     section.Calc();
+    section.ConstructListeners();
 }
 
 function CreateSlider(scene) {
@@ -516,7 +621,6 @@ function CreateSliderWithMenuBar(scene) {
     section.AddItem(menu);
 
     const slider = new Widget_Slider([200, 100, 0], [150, 10]);
-    // slider.CreateSliderHandleEvent();
     section.AddItem(slider);
 
     scene.AddWidget(section);
@@ -537,7 +641,6 @@ function CreateSectionWithNestedWidgetsWithListenEvents(scene) {
     section.AddItem(menu);
 
     const slider = new Widget_Slider([200, 100, 0], [150, 10]);
-    slider.CreateSliderHandleEvent();
     section.AddItem(slider);
 
     {
@@ -550,7 +653,6 @@ function CreateSectionWithNestedWidgetsWithListenEvents(scene) {
         s.AddItem(m);
 
         const sl = new Widget_Slider([200, 100, 0], [150, 10]);
-        sl.CreateSliderHandleEvent();
         s.AddItem(sl);
         section.AddItem(s);
 
@@ -563,7 +665,6 @@ function CreateSectionWithNestedWidgetsWithListenEvents(scene) {
             s2.AddItem(m2);
 
             const sl = new Widget_Slider([200, 100, 0], [150, 10]);
-            sl.CreateSliderHandleEvent();
             s2.AddItem(sl);
             s.AddItem(s2);
         }
@@ -580,14 +681,13 @@ function CreateSectionWithNestedWidgetsWithListenEvents(scene) {
 function CreateSectionWithNestedWidgetsWithListenEvents2(scene) {
 
     const section = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREY1, .9))
-    // section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
 
     const menu = new Widget_Menu_Bar('Widget Menu bar 0', ALIGN.LEFT, [200, 400, 0], TRANSPARENCY(GREY1, .9), WHITE, [10, 6]);
     menu.AddCloseButton(section, 'x');
     section.AddItem(menu);
 
     const slider = new Widget_Slider([200, 100, 0], [150, 10]);
-    slider.CreateSliderHandleEvent();
     section.AddItem(slider);
 
     {
@@ -599,7 +699,6 @@ function CreateSectionWithNestedWidgetsWithListenEvents2(scene) {
         s.AddItem(m);
 
         const sl = new Widget_Slider([200, 100, 0], [150, 10]);
-        sl.CreateSliderHandleEvent();
         s.AddItem(sl);
 
         section.AddItem(s);
@@ -612,7 +711,6 @@ function CreateSectionWithNestedWidgetsWithListenEvents2(scene) {
             s2.AddItem(m2);
 
             const sl1 = new Widget_Slider([200, 100, 0], [150, 10]);
-            sl1.CreateSliderHandleEvent();
             s2.AddItem(sl1);
 
             s.AddItem(s2);
@@ -624,7 +722,6 @@ function CreateSectionWithNestedWidgetsWithListenEvents2(scene) {
                 s3.AddItem(m3);
 
                 const sl3 = new Widget_Slider([200, 100, 0], [150, 10]);
-                sl3.CreateSliderHandleEvent();
                 s3.AddItem(sl3);
 
                 s2.AddItem(s3);
@@ -660,6 +757,12 @@ function CreateMenuBarSectioned(count) {
     return section;
 }
 
+/**
+ * TODO!!!:
+ * The button can move, but it can be grabbed only if it is inside it's parent section.
+ * That is because the move event is child of parent and it will fire if parent's event is fired.
+ * Fix: Make the move event so that the mesh cannot move outside parent's boundaries. 
+ */
 function CreateSectionSectioned(scene) {
 
     const flags = (SECTION.ITEM_FIT | SECTION.EXPAND);
@@ -706,46 +809,73 @@ function CreateSectionSectioned(scene) {
     { // Set widgets parameters
         label.SetName('Sectioned btn1')
         label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-        label.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-        blu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, blu.OnClick);
+        blu.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
 
         btn.SetName('Sectioned btn1')
         btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
-        btn.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
-        btn.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, btn.OnClick);
+        btn.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
     }
 
     { // Set naming and listeners
+        red.SetName('red');
+        gre.SetName('gre');
+        yel.SetName('yel');
+        ora.SetName('ora');
+        cie.SetName('cie');
+        bla.SetName('bla');
+        bla_1.SetName('bla_1');
+        pin_1.SetName('pin_1');
+        blu_1.SetName('blu_1');
+        pur_1.SetName('pur_1');
+        red_1.SetName('red_1');
+        yel_1.SetName('yel_1');
+        yel_2.SetName('yel_2');
+        red_3.SetName('red_3');
+        yel_3.SetName('yel_3');
+        gre_3.SetName('gre_3');
+        red_4.SetName('red_4');
+        yel_4.SetName('yel_4');
+        gre_4.SetName('gre_4');
+        ora_4.SetName('ora_4');
+        gry1_1.SetName('gry1_1');
+        gry1_2.SetName('gry1_2');
+        gry1_3.SetName('gry1_3');
+        gry2_1.SetName('gry2_1');
+        gry2_2.SetName('gry2_2');
+        gry2_3.SetName('gry2_3');
+        gry2_4.SetName('gry2_4');
+        vert_0.SetName('vert_0');
+    }
 
-        red.SetName('red'); red.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); red.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gre.SetName('gre'); gre.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gre.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        yel.SetName('yel'); yel.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        ora.SetName('ora'); ora.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); ora.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        cie.SetName('cie'); cie.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); cie.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        bla.SetName('bla'); bla.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); bla.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        bla_1.SetName('bla_1'); bla_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); bla_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        pin_1.SetName('pin_1'); pin_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); pin_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        blu_1.SetName('blu_1'); blu_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); blu_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        pur_1.SetName('pur_1'); pur_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); pur_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        red_1.SetName('red_1'); red_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); red_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        yel_1.SetName('yel_1'); yel_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        yel_2.SetName('yel_2'); yel_2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel_2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        red_3.SetName('red_3'); red_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); red_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        yel_3.SetName('yel_3'); yel_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gre_3.SetName('gre_3'); gre_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gre_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        red_4.SetName('red_4'); red_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); red_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        yel_4.SetName('yel_4'); yel_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); yel_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gre_4.SetName('gre_4'); gre_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gre_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        ora_4.SetName('ora_4'); ora_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); ora_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gry1_1.SetName('gry1_1'); gry1_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry1_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gry1_2.SetName('gry1_2'); gry1_2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry1_2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gry1_3.SetName('gry1_3'); gry1_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry1_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gry2_1.SetName('gry2_1'); gry2_1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry2_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gry2_2.SetName('gry2_2'); gry2_2.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry2_2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gry2_3.SetName('gry2_3'); gry2_3.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry2_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        gry2_4.SetName('gry2_4'); gry2_4.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); gry2_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        vert_0.SetName('vert_0'); vert_0.StateEnable(MESH_STATE.IS_HOVER_COLORABLE); vert_0.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-
+    { // Set listeners
+        red.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        gre.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        yel.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        ora.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        cie.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        bla.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        bla_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        pin_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        blu_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        pur_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        red_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        yel_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        yel_2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        red_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        yel_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        gre_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        red_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        yel_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        gre_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        ora_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        gry1_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        gry1_2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        gry1_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        gry2_1.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        gry2_2.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        gry2_3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        gry2_4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        vert_0.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
     }
 
     { // Set hierarchy
@@ -763,9 +893,7 @@ function CreateSectionSectioned(scene) {
 
     const minimizer = new Widget_Minimize(blu, blu.geom.pos);
     minimizer.SetName('minimizer')
-    // minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, minimizer.OnClick, minimizer);
     minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    minimizer.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
     blu.AddItem(minimizer);
 
@@ -792,7 +920,7 @@ function CreateScroller(scene) {
         s.AddItem(label);
         section.AddItem(s);
     }
-    
+
     section.Calc();
 
     const scroller = new Widget_Scroller(section);
@@ -836,8 +964,9 @@ function Help(scene) {
 
     const flags = (SECTION.ITEM_FIT);
 
-    const section = new Section(SECTION.VERTICAL, [10, 10], [280, 650, 0], [0, 0], TRANSPARENCY(GREY1, .2));
-    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick);
+    //options, margin, pos, dim, col, name
+    const section = new Section(SECTION.VERTICAL, [10, 10], [280, 650, 0], [100, 100], TRANSPARENCY(RED, .2));
+    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
     section.SetName('Help section')
 
     // scene.StoreMesh(section)
@@ -848,41 +977,40 @@ function Help(scene) {
     for (let i = 0; i < DEBUG_PRINT_KEYS.length; i++) {
 
         msgs[i] = '\"' + DEBUG_PRINT_KEYS[i].key + '\": ' + DEBUG_PRINT_KEYS[i].discr
-        const label = new Widget_Label(msgs[i], ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [1, 1], [7, 6], .5, undefined, [0, 4, 3])
-        label.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
+        //text = 'null', Align = (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos = [200, 300, 0], fontSize = 4.4, col = GREY1, text_col = WHITE, pad = [10, 5], bold = .4, style = [0, 6, 2], font = TEXTURES.SDF_CONSOLAS_LARGE) {
+        const label = new Widget_Label(msgs[i], ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 3], .5, [0, 4, 3])
         label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
 
         s1.AddItem(label)
     }
 
-    // const s2 = new Section(SECTION.HORIZONTAL, [15, 10], [220, 400, 0], [0, 0], TRANSPARENCY(BLUE_10_120_220, .2))
+    // s1.Calc()
+
     const minimizer = new Widget_Minimize(section, section.geom.pos);
     minimizer.SetName('minimizer')
-    // minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, minimizer.OnClick, minimizer);
-    // minimizer.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    // minimizer.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
 
     section.AddItem(minimizer);
-    section.AddItem(s1, flags)
+    section.AddItem(s1)
 
     scene.AddWidget(section, GFX.PRIVATE);
     Gfx_end_session(true);
 
-    section.Calc(flags)
+    section.Calc()
+    section.ConstructListeners()
 }
 
 function MeshInfo(scene) {
 
     const fontsize = 4.3;
 
-    const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 0000000000000000', 'id:000', [10, 140, 0], fontsize, GREEN_140_240_10, YELLOW_240_220_10, .4);
-    infomesh.CreateNewText('pos: 00000,00000,0', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
-    infomesh.CreateNewText('defpos: 00000,00000,0', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 000000000000', 'id:000', [10, 15, 0], fontsize, GREEN_140_240_10, YELLOW_240_220_10, .4);
+    infomesh.CreateNewText('pos: 00000,00000,0', fontsize, BLUE_10_120_220, [fontsize * 3, 10], .9);
     infomesh.CreateNewText('dim: 00000,00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
-    infomesh.CreateNewText('gfx: prog:0, vb:0, start:000000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    infomesh.CreateNewText('gfx: prog:0, vb:0, start:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    infomesh.CreateNewText('gfx: prog:0, vb:0, start:00000, count:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    infomesh.SetName('Info Mesh 2');
 
-    // infomesh.Align_pre(infomesh, ALIGN.VERTICAL)
-    // infomesh.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, infomesh.OnClick);
+    infomesh.Align_pre(infomesh, ALIGN.VERTICAL)
     scene.AddWidget(infomesh, GFX.PRIVATE);
     Gfx_end_session(true);
 
@@ -898,32 +1026,147 @@ function MeshInfoUpdate(params) {
 
         textMesh.UpdateText(infoMesh.name);
 
-        const gfx = (infoMesh.gfx !== null) ? `gfx: prog:${infoMesh.gfx.prog.idx}, vb:${infoMesh.gfx.vb.idx}, vb:${infoMesh.gfx.vb.start}`
-            : 'null'
+        const gfx = (infoMesh.gfx !== null) ? `gfx: prog:${infoMesh.gfx.prog.idx}, vb:${infoMesh.gfx.vb.idx}, vb:${infoMesh.gfx.vb.start}` : 'null'
 
         let msgs = [
             `id:${infoMesh.id}`,
             `pos:${FloorArr3(infoMesh.geom.pos)}`,
-            `defpos:${FloorArr3(infoMesh.geom.defPos)}`,
-            // `dim: x:${infoMesh.geom.dim[0]} y:${infoMesh.geom.dim[1]}`,
-            `dim: ${infoMesh.geom.dim}`,
-            gfx,
+            `dim: ${infoMesh.geom.dim}`, gfx,
         ];
 
-        for (let i = 0; i < textMesh.children.count; i++) {
+        const child = (infoMesh.children.boundary && infoMesh.children.buffer[0]) ? infoMesh.children.buffer[0] : null; 
+        if (child) {
+            if (child.type & MESH_TYPES_DBG.FONT_MATERIAL) {
+                msgs.push(`gfx: prog:${child.gfx.prog.idx}, vb:${child.gfx.vb.idx}, start:${child.gfx.vb.start}, faces:${child.text_mesh.geom.num_faces}`);
+            }
+            else if (child.text_mesh) {
+                msgs.push(`gfx: prog:${child.text_mesh.gfx.prog.idx}, vb:${child.text_mesh.gfx.vb.idx}, start:${child.text_mesh.gfx.vb.start}, faces:${child.text_mesh.geom.num_faces}`);
+            }
 
-            const childText = textMesh.children.buffer[i];
-            childText.UpdateText(msgs[i])
         }
 
+
+        for (let i = 0; i < textMesh.children.boundary; i++) {
+
+            const childText = textMesh.children.buffer[i];
+
+            if(msgs[i]) childText.UpdateText(msgs[i]);
+            else childText.UpdateText('NULL')
+        }
+    }
+}
+
+function GfxInfo(scene) {
+
+    const infogfx = new Widget_Dropdown(`GFX INFO`, [350, 100, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [5, 5]);
+    // infogfx.CreateHoverEvent();
+    infogfx.CreateClickEvent();
+    infogfx.CreateMoveEvent();
+
+    Drop_down_set_root(infogfx, infogfx)
+
+
+    infogfx.Calc();
+    infogfx.GenGfxCtx(GFX.PRIVATE);
+    Gfx_end_session(true, true);
+    infogfx.ConstructListeners();
+    // Scenes_store_gfx_to_buffer(scene.sceneidx, infogfx);
+    scene.StoreRootMesh(infogfx)
+
+    const params = {
+        infogfx_root: infogfx,
+        gfxbuffer: [],
     }
 
+    return params;
+}
+// function GfxInfo(scene) {
+
+//     const s = new Section(SECTION.VERTICAL, [20, 20], [350, 100, 0], [0, 0], ORANGE_240_130_10, 'GfxInfoSection');
+//     s.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+//     s.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
+
+//     // const infogfx = new Widget_Text('Gfx Info Mesh ', [300, 15, 0], fontsize, GREEN_140_240_10, .4);
+//     const infogfx = new Widget_Dropdown(`GFX INFO`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [5, 5]);
+//     infogfx.CreateHoverEvent();
+//     infogfx.CreateClickEvent();
+
+//     Drop_down_set_root(infogfx, infogfx)
+
+//     s.AddItem(infogfx)
+//     // scene.AddWidget(s, GFX.PRIVATE);
+//     s.Calc();
+//     s.GenGfxCtx(GFX.PRIVATE);
+//     // s.Render();
+//     Gfx_end_session(true, true);
+//     s.ConstructListeners();
+//     Scenes_store_gfx_to_buffer(scene.sceneidx, s);
+//     scene.StoreRootMesh(s)
+
+//     const params = {
+//         infogfx_section: s,
+//         gfxbuffer: [],
+//     }
+
+//     return params;
+// }
+
+function GfxInfoUpdate(params) {
+
+    const root_dp = params.params.gfxinfo.infogfx_root;
+    const gfxbuffer = params.params.gfxinfo.gfxbuffer;
+    const progs = Gl_progs_get();
+
+    let any_vb_found = false;
+
+    for (let i = 0; i < progs.length; i++) {
+        for (let j = 0; j < progs[i].vertexBuffer.length; j++) {
+
+            const vb = progs[i].vertexBuffer[j];
+
+            const gfxid = `${i}${j}`
+            if (GfxInfoFindNewMeshEntries(gfxbuffer, gfxid)) {
+
+                any_vb_found = true;
+                const dp = new Widget_Dropdown(`prog:${i} vb:${vb.idx} count:${vb.count}`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, [5, 5]);
+                dp.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX2;
+                // dp.CreateAndAddEvent(LISTEN_EVENT_TYPES_INDEX.HOVER, root_dp.listeners.buffer)
+
+                if (root_dp.menu.gfx) {
+                    dp.GenGfxCtx(GFX.SPECIFIC, [root_dp.menu.gfx.prog.idx, root_dp.menu.gfx.vb.idx], root_dp);
+                }
+                
+                root_dp.AddToMenu(dp)
+                
+                // for (let k = 0; k < vb.debug.meshesNames.length; k++) {
+                //     const meshname = vb.debug.meshesNames[k];
+                //     const meshnametext = new Widget_Text(`${meshname}`, [300, 15, 0], 4, BLACK, .4); 
+                //     meshnametext.GenGfxCtx(GFX.PRIVATE);
+                //     dp.AddToMenu(meshnametext);
+                // }
+
+            }
+        }
+    }
+
+    if (any_vb_found) {
+        console.log('infogfx:', root_dp)
+    }
+}
+
+function GfxInfoFindNewMeshEntries(gfxbuffer, gfxid) {
+    for (let i = 0; i < gfxbuffer.length; i++) {
+        if (gfxbuffer[i] === gfxid) return false;
+    }
+    gfxbuffer.push(gfxid)
+    console.log(gfxbuffer)
+    return true
 }
 
 function SetHoverToAllMeshesRecursive(mesh) {
 
     mesh.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    mesh.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+    // mesh.AddListenEvent(LISTEN_EVENT_TYPES.HOVER);
 
     for (let i = 0; i < mesh.children.count; i++) {
 

@@ -75,7 +75,6 @@ export class Widget_Scroller extends Section {
          
          this.scrolled_section = scrolled_mesh;
          this.geom.pos[0] = (this.scrolled_section.geom.pos[0] - this.scrolled_section.geom.dim[0]) - this.margin[0]; // Include the margin in the calculation
-         // this.geom.pos[0] = (this.scrolled_section.geom.pos[0] - this.scrolled_section.geom.dim[0]); // Include the margin in the calculation
          this.geom.pos[1] = (this.scrolled_section.geom.pos[1] - this.scrolled_section.geom.dim[1]) + this.margin[1]; 
       }
       else{ // else create a new scrolled section.
@@ -106,7 +105,6 @@ export class Widget_Scroller extends Section {
       bar.SetStyle([0, 3, 2]);
       bar.SetName('Scroll bar');
 
-
       /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
       // Scroller Handle: Handle is a child of the bar mesh
 
@@ -115,10 +113,10 @@ export class Widget_Scroller extends Section {
       handle.type |= MESH_TYPES_DBG.WIDGET_SCROLLER_HANDLE | handle.geom | handle.mat;
       handle.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       handle.SetStyle([4, 5, 1.9]);
-      handle.StateEnable(MESH_STATE.IS_MOVABLE);
-      handle.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
       handle.SetName('Scroll handle');
-
+      handle.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+      handle.StateEnable(MESH_STATE.IS_MOVABLE); // No event is created, cause the handle move event is handled by the OnClick() class method
+      
 
       // Make the vertical area of the bar larger for hover and handle grabing.
       bar.hover_margin = [0, handle.geom.dim[1] + 4];
@@ -140,16 +138,14 @@ export class Widget_Scroller extends Section {
       // Calculate handle's position, from bar's position
       handle.geom.pos[0] = bar.geom.pos[0];
       handle.geom.pos[1] = bar.geom.pos[1];
-      console.log(bar.geom.pos)
-      console.log(handle.geom.pos)
 
       bar.AddChild(handle);
       this.scroll_bar = bar;
 
 
       // Add the scrolled mesh
-      SCROLL_MESH_IDX = this.AddItem(this.scrolled_section);
       SCROLL_BAR_IDX = this.AddItem(this.scroll_bar);
+      SCROLL_MESH_IDX = this.AddItem(this.scrolled_section);
 
       console.log('Scroller Dim:', this.geom.dim)
 
@@ -182,12 +178,8 @@ export class Widget_Scroller extends Section {
 
    TempRecalcAll(size){
 
-      if(size[0] > this.geom.dim[0]){
-         
-         // this.#RecalculateWidth(size[0]);
-      }
+      // if(size[0] > this.geom.dim[0]){ this.#RecalculateWidth(size[0]);  }
       // this.#Reposition();
-      
 
       // Set the bar and handle y pos
       this.scroll_bar.SetPosY(this.geom.pos[1]);
@@ -213,7 +205,7 @@ export class Widget_Scroller extends Section {
 
    /*******************************************************************************************************************************************************/
    // Graphics
-   GenGfxCtx(FLAGS = GFX.ANY, gfxidx = [INT_NULL, INT_NULL]) {
+   GenGfxCtx(FLAGS = GFX.ANY, gfxidx = null) {
 
       this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
 
@@ -299,6 +291,7 @@ export class Widget_Scroller extends Section {
 
       const mesh = params.target_params.target_mesh;
       const point = MouseGetPos();
+      console.log('::::::::::::::::::::::::: mesh:', mesh.name)
 
       // Check if the click happened on bar
       const bar = mesh.children.buffer[SCROLL_BAR_IDX];
@@ -324,7 +317,6 @@ export class Widget_Scroller extends Section {
          // Move Scroller 
          if ((mesh.type & MESH_TYPES_DBG.WIDGET_SCROLLER) && mesh.StateCheck(MESH_STATE.IS_GRABABLE) && mesh.timeIntervalsIdxBuffer.boundary <= 0) {
 
-            // const idx = TimeIntervalsCreate(10, 'Move Scroller', TIME_INTERVAL_REPEAT_ALWAYS, Scroller_move_event, mesh);
             const idx = TimeIntervalsCreate(10, 'Move Scroller', TIME_INTERVAL_REPEAT_ALWAYS, mesh.OnMove, mesh);
             mesh.timeIntervalsIdxBuffer.Add(idx);
 
@@ -337,8 +329,10 @@ export class Widget_Scroller extends Section {
       return false;
    }
 
+   // SEE ### OnMove Events Implementation Logic
    OnMove(params) {
 
+      // const mesh = params.target_params;
       const mesh = params.params;
 
       // Destroy the time interval and the Move operation, if the mesh is not grabed
@@ -365,6 +359,44 @@ export class Widget_Scroller extends Section {
 
       const handle = bar.children.buffer[0];
       handle.geom.MoveXY(mouse_pos.x, -mouse_pos.y, handle.gfx);
+
+   }
+
+   ConstructListeners(_root=null){
+      
+      const scroller = this;
+      const bar = this.scroll_bar; 
+      const handle = bar.children.buffer[0]; 
+      const scrolled_section = this.scrolled_section; 
+
+      const root_evt = _root ? _root.listeners.buffer : null; 
+
+      // Create hover events
+      if(scroller.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER]) scroller.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.HOVER);
+      if(handle.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER]) handle.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.HOVER);
+      if(bar.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER]) bar.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.HOVER);
+
+      const target_params = {
+         EventClbk: null,
+         targetBindingFunctions: null,
+         target_mesh: scroller,
+         params: null,
+      }
+      if(scroller.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK]){ // This is a check mainly if the user has activated the 'Move' event for the scroller.
+
+         scroller.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, false);
+         scroller.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.CLICK, scroller.OnClick, target_params, root_evt);
+      }
+      else{
+
+         // Create a Fake click event with no callback and params, but any root events.  
+         scroller.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, true);
+         scroller.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.CLICK, null, null, root_evt); 
+      }
+      bar.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP);
+      bar.AddListenEvent(LISTEN_EVENT_TYPES_INDEX.CLICK, scroller.OnClick, target_params, scroller.listeners.buffer);
+
+      scrolled_section.ConstructListeners(this);
 
    }
 

@@ -313,7 +313,7 @@ export class Mesh {
             this.StateEnable(MESH_STATE.IS_HOVERABLE | MESH_STATE.IS_HOVER_COLORABLE);
             if(is_fake_event) this.StateEnable(MESH_STATE.IS_FAKE_EVENT | MESH_STATE.IS_FAKE_HOVERABLE);
         }
-        if (etype & LISTEN_EVENT_TYPES.CLICK_UP) {
+        else if (etype & LISTEN_EVENT_TYPES.CLICK_UP) {
 
             this.listeners.AddAtIndex(LISTEN_EVENT_TYPES_INDEX.CLICK, {
                 evt: null,
@@ -322,7 +322,7 @@ export class Mesh {
             this.StateEnable(MESH_STATE.IS_CLICKABLE);
             if(is_fake_event) this.StateEnable(MESH_STATE.IS_FAKE_EVENT | MESH_STATE.IS_FAKE_CLICKABLE);
         }
-        if (etype & LISTEN_EVENT_TYPES.MOVE) {
+        else if (etype & LISTEN_EVENT_TYPES.MOVE) {
             
             this.listeners.AddAtIndex(LISTEN_EVENT_TYPES_INDEX.CLICK, {
                 evt: null,

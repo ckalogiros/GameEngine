@@ -369,6 +369,22 @@ const COLOR_ARRAY = new Array(
 	ORANGE_240_130_10,
 	ORANGE_240_160_10,
 );
+const COLORS1 = new Array(
+	ORANGE_240_130_10,
+	PINK_240_60_160, 
+	GREEN_33_208_40, 
+	YELLOW_240_220_10,
+	BLUE_10_160_220,
+	CYAN_10_200_240,
+	CYAN_10_230_240,
+	YELLOW_240_240_10,
+	GREEN_140_240_10,
+	BLUE_10_120_220,
+	ORANGE_240_160_10,
+	CYAN_10_230_180,
+	ORANGE_240_75_10,
+	RED_200_10_10, 
+);
 
 
 
@@ -578,6 +594,8 @@ const INFO_LISTEN_EVENT_TYPE = {
 		UPDATE_VB:   _cnt <<= 0x1,
 	},
 
+	GFX2: _cnt <<= 0x1, // For the gfx info mesh that updates from the Renderer loop via time interval
+
 	LISTENERS:  _cnt <<= 0x1,
 	ALL_MESHES: _cnt <<= 0x1,
 	MOUSE: 		_cnt <<= 0x1,
@@ -609,9 +627,25 @@ const DEBUG_INFO = {
 }
 
 
+// const TEMP_GFX_SHORTCUT = function(num){
+
+// 	switch(num){
+
+// 		case 0: return [0,0];
+// 		case 1: return [0,1];
+// 		case 2: return [0,1];
+// 	}
+// };
+
+// const TEMP_GFX_SHORTCUT = {
+// 	GFX_00: [0,0],
+// 	GFX_01: [0,1],
+// };
+
+
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Debugging  
+ * Debugging. Switching On/Off console.log() in the code.
  */
 const DEBUG = {
 	CORE: true,

@@ -116,6 +116,8 @@ export class Text_Mesh extends Mesh {
 
       let gfxInfoCopy = new GfxInfoMesh(this.gfx);
 
+      if(text === undefined)
+      console.log()
       const textLen = text.length;
       const len = (this.geom.num_faces > textLen) ? this.geom.num_faces :
          (textLen > this.geom.num_faces ? this.geom.num_faces : textLen);

@@ -125,6 +125,8 @@ export class Widget_Menu_Bar extends Widget_Label {
 
    /*******************************************************************************************************************************************************/
    // Events Handling
+   
+   // SEE ### OnMove Events Implementation Logic
    OnMove(params) {
 
       // The 'OnMove' function is called by the timeInterval.
@@ -162,7 +164,8 @@ export class Widget_Menu_Bar extends Widget_Label {
    // Create all listen events recursively for all children, from each mesh's listeners buffer.
    ConstructListeners(_root = null) {
 
-      const mesh = (_mesh) ? _mesh : this; // If in recursion, use as the current mesh the passed param. 
+      // const mesh = (_mesh) ? _mesh : this; // If in recursion, use as the current mesh the passed param. 
+      const mesh = this; // If in recursion, use as the current mesh the passed param. 
       const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
       console.log('****', mesh.name, mesh.listeners.buffer)
 

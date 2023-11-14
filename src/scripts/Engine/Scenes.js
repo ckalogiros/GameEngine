@@ -534,7 +534,7 @@ export function ScenesPrintAllMeshes(children, count) {
 // Debug Info Drop Down
 // TODO!!: Maybe implement the debug info and its creation functions in another file and use a standardized 
 // info-mesh input, like the standard M_Buffer class, to insert all info meshes to the debug info dropdown menu.
-const temp_transparency = 0.02;
+const temp_transparency = 0.4;
 const pad = [20, 2.5]
 
 function Gather_mesh_children_names(mesh) {
