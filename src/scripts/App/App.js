@@ -41,6 +41,7 @@ import { Destroy_mesh } from '../Engine/Global/Functions.js';
 import { Widget_Scroller } from '../Engine/Drawables/Meshes/Widgets/WidgetScroller.js';
 import { GetRandomColor, GetSequencedColor } from '../Helpers/Helpers.js';
 import { Gfx_get_progams_count } from '../Engine/Interfaces/Gfx/GfxInterfaceFunctions.js';
+import { Debug_ui_initialize_gfx } from '../Engine/Drawables/DebugInfo/DebugUiGfx.js';
 
 
 // var osu = require('node-os-utils')
@@ -79,6 +80,9 @@ export function AppInit() {
 
     Input_create_user_input_listeners();
     Renderqueue_init();
+
+    // Debug_ui_initialize_gfx();
+
     // Initializer_popup_initialization();
 
 
@@ -88,7 +92,7 @@ export function AppInit() {
 
     // Listeners_debug_info_create(scene);
 
-    // Debug_info_ui_performancex(scene);
+    Debug_info_ui_performance(scene);
 
 
     // const label = CreateLabel(scene);
@@ -99,11 +103,11 @@ export function AppInit() {
 
     // const menu = CreateMenu(scene)
 
-    // CreateDropDownWithDropdownsInside(scene)
-    // CreateDropDownWidgetWithWidgetsInside(scene)
+    CreateDropDownWithDropdownsInside(scene)
+    CreateDropDownWidgetWithWidgetsInside(scene)
 
-    TestDropdownsTextRendering(scene, [160, 200, 0], 0);
-    TestDropdownsTextRendering(scene, [300, 200, 0], 1);
+    // TestDropdownsTextRendering(scene, [160, 200, 0], 0);
+    // TestDropdownsTextRendering(scene, [300, 200, 0], 1);
     // TestDropdownsTextRendering(scene, [460, 200, 0], 1);
     // TestDropdownsTextRendering(scene, [600, 200, 0], 1);
 
@@ -116,15 +120,35 @@ export function AppInit() {
     // CreatDynamicTextSectioned(scene)
 
     // CreatSectionedMixWidgets(scene)
-    // CreateSectionSectioned(scene)
 
+    {
+        // const pad = [10, 2.5]
+        // const drop_down = new Widget_Dropdown('DP1', [260, 200, 0], [60, 20], RED, BLUE_10_120_220, WHITE, pad);
+        // drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        // drop_down.CreateClickEvent();
+        // drop_down.CreateMoveEvent();
+        // Drop_down_set_root(drop_down, drop_down)
+    
+        // const s = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 2], [10, 10], TRANSPARENCY(YELLOW, .5))
+        // const text = new Widget_Text('DP5->Widget_Text', [OUT_OF_VIEW, OUT_OF_VIEW, 4], 4, WHITE);
+        // s.AddItem(text)
+    
+        // // drop_down.AddToMenu(text);
+        // drop_down.AddToMenu(s);
+        // scene.AddWidget(drop_down);
+        // drop_down.Calc();
+        // drop_down.ConstructListeners();
+    }
+
+    CreateSectionSectioned(scene)
+    
     // CreateScroller(scene);
 
     // Help(scene)
 
 
-    // const meshinfo_mesh = MeshInfo(scene)
-    // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: meshinfo_mesh });
+    const meshinfo_mesh = MeshInfo(scene)
+    TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: meshinfo_mesh });
 
     // const gfxinfo = GfxInfo(scene)
     // TimeIntervalsCreate(100, 'Gfx info tip', TIME_INTERVAL_REPEAT_ALWAYS, GfxInfoUpdate, { gfxinfo: gfxinfo });
@@ -314,37 +338,31 @@ function CreateDropDownWithDropdownsInside(scene) {
     drop_down.CreateMoveEvent();
 
     { // Add another dropdown in dropdown
-
+        const drop_down3 = new Widget_Dropdown('DP2', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
+        drop_down3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+        drop_down3.CreateClickEvent();
+        drop_down.AddToMenu(drop_down3);
         {
-            const drop_down3 = new Widget_Dropdown('DP2', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
-            drop_down3.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-            drop_down3.CreateClickEvent();
-            drop_down.AddToMenu(drop_down3);
+            const drop_down4 = new Widget_Dropdown('DP3', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, GREEN_140_240_10, WHITE, pad);
+            drop_down4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+            drop_down4.CreateClickEvent();
+            drop_down3.AddToMenu(drop_down4);
+
             {
-                const drop_down4 = new Widget_Dropdown('DP3', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, GREEN_140_240_10, WHITE, pad);
-                drop_down4.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                drop_down4.CreateClickEvent();
-                drop_down3.AddToMenu(drop_down4);
+                const drop_down5 = new Widget_Dropdown('DP4', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, PINK_240_60_200, WHITE, pad);
+                drop_down5.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+                drop_down5.CreateClickEvent();
+                drop_down4.AddToMenu(drop_down5);
 
                 {
-                    const drop_down5 = new Widget_Dropdown('DP4', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, PINK_240_60_200, WHITE, pad);
-                    drop_down5.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                    drop_down5.CreateClickEvent();
-                    drop_down4.AddToMenu(drop_down5);
+                    const drop_down6 = new Widget_Dropdown('DP5', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, RED_200_10_10, WHITE, pad);
+                    drop_down6.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+                    drop_down6.CreateClickEvent();
+                    drop_down5.AddToMenu(drop_down6);
 
                     {
-                        const drop_down6 = new Widget_Dropdown('DP5', [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, RED_200_10_10, WHITE, pad);
-                        drop_down6.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-                        drop_down6.CreateClickEvent();
-                        drop_down5.AddToMenu(drop_down6);
-
-                        {
-                            const text = new Widget_Text('DP5->Widget_Text', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
-                            // text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.GFX_EVT_TYPE.VB;
-                            // text.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER); 
-
-                            drop_down6.AddToMenu(text);
-                        }
+                        const text = new Widget_Text('DP5->Widget_Text', [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
+                        drop_down6.AddToMenu(text);
                     }
                 }
             }
@@ -444,6 +462,7 @@ function CreateDropDownWidgetWithWidgetsInside(scene) {
 
 function TestDropdownsTextRendering(scene, pos, id) {
 
+    // const pad = [10, 2.5]
     const pad = [10, 2.5]
     const dp = new Widget_Dropdown(`DP${id}`, pos, [60, 20], RED, BLUE_10_120_220, WHITE, pad);
     dp.CreateHoverEvent();
@@ -453,82 +472,32 @@ function TestDropdownsTextRendering(scene, pos, id) {
     const sub_dp1_count = 3;
     const sub_dp2_count = 3;
 
+    const col = GetSequencedColor()
     for(let i=0; i<sub_dp1_count; i++){
 
-        const dpsub1 = new Widget_Dropdown(`DP${id} ${i}`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, GetSequencedColor(), WHITE, pad);
+        const dpsub1 = new Widget_Dropdown(`DP${id}-${i}`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, col, WHITE, pad);
         dpsub1.CreateHoverEvent();
         dpsub1.CreateClickEvent();
         dp.AddToMenu(dpsub1);
 
-        const col = GetRandomColor()
+        const col1 = GetSequencedColor()
         for(let j=0; j<sub_dp2_count; j++){
 
-            const dpsub2 = new Widget_Dropdown(`DP${id} ${i}${j}`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, col, WHITE, pad);
+            const dpsub2 = new Widget_Dropdown(`DP${id}-${i}${j}`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, col1, WHITE, pad);
             dpsub2.CreateHoverEvent();
             dpsub2.CreateClickEvent();
             dpsub1.AddToMenu(dpsub2);
+            
+            // const col2 = GetSequencedColor()
+            // for(let k=0; k<sub_dp2_count; k++){
+    
+            //     const dpsub3 = new Widget_Dropdown(`DP${id}-${i}${j}${k}`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, col2, WHITE, pad);
+            //     dpsub3.CreateHoverEvent();
+            //     dpsub3.CreateClickEvent();
+            //     dpsub2.AddToMenu(dpsub3);
+            // }
         }
     }
-    // { // Add another dropdown in dropdown
-
-    //     const dp00 = new Widget_Dropdown(`DP${id} 0`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
-    //     dp00.CreateHoverEvent();
-    //     dp00.CreateClickEvent();
-    //     dp.AddToMenu(dp00);
-    //     {
-    //         const dp001 = new Widget_Dropdown(`DP${id} 01`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, MAGENTA_BLUE, WHITE, pad);
-    //         dp001.CreateHoverEvent();
-    //         dp001.CreateClickEvent();
-    //         dp00.AddToMenu(dp001);
-    //         const dp002 = new Widget_Dropdown(`DP${id} 02`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, MAGENTA_BLUE, WHITE, pad);
-    //         dp002.CreateHoverEvent();
-    //         dp002.CreateClickEvent();
-    //         dp00.AddToMenu(dp002);
-    //         const dp003 = new Widget_Dropdown(`DP${id} 03`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, MAGENTA_BLUE, WHITE, pad);
-    //         dp003.CreateHoverEvent();
-    //         dp003.CreateClickEvent();
-    //         dp00.AddToMenu(dp003);
-    //     }
-
-    //     const dp01 = new Widget_Dropdown(`DP${id} 1`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_160_220, WHITE, pad);
-    //     dp01.CreateHoverEvent();
-    //     dp01.CreateClickEvent();
-    //     dp.AddToMenu(dp01);
-    //     {
-    //         const dp011 = new Widget_Dropdown(`DP${id} 11`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
-    //         dp011.CreateHoverEvent();
-    //         dp011.CreateClickEvent();
-    //         dp01.AddToMenu(dp011);
-    //         const dp012 = new Widget_Dropdown(`DP${id} 12`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
-    //         dp012.CreateHoverEvent();
-    //         dp012.CreateClickEvent();
-    //         dp01.AddToMenu(dp012);
-    //         const dp013 = new Widget_Dropdown(`DP${id} 13`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, YELLOW_240_220_10, WHITE, pad);
-    //         dp013.CreateHoverEvent();
-    //         dp013.CreateClickEvent();
-    //         dp01.AddToMenu(dp013);
-    //     }
-
-    //     const dp02 = new Widget_Dropdown(`DP${id} 0`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, MAGENTA_RED, WHITE, pad);
-    //     dp02.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    //     dp02.CreateClickEvent();
-    //     dp.AddToMenu(dp02);
-    //     {
-    //         const dp021 = new Widget_Dropdown(`DP${id} 21`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, ORANGE_240_160_10, WHITE, pad);
-    //         dp021.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    //         dp021.CreateClickEvent();
-    //         dp02.AddToMenu(dp021);
-    //         const dp022 = new Widget_Dropdown(`DP${id} 22`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, ORANGE_240_160_10, WHITE, pad);
-    //         dp022.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    //         dp022.CreateClickEvent();
-    //         dp02.AddToMenu(dp022);
-    //         const dp023 = new Widget_Dropdown(`DP${id} 23`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, ORANGE_240_160_10, WHITE, pad);
-    //         dp023.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-    //         dp023.CreateClickEvent();
-    //         dp02.AddToMenu(dp023);
-    //     }
-
-    // }
 
     // scene.AddWidget(dp);
     dp.GenGfxCtx(GFX.PRIVATE);
@@ -1017,6 +986,7 @@ function MeshInfo(scene) {
     return infomesh;
 }
 
+// TODO: The text updates the gfx buffers regardless of if any change has happened
 function MeshInfoUpdate(params) {
 
     const textMesh = params.params.mesh;
@@ -1037,7 +1007,12 @@ function MeshInfoUpdate(params) {
         const child = (infoMesh.children.boundary && infoMesh.children.buffer[0]) ? infoMesh.children.buffer[0] : null; 
         if (child) {
             if (child.type & MESH_TYPES_DBG.FONT_MATERIAL) {
-                msgs.push(`gfx: prog:${child.gfx.prog.idx}, vb:${child.gfx.vb.idx}, start:${child.gfx.vb.start}, faces:${child.text_mesh.geom.num_faces}`);
+                
+                // /**DEBUG*/ if(!child.text_mesh)
+                //             console.log('ERROR: No text_mesh in:', child.name)
+
+                const text_num_faces = (child.text_mesh) ? child.text_mesh.geom.num_faces : child.geom.num_faces; // If child is of type label and has 'text_mesh' else is plain text.
+                msgs.push(`gfx: prog:${child.gfx.prog.idx}, vb:${child.gfx.vb.idx}, start:${child.gfx.vb.start}, faces:${text_num_faces}`);
             }
             else if (child.text_mesh) {
                 msgs.push(`gfx: prog:${child.text_mesh.gfx.prog.idx}, vb:${child.text_mesh.gfx.vb.idx}, start:${child.text_mesh.gfx.vb.start}, faces:${child.text_mesh.geom.num_faces}`);
@@ -1138,12 +1113,12 @@ function GfxInfoUpdate(params) {
                 
                 root_dp.AddToMenu(dp)
                 
-                // for (let k = 0; k < vb.debug.meshesNames.length; k++) {
-                //     const meshname = vb.debug.meshesNames[k];
-                //     const meshnametext = new Widget_Text(`${meshname}`, [300, 15, 0], 4, BLACK, .4); 
-                //     meshnametext.GenGfxCtx(GFX.PRIVATE);
-                //     dp.AddToMenu(meshnametext);
-                // }
+                for (let k = 0; k < vb.debug.meshesNames.length; k++) {
+                    const meshname = vb.debug.meshesNames[k];
+                    const meshnametext = new Widget_Text(`${meshname}`, [300, 15, 0], 4, BLACK, .4); 
+                    meshnametext.GenGfxCtx(GFX.PRIVATE);
+                    dp.AddToMenu(meshnametext);
+                }
 
             }
         }

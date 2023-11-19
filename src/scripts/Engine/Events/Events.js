@@ -53,6 +53,8 @@ export function HandleEvents() {
 
             if(LISTENERS_FLAGS[LISTEN_EVENT_TYPES_INDEX.CLICK] === true) // ..if no events, skip dispatching
                 Listener_dispatch_event(LISTEN_EVENT_TYPES_INDEX.CLICK, e.params.mouseButton);
+
+            console.log('CKLICK!!!!')
         }
 
         else if (e.type === 'mouse-click-up') {
@@ -129,9 +131,7 @@ export function Events_handle_immidiate(e){
         
         // Apply Hover Color
         if (e.params.mesh.StateCheck(MESH_STATE.IS_HOVER_COLORABLE)){
-            // console.debug('hover: ', e.params.mesh.name, e.params.mesh.geom.pos, e.params.mesh.geom.dim);
             e.params.mesh.SetColor(TRANSPARENCY(WHITE, .8));
-            // e.params.mesh.SetColorAlpha(1-e.params.mesh.mat.col[3]+.4);
             e.params.mesh.StateEnable(MESH_STATE.IN_HOVER_COLOR);
         }
 
@@ -140,7 +140,6 @@ export function Events_handle_immidiate(e){
     }
 
     else if (e.type === 'unhover') {
-        // console.debug('unhover: ', e.params.mesh.id)
 
         if (e.params.mesh.StateCheck(MESH_STATE.IN_HOVER_COLOR)){
             e.params.mesh.SetDefaultColor();

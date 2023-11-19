@@ -364,6 +364,19 @@ export class Widget_Slider extends Rect {
 
 	}
 
+   SetColorAlpha(alpha){
+
+      this.mat.SetColorAlpha(alpha, this.gfx);
+      
+      const bar = this.children.buffer[BAR_IDX];
+		bar.mat.SetColorAlpha(alpha, bar.gfx);
+      const name_text = this.text_mesh;
+		name_text.mat.SetColorAlpha(alpha, name_text.gfx);
+      const handle = bar.children.buffer[0];
+		handle.mat.SetColorAlpha(alpha, handle.gfx);
+      const value_text = bar.children.buffer[1];
+		value_text.mat.SetColorAlpha(alpha, value_text.gfx);
+   }
 
    /*******************************************************************************************************************************************************/
    // Setters-Getters

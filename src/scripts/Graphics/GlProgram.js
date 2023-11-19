@@ -6,6 +6,15 @@ import { Uniform, UniformsBuffer } from './Buffers/GlUniformBuffer.js';
 import { SHADER_CONSTANTS } from './Shaders/ConstructShader.js';
 import { Renderqueue_set_active } from '../Engine/Renderers/Renderer/RenderQueue.js';
 
+
+class Gl_Programs {
+
+	constructor(){
+
+		this.buffer = [];
+		this.count = 0;
+	}
+}
 // Scoped global Gl Program object
 const _glPrograms = [];
 let _glProgramsCount = 0;
@@ -120,7 +129,7 @@ export class GfxInfoMesh {
 }
 
 
-export class GlProgram {
+export class Gl_Program {
 
 	constructor(gl, sid) {
 
@@ -399,7 +408,7 @@ export class GlProgram {
  */
 export function Gl_get_progams_count() { return _glProgramsCount; }
 export function Gl_create_program(sid) {
-	const prog = new GlProgram(gfxCtx.gl, sid);
+	const prog = new Gl_Program(gfxCtx.gl, sid);
 	return prog.idx;
 }
 
@@ -415,7 +424,7 @@ export function Gl_set_vb_show(progIdx, vbIdx, flag) {
  * Enabling Attribute locations for a program
  * and
  * Setting the attribute's offsets, types and sizes. 
- * Cannot be implemented in GlProgram class because it needs vao-vbo binding first.
+ * Cannot be implemented in Gl_Program class because it needs vao-vbo binding first.
  * 
  * @param {*} gl : Gl context
  * @param {*} prog : The program to which we set enable the attribute locations

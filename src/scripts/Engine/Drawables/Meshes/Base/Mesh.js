@@ -141,6 +141,7 @@ export class Mesh {
         this.is_gfx_inserted = false;
 
         this.sceneidx = STATE.scene.active_idx;
+        this.idx = INT_NULL;
 
         if (time) this.time = time;
 

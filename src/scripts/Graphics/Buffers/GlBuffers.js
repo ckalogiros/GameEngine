@@ -15,6 +15,9 @@ class VertexBuffer {
 
     webgl_buffer = null;
     data = [];
+    // A buffer to store all vertexbuffer's meshes indexes. Used to denote the active meshes in the vertex buffer. 
+    // EXAMPLE: If index === INT_NULL, then the mesh is no longer to be rendered, so maybe we remove it from the vertex buffer.
+    mesh_indexes = []; 
     // /*DEBUG*/meshes = [];        // An array of pointers to all vertexBuffer's meshes. Has the type of 'GfxInfoMesh'
 
     idx = INT_NULL;	    // The vertex buffer (float*) idx that this Mesh is stored to.
@@ -211,9 +214,7 @@ class VertexBuffer {
         const vCount = meshTotalAttrCount / gfx.attribsPerVertex;
         this.count -= meshTotalAttrCount;
         this.vCount -= vCount;
-        // if((this.mesh_count - num_faces) < 0)
-        //     console.error('(((((((()))))) mesh count - faces < 0. vb:', this.idx)
-        // this.mesh_count -= num_faces;
+
         if(this.count < 0)
             console.error('[[[[[[[[[[[[[[[[[ Count < 0. vb:', this.idx)
         // console.log('------------- Removing Num_faces from buffer:', num_faces, ' prog:', gfx.prog.idx, ' vb:', gfx.vb.idx)
@@ -271,6 +272,7 @@ class VertexBuffer {
         this.vCount = 0;
         // this.mesh_count = 0;
         this.needsUpdate = true;
+        this.mesh_indexes = [];
         this.debug.meshesNames = [];
         this.debug.sidName = [];
     }
@@ -366,22 +368,6 @@ class IndexBuffer {
 
     }
 
-};
-
-
-export let GlFrameBuffer = {
-
-    name: '',
-
-    buffer: null,
-    tex: null,
-    texId: INT_NULL,
-    textidx: INT_NULL,
-    texWidth: 0,
-    texHeight: 0,
-    progIdx: INT_NULL,
-    vbIdx: INT_NULL,
-    isActive: false,
 };
 
 
@@ -536,12 +522,15 @@ export function GlGenerateContext(sid, sceneidx, GL_BUFFER, addToSpecificGlBuffe
     return gfxInfo;
 }
 
-export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_name){
+export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_name, meshidx){
 
+    
+    // console.log(meshidx, mesh_name)
     /**DEBUG ERROR*/ if(geom.pos[0] === undefined){ console.error('Pos is UNDEFINED. mesh:', mesh_name)}
     /**DEBUG ERROR*/ if(geom.dim[0] === undefined){ console.error('Dim is UNDEFINED. mesh:', mesh_name)}
     /**DEBUG ERROR*/ if(mat.col[0] === undefined){ console.error('Col is UNDEFINED. mesh:', mesh_name)}
     /**DEBUG ERROR*/ if(mat.style[0] === undefined){ console.error('Style is UNDEFINED. mesh:', mesh_name)}
+    // /**DEBUG ERROR*/ if(meshidx === undefined){ console.error('Mesh index is not passed as a param. mesh:', mesh_name)}
 
     const progIdx = gfx.prog.idx;
     const vbIdx = gfx.vb.idx;
@@ -554,7 +543,6 @@ export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_na
     const start = (!gfx.vb.start) ? vb.count : gfx.vb.start;
     vb.vCount += prog.shaderinfo.verticesPerRect * gfx.num_faces;
 
-    // console.log('START:' , start, ' vb:', progIdx, vbIdx)
     const count = gfx.vb.count;
 
     if (GL.BOUND_PROG_IDX !== progIdx) {
@@ -675,94 +663,15 @@ export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_na
     
     prog.isActive = true; // Sets a program to 'active', only if there are meshes in the program's vb
     vb.needsUpdate = true;
-    // console.log('VB count:', vb.count)
+
     if(vb_type_flag) vb.type |= vb_type_flag;
-    if(typeof mesh_name !== 'string')
-        console.log()
+
+    /**DEBUG */vb.mesh_indexes.push(meshidx);
     /**DEBUG */CreateUniqueMesh(vb.debug.meshesNames, mesh_name);
 
     return start;
 }
 
-// export function GlAddGeometry(sid, pos, dim, time, gfx, meshName, num_faces) {
-
-//     const progIdx = gfx.prog.idx;
-//     const vbIdx = gfx.vb.idx;
-//     const ibIdx = gfx.ib.idx;
-//     const prog = Gl_progs_get_prog_byidx(progIdx);
-//     const vb = Gl_progs_get_vb_byidx(progIdx, vbIdx);
-//     // console.log('[[[ ', progIdx, vbIdx, ' count ', vb.count, ' meshCount:', vb.mesh_count)
-//     const ib = Gl_progs_get_ib_byidx(progIdx, ibIdx);
-
-
-//     if (GL.BOUND_PROG_IDX !== progIdx) {
-//         GlUseProgram(prog.webgl_program, progIdx);
-//         GL.BOUND_PROG_IDX = progIdx;
-//         gfxCtx.gl.bindVertexArray(vb.vao);
-//         gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
-//         GL.BOUND_VBO_IDX = vbIdx;
-//     }
-//     if (GL.BOUND_VBO_IDX !== vbIdx) {
-//         gfxCtx.gl.bindVertexArray(vb.vao);
-//         gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
-//         GL.BOUND_VBO_IDX = vbIdx;
-//     }
-
-//     CreateUniqueMesh(vb.debug.meshesNames, meshName);
-
-//     // Reallocate vertex buffer if it has no more space
-//     const meshSize = gfx.attribsPerVertex * gfx.vertsPerRect * num_faces;
-//     if (vb.vCount * gfx.attribsPerVertex + meshSize >= vb.size) vb.Realloc();
-
-//     if (typeof pos[0] !== 'number')
-//         console.log(pos, dim, meshName)
-
-
-//     vb.AddGeometry(sid, pos, dim, time, prog.shaderinfo, num_faces, gfx.vb.start, gfx.vb.count);
-//     prog.isActive = true; // Sets a program to 'active', only if there are meshes in the program's vb
-
-//     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-//      * Add Mesh to Index Buffer
-//      */
-//     if (sid.shad & SID.SHAD.INDEXED) {
-
-//         // Check for buffer realloc
-//         if (ib.count + num_faces * INDICES_PER_RECT > ib.size) {
-//             ib.Realloc();
-//         }
-
-//         gfx.ib.start = ib.count;
-//         ib.Add(num_faces)
-//         gfx.ib.count = ib.count;
-//     }
-// }
-
-// export function Gl_remove_geometry_fast(gfx, num_faces) {
-
-//     const progIdx = gfx.prog.idx;
-//     const vbIdx = gfx.vb.idx;
-//     // const ibIdx = gfx.ib.idx;
-//     // const prog = Gl_progs_get_prog_byidx(progIdx);
-//     const vb = Gl_progs_get_vb_byidx(progIdx, vbIdx);
-//     // const ib = Gl_progs_get_ib_byidx(progIdx, ibIdx);
-
-//     vb.Remove_geometry_fast(gfx, num_faces);
-
-//     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-//      * Remove Mesh from Index Buffer
-//      */
-//     // if (gfx.sid.shad & SID.SHAD.INDEXED) {
-
-//     //     // Check for buffer realloc
-//     //     if(ib.count + num_faces*INDICES_PER_RECT > ib.size){
-//     //         ib.Realloc();
-//     //     }
-
-//     //     gfx.ib.start = ib.count;
-//     //     ib.Add(num_faces)
-//     //     gfx.ib.count = ib.count;
-//     // }
-// }
 
 export function Gl_shift_right_geometry(gfx, num_faces=1, new_num_faces=null) {
 
@@ -841,34 +750,6 @@ export function GlHandlerAddGeometryBuffer(sid, gfx, meshName, posBuffer, dimBuf
         gfx.ib.count = ib.count;
     }
 }
-
-// export function GlAddMaterial(sid, gfx, col, tex, style, sdf, num_faces=1) {
-
-//     // TODO: TEMP
-//     // const num_faces = 1;
-
-//     const progIdx = gfx.prog.idx;
-//     const vbIdx = gfx.vb.idx;
-//     const prog = Gl_progs_get_prog_byidx(progIdx);
-//     const vb = Gl_progs_get_vb_byidx(progIdx, vbIdx);
-
-//     if (GL.BOUND_PROG_IDX !== progIdx) {
-//         GlUseProgram(prog.webgl_program, progIdx);
-//         GL.BOUND_PROG_IDX = progIdx;
-//         gfxCtx.gl.bindVertexArray(vb.vao)
-//         gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
-//         GL.BOUND_VBO_IDX = vbIdx;
-//     }
-//     if (GL.BOUND_VBO_IDX !== vbIdx) {
-//         gfxCtx.gl.bindVertexArray(vb.vao)
-//         gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
-//         GL.BOUND_VBO_IDX = vbIdx;
-//     }
-//     // gfx.vb.start = vb.count;
-//     // console.log(gfx.vb.start)
-//     vb.AddMaterial(sid, prog.shaderinfo, num_faces, gfx.vb.start, gfx.vb.count, col, tex, style, sdf);
-
-// }
 
 export function GlHandlerAddMaterialBuffer(sid, gfx, colBuffer, texBuffer) {
 

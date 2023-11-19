@@ -347,6 +347,17 @@ export class Section extends Rect {
    Move(x, y) { Section_move_children_recursive(x, y, this); }
    SetPosX(){} // TODO: IMPLEMENT
    SetPosY(y){ Section_set_posy_children_recursive(y, this); }
+   SetColorAlpha(alpha){
+
+      super.SetColorAlpha(0);
+
+      for (let i = 0; i < this.children.boundary; i++) {
+         const child = this.children.buffer[i];
+         // if (child) {
+         // }
+         child.SetColorAlpha(alpha, alpha)
+      }
+   }
 }
 
 

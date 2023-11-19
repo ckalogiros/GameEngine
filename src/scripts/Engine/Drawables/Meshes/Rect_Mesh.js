@@ -40,7 +40,8 @@ export class Rect extends Mesh {
 
    AddToGfx() {
 
-      this.gfx.vb.start = Gfx_add_geom_mat_to_vb(this.sid, this.gfx, this.geom, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name);
+      this.gfx.vb.start = Gfx_add_geom_mat_to_vb(this.sid, this.gfx, this.geom, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name, this.idx);
+      this.is_gfx_inserted = true;
 
       const params = {
          progidx: this.gfx.prog.idx,

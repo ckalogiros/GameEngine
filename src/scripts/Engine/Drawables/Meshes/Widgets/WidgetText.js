@@ -334,6 +334,14 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 		return this.geom.dim[1];
 	}
 
+	SetColorAlpha(alpha){
+
+		super.SetColorAlpha(alpha);
+		for (let i = 0; i < this.children.boundary; i++) {
+			this.children.buffer[i].SetColorAlpha(alpha);
+		}
+	}
+
 
 	/*******************************************************************************************************************************************************/
 	// 

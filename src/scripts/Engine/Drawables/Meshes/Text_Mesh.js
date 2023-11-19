@@ -61,7 +61,7 @@ export class Text_Mesh extends Mesh {
          gfxCopy.tb.idx = this.mat.textidx !== INT_NULL ? this.mat.textidx : (this.mat.uvIdx !== INT_NULL ? this.mat.uvIdx : INT_NULL);
 
          geomCopy.pos[0] += geomCopy.dim[0] * 2;
-         Gfx_add_geom_mat_to_vb(this.sid, gfxCopy, geomCopy, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name);
+         Gfx_add_geom_mat_to_vb(this.sid, gfxCopy, geomCopy, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name, this.idx);
       }
 
       Gfx_progs_set_vb_texidx(gfxCopy.prog.idx, gfxCopy.vb.idx, gfxCopy.tb.idx); // Update the vertex buffer to store the texture index

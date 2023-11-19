@@ -112,13 +112,13 @@ export class Material {
       math.CopyArr4(this.col, this.defCol);
       GlSetColor(gfx, this.col, this.num_faces);
    }
-   SetColorRGB(col, gfx, num_faces=1) {
+   SetColorRGB(col, gfx) {
       math.CopyArr3(this.col, col);
-      GlSetColor(gfx, this.col, num_faces);
+      GlSetColor(gfx, this.col, this.num_faces);
    }
-   SetColorAlpha(alpha, gfx, num_faces=1) {
+   SetColorAlpha(alpha, gfx) {
       this.col[3] = alpha;
-      GlSetColorAlpha(gfx, this.col[3], num_faces);
+      GlSetColorAlpha(gfx, this.col[3], this.num_faces);
    }
 
    ////////////////////////////////////////////////////////////////////////////////////////////////////////

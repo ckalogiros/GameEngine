@@ -9,11 +9,12 @@ export function Gl_remove_geometry(gfx, num_faces = 1) {
     const vb = Gl_progs_get_vb_byidx(gfx.prog.idx, gfx.vb.idx);
     const ib = Gl_progs_get_ib_byidx(gfx.prog.idx, gfx.ib.idx);
 
+    // Structure to use for updating a removed mesh's sttart index pointing to it's location in the vertex buffer..
     const ret = {
-        counts: [0, 0],
+        counts: [0, 0], // 0:vb, 1:ib
         start: gfx.vb.start,
         last: (gfx.vb.start + gfx.vb.count * num_faces >= vb.count) ? true : false,
-        empty: false,
+        empty: false, // Is the buffer is empty?
     };
     // if(DEBUG.GFX.REMOVE_MESH) console.log('idx:', gfx.prog.idx, gfx.vb.idx, 'vb count:', vb.count, ' attributes from start:', gfx.vb.start, ' to:', gfx.vb.start+gfx.vb.count*num_faces)
     ret.counts[0] = vb.Remove_geometry(gfx, num_faces);
@@ -23,6 +24,11 @@ export function Gl_remove_geometry(gfx, num_faces = 1) {
 
     if (vb.count <= 0) ret.empty = true;
     return ret;
+}
+
+export function Gl_remove_geometry_with_alpha(gfx, num_faces = 1){
+
+    GlSetColorAlpha(gfx, 0, num_faces);
 }
 
 export function Gl_set_vb_mesh_priority(progIdx, vbIdx, meshIdx, meshCount) {
@@ -367,13 +373,10 @@ export function GlSetColorAlpha(gfxInfo, val, num_faces) {
     let index = gfxInfo.vb.start + progs[gfxInfo.prog.idx].shaderinfo.attributes.offset.col;
     let verts = num_faces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - progs[gfxInfo.prog.idx].shaderinfo.attributes.size.col;
-    // let stride = gfxInfo.attribsPerVertex - 1;
 
     while (verts) {
 
-        index++; // Move mesh's x pos by amt
-        index++; // Move mesh's x pos by amt
-        index++; // Move mesh's x pos by amt
+        index+=3; 
         vb.data[index++] = val; // Move mesh's x pos by amt
 
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z

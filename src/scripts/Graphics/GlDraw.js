@@ -55,7 +55,7 @@ export function GlDraw(gl) {
         if (ib.needsUpdate) 
             GlUpdateIndexBufferData(gl, ib)
         if (vb.needsUpdate) 
-            GlUpdateVertexBufferData(gl, vb)
+            GlUpdateVertexBufferData(gl, vb);
 
         gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
         // gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);

@@ -134,7 +134,7 @@ export class Widget_Label extends Rect {
         // Deactivate for label's text 
         this.text_mesh.DeactivateGfx();
     }
-
+  
     /*******************************************************************************************************************************************************/
     // Setters-Getters
 
@@ -193,6 +193,12 @@ export class Widget_Label extends Rect {
         this.geom.MoveY(y, this.gfx);
         this.text_mesh.geom.MoveY(y, this.text_mesh.gfx);
 
+    }
+
+    SetColorAlpha(btn_alpha=1, text_alpha=1){
+
+        super.SetColorAlpha(btn_alpha);
+        this.text_mesh.SetColorAlpha(text_alpha);
     }
 
     /*******************************************************************************************************************************************************/

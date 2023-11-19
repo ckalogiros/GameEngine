@@ -37,7 +37,7 @@ const GFX_CTX_FLAGS = {
  * Shader creation flags 
  */
 
-let BIT1 = 0x1, BIT2 = 0x1, BIT3 = 0x1, BIT4 = 0x1;
+let BIT1 = 0x1, BIT2 = 0x1, BIT3 = 0x1, BIT4 = 0x1, BIT5 = 0x1;
 const SID = {
     
     SHAD: {
@@ -87,7 +87,7 @@ const SID = {
         FS_VOLUMETRIC_EXPLOSION: BIT3 <<= 1,
         FS_SHADOW: BIT3 <<= 1,
     },
-
+    
     PASS: {
         COL4: BIT4 <<= 1,
         POS2: BIT4 <<= 1,
@@ -99,6 +99,11 @@ const SID = {
         STYLE3: BIT4 <<= 1,
         SDF2: BIT4 <<= 1,
         PARAMS1: BIT4 <<= 1,
+    },
+    
+    DEBUG_UI:{
+        RECT_SHADER: BIT5 <<= 1,
+        TEXT_SHADER: BIT5 <<= 1,
     },
 
     CheckSidMatch(sid1, sid2){

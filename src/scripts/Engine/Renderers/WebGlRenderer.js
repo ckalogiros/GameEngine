@@ -6,6 +6,7 @@ import { FpsGet, TimeSample, TimeUpdate } from "../Timers/Time.js";
 import { TimersUpdateGlobalTimer } from "../Timers/Timers.js";
 import { TimeIntervalsUpdateAll } from "../Timers/TimeIntervals.js";
 import {_pt_fps ,_pt2, _pt3, _pt4 } from '../Timers/PerformanceTimers.js'
+import { Gfx_progs_get_vb_byidx } from "../Interfaces/Gfx/GfxInterfaceFunctions.js";
 
 /**
  * WebGl
@@ -75,6 +76,8 @@ export class WebGlRenderer {
 
       if (STATE.loop.paused === false) {
          
+         // const vb = Gfx_progs_get_vb_byidx(1, 2)
+         // console.log(vb.needsUpdate)
          TimeUpdate(); 
          _pt_fps.Start();
          
@@ -128,7 +131,31 @@ export class WebGlRenderer {
       // this.gl.depthMask(true);
 
       this.gl.enable(this.gl.BLEND);
+      /**
+      gl.ZERO 	                        Multiplies all colors by 0.
+      gl.ONE 	                        Multiplies all colors by 1.
+      gl.SRC_COLOR 	                  Multiplies all colors by the source colors.
+      gl.ONE_MINUS_SRC_COLOR 	         Multiplies all colors by 1 minus each source color.
+      gl.DST_COLOR 	                  Multiplies all colors by the destination color.
+      gl.ONE_MINUS_DST_COLOR 	         Multiplies all colors by 1 minus each destination color.
+      gl.SRC_ALPHA 	                  Multiplies all colors by the source alpha value.
+      gl.ONE_MINUS_SRC_ALPHA 	         Multiplies all colors by 1 minus the source alpha value.
+      gl.DST_ALPHA 	                  Multiplies all colors by the destination alpha value.
+      gl.ONE_MINUS_DST_ALPHA 	         Multiplies all colors by 1 minus the destination alpha value.
+      gl.CONSTANT_COLOR 	            Multiplies all colors by a constant color.
+      gl.ONE_MINUS_CONSTANT_COLOR 	   Multiplies all colors by 1 minus a constant color.
+      gl.CONSTANT_ALPHA 	            Multiplies all colors by a constant alpha value.
+      gl.ONE_MINUS_CONSTANT_ALPHA 	   Multiplies all colors by 1 minus a constant alpha value.
+      gl.SRC_ALPHA_SATURATE 	         Multiplies the RGB colors by the smaller of either the source alpha value or the value of 1 minus the destination alpha value. The alpha value is multiplied by 1. 
+      */
       this.gl.blendFunc(this.gl.DST_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+      // this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+
+      // this.gl.blendFunc(this.gl.ONE_MINUS_SRC_ALPHA, this.gl.DST_ALPHA);
+      // this.gl.blendFunc(this.gl.ONE_MINUS_DST_ALPHA, this.gl.DST_ALPHA);
+      // this.gl.blendFunc(this.gl.ONE_MINUS_SRC_ALPHA, this.gl.SRC_ALPHA);
+      // this.gl.blendFunc(this.gl.ONE_MINUS_DST_ALPHA,this.gl.SRC_ALPHA) ;
+      
 
       // this.gl.enable(this.gl.SAMPLE_COVERAGE);
       // this.gl.sampleCoverage(2.2, false);

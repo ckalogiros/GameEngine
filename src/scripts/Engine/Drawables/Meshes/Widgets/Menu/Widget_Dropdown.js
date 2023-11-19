@@ -1,7 +1,7 @@
 "use strict";
 
 import { Section } from "../../Section.js";
-import { GetRandomColor } from "../../../../../Helpers/Helpers.js";
+import { GetRandomColor, GetSequencedColor } from "../../../../../Helpers/Helpers.js";
 import { MouseGetPosDif } from "../../../../Controls/Input/Mouse.js";
 import { M_Buffer } from "../../../../Core/Buffers.js";
 import { Gfx_activate, Gfx_end_session, Gfx_generate_context } from "../../../../Interfaces/Gfx/GfxContext.js";
@@ -11,6 +11,7 @@ import { Widget_Button } from "../WidgetButton.js";
 import { Scenes_store_gfx_to_buffer } from "../../../../Scenes.js";
 import { Listener_remove_children_event_by_idx, Listener_remove_event_by_idx } from "../../../../Events/EventListeners.js";
 import { GlCheckSid } from "../../../../../Graphics/GlProgram.js";
+import { Gfx_remove_geometry_with_alpha } from "../../../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 
 /**
  * SEE: ### Widget_Dropdown
@@ -41,7 +42,8 @@ function Dropdown_get_root_by_idx(rootidx) {
 }
 
 
-const temp_transparency = .02;
+// const temp_transparency = .02;
+const temp_transparency = .6;
 export class Widget_Dropdown extends Section {
 
    isOn; // Bool for checking a dropdown's menu expanded/contructed.
@@ -49,7 +51,7 @@ export class Widget_Dropdown extends Section {
    rootidx; // Store the root's dropdown index (of the '_root_dropdown');
    dp_symbols; // Text symbols for denoting a dropdown's Expanded/contracted menu. TODO: Add textured symbols OR create a font texture with symbols for dropdown expansion/contraction.
    depth_level; // The tree depth level that the dropdown exists (root dp = 0 depth).
-   
+
    constructor(text, pos, dim, col1 = GREY3, col2 = PINK_240_60_160, text_col = WHITE, btn_pad = [0, 0], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [2, 5, 2]) {
 
       super(SECTION.VERTICAL, [2, 2], pos, [10, 10], col2);
@@ -61,39 +63,59 @@ export class Widget_Dropdown extends Section {
       this.type |= MESH_TYPES_DBG.WIDGET_DROP_DOWN;
       this.menu = null;
       this.rootidx = INT_NULL;
+      this.depth_level = 0;
 
-      this.dp_symbols = ['+', '-'];
-      const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.RIGHT, pos, 4, col1, text_col, btn_pad, bold, style, font);
-      btn.SetName(`BTN-${this.name} btn_id:${btn.id}`)
-      btn.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;
-
-      this.AddItem(btn);
-
-      // this.menu = new Section(SECTION.VERTICAL, [10, 2], [OUT_OF_VIEW, OUT_OF_VIEW, 0], [1, 1], TRANSPARENCY(GetRandomColor(), temp_transparency));
-      this.menu = new Section(SECTION.VERTICAL, [10, 2], [OUT_OF_VIEW, OUT_OF_VIEW, 0], [1, 1], TRANSPARENCY(MAGENTA_RED, temp_transparency));
+      // this.menu = new Section(SECTION.VERTICAL, [10, 10], [OUT_OF_VIEW, OUT_OF_VIEW, 1], [1, 1], TRANSPARENCY(MAGENTA_RED, temp_transparency));
+      this.menu = new Section(SECTION.VERTICAL, [10, 10], [OUT_OF_VIEW, OUT_OF_VIEW, pos[2]+1], [1, 1], TRANSPARENCY(GetSequencedColor(), temp_transparency));
+      // this.menu = new Section(SECTION.VERTICAL, [10, 10], [OUT_OF_VIEW, OUT_OF_VIEW, pos[2]+1], [1, 1], ORANGE);
       this.menu.type |= MESH_TYPES_DBG.DROP_DOWN_MENU;
       this.menu.parent = this;
       this.menu.SetName(`MENU-${this.name}`)
+      
+      this.dp_symbols = ['+', '-'];
+      const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.RIGHT, [pos[0], pos[1], this.menu.geom.pos[2]+1], 4, col1, text_col, btn_pad, bold, style, font);
+      // const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.RIGHT, pos, 4, col1, text_col, btn_pad, bold, style, font);
+      btn.SetName(`BTN-${this.name} btn_id:${btn.id}`)
+      btn.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;
+
+      
+      
+      this.AddItem(btn);
 
    }
 
    AddToMenu(mesh) {
 
-      this.menu.AddItem(mesh);
+      
       if (mesh.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) {
-
+         
+         mesh.depth_level = this.depth_level + 1; // Set the depth of the new dp.
+         console.log('dropdown:', mesh.name, ' depth:', mesh.depth_level)
+         
          if (this.rootidx === INT_NULL) {
             // Create a reference for each root dropdown menu in a Scene
             /* IMPORTANT!!! With the current implementation we must add dropdown widgets to dropdown menus as items 
-               in the order of the tree representation. That means each dropdown that adds anothe dropdown must
-               already been added to a higher order in the tree dropdown, so that it has the 'rootidx' index.
-               ALL DROPDOWNS THAT ARE PART OF THE TREE STRUCT HAVE ONE ROOT DROPDOWN WIDGET, not the index of the parent dropdown.
-               */
-            // Also store to the root dropdown a rootidx of its self
-            this.rootidx = Drop_down_set_root(this, mesh);
+            in the order of the tree representation. That means each dropdown that adds anothe dropdown must
+            already been added to a higher order in the tree dropdown, so that it has the 'rootidx' index.
+            ALL DROPDOWNS THAT ARE PART OF THE TREE STRUCT HAVE ONE ROOT DROPDOWN WIDGET, not the index of the parent dropdown.
+            */
+           // Also store to the root dropdown a rootidx of its self
+           this.rootidx = Drop_down_set_root(this, mesh);
+           
+         //   mesh.geom.pos[2] += this.menu.geom.pos[2]+1; // Set dp's z pos.
+         //   mesh.menu.geom.pos[2] +=  this.menu.geom.pos[2]+1; // Set dp's menu z pos.
+         //   mesh.children.buffer[0].geom.pos[2] +=  this.menu.geom.pos[2]+1; // Set dp's button z pos.
+         //   console.log('----- mesh.geom.pos[2]:',  mesh.geom.pos[2])
+         //   console.log('----- menu.geom.pos[2]:',  mesh.menu.geom.pos[2])
+         //   console.log('----- button.geom.pos[2]:',  mesh.children.buffer[0].geom.pos[2])
          }
-         else mesh.rootidx = this.rootidx;
+         else {
+            // mesh.geom.pos[2] += this.menu.geom.pos[2] +1; // Set meshes z pos.
+            mesh.rootidx = this.rootidx;
+         }
       }
+
+      this.menu.AddItem(mesh);
    }
 
 
@@ -102,24 +124,33 @@ export class Widget_Dropdown extends Section {
 
    GenGfxCtx(FLAGS = GFX.PRIVATE, gfx_idxs, parent = null) {
 
-      const btn = this.children.buffer[0];
-
       this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfx_idxs);
       Scenes_store_gfx_to_buffer(this.sceneidx, this);
 
       let text_gfx_specific = null;
+      /**
+       * HACK: steal the same gfx for text rendering.
+       * If parent is passed and its a dropdown, get its menu.
+       * If the menu has a child and its of type dropdown,
+       * get it's buttons text gfx, which is already active,
+       * to use for this dropdown's button text.
+      */
       if (parent) {
-         /**
-          * HACK: steal the same gfx for text rendering.
-          * If parent is passed and its a dropdown, get its menu.
-          * If the menu has a child and its of type dropdown,
-          * get it's buttons text gfx, which is already active,
-          * to use for this dropdown's button text.
-          */
+
          if (parent.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) {
 
-            // const parent_menu = parent.children.buffer[0].text_mesh;
             const parent_menu = parent.menu;
+
+            if(this.depth_level >= 3){ // Create new gfx for dropdowns with level greater than 2
+
+            }
+            else{ // Use the same gfx where sid's gfx buffers match.
+
+               const dpgfxidxs = [parent.gfx.prog.idx, parent.gfx.vb.idx];
+               const btngfx = [parent.children.buffer[0].gfx.prog.idx, parent.children.buffer[0].gfx.vb.idx];
+               const textgfx = [parent.children.buffer[0].text_mesh.gfx.prog.idx, parent.children.buffer[0].text_mesh.gfx.vb.idx];
+            }
+
             const parent_menu_child = parent_menu.children.buffer[0];
             if (parent_menu_child && (parent_menu_child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN)) {
                const textgfx = parent_menu_child.children.buffer[0].text_mesh.gfx; // Suppose to be the buttons text_mesh gfx
@@ -127,29 +158,116 @@ export class Widget_Dropdown extends Section {
             }
          }
       }
+
+      const btn = this.children.buffer[0];
       btn.GenGfxCtx(GFX.PRIVATE, [this.gfx.prog.idx, this.gfx.vb.idx], text_gfx_specific); // Set button's area gfx same with dropDown mesh 
       Gfx_end_session(true, true);
 
       return this.gfx;
    }
 
-   // Get all parents menu children gfx indexes. If any gfx's sid matches the sid of the mesh we want to generate gfx context, generate context with the specific flag, else create new gfx program for the mesh 
-   GenGfxCtxParentBased(parent = null) {
+   GenMenuGfx(root){
 
-      /**DEBUG */ if (!parent) alert('NO PARAM PARENT WAS PASSED.')
+      const menu = this.menu;
 
-      for (let i = 0; i < parent.menu.children.boundary; i++) {
+      const dpgfxidxs = [this.gfx.prog.idx, this.gfx.vb.idx];
+      // const btngfx = [parent.children.buffer[0].gfx.prog.idx, parent.children.buffer[0].gfx.vb.idx];
+      const textgfx = [this.children.buffer[0].text_mesh.gfx.prog.idx, this.children.buffer[0].text_mesh.gfx.vb.idx];
 
-         const sid = parent.menu.children.buffer[i].sid;
-         // if(GlCheckSid(this.sid, sid)){
-         if (SID.CheckSidMatch(this.sid, sid)) {
+      if (menu.gfx){ // Case: Any other dp's menu except root and method of remove was set alpha to 0.
+         
+         if (this.id === root.id){ // Case: Menu activation of the rrot dropdown.
+            // Just set the gfx buffers counts, vb and ib, to the count of menu and all its items 
+            console.log();
+         }
+      }
+      else{ // Case: All dp menus to its own gfx.
 
-            this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, GFX.SPECIFIC, [parent.gfx.prog.idx, parent.gfx.vb.idx]);
+         menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.geom.num_faces, GFX.SPECIFIC, dpgfxidxs);
+         Scenes_store_gfx_to_buffer(menu.sceneidx, menu);
+   
+         for (let i = 0; i < menu.children.boundary; i++) {
+   
+            const item = menu.children.buffer[i];
+   
+            if (item.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) { // Case item is another dropdown
+   
+               item.gfx = Gfx_generate_context(item.sid, item.sceneidx, item.geom.num_faces, GFX.SPECIFIC, dpgfxidxs);
+               Scenes_store_gfx_to_buffer(item.sceneidx, item);
+   
+               const btn = item.children.buffer[0];
+               btn.GenGfxCtx(GFX.PRIVATE, dpgfxidxs, textgfx);
+   
+               // Create Click events for any meshes of type Dropdown
+               item.CreateClickEvent(root.menu.listeners.buffer);
+               item.CreateHoverEvent();
+   
+               if (item.isOn) { // Case the item dropdown has an 'active' menu, activate the item's dp menu (runs recursive for any opened sub dp menus). 
+   
+                  // If the menu was deactivated while open, then on activation keep its '-' symbol
+                  btn.text_mesh.mat.text = `${this.dp_symbols[1]} ${btn.text_mesh.mat.text.slice(2)}`;
+                  Gfx_end_session(true, true); // Must call end gfx private session before activating item dp's menu to new private gfx buffers.
+                  item.GenMenuGfx(root);
+                  console.log('\n      --------- RETURN FROM ACTIVATE() ')
+               }
+   
+            }
+            else { // Case: Generate gfx for any other children meshes (non dropdown meshes).
+   
+               // TODO. Do we genarate gfx for any other widget in the same gfx????  
+               item.GenGfxCtx(GFX.PRIVATE, dpgfxidxs, textgfx);
+            }
          }
       }
 
-      // Else if no matching gfx context found, create one.
-      this.GenGfxCtx(GFX.PRIVATE);
+
+   }
+
+   RenderMenu(root){
+
+      const menu = this.menu;
+
+      if(menu.is_gfx_inserted){ // Case: Menu removed by alpha, justset alpha back to default.
+
+         menu.SetColorAlpha(1);
+   
+         // const text_gfx = Find_gfx_context_for_text_in_dp_menu(menu);
+         for (let i = 0; i < menu.children.boundary; i++) {
+   
+            const item = menu.children.buffer[i];
+   
+            if (item.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) { // Case item is another dropdown
+   
+               item.SetColorAlpha(1);
+               
+               const btn = item.children.buffer[0];
+               btn.SetColorAlpha(1, 1);
+   
+               // Create Click events for any meshes of type Dropdown
+               item.CreateClickEvent(root.menu.listeners.buffer);
+               item.CreateHoverEvent();
+   
+               if (item.isOn) { // Case the item dropdown has an 'active' menu, activate the item's dp menu (runs recursive for any opened sub dp menus). 
+   
+                  // If the menu was deactivated while open, then on activation keep its '-' symbol
+                  btn.text_mesh.mat.text = `${this.dp_symbols[1]} ${btn.text_mesh.mat.text.slice(2)}`;
+                  item.RenderMenu(root);
+               }
+   
+            }
+            else { // Case: Generate gfx for any other children meshes (non dropdown meshes).
+   
+               item.SetColorAlpha(1, 1);
+            }
+         }
+      }
+      else{ // Case: First time initialization or each dp's menu to its own gfx, add menu to gfx
+
+         menu.Render(MESH_TYPES_DBG.UI_INFO_GFX); // Add to the vertex buffers
+         Gfx_end_session(true, true);
+         Gfx_activate(this); // activate the gfx buffers
+      }
+
    }
 
    Render() {
@@ -177,66 +295,75 @@ export class Widget_Dropdown extends Section {
 
       btn.text_mesh.UpdateTextCharacter(dp_symbols[1], 0);
 
-      if (menu) {
-         console.log('      --------- Activating secondary menus')
+      // if (menu) {
+      console.log('      --------- Activating secondary menus')
 
-         menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.geom.num_faces, GFX.PRIVATE);
-         Scenes_store_gfx_to_buffer(menu.sceneidx, menu);
+      menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.geom.num_faces, GFX.PRIVATE);
+      Scenes_store_gfx_to_buffer(menu.sceneidx, menu);
 
-         const text_gfx = Find_gfx_context_for_text_in_dp_menu(menu);
-         if (text_gfx) {
-            console.log('                FOUNT TEXT!!!!!!!', text_gfx)
-         }
-
-         // Here we have to gfxGen all menus children, NOT private
-         for (let i = 0; i < menu.children.boundary; i++) {
-
-            const child = menu.children.buffer[i];
-            if (child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) { // Case child is another dropdown
-
-               child.gfx = Gfx_generate_context(child.sid, child.sceneidx, child.geom.num_faces, GFX.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
-               Scenes_store_gfx_to_buffer(child.sceneidx, child);
-
-               const btn = child.children.buffer[0];
-               // const gfx = btn.GenGfxCtx(GFX.PRIVATE, [menu.gfx.prog.idx, menu.gfx.vb.idx], [.gfx.prog.idx, menu.gfx.vb.idx]);
-               const gfx = btn.GenGfxCtx(GFX.PRIVATE, [menu.gfx.prog.idx, menu.gfx.vb.idx], text_gfx);
-               // console.log('      --> btn1:', gfx.prog.idx, gfx.vb.idx, btn.name)
-
-               // Create Click events for any meshes of type Dropdown
-               child.CreateClickEvent(root.menu.listeners.buffer);
-               child.CreateHoverEvent();
-                              
-               { // DEBUG
-                  console.log( i, '      ---- item:', child.gfx.prog.idx, child.gfx.vb.idx, child.name)
-                  console.log('        ---- btn: ', gfx.prog.idx, gfx.vb.idx, btn.name)
-               }
-
-               // console.log('      --> child1:', child.gfx.prog.idx, child.gfx.vb.idx, child.name)
-               if (child.isOn) {
-                  // If the menu was deactivated while open, then on activation keep its '-' expansion symbol
-                  const child_btn = child.children.buffer[0];
-                  console.log('         Menu is on! run for menu recursiv.')
-                  child_btn.text_mesh.mat.text = `${this.dp_symbols[1]} ${child_btn.text_mesh.mat.text.slice(2)}`;
-                  // Gfx_end_session(true, true); // Must call end gfx private session for each next dropdown menu gfx activation
-
-                  child.ActivateMenu(root); // Run recursive for all dropdown's (as items of a root dropdown).
-               }
-            }
-            else { // Case: Generate gfx for children widget meshes 
-
-               const gfx = child.GenGfxCtx(GFX.PRIVATE);
-               console.log('      !!!!!!!! GenGfx for any other mesh:', gfx)
-            }
-
-         }
+      const text_gfx = Find_gfx_context_for_text_in_dp_menu(menu);
+      if (text_gfx) {
+         console.log('                FOUNT TEXT!!!!!!!', text_gfx)
       }
+
+      // Here we have to gfxGen all menus children, NOT private
+      for (let i = 0; i < menu.children.boundary; i++) {
+
+         const child = menu.children.buffer[i];
+         if (child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) { // Case child is another dropdown
+
+            child.gfx = Gfx_generate_context(child.sid, child.sceneidx, child.geom.num_faces, GFX.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
+            Scenes_store_gfx_to_buffer(child.sceneidx, child);
+
+            const btn = child.children.buffer[0];
+            const gfx = btn.GenGfxCtx(GFX.PRIVATE, [menu.gfx.prog.idx, menu.gfx.vb.idx], text_gfx);
+            // console.log('      --> btn1:', gfx.prog.idx, gfx.vb.idx, btn.name)
+
+            // Create Click events for any meshes of type Dropdown
+            child.CreateClickEvent(root.menu.listeners.buffer);
+            child.CreateHoverEvent();
+
+            { // DEBUG
+               console.log(i, '      ---- item:', child.gfx.prog.idx, child.gfx.vb.idx, child.name)
+               console.log('        ---- btn: ', gfx.prog.idx, gfx.vb.idx, btn.name)
+            }
+
+            // console.log('      --> child1:', child.gfx.prog.idx, child.gfx.vb.idx, child.name)
+            if (child.isOn) {
+               // If the menu was deactivated while open, then on activation keep its '-' expansion symbol
+               const child_btn = child.children.buffer[0];
+               console.log('         Menu is on! run for menu recursiv.')
+               child_btn.text_mesh.mat.text = `${this.dp_symbols[1]} ${child_btn.text_mesh.mat.text.slice(2)}`;
+               // Gfx_end_session(true, true); // Must call end gfx private session for each next dropdown menu gfx activation
+
+               child.ActivateMenu(root); // Run recursive for all dropdown's (as items of a root dropdown).
+            }
+         }
+         else { // Case: Generate gfx for children widget meshes 
+
+            const gfx = child.GenGfxCtx(GFX.PRIVATE);
+            console.log('      !!!!!!!! GenGfx for any other mesh:', gfx)
+         }
+
+         }
+      // }
    }
 
    DeactivateMenu(dp) {
+
       /**
-       * Deactivate all dp's menu items gfx.
-       * Remove all dp's menu items listeners.
-       * If item's listeners are child events, do nothing, the events will be winked from the parent event.
+       * Deactivate dropdown.
+       * If dp is root-dp: 
+       *    just set the vb.count to the root dp's end in the vertex buffer
+       *    update the vb
+       *    set the index buffer count to the count of one dropdown's meshes
+       * if the dp is not root or it does not start at 0 index in the vb:
+       *    dectivate all menu's meshes via color alpha value.
+       *    Use 'vb.Remove_geometry_fast(gfx, num_faces)' function
+       * 
+       * In any case:   
+       *    Must remove listeners
+       *    Must remove menu and items as it happens in the current implementation
        */
 
       const menu = dp.menu;
@@ -246,30 +373,40 @@ export class Widget_Dropdown extends Section {
          const item_dp = menu.children.buffer[j];
 
          // If the menu's item_dp mesh is of type dropdown, run recursively to deactivate mesh's menu.
-         if (item_dp.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN && dp.isOn) {
+         if (item_dp.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) {
+            if (dp.isOn) {
 
-            this.DeactivateMenu(item_dp); // Run recursive for every dropdown in every menu
+               this.DeactivateMenu(item_dp); // Run recursive for every dropdown in every menu
 
-            // Deactivate the dropdown's button
-            const btn_dp = item_dp.children.buffer[0];
+               // Deactivate the dropdown's button
+               const btn_dp = item_dp.children.buffer[0];
 
-            btn_dp.DeactivateGfx();
-            // TODO: 'If it is not a item_dp event'. Check it here
-            btn_dp.RemoveAllListenEvents();
-            // console.log('Remove Listeners:btn_dp:', btn_dp.name, btn_dp.listeners.buffer);
-
-            // Deactivate gfx for menu's children meshes.
-            if (item_dp.gfx) { item_dp.DeactivateGfx(); }
-            item_dp.RemoveAllListenEvents();
-            // console.log('Remove Listeners:item_dp:', item_dp.name, item_dp.listeners.buffer);
+               // btn_dp.DeactivateGfx();
+               btn_dp.SetColorAlpha(0, 0);
+               // TODO: 'If it is not a item_dp event'. Check it here
+               btn_dp.RemoveAllListenEvents();
+               
+               // Deactivate gfx for menu's children meshes.
+               // if (item_dp.gfx) { item_dp.DeactivateGfx(); }
+               item_dp.SetColorAlpha(0);
+               item_dp.RemoveAllListenEvents();
+            }
          }
+         else{
 
+            /**DEBUG*/ if(!  item_dp.gfx) console.log(item_dp.name)
+            if(item_dp.gfx) item_dp.SetColorAlpha(0, 0);
 
+         }
+         
+         
       }
-
+      
+      // if (menu.gfx) // TODO: Shouldn't we check if(menu.isOn)???
+      //    menu.DeactivateGfx();
       if (menu.gfx) // TODO: Shouldn't we check if(menu.isOn)???
-         menu.DeactivateGfx();
-
+         menu.SetColorAlpha(0);
+      
       // Remove menu's Fake listen events
       menu.RemoveAllListenEvents();
 
@@ -439,35 +576,11 @@ export class Widget_Dropdown extends Section {
       const menu = params.target_params.menu;
       const btn = params.source_params;
       const root = Dropdown_get_root_by_idx(dropdown_mesh.rootidx);
-      // console.log('rootname:', root.name, 'root menu:', root.menu.name, ' root listeners:', root.listeners, 'root menu listeners:', root.menu.listeners);
 
-      /** If the menu for the clicked dropdown is not active, activate it and all of its items.
-       * Do the same for each item of type dropdown widget that has its menu active/opened.
-       */
-      if (!dropdown_mesh.isOn) {
+      if (!dropdown_mesh.isOn) { // Case: Activete Menu 
 
-         /**
-          * If dropdown menu is not active:
-          * ->Add the menu as a child of the dropdown(in the dropdown's children buffer).
-          * -->Generate gfx context for the menu.
-          * -->Create Fake click event for the menu(so all its items will have a parent event in the 'EventListeners' buffer).
-          * --->Generate gfx context for all menu's items(menu's children buffer).
-          * --->Create listen events for all menu's items that are of type 'Dropdown'.(btn click event, menus fake click(if menu isOn)).
-          * --->Any othe meshes should handle any listen events in their classes. << Must call for create event from here? >>
-          * 
-          * We have 2 cases of implementing the listeners of all dropdown type items of the root dropdown.
-          * 1. Set all event listeners as a child of the root menu's Fake click.
-          * 2. Set all event listeners as a child of each dropdown menu's Fake click.
-          * The decision is made uppon efficiency measures, like the number of child events of a specific dropdown menu's items.
-          * More than 2-3-4 child events should be added to it's menu event, so a Fake event for that menu must be created.
-          */
          console.log('\n\n')
          console.log('----------------------- Activating Dropdown:', dropdown_mesh.name)
-
-         btn.text_mesh.UpdateTextCharacter(dropdown_mesh.dp_symbols[1], 0); // Update the symbol text.
-         dropdown_mesh.AddItem(menu); // Add the menu, which is a storage of Widget_Dropdown only, as a child to the drop_down
-         menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.geom.num_faces, GFX.PRIVATE);
-         Scenes_store_gfx_to_buffer(menu.sceneidx, menu);
 
          // Create Fake click event in the menu mesh, so that any items that have listen events, will be registered as children events.
          if (false) { // TODO: Implement auto-select which type of events-creation to follow. Case 1: all events added to root dp menu. Case 2: Each menu gets a Fake event to store it's item events
@@ -483,65 +596,16 @@ export class Widget_Dropdown extends Section {
                menu.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER, null, menu.listeners.buffer);
          }
 
+         btn.text_mesh.UpdateTextCharacter(dropdown_mesh.dp_symbols[1], 0); // Update the symbol text.
+         dropdown_mesh.AddItem(menu); // Add the menu, which is a storage of Widget_Dropdown only, as a child to the drop_down
 
-         // Add any menu children items(in private gfx buffers)
-         // console.log('   Add to menu:', menu.name);
-         const text_gfx = Find_gfx_context_for_text_in_dp_menu(menu);
-         for (let i = 0; i < menu.children.boundary; i++) {
-
-            const child = menu.children.buffer[i];
-            if (child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) { // Case child is another dropdown
-
-               child.gfx = Gfx_generate_context(child.sid, child.sceneidx, child.geom.num_faces, GFX.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
-               Scenes_store_gfx_to_buffer(child.sceneidx, child);
-
-               const child_btn = child.children.buffer[0];
-               const gfx = child_btn.GenGfxCtx(GFX.PRIVATE, [menu.gfx.prog.idx, menu.gfx.vb.idx], text_gfx);
-               
-               { // DEBUG
-                  console.log( i, '      item:', child.gfx.prog.idx, child.gfx.vb.idx, child.name)
-                  console.log('        btn: ', gfx.prog.idx, gfx.vb.idx, child_btn.name)
-               }
-               
-               // Create Click events for the button of any meshes of type Dropdown widget.
-               child.CreateClickEvent();
-
-               if (child.isOn) { // Case the child dropdown has an 'active' menu.
-                  
-                  // If the menu was deactivated while open, then on activation keep its '-' symbol
-                  child_btn.text_mesh.mat.text = `${dropdown_mesh.dp_symbols[1]} ${child_btn.text_mesh.mat.text.slice(2)}`;
-                  Gfx_end_session(true, true); // Must call end gfx private session before activating child dp's menu to new private gfx buffers.
-                  child.ActivateMenu(root);
-                  console.log('\n      --------- RETURN FROM ACTIVATE() ')
-               }
-
-            }
-            else { // Case: Generate gfx for any other children meshes (non dropdown meshes).
-
-               child.GenGfxCtx(GFX.PRIVATE);
-               // console.log('      child.name', child.name)
-            }
-
-         }
-
-
-         /**
-          * After creating/activating all dp menu's items(including any dps inside each of any menus(recursive)),
-          * we .Render() that is adding all mesh data to the gfx buffers,
-          * we call Recalc() to recalculate the any dimentions and positions change in the master section mesh(dropdown_mesh),
-          * and we update the dim and pos gfx buffers via the Mesh class update functions.
-          * 
-          * What we want is to regenerate gfx, find a private buffer from scratch,
-          * NOT reuse the prog and vb that pre-exists in the menu mesh, maybe it is used for another private gfx initialization.
-          */
-         menu.Render(MESH_TYPES_DBG.UI_INFO_GFX); // Add to the vertex buffers
-         Gfx_end_session(true, true);
-
+         dropdown_mesh.GenMenuGfx(root);
+         dropdown_mesh.RenderMenu(root);
+         
+         menu.ConstructListeners(dropdown_mesh);
+         
          const size = root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
          root.UpdateGfxPosDimRecursive(root);
-
-         Gfx_activate(dropdown_mesh); // activate the gfx buffers
-         menu.ConstructListeners(dropdown_mesh);
 
          const scroller = root.parent;
          if (scroller && (scroller.type & MESH_TYPES_DBG.WIDGET_SCROLLER)) {
@@ -551,7 +615,7 @@ export class Widget_Dropdown extends Section {
          }
 
       }
-      else { /** DEACTIVATE: Else dropdown button click and it's menu is active, so deactivate the menu and its items. */
+      else {  // Case: Deactivete Menu 
 
          btn.text_mesh.UpdateTextCharacter(dropdown_mesh.dp_symbols[0], 0);
 
@@ -589,7 +653,7 @@ export class Widget_Dropdown extends Section {
             dropdown_mesh.DeactivateMenu(dropdown_mesh);
             dropdown_mesh.RemoveChildByIdx(menu.idx); // Rememove menu from drop down
 
-            const size = root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
+            root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
             root.UpdateGfxPosDimRecursive(root);
 
          }
@@ -600,6 +664,7 @@ export class Widget_Dropdown extends Section {
 
       return true;
    }
+
 
    SetOnMove(params) {
 
@@ -727,3 +792,345 @@ function Find_gfx_context_for_text_in_dp_menu(menu) {
 
    return null;
 }
+
+
+/**SAVES */
+/************************************************************************************************************************************ */
+
+   /**SAVE */
+   // GenGfxCtx(FLAGS = GFX.PRIVATE, gfx_idxs, parent = null) {
+
+   //    const btn = this.children.buffer[0];
+
+   //    this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfx_idxs);
+   //    Scenes_store_gfx_to_buffer(this.sceneidx, this);
+
+   //    let text_gfx_specific = null;
+   //    if (parent) {
+   //       /**
+   //        * HACK: steal the same gfx for text rendering.
+   //        * If parent is passed and its a dropdown, get its menu.
+   //        * If the menu has a child and its of type dropdown,
+   //        * get it's buttons text gfx, which is already active,
+   //        * to use for this dropdown's button text.
+   //        */
+   //       if (parent.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) {
+
+   //          const parent_menu = parent.menu;
+   //          const parent_menu_child = parent_menu.children.buffer[0];
+   //          if (parent_menu_child && (parent_menu_child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN)) {
+   //             const textgfx = parent_menu_child.children.buffer[0].text_mesh.gfx; // Suppose to be the buttons text_mesh gfx
+   //             text_gfx_specific = [textgfx.prog.idx, textgfx.vb.idx];
+   //          }
+   //       }
+   //    }
+   //    btn.GenGfxCtx(GFX.PRIVATE, [this.gfx.prog.idx, this.gfx.vb.idx], text_gfx_specific); // Set button's area gfx same with dropDown mesh 
+   //    Gfx_end_session(true, true);
+
+   //    return this.gfx;
+   // }
+
+   // Get all parents menu children gfx indexes. If any gfx's sid matches the sid of the mesh we want to generate gfx context, generate context with the specific flag, else create new gfx program for the mesh 
+   // GenGfxCtxParentBased(parent = null) {
+
+   //    /**DEBUG */ if (!parent) alert('NO PARAM PARENT WAS PASSED.')
+
+   //    for (let i = 0; i < parent.menu.children.boundary; i++) {
+
+   //       const sid = parent.menu.children.buffer[i].sid;
+   //       // if(GlCheckSid(this.sid, sid)){
+   //       if (SID.CheckSidMatch(this.sid, sid)) {
+
+   //          this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, GFX.SPECIFIC, [parent.gfx.prog.idx, parent.gfx.vb.idx]);
+   //       }
+   //    }
+
+   //    // Else if no matching gfx context found, create one.
+   //    this.GenGfxCtx(GFX.PRIVATE);
+   // }
+   /**SAVE */
+   // ActivateMenu(root) {
+
+   //    const menu = this.menu;
+   //    const btn = this.children.buffer[0];
+   //    const dp_symbols = this.dp_symbols;
+
+   //    btn.text_mesh.UpdateTextCharacter(dp_symbols[1], 0);
+
+   //    if (menu) {
+   //       console.log('      --------- Activating secondary menus')
+
+   //       menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.geom.num_faces, GFX.PRIVATE);
+   //       Scenes_store_gfx_to_buffer(menu.sceneidx, menu);
+
+   //       const text_gfx = Find_gfx_context_for_text_in_dp_menu(menu);
+   //       if (text_gfx) {
+   //          console.log('                FOUNT TEXT!!!!!!!', text_gfx)
+   //       }
+
+   //       // Here we have to gfxGen all menus children, NOT private
+   //       for (let i = 0; i < menu.children.boundary; i++) {
+
+   //          const child = menu.children.buffer[i];
+   //          if (child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) { // Case child is another dropdown
+
+   //             child.gfx = Gfx_generate_context(child.sid, child.sceneidx, child.geom.num_faces, GFX.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
+   //             Scenes_store_gfx_to_buffer(child.sceneidx, child);
+
+   //             const btn = child.children.buffer[0];
+   //             // const gfx = btn.GenGfxCtx(GFX.PRIVATE, [menu.gfx.prog.idx, menu.gfx.vb.idx], [.gfx.prog.idx, menu.gfx.vb.idx]);
+   //             const gfx = btn.GenGfxCtx(GFX.PRIVATE, [menu.gfx.prog.idx, menu.gfx.vb.idx], text_gfx);
+   //             // console.log('      --> btn1:', gfx.prog.idx, gfx.vb.idx, btn.name)
+
+   //             // Create Click events for any meshes of type Dropdown
+   //             child.CreateClickEvent(root.menu.listeners.buffer);
+   //             child.CreateHoverEvent();
+
+   //             { // DEBUG
+   //                console.log(i, '      ---- item:', child.gfx.prog.idx, child.gfx.vb.idx, child.name)
+   //                console.log('        ---- btn: ', gfx.prog.idx, gfx.vb.idx, btn.name)
+   //             }
+
+   //             // console.log('      --> child1:', child.gfx.prog.idx, child.gfx.vb.idx, child.name)
+   //             if (child.isOn) {
+   //                // If the menu was deactivated while open, then on activation keep its '-' expansion symbol
+   //                const child_btn = child.children.buffer[0];
+   //                console.log('         Menu is on! run for menu recursiv.')
+   //                child_btn.text_mesh.mat.text = `${this.dp_symbols[1]} ${child_btn.text_mesh.mat.text.slice(2)}`;
+   //                // Gfx_end_session(true, true); // Must call end gfx private session for each next dropdown menu gfx activation
+
+   //                child.ActivateMenu(root); // Run recursive for all dropdown's (as items of a root dropdown).
+   //             }
+   //          }
+   //          else { // Case: Generate gfx for children widget meshes 
+
+   //             const gfx = child.GenGfxCtx(GFX.PRIVATE);
+   //             console.log('      !!!!!!!! GenGfx for any other mesh:', gfx)
+   //          }
+
+   //       }
+   //    }
+   // }
+   /**SAVE */
+   // DeactivateMenu(dp) {
+   //    /**
+   //     * Deactivate all dp's menu items gfx.
+   //     * Remove all dp's menu items listeners.
+   //     * If item's listeners are child events, do nothing, the events will be winked from the parent event.
+   //     */
+
+   //    const menu = dp.menu;
+
+   //    for (let j = 0; j < menu.children.boundary; j++) {
+
+   //       const item_dp = menu.children.buffer[j];
+
+   //       // If the menu's item_dp mesh is of type dropdown, run recursively to deactivate mesh's menu.
+   //       if (item_dp.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN && dp.isOn) {
+
+   //          this.DeactivateMenu(item_dp); // Run recursive for every dropdown in every menu
+
+   //          // Deactivate the dropdown's button
+   //          const btn_dp = item_dp.children.buffer[0];
+
+   //          btn_dp.DeactivateGfx();
+   //          // TODO: 'If it is not a item_dp event'. Check it here
+   //          btn_dp.RemoveAllListenEvents();
+   //          // console.log('Remove Listeners:btn_dp:', btn_dp.name, btn_dp.listeners.buffer);
+
+   //          // Deactivate gfx for menu's children meshes.
+   //          if (item_dp.gfx) { item_dp.DeactivateGfx(); }
+   //          item_dp.RemoveAllListenEvents();
+   //          // console.log('Remove Listeners:item_dp:', item_dp.name, item_dp.listeners.buffer);
+   //       }
+
+
+   //    }
+
+   //    if (menu.gfx) // TODO: Shouldn't we check if(menu.isOn)???
+   //       menu.DeactivateGfx();
+
+   //    // Remove menu's Fake listen events
+   //    menu.RemoveAllListenEvents();
+
+   // }
+   
+   /**SAVE */
+   // OnClick(params) {
+
+
+   //    /*DEBUG*/if (!params.target_params) {
+   //       console.error('Target_params.params is null, in a OnClick() event. target_params:', params.target_params);
+   //       return;
+   //    }
+
+   //    const dropdown_mesh = params.target_params.drop_down;
+   //    /*DEBUG*/if (dropdown_mesh.rootidx === INT_NULL) {
+   //       alert('Root for dropdown must be set. ', dropdown_mesh.name);
+   //       return;
+   //    }
+
+   //    const menu = params.target_params.menu;
+   //    const btn = params.source_params;
+   //    const root = Dropdown_get_root_by_idx(dropdown_mesh.rootidx);
+   //    // console.log('rootname:', root.name, 'root menu:', root.menu.name, ' root listeners:', root.listeners, 'root menu listeners:', root.menu.listeners);
+
+   //    /** If the menu for the clicked dropdown is not active, activate it and all of its items.
+   //     * Do the same for each item of type dropdown widget that has its menu active/opened.
+   //     */
+   //    if (!dropdown_mesh.isOn) {
+
+   //       /**
+   //        * If dropdown menu is not active:
+   //        * ->Add the menu as a child of the dropdown(in the dropdown's children buffer).
+   //        * -->Generate gfx context for the menu.
+   //        * -->Create Fake click event for the menu(so all its items will have a parent event in the 'EventListeners' buffer).
+   //        * --->Generate gfx context for all menu's items(menu's children buffer).
+   //        * --->Create listen events for all menu's items that are of type 'Dropdown'.(btn click event, menus fake click(if menu isOn)).
+   //        * --->Any othe meshes should handle any listen events in their classes. << Must call for create event from here? >>
+   //        * 
+   //        * We have 2 cases of implementing the listeners of all dropdown type items of the root dropdown.
+   //        * 1. Set all event listeners as a child of the root menu's Fake click.
+   //        * 2. Set all event listeners as a child of each dropdown menu's Fake click.
+   //        * The decision is made uppon efficiency measures, like the number of child events of a specific dropdown menu's items.
+   //        * More than 2-3-4 child events should be added to it's menu event, so a Fake event for that menu must be created.
+   //        */
+   //       console.log('\n\n')
+   //       console.log('----------------------- Activating Dropdown:', dropdown_mesh.name)
+
+   //       btn.text_mesh.UpdateTextCharacter(dropdown_mesh.dp_symbols[1], 0); // Update the symbol text.
+   //       dropdown_mesh.AddItem(menu); // Add the menu, which is a storage of Widget_Dropdown only, as a child to the drop_down
+   //       menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.geom.num_faces, GFX.PRIVATE);
+   //       Scenes_store_gfx_to_buffer(menu.sceneidx, menu);
+
+   //       // Create Fake click event in the menu mesh, so that any items that have listen events, will be registered as children events.
+   //       if (false) { // TODO: Implement auto-select which type of events-creation to follow. Case 1: all events added to root dp menu. Case 2: Each menu gets a Fake event to store it's item events
+   //          // Case we store all events in the menu of the root dropdown 
+   //          if (root.menu.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] === null)
+   //             root.menu.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, root.menu.OnFakeClick, root.menu.listeners.buffer);
+   //       }
+   //       else {
+   //          // Case we store all events in the menu of each dropdown (tree like struct of the events, in the EventListeners class buffer)
+   //          if (menu.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.CLICK] === null)
+   //             menu.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP, menu.OnFakeClick, menu.listeners.buffer);
+   //          if (menu.listeners.buffer[LISTEN_EVENT_TYPES_INDEX.HOVER] === null)
+   //             menu.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER, null, menu.listeners.buffer);
+   //       }
+
+
+   //       // Add any menu children items(in private gfx buffers)
+   //       // console.log('   Add to menu:', menu.name);
+   //       const text_gfx = Find_gfx_context_for_text_in_dp_menu(menu);
+   //       for (let i = 0; i < menu.children.boundary; i++) {
+
+   //          const child = menu.children.buffer[i];
+   //          if (child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) { // Case child is another dropdown
+
+   //             child.gfx = Gfx_generate_context(child.sid, child.sceneidx, child.geom.num_faces, GFX.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
+   //             Scenes_store_gfx_to_buffer(child.sceneidx, child);
+
+   //             const child_btn = child.children.buffer[0];
+   //             const gfx = child_btn.GenGfxCtx(GFX.PRIVATE, [menu.gfx.prog.idx, menu.gfx.vb.idx], text_gfx);
+
+   //             { // DEBUG
+   //                console.log(i, '      item:', child.gfx.prog.idx, child.gfx.vb.idx, child.name)
+   //                console.log('        btn: ', gfx.prog.idx, gfx.vb.idx, child_btn.name)
+   //             }
+
+   //             // Create Click events for the button of any meshes of type Dropdown widget.
+   //             child.CreateClickEvent();
+
+   //             if (child.isOn) { // Case the child dropdown has an 'active' menu.
+
+   //                // If the menu was deactivated while open, then on activation keep its '-' symbol
+   //                child_btn.text_mesh.mat.text = `${dropdown_mesh.dp_symbols[1]} ${child_btn.text_mesh.mat.text.slice(2)}`;
+   //                Gfx_end_session(true, true); // Must call end gfx private session before activating child dp's menu to new private gfx buffers.
+   //                child.ActivateMenu(root);
+   //                console.log('\n      --------- RETURN FROM ACTIVATE() ')
+   //             }
+
+   //          }
+   //          else { // Case: Generate gfx for any other children meshes (non dropdown meshes).
+
+   //             child.GenGfxCtx(GFX.PRIVATE);
+   //             // console.log('      child.name', child.name)
+   //          }
+
+   //       }
+
+
+   //       /**
+   //        * After creating/activating all dp menu's items(including any dps inside each of any menus(recursive)),
+   //        * we .Render() that is adding all mesh data to the gfx buffers,
+   //        * we call Recalc() to recalculate the any dimentions and positions change in the master section mesh(dropdown_mesh),
+   //        * and we update the dim and pos gfx buffers via the Mesh class update functions.
+   //        * 
+   //        * What we want is to regenerate gfx, find a private buffer from scratch,
+   //        * NOT reuse the prog and vb that pre-exists in the menu mesh, maybe it is used for another private gfx initialization.
+   //        */
+   //       menu.Render(MESH_TYPES_DBG.UI_INFO_GFX); // Add to the vertex buffers
+   //       Gfx_end_session(true, true);
+
+   //       const size = root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
+   //       root.UpdateGfxPosDimRecursive(root);
+
+   //       Gfx_activate(dropdown_mesh); // activate the gfx buffers
+   //       menu.ConstructListeners(dropdown_mesh);
+
+   //       const scroller = root.parent;
+   //       if (scroller && (scroller.type & MESH_TYPES_DBG.WIDGET_SCROLLER)) {
+
+   //          console.log(size)
+   //          scroller.TempRecalcAll(size);
+   //       }
+
+   //    }
+   //    else { /** DEACTIVATE: Else dropdown button click and it's menu is active, so deactivate the menu and its items. */
+
+   //       btn.text_mesh.UpdateTextCharacter(dropdown_mesh.dp_symbols[0], 0);
+
+   //       /* Need to update the symbol of the text(not only the gfx buffers), 
+   //          because when the btn will be activated it will be re-inserted in the gfx buffers 
+   //          and it will use the text_mesh's  string (wich is currently the '-' synmbol). */
+   //       btn.text_mesh.mat.text = `${dropdown_mesh.dp_symbols[0]} ${btn.text_mesh.mat.text.slice(2)}`;
+
+   //       if (menu) {
+
+   //          const clickidx = LISTEN_EVENT_TYPES_INDEX.CLICK;
+   //          // Case we have stored this menu's items events to the root menu Fake event,
+   //          // Remove all listen events of this menu's items from EventListeners buffer.(one by one, based on the root menu event(parent_event)).
+   //          if (menu.listeners.buffer[clickidx] === null) {
+
+   //             /**
+   //              * Here we remove all listen events(registered as children events of the root menu).
+   //              * IMPORTANT! The listen events may exist in any nested child widget-mesh, 
+   //              * so not only recursion is required but we must visit all nested meshes to check for listen events.
+   //              * NOTE: For widgets, let their class handle all the listen events removal,
+   //              * for structures that may have arbitary meshes, we must check and remove.
+   //              */
+   //             for (let i = 0; i < menu.children.boundary; i++) {
+
+   //                const child = menu.children.buffer[i];
+
+   //                if ((child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) && child.children.active_count) // If child is of type Dropdown...
+   //                   child.RemoveAllListenersFromDP(child, root.menu.listeners.buffer); // ...remove it's button click listener.
+
+   //                if (child.listeners.buffer[clickidx] && child.listeners.buffer[clickidx].is_child_event) // In any other case, if the child has a listener, remove it.
+   //                   Listener_remove_children_event_by_idx(clickidx, root.menu.listeners.buffer[clickidx], child.listeners.buffer[clickidx]);
+   //             }
+   //          }
+
+   //          dropdown_mesh.DeactivateMenu(dropdown_mesh);
+   //          dropdown_mesh.RemoveChildByIdx(menu.idx); // Rememove menu from drop down
+
+   //          const size = root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
+   //          root.UpdateGfxPosDimRecursive(root);
+
+   //       }
+   //    }
+
+   //    STATE.mesh.SetClicked(btn);
+   //    dropdown_mesh.isOn ^= 0x1;
+
+   //    return true;
+   // }

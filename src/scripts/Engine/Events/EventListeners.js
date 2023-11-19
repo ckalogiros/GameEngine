@@ -189,6 +189,11 @@ export class Event_Listener {
                         trigger_params: trigger_params,
                         event_type: TYPE_IDX,
                      }
+                     
+                     // Set any clicked mesh IN_FOCUS
+                     const mesh = event_found.source_params;
+                     console.log(mesh.name)
+                     In_focus_set(mesh);
 
                      if (event_found.Clbk) {
 
@@ -197,19 +202,23 @@ export class Event_Listener {
                      }
                   }
                }
-
-               // Else if no children event was triggered, run any events of the main event.
-               const dispatch_params = {
-                  source_params: evt.source_params,
-                  target_params: evt.target_params,
-                  trigger_params: trigger_params,
-                  event_type: TYPE_IDX,
-               }
-
+               
+               // Set any clicked mesh IN_FOCUS
+               const mesh = evt.source_params;
+               console.log(mesh.name)
+               
                if (evt.Clbk) {
+                  // Else if no children event was triggered, run any events of the main event.
+                  const dispatch_params = {
+                     source_params: evt.source_params,
+                     target_params: evt.target_params,
+                     trigger_params: trigger_params,
+                     event_type: TYPE_IDX,
+                  }
                   evt.Clbk(dispatch_params);
                   return;
                }
+               
             }
          }
       }
@@ -382,6 +391,15 @@ export class Event_Listener {
    PrintAll() {
       console.log('Listener: ', _listener.event_type)
    }
+}
+
+function In_focus_set(mesh){
+
+   // do{
+      
+   //    parent = mesh.parent 
+   // }while(parent){
+   // }
 }
 
 function Check_hover_recursive(events, point) {
