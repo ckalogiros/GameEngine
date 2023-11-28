@@ -56,7 +56,7 @@ export class Gfx_Pool extends M_Buffer {
           */
          else if(((FLAGS & GFX.SPECIFIC) || (FLAGS & GFX.PRIVATE)) && gfxIdx){
             
-            const gfx_idx = this.FindGfx(gfxIdx[0], gfxIdx[1]);
+            const gfx_idx = this.FindGfx(PROGRAMS_GROUPS.GetIdxByMask(sid.progs_group), gfxIdx[0], gfxIdx[1]);
             if(gfx_idx){
                
                /**DEBUG*/{
@@ -66,7 +66,7 @@ export class Gfx_Pool extends M_Buffer {
                }
                const gfx = GlGenerateContext(sid, sceneidx, GFX.SPECIFIC, gfx_idx.vbidx, mesh_count);
                gfx.gfx_ctx.idx = this.#StoreGfx(gfx);
-               Gfx_set_vb_show(gfx.prog.idx, gfx.vb.idx, true); 
+               Gfx_set_vb_show(gfx.prog.idx, gfx.vb.idx, gfx.progs_groupidx, true); 
                return gfx;
             }
             /*DEBUG:Wrong use of gfxidx.*/
@@ -84,13 +84,13 @@ export class Gfx_Pool extends M_Buffer {
                // console.log('Mesh count: ', mesh_count)
                gfx.gfx_ctx.idx = foundIdx;
                // Add this gfx to the session
-               const idx = this.FindGfxIdx(gfx.prog.idx, gfx.vb.idx)
-               /*DEBUG*/ ERROR_NULL(idx);
+               const idx = this.FindGfxIdx(gfx.progs_groupidx, gfx.prog.idx, gfx.vb.idx)
+               /*DEBUG*/ if(ERROR_NULL(idx)) console.error('GfxContext idx is:', idx);
                this.session.push(idx);
                
                gfx.gfx_ctx.sessionId = this.buffer[idx].sessionId;
 
-               Gfx_set_vb_show(gfx.prog.idx, gfx.vb.idx, true); // Corrects the none rendering of the deactivated popup's [0] vertex buffer
+               Gfx_set_vb_show(gfx.prog.idx, gfx.vb.idx, gfx.progs_groupidx, true); // Corrects the none rendering of the deactivated popup's [0] vertex buffer
 
                return gfx;
             }
@@ -109,34 +109,34 @@ export class Gfx_Pool extends M_Buffer {
    }
 
    // Enable gfx generation (for new meshes) from existing private gfx buffers.
-   SessionOpen(idxs){
+   // SessionOpen(idxs){
 
-      /**
-       * Deactivate temporarely the vrtex buffers given in the param:vbidxs,
-       * so that the GfxCtx can generate gfx context on exixting gfx buffers.
-       */
+   //    /**
+   //     * Deactivate temporarely the vrtex buffers given in the param:vbidxs,
+   //     * so that the GfxCtx can generate gfx context on exixting gfx buffers.
+   //     */
 
-      console.log('GfxCtx-SessionOpen->gfx_idxs:', idxs)
+   //    console.log('GfxCtx-SessionOpen->gfx_idxs:', idxs)
 
 
-      // Must not run if session is already open.
-      /** DEBUG ERROR*/if(this.session[0]){
+   //    // Must not run if session is already open.
+   //    /** DEBUG ERROR*/if(this.session[0]){
          
-         console.error('Gfx Session is already open')
-         console.log('session:', this.session, this.buffer)
-      } 
+   //       console.error('Gfx Session is already open')
+   //       console.log('session:', this.session, this.buffer)
+   //    } 
 
-      const count = idxs.length;
-      for(let i=0; i<count; i++){
+   //    const count = idxs.length;
+   //    for(let i=0; i<count; i++){
 
-         const idx = this.FindGfxIdx(idxs[i].progidx, idxs[i].vbidx);
-         if(idx !== INT_NULL){ // If the progidx-vbidx is not found, that probably means that the new vertex buffer is not yet added, and that the dispatch event to the debug_info_ui hapened first(before the gfx generation) 
+   //       const idx = this.FindGfxIdx(idxs[i].progidx, idxs[i].vbidx);
+   //       if(idx !== INT_NULL){ // If the progidx-vbidx is not found, that probably means that the new vertex buffer is not yet added, and that the dispatch event to the debug_info_ui hapened first(before the gfx generation) 
 
-            this.buffer[idx].isActive = false;
-            this.session.push(idx); // Push the existing gfx buffer indexes to the session, so that they can be deactivated with 'Session_end...()'.
-         }
-      }
-   }
+   //          this.buffer[idx].isActive = false;
+   //          this.session.push(idx); // Push the existing gfx buffer indexes to the session, so that they can be deactivated with 'Session_end...()'.
+   //       }
+   //    }
+   // }
 
    SessionEnd(setPrivate, setActive=true) {
 
@@ -152,10 +152,11 @@ export class Gfx_Pool extends M_Buffer {
          this.buffer[idx].isPrivate = setPrivate;
 
          
-         const progidx = this.buffer[idx].progidx,
+         const progs_groupidx = this.buffer[idx].progs_groupidx,
+         progidx = this.buffer[idx].progidx,
          vbidx = this.buffer[idx].vbidx;
          if (setPrivate)
-            GlSetVertexBufferPrivate(progidx, vbidx);
+            GlSetVertexBufferPrivate(progs_groupidx, progidx, vbidx);
 
       }
 
@@ -166,16 +167,17 @@ export class Gfx_Pool extends M_Buffer {
    #StoreGfx(gfx, isPrivate) { // Does not store duplicates
 
       // Store it, if not stored.
-      if (this.FindGfxIdx(gfx.prog.idx, gfx.vb.idx) === INT_NULL) {
-         const idx = this.#Store(gfx.prog.idx, gfx.vb.idx, gfx.sceneidx, true, isPrivate);
+      if (this.FindGfxIdx(gfx.progs_groupidx, gfx.prog.idx, gfx.vb.idx) === INT_NULL) {
+         const idx = this.#Store(gfx.progs_groupidx, gfx.prog.idx, gfx.vb.idx, gfx.sceneidx, true, isPrivate);
          return idx;
       }
    }
 
    /** This function is called only if progidx and vbidx have not been added. i.e. Does not run for duplicates  */
-   #Store(progidx, vbidx, sceneidx, isActive = true, isPrivate) {
+   #Store(progs_groupidx, progidx, vbidx, sceneidx, isActive = true, isPrivate) {
 
       const obj = {
+         progs_groupidx: progs_groupidx,
          progidx: progidx,
          vbidx: vbidx,
          sceneidx: sceneidx,
@@ -227,20 +229,22 @@ export class Gfx_Pool extends M_Buffer {
       return null;
    }
 
-   FindGfx(progidx, vbidx) {
+   FindGfx(progs_groupidx, progidx, vbidx) {
 
       for (let i = 0; i < this.boundary; i++)
-         if (this.buffer[i].progidx === progidx &&
+         if (this.buffer[i].progs_groupidx === progs_groupidx &&
+            this.buffer[i].progidx === progidx &&
             this.buffer[i].vbidx === vbidx)
             return this.buffer[i];
 
       return null
    }
 
-   FindGfxIdx(progidx, vbidx) {
+   FindGfxIdx(progs_groupidx, progidx, vbidx) {
 
       for (let i = 0; i < this.boundary; i++)
-         if (this.buffer[i].progidx === progidx &&
+         if (this.buffer[i].progs_groupidx === progs_groupidx &&
+            this.buffer[i].progidx === progidx &&
             this.buffer[i].vbidx === vbidx)
             return i;
 
@@ -271,9 +275,10 @@ export class Gfx_Pool extends M_Buffer {
       else{
          const progidx = mesh.gfx.prog.idx;
          const vbidx = mesh.gfx.vb.idx;
+         const progs_groupidx = mesh.gfx.progs_groupidx;
 
          this.SetGfxActiveFromPool(progidx, vbidx, true);
-         Gfx_set_vb_show(progidx, vbidx, true);
+         Gfx_set_vb_show(progidx, vbidx, progs_groupidx, true);
       }
 
    }
@@ -308,10 +313,12 @@ export class Gfx_Pool extends M_Buffer {
 
       const progidx = gfx.prog.idx;
       const vbidx = gfx.vb.idx;
+      const progs_groupidx = mesh.gfx.progs_groupidx;
+
       this.SetGfxActiveFromPool(progidx, vbidx, false);
       GlResetVertexBuffer(gfx);
       GlResetIndexBuffer(gfx);
-      Gfx_set_vb_show(progidx, vbidx, false);
+      Gfx_set_vb_show(progidx, vbidx, progs_groupidx, false);
       // console.log('Deactivating: progidx:',progidx,' vbidx:',vbidx)
    }
 };
@@ -322,7 +329,7 @@ const _gfx_pool = new Gfx_Pool;
 
 /** Finish the session by setting all the assigned gfx buffers to active. Also sets private all the gfx buffers  */
 export function Gfx_end_session(setPrivate, setActive) { return _gfx_pool.SessionEnd(setPrivate, setActive); }
-export function Gfx_open_session(gfx_idxs) { return _gfx_pool.SessionOpen(gfx_idxs); }
+// export function Gfx_open_session(gfx_idxs) { return _gfx_pool.SessionOpen(gfx_idxs); }
 
 /* mesh_count is nesessary for calculating vertex buffer attribute offset for Text Meshes */
 export function Gfx_generate_context(sid, sceneidx, mesh_count, FLAGS, gfxidx) {
@@ -333,7 +340,7 @@ export function Gfx_remove_geometry(gfx, num_faces){
    const ret = Gfx_remove_geometry_from_buffers(gfx, num_faces);
    if(ret.empty){ // If the vertex buffer is empty, then set it as not active, so it can be used by other gfx demands.
       _gfx_pool.SetGfxActiveFromPool(gfx.prog.idx, gfx.vb.idx, false);
-      Gfx_set_vb_show(gfx.prog.idx, gfx.vb.idx, false);
+      Gfx_set_vb_show(gfx.prog.idx, gfx.vb.idx, gfx.progs_groupidx, false);
    }
    return ret;
 }
@@ -344,9 +351,9 @@ export function Gfx_deactivate_recursive(mesh) { _gfx_pool.DeactivateGfxRecursiv
 export function Gfx_deactivate_no_listeners_touch(mesh) { _gfx_pool.DeactivateRecursive_no_listeners_touch(mesh); }
 export function Gfx_deactivate(gfx) { _gfx_pool.DeactivateGfx(gfx); }
 
-export function Gfx_is_private_vb(progidx, vbidx){
+export function Gfx_is_private_vb(progs_groupidx, progidx, vbidx){
    
-   const gfx = _gfx_pool.FindGfx(progidx, vbidx);
+   const gfx = _gfx_pool.FindGfx(progs_groupidx, progidx, vbidx);
    if(gfx.isPrivate) return true;
    return false;
 }

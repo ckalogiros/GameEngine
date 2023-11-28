@@ -1,5 +1,5 @@
 "use strict";
-import { Scenes_create_scene, Scenes_debug_info_create, Scenes_store_gfx_to_buffer } from '../Engine/Scenes.js'
+import { Scenes_create_scene } from '../Engine/Scenes.js'
 import { Renderqueue_get, Renderqueue_init } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { WebGlRenderer } from '../Engine/Renderers/WebGlRenderer.js';
 import { CameraOrthographic } from '../Engine/Renderers/Renderer/Camera.js';
@@ -9,8 +9,7 @@ import { Widget_Label_Dynamic_Text, Widget_Label, Widget_Label_Text_Mesh_Menu_Op
 import { Widget_Button, Widget_Switch } from '../Engine/Drawables/Meshes/Widgets/WidgetButton.js';
 import { Widget_Text, Widget_Dynamic_Text_Mesh } from '../Engine/Drawables/Meshes/Widgets/WidgetText.js';
 import { CubeGeometry } from '../Engine/Drawables/Geometry/Geometry3DCube.js';
-// import { PerformanceTimerCreate, PerformanceTimerInit, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _Tm1GetFps, _Tm1GetMilisec, _Tm1GetNanosec, _Tm2GetFps, _Tm2GetMilisec, _Tm3GetFps, _Tm3GetMilisec, _Tm5GetFps, _Tm5GetMilisec, _Tm6GetFps, _Tm6GetMilisec } from '../Engine/Timers/PerformanceTimers.js';
-import { PerformanceTimerCreate, PerformanceTimerInit, PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec } from '../Engine/Timers/PerformanceTimers.js';
+import { PerformanceTimerInit } from '../Engine/Timers/PerformanceTimers.js';
 import { TimeIntervalsCreate, TimeIntervalsInit } from '../Engine/Timers/TimeIntervals.js';
 import { MESH_ENABLE, Mesh } from '../Engine/Drawables/Meshes/Base/Mesh.js';
 import { Widget_Slider } from '../Engine/Drawables/Meshes/Widgets/WidgetSlider.js';
@@ -20,7 +19,6 @@ import { FloorArr3 } from '../Helpers/Math/MathOperations.js';
 import { MAT_ENABLE, Material, Material_TEMP_fromBufferFor3D } from '../Engine/Drawables/Material/Base/Material.js';
 import { Gfx_end_session } from '../Engine/Interfaces/Gfx/GfxContext.js';
 import { Section } from '../Engine/Drawables/Meshes/Section.js';
-import { Initializer_popup_initialization } from '../Engine/Drawables/Meshes/Widgets/WidgetPopup.js';
 
 
 /** Performance Timers */
@@ -28,20 +26,15 @@ import { _pt_fps, _pt2, _pt3, _pt4, _pt5, _pt6 } from '../Engine/Timers/Performa
 
 import { DEBUG_PRINT_KEYS } from '../Engine/Controls/Input/Keys.js';
 import { GetShaderTypeId } from '../Graphics/Z_Debug/GfxDebug.js';
-import { MouseGetArea, MouseGetPos, MouseGetPosDif } from '../Engine/Controls/Input/Mouse.js';
 
 // import { Buffer } from 'buffer';
-// import { Buffer } from 'buffer';
-import { Debug_get_event_listeners, Listeners_debug_info_create, Listeners_get_event } from '../Engine/Events/EventListeners.js';
 import { Drop_down_set_root, Widget_Dropdown } from '../Engine/Drawables/Meshes/Widgets/Menu/Widget_Dropdown.js';
-import { Gl_progs_get } from '../Graphics/GlProgram.js';
+import { Gl_progs_get_group } from '../Graphics/GlProgram.js';
 import { Input_create_user_input_listeners } from '../Engine/Controls/Input/Input.js';
-import { Debug_info_create_ui_performance_timers, Debug_info_ui_performance } from '../Engine/Drawables/DebugInfo/DebugInfoUi.js';
+import { Debug_info_ui_performance } from '../Engine/Drawables/DebugInfo/DebugInfoUi.js';
 import { Destroy_mesh } from '../Engine/Global/Functions.js';
 import { Widget_Scroller } from '../Engine/Drawables/Meshes/Widgets/WidgetScroller.js';
 import { GetRandomColor, GetSequencedColor } from '../Helpers/Helpers.js';
-import { Gfx_get_progams_count } from '../Engine/Interfaces/Gfx/GfxInterfaceFunctions.js';
-import { Debug_ui_initialize_gfx } from '../Engine/Drawables/DebugInfo/DebugUiGfx.js';
 
 
 // var osu = require('node-os-utils')
@@ -81,8 +74,6 @@ export function AppInit() {
     Input_create_user_input_listeners();
     Renderqueue_init();
 
-    // Debug_ui_initialize_gfx();
-
     // Initializer_popup_initialization();
 
 
@@ -96,6 +87,11 @@ export function AppInit() {
 
 
     // const label = CreateLabel(scene);
+    // CreateLabel(scene);
+    // CreateLabel(scene);
+    // CreateLabel(scene);
+    // CreateLabel(scene);
+    // CreateLabel_in_debug_gfx(scene)
     // DestroyMeshTest(scene, label)
 
     // const button = CreateButton(scene); 
@@ -103,8 +99,8 @@ export function AppInit() {
 
     // const menu = CreateMenu(scene)
 
-    CreateDropDownWithDropdownsInside(scene)
-    CreateDropDownWidgetWithWidgetsInside(scene)
+    // CreateDropDownWithDropdownsInside(scene)
+    // CreateDropDownWidgetWithWidgetsInside(scene)
 
     // TestDropdownsTextRendering(scene, [160, 200, 0], 0);
     // TestDropdownsTextRendering(scene, [300, 200, 0], 1);
@@ -140,15 +136,15 @@ export function AppInit() {
         // drop_down.ConstructListeners();
     }
 
-    CreateSectionSectioned(scene)
+    // CreateSectionSectioned(scene)
     
     // CreateScroller(scene);
 
     // Help(scene)
 
 
-    const meshinfo_mesh = MeshInfo(scene)
-    TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: meshinfo_mesh });
+    // const meshinfo_mesh = MeshInfo(scene)
+    // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: meshinfo_mesh });
 
     // const gfxinfo = GfxInfo(scene)
     // TimeIntervalsCreate(100, 'Gfx info tip', TIME_INTERVAL_REPEAT_ALWAYS, GfxInfoUpdate, { gfxinfo: gfxinfo });
@@ -157,18 +153,18 @@ export function AppInit() {
 
 
     // If camera is static, update projection matrix uniform only once
-    camera.UpdateProjectionUniform(renderer.gl);
+    camera.UpdateProjectionUniformAll(renderer.gl);
     scene.Render();
 
-    // const progs = Gl_progs_get();
+    // const progs = Gl_progs_get_group();
     // console.log(progs)
 
 
-    TimeIntervalsCreate(500, 'RenderQueue set program 1 priority', TIME_INTERVAL_REPEAT_ALWAYS, function(){
+    // TimeIntervalsCreate(500, 'RenderQueue set program 1 priority', TIME_INTERVAL_REPEAT_ALWAYS, function(){
 
-        Renderqueue_get().SetPriorityProgram('last', 1);
-        Renderqueue_get().UpdateActiveQueue();
-    });
+    //     Renderqueue_get().SetPriorityProgram('last', 1);
+    //     Renderqueue_get().UpdateActiveQueue();
+    // });
 
     { // PERFORMANCE OBJECTS
         var performance = window.performance || window.mozPerformance || window.msPerformance || window.webkitPerformance || {};
@@ -212,14 +208,43 @@ export function AppRender() {
 
 /**************************************************************************************************************************************/
 // Test Functions
-
+let labelCount = 1;
 function CreateLabel(scene) {
 
-    const label = new Widget_Label('Label', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [40, 100, 0], 5, GREY1, WHITE, [14, 4], .5);
+    const pos = [30, 100+(labelCount*35), 0];
+    const label = new Widget_Label('Label DEFAULT GFX', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, pos, 5, GREY1, WHITE, [14, 4], .5);
     label.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
     label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
     label.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
     label.ConstructListeners();
+
+
+    scene.AddWidget(label)
+    // label.text_mesh.SetColorRGB(RED);
+    // label.text_mesh.UpdateText('RED');
+
+    label.Render()
+    // label.Align(ALIGN.BOTTOM | ALIGN.LEFT, [0, 0]);
+    // label.Align(ALIGN.BOTTOM | ALIGN.RIGHT, [0, 0]);
+    // label.Align(ALIGN.TOP | ALIGN.LEFT, [0, 0]);
+    // label.Align(ALIGN.TOP | ALIGN.RIGHT, [0, 0]);
+
+    Gfx_end_session(true, true);
+
+    console.log(label)
+
+    labelCount++;
+    return label;
+}
+function CreateLabel_in_debug_gfx(scene) {
+
+    const label = new Widget_Label('Label DEBUG GFX', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [160, 100, 0], 5, GREY1, WHITE, [14, 4], .5);
+    label.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    label.StateEnable(MESH_STATE.IS_HOVER_COLORABLE);
+    label.ConstructListeners();
+
+    label.RenderToDebugGfx(); // This is all it's needed to initiate the curent mesh to use sdebug ui gfx buffers
 
 
     scene.AddWidget(label)
@@ -295,14 +320,19 @@ function CreateSwitch(scene) {
 }
 
 function CreatDynamicText(scene) {
+    const fontsize = 4;
+    const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000', [100, 300, 0], fontsize, BLUE_10_120_220, PINK_240_60_160);
+    dt.CreateNewText('Text 2', fontsize, YELLOW_240_220_10, [2,2]);
 
-    const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000', [100, 300, 0], 4, BLUE_10_120_220, PINK_240_60_160);
+    dt.Align_pre(dt, ALIGN.VERTICAL);
+
+    dt.RenderToDebugGfx();
     scene.AddWidget(dt)
 }
 
 function CreatDynamicTextSectioned(scene) {
 
-    const section = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 0], [0, 0], TRANSPARENCY(GREY1, .9))
+    const section = new Section(SECTION.VERTICAL, [10, 10], [350, 600, 0], [0, 0], TRANSPARENCY(GREY1, .9))
     section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick)
     section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
 
@@ -369,7 +399,7 @@ function CreateDropDownWithDropdownsInside(scene) {
         }
     }
 
-    scene.AddWidget(drop_down);
+    scene.AddWidget(drop_down, GFX.PRIVATE);
     drop_down.Calc();
     drop_down.ConstructListeners();
 
@@ -882,15 +912,17 @@ function CreateScroller(scene) {
 
     const section = new Section(SECTION.VERTICAL, [10, 10], [280, 650, 0], [0, 0], TRANSPARENCY(GREY1, .6));
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 163; i++) {
 
         const s = new Section(SECTION.VERTICAL, [6, 3], [280, 650, 0], [0, 0], TRANSPARENCY(GREEN_140_240_10, .6));
-        const label = new Widget_Label('Label', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3])
+        const label = new Widget_Label(`Label ${i+1}`, ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3])
         s.AddItem(label);
         section.AddItem(s);
     }
 
+    // section.geom.pos[1] -= section.geom.dim[1];
     section.Calc();
+    section.geom.pos[1] += 3500;
 
     const scroller = new Widget_Scroller(section);
     scroller.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
@@ -972,12 +1004,14 @@ function MeshInfo(scene) {
 
     const fontsize = 4.3;
 
-    const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 000000000000', 'id:000', [10, 15, 0], fontsize, GREEN_140_240_10, YELLOW_240_220_10, .4);
+    const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 000000000000', 'id:000', [420, 15, 0], fontsize, GREEN_140_240_10, YELLOW_240_220_10, .4);
     infomesh.CreateNewText('pos: 00000,00000,0', fontsize, BLUE_10_120_220, [fontsize * 3, 10], .9);
     infomesh.CreateNewText('dim: 00000,00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
-    infomesh.CreateNewText('gfx: prog:0, vb:0, start:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
-    infomesh.CreateNewText('gfx: prog:0, vb:0, start:00000, count:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    infomesh.CreateNewText('gfx: group: 0, prog:0, vb:0, start:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    infomesh.CreateNewText('text gfx: group: 0, prog:0, vb:0, start:00000, count:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.SetName('Info Mesh 2');
+
+    infomesh.RenderToDebugGfx();
 
     infomesh.Align_pre(infomesh, ALIGN.VERTICAL)
     scene.AddWidget(infomesh, GFX.PRIVATE);
@@ -996,7 +1030,7 @@ function MeshInfoUpdate(params) {
 
         textMesh.UpdateText(infoMesh.name);
 
-        const gfx = (infoMesh.gfx !== null) ? `gfx: prog:${infoMesh.gfx.prog.idx}, vb:${infoMesh.gfx.vb.idx}, vb:${infoMesh.gfx.vb.start}` : 'null'
+        const gfx = (infoMesh.gfx !== null) ? `gfx: group:${infoMesh.gfx.progs_groupidx}, prog:${infoMesh.gfx.prog.idx}, vb:${infoMesh.gfx.vb.idx}, vb:${infoMesh.gfx.vb.start}` : 'null'
 
         let msgs = [
             `id:${infoMesh.id}`,
@@ -1004,18 +1038,16 @@ function MeshInfoUpdate(params) {
             `dim: ${infoMesh.geom.dim}`, gfx,
         ];
 
+        // Create info for any text gfx, if exists
         const child = (infoMesh.children.boundary && infoMesh.children.buffer[0]) ? infoMesh.children.buffer[0] : null; 
         if (child) {
             if (child.type & MESH_TYPES_DBG.FONT_MATERIAL) {
                 
-                // /**DEBUG*/ if(!child.text_mesh)
-                //             console.log('ERROR: No text_mesh in:', child.name)
-
                 const text_num_faces = (child.text_mesh) ? child.text_mesh.geom.num_faces : child.geom.num_faces; // If child is of type label and has 'text_mesh' else is plain text.
-                msgs.push(`gfx: prog:${child.gfx.prog.idx}, vb:${child.gfx.vb.idx}, start:${child.gfx.vb.start}, faces:${text_num_faces}`);
+                msgs.push(`gfx: group:${child.gfx.progs_groupidx}, prog:${child.gfx.prog.idx}, vb:${child.gfx.vb.idx}, start:${child.gfx.vb.start}, faces:${text_num_faces}`);
             }
             else if (child.text_mesh) {
-                msgs.push(`gfx: prog:${child.text_mesh.gfx.prog.idx}, vb:${child.text_mesh.gfx.vb.idx}, start:${child.text_mesh.gfx.vb.start}, faces:${child.text_mesh.geom.num_faces}`);
+                msgs.push(`gfx: group:${child.gfx.progs_groupidx}, prog:${child.text_mesh.gfx.prog.idx}, vb:${child.text_mesh.gfx.vb.idx}, start:${child.text_mesh.gfx.vb.start}, faces:${child.text_mesh.geom.num_faces}`);
             }
 
         }
@@ -1055,49 +1087,19 @@ function GfxInfo(scene) {
 
     return params;
 }
-// function GfxInfo(scene) {
-
-//     const s = new Section(SECTION.VERTICAL, [20, 20], [350, 100, 0], [0, 0], ORANGE_240_130_10, 'GfxInfoSection');
-//     s.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-//     s.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
-
-//     // const infogfx = new Widget_Text('Gfx Info Mesh ', [300, 15, 0], fontsize, GREEN_140_240_10, .4);
-//     const infogfx = new Widget_Dropdown(`GFX INFO`, [OUT_OF_VIEW, OUT_OF_VIEW, 0], [60, 20], GREY1, BLUE_10_120_220, WHITE, [5, 5]);
-//     infogfx.CreateHoverEvent();
-//     infogfx.CreateClickEvent();
-
-//     Drop_down_set_root(infogfx, infogfx)
-
-//     s.AddItem(infogfx)
-//     // scene.AddWidget(s, GFX.PRIVATE);
-//     s.Calc();
-//     s.GenGfxCtx(GFX.PRIVATE);
-//     // s.Render();
-//     Gfx_end_session(true, true);
-//     s.ConstructListeners();
-//     Scenes_store_gfx_to_buffer(scene.sceneidx, s);
-//     scene.StoreRootMesh(s)
-
-//     const params = {
-//         infogfx_section: s,
-//         gfxbuffer: [],
-//     }
-
-//     return params;
-// }
 
 function GfxInfoUpdate(params) {
 
     const root_dp = params.params.gfxinfo.infogfx_root;
     const gfxbuffer = params.params.gfxinfo.gfxbuffer;
-    const progs = Gl_progs_get();
+    const progs = Gl_progs_get_group(gfxbuffer.progs_groupidx);
 
     let any_vb_found = false;
 
-    for (let i = 0; i < progs.length; i++) {
-        for (let j = 0; j < progs[i].vertexBuffer.length; j++) {
+    for (let i = 0; i < progs.count; i++) {
+        for (let j = 0; j < progs.buffer[i].vertexBuffer.length; j++) {
 
-            const vb = progs[i].vertexBuffer[j];
+            const vb = progs.buffer[i].vertexBuffer[j];
 
             const gfxid = `${i}${j}`
             if (GfxInfoFindNewMeshEntries(gfxbuffer, gfxid)) {
@@ -1310,138 +1312,114 @@ function Create3DCubes(scene) {
     }
 }
 
+
+
 /**
+ ​​​
+0: "Widget_Scroller id:88"
 
------------------- Mesh_print_all_mesh_listeners ------------------ Keys.js:40:18
-id:2 name:Lebel-text [+ Generic Ui Debug Info] id:2 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
-id:6 name:InfoUi-Timers label id:6 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:8 name:InfoUi-Timers switch id:8 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
-id:4 name:InfoUi-Timers section id:4 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:11 name:InfoUi-Mouse label id:11 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:13 name:InfoUi-Mouse switch id:13 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
-id:9 name:InfoUi-Mouse section id:9 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:16 name:InfoUi-Gfx label id:16 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:18 name:InfoUi-Gfx switch id:18 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
-id:14 name:InfoUi-Gfx section id:14 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:21 name:InfoUi-Mesh label id:21 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:23 name:InfoUi-Mesh switch id:23 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
-id:19 name:InfoUi-Mesh section id:19 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:3 name:SECTION_MESH id: 3 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:0 name:InfoUi Root-DP id:0 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
-id:27 name:Lebel-text [+ InfoUi Gfx DP] id:27 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
-id:35 name:Lebel-text [+ prog:0 | Vb count:3] id:35 boundary:2 
-Array [ {…}, {…} ]
-Mesh.js:882:25
-id:33 name:Program DP:0 id:33 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:57 name:Lebel-text [+ prog:1 | Vb count:2] id:57 boundary:2 
-Array [ {…}, {…} ]
-Mesh.js:882:25
-id:55 name:Program DP:1 id:55 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:31 name:Lebel-text [+ self-gfx] id:31 boundary:2 
-Array [ {…}, {…} ]
-Mesh.js:882:25
-id:29 name:self-gfx id:29 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:28 name:SECTION_MESH id: 28 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:25 name:InfoUi Gfx DP id:25 boundary:2 
-Array [ {…}, {…} ]
-Mesh.js:882:25
-id:24 name:InfoUi Gfx section 100 id:24 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
------------------- Mesh_print_all_mesh_listeners ------------------ Keys.js:40:18
-id:2 name:Lebel-text [+ Generic Ui Debug Info] id:2 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
-id:6 name:InfoUi-Timers label id:6 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:8 name:InfoUi-Timers switch id:8 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
-id:4 name:InfoUi-Timers section id:4 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:11 name:InfoUi-Mouse label id:11 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:13 name:InfoUi-Mouse switch id:13 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
-id:9 name:InfoUi-Mouse section id:9 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:16 name:InfoUi-Gfx label id:16 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:18 name:InfoUi-Gfx switch id:18 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
-id:14 name:InfoUi-Gfx section id:14 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:21 name:InfoUi-Mesh label id:21 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:23 name:InfoUi-Mesh switch id:23 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
-id:19 name:InfoUi-Mesh section id:19 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:3 name:SECTION_MESH id: 3 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:0 name:InfoUi Root-DP id:0 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
-id:27 name:Lebel-text [+ InfoUi Gfx DP] id:27 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
-id:25 name:InfoUi Gfx DP id:25 boundary:0 
-Array [ null, null ]
-Mesh.js:882:25
-id:24 name:InfoUi Gfx section 100 id:24 boundary:2 
-Array [ null, {…} ]
-Mesh.js:882:25
+1: "DP-InfoUi Mesh DP id:24"
 
+2: "BTN-DP-InfoUi Mesh DP id:24 btn_id:27 id:27"
+
+3: "MENU-DP-InfoUi Mesh DP id:24 id:25"
+
+4: "DP- DP-Generic Ui Debug Info id:0 id:28"
+
+5: "BTN-DP- DP-Generic Ui Debug Info id:0 id:28 btn_id:31 id:31"
+
+6: "MENU-DP- DP-Generic Ui Debug Info id:0 id:28 id:29"
+
+7: "DP- BTN-DP-Generic Ui Debug Info id:0 btn_id:3 id:3 id:32"
+
+8: "BTN-DP- BTN-DP-Generic Ui Debug Info id:0 btn_id:3 id:3 id:32 btn_id:35 id:35"
+
+9: "DP- MENU-DP-Generic Ui Debug Info id:0 id:1 id:36"
+
+10: "BTN-DP- MENU-DP-Generic Ui Debug Info id:0 id:1 id:36 btn_id:39 id:39"
+
+11: "MENU-DP- BTN-DP-Generic Ui Debug Info id:0 btn_id:3 id:3 id:32 id:33"
+
+12: "MENU-DP- MENU-DP-Generic Ui Debug Info id:0 id:1 id:36 id:37"
+
+13: "DP- InfoUi-Timers section id:4 id:40"
+
+14: "BTN-DP- InfoUi-Timers section id:4 id:40 btn_id:43 id:43"
+
+15: "DP- InfoUi-Mouse section id:9 id:52"
+
+16: "BTN-DP- InfoUi-Mouse section id:9 id:52 btn_id:55 id:55"
+
+17: "DP- InfoUi-Gfx section id:14 id:64"
+
+18: "BTN-DP- InfoUi-Gfx section id:14 id:64 btn_id:67 id:67"
+
+19: "DP- InfoUi-Mesh section id:19 id:76"
+
+20: "BTN-DP- InfoUi-Mesh section id:19 id:76 btn_id:79 id:79"
+
+21: "MENU-DP- InfoUi-Timers section id:4 id:40 id:41"
+
+22: "DP- InfoUi-Timers label id:6 id:44"
+
+23: "BTN-DP- InfoUi-Timers label id:6 id:44 btn_id:47 id:47"
+
+24: "DP- InfoUi-Timers switch id:8 id:48"
+
+25: "BTN-DP- InfoUi-Timers switch id:8 id:48 btn_id:51 id:51"
+
+26: "MENU-DP- InfoUi-Mouse section id:9 id:52 id:53"
+
+27: "DP- InfoUi-Mouse label id:11 id:56"
+
+28: "BTN-DP- InfoUi-Mouse label id:11 id:56 btn_id:59 id:59"
+
+29: "DP- InfoUi-Mouse switch id:13 id:60"
+
+30: "BTN-DP- InfoUi-Mouse switch id:13 id:60 btn_id:63 id:63"
+
+31: "MENU-DP- InfoUi-Mouse switch id:13 id:60 id:61"
+
+32: "MENU-DP- InfoUi-Gfx section id:14 id:64 id:65"
+
+33: "DP- InfoUi-Gfx label id:16 id:68"
+
+34: "BTN-DP- InfoUi-Gfx label id:16 id:68 btn_id:71 id:71"
+
+35: "DP- InfoUi-Gfx switch id:18 id:72"
+
+36: "BTN-DP- InfoUi-Gfx switch id:18 id:72 btn_id:75 id:75"
+
+37: "MENU-DP- InfoUi-Mesh section id:19 id:76 id:77"
+
+38: "DP- InfoUi-Mesh label id:21 id:80"
+
+39: "BTN-DP- InfoUi-Mesh label id:21 id:80 btn_id:83 id:83"
+
+40: "DP- InfoUi-Mesh switch id:23 id:84"
+
+41: "BTN-DP- InfoUi-Mesh switch id:23 id:84 btn_id:87 id:87"
+
+42: "Widget_Scroller id:267"
+
+43: "DP-InfoUi Mesh DP id:203"
+
+44: "BTN-DP-InfoUi Mesh DP id:203 btn_id:206 id:206"
+
+45: "MENU-DP-InfoUi Mesh DP id:203 id:204"
+
+46: "DP- DP-Generic Ui Debug Info id:0 id:207"
+
+47: "BTN-DP- DP-Generic Ui Debug Info id:0 id:207 btn_id:210 id:210"
+
+48: "DP-InfoUi Gfx DP id:330"
+
+49: "BTN-DP-InfoUi Gfx DP id:330 btn_id:333 id:333"
+
+50: "Widget_Scroller id:454"
+
+51: "DP-InfoUi Mesh DP id:390"
+
+52: "BTN-DP-InfoUi Mesh DP id:390 btn_id:393 id:393"
  */
+

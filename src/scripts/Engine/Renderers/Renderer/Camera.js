@@ -2,6 +2,7 @@ import { GlProgramUpdateUniformProjectionMatrix } from '../../../Graphics/GlProg
 import { MouseGetPosDif, MouseGetWheel } from '../../Controls/Input/Mouse.js';
 import { TimerGetGlobalTimer } from '../../Timers/Timers.js';
 import { Matrix4 } from '../../../Helpers/THREE_math/Matrix4.js';
+import { Gfx_get_progams_count } from '../../Interfaces/Gfx/GfxInterfaceFunctions.js';
 
 /**
  * TODO:
@@ -31,7 +32,7 @@ export const CAMERA_CONTROLS = {
 export class Camera extends Matrix4 {
 
 	isSet; // To debug if camera has been created.
-	gfx_buf; // Store all gl programs that the camera apllies to.
+	gfx_buf; // Store all gl programs that the camera aplies to.
 	controller;
 
 	constructor() {
@@ -59,15 +60,36 @@ export class Camera extends Matrix4 {
 			this.Rotate();
 		}
 
-		this.UpdateProjectionUniform(gl);
+		this.UpdateProjectionUniformAll(gl);
 	}
 
-	UpdateProjectionUniform(gl){
+	UpdateProjectionUniformAll(gl){
+
+		/** For now all gfx programs use the same camera projection uniform. So we update all shader program's uniforms 
+		 * TODO: What if there are many cameras for different programs??? Should the camera know about the programs indexes that it renders???
+		 */
 		// Update proj matrix for all gl programs
-		const len = this.gfx_buf.length;
-		for(let i=0; i<len; i++){
-			GlProgramUpdateUniformProjectionMatrix(gl, this.gfx_buf[i], this.elements);
+		const default_shader_programs_index = PROGRAMS_GROUPS.DEFAULT.IDX;
+		const debug_ui_shader_programs_index = PROGRAMS_GROUPS.DEBUG.IDX;
+		if(default_shader_programs_index !== INT_NULL){
+			const count = Gfx_get_progams_count(default_shader_programs_index);
+			// TODO!!!: IMPLEMENT CORECTLY. We need to pass the index of the gl_programs index
+			for(let i=0; i<count; i++){
+				GlProgramUpdateUniformProjectionMatrix(gl, i, this.elements, default_shader_programs_index);
+			}
 		}
+		if(debug_ui_shader_programs_index !== INT_NULL){
+			const count = Gfx_get_progams_count(debug_ui_shader_programs_index);
+			// TODO!!!: IMPLEMENT CORECTLY. We need to pass the index of the gl_programs index
+			for(let i=0; i<count; i++){
+				GlProgramUpdateUniformProjectionMatrix(gl, i, this.elements, debug_ui_shader_programs_index);
+			}
+		}
+	}
+
+	UpdateProjectionUniform(gl, progidx, progs_group){
+
+		GlProgramUpdateUniformProjectionMatrix(gl, progidx, this.elements, progs_group);
 	}
 
 	/*************************************************************************************************************/

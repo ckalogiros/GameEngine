@@ -1,9 +1,7 @@
 "use strict";
 
-var u_projection = null;
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-* Graphics Constants */
+/*******************************************************************************************************************************************************/
+// Graphics Globals
 
 
 const gfxCtx = {
@@ -21,14 +19,40 @@ const GL = {
     BOUND_TEXTURE_ID: INT_NULL, // The current bound texture 
 };
 
+/** Grouping shader programs. Example: group for debug user interface meshes, default group meshes */
+const PROGRAMS_GROUPS = {
+
+    DEBUG: {
+        IDX: INT_NULL, // The index of the group of programs dedicated for displaing debug info. 
+        MASK: 0x1,
+    },
+
+    DEFAULT: {
+        IDX: INT_NULL, // The default group stores shader programs for 
+        MASK: 0x2,
+    },
+
+    GetIdxByMask(mask) {
+        if (mask & this.DEFAULT.MASK) return this.DEFAULT.IDX;
+        else if (mask & this.DEBUG.MASK) return this.DEBUG.IDX;
+    },
+
+    /**DEBUG */ GetName(idx){
+        if(this.DEBUG.IDX === idx) return 'DEBUG progs group'
+        else if(this.DEFAULT.IDX === idx) return 'DEFAULT progs group'
+        else return `UNKOWN progs group index. index:${idx}`
+    },
+}
+
+
 
 _cnt = 0x1;
 const GFX_CTX_FLAGS = {
 
-   PRIVATE: _cnt<<=0x1,
-   ACTIVE: _cnt<<=0x1,
-   INACTIVE: _cnt<<=0x1,
-} 
+    PRIVATE: _cnt <<= 0x1,
+    ACTIVE: _cnt <<= 0x1,
+    INACTIVE: _cnt <<= 0x1,
+}
 
 
 /**
@@ -39,26 +63,26 @@ const GFX_CTX_FLAGS = {
 
 let BIT1 = 0x1, BIT2 = 0x1, BIT3 = 0x1, BIT4 = 0x1, BIT5 = 0x1;
 const SID = {
-    
+
     SHAD: {
         INDEXED: BIT1 <<= 1,
         TEXT_SDF: BIT1 <<= 1,
     },
 
     ATTR: {
-        COL4:       BIT2 <<= 1,
-        POS2:       BIT2 <<= 1,
-        SCALE2:     BIT2 <<= 1,
-        TEX2:       BIT2 <<= 1,
+        COL4: BIT2 <<= 1,
+        POS2: BIT2 <<= 1,
+        SCALE2: BIT2 <<= 1,
+        TEX2: BIT2 <<= 1,
         WPOS_TIME4: BIT2 <<= 1,
-        TIME:       BIT2 <<= 1,
-        SDF:        BIT2 <<= 1,
-        PARAMS1:    BIT2 <<= 1,
-        BORDER:     BIT2 <<= 1,
-        R_CORNERS:  BIT2 <<= 1,
-        FEATHER:    BIT2 <<= 1,
-        POS3:       BIT2 <<= 1,
-        SCALE3:     BIT2 <<= 1,
+        TIME: BIT2 <<= 1,
+        SDF: BIT2 <<= 1,
+        PARAMS1: BIT2 <<= 1,
+        BORDER: BIT2 <<= 1,
+        R_CORNERS: BIT2 <<= 1,
+        FEATHER: BIT2 <<= 1,
+        POS3: BIT2 <<= 1,
+        SCALE3: BIT2 <<= 1,
         COL4_PER_VERTEX: BIT2 <<= 1,
         EMPTY: BIT2 <<= 1,
     },
@@ -87,7 +111,7 @@ const SID = {
         FS_VOLUMETRIC_EXPLOSION: BIT3 <<= 1,
         FS_SHADOW: BIT3 <<= 1,
     },
-    
+
     PASS: {
         COL4: BIT4 <<= 1,
         POS2: BIT4 <<= 1,
@@ -100,30 +124,34 @@ const SID = {
         SDF2: BIT4 <<= 1,
         PARAMS1: BIT4 <<= 1,
     },
-    
-    DEBUG_UI:{
-        RECT_SHADER: BIT5 <<= 1,
-        TEXT_SHADER: BIT5 <<= 1,
-    },
 
-    CheckSidMatch(sid1, sid2){
+    DEBUG: false,
+    // DEBUG:{
+    //     RECT_SHADER: BIT5 <<= 1,
+    //     TEXT_SHADER: BIT5 <<= 1,
+    // },
 
-        if( 
-            sid1.shad === sid2.shad && 
-            sid1.attr === sid2.attr && 
-            sid1.unif === sid2.unif && 
-            sid1.pass === sid2.pass 
+    CheckSidMatch(sid1, sid2) {
+
+        if (
+            sid1.shad === sid2.shad &&
+            sid1.attr === sid2.attr &&
+            sid1.unif === sid2.unif &&
+            sid1.pass === sid2.pass &&
+            sid1.progs_group === sid2.progs_group
         )
             return true;
         return false;
     },
 
-    Copy(sid){
-        this.shad = sid.shad; 
-        this.attr = sid.attr; 
-        this.unif = sid.unif; 
-        this.pass = sid.pass;   
-    },
+    // Copy(sid) {
+    //     this.shad = sid.shad;
+    //     this.attr = sid.attr;
+    //     this.unif = sid.unif;
+    //     this.pass = sid.pass;
+    //     this.pass = sid.pass;
+    //     this.progs_group = this.progs_group
+    // },
 };
 
 
@@ -159,8 +187,8 @@ const SID_DEFAULT_TEXTURE_SDF = {
 /**
  * GL program's indexes
  */
-const PROGRAM = {
-    explosions: INT_NULL,
+const PROGRAMS = {
+    DEBUG_PROGRAM: 0x1,
 };
 
 
@@ -206,14 +234,14 @@ _cnt = 0x1;
 const GFX = {
 
     // Let the application decide. If a vertex buffer with the same ...
-    ANY: _cnt<<=0x1, // SID exists, it will use it, else it will create a new one.
-    NEW: _cnt<<=0x1, // Create a new vertexBuffer.
-    SPECIFIC: _cnt<<=0x1, // Use specific index of a vertex buffer.
+    ANY: _cnt <<= 0x1, // SID exists, it will use it, else it will create a new one.
+    NEW: _cnt <<= 0x1, // Create a new vertexBuffer.
+    SPECIFIC: _cnt <<= 0x1, // Use specific index of a vertex buffer.
     // Use private vertex buffer. If a private and inactive buffer exists it will use that, ...
-    PRIVATE: _cnt<<=0x1, // ... else it will create a new buffer and render it as private
-    
-    STATIC: _cnt<<=0x1, // Choose a buffer that is going to be updated rarely
-    DYNAMIC: _cnt<<=0x1, // Choose a buffer that is going to be updated every frame
+    PRIVATE: _cnt <<= 0x1, // ... else it will create a new buffer and render it as private
+
+    STATIC: _cnt <<= 0x1, // Choose a buffer that is going to be updated rarely
+    DYNAMIC: _cnt <<= 0x1, // Choose a buffer that is going to be updated every frame
 };
 
 const MAX_RESERVED_BUFFERS = 10;
@@ -346,27 +374,27 @@ const TRIG = {
     COS: 0,
     SIN: 0,
 
-}; 
+};
 
 /** Rotation Matrices */
-class ROTATION3D{
-    RX = [ 
-        1,   0,              0,
-        0, TRIG.COS, -TRIG.SIN, 
-        0, TRIG.SIN,  TRIG.COS, 
+class ROTATION3D {
+    RX = [
+        1, 0, 0,
+        0, TRIG.COS, -TRIG.SIN,
+        0, TRIG.SIN, TRIG.COS,
     ];
-    RY = [ 
-         TRIG.COS, 0, TRIG.SIN,
-                0, 1,        0, 
-        -TRIG.SIN, 0, TRIG.COS, 
+    RY = [
+        TRIG.COS, 0, TRIG.SIN,
+        0, 1, 0,
+        -TRIG.SIN, 0, TRIG.COS,
     ];
-    RZ = [ 
-        TRIG.COS, -TRIG.SIN, 0, 
-        TRIG.SIN,  TRIG.COS, 0,
-               0,         0, 1,
+    RZ = [
+        TRIG.COS, -TRIG.SIN, 0,
+        TRIG.SIN, TRIG.COS, 0,
+        0, 0, 1,
     ];
 
-    Set(cos, sin){
+    Set(cos, sin) {
 
         this.RX[4] = cos;
         this.RX[5] = -sin;
@@ -384,19 +412,19 @@ class ROTATION3D{
         this.RZ[4] = cos;
     }
 
-    SetRX(cos, sin){
+    SetRX(cos, sin) {
         this.RX[4] = cos;
         this.RX[5] = -sin;
         this.RX[7] = sin;
         this.RX[8] = cos;
     }
-    SetRY(cos, sin){
+    SetRY(cos, sin) {
         this.RY[0] = cos;
         this.RY[2] = -sin;
         this.RY[6] = sin;
         this.RY[8] = cos;
     }
-    SetRZ(cos, sin){
+    SetRZ(cos, sin) {
         this.RZ[0] = cos;
         this.RZ[1] = -sin;
         this.RZ[3] = sin;
@@ -406,19 +434,19 @@ class ROTATION3D{
 
 const ROT3D = new ROTATION3D();
 
-const RX3D = [ 
-    1,   0,              0,
-    0, TRIG.COS, -TRIG.SIN, 
-    0, TRIG.SIN,  TRIG.COS, 
+const RX3D = [
+    1, 0, 0,
+    0, TRIG.COS, -TRIG.SIN,
+    0, TRIG.SIN, TRIG.COS,
 ];
-const RY3D = [ 
-     TRIG.COS, 0, TRIG.SIN,
-            0, 1,        0, 
-    -TRIG.SIN, 0, TRIG.COS, 
+const RY3D = [
+    TRIG.COS, 0, TRIG.SIN,
+    0, 1, 0,
+    -TRIG.SIN, 0, TRIG.COS,
 ];
-const RZ3D = [ 
-    TRIG.COS, -TRIG.SIN, 0, 
-    TRIG.SIN,  TRIG.COS, 0,
-           0,         0, 1,
+const RZ3D = [
+    TRIG.COS, -TRIG.SIN, 0,
+    TRIG.SIN, TRIG.COS, 0,
+    0, 0, 1,
 ];
 

@@ -22,7 +22,7 @@ class VortexMesh extends Geometry2D {
       this.timer.t = this.mesh.time;
    }
    SetUniformRadius(val) {
-      const prog = Gl_progs_get_prog_byidx(this.gfxInfo.prog.idx);
+      const prog = Gl_progs_get_prog_byidx(this.gfxInfo.progs_groupidx, this.gfxInfo.prog.idx);
       prog.UniformsSetBufferUniform(val, UNIFORM_PARAMS.VORTEX.radiusIdx);
    }
    SetAttribParams1_Count(count) {

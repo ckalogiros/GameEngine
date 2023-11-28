@@ -1,6 +1,6 @@
 "use strict";
 
-import { Gl_progs_get, Gl_progs_get_vb_byidx } from "../../../Graphics/GlProgram";
+import { Gl_progs_get_group, Gl_progs_get_vb_byidx } from "../../../Graphics/GlProgram";
 import { Section } from "../Meshes/Section";
 import { Drop_down_set_root, Widget_Dropdown } from "../Meshes/Widgets/Menu/Widget_Dropdown";
 import { Widget_Switch } from "../Meshes/Widgets/WidgetButton";
@@ -138,7 +138,6 @@ export function Debug_info_create_ui_performance_timers(params) {
 
 
    const section = new Section(SECTION.HORIZONTAL, [10, 10], DEBUG_INFO.UI_TIMERS.POS, [0, 0], TRANSPARENCY(GREY1, .4), 'ui performance timers panel');
-   // section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE, section.OnClick);
    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
    section.SetName('InfoUi-PerformanceTimers section');
 
@@ -159,6 +158,7 @@ export function Debug_info_create_ui_performance_timers(params) {
       timer.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
       timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, PerformanceTimersGetCurTime, _pt_fps);
    
+      // timer.RenderToDebugGfx();
       section.AddItem(timer);
    }
 
@@ -248,12 +248,14 @@ export function Debug_info_create_ui_performance_timers(params) {
    }
 
 
+   section.RenderToDebugGfx();
    scene.AddWidget(section, GFX.PRIVATE);
    section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
    section.Render()
    DEBUG_INFO.UI_TIMERS.IDX = section.idx;
    Gfx_end_session(true);
    section.ConstructListeners();
+
 
    DEBUG_INFO.UI_TIMERS.IS_ON = true;
 
@@ -293,8 +295,9 @@ export function Debug_info_create_ui_mouse_coords(params) {
 
 
    section.AddItem(infomesh);
-
-
+   
+   
+   section.RenderToDebugGfx();
    scene.AddWidget(section, GFX.PRIVATE);
    section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
    section.Render()
@@ -381,15 +384,14 @@ export function Debug_info_create_gfx_info(params) {
    Drop_down_set_root(dp, dp);
 
    ui_gfx_self_state.dp = new Widget_Dropdown(`self-gfx`, [0, 0, 0], [10, 10], TRANSPARENCY(RED_200_10_10, tr), TRANSPARENCY(GREEN_140_240_10, tr), WHITE, [8, 3]);
-   // ui_gfx_self_state.dp.SetName(`self-gfx`)
    ui_gfx_self_state.dp.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
 
-   const progs = Gl_progs_get();
-   const count = progs.length;
+   const progs = Gl_progs_get_group(PROGRAMS_GROUPS.GetIdxByMask(dp.sid.progs_group));
+   const count = progs.count;
    let j = 0;
    for (let i = 0; i < count; i++) {
       
-      const dp_pr = new Widget_Dropdown(`prog:${i} | Vb count:${progs[i].vertexBufferCount}`, [0, 0, 0], [10, 10], TRANSPARENCY(BLUE_10_120_220, tr), TRANSPARENCY(PURPLE, tr), WHITE, [8, 3]);
+      const dp_pr = new Widget_Dropdown(`prog:${i} | Vb count:${progs.buffer[i].vertexBufferCount}`, [0, 0, 0], [10, 10], TRANSPARENCY(BLUE_10_120_220, tr), TRANSPARENCY(PURPLE, tr), WHITE, [8, 3]);
       // dp_pr.SetName(`Program DP:${i}`);
       dp_pr._gfxidx = i;
       dp_pr.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
@@ -398,9 +400,9 @@ export function Debug_info_create_gfx_info(params) {
       // Store all self prog-vb indexes for updating its text info on every gfx buffer changes
       ui_gfx_self_state.progs.push({  idx:i, vb:[], });
       
-      for (j = 0; j < progs[i].vertexBufferCount; j++) {
+      for (j = 0; j < progs.buffer[i].vertexBufferCount; j++) {
          
-         const vb = progs[i].vertexBuffer[j];
+         const vb = progs.buffer[i].vertexBuffer[j];
          if((vb.type & MESH_TYPES_DBG.UI_INFO_GFX) === 0){ // Add as regular vertex buffers all exept the buffers storing the ui_gfx_ dropdowns.
             
             const dp_vb = new Widget_Dropdown(`vb:${j} | count:${vb.count}`, [0, 0, 0], [10, 10], TRANSPARENCY(ORANGE_240_130_10, tr), TRANSPARENCY(GREY3, tr), WHITE, [8, 3]);
@@ -450,6 +452,7 @@ function Debug_info_gfx_update(params) {
    const tr = .6;
    const progidx = params.trigger_params.progidx;
    const vbidx = params.trigger_params.vbidx;
+   // const progs_group = params.trigger_params.vbidx;
    const section = params.target_params;
    const dp_ui_gfx = section.children.buffer[0]; 
    // const dp_self = dp_ui_gfx.menu.children.buffer[dp_ui_gfx.menu.children.boundary-1]; 
@@ -487,7 +490,7 @@ function Debug_info_gfx_update(params) {
    if(!dp_prog) console.error('dropdown program not found')
    
    const vb = Gfx_progs_get_vb_byidx(progidx, vbidx);
-   // /*DEBUG*/const progs = Gl_progs_get();
+   // /*DEBUG*/const progs = Gl_progs_get_group();
    // console.log(`Debug_info_gfx_update prog:${progidx} vb:${vbidx} vb.count:${vb.count}`);
    if(foundvbidx !== INT_NULL) {
 
@@ -551,16 +554,17 @@ function Debug_info_gfx_update(params) {
 function UpdateUiGfxSelfText(){
 
    const dp_self = ui_gfx_self_state.dp; 
+   const progs_group = ui_gfx_self_state.dp; 
    let stride = 0;
    for (let i=0; i<ui_gfx_self_state.progs.length; i++){
       
-      const vbidxs = ui_gfx_self_state.progs[i].vb;
+      const vbidxs = ui_gfx_self_state.progs.buffer[i].vb;
       for (let j=0; j<vbidxs.length; j++){
    
-         const vb = Gfx_progs_get_vb_byidx(ui_gfx_self_state.progs[i].idx, vbidxs[j]);
+         const vb = Gfx_progs_get_vb_byidx(ui_gfx_self_state.progs.buffer[i].idx, vbidxs[j]);
    
          const child = dp_self.menu.children.buffer[stride+j];
-         const text = `prog:${ui_gfx_self_state.progs[i].idx} vb:${vbidxs[j]} | count:${vb.count}`;
+         const text = `prog:${ui_gfx_self_state.progs.buffer[i].idx} vb:${vbidxs[j]} | count:${vb.count}`;
          child.SetText(text);
       }
       stride+=vbidxs.length;

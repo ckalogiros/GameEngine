@@ -72,17 +72,18 @@ export class Widget_Label extends Rect {
 
         /** Label tex mesh */
         const text_mesh = new Text_Mesh(text, pos, fontSize);
-
+        
         pos[0] -= pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
         pos[2] -= 1; // Set z for area 'behind' this.text_mesh
-
+        
         /** Label area mesh */
         const areaMetrics = CalculateArea(text, text_mesh.geom.dim, pos, pad)
         super(areaMetrics.pos, areaMetrics.dim, col);
-
+        
         // Must call super() before using the 'this'
         text_mesh.SetSceneIdx(this.sceneidx);
         text_mesh.SetName(`Text-mesh [${text}]`);
+        text_mesh.sid.progs_group = this.sid.progs_group; // If the label is a debug ui, so must be the text. 
 
         this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
         this.SetStyle(style);
@@ -113,8 +114,7 @@ export class Widget_Label extends Rect {
         this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, area_gfx_specific);
         Scenes_store_gfx_to_buffer(this.sceneidx, this);
 
-        // TODO: We pass GFX.PRIVATE and not GFX>SPECIFIC becuase we need to implement a default case for .SPECIFIC where if the 'text_gfx_specific' is null, a new gfxCtx will be created
-        this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, GFX.PRIVATE, text_gfx_specific);
+        this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, FLAGS, text_gfx_specific);
         Scenes_store_gfx_to_buffer(this.text_mesh.sceneidx, this.text_mesh);
         
         return this.gfx;
@@ -145,6 +145,11 @@ export class Widget_Label extends Rect {
         all_meshes.push(this);
         all_meshes.push(this.text_mesh);
         return all_meshes;
+    }
+
+    RenderToDebugGfx(){
+        this.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
+        this.text_mesh.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
     }
 
     /*******************************************************************************************************************************************************/

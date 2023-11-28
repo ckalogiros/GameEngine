@@ -7,31 +7,6 @@ import { SHADER_CONSTANTS } from './Shaders/ConstructShader.js';
 import { Renderqueue_set_active } from '../Engine/Renderers/Renderer/RenderQueue.js';
 
 
-class Gl_Programs {
-
-	constructor(){
-
-		this.buffer = [];
-		this.count = 0;
-	}
-}
-// Scoped global Gl Program object
-const _glPrograms = [];
-let _glProgramsCount = 0;
-
-
-function Gl_progs_increment_count() { _glProgramsCount++; }
-function Gl_progs_store_program(progIdx, program) { _glPrograms[progIdx] = program; }
-export function Gl_progs_get_programs_count() { return _glProgramsCount; }
-export function Gl_progs_get() { return _glPrograms; }
-export function Gl_progs_get_prog_byidx(progIdx) { return _glPrograms[progIdx]; }
-export function Gl_progs_get_vb_byidx(progIdx, vbIdx) { return _glPrograms[progIdx].vertexBuffer[vbIdx]; }
-export function Gl_progs_get_ib_byidx(progIdx, ibIdx) { return _glPrograms[progIdx].indexBuffer[ibIdx]; }
-export function Gl_progs_get_shaderinfo(progIdx) { return _glPrograms[progIdx].shaderinfo; }
-export function Gl_progs_get_shaderinfo_uniforms(progIdx) { return _glPrograms[progIdx].shaderinfo.uniforms; }
-
-export function Gl_progs_set_vb_texidx(progIdx, vbIdx, textidx){ _glPrograms[progIdx].vertexBuffer[vbIdx].textidx = textidx; }
-
 
 export class GfxInfoMesh {
 
@@ -39,17 +14,18 @@ export class GfxInfoMesh {
 	sceneidx = INT_NULL;
 	scene_gfx_mesh_idx = INT_NULL; // The index of the mesh inside the scenes gfx buffer.
 	isPrivate = false;
-	sessionId = INT_NULL;
 	numFaces = 0;
 	vertsPerRect = 0;
 	attribsPerVertex = 0;
 	meshIdx = INT_NULL; // The index of the current mesh from scene's mesh buffer.
 	vao = null;
+	progs_groupidx = INT_NULL; // TODO: Decide if this var should be a bool or a bi-field.
 	
 	gfx_ctx = { // This refers to the GfxCtx2 class interface. GfxCtx2 is used to connect Engine system with application's Graphic System. 
 		sessionId: INT_NULL, // If the vertex buffer has private use, the sessionid 'categorizes' all the vertex buffers belonging to a session. 
 		idx: INT_NULL // The index of the GfxCtx buffer. 
 	}
+
 	prog = {
 		idx: INT_NULL,
 	}
@@ -82,6 +58,7 @@ export class GfxInfoMesh {
 			this.vertsPerRect = gfxInfoMesh.vertsPerRect;
 			this.attribsPerVertex = gfxInfoMesh.attribsPerVertex;
 			this.meshIdx = gfxInfoMesh.meshIdx; 
+			this.progs_groupidx = gfxInfoMesh.progs_groupidx;
 			this.vao = gfxInfoMesh.vao; 
 			
 			this.prog.idx = gfxInfoMesh.prog.idx; 
@@ -109,6 +86,7 @@ export class GfxInfoMesh {
 			this.vertsPerRect = gfx.vertsPerRect;
 			this.attribsPerVertex = gfx.attribsPerVertex;
 			this.meshIdx = gfx.meshIdx; 
+			this.progs_groupidx = gfx.progs_groupidx;
 			this.vao = gfx.vao; 
 			
 			this.prog.idx = gfx.prog.idx; 
@@ -129,13 +107,24 @@ export class GfxInfoMesh {
 }
 
 
+class Gl_Programs {
+	constructor(){
+		this.buffer = []; // Buffer for gl shader programs
+		this.count = 0;
+	}
+
+	CreateProgram(gl, sid){
+		const progidx = this.count++;
+		this.buffer[progidx] = new Gl_Program(gl, sid);
+		return progidx;
+	}
+}
+
 export class Gl_Program {
 
 	constructor(gl, sid) {
 
 		this.sid = sid; // Shader Type ID (E.g. ATTR_COL4 | ATTR_POS2 | INDEXED)
-		this.idx = Gl_progs_get_programs_count();
-		Gl_progs_increment_count();
 
 		this.webgl_program = null;
 		this.isActive = false;
@@ -206,8 +195,6 @@ export class Gl_Program {
 			index: INT_NULL,
 			isActive: false,
 		};
-
-		Gl_progs_store_program(this.idx, this);
 
 		this.#PrivateCreateAttribsOffsets();
 	}
@@ -323,16 +310,20 @@ export class Gl_Program {
 	UniformsCreateBufferUniform(name) {
 		this.shaderinfo.uniforms.buffer.CreateUniform(name);
 	}
+
 	UniformsSetBufferUniform(val, index) {
 		this.shaderinfo.uniforms.buffer.Set(val, index);
 	}
+
 	UniformsCreateSetBufferUniform(name, val) {
 		const idx = this.shaderinfo.uniforms.buffer.CreateUniform(name);
 		this.shaderinfo.uniforms.buffer.Set(val, idx);
 	}
+
 	UniformsUpdateBufferUniforms(gl) {
 			this.shaderinfo.uniforms.buffer.Update(gl);
 	}
+
 	UniformsSetUpdateBufferUniform(gl, val, index) {
 		this.shaderinfo.uniforms.buffer.Set(val, index);
 		this.shaderinfo.uniforms.buffer.Update(gl);
@@ -378,9 +369,11 @@ export class Gl_Program {
 	UniformsSetProjectionMatrix(val) {
 		this.shaderinfo.uniforms.projection.Set(val);
 	}
+
 	UniformsUpdateProjectionMatrix(gl) {
 		this.shaderinfo.uniforms.projection.Update(gl);
 	}
+
 	UniformsSetUpdateProjectionMatrix(gl, val) {
 		this.shaderinfo.uniforms.projection.Set(val);
 		this.shaderinfo.uniforms.projection.Update(gl);
@@ -402,23 +395,91 @@ export class Gl_Program {
 
 };
 
+// Scoped global Gl Program object
+// const _glPrograms = new Gl_Programs();
+const _gl_programs_groups = {
 
-/*
- * Generalized Program Web Gl Creation 
- */
-export function Gl_get_progams_count() { return _glProgramsCount; }
+	buffer: [],
+	count: 0,
+
+	CreateGroup(){
+		const groupidx = this.count++;
+		this.buffer[groupidx] = new Gl_Programs(); // Create new buffer to store gl shader programs
+		return groupidx; // Return the index of the newly created group buffer.
+	},
+
+	CreateProgram(gl, sid){
+
+		let program_group_idx = INT_NULL;
+		if(!this.GroupExists(PROGRAMS_GROUPS.GetIdxByMask(sid.progs_group))){ // If group does not exist, create it.
+			
+			program_group_idx = this.CreateGroup();
+
+			// Important! Here we set globaly the index of the program group.
+			if(sid.progs_group & PROGRAMS_GROUPS.DEBUG.MASK) PROGRAMS_GROUPS.DEBUG.IDX = program_group_idx;
+			else if(sid.progs_group & PROGRAMS_GROUPS.DEFAULT.MASK) PROGRAMS_GROUPS.DEFAULT.IDX = program_group_idx;
+		}
+		else program_group_idx = PROGRAMS_GROUPS.GetIdxByMask(sid.progs_group);
+
+		const progidx = this.buffer[program_group_idx].CreateProgram(gl, sid); // Create the shader program
+		console.log('++++ Program shader group:' , PROGRAMS_GROUPS.GetName(sid.progs_group), ' idx:', program_group_idx, ' progidx:', progidx)
+
+		return {progidx:progidx, progs_groupidx:program_group_idx};
+	},
+
+	GroupExists(prog_group_idx){
+
+		if(prog_group_idx !== INT_NULL && this.buffer[prog_group_idx]) return true;
+		return false;
+	},
+
+};
+
+export function Gl_progs_get() { 
+	return _gl_programs_groups; 
+}
+export function Gl_progs_get_group(programs_groupidx=INT_NULL) { 
+	return _gl_programs_groups.buffer[programs_groupidx]; 
+}
+export function Gl_progs_get_prog_byidx(programs_groupidx=INT_NULL, progIdx) { 
+	return _gl_programs_groups.buffer[programs_groupidx].buffer[progIdx]; 
+}
+export function Gl_progs_get_vb_byidx(programs_groupidx=INT_NULL, progIdx, vbIdx) { 
+	if(_gl_programs_groups.buffer[programs_groupidx] === undefined)
+	console.log
+	return _gl_programs_groups.buffer[programs_groupidx].buffer[progIdx].vertexBuffer[vbIdx]; 
+}
+export function Gl_progs_get_ib_byidx(programs_groupidx=INT_NULL, progIdx, ibIdx) { 
+	return _gl_programs_groups.buffer[programs_groupidx].buffer[progIdx].indexBuffer[ibIdx]; 
+}
+export function Gl_progs_get_shaderinfo(programs_groupidx=INT_NULL, progIdx) { 
+	return _gl_programs_groups.buffer[programs_groupidx].buffer[progIdx].shaderinfo; 
+}
+export function Gl_progs_get_shaderinfo_uniforms(programs_groupidx=INT_NULL, progIdx) { 
+	return _gl_programs_groups.buffer[programs_groupidx].buffer[progIdx].shaderinfo.uniforms; 
+}
+export function Gl_progs_set_vb_texidx(programs_groupidx=INT_NULL, progIdx, vbIdx, textidx){ 
+	_gl_programs_groups.buffer[programs_groupidx].buffer[progIdx].vertexBuffer[vbIdx].textidx = textidx; 
+}
+
+
 export function Gl_create_program(sid) {
-	const prog = new Gl_Program(gfxCtx.gl, sid);
-	return prog.idx;
+	return _gl_programs_groups.CreateProgram(gfxCtx.gl, sid);
+}
+export function Gl_progs_get_programs_count(programs_groupidx=INT_NULL) { 
+	return _gl_programs_groups.buffer[programs_groupidx].count;  
 }
 
-export function Gl_set_vb_show(progIdx, vbIdx, flag) {
-
-	_glPrograms[progIdx].vertexBuffer[vbIdx].show = flag;
-	_glPrograms[progIdx].indexBuffer[vbIdx].show = flag;
-	Renderqueue_set_active(progIdx, vbIdx, flag); // Update the draw buffer
+export function Gl_get_progams_count(programs_groupidx=INT_NULL) { 
+	return _gl_programs_groups.buffer[programs_groupidx].count; 
 }
 
+export function Gl_set_vb_show(progIdx, vbIdx, programs_groupidx=INT_NULL, flag) {
+
+	_gl_programs_groups.buffer[programs_groupidx].buffer[progIdx].vertexBuffer[vbIdx].show = flag;
+	_gl_programs_groups.buffer[programs_groupidx].buffer[progIdx].indexBuffer[vbIdx].show = flag;
+	Renderqueue_set_active(programs_groupidx, progIdx, vbIdx, flag); // Update the draw buffer
+}
 
 /**
  * Enabling Attribute locations for a program
@@ -472,25 +533,25 @@ export function GlEnableAttribsLocations(gl, prog) {
 	}
 }
 
+export function GlProgramUpdateUniformProjectionMatrix(gl, progIdx, mat4, programs_groupidx=INT_NULL) {
 
-
-export function GlProgramUpdateUniformProjectionMatrix(gl, progIdx, mat4) {
-	const prog = _glPrograms[progIdx];
+	const prog = _gl_programs_groups.buffer[programs_groupidx].buffer[progIdx];
 	GlUseProgram(prog.webgl_program); 
 	prog.UniformsSetUpdateProjectionMatrix(gl, mat4);
+
 }
 
 export function GlCheckSid(sid, progidx){
 
-	const prog = Gl_progs_get_prog_byidx(progidx);
+	const progs_groupidx = PROGRAMS_GROUPS.GetIdxByMask(sid.progs_group);
+	if(progs_groupidx === INT_NULL) return false; // Case  programs group hasn't been created
+	
+	const progs_group = Gl_progs_get_group(progs_groupidx);
+	if(!progs_group.buffer[progidx]) return false;	// Case  program in programs group hasn't been created
+	
+	const prog = progs_group.buffer[progidx];
 	
 	if (SID.CheckSidMatch(sid, prog.sid)) return true;
 	return false;
 }
 
-
-let GlUID = INT_NULL; // A unique id for every vertex buffer, to distinguish which meshes belong to which buffer 
-export function GlCreateUniqueBufferid() {
-	GlUID++;
-	return GlUID;
-}

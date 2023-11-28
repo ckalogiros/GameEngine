@@ -135,6 +135,8 @@ export class Mesh {
             attr: (this.geom.sid.attr | this.mat.sid.attr),
             unif: (this.mat.sid.unif) | SID.UNIF.PROJECTION, // Assuming we always have  a projection camera and a uniforms buffer. 
             pass: (this.geom.sid.pass | this.mat.sid.pass | SID.PASS.COL4),
+            // progs_group: PROGRAMS_GROUPS.DEFAULT, // To denote if the curent mesh is used for dubug, so it uses specific gfx buffers for debug ui rendering.
+            progs_group: PROGRAMS_GROUPS.DEFAULT.MASK, // To denote if the curent mesh is used for dubug, so it uses specific gfx buffers for debug ui rendering.
         };
 
         this.gfx = null;
@@ -239,7 +241,7 @@ export class Mesh {
         // Remove from scene
         Scenes_update_all_gfx_starts(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, ret); // Update the gfx.start of all meshes that are inserted in the same vertex buffer.
         Scenes_remove_root_mesh(this, this.sceneidx);
-        console.log('Destroy mesh:', this.name)
+        // console.log('Destroy mesh:', this.name)
         const error = Scenes_remove_mesh_from_gfx(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.scene_gfx_mesh_idx); // Remove mesh from the scene's gfx buffer
         if (error) { console.error('ERROR REMOVING MESH: ', this.name); }
 
@@ -281,7 +283,7 @@ export class Mesh {
 
     Set_graphics_vertex_buffer_render(flag) {
 
-        Gfx_set_vb_show(this.gfx.prog.idx, this.gfx.vb.idx, flag);
+        Gfx_set_vb_show(this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.progs_groupidx, flag);
         if (flag) this.StateEnable(MESH_STATE.IS_HOVERABLE);
         else this.StateDisable(MESH_STATE.IS_HOVERABLE);
 

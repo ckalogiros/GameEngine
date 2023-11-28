@@ -64,7 +64,7 @@ export class Text_Mesh extends Mesh {
          Gfx_add_geom_mat_to_vb(this.sid, gfxCopy, geomCopy, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name, this.idx);
       }
 
-      Gfx_progs_set_vb_texidx(gfxCopy.prog.idx, gfxCopy.vb.idx, gfxCopy.tb.idx); // Update the vertex buffer to store the texture index
+      Gfx_progs_set_vb_texidx(gfxCopy.progs_groupidx, gfxCopy.prog.idx, gfxCopy.vb.idx, gfxCopy.tb.idx); // Update the vertex buffer to store the texture index
 
       const params = {
          progidx: this.gfx.prog.idx,

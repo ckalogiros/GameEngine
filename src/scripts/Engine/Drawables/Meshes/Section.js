@@ -188,8 +188,17 @@ export class Section extends Rect {
          const child = this.children.buffer[i];
          if (child) child.Render();
       }
-
    }
+
+   RenderToDebugGfx() {
+
+		this.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
+		for (let i = 0; i < this.children.boundary; i++) {
+			const child = this.children.buffer[i];
+			// child.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
+			child.RenderToDebugGfx();
+		}
+	}
 
    DeactivateGfx() {
 
@@ -226,6 +235,8 @@ export class Section extends Rect {
       this.geom.dim[1] += this.margin[1];
    }
 
+   /*******************************************************************************************************************************************************/
+   // Listeners
    OnClick(params) {
 
       const section = params.target_params.target_mesh;
@@ -353,8 +364,6 @@ export class Section extends Rect {
 
       for (let i = 0; i < this.children.boundary; i++) {
          const child = this.children.buffer[i];
-         // if (child) {
-         // }
          child.SetColorAlpha(alpha, alpha)
       }
    }

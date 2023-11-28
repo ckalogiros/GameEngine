@@ -103,10 +103,6 @@ export class Scene {
 
         /** Handle Events */
         HandleEvents();
-
-        /** Special case for DebugInfoUi for the GFX, must update its rendering from main loop */
-        // const event_params = Info_listener_get_event(INFO_LISTEN_EVENT_TYPE.GFX);
-        // if(event_params) Debug_info_render_gfx_info(event_params);
     }
 
     AddWidget(widget, FLAGS = GFX.ANY, gfxidx) {
@@ -168,9 +164,11 @@ export class Scene {
 
     // Store a reference to the camera object
     SetCamera(camera) {
-        if (this.camera) alert('Camera already existas for scene:', this.sceneidx)
+        if (this.camera) alert('Camera already exists for scene:', this.sceneidx)
         this.camera = camera;
     }
+
+    UpdateCamera
 
     /*******************************************************************************************************************************************************/
     // Getters-Setters
@@ -420,7 +418,13 @@ export function Scenes_remove_root_mesh(widget, sceneidx) {
     _scenes.buffer[sceneidx].RemoveRootMesh(widget);
 }
 export function Scenes_store_gfx_to_buffer(sceneidx, mesh) { 
+
     _scenes.buffer[sceneidx].StoreGfxCtx(mesh);
+
+    // Update the camera uniform of the new shader program.
+    _scenes.buffer[sceneidx].camera.UpdateProjectionUniform(gfxCtx.gl, mesh.gfx.prog.idx, PROGRAMS_GROUPS.GetIdxByMask(mesh.sid.progs_group));
+		
+
 
     if(!(mesh.type & MESH_TYPES_DBG.UI_INFO_MESH)) // Avoid infinite loops.
         Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.MESH, mesh);

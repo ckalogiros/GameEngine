@@ -1,31 +1,32 @@
-import { Gl_progs_get, Gl_progs_get_programs_count } from "../../../Graphics/GlProgram.js";
+"use strict";
 
 const MAX_DRAWQUEUE_COUNT = 64; // Number of Gl programs for the queue  
 
 class Queue {
 
-   progIdx;
-   vbIdx;
+   progidx;
+   vbidx;
    queueIdx;
    isActive;
 
    constructor(){
-      this.progIdx  = INT_NULL;
-      this.vbIdx    = INT_NULL;
+      this.progidx  = INT_NULL;
+      this.vbidx    = INT_NULL;
       this.queueIdx = INT_NULL;
       this.isActive = false;
    }
 
    Set(elem){
-      this.progIdx  = elem.progIdx;
-      this.vbIdx    = elem.vbIdx;
+      this.progs_groupidx  = elem.progs_groupidx;
+      this.progidx  = elem.progidx;
+      this.vbidx    = elem.vbidx;
       this.queueIdx = elem.queueIdx;
       this.isActive = elem.isActive;
    }
 
    Reset(){
-      this.progIdx  = INT_NULL;
-      this.vbIdx    = INT_NULL;
+      this.progidx  = INT_NULL;
+      this.vbidx    = INT_NULL;
       this.queueIdx = INT_NULL;
       this.isActive = false;
    }
@@ -51,23 +52,9 @@ class RenderQueue {
       }
    }
 
-   Create(){
+   Deactivate(progs_groupidx, progidx, vbidx){
 
-      const progs = Gl_progs_get();
-      const progCount = Gl_progs_get_programs_count();
-      for (let i = 0; i < progCount; i++) {
-         for (let j = 0; j < progs[i].vertexBufferCount; j++) {
-            const isActive = progs[i].vertexBuffer[j].show; 
-            const progIdx = progs[i].idx;
-            const vbIdx = progs[i].vertexBuffer[j].idx;
-            this.Add(progIdx, vbIdx, isActive);
-         }
-      }
-   }
-
-   Deactivate(progidx, vbidx){
-
-      const foundIdx = this.Find(progidx, vbidx);
+      const foundIdx = this.Find(progs_groupidx, progidx, vbidx);
       if (foundIdx !== INT_NULL && foundIdx < this.count-1) {
          this.buffer[foundIdx].isActive = false;
          this.UpdateActiveQueue()
@@ -77,19 +64,20 @@ class RenderQueue {
    UpdateActiveQueue(){ // Recreates an array of all active vertex buffers from the draw queue on every Frame.
 
       this.activeCount = 0;
-      this.active = [];
+      this.active = []; // Reset curent active queue buffer
       for (let i = 0; i < this.size; i++) {
-         if(this.buffer[i].isActive){
+         if(this.buffer[i].isActive){ // recreate the active queue buffer from the renderqueue buffer 
             this.active[this.activeCount++] = this.buffer[i];
          }
       }
    }
 
-   Add(progIdx, vbIdx, isActive) {
+   Add(progs_groupidx, progidx, vbidx, isActive) {
 
       const obj = {
-         progIdx: progIdx,
-         vbIdx: vbIdx,
+         progs_groupidx: progs_groupidx,
+         progidx: progidx,
+         vbidx: vbidx,
          queueIdx: this.count,
          isActive: isActive,
       }
@@ -100,9 +88,9 @@ class RenderQueue {
       if(this.count > this.size) alert('ERROR - RenderQueue buffer is FULL')
    }
 
-   Remove(progIdx, vbIdx) {
+   Remove(progs_groupidx, progidx, vbidx) {
 
-      const foundIdx = this.Find(progIdx, vbIdx);
+      const foundIdx = this.Find(progs_groupidx, progidx, vbidx);
       if (foundIdx !== INT_NULL && foundIdx < this.count-1) {
 
          for(let i = foundIdx; i<this.count; i++){
@@ -119,24 +107,25 @@ class RenderQueue {
       }
    }
 
-   Find(progIdx, vbIdx) {
+   Find(progs_groupidx, progidx, vbidx) {
 
       if(!this.count) return INT_NULL; // Case RenderQueue hasn't been initialized
       for (let i = 0; i < this.size; i++) {
-         if (this.buffer[i].vbIdx === vbIdx &&
-            this.buffer[i].progIdx === progIdx) {
+         if (this.buffer[i].vbidx === vbidx &&
+            this.buffer[i].progidx === progidx && 
+            this.buffer[i].progs_groupidx === progs_groupidx) {
             return i;
          }
       }
       return INT_NULL;
    }
    
-   FindAllBuffersFromProgram(progIdx) {
+   FindAllBuffersFromProgram(progs_groupidx, progidx) {
 
       if(!this.count) return INT_NULL; // Case RenderQueue hasn't been initialized
       let idxs = [];
       for (let i = 0; i < this.size; i++) {
-         if (this.buffer[i].progIdx === progIdx) {
+         if (this.buffer[i].progidx === progidx && this.bbbuffer[i].progs_groupidx === progs_groupidx) {
             idxs.push(i);
          }
       }
@@ -152,11 +141,11 @@ class RenderQueue {
    }
 
    // TODO: SLOW, 
-   SetPriority(flag, progIdx, vbIdx = ALL){
+   SetPriority(flag, progs_groupidx, progidx, vbidx = ALL){
 
-      if(vbIdx === ALL){
+      if(vbidx === ALL){
 
-         const idxs = this.FindAllBuffersFromProgram(progIdx);
+         const idxs = this.FindAllBuffersFromProgram(progs_groupidx, progidx);
 
          for(let k=0; k<idxs.length; k++){
 
@@ -183,7 +172,7 @@ class RenderQueue {
 
       /**************************************************************************/
 
-      const idx = this.Find(progIdx, vbIdx);
+      const idx = this.Find(progs_groupidx, progidx, vbidx);
       if(idx !== INT_NULL){
 
          const temp = new Queue;
@@ -213,24 +202,23 @@ class RenderQueue {
     * But we do not care for now.
     * TODO: Implement correctly: using bubble sort? 
     */
-   SetPriorityProgram(flag, progIdx){
+   SetPriorityProgram(flag, progs_groupidx, progidx){
 
       if(!this.count) return; // Case RenderQueue hasn't been initialized
 
-      // for (let i = 0; i < this.size; i++) {
       for (let i = 0; i < this.count; i++) {
          
-         if (this.buffer[i].progIdx === progIdx) {
-            this.SetPriority(flag, progIdx, this.buffer[i].vbIdx)
+         if (this.buffer[i].progidx === progidx && this.buffer[i].progs_groupidx === progs_groupidx) {
+            this.SetPriority(flag, progs_groupidx, progidx, this.buffer[i].vbidx)
          }
       }
 
    }
 
-   SetPrioritySwap(progIdx1, vbIdx1, progIdx2, vbIdx2){
+   SetPrioritySwap(progs_groupidx1, progIdx1, vbIdx1, progs_groupidx2, progIdx2, vbIdx2){
 
-      const idx1 = this.Find(progIdx1, vbIdx1);
-      const idx2 = this.Find(progIdx2, vbIdx2);
+      const idx1 = this.Find(progs_groupidx1, progIdx1, vbIdx1);
+      const idx2 = this.Find(progs_groupidx2, progIdx2, vbIdx2);
       if(idx1 !== INT_NULL && idx2 !== INT_NULL){
          const temp = new Queue;
          temp.Set(this.buffer[idx1]); // Temporary store the prioritized element
@@ -242,11 +230,16 @@ class RenderQueue {
    // Debug
    PrintAll() {
       console.log('--- RenderQueue All');
-      console.log(this.buffer);
+      for(let i=0; i<this.count; i++){
+         if(this.buffer[i]) console.log(this.buffer[i]);
+      }
    }
    PrintActive() {
       console.log('--- RenderQueue Active');
       console.log(this.active);
+      for(let i=0; i<this.activeCount; i++){
+         if(this.active[i]) console.log(this.active[i]);
+      }
    }
 }
 
@@ -258,10 +251,12 @@ export function Renderqueue_get_active() { return renderQueue.active; }
 export function Renderqueue_active_get_count() { return renderQueue.activeCount; }
 
 // Set priority to the render queue buffer, but need to update the active render queue buffer.
-export function Renderqueue_set_priority(flag, progIdx, vbIdx) { renderQueue.SetPriority(flag, progIdx, vbIdx); }
+export function Renderqueue_set_priority(flag, progs_groupidx1, progidx, vbidx) { 
+   renderQueue.SetPriority(flag, progs_groupidx1, progidx, vbidx); 
+}
 
 // Set priority to the active render queue buffer, no need to update.
-export function Renderqueue_set_priority_to_active_queue(flag, progIdx, vbIdx) { /*TODO: IMPLEMENT*/ }
+export function Renderqueue_set_priority_to_active_queue(flag, progs_groupidx1, progidx, vbidx) { /*TODO: IMPLEMENT*/ }
 
 /**
  * Enable and Disable programs and vertex buffers from the draw queue.
@@ -269,9 +264,9 @@ export function Renderqueue_set_priority_to_active_queue(flag, progIdx, vbIdx) {
  * changed(enabled or disabled for drawing), we must add or remove
  * these programs-vertex buffers from the draw queue.
  */
-export function Renderqueue_set_active(progIdx, vbIdx, flag){ 
+export function Renderqueue_set_active(progs_groupidx, progidx, vbidx, flag){ 
 
-   const idx = renderQueue.Find(progIdx, vbIdx);
+   const idx = renderQueue.Find(progs_groupidx, progidx, vbidx);
    if(idx !== INT_NULL){
 
       renderQueue.buffer[idx].isActive = flag;

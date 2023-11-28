@@ -6,7 +6,6 @@ import { FpsGet, TimeSample, TimeUpdate } from "../Timers/Time.js";
 import { TimersUpdateGlobalTimer } from "../Timers/Timers.js";
 import { TimeIntervalsUpdateAll } from "../Timers/TimeIntervals.js";
 import {_pt_fps ,_pt2, _pt3, _pt4 } from '../Timers/PerformanceTimers.js'
-import { Gfx_progs_get_vb_byidx } from "../Interfaces/Gfx/GfxInterfaceFunctions.js";
 
 /**
  * WebGl
@@ -48,7 +47,7 @@ import { Gfx_progs_get_vb_byidx } from "../Interfaces/Gfx/GfxInterfaceFunctions.
 export class WebGlRenderer {
 
    scene;
-   camera;
+   // camera;
    canvas;
    gl;
    extensions;
@@ -65,8 +64,9 @@ export class WebGlRenderer {
       STATE.scene.active = this.scene;
       STATE.scene.active_idx = this.scene.sceneidx;
 
-      this.camera = camera;
-      this.camera.Init();
+      // this.camera = camera;
+      // this.camera.Init();
+      camera.Init();
 
       this.fpsTimer = FpsGet();
 
@@ -76,8 +76,6 @@ export class WebGlRenderer {
 
       if (STATE.loop.paused === false) {
          
-         // const vb = Gfx_progs_get_vb_byidx(1, 2)
-         // console.log(vb.needsUpdate)
          TimeUpdate(); 
          _pt_fps.Start();
          
@@ -105,6 +103,7 @@ export class WebGlRenderer {
 
 
    }
+
    Init() {
       console.log('Initializing Graphics.')
 
@@ -170,6 +169,7 @@ export class WebGlRenderer {
       var maxTextureSize = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE);
       console.log("Maximum Texture Size: " + maxTextureSize);
    }
+
    DeviceSetUp() {
 
       // const canvas = document.getElementById("glCanvas");
