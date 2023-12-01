@@ -1,11 +1,8 @@
 "use strict";
 
-import { CopyArr1_3, CopyArr2 } from "../../../../Helpers/Math/MathOperations";
 import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse";
 import { Gfx_generate_context } from "../../../Interfaces/Gfx/GfxContext";
-import { Scenes_store_gfx_to_buffer } from "../../../Scenes";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals";
-import { Check_intersection_point_rect } from "../../Operations/Collisions";
 import { MESH_ENABLE } from "../Base/Mesh";
 import { Rect } from "../Rect_Mesh";
 import { Section } from "../Section";
@@ -205,18 +202,16 @@ export class Widget_Scroller extends Section {
 
    /*******************************************************************************************************************************************************/
    // Graphics
-   GenGfxCtx(FLAGS = GFX.ANY, gfxidx = null) {
+   GenGfxCtx(FLAGS = GFX_CTX_FLAGS.ANY, gfxidx = null) {
 
       this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
 
       this.scrolled_section.GenGfxCtx(FLAGS, gfxidx); // Let widget_Dynamic_Text to handle the gfx generation
 
       this.scroll_bar.gfx = Gfx_generate_context(this.scroll_bar.sid, this.scroll_bar.sceneidx, this.scroll_bar.geom.num_faces, FLAGS, gfxidx);
-      Scenes_store_gfx_to_buffer(this.scroll_bar.sceneidx, this.scroll_bar);
 
       const handle = this.scroll_bar.children.buffer[0];
       handle.gfx = Gfx_generate_context(handle.sid, handle.sceneidx, handle.geom.num_faces, FLAGS, gfxidx);
-      Scenes_store_gfx_to_buffer(handle.sceneidx, handle);
 
       return this.gfx;
    }

@@ -672,7 +672,7 @@ export function GlSetAttrTime(gfxInfo, val) {
         index += stride; // Go to next vertice's borderWidth attrib.
         verts--;
     }
-    vb.needsUpdate = true; // HACK. TODO suppose to be implemented in MESH????
+    vb.needsUpdate = true; // HACK. // TODO suppose to be implemented in MESH????
 }
 export function GlSetAttrSdfParams(gfxInfo, val) {
 
@@ -1056,7 +1056,7 @@ export function GlRotateZ3D(mesh, angle) {
     vb.needsUpdate = true;
 }
 
-/** TODO: Store the new pos and dim to the mesh for collision detection */
+/** // TODO: Store the new pos and dim to the mesh for collision detection */
 export function GlRotateXY3D(mesh, angle) {
 
     const gfxInfo = mesh.gfx;

@@ -45,16 +45,6 @@ const PROGRAMS_GROUPS = {
 }
 
 
-
-_cnt = 0x1;
-const GFX_CTX_FLAGS = {
-
-    PRIVATE: _cnt <<= 0x1,
-    ACTIVE: _cnt <<= 0x1,
-    INACTIVE: _cnt <<= 0x1,
-}
-
-
 /**
  * SID: Shader Type ID, for creating different _glPrograms with 
  * different vertex and fragment shaders bbbased uppon the input attribbutes, input uniforms and other properties.
@@ -230,15 +220,23 @@ const GL_VB = {
     PRIVATE: 3, // ... else it will create a new buffer and render it as private
 };
 
-_cnt = 0x1;
-const GFX = {
 
-    // Let the application decide. If a vertex buffer with the same ...
+
+
+
+_cnt = 0x1;
+const GFX_CTX_FLAGS = {
+
+    // Let the application decide a vertex buffer with the same shader id(sid)
     ANY: _cnt <<= 0x1, // SID exists, it will use it, else it will create a new one.
     NEW: _cnt <<= 0x1, // Create a new vertexBuffer.
     SPECIFIC: _cnt <<= 0x1, // Use specific index of a vertex buffer.
     // Use private vertex buffer. If a private and inactive buffer exists it will use that, ...
     PRIVATE: _cnt <<= 0x1, // ... else it will create a new buffer and render it as private
+
+    CHILDEN: _cnt <<= 0x1, // Choose the first match (sid match) from mesh'a children.
+    SIBLINGS: _cnt <<= 0x1, // Choose the first match (sid match) from mesh's siblings.
+    PARENT: _cnt <<= 0x1, // Choose the first match (sid match) from mesh's parent.
 
     STATIC: _cnt <<= 0x1, // Choose a buffer that is going to be updated rarely
     DYNAMIC: _cnt <<= 0x1, // Choose a buffer that is going to be updated every frame

@@ -64,6 +64,8 @@ export function GlDraw(gl) {
 
             // console.log(progs_groupidx, progidx, vbidx)
         gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
+        // if(progs_groupidx === 0 && progidx===0) gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
+        // else gl.drawElements(gl.POINTS, ib.count, gl.UNSIGNED_SHORT, 0);
         // gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
         // gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 6);
     }

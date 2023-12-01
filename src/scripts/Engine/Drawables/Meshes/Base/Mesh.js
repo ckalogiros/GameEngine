@@ -1,11 +1,11 @@
 "use strict";
 import { GlSetAttrTime } from "../../../../Graphics/Buffers/GlBufferOps.js";
-import { Int8Buffer, Int8Buffer2, M_Buffer } from "../../../Core/Buffers.js";
+import { Int8Buffer, M_Buffer } from "../../../Core/Buffers.js";
 import { TimerGetGlobalTimer } from "../../../Timers/Timers.js";
-import { Listener_create_child_event, Listener_create_event, Listener_events_set_mesh_events_active, Listener_remove_children_event_by_idx, Listener_remove_event_by_idx, Listener_set_event_active_by_idx } from "../../../Events/EventListeners.js";
+import { Listener_create_child_event, Listener_create_event, Listener_remove_children_event_by_idx, Listener_remove_event_by_idx } from "../../../Events/EventListeners.js";
 import { CopyArr4 } from "../../../../Helpers/Math/MathOperations.js";
 import { Scenes_get_count, Scenes_update_all_gfx_starts, Scenes_get_root_meshes, Scenes_remove_mesh_from_gfx, Scenes_remove_root_mesh } from "../../../Scenes.js";
-import { Gfx_deactivate, Gfx_deactivate_recursive, Gfx_remove_geometry } from "../../../Interfaces/Gfx/GfxContext.js";
+import { Gfx_deactivate, Gfx_remove_geometry } from "../../../Interfaces/Gfx/GfxContext.js";
 import { TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals.js";
 import { Gfx_set_vb_show } from "../../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 import { Info_listener_dispatch_event } from "../../DebugInfo/InfoListeners.js";
@@ -55,8 +55,8 @@ let _meshId = 0;
 export class Mesh {
 
     /**
-     * TODO: Organize all function callbacks to an object
-     * TODO: Organize all buffers to an object
+     * // TODO: Organize all function callbacks to an object
+     * // TODO: Organize all buffers to an object
      */
 
     sid; // Shader Identifier
@@ -77,7 +77,7 @@ export class Mesh {
     state;  // Bitfield integer. Stores enebled-dissabled mesh state. 
     timeIntervalsIdxBuffer; // This buffer stores indexes of the timeIntervals this mesh is using.
     timedEvents; // A buffer to set a one time event that is triggered by another event. E.x. When we need to set the mesh priority in the renderQueue and the mesh does not have a gfx yet. 
-    hover_margin; // A margin to be set for hovering. TODO: Abstract to a struct.
+    hover_margin; // A margin to be set for hovering. // TODO: Abstract to a struct.
     menu_options; // A callback and an index. Constructs the options popup menu for the mesh
     menu_options_idx; // An index to the menu options handler's buffer
     minimized; // Pointer to a minimized version of the mesh.
@@ -117,7 +117,7 @@ export class Mesh {
 
         time;
         parent; // Pointer to the parent mesh.
-        hover_margin; // A margin to be set for hovering. TODO: Abstract to a struct.
+        hover_margin; // A margin to be set for hovering. // TODO: Abstract to a struct.
         menu_options; // A callback and an index. Constructs the options popup menu for the mesh
         menu_options_idx; // An index to the menu options handler's buffer
         minimized; // Pointer to a minimized version of the mesh.
@@ -239,10 +239,10 @@ export class Mesh {
         // Remove from gfx buffers.
         const ret = Gfx_remove_geometry(this.gfx, this.geom.num_faces)
         // Remove from scene
-        Scenes_update_all_gfx_starts(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, ret); // Update the gfx.start of all meshes that are inserted in the same vertex buffer.
+        Scenes_update_all_gfx_starts(this.sceneidx, this.gfx.progs_groupidx, this.gfx.prog.idx, this.gfx.vb.idx, ret); // Update the gfx.start of all meshes that are inserted in the same vertex buffer.
         Scenes_remove_root_mesh(this, this.sceneidx);
         // console.log('Destroy mesh:', this.name)
-        const error = Scenes_remove_mesh_from_gfx(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.scene_gfx_mesh_idx); // Remove mesh from the scene's gfx buffer
+        const error = Scenes_remove_mesh_from_gfx(this.sceneidx, this.gfx.progs_groupidx, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.scene_mesh_in_gfx_idx); // Remove mesh from the scene's gfx buffer
         if (error) { console.error('ERROR REMOVING MESH: ', this.name); }
 
         if (this.parent) this.parent.RemoveChildByIdx(this.idx); // Remove the current mesh from the parent
@@ -252,7 +252,7 @@ export class Mesh {
             vbidx: this.gfx.vb.idx,
             sceneidx: this.sceneidx,
             isActive: true,
-            isPrivate: (FLAGS & GFX.PRIVATE) ? true : false,
+            isPrivate: (FLAGS & GFX_CTX_FLAGS.PRIVATE) ? true : false,
             type: INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB,
         }
         Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE, params);
@@ -268,14 +268,14 @@ export class Mesh {
         Gfx_deactivate(this.gfx);
         this.is_gfx_inserted = false;
 
-        Scenes_remove_mesh_from_gfx(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.scene_gfx_mesh_idx);
+        Scenes_remove_mesh_from_gfx(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.scene_mesh_in_gfx_idx);
 
         const params = {
             progidx: this.gfx.prog.idx,
             vbidx: this.gfx.vb.idx,
             sceneidx: this.sceneidx,
             isActive: true,
-            isPrivate: (FLAGS & GFX.PRIVATE) ? true : false,
+            isPrivate: (FLAGS & GFX_CTX_FLAGS.PRIVATE) ? true : false,
             type: INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB,
         }
         Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE, params);
@@ -352,7 +352,7 @@ export class Mesh {
 
     RemoveAllListenEvents() {
         /**
-         * TODO!!
+         * // TODO!!
          * The if's maybe better implemented in EventListeners class RemoveEvent()???
          */
         for (let etype = 0; etype < this.listeners.boundary; etype++) {

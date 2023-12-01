@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * TODO: Pass an attribute to control the twist's magnitude from start to stop
+ * // TODO: Pass an attribute to control the twist's magnitude from start to stop
  */
 
 export const VS_TWIST = `#version 300 es

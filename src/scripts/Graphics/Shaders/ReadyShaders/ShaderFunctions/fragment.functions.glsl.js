@@ -1,12 +1,12 @@
 
 
-export const frag_round_corners_call = '    color = Stylize();';
+export const frag_round_corners_call = '   color = Stylize();';
 export const frag_round_corners = '\
 vec4 pos = vec4(.0, .0, .0, .0); \n\
 float ScreenH; \n\
 float AA;   \n\
 vec2 length2(vec4 a) {  \n\
-    return vec2(length(a.xy), length(a.zw)); \n\
+  return vec2(length(a.xy), length(a.zw)); \n\
 }  \n\
 vec2 RoundedRectangle(vec2 dim, float r, float bw) {              \n\
   dim -= bw +.0002; // Subtract the border                        \n\
@@ -72,7 +72,7 @@ vec2 res = vec2(824., 893.);    \n\
   // color += vec3(.1,.4,.8) * vec3(abs(wa * wb));              \n\
   // color *= 2.*vec3(abs(wa * wb));              \n\
   \n\
-  // Bevel. TODO: Control @colorIntensity for the pow() and @darkness for the mult of the pow() \n\
+  // Bevel. // TODO: Control @colorIntensity for the pow() and @darkness for the mult of the pow() \n\
   // float r = min(rCorners*.17, min(dim.x, dim.y)); \n\
   // // float r = min(.023, min(dim.x, dim.y)); \n\
   // float f = smoothstep(r, .0, abs(d.x)-borderWidth); \n\
@@ -175,7 +175,7 @@ vec2 res = vec2(824., 893.);    \n\
 //   wb = clamp(-bd / (blur.x+blur.y), 0.0, 1.0);                    
 //   color += color * vec3(abs(wa * wb) - borderWidth);              
   
-//   // Bevel. TODO: Control @colorIntensity for the pow() and @darkness for the mult of the pow() 
+//   // Bevel. // TODO: Control @colorIntensity for the pow() and @darkness for the mult of the pow() 
 //   // float r = min(rCorners*.17, min(dim.x, dim.y)); 
 //   float r = min(.023, min(dim.x, dim.y)); 
 //   float f = smoothstep(r, .0, abs(d.x)-borderWidth); 

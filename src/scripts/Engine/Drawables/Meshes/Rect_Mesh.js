@@ -1,9 +1,8 @@
 "use strict";
 
-import { Listener_events_set_mesh_events_active } from "../../Events/EventListeners.js";
 import {  Gfx_generate_context } from "../../Interfaces/Gfx/GfxContext.js";
 import { Gfx_add_geom_mat_to_vb } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
-import { Scenes_store_gfx_to_buffer } from "../../Scenes.js";
+import { Scenes_store_mesh_in_gfx } from "../../Scenes.js";
 import { Info_listener_dispatch_event } from "../DebugInfo/InfoListeners.js";
 import { Geometry2D } from "../Geometry/Base/Geometry.js";
 import { Material } from "../Material/Base/Material.js";
@@ -31,10 +30,9 @@ export class Rect extends Mesh {
 
    /*******************************************************************************************************************************************************/
    // Graphics
-   GenGfxCtx(FLAGS = GFX.ANY, gfxidx = null) {
+   GenGfxCtx(FLAGS = GFX_CTX_FLAGS.ANY, gfxidx = null) {
 
       this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
-      Scenes_store_gfx_to_buffer(this.sceneidx, this);
       return this.gfx;
    }
 
@@ -43,12 +41,14 @@ export class Rect extends Mesh {
       this.gfx.vb.start = Gfx_add_geom_mat_to_vb(this.sid, this.gfx, this.geom, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name, this.idx);
       this.is_gfx_inserted = true;
 
+      Scenes_store_mesh_in_gfx(this.sceneidx, this); // For storing meshes by its gfx
+
       const params = {
          progidx: this.gfx.prog.idx,
          vbidx: this.gfx.vb.idx,
          sceneidx: this.sceneidx,
          isActive: true,
-         isPrivate: (FLAGS & GFX.PRIVATE) ? true : false,
+         isPrivate: (FLAGS & GFX_CTX_FLAGS.PRIVATE) ? true : false,
          type: INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB,
       }
       Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE, params);

@@ -8,7 +8,6 @@ import { Gfx_activate, Gfx_end_session, Gfx_generate_context } from "../../../..
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../../../Timers/TimeIntervals.js";
 import { MESH_ENABLE } from "../../Base/Mesh.js";
 import { Widget_Button } from "../WidgetButton.js";
-import { Scenes_store_gfx_to_buffer } from "../../../../Scenes.js";
 import { Listener_remove_children_event_by_idx } from "../../../../Events/EventListeners.js";
 
 /**
@@ -47,7 +46,7 @@ export class Widget_Dropdown extends Section {
    isOn; // Bool for checking a dropdown's menu expanded/contructed.
    menu; // SEE ## Dropdown Menu 
    rootidx; // Store the root's dropdown index (of the '_root_dropdown');
-   dp_symbols; // Text symbols for denoting a dropdown's Expanded/contracted menu. TODO: Add textured symbols OR create a font texture with symbols for dropdown expansion/contraction.
+   dp_symbols; // Text symbols for denoting a dropdown's Expanded/contracted menu. // TODO: Add textured symbols OR create a font texture with symbols for dropdown expansion/contraction.
    depth_level; // The tree depth level that the dropdown exists (root dp = 0 depth).
 
    constructor(text, pos, dim, col1 = GREY3, col2 = PINK_240_60_160, text_col = WHITE, btn_pad = [0, 0], bold = .4, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [2, 5, 2]) {
@@ -82,7 +81,7 @@ export class Widget_Dropdown extends Section {
       if (mesh.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) {
 
          mesh.depth_level = this.depth_level + 1; // Set the depth of the new dp.
-         console.log('dropdown:', mesh.name, ' depth:', mesh.depth_level)
+         // console.log('dropdown:', mesh.name, ' depth:', mesh.depth_level)
 
          if (this.rootidx === INT_NULL) {
             // Create a reference for each root dropdown menu in a Scene
@@ -106,14 +105,13 @@ export class Widget_Dropdown extends Section {
    /*******************************************************************************************************************************************************/
    // Graphics
 
-   GenGfxCtx(FLAGS = GFX.PRIVATE, gfx_idxs, parent = null) {
+   GenGfxCtx(FLAGS = GFX_CTX_FLAGS.PRIVATE, gfx_idxs, parent = null) {
 
       this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfx_idxs);
-      Scenes_store_gfx_to_buffer(this.sceneidx, this);
 
       let text_gfx_specific = null;
       /**
-       * HACK: steal the same gfx for text rendering.
+       * // HACK: steal the same gfx for text rendering.
        * If parent is passed and its a dropdown, get its menu.
        * If the menu has a child and its of type dropdown,
        * get it's buttons text gfx, which is already active,
@@ -145,7 +143,7 @@ export class Widget_Dropdown extends Section {
       }
 
       const btn = this.children.buffer[0];
-      btn.GenGfxCtx(GFX.PRIVATE, [this.gfx.prog.idx, this.gfx.vb.idx], text_gfx_specific); // Set button's area gfx same with dropDown mesh 
+      btn.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE, [this.gfx.prog.idx, this.gfx.vb.idx], text_gfx_specific); // Set button's area gfx same with dropDown mesh 
       Gfx_end_session(true, true);
 
       return this.gfx;
@@ -167,8 +165,7 @@ export class Widget_Dropdown extends Section {
       }
       else { // Case: All dp menus to its own gfx.
 
-         menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.geom.num_faces, GFX.SPECIFIC, dpgfxidxs);
-         Scenes_store_gfx_to_buffer(menu.sceneidx, menu);
+         menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.geom.num_faces, GFX_CTX_FLAGS.SPECIFIC, dpgfxidxs);
 
          for (let i = 0; i < menu.children.boundary; i++) {
 
@@ -176,11 +173,10 @@ export class Widget_Dropdown extends Section {
 
             if (item.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) { // Case item is another dropdown
 
-               item.gfx = Gfx_generate_context(item.sid, item.sceneidx, item.geom.num_faces, GFX.SPECIFIC, dpgfxidxs);
-               Scenes_store_gfx_to_buffer(item.sceneidx, item);
+               item.gfx = Gfx_generate_context(item.sid, item.sceneidx, item.geom.num_faces, GFX_CTX_FLAGS.SPECIFIC, dpgfxidxs);
 
                const btn = item.children.buffer[0];
-               btn.GenGfxCtx(GFX.PRIVATE, dpgfxidxs, textgfx);
+               btn.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE, dpgfxidxs, textgfx);
 
                // Create Click events for any meshes of type Dropdown
                item.CreateClickEvent(root.menu.listeners.buffer);
@@ -199,7 +195,7 @@ export class Widget_Dropdown extends Section {
             else { // Case: Generate gfx for any other children meshes (non dropdown meshes).
 
                // TODO. Do we genarate gfx for any other widget in the same gfx????  
-               item.GenGfxCtx(GFX.PRIVATE, dpgfxidxs, textgfx);
+               item.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE, dpgfxidxs, textgfx);
             }
          }
       }
@@ -280,8 +276,7 @@ export class Widget_Dropdown extends Section {
 
       console.log('      --------- Activating secondary menus')
 
-      menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.geom.num_faces, GFX.PRIVATE);
-      Scenes_store_gfx_to_buffer(menu.sceneidx, menu);
+      menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.geom.num_faces, GFX_CTX_FLAGS.PRIVATE);
 
       const text_gfx = Find_gfx_context_for_text_in_dp_menu(menu);
       if (text_gfx) {
@@ -294,11 +289,10 @@ export class Widget_Dropdown extends Section {
          const child = menu.children.buffer[i];
          if (child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) { // Case child is another dropdown
 
-            child.gfx = Gfx_generate_context(child.sid, child.sceneidx, child.geom.num_faces, GFX.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
-            Scenes_store_gfx_to_buffer(child.sceneidx, child);
+            child.gfx = Gfx_generate_context(child.sid, child.sceneidx, child.geom.num_faces, GFX_CTX_FLAGS.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
 
             const btn = child.children.buffer[0];
-            btn.GenGfxCtx(GFX.PRIVATE, [menu.gfx.prog.idx, menu.gfx.vb.idx], text_gfx);
+            btn.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE, [menu.gfx.prog.idx, menu.gfx.vb.idx], text_gfx);
 
             // Create Click events for any meshes of type Dropdown
             child.CreateClickEvent(root.menu.listeners.buffer);
@@ -312,7 +306,7 @@ export class Widget_Dropdown extends Section {
             }
          }
          else { // Case: Generate gfx for children widget meshes 
-            child.GenGfxCtx(GFX.PRIVATE);
+            child.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
          }
       }
    }

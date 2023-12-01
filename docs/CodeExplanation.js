@@ -35,7 +35,7 @@
  *    shader program,   
  */
 
-/** TODO:NOT VALID, RE-WRITE
+/** // TODO:NOT VALID, RE-WRITE
  * Position-Size Controler and grid sections
  * 
  * A section should be responsible for:
@@ -75,7 +75,22 @@
  */
 
 /****************************************************************************** */
-// Widgets An Meshes
+// Scenes
+
+/** ### Scene gfx buffer
+ * Stores all meshes gfx in that order:
+ *    1. buffer of programs groups
+ *    2. buffer of programs
+ *    3. buffer of vertex buffers
+ *    4 buffer of meshes in vertex buffer
+ * 
+ * Used for: Have a refference to all meshes of each buffer of each shader program.
+ *    1. Batch update all 'start' of all meshes in a specific vertex buffer. 
+ */
+
+
+/****************************************************************************** */
+// Widgets And Meshes
 
 /** ### Widget Drop down menu.
 
@@ -125,7 +140,7 @@
 
  */
 
-/** ### Fake Events TODO:IMPLEMENT DISCRIPTION
+/** ### Fake Events // TODO:IMPLEMENT DISCRIPTION
  * 
  */
 

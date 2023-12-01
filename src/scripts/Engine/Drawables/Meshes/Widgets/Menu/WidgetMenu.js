@@ -285,7 +285,7 @@ export class Close_Button extends Widget_Button {
          target_params: root,
          Clbk: this.OnDestroy,
        */
-      const params = this.eventCallbacks.buffer[0]; // TODO: HACK: We must set up an index clarification for eventCallbacks buffer. 
+      const params = this.eventCallbacks.buffer[0]; // TODO: // HACK: We must set up an index clarification for eventCallbacks buffer. 
       const root = params.target_params
       root.Destroy(root);
 
@@ -380,7 +380,7 @@ export class Widget_Minimize extends Widget_Button {
                   root.Recalc(SECTION.HORIZONTAL);
 
                   // Set Graphics
-                  root.GenGfxCtx(GFX.PRIVATE);
+                  root.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
                   root.Render();
                   Gfx_end_session(true);
                   Gfx_activate(root); // Re-enable the rendering of the vertex buffers.
@@ -417,7 +417,7 @@ export class Widget_Minimize extends Widget_Button {
                   root.Recalc(SECTION.INHERIT); // Recalculate all widgets children pos and dim.
 
                   // Add to gfx
-                  root.GenGfxCtx(GFX.PRIVATE);
+                  root.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
                   root.Render();
                   Gfx_end_session(true);
                   Gfx_activate(root); // Re-enable the rendering of the vertex buffers.

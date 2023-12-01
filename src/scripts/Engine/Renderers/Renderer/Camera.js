@@ -5,7 +5,7 @@ import { Matrix4 } from '../../../Helpers/THREE_math/Matrix4.js';
 import { Gfx_get_progams_count } from '../../Interfaces/Gfx/GfxInterfaceFunctions.js';
 
 /**
- * TODO:
+ * // TODO:
  * 
  * Create a camera enabling system for controling the camera.
  * OnCameraUpdate all the anabled controls must be updated(Matrix arithmetic, translation, rotation, ...etc)
@@ -66,7 +66,7 @@ export class Camera extends Matrix4 {
 	UpdateProjectionUniformAll(gl){
 
 		/** For now all gfx programs use the same camera projection uniform. So we update all shader program's uniforms 
-		 * TODO: What if there are many cameras for different programs??? Should the camera know about the programs indexes that it renders???
+		 * // TODO: What if there are many cameras for different programs??? Should the camera know about the programs indexes that it renders???
 		 */
 		// Update proj matrix for all gl programs
 		const default_shader_programs_index = PROGRAMS_GROUPS.DEFAULT.IDX;
@@ -90,6 +90,7 @@ export class Camera extends Matrix4 {
 	UpdateProjectionUniform(gl, progidx, progs_group){
 
 		GlProgramUpdateUniformProjectionMatrix(gl, progidx, this.elements, progs_group);
+		console.log('CAMERA UNIFORM MATRIX UPDATE: goup:', progs_group, ' program:', progidx);
 	}
 
 	/*************************************************************************************************************/
@@ -120,6 +121,7 @@ export class Camera extends Matrix4 {
 	Zoom() {
 		const mouseWheel = MouseGetWheel();
 		this.Translate(0, 0, mouseWheel.delta);
+		console.log(mouseWheel.delta)
 	}
 	
 	/*************************************************************************************************************/

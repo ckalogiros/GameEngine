@@ -12,7 +12,7 @@ import { Rect } from "./Rect_Mesh.js";
 
 
 /**
- * TODO: 
+ * // TODO: 
  *    Implement: 
  *       Add_pre. add a mesh at the start of the children's buffer.
  *       Add_specific. add a mesh at a specific index of the children's buffer.
@@ -64,7 +64,7 @@ export class Section extends Rect {
 
          if (options & SECTION.FIT) {
 
-            TODO: implement
+            // TODO: implement
          }
          else if (options & SECTION.ITEM_FIT) {
 
@@ -305,7 +305,7 @@ export class Section extends Rect {
              * Create a Fake listen event as a parent event, if the section has no listen events,
              * so that the actual listen events of the section's children meshes have a parent event to be grouped.
              * 
-             * TODO!!: IMPORTANT!
+             * // TODO!!: IMPORTANT!
              * 1. We create Fake event only for click events.
              * 2. We create Fake event despite the fact that there may not be any children events.
              */
@@ -424,7 +424,7 @@ function Section_on_move_section(params) {
    // Destroy the time interval calling this function if the mesh is not grabed.
    if (section.StateCheck(MESH_STATE.IN_GRAB) === 0 && section.timeIntervalsIdxBuffer.boundary) {
 
-      const intervalIdx = section.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
+      const intervalIdx = section.timeIntervalsIdxBuffer.buffer[0]; // HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
       TimeIntervalsDestroyByIdx(intervalIdx);
       section.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
 

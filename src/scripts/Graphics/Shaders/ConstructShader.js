@@ -40,7 +40,7 @@ function filterEmptyLine( string ) {
 	return string !== '';
 }
 /*
-   TODO!!!: The shader constants, for buffer sizes etc, must be calculated at run time.
+   // TODO!!!: The shader constants, for buffer sizes etc, must be calculated at run time.
    That requires that the app collects all the data from all the meshes, 
    without creating any gl program and its shaders.
    MUST BE IMPLEMENTED.
@@ -106,12 +106,13 @@ export function GlVertexShaderConstruct(sid){
       (sid.pass & SID.PASS.DIM2) ? '  v_dim = abs(a_pos);' : '',
       (sid.pass & SID.PASS.WPOS2) ? '  v_wpos = a_wpos_time.xy;' : '',
       (sid.attr & SID.ATTR.TEX2) ? '  v_tex_coord = a_tex;' : '',
-      (sid.attr & SID.ATTR.SDF) ? ' v_sdf = a_sdf;' : '',
-      (sid.pass & SID.PASS.RES2) ? '   v_res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]' : '', // TODO!!!: What happens if res.xy is passed to other than 0 and 1 indexes???
-      (sid.attr & SID.ATTR.BORDER) ? ' v_border_width = a_params1.x;' : '',
-      (sid.attr & SID.ATTR.R_CORNERS) ? ' v_rCorners = a_params1.y;' : '',
-      (sid.attr & SID.ATTR.FEATHER) ? '   v_border_feather = a_params1.z;' : '',
+      (sid.attr & SID.ATTR.SDF) ? '  v_sdf = a_sdf;' : '',
+      (sid.pass & SID.PASS.RES2) ? '  v_res = vec2(v_uniforms_buffer[0], v_uniforms_buffer[1]' : '', // TODO!!!: What happens if res.xy is passed to other than 0 and 1 indexes???
+      (sid.attr & SID.ATTR.BORDER) ? '  v_border_width = a_params1.x;' : '',
+      (sid.attr & SID.ATTR.R_CORNERS) ? '  v_rCorners = a_params1.y;' : '',
+      (sid.attr & SID.ATTR.FEATHER) ? '  v_border_feather = a_params1.z;' : '',
       (sid.unif & SID.UNIF.U_BUFFER) ? '  v_uniforms_buffer = uniforms_buffer;' : '',
+      (true) ? '   gl_PointSize = 10.0;' : '',
       '}',
 
    ];
@@ -166,13 +167,13 @@ export function GlFragmentShaderConstruct(sid){
       // Main
       true ? 'void main(void) ' : '',
       true ? '{' : '',
-      true ? '    #include <frag_color_create>' : '',
+      true ? '#include <frag_color_create>' : '',
       (sid.attr & SID.ATTR.BORDER) ? resolveIncludesFragment(frag_round_corners_call) : '',
       (sid.attr & SID.ATTR.SDF) ? frag_sdf_call : '',
       // (sid.attr & SID.ATTR.TEX2) ? frag_msdf_call : '',
       // true ? '    frag_color = vec4(1.);' : '',
-      true ? '    frag_color = color;' : '',
-      true ? '    frag_color.xyz *= color.a;' : '',
+      true ? '  frag_color = color;' : '',
+      true ? '  frag_color.xyz *= color.a;' : '',
       true ? '}' : '',
    ];
 

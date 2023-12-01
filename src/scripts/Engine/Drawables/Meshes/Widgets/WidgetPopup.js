@@ -111,7 +111,7 @@ let _popup = null;
 export function Initializer_popup_initialization(){
 
    _popup = new Widget_PopUp([200, 300, 0], [15,10], TRANSPARENCY(GREY2, .6));
-   _popup.GenGfxCtx(GFX.PRIVATE);
+   _popup.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
    _popup.Deactivate();
    Gfx_end_session(true, false);
 }
@@ -137,7 +137,7 @@ export function Initializer_popup_initialization(){
 // }
 
 /**
- * TODO: SEE ## Widget_popup_handler_onclick_event. 
+ * // TODO: SEE ## Widget_popup_handler_onclick_event. 
  */
 export function Widget_popup_handler_onclick_event(clicked_mesh, clickedButtonId) {
 
@@ -158,7 +158,7 @@ export function Widget_popup_handler_onclick_event(clicked_mesh, clickedButtonId
       popup.AddItem(options_menu_section, SECTION.ITEM_FIT);
       popup.Recalc(); // Reset pos-dim and calculate.
 
-      popup.GenGfxCtx(GFX.PRIVATE);
+      popup.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
       Gfx_end_session(true);
       popup.Render();
 

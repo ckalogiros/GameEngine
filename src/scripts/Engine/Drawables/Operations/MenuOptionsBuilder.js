@@ -12,7 +12,9 @@ import { Scenes_get_root_meshes } from "../../Scenes.js";
 const _menu_options = [];
 
 
-export function Menu_options_destroy(idx) { TODO: Implement }
+export function Menu_options_destroy(idx) { 
+   // TODO: Implement
+}
 
 /**
  * Clicked_mesh should have a struct:
@@ -26,7 +28,7 @@ export function Menu_options_destroy(idx) { TODO: Implement }
  *    return the options object(that consists of info and a buffer[] of type Mesh)
  * 
  * Case create options
- * Run the apropriate function based on the clicked mesh's (TODO: clicked mesh should hav a callback for creating the menu?),
+ * Run the apropriate function based on the clicked mesh's (// TODO: clicked mesh should have a callback for creating the menu?),
  * assuming there is one options menu across all widgets of a certain type.
  * 
  * Responsible for adding the options meshes to the gfx pipeline.

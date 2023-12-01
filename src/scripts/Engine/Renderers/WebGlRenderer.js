@@ -76,6 +76,8 @@ export class WebGlRenderer {
 
       if (STATE.loop.paused === false) {
          
+         this.scene.camera.UpdateProjectionUniformAll(gfxCtx.gl)
+
          TimeUpdate(); 
          _pt_fps.Start();
          

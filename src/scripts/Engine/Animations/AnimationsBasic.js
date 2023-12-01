@@ -180,7 +180,7 @@ function Animations_run_scale_down_stop(mesh) {
 /**
  * Helper Functions for scale animation
  * 
- * TODO: Abtruct better in another file???
+ * // TODO: Abtruct better in another file???
  */
 
 function Helper_scale_rect(_mesh, scaleFactor) {

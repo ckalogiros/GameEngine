@@ -11,7 +11,7 @@ import { Text_Mesh } from "../Text_Mesh.js";
 
 /**
  * 
- * TODO: When we have to implement that the user decides for the font type (sdf...etc)
+ * // TODO: When we have to implement that the user decides for the font type (sdf...etc)
  * then the CalculateSdfOuterFromDim must:
  * 1. live in an if statment (if(fontType is sdf))
  * 2. move the function to the parent class instead of call it from all children classes of Text_Mesh

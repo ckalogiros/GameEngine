@@ -200,7 +200,7 @@ class RenderQueue {
    /**
     * INEFFICIENT.
     * But we do not care for now.
-    * TODO: Implement correctly: using bubble sort? 
+    * // TODO: Implement correctly: using bubble sort? 
     */
    SetPriorityProgram(flag, progs_groupidx, progidx){
 
@@ -256,7 +256,7 @@ export function Renderqueue_set_priority(flag, progs_groupidx1, progidx, vbidx) 
 }
 
 // Set priority to the active render queue buffer, no need to update.
-export function Renderqueue_set_priority_to_active_queue(flag, progs_groupidx1, progidx, vbidx) { /*TODO: IMPLEMENT*/ }
+export function Renderqueue_set_priority_to_active_queue(flag, progs_groupidx1, progidx, vbidx) { /*// TODO: IMPLEMENT*/ }
 
 /**
  * Enable and Disable programs and vertex buffers from the draw queue.

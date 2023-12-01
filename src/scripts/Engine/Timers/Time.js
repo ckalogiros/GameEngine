@@ -162,7 +162,7 @@ export function FpsGetWorstFrameAvg() { return Math.floor(1 / (_fps.worst.accum 
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * TODO: Name correctly
+ * // TODO: Name correctly
  */
 
 function Fps_create_1Sec_interval(){

@@ -6,7 +6,7 @@ import { AddArr3, CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
 import { Gfx_generate_context } from "../../Interfaces/Gfx/GfxContext.js";``
 import { GfxSetTex, Gfx_add_geom_mat_to_vb, Gfx_progs_set_vb_texidx } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 import { FontGetUvCoords } from "../../Loaders/Font/Font.js";
-import { Scenes_store_gfx_to_buffer } from "../../Scenes.js";
+import {  Scenes_store_mesh_in_gfx } from "../../Scenes.js";
 import { Info_listener_dispatch_event } from "../DebugInfo/InfoListeners.js";
 import { Geometry2D_Text } from "../Geometry/Geometry2DText.js";
 import { FontMaterial } from "../Material/Base/Material.js";
@@ -35,7 +35,6 @@ export class Text_Mesh extends Mesh {
    GenGfxCtx(FLAGS, gfxidx) {
 
       this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
-      Scenes_store_gfx_to_buffer(this.sceneidx, this);
       return this.gfx;
    }
 
@@ -50,6 +49,8 @@ export class Text_Mesh extends Mesh {
       // Get the starting index of the text in the vertex buffer.
       this.mat.uv = FontGetUvCoords(this.mat.uvIdx, this.mat.text[0]);
       this.gfx.vb.start = Gfx_add_geom_mat_to_vb(this.sid, gfxCopy, geomCopy, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name);
+
+      Scenes_store_mesh_in_gfx(this.sceneidx, this); // For storing meshes by its gfx
 
       for (let i = 1; i < geomCopy.num_faces; i++) {
 
@@ -71,7 +72,7 @@ export class Text_Mesh extends Mesh {
          vbidx: this.gfx.vb.idx,
          sceneidx: this.sceneidx,
          isActive: true,
-         isPrivate: (FLAGS & GFX.PRIVATE) ? true : false,
+         isPrivate: (FLAGS & GFX_CTX_FLAGS.PRIVATE) ? true : false,
          type: INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB,
       }
       Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE, params);

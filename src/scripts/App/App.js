@@ -2,7 +2,7 @@
 import { Scenes_create_scene } from '../Engine/Scenes.js'
 import { Renderqueue_get, Renderqueue_init } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { WebGlRenderer } from '../Engine/Renderers/WebGlRenderer.js';
-import { CameraOrthographic } from '../Engine/Renderers/Renderer/Camera.js';
+import { CAMERA_CONTROLS, CameraOrthographic, CameraPerspective } from '../Engine/Renderers/Renderer/Camera.js';
 import { TextureInitBuffers } from '../Engine/Loaders/Textures/Texture.js';
 import { PerformanceTimerGetFps1sAvg, TimeGetDeltaAvg, TimeGetFps, TimeGetTimer, _fps_100ms_avg, _fps_1s_avg, _fps_200ms_avg, _fps_500ms_avg } from '../Engine/Timers/Time.js';
 import { Widget_Label_Dynamic_Text, Widget_Label, Widget_Label_Text_Mesh_Menu_Options } from '../Engine/Drawables/Meshes/Widgets/WidgetLabel.js';
@@ -59,12 +59,12 @@ export function AppInit() {
     */
     const scene = Scenes_create_scene();
     const camera = new CameraOrthographic();
+    // const camera = new CameraPerspective();
     {
-        // const camera = new CameraPerspective();
         // camera.SetControls(CAMERA_CONTROLS.PAN);
         // camera.SetControls(CAMERA_CONTROLS.ZOOM);
         // camera.SetControls(CAMERA_CONTROLS.ROTATE);
-        // camera.Translate(80, 80, 20)
+        // camera.Translate(280, 80, 20)
         // STATE.scene.active = scene;
         // STATE.scene.active_idx = scene.sceneidx;
     }
@@ -83,8 +83,19 @@ export function AppInit() {
 
     // Listeners_debug_info_create(scene);
 
-    Debug_info_ui_performance(scene);
 
+    Debug_info_ui_performance(scene);
+    /**
+     * // TODO: IMPLEMENT:
+     *  On destroy a mesh that belongs to the scene as a direct child (parent=scene),
+     *  just reset the vertex buffers instead of removing attributes and shifting memory around.
+     * 
+     * 2. There is some issue with the insertion of text in buffers in relation with the fact that must be on a PRIVATE gfx buffer.
+     * 
+     * 3. Also see the insertion of widget root dropdowns if they are inserted to PRIVATE buffers as long as they exist in the scene root meshes.
+     * 
+     * 3.
+     */
 
     // const label = CreateLabel(scene);
     // CreateLabel(scene);
@@ -117,32 +128,13 @@ export function AppInit() {
 
     // CreatSectionedMixWidgets(scene)
 
-    {
-        // const pad = [10, 2.5]
-        // const drop_down = new Widget_Dropdown('DP1', [260, 200, 0], [60, 20], RED, BLUE_10_120_220, WHITE, pad);
-        // drop_down.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-        // drop_down.CreateClickEvent();
-        // drop_down.CreateMoveEvent();
-        // Drop_down_set_root(drop_down, drop_down)
-    
-        // const s = new Section(SECTION.VERTICAL, [10, 10], [250, 600, 2], [10, 10], TRANSPARENCY(YELLOW, .5))
-        // const text = new Widget_Text('DP5->Widget_Text', [OUT_OF_VIEW, OUT_OF_VIEW, 4], 4, WHITE);
-        // s.AddItem(text)
-    
-        // // drop_down.AddToMenu(text);
-        // drop_down.AddToMenu(s);
-        // scene.AddWidget(drop_down);
-        // drop_down.Calc();
-        // drop_down.ConstructListeners();
-    }
 
     // CreateSectionSectioned(scene)
     
     // CreateScroller(scene);
 
     // Help(scene)
-
-
+    
     // const meshinfo_mesh = MeshInfo(scene)
     // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: meshinfo_mesh });
 
@@ -251,7 +243,7 @@ function CreateLabel_in_debug_gfx(scene) {
     label.text_mesh.SetColorRGB(RED);
     // label.text_mesh.UpdateText('RED');
 
-    label.Render()
+    // label.Render()
     // label.Align(ALIGN.BOTTOM | ALIGN.LEFT, [0, 0]);
     // label.Align(ALIGN.BOTTOM | ALIGN.RIGHT, [0, 0]);
     // label.Align(ALIGN.TOP | ALIGN.LEFT, [0, 0]);
@@ -272,7 +264,7 @@ function CreateButton(scene) {
     btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
     btn.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
     btn.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE, { style: [6, 6, 3] })
-    // scene.AddWidget(btn, GFX.PRIVATE);
+    // scene.AddWidget(btn, GFX_CTX_FLAGS.PRIVATE);
     scene.AddWidget(btn);
     btn.text_mesh.SetColorRGB(BLUE_10_120_220);
 
@@ -399,7 +391,7 @@ function CreateDropDownWithDropdownsInside(scene) {
         }
     }
 
-    scene.AddWidget(drop_down, GFX.PRIVATE);
+    scene.AddWidget(drop_down, GFX_CTX_FLAGS.PRIVATE);
     drop_down.Calc();
     drop_down.ConstructListeners();
 
@@ -530,7 +522,7 @@ function TestDropdownsTextRendering(scene, pos, id) {
     }
 
     // scene.AddWidget(dp);
-    dp.GenGfxCtx(GFX.PRIVATE);
+    dp.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
     // dp.Render()
     dp.Calc();
     dp.ConstructListeners();
@@ -757,7 +749,7 @@ function CreateMenuBarSectioned(count) {
 }
 
 /**
- * TODO!!!:
+ * // TODO!!!:
  * The button can move, but it can be grabbed only if it is inside it's parent section.
  * That is because the move event is child of parent and it will fire if parent's event is fired.
  * Fix: Make the move event so that the mesh cannot move outside parent's boundaries. 
@@ -899,7 +891,7 @@ function CreateSectionSectioned(scene) {
     yel.AddItem(gre, flags);
     blu.AddItem(red, flags);
 
-    scene.AddWidget(blu, GFX.PRIVATE);
+    scene.AddWidget(blu, GFX_CTX_FLAGS.PRIVATE);
     Gfx_end_session(true);
     blu.Calc();
     blu.ConstructListeners();
@@ -927,14 +919,14 @@ function CreateScroller(scene) {
     const scroller = new Widget_Scroller(section);
     scroller.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
 
-    scene.AddWidget(scroller, GFX.PRIVATE);
+    scene.AddWidget(scroller, GFX_CTX_FLAGS.PRIVATE);
     Gfx_end_session(true);
     // scroller.Recalc();
     scroller.ConstructListeners();
 
     { // Add more items to the scroller's scrolled section, to debug the correct behavior of the scroller's re-size and reposition.
         const l = new Widget_Label('Label 123 DDSDSDSfsdsdsdsds', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3]);
-        l.GenGfxCtx();
+        l.GenGfxCtx(GFX_CTX_FLAGS.SPECIFIC, [], []);
         scroller.AddToScrolledSection(l);
     }
     {
@@ -993,7 +985,7 @@ function Help(scene) {
     section.AddItem(minimizer);
     section.AddItem(s1)
 
-    scene.AddWidget(section, GFX.PRIVATE);
+    scene.AddWidget(section, GFX_CTX_FLAGS.PRIVATE);
     Gfx_end_session(true);
 
     section.Calc()
@@ -1007,6 +999,7 @@ function MeshInfo(scene) {
     const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 000000000000', 'id:000', [420, 15, 0], fontsize, GREEN_140_240_10, YELLOW_240_220_10, .4);
     infomesh.CreateNewText('pos: 00000,00000,0', fontsize, BLUE_10_120_220, [fontsize * 3, 10], .9);
     infomesh.CreateNewText('dim: 00000,00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    infomesh.CreateNewText('idx: 0000', fontsize, ORANGE_240_130_10, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('gfx: group: 0, prog:0, vb:0, start:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('text gfx: group: 0, prog:0, vb:0, start:00000, count:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.SetName('Info Mesh 2');
@@ -1014,7 +1007,8 @@ function MeshInfo(scene) {
     infomesh.RenderToDebugGfx();
 
     infomesh.Align_pre(infomesh, ALIGN.VERTICAL)
-    scene.AddWidget(infomesh, GFX.PRIVATE);
+    // scene.AddWidget(infomesh, GFX_CTX_FLAGS.PRIVATE);
+    scene.AddWidget(infomesh);
     Gfx_end_session(true);
 
     return infomesh;
@@ -1035,7 +1029,9 @@ function MeshInfoUpdate(params) {
         let msgs = [
             `id:${infoMesh.id}`,
             `pos:${FloorArr3(infoMesh.geom.pos)}`,
-            `dim: ${infoMesh.geom.dim}`, gfx,
+            `dim: ${infoMesh.geom.dim}`, 
+            `idx: ${infoMesh.idx}`, 
+            gfx,
         ];
 
         // Create info for any text gfx, if exists
@@ -1074,10 +1070,9 @@ function GfxInfo(scene) {
 
 
     infogfx.Calc();
-    infogfx.GenGfxCtx(GFX.PRIVATE);
+    infogfx.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
     Gfx_end_session(true, true);
     infogfx.ConstructListeners();
-    // Scenes_store_gfx_to_buffer(scene.sceneidx, infogfx);
     scene.StoreRootMesh(infogfx)
 
     const params = {
@@ -1110,7 +1105,7 @@ function GfxInfoUpdate(params) {
                 // dp.CreateAndAddEvent(LISTEN_EVENT_TYPES_INDEX.HOVER, root_dp.listeners.buffer)
 
                 if (root_dp.menu.gfx) {
-                    dp.GenGfxCtx(GFX.SPECIFIC, [root_dp.menu.gfx.prog.idx, root_dp.menu.gfx.vb.idx], root_dp);
+                    dp.GenGfxCtx(GFX_CTX_FLAGS.SPECIFIC, [root_dp.menu.gfx.prog.idx, root_dp.menu.gfx.vb.idx], root_dp);
                 }
                 
                 root_dp.AddToMenu(dp)
@@ -1118,7 +1113,7 @@ function GfxInfoUpdate(params) {
                 for (let k = 0; k < vb.debug.meshesNames.length; k++) {
                     const meshname = vb.debug.meshesNames[k];
                     const meshnametext = new Widget_Text(`${meshname}`, [300, 15, 0], 4, BLACK, .4); 
-                    meshnametext.GenGfxCtx(GFX.PRIVATE);
+                    meshnametext.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
                     dp.AddToMenu(meshnametext);
                 }
 
@@ -1315,111 +1310,6 @@ function Create3DCubes(scene) {
 
 
 /**
- ​​​
-0: "Widget_Scroller id:88"
 
-1: "DP-InfoUi Mesh DP id:24"
-
-2: "BTN-DP-InfoUi Mesh DP id:24 btn_id:27 id:27"
-
-3: "MENU-DP-InfoUi Mesh DP id:24 id:25"
-
-4: "DP- DP-Generic Ui Debug Info id:0 id:28"
-
-5: "BTN-DP- DP-Generic Ui Debug Info id:0 id:28 btn_id:31 id:31"
-
-6: "MENU-DP- DP-Generic Ui Debug Info id:0 id:28 id:29"
-
-7: "DP- BTN-DP-Generic Ui Debug Info id:0 btn_id:3 id:3 id:32"
-
-8: "BTN-DP- BTN-DP-Generic Ui Debug Info id:0 btn_id:3 id:3 id:32 btn_id:35 id:35"
-
-9: "DP- MENU-DP-Generic Ui Debug Info id:0 id:1 id:36"
-
-10: "BTN-DP- MENU-DP-Generic Ui Debug Info id:0 id:1 id:36 btn_id:39 id:39"
-
-11: "MENU-DP- BTN-DP-Generic Ui Debug Info id:0 btn_id:3 id:3 id:32 id:33"
-
-12: "MENU-DP- MENU-DP-Generic Ui Debug Info id:0 id:1 id:36 id:37"
-
-13: "DP- InfoUi-Timers section id:4 id:40"
-
-14: "BTN-DP- InfoUi-Timers section id:4 id:40 btn_id:43 id:43"
-
-15: "DP- InfoUi-Mouse section id:9 id:52"
-
-16: "BTN-DP- InfoUi-Mouse section id:9 id:52 btn_id:55 id:55"
-
-17: "DP- InfoUi-Gfx section id:14 id:64"
-
-18: "BTN-DP- InfoUi-Gfx section id:14 id:64 btn_id:67 id:67"
-
-19: "DP- InfoUi-Mesh section id:19 id:76"
-
-20: "BTN-DP- InfoUi-Mesh section id:19 id:76 btn_id:79 id:79"
-
-21: "MENU-DP- InfoUi-Timers section id:4 id:40 id:41"
-
-22: "DP- InfoUi-Timers label id:6 id:44"
-
-23: "BTN-DP- InfoUi-Timers label id:6 id:44 btn_id:47 id:47"
-
-24: "DP- InfoUi-Timers switch id:8 id:48"
-
-25: "BTN-DP- InfoUi-Timers switch id:8 id:48 btn_id:51 id:51"
-
-26: "MENU-DP- InfoUi-Mouse section id:9 id:52 id:53"
-
-27: "DP- InfoUi-Mouse label id:11 id:56"
-
-28: "BTN-DP- InfoUi-Mouse label id:11 id:56 btn_id:59 id:59"
-
-29: "DP- InfoUi-Mouse switch id:13 id:60"
-
-30: "BTN-DP- InfoUi-Mouse switch id:13 id:60 btn_id:63 id:63"
-
-31: "MENU-DP- InfoUi-Mouse switch id:13 id:60 id:61"
-
-32: "MENU-DP- InfoUi-Gfx section id:14 id:64 id:65"
-
-33: "DP- InfoUi-Gfx label id:16 id:68"
-
-34: "BTN-DP- InfoUi-Gfx label id:16 id:68 btn_id:71 id:71"
-
-35: "DP- InfoUi-Gfx switch id:18 id:72"
-
-36: "BTN-DP- InfoUi-Gfx switch id:18 id:72 btn_id:75 id:75"
-
-37: "MENU-DP- InfoUi-Mesh section id:19 id:76 id:77"
-
-38: "DP- InfoUi-Mesh label id:21 id:80"
-
-39: "BTN-DP- InfoUi-Mesh label id:21 id:80 btn_id:83 id:83"
-
-40: "DP- InfoUi-Mesh switch id:23 id:84"
-
-41: "BTN-DP- InfoUi-Mesh switch id:23 id:84 btn_id:87 id:87"
-
-42: "Widget_Scroller id:267"
-
-43: "DP-InfoUi Mesh DP id:203"
-
-44: "BTN-DP-InfoUi Mesh DP id:203 btn_id:206 id:206"
-
-45: "MENU-DP-InfoUi Mesh DP id:203 id:204"
-
-46: "DP- DP-Generic Ui Debug Info id:0 id:207"
-
-47: "BTN-DP- DP-Generic Ui Debug Info id:0 id:207 btn_id:210 id:210"
-
-48: "DP-InfoUi Gfx DP id:330"
-
-49: "BTN-DP-InfoUi Gfx DP id:330 btn_id:333 id:333"
-
-50: "Widget_Scroller id:454"
-
-51: "DP-InfoUi Mesh DP id:390"
-
-52: "BTN-DP-InfoUi Mesh DP id:390 btn_id:393 id:393"
  */
 

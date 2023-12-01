@@ -5,6 +5,7 @@ import { GlUseProgram } from './Buffers/GlBuffers.js';
 import { Uniform, UniformsBuffer } from './Buffers/GlUniformBuffer.js';
 import { SHADER_CONSTANTS } from './Shaders/ConstructShader.js';
 import { Renderqueue_set_active } from '../Engine/Renderers/Renderer/RenderQueue.js';
+import { Scenes_create_programs_buffer, Scenes_create_programs_group_buffer } from '../Engine/Scenes.js';
 
 
 
@@ -12,7 +13,7 @@ export class GfxInfoMesh {
 
 	sid = INT_NULL;
 	sceneidx = INT_NULL;
-	scene_gfx_mesh_idx = INT_NULL; // The index of the mesh inside the scenes gfx buffer.
+	scene_mesh_in_gfx_idx = INT_NULL; // The index of the mesh inside the scenes gfx buffer.
 	isPrivate = false;
 	numFaces = 0;
 	vertsPerRect = 0;
@@ -115,16 +116,17 @@ class Gl_Programs {
 
 	CreateProgram(gl, sid){
 		const progidx = this.count++;
-		this.buffer[progidx] = new Gl_Program(gl, sid);
+		this.buffer[progidx] = new Gl_Program(gl, sid, progidx);
 		return progidx;
 	}
 }
 
 export class Gl_Program {
 
-	constructor(gl, sid) {
+	constructor(gl, sid, idx) {
 
 		this.sid = sid; // Shader Type ID (E.g. ATTR_COL4 | ATTR_POS2 | INDEXED)
+		this.idx = idx; // Refference to this programs index in the 'Gl_Programs' buffer.
 
 		this.webgl_program = null;
 		this.isActive = false;
@@ -168,7 +170,7 @@ export class Gl_Program {
 				},
 			},
 
-			// Create uniforms buffer. TODO: Create a dynamic buffer Float32Array, by knowing the num of uniforms meshes will create.
+			// Create uniforms buffer. // TODO: Create a dynamic buffer Float32Array, by knowing the num of uniforms meshes will create.
 			uniforms: {
 
 				// Static uniforms
@@ -227,14 +229,6 @@ export class Gl_Program {
 					[k]: v
 				}), {});
 
-			// if(DEBUG.SHADER_INFO){
-			// 	for (let prop in sortedAttribLocations) {
-			// 		if (sortedAttribLocations[prop] > INT_NULL) {
-			// 			console.log(prop, ':', sortedAttribLocations[prop])
-			// 		}
-			// 	}
-			// }
-
 			// Store back the sorted version
 			this.shaderinfo.attributes.loc = sortedAttribLocations;
 
@@ -259,7 +253,7 @@ export class Gl_Program {
 					else if (prop === 'wposTime') {
 						this.shaderinfo.attributes.offset.wposTime = attribsOffset;
 						attribsOffset += this.shaderinfo.attributes.size.wposTime - 1;
-						// HACK. TODO, correct
+						// HACK. // TODO, correct
 						this.shaderinfo.attributes.offset.time = attribsOffset;
 						attribsOffset += 1;
 					}
@@ -284,13 +278,16 @@ export class Gl_Program {
 
 			// Store the total attributes count
 			this.shaderinfo.attribsPerVertex = attribsOffset;
-			// Store the total vertices per rectangle mesh based on Indexed geometry or not
-			if (this.sid.shad & SID.SHAD.INDEXED)
-				this.shaderinfo.verticesPerRect = VERTS_PER_RECT_INDEXED;
-			else
-				this.shaderinfo.verticesPerRect = VERTS_PER_RECT;
 
-				if(DEBUG.SHADER_INFO) console.log('ShaderInfo:', this.shaderinfo)
+			// Store the total vertices per rectangle mesh based on Indexed geometry or not
+			if (this.sid.shad & SID.SHAD.INDEXED){
+				this.shaderinfo.verticesPerRect = VERTS_PER_RECT_INDEXED;
+			}
+			else{
+				this.shaderinfo.verticesPerRect = VERTS_PER_RECT;
+			}
+
+			if(DEBUG.SHADER_INFO) console.log('ShaderInfo:', this.shaderinfo)
 
 		}
 	}
@@ -402,18 +399,22 @@ const _gl_programs_groups = {
 	buffer: [],
 	count: 0,
 
-	CreateGroup(){
+	CreateGroup(sceneidx){
 		const groupidx = this.count++;
 		this.buffer[groupidx] = new Gl_Programs(); // Create new buffer to store gl shader programs
+
+		Scenes_create_programs_group_buffer(sceneidx, groupidx); // For storing meshes by its gfx
+
 		return groupidx; // Return the index of the newly created group buffer.
 	},
 
 	CreateProgram(gl, sid){
 
 		let program_group_idx = INT_NULL;
+		const sceneidx = 0;
 		if(!this.GroupExists(PROGRAMS_GROUPS.GetIdxByMask(sid.progs_group))){ // If group does not exist, create it.
 			
-			program_group_idx = this.CreateGroup();
+			program_group_idx = this.CreateGroup(sceneidx);
 
 			// Important! Here we set globaly the index of the program group.
 			if(sid.progs_group & PROGRAMS_GROUPS.DEBUG.MASK) PROGRAMS_GROUPS.DEBUG.IDX = program_group_idx;
@@ -422,7 +423,8 @@ const _gl_programs_groups = {
 		else program_group_idx = PROGRAMS_GROUPS.GetIdxByMask(sid.progs_group);
 
 		const progidx = this.buffer[program_group_idx].CreateProgram(gl, sid); // Create the shader program
-		console.log('++++ Program shader group:' , PROGRAMS_GROUPS.GetName(sid.progs_group), ' idx:', program_group_idx, ' progidx:', progidx)
+		Scenes_create_programs_buffer(sceneidx, program_group_idx, progidx); // For storing meshes by its gfx, also binds the camera's uniform matrix to the shader program uniform
+		console.log('++++ Program shader group:' , PROGRAMS_GROUPS.GetName(sid.progs_group), ' program_group_idx:', program_group_idx, ' progidx:', progidx)
 
 		return {progidx:progidx, progs_groupidx:program_group_idx};
 	},

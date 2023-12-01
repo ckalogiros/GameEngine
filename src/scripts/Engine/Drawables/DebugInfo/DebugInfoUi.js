@@ -22,7 +22,7 @@ export function Debug_info_ui_performance(scene) {
    const fontsize = 4;
 
    // the drop down menu to hold the enabling/disabling of the 
-   const dp = new Widget_Dropdown('Generic Ui Debug Info', [110, 10, 0], [10, 10], GREY1, TRANSPARENCY(BLUE_10_120_220, tr), WHITE, [8, 3]);
+   const dp = new Widget_Dropdown('Generic Ui Debug Info', [120, 20, 0], [10, 10], GREY1, TRANSPARENCY(BLUE_10_120_220, tr), WHITE, [8, 3]);
    // dp.SetName('InfoUi Root-DP');
    dp.CreateClickEvent();
    dp.CreateMoveEvent();
@@ -161,9 +161,6 @@ export function Debug_info_create_ui_performance_timers(params) {
       // timer.RenderToDebugGfx();
       section.AddItem(timer);
    }
-
-   /********************************************************************************************************************************************************************************************************** */
-
    { // FPS average 1 second
       ms = 1000;
       const fps1sAvg = new Widget_Dynamic_Text_Mesh('Fps 1sec: | avg:', '00000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
@@ -175,9 +172,6 @@ export function Debug_info_create_ui_performance_timers(params) {
    
       section.AddItem(fps1sAvg);
    }
-
-   /********************************************************************************************************************************************************************************************************** */
-
    { // FPS average 500 miliseconds
       ms = 500;
       const fps500msAvg = new Widget_Dynamic_Text_Mesh('Fps 500ms: | avg:', '00000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
@@ -188,9 +182,6 @@ export function Debug_info_create_ui_performance_timers(params) {
       fps500msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_500ms_avg);
       section.AddItem(fps500msAvg);
    }
-
-   /********************************************************************************************************************************************************************************************************** */
-
    { // All Timers Update timer
       ms = 500;
       const t = new Widget_Dynamic_Text_Mesh(`All timers(${ms}ms):`, '0000000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
@@ -247,9 +238,8 @@ export function Debug_info_create_ui_performance_timers(params) {
       section.AddItem(t);
    }
 
-
    section.RenderToDebugGfx();
-   scene.AddWidget(section, GFX.PRIVATE);
+   scene.AddWidget(section, GFX_CTX_FLAGS.PRIVATE);
    section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
    section.Render()
    DEBUG_INFO.UI_TIMERS.IDX = section.idx;
@@ -298,7 +288,7 @@ export function Debug_info_create_ui_mouse_coords(params) {
    
    
    section.RenderToDebugGfx();
-   scene.AddWidget(section, GFX.PRIVATE);
+   scene.AddWidget(section, GFX_CTX_FLAGS.PRIVATE);
    section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
    section.Render()
    DEBUG_INFO.UI_MOUSE.IDX = section.idx;
@@ -436,7 +426,7 @@ export function Debug_info_create_gfx_info(params) {
    ui_gfx_self_state.dp._gfxidx = j;
    dp.AddToMenu(ui_gfx_self_state.dp);
 
-   scene.AddWidget(dp, GFX.PRIVATE);
+   scene.AddWidget(dp, GFX_CTX_FLAGS.PRIVATE);
    dp.Calc();
    dp.Render();
    Gfx_end_session(true);
@@ -515,26 +505,26 @@ function Debug_info_gfx_update(params) {
       // new_dp_vb._gfxidx = vbidx;
       // new_dp_vb.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
       // new_dp_vb.debug_info.data = { progidx: progidx, vbidx: vbidx, };
-      // new_dp_vb.gfx = Gfx_generate_context(new_dp_vb.sid, new_dp_vb.sceneidx, new_dp_vb.geom.num_faces, GFX.PRIVATE);
-      // Scenes_store_gfx_to_buffer(new_dp_vb.sceneidx, new_dp_vb);
+      // new_dp_vb.gfx = Gfx_generate_context(new_dp_vb.sid, new_dp_vb.sceneidx, new_dp_vb.geom.num_faces, GFX_CTX_FLAGS.PRIVATE);
+      // Scenes_bind_camera_uniforms(new_dp_vb.sceneidx, new_dp_vb);
       // {
       //    // new_dp_vb.SetName(`UIDP-vb:${vbidx}`);
       //    // // Object.defineProperty(new_dp_vb, 'gfxidx', { value: vbidx });
       //    // new_dp_vb._gfxidx = vbidx
       //    // new_dp_vb.type |= MESH_TYPES_DBG.UI_INFO_GFX; // Special recognition of this type, so we skip any infinite loops
-      //    // new_dp_vb.gfx = Gfx_generate_context(new_dp_vb.sid, new_dp_vb.sceneidx, new_dp_vb.geom.num_faces, GFX.PRIVATE);
-      //    // Scenes_store_gfx_to_buffer(new_dp_vb.sceneidx, new_dp_vb);
+      //    // new_dp_vb.gfx = Gfx_generate_context(new_dp_vb.sid, new_dp_vb.sceneidx, new_dp_vb.geom.num_faces, GFX_CTX_FLAGS.PRIVATE);
+      //    // Scenes_bind_camera_uniforms(new_dp_vb.sceneidx, new_dp_vb);
       //    // new_dp_vb.gfx.vb.start = Gfx_add_geom_mat_to_vb(new_dp_vb.sid, new_dp_vb.gfx, new_dp_vb.geom, new_dp_vb.mat, new_dp_vb.type & MESH_TYPES_DBG.UI_INFO_GFX, new_dp_vb.name)
       //    // // new_dp_vb.Render();
       // }
       
       // const btn = new_dp_vb.children.buffer[0];
-      // btn.GenGfxCtx(GFX.PRIVATE)
-      // Scenes_store_gfx_to_buffer(btn.sceneidx, btn);
+      // btn.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE)
+      // Scenes_bind_camera_uniforms(btn.sceneidx, btn);
       // btn.gfx.vb.start = Gfx_add_geom_mat_to_vb(btn.sid, btn.gfx, btn.geom, btn.mat, btn.type & MESH_TYPES_DBG.UI_INFO_GFX, btn.name)
-      // Scenes_store_gfx_to_buffer(btn.text_mesh.sceneidx, btn.text_mesh);
+      // Scenes_bind_camera_uniforms(btn.text_mesh.sceneidx, btn.text_mesh);
       // btn.text_mesh.gfx.vb.strt = Gfx_add_geom_mat_to_vb(btn.text_mesh.sid, btn.text_mesh.gfx, btn.text_mesh.geom, btn.text_mesh.mat, btn.type & MESH_TYPES_DBG.UI_INFO_GFX,  btn.text_mesh.name)
-      // // new_dp_vb.GenGfxCtx(GFX.PRIVATE);
+      // // new_dp_vb.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
       
       // parent.AddToMenu(new_dp_vb);
 
@@ -571,28 +561,6 @@ function UpdateUiGfxSelfText(){
    }
 }
 
-// function Temp_render(dp){
-
-//    dp.gfx = Gfx_generate_context(dp.sid, dp.sceneidx, dp.geom.num_faces, GFX.PRIVATE);
-//    Scenes_store_gfx_to_buffer(dp.sceneidx, dp);
-//    Gfx_add_geom_mat_to_vb(dp.sid, dp.gfx, dp.geom, dp.mat, dp.type & MESH_TYPES_DBG.UI_INFO_GFX, dp.name)
-   
-//    const btn = dp.children.buffer[0];
-//    btn.GenGfxCtx(GFX.PRIVATE)
-//    Gfx_add_geom_mat_to_vb(btn.sid, btn.gfx, btn.geom, btn.mat, btn.type & MESH_TYPES_DBG.UI_INFO_GFX, btn.name)
-   
-//    const menu = dp.menu;
-//    for(let i=0; i<menu.children.boundary; i++){
-      
-//       const child = menu.children.buffer[i];
-//       child.gfx = Gfx_generate_context(child.sid, child.sceneidx, child.geom.num_faces, GFX.PRIVATE);
-//       Scenes_store_gfx_to_buffer(child.sceneidx, child);
-//       Gfx_add_geom_mat_to_vb(child.sid, child.gfx, child.geom, child.mat, child.type & MESH_TYPES_DBG.UI_INFO_GFX, child.name)
-
-//    }
-// }
-
-
 
 /************************************************************************************************************************************************/
 // Mesh Info
@@ -624,7 +592,6 @@ function Debug_info_create_mesh_info(params){
    const tr = .45;
 
    const dp = new Widget_Dropdown(`InfoUi Mesh DP`, [600, 20, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
-   // dp.SetName('InfoUi Mesh DP');
    dp.SetType(MESH_TYPES_DBG.UI_INFO_MESH); // Special recognition of this type, so we skip any infinite loops
    dp.CreateClickEvent();
    dp.CreateMoveEvent();
@@ -647,7 +614,7 @@ function Debug_info_create_mesh_info(params){
       dp_symbols: Array [ "+", "-" ]
       eventCallbacks: Object { boundary: 0, active_count: 0, size: -1, … }
       geom: Object { zIndex: 0, time: 0, type: 2, … }
-      gfx: Object { sceneidx: 0, scene_gfx_mesh_idx: 0, isPrivate: false, … }
+      gfx: Object { sceneidx: 0, scene_mesh_in_gfx_idx: 0, isPrivate: false, … }
       hover_margin: Array [ 0, 0 ]
       id: 0
       idx: 0
@@ -693,10 +660,10 @@ function Debug_info_create_mesh_info(params){
 
    dp.Calc();
    // Create scroller for the ui-mesh info widget
-   const scroller = new Widget_Scroller(dp, [0, 100] );
+   const scroller = new Widget_Scroller(dp, [100, 300] );
    scroller.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
 
-   scene.AddWidget(scroller, GFX.PRIVATE);
+   scene.AddWidget(scroller, GFX_CTX_FLAGS.PRIVATE);
    scroller.Render();
    Gfx_end_session(true);
    scroller.ConstructListeners();
@@ -768,7 +735,7 @@ function Debug_info_create_mesh_info(params){
 //    //       dp_symbols: Array [ "+", "-" ]
 //    //       eventCallbacks: Object { boundary: 0, active_count: 0, size: -1, … }
 //    //       geom: Object { zIndex: 0, time: 0, type: 2, … }
-//    //       gfx: Object { sceneidx: 0, scene_gfx_mesh_idx: 0, isPrivate: false, … }
+//    //       gfx: Object { sceneidx: 0, scene_mesh_in_gfx_idx: 0, isPrivate: false, … }
 //    //       hover_margin: Array [ 0, 0 ]
 //    //       id: 0
 //    //       idx: 0
@@ -822,7 +789,7 @@ function Debug_info_create_mesh_info(params){
 //    //    dp.AddToMenu(dp_mesh);
 //    // }
 
-//    scene.AddWidget(dp, GFX.PRIVATE);
+//    scene.AddWidget(dp, GFX_CTX_FLAGS.PRIVATE);
 //    dp.Calc();
 //    dp.Render();
 //    Gfx_end_session(true);
@@ -885,9 +852,9 @@ function Debug_info_mesh_update(params){
    //    root_info_dp.AddToMenu(dp_mesh);
 
 
-   //    // dp_mesh.GenGfxCtx(GFX.PRIVATE);
+   //    // dp_mesh.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
    //    const gfx_idxs = [root_info_dp.menu.gfx.prog.idx, root_info_dp.menu.gfx.vb.idx];
-   //    dp_mesh.GenGfxCtx(GFX.PRIVATE, gfx_idxs);
+   //    dp_mesh.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE, gfx_idxs);
    //    // Gfx_add_geom_mat_to_vb(dp_mesh.sid, dp_mesh.gfx, dp_mesh.geom, dp_mesh.mat, dp_mesh.type & MESH_TYPES_DBG.MESH, dp_mesh.name);
    //    dp_mesh.Render();
    //    root_info_dp.Recalc();

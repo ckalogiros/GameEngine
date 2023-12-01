@@ -120,7 +120,7 @@ export function HandleEvents() {
 export function Events_handle_immidiate(e){
 
     /**
-     * TODO: Set the hovered mesh to be darwn on top(last in vertexBuffer or in render queue)
+     * // TODO: Set the hovered mesh to be darwn on top(last in vertexBuffer or in render queue)
      * 0. Check to see if overlap (2)
      * 1. If the hovered mesh is in different vertexBuffer than the previous hovered mesh,
      *      change the order of the render queue, if it is drawn before. 

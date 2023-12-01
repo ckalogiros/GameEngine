@@ -88,8 +88,8 @@ export const vertex_shader_chunks = {
 
 
 // Fragment Shader
-const frag_color_create  = '    vec4 color = v_col;';
-const frag_color_assign  = '    frag_color = color;';
+const frag_color_create  = '  vec4 color = v_col;';
+const frag_color_assign  = '  frag_color = color;';
 const out_frag_color     = 'out vec4 frag_color;';
 const frag_u_sampler0    = 'uniform sampler2D u_sampler0;';
 const in_frag_col4       = 'in vec4 v_col;';

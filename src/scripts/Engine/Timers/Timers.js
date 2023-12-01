@@ -192,7 +192,7 @@ export function TimersCreateTimer(start, duration, step, name, clbk, params){
  * Update all _timers used by the game here.
  * Must run for each render iteration(frame)
  * 
- * TODO !!!: Not efficient, it runs 350 elements without any being active
+ * // TODO !!!: Not efficient, it runs 350 elements without any being active
  */
 export function TimersUpdateTimers(){
 

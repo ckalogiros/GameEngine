@@ -410,7 +410,7 @@ class Matrix4 {
 		const n31 = te[2], n32 = te[6], n33 = te[10], n34 = te[14];
 		const n41 = te[3], n42 = te[7], n43 = te[11], n44 = te[15];
 
-		//TODO: make this more efficient
+		//// TODO: make this more efficient
 		//( based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm )
 
 		return (

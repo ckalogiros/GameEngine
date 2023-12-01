@@ -1,7 +1,5 @@
 "use strict";
 
-import { AddArr3, CopyArr2 } from '../../../../Helpers/Math/MathOperations.js';
-import { Check_intersection_point_rect } from '../../Operations/Collisions.js';
 import { MouseGetPos, MouseGetPosDif } from '../../../Controls/Input/Mouse.js';
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from '../../../Timers/TimeIntervals.js';
 import { MESH_ENABLE } from '../Base/Mesh.js';
@@ -9,9 +7,7 @@ import { Rect } from '../Rect_Mesh.js';
 import { Text_Mesh } from '../Text_Mesh.js';
 
 import { Widget_popup_handler_onclick_event } from './WidgetPopup.js';
-import { Widget_Label } from './WidgetLabel.js';
 import { Gfx_generate_context } from '../../../Interfaces/Gfx/GfxContext.js';
-import { Scenes_store_gfx_to_buffer } from '../../../Scenes.js';
 
 
 /**
@@ -24,7 +20,7 @@ import { Scenes_store_gfx_to_buffer } from '../../../Scenes.js';
  *    ->name-text.
  * 
  * 
- * TODO: Create a ui slider binding.
+ * // TODO: Create a ui slider binding.
  * If slider is onHover and right click event, show a menu of: \
  *    1. slider's binding points.
  *    2. all meshes of the current scene tha can be bound to a slider.
@@ -83,7 +79,6 @@ export class Widget_Slider extends Rect {
       
       /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
       // Slider Handle: Handle is a child of the bar mesh
-      
       pad[1] = dim[1] / 10;
       const handleMetrics = this.#CalculateHandleArea(bar.geom.pos, dim, pad)
       
@@ -151,27 +146,22 @@ export class Widget_Slider extends Rect {
 
    /*******************************************************************************************************************************************************/
    // Graphics
-   GenGfxCtx(FLAGS = GFX.ANY, gfxidx = null) {
+   GenGfxCtx(FLAGS = GFX_CTX_FLAGS.ANY, gfxidx = null) {
 
       this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
       this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, FLAGS, gfxidx);
-      Scenes_store_gfx_to_buffer(this.sceneidx, this);
 
       const name_text = this.text_mesh;
       name_text.gfx = Gfx_generate_context(name_text.sid, name_text.sceneidx, name_text.geom.num_faces, FLAGS, gfxidx);
-      Scenes_store_gfx_to_buffer(name_text.sceneidx, name_text);
 
       const bar = this.children.buffer[BAR_IDX];
       bar.gfx = Gfx_generate_context(bar.sid, bar.sceneidx, bar.geom.num_faces, FLAGS, gfxidx);
-      Scenes_store_gfx_to_buffer(bar.sceneidx, bar);
       
       const handle = bar.children.buffer[0];
       handle.gfx = Gfx_generate_context(handle.sid, handle.sceneidx, handle.geom.num_faces, FLAGS, gfxidx);
-      Scenes_store_gfx_to_buffer(handle.sceneidx, handle);
       
       const value_text = bar.children.buffer[1];
       value_text.gfx = Gfx_generate_context(value_text.sid, value_text.sceneidx, value_text.geom.num_faces, FLAGS, gfxidx);
-      Scenes_store_gfx_to_buffer(value_text.sceneidx, value_text);
 
       return this.gfx;
    }
@@ -208,7 +198,6 @@ export class Widget_Slider extends Rect {
 
    /*******************************************************************************************************************************************************/
    // Events Handling
-
 
    // SEE ### OnMove Events Implementation Logic
 	OnMove(params) {
@@ -448,43 +437,6 @@ export class Widget_Slider extends Rect {
 
 
 }
-
-// function Slider_move_event(params) {
-//    /**
-//     * The function is called by the timeInterval.
-//     * The timeInterval has been set by the 'OnClick' event.
-//     */
-
-//    const slider = params.params;
-
-//    // Destroy the time interval calling this function if the mesh is not grabed.
-//    if (slider.StateCheck(MESH_STATE.IN_GRAB) === 0 && slider.timeIntervalsIdxBuffer.boundary) {
-
-//       const intervalIdx = slider.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
-//       TimeIntervalsDestroyByIdx(intervalIdx);
-//       slider.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
-
-//       return;
-//    }
-
-//    // Move the mesh
-//    const mouse_pos = MouseGetPosDif();
-//    if (mouse_pos.x === 0 && mouse_pos.y === 0) return;
-
-//    // console.log('MOVING SECTION', slider.name, mouse_pos)
-//    console.log('MOVING SLIDER', slider.name)
-
-//    slider.MoveXY(mouse_pos.x, -mouse_pos.y);
-//    const bar = slider.children.buffer[0];
-//    bar.MoveXY(mouse_pos.x, -mouse_pos.y);
-//    const handle = bar.children.buffer[0];
-//    handle.MoveXY(mouse_pos.x, -mouse_pos.y);
-//    const value = bar.children.buffer[1];
-//    value.MoveXY(mouse_pos.x, -mouse_pos.y);
-//    const name = slider.children.buffer[1];
-//    name.MoveXY(mouse_pos.x, -mouse_pos.y);
-
-// }
 
 export function Slider_connect(_params) {
 

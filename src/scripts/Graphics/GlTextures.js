@@ -5,8 +5,8 @@ import { GlBindTexture } from "./Buffers/GlBuffers.js";
 
 export function GlCreateTexture(gl, texture, idx, img) {
 
-    texture.texId = gl.TEXTURE0 + idx; // Advance the texture ID to the next. TODO: Should check for GL_MAX_ALLOWED_TEXTURE_UNITS.
-    texture.idx = idx; // Advance the texture ID to the next. TODO: Should check for GL_MAX_ALLOWED_TEXTURE_UNITS.
+    texture.texId = gl.TEXTURE0 + idx; // Advance the texture ID to the next. // TODO: Should check for GL_MAX_ALLOWED_TEXTURE_UNITS.
+    texture.idx = idx; // Advance the texture ID to the next. // TODO: Should check for GL_MAX_ALLOWED_TEXTURE_UNITS.
     texture.level = 0;
     texture.internalFormat = gl.RGBA;
     texture.srcFormat = gl.RGBA;

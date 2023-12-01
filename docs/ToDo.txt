@@ -38,27 +38,22 @@ redrawing the meshes to it's self
 
 . Implement set render queue priority for meshes inside a vertexBuffer.
 
-. Definetly we need an implementation of removing vertices from the gfx buffers.
-  . One way would be to keep track of all the free attributes of a vertex buffer
-    and add to that free space when it sees fit. Also we need a kind of combining
-    overlaping free space implementation
-
   . Implement destruction of gfx buffers and gl program.
     (Also make sure all suposed private buffers are set private).
 --------------------------------------------------- IMIDIATE!
 
---------------------------------------------------- TODO
+--------------------------------------------------- _asdhjdTODO_
 
-.IMPORTANT!: Ineficiency problem with the creation of too many private vertex buffers, considering the case of Dropdown creation.
-  Currently we use separate vertex buffers(private gfx) for each and every mesh of a dropdown
-  that needs to be drawn/Undrawn on a a basis of activated/deactivated dp's menu.
-  This is rather ineficient, if for example we need to have a huge list of dropdowns with their own dropdowns inside.
-  We are talking about tens even hundrent's of vertex buffers created.
-  In addition all these vertex buffers remain as private-Unused in the buffer of GfxContext class, even if all dropdowns are closed.
-  SOLUTION: The only reasonable solution is to implement a system where SOME menus and its items, selected not randomly but by reasoning,
-  being stored at one vertex generic buffer and the stop rendering is done by setting the alpha value of the meshes color to 0.
-  Then when the vertex buffer is empty, empty by the definition of all its alpha color attributes are 0, we can give back the 
-  vertex buffer as unused for further use.  
+TODO: Render all the meshes taht do not change (vertex buffers) to a frame buffer texture and render the texture instead
+
+// TODO: . IMPORTANT!:Batch remove meshes attribs from gfx buffers.
+  Example: 
+      GfxRemoveMesh(gfx){
+        SOME_BUFFER[some].push(start, progidx,, vbidx)
+      }
+      GfxRemoveBatch(SOME_BUFFER){
+        // Unify all starts of all attribs to be removed and shift exixting attributes of the buffer as few times as possible.
+      }
 
 . Batch activate/deactivate buffers. Use an indexed  by prog and vb buffer.
   Example: StoreForUpdate(arr); arr = prog[progidx].vb[vbidx]
@@ -99,7 +94,7 @@ redrawing the meshes to it's self
   . Triangle2D
   . Triangle3D
   . etc
---------------------------------------------------- TODO
+--------------------------------------------------- // TODO
 
 --------------------------------------------------- CONTINUE
 

@@ -8,7 +8,7 @@ import { Check_intersection_point_rect } from "../../Operations/Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
 import { Gfx_generate_context } from "../../../Interfaces/Gfx/GfxContext.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
-import { Scenes_remove_root_mesh, Scenes_store_gfx_to_buffer } from "../../../Scenes.js";
+import { Scenes_remove_root_mesh } from "../../../Scenes.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals.js";
 import { MESH_ENABLE } from "../Base/Mesh.js";
 import { Rect } from "../Rect_Mesh.js";
@@ -109,13 +109,10 @@ export class Widget_Label extends Rect {
 
     /*******************************************************************************************************************************************************/
     // Graphics
-    GenGfxCtx(FLAGS=GFX.ANY, area_gfx_specific=null, text_gfx_specific=null) {
+     GenGfxCtx(FLAGS=GFX_CTX_FLAGS.ANY, area_gfx_specific=null, text_gfx_specific=null) {
 
         this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, area_gfx_specific);
-        Scenes_store_gfx_to_buffer(this.sceneidx, this);
-
         this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, FLAGS, text_gfx_specific);
-        Scenes_store_gfx_to_buffer(this.text_mesh.sceneidx, this.text_mesh);
         
         return this.gfx;
     }
