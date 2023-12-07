@@ -54,7 +54,7 @@ export function HandleEvents() {
             if(LISTENERS_FLAGS[LISTEN_EVENT_TYPES_INDEX.CLICK] === true) // ..if no events, skip dispatching
                 Listener_dispatch_event(LISTEN_EVENT_TYPES_INDEX.CLICK, e.params.mouseButton);
 
-            console.log('CKLICK!!!!')
+            // console.log('CKLICK!!!!')
         }
 
         else if (e.type === 'mouse-click-up') {

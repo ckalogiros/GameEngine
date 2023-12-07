@@ -5,7 +5,7 @@ import { TimerGetGlobalTimer } from "../../../Timers/Timers.js";
 import { Listener_create_child_event, Listener_create_event, Listener_remove_children_event_by_idx, Listener_remove_event_by_idx } from "../../../Events/EventListeners.js";
 import { CopyArr4 } from "../../../../Helpers/Math/MathOperations.js";
 import { Scenes_get_count, Scenes_update_all_gfx_starts, Scenes_get_root_meshes, Scenes_remove_mesh_from_gfx, Scenes_remove_root_mesh } from "../../../Scenes.js";
-import { Gfx_deactivate, Gfx_remove_geometry } from "../../../Interfaces/Gfx/GfxContext.js";
+import { Gfx_remove_geometry } from "../../../Interfaces/Gfx/GfxContextCreate.js";
 import { TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals.js";
 import { Gfx_set_vb_show } from "../../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 import { Info_listener_dispatch_event } from "../../DebugInfo/InfoListeners.js";
@@ -263,27 +263,28 @@ export class Mesh {
     /*******************************************************************************************************************************************************/
     // Graphics
 
-    DeactivateGfx() {
+    /**DO NOT DELETE */
+    // DeactivateGfx() {
 
-        Gfx_deactivate(this.gfx);
-        this.is_gfx_inserted = false;
+    //     Gfx_deactivate(this.gfx);
+    //     this.is_gfx_inserted = false;
 
-        Scenes_remove_mesh_from_gfx(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.scene_mesh_in_gfx_idx);
+    //     Scenes_remove_mesh_from_gfx(this.sceneidx, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.scene_mesh_in_gfx_idx);
 
-        const params = {
-            progidx: this.gfx.prog.idx,
-            vbidx: this.gfx.vb.idx,
-            sceneidx: this.sceneidx,
-            isActive: true,
-            isPrivate: (FLAGS & GFX_CTX_FLAGS.PRIVATE) ? true : false,
-            type: INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB,
-        }
-        Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE, params);
-    }
+    //     const params = {
+    //         progidx: this.gfx.prog.idx,
+    //         vbidx: this.gfx.vb.idx,
+    //         sceneidx: this.sceneidx,
+    //         isActive: true,
+    //         isPrivate: (FLAGS & GFX_CTX_FLAGS.PRIVATE) ? true : false,
+    //         type: INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB,
+    //     }
+    //     Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE, params);
+    // }
 
     Set_graphics_vertex_buffer_render(flag) {
 
-        Gfx_set_vb_show(this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.progs_groupidx, flag);
+        Gfx_set_vb_show(this.gfx.progs_groupidx, this.gfx.prog.idx, this.gfx.vb.idx, flag);
         if (flag) this.StateEnable(MESH_STATE.IS_HOVERABLE);
         else this.StateDisable(MESH_STATE.IS_HOVERABLE);
 

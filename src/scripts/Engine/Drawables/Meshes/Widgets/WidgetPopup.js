@@ -6,7 +6,7 @@ import { MESH_ENABLE } from '../Base/Mesh.js';
 import { CopyArr2 } from '../../../../Helpers/Math/MathOperations.js';
 import { Menu_options_create } from '../../Operations/MenuOptionsBuilder.js';
 import { Section } from '../Section.js';
-import { Gfx_activate, Gfx_deactivate_recursive, Gfx_end_session } from '../../../Interfaces/Gfx/GfxContext.js';
+import { Gfx_activate } from '../../../Interfaces/Gfx/GfxContextCreate.js';
 
 
 class Widget_PopUp extends Section {
@@ -113,7 +113,7 @@ export function Initializer_popup_initialization(){
    _popup = new Widget_PopUp([200, 300, 0], [15,10], TRANSPARENCY(GREY2, .6));
    _popup.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
    _popup.Deactivate();
-   Gfx_end_session(true, false);
+   //*Gfx_end_session(true, false);
 }
 
 /** DO NOT DELETE */
@@ -159,7 +159,7 @@ export function Widget_popup_handler_onclick_event(clicked_mesh, clickedButtonId
       popup.Recalc(); // Reset pos-dim and calculate.
 
       popup.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
-      Gfx_end_session(true);
+      //*Gfx_end_session(true);
       popup.Render();
 
       popup.Activate();

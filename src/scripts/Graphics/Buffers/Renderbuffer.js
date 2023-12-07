@@ -270,7 +270,7 @@ export function FramebufferRenderToFramebuffer(drawQueue, drawQueueCount) {
    gl.enable(gl.DEPTH_TEST);
    gl.depthMask(false);
 
-   Gfx_set_vb_show(fb.gfxInfo.prog.idx, fb.gfxInfo.vb.idx, fb.gfx.progs_groupidx, false); // Disable rendering the rect that the texture of the frameBuffer will be rendered to 
+   Gfx_set_vb_show(fb.gfx.progs_groupidx, fb.gfxInfo.prog.idx, fb.gfxInfo.vb.idx, false); // Disable rendering the rect that the texture of the frameBuffer will be rendered to 
 
    for (let i = 0; i < drawQueueCount; i++) {
 
@@ -304,7 +304,7 @@ export function FramebufferRenderToFramebuffer(drawQueue, drawQueueCount) {
           gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
        }
    }
-   Gfx_set_vb_show(fb.gfxInfo.prog.idx, fb.gfxInfo.vb.idx, fb.gfx.progs_groupidx, true); // Enable rendering FrameBuffer's rect
+   Gfx_set_vb_show(fb.gfx.progs_groupidx, fb.gfxInfo.prog.idx, fb.gfxInfo.vb.idx, true); // Enable rendering FrameBuffer's rect
 
    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
    gl.bindTexture(gl.TEXTURE_2D, null);

@@ -1,12 +1,11 @@
 "use strict";
 
-import { Gl_progs_get_group, Gl_progs_get_vb_byidx } from "../../../Graphics/GlProgram";
+import { Gl_progs_get_group } from "../../../Graphics/GlProgram";
 import { Section } from "../Meshes/Section";
 import { Drop_down_set_root, Widget_Dropdown } from "../Meshes/Widgets/Menu/Widget_Dropdown";
 import { Widget_Switch } from "../Meshes/Widgets/WidgetButton";
 import { Widget_Label } from "../Meshes/Widgets/WidgetLabel";
 import { Widget_Dynamic_Text_Mesh } from "../Meshes/Widgets/WidgetText";
-import { Gfx_end_session } from "../../Interfaces/Gfx/GfxContext";
 import { Scenes_get_root_meshes } from "../../Scenes.js";
 import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _pt2, _pt3, _pt4, _pt5, _pt6, _pt_fps } from "../../Timers/PerformanceTimers";
 import { PerformanceTimerGetFps1sAvg, _fps_1s_avg, _fps_500ms_avg } from "../../Timers/Time";
@@ -19,48 +18,44 @@ export function Debug_info_ui_performance(scene) {
 
    const tr = .5; // Transparency
    const pad = [5, 5];
+   const sectionpad = [10, 10];
    const fontsize = 4;
 
-   // the drop down menu to hold the enabling/disabling of the 
-   const dp = new Widget_Dropdown('Generic Ui Debug Info', [120, 20, 0], [10, 10], GREY1, TRANSPARENCY(BLUE_10_120_220, tr), WHITE, [8, 3]);
-   // dp.SetName('InfoUi Root-DP');
+   const dp = new Widget_Dropdown('Generic Ui Debug Info', [120, 20, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
    dp.CreateClickEvent();
    dp.CreateMoveEvent();
    Drop_down_set_root(dp, dp);
 
-   
+   let zindex = dp.geom.pos[2];
    
    /************************************************************************************************************************************************/
    // Performance timers
    {
-      const section = new Section(SECTION.HORIZONTAL, [10, 10], [0, 0, 0], [0, 0], TRANSPARENCY(GREY6, .4), 'InfoUi-Timers section');
-      // section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+      const section = new Section(SECTION.HORIZONTAL, sectionpad, [0, 0, zindex+1], [0, 0], TRANSPARENCY(GREY6, .4), 'InfoUi-Timers section');
       
-      const enable_ui_timers_label = new Widget_Label('Ui Performance Timers', (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), [200, 300, 0], fontsize, TRANSPARENCY(BLUE_10_120_220, .7), WHITE, pad, .4, undefined, [2, 3, 2]);
+      const enable_ui_timers_label = new Widget_Label('Ui Performance Timers', (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), [0, 0, zindex+2], fontsize, TRANSPARENCY(BLUE_10_120_220, tr), WHITE, pad, .4, undefined, [2, 3, 2]);
       enable_ui_timers_label.SetName(`InfoUi-Timers label`);
       section.AddItem(enable_ui_timers_label);
       
-      
-      const enable_ui_timers_switch = new Widget_Switch('on', 'off', [Viewport.right - 500, 200, 0], 4.4, BLUE_10_120_220, WHITE, [2, 3]);
+      const enable_ui_timers_switch = new Widget_Switch('on', 'off', [0, 0, zindex+2], 4.4, BLUE_10_120_220, WHITE, [2, 3]);
       enable_ui_timers_switch.Bind(Debug_info_create_ui_performance_timers, null, scene);
       enable_ui_timers_switch.SetName(`InfoUi-Timers switch`);
       section.AddItem(enable_ui_timers_switch);
 
       dp.AddToMenu(section);
-      
    }
 
    /************************************************************************************************************************************************/
    // Mouse Info
    {
-      const section = new Section(SECTION.HORIZONTAL, [10, 10], [0, 0, 0], [0, 0], TRANSPARENCY(ORANGE_240_130_10, .4), 'InfoUi-Mouse section');
+      const section = new Section(SECTION.HORIZONTAL, sectionpad, [0, 0, zindex+1], [0, 0], TRANSPARENCY(GREY6, .4), 'InfoUi-Mouse section');
       section.SetName('InfoUi-Mouse section');
 
-      const label = new Widget_Label('Mouse Info', (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), [200, 300, 0], fontsize, TRANSPARENCY(BLUE_10_120_220, .5), YELLOW, pad, .4, undefined, [2, 3, 2]);
+      const label = new Widget_Label('Mouse Info', (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), [0, 0, zindex+2], fontsize, TRANSPARENCY(BLUE_10_120_220, tr), WHITE, pad, .4, undefined, [2, 3, 2]);
       label.SetName(`InfoUi-Mouse label`);
       section.AddItem(label);
 
-      const ui_switch = new Widget_Switch('on', 'off', [Viewport.right - 500, 200, 0], 4.4, BLUE_10_120_220, WHITE, [2, 3]);
+      const ui_switch = new Widget_Switch('on', 'off', [0, 0, zindex+2], 4.4, BLUE_10_120_220, WHITE, [2, 3]);
       ui_switch.Bind(Debug_info_create_ui_mouse_coords, null, scene);
       ui_switch.SetName(`InfoUi-Mouse switch`);
       section.AddItem(ui_switch);
@@ -71,17 +66,14 @@ export function Debug_info_ui_performance(scene) {
    /************************************************************************************************************************************************/
    // Gfx Info
    {
-      const section = new Section(SECTION.HORIZONTAL, [4, 4], [0, 0, 0], [0, 0], TRANSPARENCY(GREY6, .6), 'InfoUi-Gfx section');
+      const section = new Section(SECTION.HORIZONTAL, sectionpad, [0, 0, zindex+1], [0, 0], TRANSPARENCY(GREY6, .4), 'InfoUi-Gfx section');
       section.SetName('InfoUi-Gfx section');
-      // section.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
-      // section.mat.col = [WHITE, RED, GREEN, BLUE];
-      // section.geom.pos[2] = 2;
 
-      const label = new Widget_Label('Gfx Info', (ALIGN.BOTTOM | ALIGN.VERT_CENTER), [200, 300, 0], fontsize, TRANSPARENCY(GREEN_140_240_10, .6), WHITE, pad, .4, undefined, [2, 3, 2]);
+      const label = new Widget_Label('Gfx Info', (ALIGN.BOTTOM | ALIGN.VERT_CENTER), [0, 0, zindex+2], fontsize, TRANSPARENCY(GREEN_140_240_10, tr), WHITE, pad, .4, undefined, [2, 3, 2]);
       label.SetName(`InfoUi-Gfx label`);
       section.AddItem(label);
 
-      const ui_switch = new Widget_Switch('on', 'off', [0, 0, 0], 4.4, BLUE_10_120_220, WHITE, [2, 3]);
+      const ui_switch = new Widget_Switch('on', 'off', [0, 0, zindex+2], 4.4, BLUE_10_120_220, WHITE, [2, 3]);
       ui_switch.Bind(Debug_info_create_gfx_info, null, scene);
       ui_switch.SetName(`InfoUi-Gfx switch`);
       section.AddItem(ui_switch);
@@ -92,25 +84,22 @@ export function Debug_info_ui_performance(scene) {
    /************************************************************************************************************************************************/
    // Mesh Info
    {
-      const section = new Section(SECTION.HORIZONTAL, [4, 4], [0, 0, 0], [0, 0], TRANSPARENCY(GREY6, .6), 'InfoUi-Mesh section');
+      const section = new Section(SECTION.HORIZONTAL, sectionpad, [0, 0, zindex+1], [0, 0], TRANSPARENCY(GREY6, .4), 'InfoUi-Mesh section');
       section.SetName('InfoUi-Mesh section');
-      // section.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
-      // section.mat.col = [WHITE, RED, GREEN, BLUE];
-      // section.geom.pos[2] = 2;
 
-      const label = new Widget_Label('Mesh Info', (ALIGN.BOTTOM | ALIGN.VERT_CENTER), [200, 300, 0], fontsize, TRANSPARENCY(GREEN_140_240_10, .6), WHITE, pad, .4, undefined, [2, 3, 2]);
+      const label = new Widget_Label('Mesh Info', (ALIGN.BOTTOM | ALIGN.VERT_CENTER), [0, 0, zindex+2], fontsize, TRANSPARENCY(GREEN_140_240_10, tr), WHITE, pad, .4, undefined, [2, 3, 2]);
       label.SetName(`InfoUi-Mesh label`);
       section.AddItem(label);
 
-      const ui_switch = new Widget_Switch('on', 'off', [0, 0, 0], 4.4, BLUE_10_120_220, WHITE, [2, 3]);
+      const ui_switch = new Widget_Switch('on', 'off', [0, 0, zindex+2], 4.4, BLUE_10_120_220, WHITE, [2, 3]);
       ui_switch.Bind(Debug_info_create_mesh_info, null, scene);
-      // ui_switch.Bind(Scenes_debug_info_create_recursive, null, scene);
       ui_switch.SetName(`InfoUi-Mesh switch`);
       section.AddItem(ui_switch);
 
       dp.AddToMenu(section);
    }
-   scene.AddWidget(dp);
+
+   scene.AddWidget(dp, GFX_CTX_FLAGS.PRIVATE);
    dp.Calc();
    dp.ConstructListeners();
 
@@ -128,7 +117,6 @@ export function Debug_info_create_ui_performance_timers(params) {
       const section = meshes.buffer[DEBUG_INFO.UI_TIMERS.IDX];
 
       DEBUG_INFO.UI_TIMERS.POS = section.geom.pos; // Remember the info's position.
-      // section.DestroyPrivateGfxRecursive();
       section.Destroy();
 
       DEBUG_INFO.UI_TIMERS.IDX = INT_NULL;
@@ -136,11 +124,9 @@ export function Debug_info_create_ui_performance_timers(params) {
       return;
    }
 
-
    const section = new Section(SECTION.HORIZONTAL, [10, 10], DEBUG_INFO.UI_TIMERS.POS, [0, 0], TRANSPARENCY(GREY1, .4), 'ui performance timers panel');
    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
    section.SetName('InfoUi-PerformanceTimers section');
-
 
    const fontsize = 4;
    let pad = 0;
@@ -238,12 +224,12 @@ export function Debug_info_create_ui_performance_timers(params) {
       section.AddItem(t);
    }
 
-   section.RenderToDebugGfx();
+   // section.RenderToDebugGfx();
    scene.AddWidget(section, GFX_CTX_FLAGS.PRIVATE);
-   section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
+   // section.Recalc(SECTION.HORIZONTAL);
+   section.Calc(SECTION.VERTICAL);
    section.Render()
    DEBUG_INFO.UI_TIMERS.IDX = section.idx;
-   Gfx_end_session(true);
    section.ConstructListeners();
 
 
@@ -287,12 +273,12 @@ export function Debug_info_create_ui_mouse_coords(params) {
    section.AddItem(infomesh);
    
    
-   section.RenderToDebugGfx();
+   // section.RenderToDebugGfx();
    scene.AddWidget(section, GFX_CTX_FLAGS.PRIVATE);
-   section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
+   // section.Recalc(SECTION.VERTICAL | SECTION.HORIZONTAL);
+   section.Recalc(SECTION.VERTICAL);
    section.Render()
    DEBUG_INFO.UI_MOUSE.IDX = section.idx;
-   Gfx_end_session(true);
    section.ConstructListeners();
 
    DEBUG_INFO.UI_MOUSE.IS_ON = true;
@@ -410,7 +396,6 @@ export function Debug_info_create_gfx_info(params) {
          else {
             
             const dp_vb = new Widget_Dropdown(`Self prog:${i} vb:${j} | count:${vb.count}`, [0, 0, 0], [10, 10], TRANSPARENCY(PINK_240_60_160, tr), TRANSPARENCY(GREY3, tr), WHITE, [8, 3]);
-            // dp_vb.SetName(`VB DP:${j}`)
             dp_vb._gfxidx = j;
             dp_vb.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
             dp_vb.debug_info.data = { progidx: i, vbidx: j, };
@@ -429,7 +414,6 @@ export function Debug_info_create_gfx_info(params) {
    scene.AddWidget(dp, GFX_CTX_FLAGS.PRIVATE);
    dp.Calc();
    dp.Render();
-   Gfx_end_session(true);
    dp.ConstructListeners();
    
    DEBUG_INFO.UI_GFX.IDX = dp.idx;
@@ -567,7 +551,6 @@ function UpdateUiGfxSelfText(){
 
 function Debug_info_create_mesh_info(params){
 
-   
    const scene = params.params;
 
    if (DEBUG_INFO.UI_MESH.IS_ON) {
@@ -665,7 +648,7 @@ function Debug_info_create_mesh_info(params){
 
    scene.AddWidget(scroller, GFX_CTX_FLAGS.PRIVATE);
    scroller.Render();
-   Gfx_end_session(true);
+   //*Gfx_end_session(true);
    scroller.ConstructListeners();
    
    DEBUG_INFO.UI_MESH.IDX = scroller.idx;
@@ -792,7 +775,7 @@ function Debug_info_create_mesh_info(params){
 //    scene.AddWidget(dp, GFX_CTX_FLAGS.PRIVATE);
 //    dp.Calc();
 //    dp.Render();
-//    Gfx_end_session(true);
+//    //*Gfx_end_session(true);
 //    dp.ConstructListeners();
    
 //    DEBUG_INFO.UI_MESH.IDX = dp.idx;

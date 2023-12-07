@@ -153,8 +153,7 @@ export class Scene {
         }
         { /**DEBUG */
             const mesh = this.gfx.buffer[progs_groupidx].buffer[progidx].buffer[vbidx].buffer[scene_mesh_in_gfx_idx];
-            console.log(`Removing mesh: group:${progs_groupidx} prog:${progidx} vb:${vbidx} idx:${scene_mesh_in_gfx_idx}`)
-            // if(mesh) console.log(`name:${mesh.name}`)
+            if(DEBUG.REMOVE_MESH) console.log(`Removing mesh: group:${progs_groupidx} prog:${progidx} vb:${vbidx} idx:${scene_mesh_in_gfx_idx}`)
         }
         this.gfx.buffer[progs_groupidx].buffer[progidx].buffer[vbidx].RemoveByIdx(scene_mesh_in_gfx_idx);
         return false;
@@ -270,19 +269,21 @@ export class Scene {
     PrintGfxStorageBuffer() {
         // console.log(this.gfx)
         let count_meshes = 0;
-        for (let i = 0; i < this.gfx.boundary; i++){
+        for (let progs_groupidx = 0; progs_groupidx < this.gfx.boundary; progs_groupidx++){
+            for (let i = 0; i < this.gfx.buffer[progs_groupidx].boundary; i++){
 
-            console.log('progidx:', this.gfx.buffer[progs_groupidx].progs.buffer[i].progidx);
-            for (let j = 0; j < this.gfx.buffer[progs_groupidx].progs.buffer[i].vb.boundary; j++){
-                
-                console.log('  vbidx:', this.gfx.buffer[progs_groupidx].progs.buffer[i].vb.buffer[j].vbidx);
-                for (let k = 0; k < this.gfx.buffer[progs_groupidx].progs.buffer[i].vb.buffer[j].mesh.boundary; k++) { 
-                    if(this.gfx.buffer[progs_groupidx].progs.buffer[i].vb.buffer[j].mesh.buffer[k]){
-                        
-                        const mesh = this.gfx.buffer[progs_groupidx].progs.buffer[i].vb.buffer[j].mesh.buffer[k];
-                        console.log(`    ${k} name:${mesh.name}, gfxmesh: ${mesh.gfx.scene_mesh_in_gfx_idx} mesh: ${mesh.idx} root: ${mesh.scene_rootidx}`)
-                        count_meshes++;
-                    } 
+                console.log('progidx:', i);
+                for (let j = 0; j < this.gfx.buffer[progs_groupidx].buffer[i].boundary; j++){
+                    
+                    console.log('  vbidx:', j);
+                    for (let k = 0; k < this.gfx.buffer[progs_groupidx].buffer[i].buffer[j].boundary; k++) { 
+                        if(this.gfx.buffer[progs_groupidx].buffer[i].buffer[j].buffer[k]){
+                            
+                            const mesh = this.gfx.buffer[progs_groupidx].buffer[i].buffer[j].buffer[k];
+                            console.log(`    ${k} name:${mesh.name}, gfxmesh: ${mesh.gfx.scene_mesh_in_gfx_idx} mesh: ${mesh.idx} root: ${mesh.scene_rootidx}`)
+                            count_meshes++;
+                        } 
+                    }
                 }
             }
         }

@@ -26,7 +26,7 @@ export function Gl_remove_geometry(gfx, num_faces = 1) {
     return ret;
 }
 
-export function Gl_remove_geometry_with_alpha(gfx, num_faces = 1){
+export function Gl_remove_geometry_with_alpha(gfx, num_faces = 1) {
 
     GlSetColorAlpha(gfx, 0, num_faces);
 }
@@ -100,19 +100,31 @@ export function VbSetAttribColPerVertex(vb, start, count, stride, col, num_faces
 
     let index = start;
     const end = start + (count * num_faces);
-    let k = 0;
+    // let k = 0;
+
+    // while (index < end) {
+    //     vb.data[index++] = col[k][0];
+    //     vb.data[index++] = col[k][1];
+    //     vb.data[index++] = col[k][2];
+    //     vb.data[index++] = col[k][3];
+
+    //     index += stride;
+    //     vb.count += V_COL_COUNT;
+    //     k++;
+    //     if (k >= 4) k = 0;
+    // }
+    let k = 1;
 
     while (index < end) {
-
-        vb.data[index++] = col[k][0];
+        vb.data[index++] = col[k][0]; 
         vb.data[index++] = col[k][1];
-        vb.data[index++] = col[k][2];
-        vb.data[index++] = col[k][3];
+        vb.data[index++] = col[k][1];
+        vb.data[index++] = col[k][0];
 
         index += stride;
         vb.count += V_COL_COUNT;
         k++;
-        if (k >= 4) k = 0;
+        if (k >= 3) k = 2;
     }
 }
 export function VbSetAttribCol(vb, start, count, stride, col, num_faces) {
@@ -353,6 +365,38 @@ export function GlSetColor(gfxInfo, color, num_faces = 1) {
     let verts = num_faces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - V_COL_COUNT;
 
+    // HACK: Maybe implement a separate function for 4-coloring
+    // if (gfxInfo.sid.attr & SID.ATTR.COL4_PER_VERTEX) {
+
+    //     let k = 0;
+    //     while (verts) {
+
+    //         vb.data[index++] = color[k][0];
+    //         vb.data[index++] = color[k][1];
+    //         vb.data[index++] = color[k][0];
+    //         vb.data[index++] = color[k][3];
+
+    //         index += stride;
+    //         vb.count += V_COL_COUNT;
+    //         k++;
+    //         if (k >= 4) k = 0;
+    //         verts--;
+    //     }
+
+    // }
+    // else if (gfxInfo.sid.attr & SID.ATTR.COL4) {
+    //     while (verts) {
+
+    //         vb.data[index++] = color[0]; // Move mesh's x pos by amt
+    //         vb.data[index++] = color[1]; // Move mesh's x pos by amt
+    //         vb.data[index++] = color[2]; // Move mesh's x pos by amt
+    //         vb.data[index++] = color[3]; // Move mesh's x pos by amt
+            
+    //         index += stride;
+    //         vb.count += V_COL_COUNT;
+    //         verts--;
+    //     }
+    // }
     while (verts) {
 
         vb.data[index++] = color[0]; // Move mesh's x pos by amt
@@ -376,7 +420,7 @@ export function GlSetColorAlpha(gfxInfo, val, num_faces) {
 
     while (verts) {
 
-        index+=3; 
+        index += 3;
         vb.data[index++] = val; // Move mesh's x pos by amt
 
         index += stride; // Go to next vertice's pos. +1 for skipping pos.z

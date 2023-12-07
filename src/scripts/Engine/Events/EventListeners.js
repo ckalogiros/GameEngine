@@ -192,7 +192,7 @@ export class Event_Listener {
                      
                      // Set any clicked mesh IN_FOCUS
                      const mesh = event_found.source_params;
-                     console.log(mesh.name)
+                     // console.log(mesh.name)
                      In_focus_set(mesh);
 
                      if (event_found.Clbk) {
@@ -205,7 +205,7 @@ export class Event_Listener {
                
                // Set any clicked mesh IN_FOCUS
                const mesh = evt.source_params;
-               console.log(mesh.name)
+               // console.log(mesh.name)
                
                if (evt.Clbk) {
                   // Else if no children event was triggered, run any events of the main event.
@@ -808,8 +808,8 @@ export function Listeners_debug_info_create(scene) {
    dropdown.CreateClickEvent();
    dropdown.CreateMoveEvent();
    Drop_down_set_root(dropdown, dropdown);
-   dropdown.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS; // Must set the specific type for the dropdown to avoid infinite looping
-   dropdown.menu.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS; // Must set the specific type for the dp's menu to avoid infinite looping
+   dropdown.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS; // NOTE: Must set the specific type for the dropdown to avoid infinite looping
+   dropdown.menu.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS; // NOTE: Must set the specific type for the dp's menu to avoid infinite looping
 
 
    scene.AddWidget(dropdown);
@@ -907,11 +907,6 @@ export function Listeners_debug_info_update(params) {
 
    const dropdown_root = params.source_params;
    const trigger_mesh = params.trigger_params.source_params;
-
-   // // Catch self listeners to avoid infinite loop.
-   // if(trigger_mesh.debug_info.type & INFO_LISTEN_EVENT_TYPE.LISTENERS) 
-   //    return;
-
    
    console.log('------ INFO UI LISTENERS - trigger mesh:', trigger_mesh.name, 'dropdown_root:', dropdown_root.name);
    if(trigger_mesh.parent) console.log(trigger_mesh.parent.name)
@@ -924,8 +919,8 @@ export function Listeners_debug_info_update(params) {
    new_ui_dp.Render()
 
    dropdown_root.AddToMenu(new_ui_dp);
-   new_ui_dp.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS; // Must set the specific type for the drpdown to avoid infinite looping
-   new_ui_dp.menu.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS; // Must set the specific type for the dp's menu to avoid infinite looping
+   new_ui_dp.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS; // NOTE: Must set the specific type for the drpdown to avoid infinite looping
+   new_ui_dp.menu.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS; // NOTE: Must set the specific type for the dp's menu to avoid infinite looping
 
 
    dropdown_root.Recalc();

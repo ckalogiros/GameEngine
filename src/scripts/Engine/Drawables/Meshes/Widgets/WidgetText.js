@@ -19,7 +19,7 @@ import { Text_Mesh } from "../Text_Mesh.js";
 export class Widget_Text extends Text_Mesh {
 
 	pad = [0, 0];
-
+	
 	constructor(text, pos, fontSize = 5, col = WHITE, bold = 4) {
 
 		const sdfouter = CalculateSdfOuterFromDim(fontSize);
@@ -53,30 +53,11 @@ export class Widget_Text extends Text_Mesh {
 
 	/*******************************************************************************************************************************************************/
 	// Alignment
-	// Reposition_post(dif_pos) {
-
-	//    this.MoveXYZ(dif_pos);
-	// }
 
 	Align_pre(target_mesh, flags, pad = [0, 0]) { // Align pre-added to the vertexBuffers
 
 		const pos = [0, 0];
-		const dim = this.geom.dim;
 		CopyArr2(pos, this.geom.pos);
-		let ypos = pos[1] + dim[1] * 2;
-
-		if (flags & ALIGN.VERTICAL) {
-
-			for (let i = 0; i < this.children.boundary; i++) {
-
-				const child = this.children.buffer[i];
-				pos[1] = ypos;
-
-				child.geom.Reposition_pre(pos);
-				ypos += child.geom.dim[1] * 2;
-			}
-		}
-
 
 		if (flags & ALIGN.LEFT) {
 
@@ -131,9 +112,13 @@ export class Widget_Text extends Text_Mesh {
 /**
  * A widget of rendering static text 
  * in combination with dynamic text.
+ * 
+ * TODO: separate conceptualy the dynamic text from the plain text
+ * 	and if there is a way of 'connecting' the two. 
  */
-// export class Widget_Dynamic_Text_Mesh extends Widget_Dynamic_Text_Mesh_Only {
 export class Widget_Dynamic_Text_Mesh extends Widget_Text {
+
+	alignment = 0x0;
 
 	/** Set the max number of characters for the dynamic text, 
 	 * by passing any text as 'dynamic_text' of length= dynamic text number of characters*/
@@ -148,6 +133,11 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 		this.AddChild(dynamicText)
 
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | dynamicText.geom.type | dynamicText.mat.type;
+
+		// Default alignment for all children text meshes
+		this.alignment = ALIGN.HORIZONTAL;
+		// this.alignment = ALIGN.VERTICAL;
+		// this.Align_pre(this, this.alignment)
 
 	}
 
@@ -167,6 +157,8 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 
 		text_mesh.idx = this.children.Add(text_mesh);
 		text_mesh.parent = this;
+		// this.Align_pre(text_mesh, this.alignment)
+		// this.Align_pre(this, this.alignment)
 		return text_mesh.idx;
 	}
 
@@ -179,7 +171,8 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 		for (let i = 0; i < this.children.boundary; i++) {
 
 			const child = this.children.buffer[i];
-			if (child) child.GenGfxCtx(FLAGS, gfxidx);
+			FLAGS |= GFX_CTX_FLAGS.SPECIFIC;
+			if (child) child.GenGfxCtx(FLAGS, [this.gfx.prog.idx, this.gfx.vb.idx]); // Pass the already exixting gfx buffers for use
 		}
 		return this.gfx;
 	}
@@ -194,12 +187,22 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 		}
 	}
 
+	// RenderToDebugGfx() {
+
+	// 	this.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
+	// 	for (let i = 0; i < this.children.boundary; i++) {
+	// 		const child = this.children.buffer[i];
+	// 		child.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
+	// 	}
+	// }
+	
 	RenderToDebugGfx() {
 
 		this.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
 		for (let i = 0; i < this.children.boundary; i++) {
 			const child = this.children.buffer[i];
-			child.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
+			// child.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
+			child.RenderToDebugGfx();
 		}
 	}
 
@@ -219,18 +222,50 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 		return all_meshes;
 	}
 
+	GetMaxWidth() {
+
+		let max_width = super.GetMaxWidth();
+
+		if(this.alignment & ALIGN.HORIZONTAL){ // If the children text meshes are aligned horizontaly, acumulate all text meshes widths
+			for (let i = 0; i < this.children.boundary; i++) {
+				max_width += this.children.buffer[i].GetMaxWidth();
+			}
+			return max_width;
+		}
+		else{
+			for (let i = 0; i < this.children.boundary; i++) {
+				if(max_width < this.children.buffer[i].GetMaxWidth())
+					max_width = this.children.buffer[i].GetMaxWidth();
+			}
+			return max_width;
+		}
+
+	}
+
 	GetTotalWidth() {
-		let total_width = super.GetTotalWidth();
+		let total_width = super.GetMaxWidth();
 		for (let i = 0; i < this.children.boundary; i++) {
-			// total_width += this.children.buffer[i].geom.dim[0] * this.children.buffer[i].geom.num_faces;
-			total_width += this.children.buffer[i].GetTotalWidth();
+			total_width += this.children.buffer[i].GetMaxWidth();
 		}
 
 		return total_width;
 	}
 
 	GetTotalHeight() {
-		return this.geom.dim[1];
+
+		let max_height = this.geom.dim[1];
+
+		// HACK: TODO: Set only one of both(SECTION or ALIGN) as global lign bit field
+		if(this.alignment & ALIGN.HORIZONTAL){ // If the children text meshes are aligned horizontaly, return the height of the 'this' text mesh height
+			return max_height;
+		}
+		else { // Else calculate all the lines of the text meshes
+			for (let i = 0; i < this.children.boundary; i++) {
+				max_height += this.children.buffer[i].geom.dim[1];
+			}
+			return max_height;
+		}
+
 	}
 
 	SetColorAlpha(alpha) {
@@ -238,16 +273,6 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 		super.SetColorAlpha(alpha);
 		for (let i = 0; i < this.children.boundary; i++) {
 			this.children.buffer[i].SetColorAlpha(alpha);
-		}
-	}
-
-	RenderToDebugGfx() {
-
-		this.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
-		for (let i = 0; i < this.children.boundary; i++) {
-			const child = this.children.buffer[i];
-			// child.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
-			child.RenderToDebugGfx();
 		}
 	}
 
@@ -468,6 +493,33 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 			const child = this.children.buffer[i];
 			if (child) child.geom.MoveXY(x, y, child.gfx);
 		}
+
+	}
+
+	Align_pre(target_mesh, flags, pad = [0, 0]) { // Align pre-added to the vertexBuffers
+
+		const pos = [0, 0];
+		const dim = this.geom.dim;
+		CopyArr2(pos, this.geom.pos);
+		let ypos = pos[1] + dim[1] * 2;
+
+		if (flags & ALIGN.VERTICAL) {
+
+			for (let i = 0; i < this.children.boundary; i++) {
+
+				const child = this.children.buffer[i];
+				pos[1] = ypos;
+
+				child.geom.Reposition_pre(pos);
+				ypos += child.geom.dim[1] * 2;
+			}
+		}
+
+		this.alignment = flags;
+
+		// NOTE: The super is aligning the top-bot-left-right only.
+		// TODO: Separate conceptualy the two alignments
+		super.Align_pre(target_mesh, flags, pad)
 
 	}
 }

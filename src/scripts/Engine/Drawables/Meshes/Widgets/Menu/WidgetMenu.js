@@ -5,7 +5,7 @@ import { Check_intersection_point_rect } from "../../../Operations/Collisions.js
 import { MouseGetPos, MouseGetPosDif } from "../../../../Controls/Input/Mouse.js";
 import { M_Buffer } from "../../../../Core/Buffers.js";
 import { Debug_get_event_listeners, Listener_events_set_mesh_events_active, Listener_recover_children_buffer, Listener_reset_children_buffer, Listeners_copy_event_children_buffer } from "../../../../Events/EventListeners.js";
-import { Gfx_activate, Gfx_deactivate_no_listeners_touch, Gfx_end_session } from "../../../../Interfaces/Gfx/GfxContext.js";
+import { Gfx_activate } from "../../../../Interfaces/Gfx/GfxContextCreate.js";
 import { MESH_ENABLE } from "../../Base/Mesh.js";
 import { Widget_Button } from "../WidgetButton.js";
 import { Widget_Label } from "../WidgetLabel.js";
@@ -382,7 +382,7 @@ export class Widget_Minimize extends Widget_Button {
                   // Set Graphics
                   root.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
                   root.Render();
-                  Gfx_end_session(true);
+                  //*Gfx_end_session(true);
                   Gfx_activate(root); // Re-enable the rendering of the vertex buffers.
                }
 
@@ -419,7 +419,7 @@ export class Widget_Minimize extends Widget_Button {
                   // Add to gfx
                   root.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
                   root.Render();
-                  Gfx_end_session(true);
+                  //*Gfx_end_session(true);
                   Gfx_activate(root); // Re-enable the rendering of the vertex buffers.
                }
 

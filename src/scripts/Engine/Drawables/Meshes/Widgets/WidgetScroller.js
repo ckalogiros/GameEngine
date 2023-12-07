@@ -1,8 +1,9 @@
 "use strict";
 
 import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse";
-import { Gfx_generate_context } from "../../../Interfaces/Gfx/GfxContext";
+import { Gfx_generate_context } from "../../../Interfaces/Gfx/GfxContextCreate";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals";
+import { Find_gfx_from_parent_ascend_descend } from "../../../Interfaces/Gfx/GfxContextFindMatch";
 import { MESH_ENABLE } from "../Base/Mesh";
 import { Rect } from "../Rect_Mesh";
 import { Section } from "../Section";
@@ -175,15 +176,11 @@ export class Widget_Scroller extends Section {
 
    TempRecalcAll(size){
 
-      // if(size[0] > this.geom.dim[0]){ this.#RecalculateWidth(size[0]);  }
-      // this.#Reposition();
-
       // Set the bar and handle y pos
       this.scroll_bar.SetPosY(this.geom.pos[1]);
       const handle = this.scroll_bar.children.buffer[0];
       handle.SetPosY(this.geom.pos[1]);
 
-      console.log('***')
    }
 
    Destroy() {
@@ -204,14 +201,33 @@ export class Widget_Scroller extends Section {
    // Graphics
    GenGfxCtx(FLAGS = GFX_CTX_FLAGS.ANY, gfxidx = null) {
 
-      this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
+      if (FLAGS & GFX_CTX_FLAGS.PRIVATE) {
 
-      this.scrolled_section.GenGfxCtx(FLAGS, gfxidx); // Let widget_Dynamic_Text to handle the gfx generation
+         const gfxidxs = Find_gfx_from_parent_ascend_descend(this, this.parent);
+         FLAGS |= gfxidxs.rect.FLAGS; // NOTE: The only way to pass .PRIVATE to 'Gfx_generate_context()'
 
-      this.scroll_bar.gfx = Gfx_generate_context(this.scroll_bar.sid, this.scroll_bar.sceneidx, this.scroll_bar.geom.num_faces, FLAGS, gfxidx);
+         this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidxs.rect.idxs);
 
-      const handle = this.scroll_bar.children.buffer[0];
-      handle.gfx = Gfx_generate_context(handle.sid, handle.sceneidx, handle.geom.num_faces, FLAGS, gfxidx);
+         // We already have a vertex buffer for rect and text rendering
+         const rect_gfxidxs = [this.gfx.prog.idx, this.gfx.vb.idx];
+
+         this.scrolled_section.GenGfxCtx(FLAGS, rect_gfxidxs); 
+   
+         this.scroll_bar.gfx = Gfx_generate_context(this.scroll_bar.sid, this.scroll_bar.sceneidx, this.scroll_bar.geom.num_faces, FLAGS | GFX_CTX_FLAGS.SPECIFIC, rect_gfxidxs);
+   
+         const handle = this.scroll_bar.children.buffer[0];
+         handle.gfx = Gfx_generate_context(handle.sid, handle.sceneidx, handle.geom.num_faces, FLAGS | GFX_CTX_FLAGS.SPECIFIC, rect_gfxidxs);
+      }
+      else {
+         this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
+         
+         this.scrolled_section.GenGfxCtx(FLAGS, gfxidx); // Let widget_Dynamic_Text to handle the gfx generation
+   
+         this.scroll_bar.gfx = Gfx_generate_context(this.scroll_bar.sid, this.scroll_bar.sceneidx, this.scroll_bar.geom.num_faces, FLAGS, gfxidx);
+   
+         const handle = this.scroll_bar.children.buffer[0];
+         handle.gfx = Gfx_generate_context(handle.sid, handle.sceneidx, handle.geom.num_faces, FLAGS, gfxidx);
+      }
 
       return this.gfx;
    }

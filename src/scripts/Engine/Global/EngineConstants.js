@@ -45,7 +45,7 @@ const PLATFORM = {
  * Engine Constants */
 
 const Device = {
-	MAX_WIDTH: 1200,
+	MAX_WIDTH: 1600,
 	MAX_HEIGHT: 800,
 	width: 0,
 	height: 0,
@@ -669,6 +669,7 @@ const DEBUG = {
 	LISTENERS: true,
 
 	SET_HOVER_TO_ALL_MESHES: false,
+	REMOVE_MESH: false,
 
 	GFX: {
 		ADD_MESH: true,
@@ -677,5 +678,7 @@ const DEBUG = {
 
 	EVENTS_LISTENERS:{
 		WIDGET_DROP_DOWN: false,
-	}
+	},
+
+	WIGET_DROPDOWN: false,
 };

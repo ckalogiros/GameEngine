@@ -6,7 +6,7 @@ import { Renderqueue_get } from "../../Renderers/Renderer/RenderQueue.js";
 import { ScenesPrintAllMeshes, ScenesPrintRootMeshes, Scenes_get_scene_by_idx } from "../../Scenes.js";
 import { FpsGet } from "../../Timers/Time.js";
 import { TimeIntervalsPrintAll } from "../../Timers/TimeIntervals.js";
-import { Gfx_pool_print } from "../../Interfaces/Gfx/GfxContext.js";
+import { Gfx_pool_print } from "../../Interfaces/Gfx/GfxContextCreate.js";
 import { Mesh_print_all_mesh_listeners } from "../../Drawables/Meshes/Base/Mesh.js";
 
 _cnt = 0;

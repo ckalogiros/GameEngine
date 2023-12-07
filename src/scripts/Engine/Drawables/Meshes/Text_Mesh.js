@@ -1,12 +1,13 @@
 "use strict";
 
-import { GfxInfoMesh} from "../../../Graphics/GlProgram.js";
+import { GfxInfoMesh } from "../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../Helpers/Helpers.js";
 import { AddArr3, CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
-import { Gfx_generate_context } from "../../Interfaces/Gfx/GfxContext.js";``
+import { Gfx_generate_context } from "../../Interfaces/Gfx/GfxContextCreate.js"; ``
 import { GfxSetTex, Gfx_add_geom_mat_to_vb, Gfx_progs_set_vb_texidx } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 import { FontGetUvCoords } from "../../Loaders/Font/Font.js";
-import {  Scenes_store_mesh_in_gfx } from "../../Scenes.js";
+import { Scenes_store_mesh_in_gfx } from "../../Scenes.js";
+import { Find_gfx_from_parent_ascend_descend } from "../../Interfaces/Gfx/GfxContextFindMatch.js";
 import { Info_listener_dispatch_event } from "../DebugInfo/InfoListeners.js";
 import { Geometry2D_Text } from "../Geometry/Geometry2DText.js";
 import { FontMaterial } from "../Material/Base/Material.js";
@@ -34,7 +35,16 @@ export class Text_Mesh extends Mesh {
    // Graphics
    GenGfxCtx(FLAGS, gfxidx) {
 
-      this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
+      if (FLAGS & GFX_CTX_FLAGS.PRIVATE) {
+
+         const gfxidxs = Find_gfx_from_parent_ascend_descend(this, this.parent);
+         FLAGS |= gfxidxs.text.FLAGS; // NOTE: The only way to pass .PRIVATE to 'Gfx_generate_context()'
+         this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidxs.text.idxs);
+      }
+      else {
+         this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
+      }
+
       return this.gfx;
    }
 
@@ -66,6 +76,8 @@ export class Text_Mesh extends Mesh {
       }
 
       Gfx_progs_set_vb_texidx(gfxCopy.progs_groupidx, gfxCopy.prog.idx, gfxCopy.vb.idx, gfxCopy.tb.idx); // Update the vertex buffer to store the texture index
+
+      // Gfx_set_vb_show(gfxCopy.progs_groupidx,  gfxCopy.prog.idx, gfxCopy.vb.idx, true);
 
       const params = {
          progidx: this.gfx.prog.idx,
@@ -117,8 +129,8 @@ export class Text_Mesh extends Mesh {
 
       let gfxInfoCopy = new GfxInfoMesh(this.gfx);
 
-      if(text === undefined)
-      console.log()
+      if (text === undefined)
+         console.log()
       const textLen = text.length;
       const len = (this.geom.num_faces > textLen) ? this.geom.num_faces :
          (textLen > this.geom.num_faces ? this.geom.num_faces : textLen);
@@ -162,13 +174,15 @@ export class Text_Mesh extends Mesh {
    /*******************************************************************************************************************************************************/
    // Setters-Getters
 
-   GetTotalWidth() { return this.geom.dim[0] * (this.geom.num_faces) + 1; }
+   GetMaxWidth() { return this.geom.dim[0] * (this.geom.num_faces) + 1; }
 
    GetTotalHeight() { return this.geom.dim[1]; }
 
-   GetCenterPosX() { return this.geom.pos[0] + this.GetTotalWidth() - this.geom.dim[0]; }
+   GetCenterPosX() { return this.geom.pos[0] + this.GetMaxWidth() - this.geom.dim[0]; }
 
-   GetCenterPosY() { return this.geom.pos[1] - this.GetTotalHeight() + this.geom.dim[1]; }
+   // GetCenterPosY() { return this.geom.pos[1] - this.GetTotalHeight() + this.geom.dim[1]; }
+   // NOTE: We do not count all the lines of the text, probably because we need to place the first line of a multiline text, and the next line ypos is calculated based on the first one(in case of type Widget_Dynamic_Text_Mesh) 
+   GetCenterPosY() { return this.geom.pos[1] - this.geom.dim[1]; }
 
 
    /*******************************************************************************************************************************************************/
@@ -176,8 +190,8 @@ export class Text_Mesh extends Mesh {
 
    Reposition_pre(pos_dif) {
 
-		AddArr3(this.geom.pos, pos_dif);
-	}
+      AddArr3(this.geom.pos, pos_dif);
+   }
 
 
    /*******************************************************************************************************************************************************/

@@ -101,6 +101,8 @@ export class WebGlRenderer {
          _pt_fps.Stop();
          TimeSample()
          this.fpsTimer.Stop();
+
+         // TEMP_check_for_not_isPrivate()
       }
 
 

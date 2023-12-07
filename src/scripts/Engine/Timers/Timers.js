@@ -47,7 +47,7 @@ export function TimersUpdateGlobalTimer(){
  * Later maybe create a realocated buffer.
  */
 
-const MAX_TIMERS_NUM = 350;
+const MAX_TIMERS_COUNT = 350;
 
 class Timer {
 
@@ -110,7 +110,7 @@ class Timer {
 class Timers {
 
     buffer = [];
-    size = MAX_TIMERS_NUM;
+    size = MAX_TIMERS_COUNT;
     count   = 0;
 
     constructor(){}

@@ -185,7 +185,7 @@ class TimeIntervals {
             return i;
          }
       }
-      alert('Buffer Overflow. At Time.js-class TimeIntervals')
+      alert('Buffer Overflow. At Time.js-class TimeIntervals. size:', this.size)
       return null;
    }
 

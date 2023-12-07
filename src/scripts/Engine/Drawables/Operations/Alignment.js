@@ -1,6 +1,12 @@
 "use strict";
 
-
+/**
+ * 
+ * @param {BIT_FIELD} flags type of struct ALIGN
+ * @param {.geom} src_mesh type of: Geometry2D
+ * @param {.geom} dst_mesh type of: Geometry2D
+ * @param {arr} pad type of: int arr[2] | default values if not set:[0,0]
+ */
 export function Align(flags, src_mesh, dst_mesh, pad = [0, 0]) {
 
     let dst_width = dst_mesh.dim[0];

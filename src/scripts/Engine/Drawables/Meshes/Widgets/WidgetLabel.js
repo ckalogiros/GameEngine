@@ -1,12 +1,12 @@
 "use strict";
 
 import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
-import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
+import { GfxInfoMesh, GlProgramUpdateUniformProjectionMatrix } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { AddArr3, CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../Operations/Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
-import { Gfx_generate_context } from "../../../Interfaces/Gfx/GfxContext.js";
+import { Gfx_generate_context } from "../../../Interfaces/Gfx/GfxContextCreate.js";
 import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { Scenes_remove_root_mesh } from "../../../Scenes.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals.js";
@@ -14,6 +14,7 @@ import { MESH_ENABLE } from "../Base/Mesh.js";
 import { Rect } from "../Rect_Mesh.js";
 import { Text_Mesh } from "../Text_Mesh.js";
 import { Align } from "../../Operations/Alignment.js";
+import { Find_gfx_from_parent_ascend_descend } from "../../../Interfaces/Gfx/GfxContextFindMatch.js";
 
 
 
@@ -72,14 +73,14 @@ export class Widget_Label extends Rect {
 
         /** Label tex mesh */
         const text_mesh = new Text_Mesh(text, pos, fontSize);
-        
+
         pos[0] -= pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
         pos[2] -= 1; // Set z for area 'behind' this.text_mesh
-        
+
         /** Label area mesh */
         const areaMetrics = CalculateArea(text, text_mesh.geom.dim, pos, pad)
         super(areaMetrics.pos, areaMetrics.dim, col);
-        
+
         // Must call super() before using the 'this'
         text_mesh.SetSceneIdx(this.sceneidx);
         text_mesh.SetName(`Text-mesh [${text}]`);
@@ -87,12 +88,13 @@ export class Widget_Label extends Rect {
 
         this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
         this.SetStyle(style);
-        this.type |= MESH_TYPES_DBG.WIDGET_TEXT_LABEL | text_mesh.type | this.geom.type | this.mat.type;
+        this.type |= MESH_TYPES_DBG.WIDGET_TEXT_LABEL | this.geom.type | this.mat.type;
         this.SetName(`Lebel-text [${text}]`);
         this.pad = pad;
 
         this.text_mesh = text_mesh;
         this.text_mesh.parent = null;
+
     }
 
     Destroy() {
@@ -109,11 +111,23 @@ export class Widget_Label extends Rect {
 
     /*******************************************************************************************************************************************************/
     // Graphics
-     GenGfxCtx(FLAGS=GFX_CTX_FLAGS.ANY, area_gfx_specific=null, text_gfx_specific=null) {
+    GenGfxCtx(FLAGS = GFX_CTX_FLAGS.ANY, area_gfx_specific = null, text_gfx_specific = null) {
 
-        this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, area_gfx_specific);
-        this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, FLAGS, text_gfx_specific);
-        
+
+        if (FLAGS & GFX_CTX_FLAGS.PRIVATE) {
+
+            const gfxidxs = Find_gfx_from_parent_ascend_descend(this, this.parent);
+            gfxidxs.rect.FLAGS |= FLAGS; // NOTE: The only way to pass .PRIVATE to 'Gfx_generate_context()'
+            this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, gfxidxs.rect.FLAGS, gfxidxs.rect.idxs);
+            gfxidxs.text.FLAGS |= FLAGS; // NOTE: The only way to pass .PRIVATE to 'Gfx_generate_context()'
+            // if(gfxidxs.text.idxs[0] === INT_NULL && (FLAGS & GFX_CTX_FLAGS.SPECIFIC)) gfxidxs.text.FLAGS &= ~GFX_CTX_FLAGS.SPECIFIC; // Disable SPECIFIC if no indexes are provided.
+            this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, gfxidxs.text.FLAGS, gfxidxs.text.idxs);
+        }
+        else {
+            this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, area_gfx_specific);
+            this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, FLAGS, text_gfx_specific);
+        }
+
         return this.gfx;
     }
 
@@ -131,7 +145,7 @@ export class Widget_Label extends Rect {
         // Deactivate for label's text 
         this.text_mesh.DeactivateGfx();
     }
-  
+
     /*******************************************************************************************************************************************************/
     // Setters-Getters
 
@@ -144,7 +158,7 @@ export class Widget_Label extends Rect {
         return all_meshes;
     }
 
-    RenderToDebugGfx(){
+    RenderToDebugGfx() {
         this.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
         this.text_mesh.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
     }
@@ -152,7 +166,6 @@ export class Widget_Label extends Rect {
     /*******************************************************************************************************************************************************/
     // Alignment
     Align(flags, pad = [0, 0]) { // Align pre-added to the vertexBuffers
-
 
         Align(flags, this.geom, this.text_mesh.geom, pad);
 
@@ -162,13 +175,12 @@ export class Widget_Label extends Rect {
              * If the alignment happens after the widgets insertion to 
              * the vertex buffers, we must update the vertex buffers too.
              */
-
             this.text_mesh.geom.UpdatePosXY(this.text_mesh.gfx)
         }
 
     }
 
-    Reposition_pre(dif_pos) { 
+    Reposition_pre(dif_pos) {
 
         AddArr3(this.geom.pos, dif_pos);
         this.text_mesh.Reposition_pre(dif_pos);
@@ -189,6 +201,7 @@ export class Widget_Label extends Rect {
         this.text_mesh.geom.MoveXY(x, y, this.text_mesh.gfx);
 
     }
+
     MoveY(y) {
 
         // Move 'this' text
@@ -197,7 +210,7 @@ export class Widget_Label extends Rect {
 
     }
 
-    SetColorAlpha(btn_alpha=1, text_alpha=1){
+    SetColorAlpha(btn_alpha = 1, text_alpha = 1) {
 
         super.SetColorAlpha(btn_alpha);
         this.text_mesh.SetColorAlpha(text_alpha);
@@ -264,7 +277,7 @@ export class Widget_Label extends Rect {
         return false;
     }
 
-   // SEE ### OnMove Events Implementation Logic
+    // SEE ### OnMove Events Implementation Logic
     OnMove(params) {
 
         // The 'OnMove' function is called by the timeInterval.

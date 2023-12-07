@@ -30,6 +30,7 @@ export function GlDraw(gl) {
 
 
     for (let i = 0; i < drawQueueCount; i++) {
+    // for (let i = drawQueueCount-1; i >= 0 ; i--) {
 
         const progs_groupidx = drawQueue[i].progs_groupidx;
         const progidx = drawQueue[i].progidx;

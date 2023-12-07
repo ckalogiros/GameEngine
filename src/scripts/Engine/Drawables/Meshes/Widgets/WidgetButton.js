@@ -23,7 +23,8 @@ export class Widget_Switch extends Widget_Button {
 
    constructor(text_on, text_off, pos, fontSize = 5, color = GREY1, colorText = WHITE, pad = [fontSize, fontSize], bold, style = [3, 6, 2], font) {
 
-      super(text_off, (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos, fontSize, color, colorText, pad, bold, style, font)
+      // super(text_off, (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos, fontSize, color, colorText, pad, bold, style, font)
+      super(text_off, (ALIGN.LEFT | ALIGN.BOTTOM), pos, fontSize, color, colorText, pad, bold, style, font)
 
       this.isOn = 0x0;
       this.state_text = [text_off, text_on];

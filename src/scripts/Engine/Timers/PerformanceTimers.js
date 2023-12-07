@@ -109,5 +109,6 @@ export const _pt3 = new PerformanceTimerCreate('SceneUpdate'); // Generic perfor
 export const _pt4 = new PerformanceTimerCreate('GlDraw'); // Generic performance timer
 export const _pt5 = new PerformanceTimerCreate('EventListener'); // Generic performance timer
 export const _pt6 = new PerformanceTimerCreate('HoverListener'); // Generic performance timer
+// export const _gfxctxtimer = new PerformanceTimerCreate('Measure GfxContext buffer'); // Generic performance timer
 
 

@@ -7,7 +7,8 @@ import { Rect } from '../Rect_Mesh.js';
 import { Text_Mesh } from '../Text_Mesh.js';
 
 import { Widget_popup_handler_onclick_event } from './WidgetPopup.js';
-import { Gfx_generate_context } from '../../../Interfaces/Gfx/GfxContext.js';
+import { Gfx_generate_context } from '../../../Interfaces/Gfx/GfxContextCreate.js';
+import { Find_gfx_from_parent_ascend_descend } from '../../../Interfaces/Gfx/GfxContextFindMatch.js';
 
 
 /**
@@ -148,23 +149,52 @@ export class Widget_Slider extends Rect {
    // Graphics
    GenGfxCtx(FLAGS = GFX_CTX_FLAGS.ANY, gfxidx = null) {
 
-      this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
-      this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, FLAGS, gfxidx);
+      if(FLAGS & GFX_CTX_FLAGS.PRIVATE){
 
-      const name_text = this.text_mesh;
-      name_text.gfx = Gfx_generate_context(name_text.sid, name_text.sceneidx, name_text.geom.num_faces, FLAGS, gfxidx);
+         const gfxidxs = Find_gfx_from_parent_ascend_descend(this, this.parent);
+         gfxidxs.rect.FLAGS |= FLAGS; // NOTE: The only way to pass .PRIVATE to 'Gfx_generate_context()'
+         this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, gfxidxs.rect.FLAGS, gfxidxs.rect.idxs);
+         gfxidxs.text.FLAGS |= FLAGS; // NOTE: The only way to pass .PRIVATE to 'Gfx_generate_context()'
+         this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, gfxidxs.text.FLAGS, gfxidxs.text.idxs);
+         
+         // We already have a vertex buffer for rect and text rendering
+         const rect_gfxidxs = [this.gfx.prog.idx, this.gfx.vb.idx];
+         const text_gfxidxs = [this.text_mesh.gfx.prog.idx, this.text_mesh.gfx.vb.idx];
 
-      const bar = this.children.buffer[BAR_IDX];
-      bar.gfx = Gfx_generate_context(bar.sid, bar.sceneidx, bar.geom.num_faces, FLAGS, gfxidx);
-      
-      const handle = bar.children.buffer[0];
-      handle.gfx = Gfx_generate_context(handle.sid, handle.sceneidx, handle.geom.num_faces, FLAGS, gfxidx);
-      
-      const value_text = bar.children.buffer[1];
-      value_text.gfx = Gfx_generate_context(value_text.sid, value_text.sceneidx, value_text.geom.num_faces, FLAGS, gfxidx);
+
+         const name_text = this.text_mesh;
+         name_text.gfx = Gfx_generate_context(name_text.sid, name_text.sceneidx, name_text.geom.num_faces, FLAGS | GFX_CTX_FLAGS.SPECIFIC, text_gfxidxs);
+
+         const bar = this.children.buffer[BAR_IDX];
+         bar.gfx = Gfx_generate_context(bar.sid, bar.sceneidx, bar.geom.num_faces, FLAGS | GFX_CTX_FLAGS.SPECIFIC, rect_gfxidxs);
+         
+         const handle = bar.children.buffer[0];
+         handle.gfx = Gfx_generate_context(handle.sid, handle.sceneidx, handle.geom.num_faces, FLAGS | GFX_CTX_FLAGS.SPECIFIC, rect_gfxidxs);
+         
+         const value_text = bar.children.buffer[1];
+         value_text.gfx = Gfx_generate_context(value_text.sid, value_text.sceneidx, value_text.geom.num_faces, FLAGS | GFX_CTX_FLAGS.SPECIFIC, text_gfxidxs);
+      }
+      else{
+         this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, gfxidx);
+         this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, FLAGS, gfxidx);
+         
+         const name_text = this.text_mesh;
+         name_text.gfx = Gfx_generate_context(name_text.sid, name_text.sceneidx, name_text.geom.num_faces, FLAGS, gfxidx);
+
+         const bar = this.children.buffer[BAR_IDX];
+         bar.gfx = Gfx_generate_context(bar.sid, bar.sceneidx, bar.geom.num_faces, FLAGS, gfxidx);
+         
+         const handle = bar.children.buffer[0];
+         handle.gfx = Gfx_generate_context(handle.sid, handle.sceneidx, handle.geom.num_faces, FLAGS, gfxidx);
+         
+         const value_text = bar.children.buffer[1];
+         value_text.gfx = Gfx_generate_context(value_text.sid, value_text.sceneidx, value_text.geom.num_faces, FLAGS, gfxidx);
+     }
+
 
       return this.gfx;
    }
+
 
    Render() {
 
