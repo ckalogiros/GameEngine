@@ -399,7 +399,7 @@ export class Widget_Slider extends Rect {
 
    /*******************************************************************************************************************************************************/
    // Setters-Getters
-   /** Return type: Array. Returns an array of all widgets meshes */
+   /** Return type: Array. Returns an array with all widget's children + this */
    GetAllMeshes(parent_meshes_buf) {
 
       // If a parent mesh called this method, all_meshes buffer should include the parents all_meshes (put at the start of the buffer)

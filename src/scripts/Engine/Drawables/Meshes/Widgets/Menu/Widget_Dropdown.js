@@ -69,13 +69,13 @@ export class Widget_Dropdown extends Section {
       this.menu.type |= MESH_TYPES_DBG.DROP_DOWN_MENU;
       this.menu.parent = this;
       this.menu.SetName(`MENU-${this.name}`);
-      this.menu.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
-      this.menu.mat.col = [WHITE, RED, GREEN, BLUE];
-      this.menu.mat.defCol = [WHITE, RED, GREEN, BLUE];
+      // this.menu.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
+      // this.menu.mat.col = [WHITE, RED, GREEN, BLUE];
+      // this.menu.mat.defCol = [WHITE, RED, GREEN, BLUE];
       // this.menu.mat.col[3] = .5;
       // this.menu.mat.col[7] = .5;
-      this.menu.mat.col[11] = .5;
-      this.menu.mat.col[15] = .6;
+      // this.menu.mat.col[11] = .5;
+      // this.menu.mat.col[15] = .6;
 
       this.dp_symbols = ['+', '-'];
       // const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.RIGHT, [pos[0], pos[1], this.menu.geom.pos[2] + 1], 4, col1, text_col, btn_pad, bold, style, font);
@@ -128,26 +128,8 @@ export class Widget_Dropdown extends Section {
          this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, FLAGS, null);
       }
 
-      /**
-       * // HACK: steal the same gfx for text rendering.
-       * If parent is passed and its a dropdown, get its menu.
-       * If the menu has a child and its of type dropdown,
-       * get it's buttons text gfx, which is already active,
-       * to use for this dropdown's button text.
-         // if (parent) {
-         //    if (parent.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) {
-         //       const parent_menu = parent.menu;
-         //       if (this.depth_level >= 3) { // Create new gfx for dropdowns with level greater than 2
-         //          console.error('IMPLEMENT DEPTH LEVEL 3 FOR DROPDOWN')
-         //       }
-         //    }
-         // }
-      */
-
       const btn = this.children.buffer[0];
       btn.GenGfxCtx(FLAGS, [this.gfx.prog.idx, this.gfx.vb.idx]); // Set button's area gfx same with dropDown mesh 
-      // btn.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE); // Set button's area gfx same with dropDown mesh 
-      // btn.GenGfxCtx(FLAGS); // Set button's area gfx same with dropDown mesh 
 
       return this.gfx;
    }
@@ -157,7 +139,6 @@ export class Widget_Dropdown extends Section {
       const menu = this.menu;
 
       const dpgfxidxs = [this.gfx.prog.idx, this.gfx.vb.idx];
-      // const textgfx = [this.children.buffer[0].text_mesh.gfx.prog.idx, this.children.buffer[0].text_mesh.gfx.vb.idx];
 
       if (menu.gfx) { // Case: Any other dp's menu except root + method of remove was fast-remove:'set alpha to 0'.
 
@@ -351,13 +332,10 @@ export class Widget_Dropdown extends Section {
                // Deactivate the dropdown's button
                const btn_dp = item_dp.children.buffer[0];
 
-               // btn_dp.DeactivateGfx();
                btn_dp.SetColorAlpha(0, 0);
-               // TODO: 'If it is not a item_dp event'. Check it here
                btn_dp.RemoveAllListenEvents();
 
                // Deactivate gfx for menu's children meshes.
-               // if (item_dp.gfx) { item_dp.DeactivateGfx(); }
                item_dp.SetColorAlpha(0);
                item_dp.RemoveAllListenEvents();
             }
@@ -372,9 +350,7 @@ export class Widget_Dropdown extends Section {
 
       }
 
-      // if (menu.gfx) // TODO: Shouldn't we check if(menu.isOn)???
-      //    menu.DeactivateGfx();
-      if (menu.gfx) // TODO: Shouldn't we check if(menu.isOn)???
+      if (menu.gfx) // FIXME: Shouldn't we check if(menu.isOn)???
          menu.SetColorAlpha(0);
 
       // Remove menu's Fake listen events
@@ -405,7 +381,6 @@ export class Widget_Dropdown extends Section {
       }
 
       this.RemoveAllListenEvents();
-
       super.Destroy();
    }
 
@@ -414,20 +389,17 @@ export class Widget_Dropdown extends Section {
    // Events Handling
 
    CreateHoverEvent() {
-
       const btn = this.children.buffer[0];
       btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
 
    }
 
    CreateClickEvent() {
-
       const btn = this.children.buffer[0];
       btn.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP);
    }
 
    CreateMoveEvent() {
-
       this.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
    }
 
@@ -673,7 +645,7 @@ export class Widget_Dropdown extends Section {
 
          const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
          TimeIntervalsDestroyByIdx(intervalIdx);
-         mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+         mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK: We assume that there is only one time interval index for all meshes. What happenns when we use more???
 
          return;
       }
@@ -760,8 +732,4 @@ function Find_gfx_context_for_text_in_dp_menu(menu) {
 
    return null;
 }
-
-
-/**SAVES */
-/************************************************************************************************************************************ */
 

@@ -352,20 +352,48 @@ export function VbSetAttribBuffer(vb, start, count, stride, buffer, attribSize) 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * 
  */
-export function GlSetColor(gfxInfo, color, num_faces = 1) {
+export function GlSetColorPerVertex(gfxInfo, color, num_faces = 1) {
 
+    /**DEBUG*/if (gfxInfo === null) { alert('GFX is null. @ GlSetColor()'); }
+    
     const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
-
-    if (gfxInfo === null) {
-        return
-    }
     const vb = progs.buffer[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.col;
     let verts = num_faces * gfxInfo.vertsPerRect;
     let stride = gfxInfo.attribsPerVertex - V_COL_COUNT;
 
-    // HACK: Maybe implement a separate function for 4-coloring
+    if (gfxInfo.sid.attr & SID.ATTR.COL4_PER_VERTEX) {
+
+        let k = 0;
+        while (verts) {
+
+            vb.data[index++] = color[k][0];
+            vb.data[index++] = color[k][1];
+            vb.data[index++] = color[k][0];
+            vb.data[index++] = color[k][3];
+
+            index += stride;
+            vb.count += V_COL_COUNT;
+            k++;
+            if (k >= 4) k = 0;
+            verts--;
+        }
+    }
+
+    vb.needsUpdate = true;
+}
+export function GlSetColor(gfxInfo, color, num_faces = 1) {
+
+    /**DEBUG*/if (gfxInfo === null) { alert('GFX is null. @ GlSetColor()'); }
+    
+    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const vb = progs.buffer[gfxInfo.prog.idx].vertexBuffer[gfxInfo.vb.idx];
+
+    let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.col;
+    let verts = num_faces * gfxInfo.vertsPerRect;
+    let stride = gfxInfo.attribsPerVertex - V_COL_COUNT;
+
     // if (gfxInfo.sid.attr & SID.ATTR.COL4_PER_VERTEX) {
 
     //     let k = 0;
@@ -384,19 +412,7 @@ export function GlSetColor(gfxInfo, color, num_faces = 1) {
     //     }
 
     // }
-    // else if (gfxInfo.sid.attr & SID.ATTR.COL4) {
-    //     while (verts) {
 
-    //         vb.data[index++] = color[0]; // Move mesh's x pos by amt
-    //         vb.data[index++] = color[1]; // Move mesh's x pos by amt
-    //         vb.data[index++] = color[2]; // Move mesh's x pos by amt
-    //         vb.data[index++] = color[3]; // Move mesh's x pos by amt
-            
-    //         index += stride;
-    //         vb.count += V_COL_COUNT;
-    //         verts--;
-    //     }
-    // }
     while (verts) {
 
         vb.data[index++] = color[0]; // Move mesh's x pos by amt

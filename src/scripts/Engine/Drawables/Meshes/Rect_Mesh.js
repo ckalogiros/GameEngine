@@ -1,7 +1,7 @@
 "use strict";
 
 import { Gfx_generate_context } from "../../Interfaces/Gfx/GfxContextCreate.js";
-import { Gfx_add_geom_mat_to_vb, Gfx_set_vb_show } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
+import { Gfx_add_geom_mat_to_vb } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 import { Scenes_store_mesh_in_gfx } from "../../Scenes.js";
 import { Find_gfx_from_parent_ascend_descend } from "../../Interfaces/Gfx/GfxContextFindMatch.js";
 import { Info_listener_dispatch_event } from "../DebugInfo/InfoListeners.js";

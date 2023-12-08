@@ -187,15 +187,6 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 		}
 	}
 
-	// RenderToDebugGfx() {
-
-	// 	this.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
-	// 	for (let i = 0; i < this.children.boundary; i++) {
-	// 		const child = this.children.buffer[i];
-	// 		child.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
-	// 	}
-	// }
-	
 	RenderToDebugGfx() {
 
 		this.sid.progs_group = PROGRAMS_GROUPS.DEBUG.MASK;
@@ -255,7 +246,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 
 		let max_height = this.geom.dim[1];
 
-		// HACK: TODO: Set only one of both(SECTION or ALIGN) as global lign bit field
+		// HACK: TODO: Set only one of both(SECTION or ALIGN) as global align bit field
 		if(this.alignment & ALIGN.HORIZONTAL){ // If the children text meshes are aligned horizontaly, return the height of the 'this' text mesh height
 			return max_height;
 		}
@@ -333,7 +324,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 
 
 			/**
-			 * MAYBE BUG: Getting the 0 index timeInterval from timeIntervalsIdxBuffer assuming the bellow explanation.
+			 * // BUG: Getting the 0 index timeInterval from timeIntervalsIdxBuffer assuming the bellow explanation.
 			 *	If the same interval and update is going to be used, then we want the first timeInterval 
 			 *	that was created which is the 0-th element of the this.timeIntervalsIdxBuffer.buffer[].
 			 * What happens if the this.timeIntervalsIdxBuffer.buffer[] gets another timeInterval???
@@ -517,7 +508,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 
 		this.alignment = flags;
 
-		// NOTE: The super is aligning the top-bot-left-right only.
+		// NOTE: The super class is aligning only the top-bot-left-right.
 		// TODO: Separate conceptualy the two alignments
 		super.Align_pre(target_mesh, flags, pad)
 

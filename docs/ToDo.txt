@@ -44,7 +44,10 @@ redrawing the meshes to it's self
 
 --------------------------------------------------- _asdhjdTODO_
 
-TODO: Render all the meshes taht do not change (vertex buffers) to a frame buffer texture and render the texture instead
+// TODO: Implement sections expand horizontaly 
+// TODO: Implement minimize on menus
+
+TODO: Render all the meshes that are static to a frame buffer texture and render the texture.
 
 // TODO: . IMPORTANT!:Batch remove meshes attribs from gfx buffers.
   Example: 

@@ -1,7 +1,7 @@
 "use strict";
 
 import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
-import { GfxInfoMesh, GlProgramUpdateUniformProjectionMatrix } from "../../../../Graphics/GlProgram.js";
+import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { AddArr3, CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../Operations/Collisions.js";
@@ -119,8 +119,8 @@ export class Widget_Label extends Rect {
             const gfxidxs = Find_gfx_from_parent_ascend_descend(this, this.parent);
             gfxidxs.rect.FLAGS |= FLAGS; // NOTE: The only way to pass .PRIVATE to 'Gfx_generate_context()'
             this.gfx = Gfx_generate_context(this.sid, this.sceneidx, this.geom.num_faces, gfxidxs.rect.FLAGS, gfxidxs.rect.idxs);
+
             gfxidxs.text.FLAGS |= FLAGS; // NOTE: The only way to pass .PRIVATE to 'Gfx_generate_context()'
-            // if(gfxidxs.text.idxs[0] === INT_NULL && (FLAGS & GFX_CTX_FLAGS.SPECIFIC)) gfxidxs.text.FLAGS &= ~GFX_CTX_FLAGS.SPECIFIC; // Disable SPECIFIC if no indexes are provided.
             this.text_mesh.gfx = Gfx_generate_context(this.text_mesh.sid, this.text_mesh.sceneidx, this.text_mesh.geom.num_faces, gfxidxs.text.FLAGS, gfxidxs.text.idxs);
         }
         else {
@@ -180,13 +180,13 @@ export class Widget_Label extends Rect {
 
     }
 
-    Reposition_pre(dif_pos) {
+    Reposition_pre(dif_pos) { // Update the widget's position, before it is added to the gfx buffers
 
         AddArr3(this.geom.pos, dif_pos);
         this.text_mesh.Reposition_pre(dif_pos);
     }
 
-    Reposition_post(dif_pos) {
+    Reposition_post(dif_pos) { // Update the widget's position, after it is added to the gfx buffers
 
         this.MoveXYZ(dif_pos)
         this.text_mesh.MoveXYZ(dif_pos)
@@ -199,7 +199,6 @@ export class Widget_Label extends Rect {
         // Move 'this' text
         this.geom.MoveXY(x, y, this.gfx);
         this.text_mesh.geom.MoveXY(x, y, this.text_mesh.gfx);
-
     }
 
     MoveY(y) {
@@ -207,7 +206,6 @@ export class Widget_Label extends Rect {
         // Move 'this' text
         this.geom.MoveY(y, this.gfx);
         this.text_mesh.geom.MoveY(y, this.text_mesh.gfx);
-
     }
 
     SetColorAlpha(btn_alpha = 1, text_alpha = 1) {
@@ -287,7 +285,7 @@ export class Widget_Label extends Rect {
         const text_mesh = mesh.text_mesh;
 
         // Destroy the time interval and the Move operation, if the mesh is not grabed
-        // MESH_STATE.IN_GRAB is deactivated upon mouse click up in Events.js.
+        // MESH_STATE.IN_GRAB is deactivated upon mouse 'click up' in Events.js.
         if (mesh.StateCheck(MESH_STATE.IN_GRAB) === 0 && mesh.timeIntervalsIdxBuffer.boundary) {
 
             const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
@@ -331,7 +329,6 @@ export class Widget_Label_Dynamic_Text extends Widget_Label {
     }
 
     /**
-      * 
       * @param {integer} msInterval The time interval in ms the dynamic text will be updated
       * @param {callbackfunction} Func The function to call upon time interval
       */

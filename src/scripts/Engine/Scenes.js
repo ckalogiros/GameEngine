@@ -7,47 +7,47 @@ import { Drop_down_set_root, Widget_Dropdown } from './Drawables/Meshes/Widgets/
 import { Widget_Text } from './Drawables/Meshes/Widgets/WidgetText.js';
 import { HandleEvents } from './Events/Events.js';
 
-class Update_Meshes_buffer {
-    mesh;
-    flag;
-    callbacks;
-    params;
-    constructor(mesh = null, flags = 0x0, callbacks = null, params = null) {
-        this.mesh = mesh;
-        this.flags |= flags;
-        this.callbacks = callbacks;
-        this.params = params;
-    }
-}
-const _update_meshes_buffer = new M_Buffer();
+// class Update_Meshes_buffer {
+//     mesh;
+//     flag;
+//     callbacks;
+//     params;
+//     constructor(mesh = null, flags = 0x0, callbacks = null, params = null) {
+//         this.mesh = mesh;
+//         this.flags |= flags;
+//         this.callbacks = callbacks;
+//         this.params = params;
+//     }
+// }
+// const _update_meshes_buffer = new M_Buffer();
 
-export function UpdaterAdd(mesh, flags, callbacks, params) {
-    _update_meshes_buffer.Add(new Update_Meshes_buffer(mesh, flags, callbacks, params))
-}
-export function UpdaterRun() {
+// export function UpdaterAdd(mesh, flags, callbacks, params) {
+//     _update_meshes_buffer.Add(new Update_Meshes_buffer(mesh, flags, callbacks, params))
+// }
+// export function UpdaterRun() {
 
-    for (let i = 0; i < _update_meshes_buffer.boundary; i++) {
+//     for (let i = 0; i < _update_meshes_buffer.boundary; i++) {
 
-        if (_update_meshes_buffer.buffer[i]) {
+//         if (_update_meshes_buffer.buffer[i]) {
 
-            const mesh = _update_meshes_buffer.buffer[i].mesh;
-            const params = _update_meshes_buffer.buffer[i].params;
+//             const mesh = _update_meshes_buffer.buffer[i].mesh;
+//             const params = _update_meshes_buffer.buffer[i].params;
 
-            if (mesh.gfx) {
+//             if (mesh.gfx) {
 
-                /**DEBUG */ if(!mesh.Reposition_post) {console.log('+++++++++++++++', mesh.name); break;}
+//                 /**DEBUG */ if(!mesh.Reposition_post) {console.log('+++++++++++++++', mesh.name); break;}
 
-                // console.log('Update positions: PREV', mesh.geom.pos)
-                mesh.Reposition_post(params);
-                // console.log('Update positions:', mesh.geom.pos)
+//                 // console.log('Update positions: PREV', mesh.geom.pos)
+//                 mesh.Reposition_post(params);
+//                 // console.log('Update positions:', mesh.geom.pos)
 
-                // Mesh update handled, remove.
-                _update_meshes_buffer.RemoveByIdx(i)
-            }
-        }
+//                 // Mesh update handled, remove.
+//                 _update_meshes_buffer.RemoveByIdx(i)
+//             }
+//         }
 
-    }
-}
+//     }
+// }
 
 
 function UpdaterRunRecursive(mesh, params, level) {
@@ -74,8 +74,8 @@ function UpdaterRunRecursive(mesh, params, level) {
 
 export class Scene {
 
-    sceneidx = 0;   // Scene ID (of type: SCENE const structure).
-    camera;        // Cameras buffer used by the scene
+    sceneidx = 0; // Scene ID (of type: SCENE const structure).
+    camera; // Cameras buffer used by the scene
     gfx; // SEE ### Scene gfx buffer
     root_meshes; // Holds only the root widget mesh of the scene(not widgets)
     name;
@@ -87,7 +87,6 @@ export class Scene {
         this.type |= MESH_TYPES_DBG.SCENE;
         this.name = 'scene, idx:' + this.idx;
 
-        // this.gfx = null;
         this.gfx = new M_Buffer(1);
         this.root_meshes = new M_Buffer();
 
@@ -97,7 +96,7 @@ export class Scene {
 
         const animations = AnimationsGet();
 
-        UpdaterRun();
+        // UpdaterRun();
 
         /** Run Animations */
         animations.Run();

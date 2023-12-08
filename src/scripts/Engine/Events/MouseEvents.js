@@ -51,16 +51,6 @@ export function OnTouchMove(e) {
     const x = e.changedTouches[0].clientX;
     const y = e.changedTouches[0].clientY;
     MouseSetCoords([x,y]);
-
-    // const scene = ScenesGetScene(SCENE.active.idx);
-    // if(scene){
-    //     OnHover(scene, mouse);
-    // }
-
-    // if (scene && scene.sceneidx === SCENE.stage) {
-    //     // Move Player 
-    //     OnPlayerMove(mouse.x, mouse.xdiff);
-    // }
 }
 
   

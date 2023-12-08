@@ -186,7 +186,6 @@ export class M_Buffer extends Buffer_Interface {
 
 }
 
-
 export class Int8Buffer extends Buffer_Interface {
 
    constructor(size) {
@@ -242,7 +241,8 @@ export class Int8Buffer2 extends Buffer_Interface {
 
       if (this.active_count <= idx) {
          this.boundary = idx + 1;
-      } else if (this.boundary+1 <= this.size) {
+      } 
+      else if (this.boundary+1 <= this.size) {
          // Case inserting the click event (idx=1) first. Then if we insert 
          // the hover event (idx=0), the boundary shall not be icremented;
          this.boundary++;

@@ -29,8 +29,7 @@ export class Widget_Switch extends Widget_Button {
       this.isOn = 0x0;
       this.state_text = [text_off, text_on];
       this.evt_clbk = {
-         // Binding function for the switch callback function and some params.
-         EventClbk: null,
+         EventClbk: null, // Binding function for the switch callback function and some params.
          targetBindingFunctions: null,
          target_mesh: this,
          params: null,

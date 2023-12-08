@@ -1,7 +1,7 @@
 "use strict";
 
 import * as math from '../../../../Helpers/Math/MathOperations.js'
-import { GlSetColor, GlSetColorAlpha } from "../../../../Graphics/Buffers/GlBufferOps.js";
+import { GlSetColor, GlSetColorAlpha, GlSetColorPerVertex } from "../../../../Graphics/Buffers/GlBufferOps.js";
 import { GlHandlerAddMaterialBuffer } from '../../../../Graphics/Buffers/GlBuffers.js';
 import { FontGetUvCoords } from '../../../Loaders/Font/Font.js';
 import { GfxInfoMesh } from '../../../../Graphics/GlProgram.js';
@@ -106,8 +106,32 @@ export class Material {
    GetColorBlue() { return this.col[2]; }
    GetColorAlpha() { return this.col[3]; }
    SetColor(col, gfx) {
-      math.CopyArr4(this.col, col);
-      GlSetColor(gfx, this.col);
+      if(gfx.sid.attr & SID.ATTR.COL4_PER_VERTEX){
+         math.CopyMat4(this.col, col);
+         GlSetColorPerVertex(gfx, this.col);
+      }
+      else {
+         math.CopyArr4(this.col, col);
+         GlSetColor(gfx, this.col);
+      }
+   }
+   SetHoverColor(gfx) {
+      if(gfx.sid.attr & SID.ATTR.COL4_PER_VERTEX){
+         GlSetColorPerVertex(gfx, math.Mult_mat4_scalar2(this.col, 1.3));
+      }
+      else {
+         GlSetColor(gfx, math.Mult_arr4_scalar2(this.col, 1.3));
+      }
+   }
+   SeHoverColortDefault(gfx) {
+      if(gfx.sid.attr & SID.ATTR.COL4_PER_VERTEX){
+         math.CopyMat4(this.col, this.defCol);
+         GlSetColorPerVertex(gfx, this.col);
+      }
+      else {
+         math.CopyArr4(this.col, this.defCol);
+         GlSetColor(gfx, this.col);
+      }
    }
    SetDefaultColor(gfx) {
       math.CopyArr4(this.col, this.defCol);
@@ -187,8 +211,8 @@ export class Material {
 
 		}
 	}
-
 }
+
 export class FontMaterial extends Material {
 
    text;

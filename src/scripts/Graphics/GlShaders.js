@@ -29,7 +29,8 @@ export function LoadShaderProgram(gl, sid) {
 	const webgl_program = LoadShaders(gl, shader);
 	if (webgl_program) {
 		if (dbg.GL_DEBUG_SHADERS) console.log('Shader Program Created Successfully!\nShader Type ID: ', dbg.GetShaderTypeId(sid));
-	} else {
+	} 
+	else {
 		alert('Unable to CREATE shader program: ' + gl.getProgramInfoLog(webgl_program));
 	}
 
@@ -55,7 +56,8 @@ function LoadShaders(gl, shader) {
 		gl.deleteProgram(webgl_program);
 		webgl_program = 0;
 		return null;
-	} else {
+	} 
+	else {
 		console.log('Shaders Linked Successfully!\n status:', gl.validateProgram(webgl_program));
 	}
 

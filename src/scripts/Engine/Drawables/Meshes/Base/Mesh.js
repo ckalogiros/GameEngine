@@ -85,46 +85,6 @@ export class Mesh {
     debug_info; // Debug_info_ui data.
 
 
-    /**
-        gfx: {
-            sid,
-            gfx,
-            attr_params1
-            uniforms
-        }
-
-        bools:{
-            is_gfx_inserted,
-
-        }
-
-        scene:{
-            idx,
-            sceneidx,
-
-        }
-        children:[]
-        listeners:[]
-        eventCallbacks:[]
-        timeIntervalsIdxBuffer:[]
-        timedEvents:[]
-
-        type; // A bit masked large integer to 'name' all different types of a mesh. 
-        state;  // Bitfield integer. Stores enebled-dissabled mesh state. 
-     
-        geom;
-        mat;
-
-        time;
-        parent; // Pointer to the parent mesh.
-        hover_margin; // A margin to be set for hovering. // TODO: Abstract to a struct.
-        menu_options; // A callback and an index. Constructs the options popup menu for the mesh
-        menu_options_idx; // An index to the menu options handler's buffer
-        minimized; // Pointer to a minimized version of the mesh.
-        debug_info; // Debug_info_ui data.
-        name;
-     */
-
     constructor(geom = null, mat = null, time = 0, attrParams1 = [0, 0, 0, 0], name = '???') {
 
         this.geom = geom;
@@ -135,7 +95,6 @@ export class Mesh {
             attr: (this.geom.sid.attr | this.mat.sid.attr),
             unif: (this.mat.sid.unif) | SID.UNIF.PROJECTION, // Assuming we always have  a projection camera and a uniforms buffer. 
             pass: (this.geom.sid.pass | this.mat.sid.pass | SID.PASS.COL4),
-            // progs_group: PROGRAMS_GROUPS.DEFAULT, // To denote if the curent mesh is used for dubug, so it uses specific gfx buffers for debug ui rendering.
             progs_group: PROGRAMS_GROUPS.DEFAULT.MASK, // To denote if the curent mesh is used for dubug, so it uses specific gfx buffers for debug ui rendering.
         };
 
@@ -165,8 +124,6 @@ export class Mesh {
         this.type |= MESH_TYPES_DBG.MESH;
         this.state = { mask: 0 }; // Unfortunately js cannot create a pointer for integers, so we have to wrap the mask to a class;
 
-        // this.listeners = new Int8Buffer2();
-        // this.listeners.Init(LISTEN_EVENT_TYPES_INDEX.SIZE, INT_NULL);
         this.listeners = new M_Buffer();
         this.listeners.Init(LISTEN_EVENT_TYPES_INDEX.SIZE);
 
@@ -287,10 +244,6 @@ export class Mesh {
         Gfx_set_vb_show(this.gfx.progs_groupidx, this.gfx.prog.idx, this.gfx.vb.idx, flag);
         if (flag) this.StateEnable(MESH_STATE.IS_HOVERABLE);
         else this.StateDisable(MESH_STATE.IS_HOVERABLE);
-
-        // if (this.children.boundary)
-        //     Recursive_gfx_operations(this, Set_graphics_vertex_buffer_render, flag)
-
     }
 
     /*******************************************************************************************************************************************************/
@@ -392,7 +345,9 @@ export class Mesh {
 
     /*******************************************************************************************************************************************************/
     // Setters-Getters
+    SetHoverColor() { this.mat.SetHoverColor(this.gfx); }
     SetColor(col) { this.mat.SetColor(col, this.gfx); }
+    SeHoverColortDefault() { this.mat.SeHoverColortDefault(this.gfx); }
     SetDefaultColor() { this.mat.SetDefaultColor(this.gfx); }
     SetDefaultPosXY() { this.geom.SetDefaultPosXY(this.gfx); }
     SetColorRGB(col) { this.mat.SetColorRGB(col, this.gfx); }
@@ -551,44 +506,3 @@ function Mesh_print_all_mesh_listeners_recursive(meshes) {
 
 
 /**SAVES */
-
-/** function Reconstruct_listeners_recursive(mesh, root){
-
-    for(let i=0; i< mesh.children.count; i++){
-
-        const child = mesh.children.buffer[i];
-        if(child)
-            Reconstruct_listeners_recursive(child, root);
-
-        if(child.StateCheck(MESH_STATE.IS_HOVERABLE)){
-            
-            const type = LISTEN_EVENT_TYPES_INDEX.HOVER;
-
-            // Create a Fake event for the root, if the root does not have an event (of same type)
-            if(root.listeners.buffer[type] === INT_NULL)
-                root.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-
-            root.StateEnable(MESH_STATE.IS_FAKE_HOVERABLE);
-
-            const evt_idx = child.listeners.buffer[type];
-            child.listeners.buffer[type] = Listener_set_event_active_by_idx(type, root, evt_idx);
-            // console.log('Remove Hover event:', type, child.name, child.listeners.buffer, ' parent:', mesh.name, ' root:', root.name)
-        }
-        if(child.StateCheck(MESH_STATE.IS_CLICKABLE)){
-            
-            const type = LISTEN_EVENT_TYPES_INDEX.CLICK;
-            
-            // Create a Fake event for the root, if the root does not have an event (of same type)
-            if(root.listeners.buffer[type] === INT_NULL)
-                root.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_DOWN, root.OnFakeClick);
-            
-            root.StateEnable(MESH_STATE.IS_FAKE_CLICKABLE);
-            
-            const evt_idx = child.listeners.buffer[type];
-            child.listeners.buffer[type] = Listener_set_event_active_by_idx(type, root, evt_idx)
-            // console.log('Remove click event:', type, child.name, child.listeners.buffer, ' parent:', mesh.name, ' root:', root.name)
-        }
-    }
-}
- */
-

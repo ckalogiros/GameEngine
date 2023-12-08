@@ -1,9 +1,8 @@
 "use strict";
 
-import { AddArr2, AddArr3, CopyArr2, CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
+import { AddArr2, CopyArr2, CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../Operations/Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../Controls/Input/Mouse.js";
-import { UpdaterAdd } from "../../Scenes.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../Timers/TimeIntervals.js";
 import { MESH_ENABLE } from "./Base/Mesh.js";
 import { Rect } from "./Rect_Mesh.js";
@@ -14,7 +13,7 @@ import { Rect } from "./Rect_Mesh.js";
 
 export class Section extends Rect {
 
-   options;  // Stores some state of 'this'.
+   options;  // BIT-FIELD. Stores some state for 'this'.
    margin;   // [1,1] Stores the x-y margins
    padding;  // [1,1] Stores padding for the meshes in-between space.
    max_size; // [1,1] Stores the max x-y size of all children meshes (not accumulative).
@@ -122,25 +121,6 @@ export class Section extends Rect {
       section.max_size[1] = 0;
 
    }
-
-   // UpdateGfxPosRecursive_bottomUpTraverse(mesh) {
-
-   //    if (mesh.gfx !== null) {
-   //       mesh.UpdatePosXYZ();
-   //    }
-   //    else {
-   //       mesh.GenGfxCtx(FLAGS, gfxidx); // Add any none-added meshes.
-   //    }
-
-   //    for (let i = 0; i < mesh.children.boundary; i++) {
-
-   //       const child = mesh.children.buffer[i];
-
-   //       if (child && child.type & MESH_TYPES_DBG.SECTION_MESH)
-   //          this.UpdateGfxPosRecursive_bottomUpTraverse(child);
-   //    }
-
-   // }
 
    UpdateGfxPosDimRecursive(mesh) {
 
@@ -324,28 +304,6 @@ export class Section extends Rect {
       }
    }
 
-   // SEE ### OnMove Events Implementation Logic
-   // OnMove(params) {
-
-   //    const section = params.params;
-
-   //    // Destroy the time interval and the Move operation, if the mesh is not grabed
-   //    if (section.StateCheck(MESH_STATE.IN_GRAB) === 0 && section.timeIntervalsIdxBuffer.boundary) {
-
-   //       const intervalIdx = section.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
-   //       TimeIntervalsDestroyByIdx(intervalIdx);
-   //       section.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
-
-   //       return;
-   //    }
-   //    console.error('CALING SECTIONS\'S OnMove FUNCTION')
-
-   //    // Move 
-   //    const mouse_pos = MouseGetPosDif();
-   //    section.geom.MoveXY(mouse_pos.x, -mouse_pos.y, section.gfx);
-
-   // }
-
    /*******************************************************************************************************************************************************/
    // Transformations
    Move(x, y) { Section_move_children_recursive(x, y, this); }
@@ -361,7 +319,6 @@ export class Section extends Rect {
       }
    }
 }
-
 
 function Section_move_children_recursive(x, y, mesh) {
 
@@ -499,9 +456,7 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
          const p_dx = parent.GetMaxWidth(), p_dy = parent.GetTotalHeight(); // parent mesh dimention
          const p_mx = parent.margin[0], p_my = parent.margin[1]; // parent mesh margin
 
-         // const new_pos = [c_x - p_dx + mesh.GetMaxWidth() + p_mx, c_y - p_dy + mesh.GetTotalHeight() + p_my, parent.geom.pos[2] + 1,];
          const new_pos = [c_x - p_dx + mesh.GetMaxWidth() + p_mx, c_y - p_dy + mesh.geom.dim[1] + p_my, parent.geom.pos[2] + 1,];
-         // const new_pos = [c_x - p_dx + mesh.GetMaxWidth() + p_mx, c_y - p_dy + mesh.geom.dim[1], parent.geom.pos[2] + 1,];
 
          if ((mesh.type & MESH_TYPES_DBG.SECTION_MESH) === 0) { // Case mesh not of type section, have it update it's new pos-dim on a later when it's gfx exists.
 
@@ -514,7 +469,7 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
                mesh.Reposition_pre(pos_dif);
             }
 
-            continue_recur = false; // Stop recursion for meshe's children. Let the mesh deal with it's children.
+            continue_recur = false; // Stop recursion for mesh's children. Let the mesh deal with it's children.
          }
          else { // Case  mesh is of type section  
 
@@ -541,7 +496,7 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
    return accum_pos;
 }
 
-// TODO: For calculating multi-word text, if we need separate flags (first mesh:HORIZONTAL, second mesh:vertical), we need to store the flags in the mesh. 
+// TODO: For calculating multi-word text, if we need separate flags (HORIZONTAL | VERTICAL), we need to store the flags in the mesh. 
 function Calculate_sizes_recursive(section, top, left, options, total_margin = [0, 0], total_size = [0, 0]) {
 
    const padding = [0, 0]
@@ -590,24 +545,15 @@ function Calculate_sizes_recursive(section, top, left, options, total_margin = [
                accum_size_per_section[1] += mesh.geom.dim[1];
                section.max_size[1] += mesh.geom.dim[1];
             }
-            // accum_size_per_section[0] = mesh.geom.dim[0] * mesh.geom.num_faces;
             accum_size_per_section[0] = mesh.GetMaxWidth();
             if (section.max_size[0] < accum_size_per_section[0])
                section.max_size[0] = accum_size_per_section[0];  // Keep the max width of all meshes in Vertical mode.
-            // section.max_size[0] = mesh.geom.dim[0] * mesh.geom.num_faces;  // Keep the max width of all meshes in Vertical mode.
          }
          else if (opt & SECTION.HORIZONTAL) {
 
             accum_size_per_section[0] += mesh.GetTotalWidth();
             section.max_size[0] += mesh.GetTotalWidth();
-            // if (mesh.children.boundary) { // Case text mesh has separate text as children, calculate size of all of them.
-            //    accum_size_per_section[0] += mesh.GetTotalWidth();
-            //    section.max_size[0] += mesh.GetTotalWidth();
-            // }
-            // else {
-            //    accum_size_per_section[1] += mesh.GetTotalWidth();
-            //    section.max_size[1] += mesh.GetTotalWidth();
-            // }
+
             accum_size_per_section[1] = mesh.geom.dim[1];
             section.max_size[0] += mesh.geom.dim[0] * mesh.geom.num_faces;
             if (section.max_size[1] < accum_size_per_section[1])

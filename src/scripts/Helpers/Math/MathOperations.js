@@ -24,6 +24,87 @@ export function Pow(base, exp){
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Set Array */
 // TODO: dst and src are logicaly opposite, swap them
+
+export function Mult_arr4_scalar2(arr, scalar){
+    return[
+        arr[0] * scalar,
+        arr[1] * scalar,
+        arr[2] * scalar,
+        arr[3] * scalar,
+    ]
+
+}
+export function Mult_arr4_scalar(arr, scalar){
+    arr[0] *=  scalar;
+    arr[1] *=  scalar;
+    arr[2] *=  scalar;
+    arr[3] *=  scalar;
+
+}
+export function Mult_mat4_scalar2(mat, scalar){
+    return[
+        mat[0][0] * scalar,
+        mat[0][1] * scalar,
+        mat[0][2] * scalar,
+        mat[0][3] * scalar,
+        mat[1][0] * scalar,
+        mat[1][1] * scalar,
+        mat[1][2] * scalar,
+        mat[1][3] * scalar,
+        mat[2][0] * scalar,
+        mat[2][1] * scalar,
+        mat[2][2] * scalar,
+        mat[2][3] * scalar,
+        mat[3][0] * scalar,
+        mat[3][1] * scalar,
+        mat[3][2] * scalar,
+        mat[3][3] * scalar,
+    ];
+}
+export function Mult_mat4_scalar(mat, scalar){
+    let k = 0;
+    mat[k][0] *=  scalar;
+    mat[k][1] *=  scalar;
+    mat[k][2] *=  scalar;
+    mat[k][3] *=  scalar; k++;
+    mat[k][0] *=  scalar;
+    mat[k][1] *=  scalar;
+    mat[k][2] *=  scalar;
+    mat[k][3] *=  scalar; k++;
+    mat[k][0] *=  scalar;
+    mat[k][1] *=  scalar;
+    mat[k][2] *=  scalar;
+    mat[k][3] *=  scalar; k++;
+    if(mat[k][1] === undefined)
+    console.error('888888888888888888888')
+    mat[k][0] *=  scalar;
+    mat[k][1] *=  scalar;
+    mat[k][2] *=  scalar;
+    mat[k][3] *=  scalar;
+}
+export function CopyMat4(dst, src){
+    let k = 0;
+    dst[k][0] = src[k][0];
+    dst[k][1] = src[k][1];
+    dst[k][2] = src[k][2];
+    dst[k][3] = src[k][3];
+    k++;
+    dst[k][0] = src[k][0];
+    dst[k][1] = src[k][1];
+    dst[k][2] = src[k][2];
+    dst[k][3] = src[k][3];
+    k++;
+    dst[k][0] = src[k][0];
+    dst[k][1] = src[k][1];
+    dst[k][2] = src[k][2];
+    dst[k][3] = src[k][3];
+    k++;
+    dst[k][0] = src[k][0];
+    dst[k][1] = src[k][1];
+    dst[k][2] = src[k][2];
+    dst[k][3] = src[k][3];
+
+}
 export function CopyArr(dst, src){
     
     if(!src || src === undefined){

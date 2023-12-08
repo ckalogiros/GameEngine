@@ -51,7 +51,6 @@ let SCROLL_MESH_IDX = INT_NULL;
 let SCROLL_BAR_IDX = INT_NULL;
 
 
-// export class Widget_Scroller extends Rect{
 export class Widget_Scroller extends Section {
 
    scrolled_section;
@@ -150,9 +149,9 @@ export class Widget_Scroller extends Section {
       console.log(this.scrolled_section.geom.pos[1])
    }
 
-   AddToScrolledSection(mesh){
+   AddItemToScrolledSection(mesh){
 
-      /**DEBUG*/if(ERROR_NULL(mesh)) { console.error('AddToScrolledSection(), the mesh to be added is null or undefined'); return; }
+      /**DEBUG*/if(ERROR_NULL(mesh)) { console.error('AddItemToScrolledSection(), the mesh to be added is null or undefined'); return; }
 
       this.scrolled_section.AddItem(mesh);
       
@@ -259,44 +258,9 @@ export class Widget_Scroller extends Section {
 
    /*******************************************************************************************************************************************************/
    // Transformations
-   Move(x, y) {
-
-   }
 
    /*******************************************************************************************************************************************************/
    // Events Handling
-   // OnClick(params) {
-
-   //    const scroller = params.target_params.target_mesh;
-
-   //    const point = MouseGetPos();
-   //    const g = scroller.geom;
-   //    if (Check_intersection_point_rect(g.pos, g.dim, point, [0, 8])) {
-
-   //       STATE.mesh.SetClicked(scroller);
-   //       console.log('Clicked:', scroller.name)
-
-   //       if (scroller.timeIntervalsIdxBuffer.boundary <= 0) {
-
-   //          /**
-   //           * Create Move event.
-   //           * The Move event runs only when the mesh is GRABED. That means that the timeInterval 
-   //           * is created and destroyed upon 'onClickDown' and 'onClickUp' respectively.
-   //           */
-   //          const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, scroller.OnMove, scroller);
-   //          scroller.timeIntervalsIdxBuffer.Add(idx);
-
-   //          if (scroller.StateCheck(MESH_STATE.IS_GRABABLE)) {
-
-   //             STATE.mesh.SetGrabed(scroller);
-   //             scroller.StateEnable(MESH_STATE.IN_GRAB);
-   //          }
-
-   //       }
-   //       return true;
-   //    }
-
-   // }
 
    OnClick(params) {
 

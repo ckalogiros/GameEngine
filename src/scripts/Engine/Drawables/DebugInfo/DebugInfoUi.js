@@ -353,7 +353,6 @@ export function Debug_info_create_gfx_info(params) {
    const tr = .85;
 
    const dp = new Widget_Dropdown(`InfoUi Gfx DP`, [350, 20, 0], [10, 10], GREY1, TRANSPARENCY(GREEN_60_240_100, tr), WHITE, [8, 3]);
-   // dp.SetName('InfoUi Gfx DP');
    dp.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
    dp.CreateClickEvent();
    dp.CreateMoveEvent();
@@ -589,7 +588,7 @@ function Debug_info_create_mesh_info(params){
    }
 
 
-   /**
+   /** SAMPLE:
       alreadyAdded: false
       attrParams1: Array(4) [ 0, 0, 0, … ]
       children: Object { boundary: 2, active_count: 2, size: 2, … }
@@ -658,133 +657,6 @@ function Debug_info_create_mesh_info(params){
    // dp.debug_info.evtidx = Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.MESH, Debug_info_mesh_update, params, dp);
 
 }
-
-/**SAVE */
-// function Debug_info_create_mesh_info(params){
-
-   
-//    const scene = params.params;
-
-//    if (DEBUG_INFO.UI_MESH.IS_ON) {
-
-//       const meshes = Scenes_get_root_meshes(scene.sceneidx);
-//       const dropdown = meshes.buffer[DEBUG_INFO.UI_MESH.IDX];
-
-//       Info_listener_destroy_event(dropdown.debug_info.evtidx);
-//       DEBUG_INFO.UI_MESH.POS = dropdown.geom.pos; // Remember the ui's position.
-
-//       dropdown.Destroy();
-
-//       DEBUG_INFO.UI_MESH.IDX = INT_NULL; // reference to the scene's mesh buffer
-//       DEBUG_INFO.UI_MESH.IS_ON = false;
-
-//       ui_gfx_self_state.progs = [];
-
-//       return;
-//    }
-
-
-//    const tr = .45;
-
-//    const dp = new Widget_Dropdown(`InfoUi Mesh DP`, [600, 20, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
-//    dp.SetName('InfoUi Mesh DP');
-//    dp.SetType(MESH_TYPES_DBG.UI_INFO_MESH); // Special recognition of this type, so we skip any infinite loops
-//    dp.CreateClickEvent();
-//    dp.CreateMoveEvent();
-//    Drop_down_set_root(dp, dp);
-
-//    const root_meshes = Scenes_get_root_meshes(STATE.scene.active_idx);
-
-//    for (let i=0; i<root_meshes.boundary; i++){
-
-//       if(root_meshes.buffer[i]) 
-//          Debug_info_mesh_add_meshes_as_tree_struct(root_meshes.buffer[i], dp);
-//    }
-
-//    // Create dropdown info for each mesh in scene
-//    // const meshes = Scenes_get_all_scene_meshes(STATE.scene.active_idx);
-//    // const fontsize = 4;
-   
-//    // for (let i=0; i<meshes.length; i++){
-
-//    //    const dp_mesh = new Widget_Dropdown(`${i}: ${meshes[i].name}`, [0, 0, 0], [10, 10], TRANSPARENCY(GREEN_140_240_10, tr), GREY1, WHITE, [8, 3]);
-//    //    dp_mesh.SetName(`${meshes[i].name}`);
-
-//    //    /**
-//    //       alreadyAdded: false
-//    //       attrParams1: Array(4) [ 0, 0, 0, … ]
-//    //       children: Object { boundary: 2, active_count: 2, size: 2, … }
-//    //       debug_info: Object { type: 0, data: null, evtidx: -1 }
-//    //       dp_symbols: Array [ "+", "-" ]
-//    //       eventCallbacks: Object { boundary: 0, active_count: 0, size: -1, … }
-//    //       geom: Object { zIndex: 0, time: 0, type: 2, … }
-//    //       gfx: Object { sceneidx: 0, scene_mesh_in_gfx_idx: 0, isPrivate: false, … }
-//    //       hover_margin: Array [ 0, 0 ]
-//    //       id: 0
-//    //       idx: 0
-//    //       isOn: 1
-//    //       is_gfx_inserted: false
-//    //       listeners: Object { boundary: 0, active_count: 0, size: 2, … }
-//    //       margin: Array [ 0, 0 ]
-//    //       mat: Object { textidx: -1, uvIdx: -1, hasFontTex: false, … }
-//    //       max_size: Array [ 131.2, 124.25 ]
-//    //       menu: Object { idx: 1, is_gfx_inserted: false, sceneidx: 0, … }
-//    //       menu_options: Object { Clbk: null, idx: -1 }
-//    //       menu_options_idx: -1
-//    //       minimized: undefined
-//    //       name: "InfoUi Root-DP id:0"
-//    //       options: 2
-//    //       padding: undefined
-//    //       parent: undefined
-//    //       rootidx: 0
-//    //       scene_rootidx: 0
-//    //       sceneidx: 0
-//    //       sid: Object { shad: 2, attr: 36646, unif: 7, … }
-//    //       state: Object { mask: 0 }
-//    //       time: undefined
-//    //       timeIntervalsIdxBuffer: Object { boundary: 0, active_count: 0, size: -1, … }
-//    //       active_count: 0
-//    //       boundary: 0
-//    //       buffer: null
-//    //       size: -1
-//    //       <prototype>: Object { … }
-//    //       timedEvents: Object { boundary: 0, active_count: 0, size: -1, … }
-//    //       active_count: 0
-//    //       boundary: 0
-//    //       buffer: null
-//    //       size: -1
-//    //       type: 33557120
-//    //       uniforms: Object { time: {…} }
-//    //       time: Object { val: 0, idx: -1 }
-//    //       idx: -1
-//    //       val: 0
-//    //     */
- 
-//    //    dp_mesh.AddToMenu(new Widget_Text(`name: ${meshes[i].name}`, [0, 0, 0], fontsize, BLUE_10_120_220, .4));
-//    //    dp_mesh.AddToMenu(new Widget_Text(`id: ${meshes[i].id}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
-//    //    dp_mesh.AddToMenu(new Widget_Text(`isOn: ${meshes[i].isOn}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
-//    //    dp_mesh.AddToMenu(new Widget_Text(`is_gfx_inserted: ${meshes[i].is_gfx_inserted}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
-//    //    dp_mesh.AddToMenu(new Widget_Text(`parent: ${meshes[i].parent}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
-//    //    dp_mesh.AddToMenu(new Widget_Text(`rootidx: ${meshes[i].rootidx}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
-//    //    dp_mesh.AddToMenu(new Widget_Text(`scene_rootidx: ${meshes[i].scene_rootidx}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
-//    //    dp_mesh.AddToMenu(new Widget_Text(`sceneidx: ${meshes[i].sceneidx}`, [0, 0, 0], fontsize, YELLOW_240_220_10, .4));
-
-//    //    dp.AddToMenu(dp_mesh);
-//    // }
-
-//    scene.AddWidget(dp, GFX_CTX_FLAGS.PRIVATE);
-//    dp.Calc();
-//    dp.Render();
-//    //*Gfx_end_session(true);
-//    dp.ConstructListeners();
-   
-//    DEBUG_INFO.UI_MESH.IDX = dp.idx;
-//    DEBUG_INFO.UI_MESH.IS_ON = true;
-
-//    // Create an Info listener to update the mouse position ui text
-//    // dp.debug_info.evtidx = Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.MESH, Debug_info_mesh_update, params, dp);
-
-// }
 
 function Debug_info_mesh_add_meshes_as_tree_struct(mesh, parent){
 

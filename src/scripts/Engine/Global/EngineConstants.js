@@ -13,26 +13,12 @@ const ALL = 0xffff;
 
 const UNCHANGED = 0xffff; // Just a flag, used for checking if a value should change or remain the same.
 
-function ERROR_NULL(obj) {
-	if (obj === null || obj === undefined || obj === INT_NULL) {
-		// console.error('Null ERROR. object:', obj, msg)
-		return true;
-	}
-}
-
-function ERROR_TYPE(obj, type, msg) {
-	if ((obj.type & type) === 0) {
-		console.error(`Type ERROR. type: ${GetMeshNameFromType(type)}, objectType: ${GetMeshNameFromType(obj.type)}`, msg)
-		return true;
-	}
-}
 
 
+
+/*************************************************************************************************/
+// Application Constants 
 let _cnt = 0x1;
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Application Constants 
- */
 const PLATFORM = {
 	WIN_NT_IMPL: false,
 	WIN_PHONE_IMPL: false,
@@ -41,9 +27,11 @@ const PLATFORM = {
 	BLACK_BERRY_IMPL: false,
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Engine Constants */
 
+
+
+/*************************************************************************************************/
+// Engine Constants
 const Device = {
 	MAX_WIDTH: 1600,
 	MAX_HEIGHT: 800,
@@ -96,7 +84,8 @@ const STATE = {
 			if (!mesh) {
 				this.hoveredId = INT_NULL;
 				this.hoveredIdx = INT_NULL;
-			} else {
+			} 
+			else {
 				this.hoveredId = mesh.id;
 				this.hoveredIdx = mesh.idx;
 			}
@@ -106,7 +95,8 @@ const STATE = {
 			if (!mesh) {
 				this.grabedId = INT_NULL;
 				this.grabedIdx = INT_NULL;
-			} else {
+			} 
+			else {
 				this.grabedId = mesh.id;
 				this.grabedIdx = mesh.idx;
 			}
@@ -116,7 +106,8 @@ const STATE = {
 			if (!mesh) {
 				this.clickedId = INT_NULL;
 				this.clickedIdx = INT_NULL;
-			} else {
+			} 
+			else {
 				this.clickedId = mesh.id;
 				this.clickedIdx = mesh.idx;
 			}
@@ -126,7 +117,8 @@ const STATE = {
 			if (!mesh) {
 				this.selectedId = INT_NULL;
 				this.selectedIdx = INT_NULL;
-			} else {
+			} 
+			else {
 				this.selectedId = mesh.id;
 				this.selectedIdx = mesh.idx;
 			}
@@ -247,39 +239,36 @@ const FLAGS = {
 }
 
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Loaders's Constants 
- */
+/*************************************************************************************************/
+// Loaders's Constants 
 const CHAR_ARRAY_START_OFFSET = ' '.charCodeAt(0);
 const CHAR_ARRAY_LETTERS_START_OFFSET = 'A'.charCodeAt(0);
 
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Timer's Constants 
- */
+
+
+/*************************************************************************************************/
+// Timer's Constants 
 const TIME_INTERVAL_REPEAT_ALWAYS = 9999999999; // Repeat always a time interval clbk function.
 
 
 
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Mesh's Constants 
- */
+/*************************************************************************************************/
+// Mesh's Constants 
 const OUT_OF_VIEW = 1000; // Out of screen view in pixels
 
 
 
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Events Constants 
- */
+/*************************************************************************************************/
+// Events Constants 
 
 
 
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Style Constants  
- */
+/*************************************************************************************************/
+// Style Constants  
 
 const STYLE = {
 
@@ -389,6 +378,9 @@ const COLORS1 = new Array(
 
 
 
+/*************************************************************************************************/
+// Textures
+
 let g_cnt = 0;
 const FONTS = {
 
@@ -423,14 +415,10 @@ const MENU_FONT_SIZE = 4;
 
 
 
+/*************************************************************************************************/
+// Meshes  
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Meshes  
- */
-
-/**
- * MESH_TYPES_DBG: A bitmask to check if a mesh is of a specific type
- */
+// MESH_TYPES_DBG: A bitmask to check if a mesh is of a specific type
 _cnt = 0x1;
 const MESH_TYPES_DBG = {
 
@@ -542,9 +530,10 @@ function GetMeshHighOrderNameFromType(type) {
 }
 
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Events  
- */
+
+
+/*************************************************************************************************/
+//  Events  
 _cnt = 0x1;
 const LISTENERS_FLAGS = {
 	ANY_HOVER: _cnt <<= 0x1,
@@ -627,26 +616,10 @@ const DEBUG_INFO = {
 }
 
 
-// const TEMP_GFX_SHORTCUT = function(num){
-
-// 	switch(num){
-
-// 		case 0: return [0,0];
-// 		case 1: return [0,1];
-// 		case 2: return [0,1];
-// 	}
-// };
-
-// const TEMP_GFX_SHORTCUT = {
-// 	GFX_00: [0,0],
-// 	GFX_01: [0,1],
-// };
 
 
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Debugging. Switching On/Off console.log() in the code.
- */
+/*************************************************************************************************/
+// Debugging. Switching On/Off console.log() in the code.
 const DEBUG = {
 	CORE: true,
 	MATERIAL: true,
@@ -682,3 +655,19 @@ const DEBUG = {
 
 	WIGET_DROPDOWN: false,
 };
+
+
+
+function ERROR_NULL(obj) {
+	if (obj === null || obj === undefined || obj === INT_NULL) {
+		// console.error('Null ERROR. object:', obj, msg)
+		return true;
+	}
+}
+
+function ERROR_TYPE(obj, type, msg) {
+	if ((obj.type & type) === 0) {
+		console.error(`Type ERROR. type: ${GetMeshNameFromType(type)}, objectType: ${GetMeshNameFromType(obj.type)}`, msg)
+		return true;
+	}
+}

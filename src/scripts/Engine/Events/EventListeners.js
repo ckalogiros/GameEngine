@@ -98,11 +98,9 @@ export class Event_Listener {
 
       LISTENERS_FLAGS[TYPE_IDX] = true;
       event_params.evt_idx = this.event_type[TYPE_IDX].Add(event_params);
-      // console.log(' === Add event:', event_params.source_params.name, ' parent event idx:', event_params.parent_evt)
-      // console.log('{{{{{{{{{{{{{{{:',source_params.debug_info.type)
-      if(source_params.debug_info.type === 0)
+      if (source_params.debug_info.type === 0)
          Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.LISTENERS, event_params);
-      
+
       return this.event_type[TYPE_IDX].buffer[event_params.evt_idx];
    }
 
@@ -139,11 +137,9 @@ export class Event_Listener {
       event_params.evt_idx = event.children.Add(event_params);
       event.has_child_events = true;
 
-      // console.log('{{{{{{{{{{{{{{{:',source_params.debug_info.type)
-      if(source_params.debug_info.type === 0)
+      if (source_params.debug_info.type === 0)
          Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.LISTENERS, event_params);
 
-      // console.log(' = Add child event:', event_params.source_params.name, ' parent event:', event.source_params.name)
       return event.children.buffer[event_params.evt_idx];
    }
 
@@ -155,29 +151,26 @@ export class Event_Listener {
       /**DEBUG Alert*/if (TYPE_IDX < 0 || TYPE_IDX >= LISTEN_EVENT_TYPES_INDEX.SIZE) alert('Event type index does not exist.');
 
       let intersects = false;
-      // console.log('------------------------')
-      
-      
-      for (let i = 0; i < this.event_type[TYPE_IDX].boundary; i++) {
-         
-         const evt = this.event_type[TYPE_IDX].buffer[i];
-         
-         // if(evt && evt.isActive) {
-            if (evt) {
 
-               const mesh = evt.source_params;
-               const point = MouseGetPos();
-               const verticalMargin = mesh.hover_margin;
-               
-               const rect = [ // The rect area to check for event(mouse hover)
+      for (let i = 0; i < this.event_type[TYPE_IDX].boundary; i++) {
+
+         const evt = this.event_type[TYPE_IDX].buffer[i];
+
+         if (evt) {
+
+            const mesh = evt.source_params;
+            const point = MouseGetPos();
+            const verticalMargin = mesh.hover_margin;
+
+            const rect = [ // The rect area to check for event(mouse hover)
                [mesh.geom.pos[0] - mesh.geom.dim[0] - verticalMargin[0], mesh.geom.pos[0] + mesh.geom.dim[0] + verticalMargin[0]], // Left  Right 
                [(mesh.geom.pos[1] - mesh.geom.dim[1]) - verticalMargin[1], (mesh.geom.pos[1] + mesh.geom.dim[1]) + verticalMargin[1]], // Top  Bottom
             ];
 
             // If and only if mouse is intersecting with the current mesh(mouse hover) ...
             intersects = Intersection_point_rect(point, rect);
+
             if (intersects) {
-               // console.log('  -- event mesh:', evt.source_params.name)
 
                if (evt.has_child_events) { // Check all of its children(recursively)
                   const event_found = Check_child_events_recursive(evt, point);
@@ -189,7 +182,7 @@ export class Event_Listener {
                         trigger_params: trigger_params,
                         event_type: TYPE_IDX,
                      }
-                     
+
                      // Set any clicked mesh IN_FOCUS
                      const mesh = event_found.source_params;
                      // console.log(mesh.name)
@@ -202,11 +195,10 @@ export class Event_Listener {
                      }
                   }
                }
-               
+
                // Set any clicked mesh IN_FOCUS
                const mesh = evt.source_params;
-               // console.log(mesh.name)
-               
+
                if (evt.Clbk) {
                   // Else if no children event was triggered, run any events of the main event.
                   const dispatch_params = {
@@ -218,101 +210,9 @@ export class Event_Listener {
                   evt.Clbk(dispatch_params);
                   return;
                }
-               
             }
          }
       }
-
-      // for (let i = 0; i < this.event_type[TYPE_IDX].boundary; i++) {
-
-      //    const evt = this.event_type[TYPE_IDX].buffer[i]; 
-
-      //    // Case the EventListeners has nulled elements in the buffer (E.g EventListeners.buffer[null, evt1, evt2, ...])
-      //    // if(evt && evt.isActive) {
-      //    if(evt) {
-
-      //       const mesh = evt.source_params;
-      //       const point = MouseGetPos();
-      //       const verticalMargin = mesh.hover_margin;
-
-      //       const rect = [ // The rect area to check for event(mouse hover)
-      //          [mesh.geom.pos[0] - mesh.geom.dim[0] - verticalMargin[0], mesh.geom.pos[0] + mesh.geom.dim[0] + verticalMargin[0]], // Left  Right 
-      //          [(mesh.geom.pos[1] - mesh.geom.dim[1]) - verticalMargin[1], (mesh.geom.pos[1] + mesh.geom.dim[1]) + verticalMargin[1]], // Top  Bottom
-      //       ];
-
-      //       // If and only if mouse is intersecting with the current mesh(mouse hover) ...
-      //       ret = Intersection_point_rect(point, rect);
-
-      //       // ... see if any of it's children  have the same event type, check them and dispatch thei event first.
-      //       if(ret){ // If we have an event on the parent, check if children have too.
-
-      //          if(evt.has_child_events && evt.children !== null){ // Check if has children events.
-
-      //             ret = false; // Use ret to test the children events intersection
-      //             for(let j=0; j<evt.children.boundary; j++){
-
-      //                const child_event = evt.children.buffer[j];
-      //                if(child_event){
-
-      //                   const child = child_event.source_params;
-      //                   const child_rect = [ // The rect area to check for event(mouse hover)
-      //                      [child.geom.pos[0] - child.geom.dim[0], child.geom.pos[0] + child.geom.dim[0]], // Left  Right 
-      //                      [(child.geom.pos[1] - child.geom.dim[1]), (child.geom.pos[1] + child.geom.dim[1])], // Top  Bottom
-      //                   ];
-
-      //                   ret = Intersection_point_rect(point, child_rect);
-      //                   if(ret){
-
-      //                      const dispatch_params = {
-      //                         source_params: child_event.source_params,
-      //                         target_params: child_event.target_params,
-      //                         trigger_params: trigger_params,
-      //                         event_type: TYPE_IDX,
-      //                      }
-
-      //                      if(child_event.Clbk){
-
-      //                         ret = child_event.Clbk(dispatch_params);
-      //                         if(ret === FLAGS.DESTROY){
-      //                            evt.children.RemoveByIdx(j);
-      //                         }
-      //                      }
-      //                      /**
-      //                       * If the child_event.Clbk is null, means that the event is a Fake event
-      //                       * and we have to run recursively if the event has children events
-      //                       */
-      //                   }
-
-      //                   _pt5.Stop(); /* Performance measure */
-      //                }
-      //                // If at least one event is handled, do not continue with the rest 
-      //                // since it is a depth traversal so we found the inner most mesh.
-      //                // Else continue looping through all childrent for an event.
-      //                if(ret & FLAGS.TRUE) return; 
-      //             }
-      //          }
-
-      //          // In the case 'no children' or 'children have no ret event', then call parents Clbk, since it succeded.
-      //          const dispatch_params = {
-      //             source_params: evt.source_params,
-      //             target_params: evt.target_params,
-      //             trigger_params: trigger_params,
-      //             event_type: TYPE_IDX,
-      //          }
-
-      //          if(evt.Clbk){
-
-      //             ret = evt.Clbk(dispatch_params);
-      //             if(ret === FLAGS.DESTROY){
-      //                this.event_type[TYPE_IDX].RemoveByIdx(i);
-      //             }
-      //          }
-
-      //          _pt5.Stop();
-      //          return; 
-      //       }
-      //    }
-      // } 
    }
 
    CheckHover() {
@@ -324,7 +224,7 @@ export class Event_Listener {
          console.error('Event type index does not exist.');
 
 
-         // console.log('----- CHECK HOVER EVENTS -----')
+      // console.log('----- CHECK HOVER EVENTS -----')
       for (let i = 0; i < this.event_type[TYPE_IDX].boundary; i++) {
 
          const event = this.event_type[TYPE_IDX].buffer[i];
@@ -353,9 +253,8 @@ export class Event_Listener {
                Events_handle_immidiate({ type: 'hover', params: { mesh: mesh } });
                // console.log('', mesh.name)
 
-            } else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (
-               !mesh.StateCheck(MESH_STATE.IN_MOVE) || !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
-
+            } 
+            else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (!mesh.StateCheck(MESH_STATE.IN_MOVE) || !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
                Events_handle_immidiate({ type: 'unhover', params: { mesh: mesh } });
             }
          }
@@ -393,10 +292,10 @@ export class Event_Listener {
    }
 }
 
-function In_focus_set(mesh){
+function In_focus_set(mesh) {
 
    // do{
-      
+
    //    parent = mesh.parent 
    // }while(parent){
    // }
@@ -410,9 +309,9 @@ function Check_hover_recursive(events, point) {
 
          const evt = events.children.buffer[i];
 
-         if(evt.has_child_events){
+         if (evt.has_child_events) {
             const ret = Check_hover_recursive(evt, point);
-            if(ret) return true; // If the most inner hovered found, return recursively so that we do not check annd set a hover of the parent meshes(that are obviusly hovered in the first place).
+            if (ret) return true; // If the most inner hovered found, return recursively so that we do not check annd set a hover of the parent meshes(that are obviusly hovered in the first place).
          }
 
 
@@ -434,7 +333,8 @@ function Check_hover_recursive(events, point) {
             Events_handle_immidiate({ type: 'hover', params: { mesh: mesh } });
             return true;
 
-         } else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (
+         } 
+         else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (
             !mesh.StateCheck(MESH_STATE.IN_MOVE) || !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
 
             Events_handle_immidiate({ type: 'unhover', params: { mesh: mesh } });
@@ -505,7 +405,7 @@ export function Listener_remove_event_by_idx(TYPE_IDX, evt) {
    // Handle the InfoUi for the eventListeners 
    // Listeners_debug_info_remove('[[[[[[[[[[[[[[[[[', evt)
    Listeners_debug_info_remove(_listener.event_type[TYPE_IDX].buffer[evt.evt_idx], evt)
-   
+
    _listener.event_type[TYPE_IDX].RemoveByIdx(evt.evt_idx);
    if (_listener.event_type[TYPE_IDX].active_count === 0)
       LISTENERS_FLAGS[TYPE_IDX] = false;
@@ -804,7 +704,7 @@ export function Listeners_debug_info_create(scene) {
    const dp_btn_pad = [10, 2];
 
    // Create the dropdown that will hold all listen events to display for debuging purposes.
-   const dropdown = new Widget_Dropdown('Info Ui Listeners Root-DP', [Viewport.right-140, 20, 0], [60, 20], GREY1, TRANSPARENCY(GREY5, .8), WHITE, dp_btn_pad);
+   const dropdown = new Widget_Dropdown('Info Ui Listeners Root-DP', [Viewport.right - 140, 20, 0], [60, 20], GREY1, TRANSPARENCY(GREY5, .8), WHITE, dp_btn_pad);
    dropdown.CreateClickEvent();
    dropdown.CreateMoveEvent();
    Drop_down_set_root(dropdown, dropdown);
@@ -815,7 +715,7 @@ export function Listeners_debug_info_create(scene) {
    scene.AddWidget(dropdown);
    dropdown.Calc();
    dropdown.ConstructListeners();
-   
+
    Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.LISTENERS, Listeners_debug_info_update, dropdown, null);
 }
 
@@ -830,30 +730,30 @@ export function Listeners_debug_info_create(scene) {
 //    for (let i = 0; i < _listener.event_type.length; i++) {
 
 //       const evt_type = _listener.event_type[i];
-      
+
 //       if(evt_type){
 
 //          const type = Listeners_get_event_type_string(i);
-   
+
 //          let count = evt_type.boundary;
-   
+
 //          const drop_down_evt_type = new Widget_Dropdown(`buffer type:${type} | count:${evt_type.boundary}`, [200, 400, 0], [60, 20], GREY1, TRANSPARENCY(BLACK, 1.1), WHITE, dp_btn_pad);
 //          drop_down_evt_type.CreateClickEvent();
-   
+
 //          for (let j = 0; j < evt_type.boundary; j++) {
-   
+
 //             const evt = evt_type.buffer[j];
-   
+
 //             if (evt.has_child_events)
 //                count += Listeners_debug_info_create_recursive(scene, drop_down_evt_type, evt.children, evt.source_params.name);
-   
+
 //             if (evt) {
 //                const info = `type: ${type} | idx: ${j} | ${evt.source_params.name}`;
 //                const text = new Widget_Text(info, [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, WHITE);
 //                text.info_id = [i, j]
 //                text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;
 //                drop_down_evt_type.AddToMenu(text)
-   
+
 //             }
 //          }
 
@@ -864,7 +764,7 @@ export function Listeners_debug_info_create(scene) {
 //    scene.AddWidget(dropdown);
 //    dropdown.Calc();
 //    dropdown.ConstructListeners();
-   
+
 //    Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.LISTENERS, Listeners_debug_info_update, dropdown, null);
 // }
 
@@ -907,12 +807,12 @@ export function Listeners_debug_info_update(params) {
 
    const dropdown_root = params.source_params;
    const trigger_mesh = params.trigger_params.source_params;
-   
+
    console.log('------ INFO UI LISTENERS - trigger mesh:', trigger_mesh.name, 'dropdown_root:', dropdown_root.name);
-   if(trigger_mesh.parent) console.log(trigger_mesh.parent.name)
+   if (trigger_mesh.parent) console.log(trigger_mesh.parent.name)
 
    // Create the actual ui for the newly added event
-   const new_ui_dp = new Widget_Dropdown(`${trigger_mesh.name}`, [200, 400, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [3,3]);
+   const new_ui_dp = new Widget_Dropdown(`${trigger_mesh.name}`, [200, 400, 0], [60, 20], GREY1, ORANGE_240_130_10, WHITE, [3, 3]);
    new_ui_dp.CreateClickEvent();
    new_ui_dp.GenGfxCtx()
    // new_ui_dp.GenGfxCtxParentBased(dropdown_root)
@@ -925,7 +825,7 @@ export function Listeners_debug_info_update(params) {
 
    dropdown_root.Recalc();
 
-} 
+}
 
 // export function Listeners_debug_info_update(params) {
 

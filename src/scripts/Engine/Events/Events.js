@@ -131,7 +131,10 @@ export function Events_handle_immidiate(e){
         
         // Apply Hover Color
         if (e.params.mesh.StateCheck(MESH_STATE.IS_HOVER_COLORABLE)){
-            e.params.mesh.SetColor(TRANSPARENCY(WHITE, .8));
+            // e.params.mesh.SetColor(TRANSPARENCY(WHITE, .8));
+            if(!e.params.mesh.SetHoverColor)
+            console.log()
+            e.params.mesh.SetHoverColor();
             e.params.mesh.StateEnable(MESH_STATE.IN_HOVER_COLOR);
         }
 
@@ -142,7 +145,8 @@ export function Events_handle_immidiate(e){
     else if (e.type === 'unhover') {
 
         if (e.params.mesh.StateCheck(MESH_STATE.IN_HOVER_COLOR)){
-            e.params.mesh.SetDefaultColor();
+            // e.params.mesh.SetDefaultColor();
+            e.params.mesh.SeHoverColortDefault();
             e.params.mesh.StateDisable(MESH_STATE.IN_HOVER_COLOR);
         }
         

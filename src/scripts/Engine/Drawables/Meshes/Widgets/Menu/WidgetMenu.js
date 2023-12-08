@@ -11,8 +11,6 @@ import { Widget_Button } from "../WidgetButton.js";
 import { Widget_Label } from "../WidgetLabel.js";
 import { Align } from "../../../Operations/Alignment.js";
 import { TimeIntervalsDestroyByIdx } from "../../../../Timers/TimeIntervals.js";
-// import { Scenes_remove_root_mesh } from "../../../../Scenes.js";
-
 
 
 export class Widget_Menu_Bar extends Widget_Label {
@@ -67,8 +65,6 @@ export class Widget_Menu_Bar extends Widget_Label {
 
       this.minimize_btn_idx = this.AddChild(minimize_btn);
 
-      // Realign menu's children
-      // this.ReAlign();
    }
 
    Destroy(_this) {
@@ -243,9 +239,7 @@ export class Widget_Menu_Bar extends Widget_Label {
 
 }
 
-/**
- * @param {*pointer} parent Must pass the parent so the close button can destroy all parent's meshes
- */
+
 export class Close_Button extends Widget_Button {
 
    constructor(root, text, pos, fontsize, col = GREY3, text_col = WHITE, pad = [0, 0], bold = .4, style = [6, 5, 3], font = TEXTURES.SDF_CONSOLAS_LARGE) {
@@ -285,7 +279,7 @@ export class Close_Button extends Widget_Button {
          target_params: root,
          Clbk: this.OnDestroy,
        */
-      const params = this.eventCallbacks.buffer[0]; // TODO: // HACK: We must set up an index clarification for eventCallbacks buffer. 
+      const params = this.eventCallbacks.buffer[0]; // HACK: We must set up an index clarification for eventCallbacks buffer. 
       const root = params.target_params
       root.Destroy(root);
 
@@ -371,8 +365,6 @@ export class Widget_Minimize extends Widget_Button {
                   minim_mesh.CreateListenEvent(LISTEN_EVENT_TYPES.CLICK_UP);
                   minim_mesh.toggle = true;
 
-                  // root.Reconstruct_listeners_recursive();
-
                   CopyArr3(root.geom.defPos, root.geom.pos); // Set current pos as the default pos.
                   // Reposition minimized widget
                   root.geom.pos[1] -= root.geom.dim[1] - 20;
@@ -392,7 +384,6 @@ export class Widget_Minimize extends Widget_Button {
             }
             else { // Maximize - toggle off
 
-               // /*DEBUG*/ const l = Debug_get_event_listeners();
                Gfx_deactivate_no_listeners_touch(root);
 
                root.children.Reset();
@@ -419,7 +410,6 @@ export class Widget_Minimize extends Widget_Button {
                   // Add to gfx
                   root.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
                   root.Render();
-                  //*Gfx_end_session(true);
                   Gfx_activate(root); // Re-enable the rendering of the vertex buffers.
                }
 

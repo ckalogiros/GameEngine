@@ -5,8 +5,6 @@ import { M_Buffer } from './Buffers.js';
 
 class Binary_Tree_Array_Impl extends M_Buffer {
 
-
-
    constructor() {
       super();
    }
@@ -32,16 +30,7 @@ class Binary_Tree_Array_Impl extends M_Buffer {
       let root = 0;
       let node = this.buffer[0];
 
-      while(!node.isNull){
-         
-      }
-      // for (let i = 0; i < this.size; i++) {
-
-      //    if (this.buffer[i].isNull)
-      //       return i;
-
-      //    return INT_NULL;
-      // }
+      // TODO: IMPLEMENT
    }
 
    Insert(data) {
