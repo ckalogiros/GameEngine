@@ -88,7 +88,7 @@ export function Find_gfx_from_parent_ascend_descend(mesh, parent, _gfxidxs=null,
             }
          
             // Check for text gfx also
-            const ret = Check_for_text_gfx_combinatory(mesh, child);
+            const ret = Check_for_textgfx_in_mesh_combinatory(mesh, child);
             gfxidxs.text = ret;
 
             if (ret.idxs[0] !== INT_NULL) {
@@ -147,7 +147,7 @@ function Find_gfx_from_children_descending(mesh, parent, gfxidxs, done){
          }
       
          // Check for text gfx also
-         const ret = Check_for_text_gfx_combinatory(mesh, child);
+         const ret = Check_for_textgfx_in_mesh_combinatory(mesh, child);
          
          if (ret.idxs[0] !== INT_NULL) {
             gfxidxs.text = ret;
@@ -173,7 +173,7 @@ function Find_gfx_from_children_descending(mesh, parent, gfxidxs, done){
  *    and some meshes have text mesh as child in the childrens buffer.
  * So all 4 combinations are checked.
  */
-function Check_for_text_gfx_combinatory(mesh, child) {
+function Check_for_textgfx_in_mesh_combinatory(mesh, child) {
 
    const gfxidxs = {
       idxs: [INT_NULL, INT_NULL],
@@ -231,4 +231,32 @@ function Check_for_text_gfx_combinatory(mesh, child) {
    }
 
    return gfxidxs;
+}
+
+/*************************************************************************************************/
+
+export function Find_textgfx_from_parent_descending(parent){
+
+   const mesh = parent;
+   for(let i=0; i<mesh.children.boundary; i++){
+
+      const child = mesh.children.buffer[i];
+      if(child && child.gfx){
+
+         if(child.type & MESH_TYPES_DBG.WIDGET_TEXT){
+            return child.gfx;
+         }
+         else if(child.text_mesh){
+            return child.text_mesh.gfx;
+         }
+      }
+
+      // If no text gfx found in current child, run recursive descending.
+      if(child.children.boundary){
+         const gfx = Find_textgfx_from_parent_descending(child);
+         if(gfx) return gfx;
+      }
+   }
+
+   return null;
 }

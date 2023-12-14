@@ -3,7 +3,7 @@ import { Scenes_create_scene } from '../Engine/Scenes.js'
 import { Renderqueue_init } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { WebGlRenderer } from '../Engine/Renderers/WebGlRenderer.js';
 import { CAMERA_CONTROLS, CameraOrthographic, CameraPerspective } from '../Engine/Renderers/Renderer/Camera.js';
-import { TextureInitBuffers } from '../Engine/Loaders/Textures/Texture.js';
+import { Texture_init_texture_storage_buffer } from '../Engine/Loaders/Textures/Texture.js';
 import { PerformanceTimerGetFps1sAvg, TimeGetDeltaAvg, TimeGetFps, TimeGetTimer, _fps_100ms_avg, _fps_1s_avg, _fps_200ms_avg, _fps_500ms_avg } from '../Engine/Timers/Time.js';
 import { PerformanceTimerInit } from '../Engine/Timers/PerformanceTimers.js';
 
@@ -21,17 +21,6 @@ import { TimeIntervalsInit } from '../Engine/Timers/TimeIntervals.js';
 // import {osu} from '../node-os-utils/index.js'
 // import * as os from "../node-os-utils/index.js"
 
-/**
- * // TODO: IMPLEMENT:
- * 1. Every widget should have a bit-field as to how the renderer will choose the vertex buffers for that mesh(PRIVATE, ANY, ...)
- * 
- * 3. Because we want to have a 'clean' 'GenerateGfxContext()', passing specific index for generating buffers,
- *      the only place to analyze the GFX_CTX_FLAGS is the GenGfxCtx method of each widget.
- * 
- * 4. Implement the switch's widget click listener to b automatic from the class.  
- *
- * reorganize the functions in GlVuffers.js 
- */
 
 let renderer = null;
 
@@ -41,7 +30,7 @@ export function AppInit() {
     PerformanceTimerInit();
 
     // Create and initialize the buffers that will be storing texture-font-uv data. 
-    TextureInitBuffers();
+    Texture_init_texture_storage_buffer();
 
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * *

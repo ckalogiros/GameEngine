@@ -17,7 +17,7 @@ import { Mesh } from "./Base/Mesh.js";
 
 export class Text_Mesh extends Mesh {
 
-   constructor(text, pos = [0, 0, 0], fontSize = 4, color = WHITE, bold = 4, font = TEXTURES.SDF_CONSOLAS_LARGE, scale = [1, 1]) {
+   constructor(text, pos = [0, 0, 0], fontSize = 4, color = WHITE, bold = 4, font = FONTS.SDF_CONSOLAS_LARGE, scale = [1, 1]) {
 
       const sdfouter = CalculateSdfOuterFromDim(fontSize);
       if (sdfouter + bold > 1) bold = 1 - sdfouter;
@@ -69,7 +69,7 @@ export class Text_Mesh extends Mesh {
             this.mat.uv = FontGetUvCoords(this.mat.uvIdx, this.mat.text[i]);
 
          // If texture exists, store texture index, else if font texture exists, store font texture index, else store null
-         gfxCopy.tb.idx = this.mat.textidx !== INT_NULL ? this.mat.textidx : (this.mat.uvIdx !== INT_NULL ? this.mat.uvIdx : INT_NULL);
+         gfxCopy.tb.idx = this.mat.texidx !== INT_NULL ? this.mat.texidx : (this.mat.uvIdx !== INT_NULL ? this.mat.uvIdx : INT_NULL);
 
          geomCopy.pos[0] += geomCopy.dim[0] * 2;
          Gfx_add_geom_mat_to_vb(this.sid, gfxCopy, geomCopy, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name, this.idx);

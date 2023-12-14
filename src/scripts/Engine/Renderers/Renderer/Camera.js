@@ -1,7 +1,7 @@
 import { GlProgramUpdateUniformProjectionMatrix } from '../../../Graphics/GlProgram.js';
 import { MouseGetPosDif, MouseGetWheel } from '../../Controls/Input/Mouse.js';
 import { TimerGetGlobalTimer } from '../../Timers/Timers.js';
-import { Matrix4 } from '../../../Helpers/THREE_math/Matrix4.js';
+import { Matrix4 } from '../../../Helpers/Math/Matrix4.js';
 import { Gfx_get_progams_count } from '../../Interfaces/Gfx/GfxInterfaceFunctions.js';
 
 /**
@@ -113,8 +113,8 @@ export class Camera extends Matrix4 {
 
 	Pan() {
 		const mouseDif = MouseGetPosDif();
-		mouseDif.x /= Viewport.width / 2;
-		mouseDif.y /= Viewport.height / 2;
+		mouseDif.x /= VIEWPORT.WIDTH / 2;
+		mouseDif.y /= VIEWPORT.HEIGHT / 2;
 		this.Translate(mouseDif.x, mouseDif.y, 0);
 	}
 
@@ -159,10 +159,10 @@ export class CameraOrthographic extends Camera {
 	Init() {
 
 		const zoom = 1;
-		const dx = ( Viewport.width- 0 ) / ( 2 * zoom );
-		const dy = ( 0 - Viewport.height ) / ( 2 * zoom );
-		const cx = ( Viewport.width + 0 ) / 2;
-		const cy = ( 0 + Viewport.height ) / 2;
+		const dx = ( VIEWPORT.WIDTH- 0 ) / ( 2 * zoom );
+		const dy = ( 0 - VIEWPORT.HEIGHT ) / ( 2 * zoom );
+		const cx = ( VIEWPORT.WIDTH + 0 ) / 2;
+		const cy = ( 0 + VIEWPORT.HEIGHT ) / 2;
 
 		let left = cx - dx;
 		let right = cx + dx;

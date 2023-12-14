@@ -23,6 +23,10 @@ export function Gl_remove_geometry(gfx, num_faces = 1) {
     ret.counts[1] = ib.Remove_geometry(num_faces);
 
     if (vb.count <= 0) ret.empty = true;
+
+    if(ret.empty) vb.Reset();
+
+
     return ret;
 }
 

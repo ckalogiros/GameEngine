@@ -31,7 +31,7 @@ export function Bind_change_pos_x(target, val, maxval){
 
    if(target === undefined) alert('Target should not be undefined. @ BindingFunctions.js Bind_change_color_rgb().');
 
-   const x = MapLinear( val, 0, maxval, 0, Viewport.right );
+   const x = MapLinear( val, 0, maxval, 0, VIEWPORT.RIGHT );
    // console.log(x)
 
    target.SetPosX(x);

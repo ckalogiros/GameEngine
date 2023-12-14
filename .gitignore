@@ -2,3 +2,5 @@ node_modules
 
 docs
 docs/temp.cpp
+src/Graphics/Shaders/OLD
+src/Helpers/THREE_math

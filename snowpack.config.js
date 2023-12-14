@@ -7,7 +7,7 @@ module.exports = {
     /* ... */
     src: '/',
     resources: '/resources',
-    style: '/src/style/style.css'
+    // style: '/src/style/style.css'
   },
   plugins: [
     /* ... */

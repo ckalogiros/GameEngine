@@ -65,7 +65,7 @@ export class Widget_Label extends Rect {
     pad = [0, 0];
 
     // text, Align, pos, col = GREY3, text_col = WHITE, pad = [0, 0], bold = .4, style = [2, 5, 2], font
-    constructor(text = 'null', Align = (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos = [200, 300, 0], fontSize = 4.4, col = GREY1, text_col = WHITE, pad = [10, 5], bold = .4, style = [0, 6, 2], font = TEXTURES.SDF_CONSOLAS_LARGE) {
+    constructor(text = 'null', Align = (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos = [200, 300, 0], fontSize = 4.4, col = GREY1, text_col = WHITE, pad = [10, 5], bold = .4, style = [0, 6, 2], font = FONTS.SDF_CONSOLAS_LARGE) {
 
         const sdfouter = CalculateSdfOuterFromDim(fontSize);
         if (sdfouter + bold > 1) bold = 1 - sdfouter;
@@ -212,6 +212,13 @@ export class Widget_Label extends Rect {
 
         super.SetColorAlpha(btn_alpha);
         this.text_mesh.SetColorAlpha(text_alpha);
+    }
+
+    Resize(){
+
+        console.log('\n==== Resizing:', this.name)
+        console.log()
+        // this.SetColorRGB([1,1,0]);
     }
 
     /*******************************************************************************************************************************************************/

@@ -6,7 +6,7 @@ import { Widget_Label } from './WidgetLabel.js';
 
 export class Widget_Button extends Widget_Label {
 
-   constructor(text, Align = (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos = [200, 300, 0], fontSize = 4.4, col = GREY1, textCol = WHITE, pad = [10, 5], bold = .4, style = [0, 6, 2], font = TEXTURES.SDF_CONSOLAS_LARGE) {
+   constructor(text, Align = (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos = [200, 300, 0], fontSize = 4.4, col = GREY1, textCol = WHITE, pad = [10, 5], bold = .4, style = [0, 6, 2], font = FONTS.SDF_CONSOLAS_LARGE) {
 
       super(text, Align, pos, fontSize, col, textCol, pad, bold, style, font)
       this.type |= MESH_TYPES_DBG.WIDGET_BUTTON;

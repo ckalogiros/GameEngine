@@ -502,7 +502,7 @@ function Scenes_debug_info_create_recursive(scene, dropdown_root, mesh_children,
 
         const type = Listeners_get_event_type_string(mesh.type);
         const info = `mesh: ${mesh.name}`;
-        //text, pos, fontSize = 5, scale = [1, 1], color = WHITE, bold = 4, font = TEXTURES.SDF_CONSOLAS_LARGE
+        
         const text = new Widget_Text(info, [OUT_OF_VIEW, OUT_OF_VIEW, 0], 4, BLUE_10_120_220);
         text.info_id = [type, j]
         text.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;

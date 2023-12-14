@@ -1,6 +1,6 @@
 "use strict";
 
-import { GlDraw } from "../../Graphics/GlDraw.js";
+import { Gl_draw } from "../../Graphics/GlDraw.js";
 import { MouseResetDif, MouseResetWheel } from "../Controls/Input/Mouse.js";
 import { FpsGet, TimeSample, TimeUpdate } from "../Timers/Time.js";
 import { TimersUpdateGlobalTimer } from "../Timers/Timers.js";
@@ -41,7 +41,7 @@ import {_pt_fps ,_pt2, _pt3, _pt4 } from '../Timers/PerformanceTimers.js'
  */
 
 
-// TODO: Make PLATFORM, Device and Viewport private to Renderer???
+// TODO: Make PLATFORM, Device and VIEWPORT private to Renderer???
 
 
 export class WebGlRenderer {
@@ -93,7 +93,7 @@ export class WebGlRenderer {
          
          _pt3.Start(); this.scene.OnUpdate(); _pt3.Stop();
          
-         _pt4.Start(); GlDraw(this.gl); _pt4.Stop();
+         _pt4.Start(); Gl_draw(this.gl); _pt4.Stop();
          
          MouseResetDif(.5);
          MouseResetWheel();
@@ -163,6 +163,7 @@ export class WebGlRenderer {
       // this.gl.enable(this.gl.SAMPLE_COVERAGE);
       // this.gl.sampleCoverage(2.2, false);
 
+
       DetectHostPlatform();
 
       gfxCtx.gl = this.gl;
@@ -192,23 +193,23 @@ export class WebGlRenderer {
          // Calculate the correct proportions for all renderables compare to current device
          Device.ratio = Device.width / Device.MAX_WIDTH;
       }
-      // Update (global) Viewport object
-      Viewport.width = this.canvas.width;
-      Viewport.height = this.canvas.height;
+      // Update (global) VIEWPORT object
+      VIEWPORT.WIDTH = this.canvas.width;
+      VIEWPORT.HEIGHT = this.canvas.height;
 
-      Viewport.left = 0;
-      Viewport.right = this.canvas.width;
-      Viewport.top = 0;
-      Viewport.bottom = this.canvas.height;
-      Viewport.centerX = Viewport.left + (Viewport.width / 2);
-      Viewport.centerY = Viewport.top + (Viewport.height / 2);
+      VIEWPORT.LEFT = 0;
+      VIEWPORT.RIGHT = this.canvas.width;
+      VIEWPORT.TOP = 0;
+      VIEWPORT.BOTTOM = this.canvas.height;
+      VIEWPORT.centerX = VIEWPORT.LEFT + (VIEWPORT.WIDTH / 2);
+      VIEWPORT.centerY = VIEWPORT.TOP + (VIEWPORT.HEIGHT / 2);
 
-      Viewport.ratio = this.canvas.width / this.canvas.height;
-      Viewport.leftMargin = (window.innerWidth - Viewport.width) / 2;
-      Viewport.topMargin = (window.innerHeight - Viewport.height) / 2
+      VIEWPORT.ASPECT_RATIO = this.canvas.width / this.canvas.height;
+      VIEWPORT.MARGIN.LEFT = (window.innerWidth - VIEWPORT.WIDTH) / 2;
+      VIEWPORT.MARGIN.TOP = (window.innerHeight - VIEWPORT.HEIGHT) / 2
 
-      POSITION_CENTER[0] = Viewport.width/2;
-      POSITION_CENTER[1] = Viewport.height/2;
+      POSITION_CENTER[0] = VIEWPORT.WIDTH/2;
+      POSITION_CENTER[1] = VIEWPORT.HEIGHT/2;
 
    }
 }

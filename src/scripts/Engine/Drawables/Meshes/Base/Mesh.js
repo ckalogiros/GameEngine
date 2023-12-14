@@ -294,7 +294,7 @@ export class Mesh {
     AddListenEvent(etypeidx, Clbk = null, params = null, parent_event = null) {
 
         if(!this.listeners.buffer[etypeidx])
-            console.log()
+            console.error('NO LISTENER IN this.listeners.buffer[etypeidx]')
         if (parent_event && parent_event[etypeidx] && parent_event[etypeidx].evt) {
             this.listeners.buffer[etypeidx].evt = Listener_create_child_event(etypeidx, parent_event[etypeidx].evt, Clbk, this, params);
             this.listeners.buffer[etypeidx].is_child_event = true;
@@ -348,10 +348,10 @@ export class Mesh {
     SetHoverColor() { this.mat.SetHoverColor(this.gfx); }
     SetColor(col) { this.mat.SetColor(col, this.gfx); }
     SeHoverColortDefault() { this.mat.SeHoverColortDefault(this.gfx); }
-    SetDefaultColor() { this.mat.SetDefaultColor(this.gfx); }
+    SetDefaultColor() { this.mat.SetDefaultColor(this.gfx, this.geom.num_faces); }
     SetDefaultPosXY() { this.geom.SetDefaultPosXY(this.gfx); }
-    SetColorRGB(col) { this.mat.SetColorRGB(col, this.gfx); }
-    SetColorAlpha(alpha) { this.mat.SetColorAlpha(alpha, this.gfx); }
+    SetColorRGB(col) { this.mat.SetColorRGB(col, this.gfx, this.geom.num_faces); }
+    SetColorAlpha(alpha) { this.mat.SetColorAlpha(alpha, this.gfx, this.geom.num_faces); }
     SetPosXYZ(pos) { this.geom.SetPosXYZ(pos, this.gfx); }
     SetPosXY(pos) { this.geom.SetPosXY(pos, this.gfx); }
     SetPosX(x) { this.geom.SetPosX(x, this.gfx); }

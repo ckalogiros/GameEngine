@@ -1,16 +1,3 @@
-!!
-Static draw meshes should be rendered to a render buffer once
-and render buffer should been drawn every frame without 
-redrawing the meshes to it's self
-!!
-
-
---------------------------------------------------- REMOVE!
---------------------------------------------------- REMOVE!
-
---------------------------------------------------- ALGORITHMS!
---------------------------------------------------- ALGORITHMS!
-
 --------------------------------------------------- TESTING!
 . Implement a smooth fps timer, by addding
   on each frame the new delta time but
@@ -42,14 +29,67 @@ redrawing the meshes to it's self
     (Also make sure all suposed private buffers are set private).
 --------------------------------------------------- IMIDIATE!
 
---------------------------------------------------- _asdhjdTODO_
+--------------------------------------------------- 
 
-// TODO: Implement sections expand horizontaly 
-// TODO: Implement minimize on menus
+IMIDIATELY:
+Resolve probable issue with texidx.
+It is used for sure from the font file as a fontidx: "FontGetFontDimRatio(fontIdx: passed texidx)"
+but also by the Texture.js file: "texture.texidx = gl.TEXTURE0 + idx; // Advance the texture ID to the next"
 
-TODO: Render all the meshes that are static to a frame buffer texture and render the texture.
+IMIDIATELY:
+Implement correctly 'Texture_load_texture_byidx(texidx)'.
+The function must return a texture index based on a tex id.
+The texture is searched in the '_textureBuffer' and '_activeTextures' array.
+The '_textureBuffer' stores all aplications textures with an index.
+The '_activeTextures' has all indexes of the currently used textures in the '_textureBuffer'.
+The activeness of a texture depends upon if it is used by any gfx program/vertex buffer ??? 
 
-// TODO: . IMPORTANT!:Batch remove meshes attribs from gfx buffers.
+IMIDIATELY:
+Currently the vertex buffer has one tex id that is bound in its sampler,
+and it is bound in the Gl_draw() function.
+
+TODO:
+Implement all class names to an array and class has only an index to the name.
+In order to see the text name for debugging, create a conditional: if(DEBUG.see names) name=string Else name=index
+and enable-disable with DEBUG.see name = true/false
+
+TODO:
+Remove any duplicate methods of Mesh, Text_Mesh, Rect_Mesh and the rest.
+Also organize all the methods of the Mesh class with the widget classe deriving from them
+
+TODO:
+On a dropdown menu deactivation,
+  check if the attributes of the meshes to be removed are in a concecutive order,
+  so that we can simply remove the indexes and reduce the vertexbuffer's count
+
+TODO:
+Create a DEBUG hover listeners buffer, only for the tip tool.
+By  calling one function with a root widget and run recursive down the tree.
+
+TODO:
+Learn how VAO's work and use them properly
+
+TODO:
+Go Workers!
+
+TODO: 
+We can render the text of a scroller to a frame buffer, 10 lines above and 10 below from the bounding box,
+and on a scroll move event we re-render the framebuffer with the correct lines, depended on the scroll movement.
+
+TODO: 
+Build a proper sdf font texture
+
+TODO: 
+Implement minimize on menus
+
+TODO: 
+Finish with the info widgets, now that we have separation of gfx buffers for debuging 
+
+TODO: 
+Render all the meshes that are static to a frame buffer texture and render the texture.
+
+IMPORTANT!:
+Batch remove meshes attribs from gfx buffers.
   Example: 
       GfxRemoveMesh(gfx){
         SOME_BUFFER[some].push(start, progidx,, vbidx)
@@ -66,12 +106,8 @@ TODO: Render all the meshes that are static to a frame buffer texture and render
 
 . Implement second popup menu(from the main popup menu)
 
-. Maybe we should implement timeIntervals for the GlDraw function. 
+. Maybe we should implement timeIntervals for the Gl_draw function. 
 . Or have static meshes in specific programs and buffers. 
-
-. Implement:
-    Widget Menu.
-    Widget Drop-Down-Menu.
 
 . Move touch screen input from MouseEvents.js to input folder
 

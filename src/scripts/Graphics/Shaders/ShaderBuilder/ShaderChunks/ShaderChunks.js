@@ -88,8 +88,6 @@ export const vertex_shader_chunks = {
 
 
 // Fragment Shader
-const frag_color_create  = '  vec4 color = v_col;';
-const frag_color_assign  = '  frag_color = color;';
 const out_frag_color     = 'out vec4 frag_color;';
 const frag_u_sampler0    = 'uniform sampler2D u_sampler0;';
 const in_frag_col4       = 'in vec4 v_col;';
@@ -97,10 +95,12 @@ const in_frag_dim2       = 'in vec2 v_dim;';
 const in_frag_wpos2      = 'in vec2 v_wpos;';
 const in_frag_tex2       = 'in vec2 v_tex_coord;';
 const in_frag_sdf2       = 'in vec2 v_sdf;';
+const frag_color_create  = '  vec4 color = v_col;';
+const frag_color_assign  = '  frag_color = color;';
 // const in_frag_style3     = 'in vec3 v_style;';
-const in_frag_border_width           = 'in float v_border_width;';
-const in_frag_border_feather         = 'in float v_border_feather;';
-const in_frag_rCorners               = 'in float v_rCorners;';
+const in_frag_border_width         = 'in float v_border_width;';
+const in_frag_border_feather       = 'in float v_border_feather;';
+const in_frag_rCorners             = 'in float v_rCorners;';
 const in_frag_v_uniforms_buffer    = `in float v_uniforms_buffer[${UNIFORMS_BUFFER_SIZE}];`;
 
 export const fragment_shader_chunks = {
@@ -110,7 +110,7 @@ export const fragment_shader_chunks = {
    frag_color_create : frag_color_create,
    frag_color_assign : frag_color_assign,
    out_frag_color    : out_frag_color   ,
-   frag_u_sampler0  : frag_u_sampler0 ,
+   frag_u_sampler0   : frag_u_sampler0  ,
    in_frag_col4      : in_frag_col4     ,
    in_frag_dim2      : in_frag_dim2     ,
    in_frag_wpos2     : in_frag_wpos2    ,

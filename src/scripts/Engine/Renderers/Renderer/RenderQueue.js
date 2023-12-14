@@ -273,7 +273,7 @@ export function Renderqueue_update_active_queue() { renderQueue.RebuildActiveQue
  * these programs-vertex buffers from the draw queue.
  */
 export function Renderqueue_set_active(progs_groupidx, progidx, vbidx, flag){ 
-   console.log(flag, '1111111111111111111111 Renderqueue_set_active ', progs_groupidx, progidx, vbidx)
+   // console.log(flag, '1111111111111111111111 Renderqueue_set_active ', progs_groupidx, progidx, vbidx)
    const idx = renderQueue.Find(progs_groupidx, progidx, vbidx);
    if(idx !== INT_NULL){
 

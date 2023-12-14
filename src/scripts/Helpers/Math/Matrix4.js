@@ -1,4 +1,4 @@
-import { Vector3 } from './Vector3.js';
+import { Vector3 } from '../THREE_math/Vector3.js';
 
 const identityMatrix = [
 	1, 0, 0, 0,

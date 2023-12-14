@@ -39,16 +39,20 @@ const Device = {
 	height: 0,
 	ratio: 1, // Create same proportions throughout any device. It measures the ratio of the game's build device width and the current device width
 }
-const Viewport = {
-	width: 0,
-	height: 0,
-	left: 0,
-	right: 0,
-	top: 0,
-	bottom: 0,
+const VIEWPORT = {
+	WIDTH: 0,
+	HEIGHT: 0,
+	LEFT: 0,
+	RIGHT: 0,
+	TOP: 0,
+	BOTTOM: 0,
 	ratio: 0,
-	leftMargin: 0,
-	topMargin: 0,
+	MARGIN: {
+		LEFT: 0,
+		RIGHT: 0,
+		TOP: 0,
+		BOTTOM: 0,
+	},
 };
 
 const STATE = {
@@ -135,7 +139,7 @@ _cnt = 0x1;
 let _cnt2 = 0x1;
 const SECTION = {
 
-	VERTICAL: _cnt <<= 0x1,
+	VERTICAL: _cnt,
 	HORIZONTAL: _cnt <<= 0x1,
 	INHERIT: _cnt <<= 0x1,
 	EXPAND: _cnt <<= 0x1,
@@ -216,7 +220,7 @@ const MOUSE = {
 _cnt = 0x1;
 const ALIGN = {
 
-	LEFT: _cnt <<= 0x1,
+	LEFT: _cnt,
 	RIGHT: _cnt <<= 0x1,
 	TOP: _cnt <<= 0x1,
 	BOTTOM: _cnt <<= 0x1,
@@ -345,7 +349,13 @@ const bluePurple = InterpolateRgb(0.361 * 255, 0.020 * 255, 0.839 * 255)
 
 
 const COLOR_ARRAY = new Array(
-	PINK_240_60_160, PINK_240_60_200, RED_200_10_10, GREEN_33_208_40, GREEN_60_240_100, GREEN_60_240_60, GREEN_60_240_60,
+	PINK_240_60_160, 
+	PINK_240_60_200, 
+	RED_200_10_10, 
+	GREEN_33_208_40, 
+	GREEN_60_240_100, 
+	GREEN_60_240_60, 
+	GREEN_60_240_60,
 	GREEN_140_240_10,
 	BLUE_10_160_220,
 	BLUE_10_120_220,
@@ -358,6 +368,7 @@ const COLOR_ARRAY = new Array(
 	ORANGE_240_130_10,
 	ORANGE_240_160_10,
 );
+
 const COLORS1 = new Array(
 	ORANGE_240_130_10,
 	PINK_240_60_160, 
@@ -379,9 +390,53 @@ const COLORS1 = new Array(
 
 
 /*************************************************************************************************/
-// Textures
-
+const RESOURCES_PATH = '/resources';
 let g_cnt = 0;
+const TEXTURE_TYPE = {
+	TYPE_FONT: 0x1,
+	TYPE_TEXTURE: 0x2,
+};
+
+// Textures
+const TEST_MSDF_FONT_1 = 'msdf_a_char';
+// IMPORTANT: For any texture image file above, must store it to the FONT_PATHS below as shown.
+const TEXTURE_PATHS = [
+		{
+			imgPath: 'textures',
+			imgName: TEST_MSDF_FONT_1,
+			imgType: 'png',
+	
+		},
+];
+g_cnt = 0;
+const TEXTURES = {
+	TEST_MSDF: INT_NULL, // The INT_NULL will be used to create a new texture in the application's texture buffer
+
+	COUNT: 0,
+}
+
+// Font textures
+const FONT_CONSOLAS_SDF_LARGE = 'consolas_sdf_11115w';
+const FONT_CONSOLAS_SDF_SMALL = 'consolas_sdf_2048w';
+// const COMIC_FONT_METRICS_PATH = '../../../../consolas_sdf/metrics/consolas_sdf.txt'
+const COMIC_FONT_METRICS_PATH = '../../../../resources/fonts/consolas_sdf/metrics/consolas_sdf35.txt'
+
+// IMPORTANT: For any font image file above, must store it to the FONT_PATHS below as shown.
+const FONT_PATHS = [
+	{
+		imgPath: 'fonts/consolas_sdf',
+		imgName: FONT_CONSOLAS_SDF_LARGE,
+		imgType: 'png',
+
+	},
+	{
+		imgPath: 'fonts/consolas_sdf',
+		imgName: FONT_CONSOLAS_SDF_SMALL,
+		imgType: 'png',
+
+	},
+];
+g_cnt = 0;
 const FONTS = {
 
 	SDF_CONSOLAS_LARGE: g_cnt++,
@@ -389,28 +444,10 @@ const FONTS = {
 
 	COUNT: g_cnt,
 };
-//  must continue counting from FONTS, as all font textures should be at the
-const TEXTURES = {
 
-	SDF_CONSOLAS_LARGE: FONTS.SDF_CONSOLAS_LARGE,
-	SDF_CONSOLAS_SMALL: FONTS.SDF_CONSOLAS_SMALL,
-	TEST: g_cnt++,
+const MENU_FONT_IDX = FONTS.SDF_CONSOLAS_LARGE; // Set the font for the options menu
+const MENU_FONT_SIZE = 4; // Set the font size for the options menu
 
-	COUNT: g_cnt,
-};
-
-// SDF Font textures names and paths
-const RESOURCES_PATH = '/resources';
-const FONT_CONSOLAS_SDF_LARGE = 'consolas_sdf_11115w';
-// const FONT_CONSOLAS_SDF_LARGE = 'consolas_sdf_2048w';
-const FONT_CONSOLAS_SDF_SMALL = 'consolas_sdf_2048w';
-const COMIC_FONT_METRICS_PATH = '../../../../consolas_sdf/metrics/consolas_sdf.txt'
-
-// Textures names and paths
-const TEXTURE_TEST = 'msdf';
-
-const MENU_FONT_IDX = TEXTURES.SDF_CONSOLAS_LARGE;
-const MENU_FONT_SIZE = 4;
 
 
 
@@ -429,6 +466,7 @@ const MESH_TYPES_DBG = {
 
 	MATERIAL: _cnt <<= 1,
 	FONT_MATERIAL: _cnt <<= 1,
+	TEXTURE_MATERIAL: _cnt <<= 1,
 
 	MESH: _cnt <<= 1,
 	TEXT_MESH: _cnt <<= 1,
@@ -596,12 +634,12 @@ const DEBUG_INFO = {
 	UI_TIMERS: {
 		IS_ON: false,
 		IDX: INT_NULL,
-		POS: [100, 860, 0]
+		POS: [240, 820, 0]
 	},
 	UI_MOUSE: {
 		IS_ON: false,
 		IDX: INT_NULL,
-		POS: [80, 820, 0]
+		POS: [210, 730, 0]
 	},
 	UI_GFX: {
 		IS_ON: false,

@@ -5,7 +5,7 @@ import { COMIC_FONT_METRICS } from './ComicFontMetrics.js'
 
 // The maximum number of characters for ASCII
 const ASCII_NUM_CHARACTERS = '~'.charCodeAt(0) - (' '.charCodeAt(0));
-const FONTS_MAX_COUNT = FONTS.COUNT;
+const FONTS_MAX_COUNT = FONTS.COUNT; // IMIDIATELY: Must take the fonts count from the global FONTS.COUNT
 
 const _fontMetricsBuffer = [];
 let _fontMetricsBufferCount = 0;
@@ -24,10 +24,11 @@ function GetNextFreeElem(){
 }
 
 
-export function FontInitBuffers() {
+export function Font_init_fonts_storage_buffer() {
+
 	for (let i = 0; i < FONTS_MAX_COUNT; i++) {
 
-		_activeFontTextures[i] = INT_NULL;
+		_activeFontTextures[i] = INT_NULL; // Initialize elements for active font textures
 		_fontMetricsBuffer[i] = {
 			ch: [],
 			size: 0,
@@ -43,9 +44,10 @@ export function FontInitBuffers() {
 		_fontsUvMap[i] = [];
 		
 		// New font metrics for every character
+		const char_metrics = _fontMetricsBuffer[i]; 
 		for (let j = 0; j <= ASCII_NUM_CHARACTERS; j++) {
 			
-			_fontMetricsBuffer[i].ch[j] = {
+			char_metrics.ch[j] = {
 				left: 0,
 				right: 0,
 				top: 0,
@@ -63,12 +65,12 @@ export function FontInitBuffers() {
 	}
 }
 
-export function FontIsLoaded(texId) {
-	if (_activeFontTextures[texId] === INT_NULL) return false;
+export function Font_is_loaded(texidx) {
+	if (_activeFontTextures[texidx] === INT_NULL) return false;
 	return true;
 }
-export function FontRetrieveFontIdx(texId) {
-	return _activeFontTextures[texId];
+export function FontRetrieveFontIdx(texidx) {
+	return _activeFontTextures[texidx];
 }
 
 /**
@@ -96,10 +98,12 @@ export function FontGetFaceHeight(fontIdx) {
 	return _fontMetricsBuffer[fontIdx].texHeight;
 }
 
-export function FontLoadUvs(texId) {
+export function FontLoadUvs(texidx) {
+
 	const fontIdx = LoadMetrics(_fontMetricsBuffer);
 	CreateUvMap(_fontMetricsBuffer[fontIdx], _fontsUvMap[fontIdx]);
-	_activeFontTextures[texId] = fontIdx; 
+	
+	_activeFontTextures[texidx] = fontIdx; // Font textures and their equivalent metrics have 1to1 indexing.
 	return fontIdx;
 }
 
@@ -107,11 +111,11 @@ export function FontLoadUvs(texId) {
 const filePos = { start: 0, end: 0, len: 0, line: 0 };
 function LoadMetrics(metricsBuffer) {
 
-	const idx = GetNextFreeElem();
+	const idx = GetNextFreeElem(); // IMPORTANT: This index is the same for: The texture in the texture buffer, the font in the font buffer and the metrics of the font in the metrics buffer. The texture and the font are the SAME FILE.
 	const metrics = metricsBuffer[idx];
 
 	const file = { content: '', name: '', pos: filePos, size: 0, };
-	file.content = COMIC_FONT_METRICS; // TODO: Load the metrics automaticaly (from a buffer of fileNames)
+	file.content = COMIC_FONT_METRICS; // IMIDIATELY: Load the metrics automaticaly (from a buffer of fileNames)
 	file.size = file.content.length;
 
 

@@ -1,0 +1,14 @@
+
+Use a big amount of data, to compare rendering efficiency.
+
+Widget used: scroller with labels.
+   Create 500 * 2 label widgets
+   Data Ammount: See pictures
+
+For the regular test, we just rendered the geometry from the vertex buffers.
+The frequency is determined by the request animation frame, which i think it is 60 frames ~= 16 miliseconds.
+
+On the second test, we draw all vertexbuffers to a framebuffer and then render the framebuffer as a texture to the canvas.
+The frequency is 16 miliseconds, through a js setTimeInterval.
+The callback reads all vertexbuffers and renders them to the framebuffer.
+The vertexbuffers then are exluded from the renderqueue. 

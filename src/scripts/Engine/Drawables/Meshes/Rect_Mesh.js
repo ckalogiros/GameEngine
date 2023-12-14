@@ -53,8 +53,6 @@ export class Rect extends Mesh {
 
       Scenes_store_mesh_in_gfx(this.sceneidx, this); // For storing meshes by its gfx
 
-      // Gfx_set_vb_show(this.gfx.progs_groupidx,  this.gfx.prog.idx, this.gfx.vb.idx, true);
-
       const params = {
          progidx: this.gfx.prog.idx,
          vbidx: this.gfx.vb.idx,

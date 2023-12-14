@@ -2,8 +2,8 @@
 
 
 import { vertex_shader_chunks, fragment_shader_chunks } from './ShaderChunks/ShaderChunks.js'
-import { frag_round_corners_call, frag_round_corners } from './ReadyShaders/ShaderFunctions/fragment.functions.glsl.js'
-import { frag_msdf, frag_msdf_call, frag_sdf, frag_sdf_call } from './Functions/Tex.js'
+import { frag_round_corners_call, frag_round_corners } from './Functions/fragment.roundcorners.js'
+import { frag_msdf, frag_msdf_call, frag_sdf, frag_sdf_call, frag_tex } from './Functions/fragment.texture.js'
 
 
 // Resolve Includes to build the correct shaders
@@ -49,7 +49,7 @@ export const SHADER_CONSTANTS = {
    UNIFORM_BUFFER_COUNT: 5,
 };
 
-export function GlVertexShaderConstruct(sid){
+export function Gl_vs_build_vertexshader(sid){
    const vs_chunks = [
 
       '#version 300 es',
@@ -125,7 +125,7 @@ export function GlVertexShaderConstruct(sid){
    return vs;
 }
 
-export function GlFragmentShaderConstruct(sid){
+export function Gl_fs_build_fragmentshader(sid){
 
    const fs_chunks = [
 
@@ -168,12 +168,15 @@ export function GlFragmentShaderConstruct(sid){
       true ? 'void main(void) ' : '',
       true ? '{' : '',
       true ? '#include <frag_color_create>' : '',
-      (sid.attr & SID.ATTR.BORDER) ? resolveIncludesFragment(frag_round_corners_call) : '',
+      // (sid.attr & SID.ATTR.TEX2) ? resolveIncludesFragment(frag_tex) : '',
+      (sid.attr & SID.ATTR.BORDER) ? frag_round_corners_call : '',
+      // (sid.attr & SID.ATTR.BORDER) ? resolveIncludesFragment(frag_round_corners_call) : '',
       (sid.attr & SID.ATTR.SDF) ? frag_sdf_call : '',
       // (sid.attr & SID.ATTR.TEX2) ? frag_msdf_call : '',
       // true ? '    frag_color = vec4(1.);' : '',
+      (sid.attr & SID.ATTR.TEX2  && !(sid.attr & SID.ATTR.SDF)) ? frag_tex : '', // TODO: Create a better conditional. Idea is that the sdf rendering does not need the implementation of 'frag_tex'
       true ? '  frag_color = color;' : '',
-      true ? '  frag_color.xyz *= color.a;' : '',
+      // true ? '  frag_color.xyz *= color.a;' : '',
       true ? '}' : '',
    ];
 

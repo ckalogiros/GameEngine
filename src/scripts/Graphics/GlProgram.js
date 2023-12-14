@@ -3,7 +3,7 @@ import { PrintShaderInfo } from './Z_Debug/GfxDebug.js';
 import { LoadShaderProgram } from './GlShaders.js';
 import { GlUseProgram } from './Buffers/GlBuffers.js';
 import { Uniform, UniformsBuffer } from './Buffers/GlUniformBuffer.js';
-import { SHADER_CONSTANTS } from './Shaders/ConstructShader.js';
+import { SHADER_CONSTANTS } from './Shaders/ShaderBuilder/ShaderBuilder.js';
 import { Renderqueue_set_active } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { Scenes_create_programs_buffer, Scenes_create_programs_group_buffer } from '../Engine/Scenes.js';
 import { Gfx_create_group_buffer, Gfx_create_program_buffer } from '../Engine/Interfaces/Gfx/GfxContextCreate.js';
@@ -478,8 +478,8 @@ export function Gl_progs_get_shaderinfo(programs_groupidx = INT_NULL, progIdx) {
 export function Gl_progs_get_shaderinfo_uniforms(programs_groupidx = INT_NULL, progIdx) {
 	return _gl_programs_groups.buffer[programs_groupidx].buffer[progIdx].shaderinfo.uniforms;
 }
-export function Gl_progs_set_vb_texidx(programs_groupidx = INT_NULL, progIdx, vbIdx, textidx) {
-	_gl_programs_groups.buffer[programs_groupidx].buffer[progIdx].vertexBuffer[vbIdx].textidx = textidx;
+export function Gl_progs_set_vb_texidx(programs_groupidx = INT_NULL, progIdx, vbIdx, texidx) {
+	_gl_programs_groups.buffer[programs_groupidx].buffer[progIdx].vertexBuffer[vbIdx].texidx = texidx;
 }
 
 

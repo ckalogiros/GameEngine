@@ -1,13 +1,14 @@
 "use strict";
 
-import { GlCreateTexture } from "../../../Graphics/GlTextures.js";
-import { FontInitBuffers, FontIsLoaded, FontLoadUvs, FontRetrieveFontIdx } from "../Font/Font.js";
+import { Gl_texture_unit_create } from "../../../Graphics/GlTextureUnit.js";
+import { Font_init_fonts_storage_buffer, Font_is_loaded, FontLoadUvs, FontRetrieveFontIdx } from "../Font/Font.js";
 import { ImageLoader } from "../ImageLoader.js";
 
 
 
 
-const TEXTURES_MAX_COUNT = TEXTURES.COUNT;
+// const TEXTURES_MAX_COUNT = TEXTURES.COUNT;
+const TEXTURES_MAX_COUNT = 2;
 const _activeTextures = new Int8Array(TEXTURES_MAX_COUNT);
 const _textureBuffer = [];
 let _textureBufferCount = 0;
@@ -16,9 +17,9 @@ let _uvMapBufferCount = 0;
 
 export class Texture {
 
-	tex = null;
-	texId = -1;
-	Idx = -1;
+	TUO = null; // The Graphic's texture unit object.
+	tex_unit_id = -1; // Graphic's unique 'unsigned integer' id. 
+	// Idx = -1;	// Engine's 
 	width = 0;
 	height = 0;
 	level = -1;
@@ -31,7 +32,7 @@ export class Texture {
 
 };
 
-export function TextureInitBuffers() {
+export function Texture_init_texture_storage_buffer() { // Initialize a buffer to store all the application's textures.
 
 	for (let i = 0; i < TEXTURES_MAX_COUNT; i++) {
 
@@ -40,114 +41,123 @@ export function TextureInitBuffers() {
 	}
 
 	// Initialize font buffers
-	FontInitBuffers();
+	Font_init_fonts_storage_buffer();
 }
 
-function GetNextFreeElem() {
+function Get_next_free_elem() {
 
 	const idx = _textureBufferCount++;
 
 	if (idx >= TEXTURES_MAX_COUNT) {
-		alert('Fonts buffer overflow. @ FontLoadUvs.js')
+		alert('Texture buffer overflow. @ Texture.js')
 	}
 
 	return idx;
 }
 
 
-export function TextureGetTextureByIdx(idx) {
+export function Texture_get_texture_byidx(idx) {
 	return _textureBuffer[idx];
 }
-export function TextureIsLoaded(texId) {
-	if (_activeTextures[texId] === INT_NULL) return false;
+function Texture_is_active_check_byidx(idx) {
+	if (_activeTextures[idx] === INT_NULL) return false;
 	return true;
 }
-function TextureRetrieveTextureIdx(texId) {
-	return _activeTextures[texId];
+function Texture_get_texture_active_byidx(idx) {
+	return _activeTextures[idx];
 }
-export function TextureRetrieveUvMapIdx(texId) {
-	switch(texId){
-		case TEXTURES.SDF_CONSOLAS_LARGE: 
-		case TEXTURES.SDF_CONSOLAS_SMALL:{
-			return FontRetrieveFontIdx(texId)
-		}
-		case TEXTURES.TEST:{
-			return _activeTextures[texId];
+function Texture_retrieve_uvmap_bytexid(texidx) {
+	switch(texidx){
+		case FONTS.SDF_CONSOLAS_LARGE: 
+		case FONTS.SDF_CONSOLAS_SMALL:{
+			return FontRetrieveFontIdx(texidx)
 		}
 	}
 }
-export function AtlasTextureGetCoords(index) {
-	return ATLAS_TEX_COORDS[index];
+function Texture_is_texture_font_texture(texidx){
+	// return Font_is_loaded(texidx)
+	if(texidx >= FONTS.COUNT) return false;
+	else return true;
 }
+function Texture_is_loaded(texidx){
+	if(_activeTextures[texidx]) return true;
+	else return false;
+}
+
 
 
 // Texture loading - Generic
-export function TextureLoadTexture(texId) {
+/**
+ * Search in active textures by index,
+ * if not found search in the texture buffer array,
+ * if not found: probably console ERROR.
+ */
+// TODO: we need a direct image path selection from the texidx index
+// let count = 0;
+export function Texture_load_texture_byidx(texidx, TEX_TYPE) {
 
-	const ret = {
-		textidx: INT_NULL, // The index of the texture, that is stored(upon texture creation) in a buffer.
-		uvIdx: INT_NULL, // The index of the uv coordinates. All coordinates for all , 
-	};
+	let texture_idx = INT_NULL; 	// The index of the texture, that is stored(upon texture creation) in a buffer.
+	let uvmap_idx = INT_NULL; 		// The index of the uv coordinates. All coordinates for all , 
 
-	// if ( !FontIsLoaded(texId) || !TextureIsLoaded(texId) ) {
-	if ( !FontIsLoaded(texId) ) {
+	console.log(_textureBuffer[texidx])
+	const is_font_texture = Texture_is_texture_font_texture(texidx)
 
-		switch (texId) {
+	if (!(TEX_TYPE & TEXTURE_TYPE.TYPE_FONT)) { // Load/use texture image 
 
-			case FONTS.SDF_CONSOLAS_LARGE: {
+		if(!Texture_is_loaded(texidx)){
+			
+			const img = ImageLoader.Load(TEXTURE_PATHS[texidx].imgPath, TEXTURE_PATHS[texidx].imgName, TEXTURE_PATHS[texidx].imgType);
+			// Load the texture image
+			_activeTextures[texidx] = Texture_create_texture(gfxCtx.gl, img, TEXTURE_PATHS[texidx].imgName);
+			texture_idx = _activeTextures[texidx];
+		}
+		else{
+			texture_idx = _activeTextures[texidx];
+		}
 
-				// Load the font image
-				const img = ImageLoader.Load('fonts/consolas_sdf', FONT_CONSOLAS_SDF_LARGE, 'png');
-				_activeTextures[texId] = TextureCreateTexture(gfxCtx.gl, img, FONT_CONSOLAS_SDF_LARGE);
-				ret.textidx = _activeTextures[texId];
-				ret.uvIdx = FontLoadUvs(texId);
-				
-				break;
-			}
-			case FONTS.SDF_CONSOLAS_SMALL: {
-				// Load the font image
-				const img = ImageLoader.Load('fonts/consolas_sdf', FONT_CONSOLAS_SDF_SMALL, 'png');
-				_activeTextures[texId] = TextureCreateTexture(gfxCtx.gl, img, FONT_CONSOLAS_SDF_SMALL);
-				ret.textidx = _activeTextures[texId];
-				ret.uvIdx = FontLoadUvs(texId);
-				break;
-			}
-			case TEXTURES.TEST: {
-				// Load the texture image
-				const img = ImageLoader.Load('textures', TEXTURE_TEST, 'png');
-				_activeTextures[texId] = TextureCreateTexture(gfxCtx.gl, img, TEXTURE_TEST);
-				ret.textidx = _activeTextures[texId];
-				ret.uvIdx = TextureLoadUvs(); // If uvs not found, fallback to [0,1] coordinates
-				break;
-			}
+	}
+	else { // Load/use font texture image 
+		if ( !Font_is_loaded(texidx) ) {
+
+			const img = ImageLoader.Load(FONT_PATHS[texidx].imgPath, FONT_PATHS[texidx].imgName, FONT_PATHS[texidx].imgType);
+			// Load the font image
+			_activeTextures[texidx] = Texture_create_texture(gfxCtx.gl, img, FONT_PATHS[texidx].imgName);
+			texture_idx = _activeTextures[texidx];
+			uvmap_idx = FontLoadUvs(texidx);
+
+		}
+		else {
+			texture_idx = Texture_get_texture_active_byidx(texidx), // The index for the texture
+			uvmap_idx = Texture_retrieve_uvmap_bytexid(texidx) // the index for the texture metrics in the font metrics buffer
 		}
 	}
-	else {
-		ret.textidx = TextureRetrieveTextureIdx(texId), // The index for the texture
-		ret.uvIdx = TextureRetrieveUvMapIdx(texId) // the index for the texture coordinates
-	}
 
-	return ret;
+	return {texidx:texture_idx, uvmapidx:uvmap_idx};
 }
 
 
-export function TextureCreateTexture(gl, img, name) {
+export function Texture_create_texture(gl, img, name) {
 
-	const idx = GetNextFreeElem();
+	const idx = Get_next_free_elem();
 	_textureBuffer[idx].name = name;
 
-	GlCreateTexture(gl, _textureBuffer[idx], idx, img);
+	Gl_texture_unit_create(gl, _textureBuffer[idx], idx, img);
 
-	GL.BOUND_TEXTURE_ID = _textureBuffer[idx].texId;
+	GL.BOUND_TEXTURE_UNIT_ID = _textureBuffer[idx].texidx;
 	GL.BOUND_TEXTURE_IDX = idx;
 
 	return idx;
 }
+export function Texture_create_renderbuffer_texture(gl, width, height, name) {
 
-function TextureLoadUvs() {
-	// If uvs from atlas, create uvs
-	// Else create default uvs, but only once
-	const idx = _uvMapBufferCount++;
-	_uvMapBuffer[idx] = [0,1,0,1];
+	const idx = Get_next_free_elem();
+	_textureBuffer[idx].name = name;
+
+	Gl_texture_unit_create(gl, _textureBuffer[idx], idx, null, width, height);
+
+	GL.BOUND_TEXTURE_UNIT_ID = _textureBuffer[idx].texidx;
+	GL.BOUND_TEXTURE_IDX = idx;
+
+	return idx;
 }
 

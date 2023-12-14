@@ -33,11 +33,11 @@ class VertexBuffer {
     vboId = INT_NULL;	// Vertex Buffer Gl-Id
     iboId = INT_NULL;	// Index Buffer Gl-Id
     tboId = INT_NULL;	// Texture Buffer Gl-Id
-    textidx = INT_NULL;	// Stores the index of the texture's location in the texture array
+    texidx = INT_NULL;	// Stores the index of the texture's location in the texture array
 
     type = 0; // Some flags to interpet the type of the vertex buffer(Example: type:INFO_UI_GFX)
 
-    /*NOT_USED*/scissorBox = [];
+    /*NOT_USED*/scissorbox = [];
     /*NOT_USED*/free_vertex_buffer;
 
     show = false;
@@ -268,6 +268,17 @@ class VertexBuffer {
 
     SetPrivate() { this.isPrivate = true; }
 
+    EnableScissorBox(){ this.hasScissorBox = true; }
+    
+    SetScissorBox(box=null) { 
+        
+        /**DEBUG */ if(box === null) alert('Scissor box dimentions should be passed as parameter, but null is passed instead.')
+        this.scissorbox[0] = box[0];
+        this.scissorbox[1] = VIEWPORT.HEIGHT - box[1];
+        this.scissorbox[2] = box[2];
+        this.scissorbox[3] = box[3];
+    }
+
     // Resets (set to 0) the start and counts of the buffer 
     Reset() {
         this.count = 0;
@@ -436,8 +447,8 @@ export function Gl_create_shader_program(sid){
     // Enable screen resolution uniform (vec2)  
     if (sid.unif & SID.UNIF.BUFFER_RES) {
         const unifBufferResIdx = prog.UniformsBufferCreateScreenRes();
-        prog.UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
-        prog.UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
+        prog.UniformsSetBufferUniform(VIEWPORT.WIDTH, unifBufferResIdx.resXidx);
+        prog.UniformsSetBufferUniform(VIEWPORT.HEIGHT, unifBufferResIdx.resYidx);
     }
 
     // Enable global timer uniform (float)
@@ -466,8 +477,8 @@ export function Gl_create_vertex_buffer(sid, sceneidx, prog, progs_groupidx){
 
     // Connect the vertex buffer with the atlas texture. 
     if (sid.attr & SID.ATTR.TEX2) {
-        if (sid.shad & SID.SHAD.TEXT_SDF) vb.textidx = Texture.font;
-        else vb.textidx = Texture.atlas;
+        if (sid.shad & SID.SHAD.TEXT_SDF) vb.texidx = Texture.font;
+        else vb.texidx = Texture.atlas;
     }
     if (dbg.GL_DEBUG_BUFFERS_ALL) console.log('===== VertexBuffer =====\nvbidx:', vbidx, 'progidx:', prog.idx);
 
@@ -549,8 +560,8 @@ export function GlGenerateContext2(sid, sceneidx, progs_groupidx, progidx, vbidx
 //         // Enable screen_resolution vec2 uniform  
 //         if (sid.unif & SID.UNIF.BUFFER_RES) {
 //             const unifBufferResIdx = progs.buffer[progIdx].UniformsBufferCreateScreenRes();
-//             progs.buffer[progIdx].UniformsSetBufferUniform(Viewport.width, unifBufferResIdx.resXidx);
-//             progs.buffer[progIdx].UniformsSetBufferUniform(Viewport.height, unifBufferResIdx.resYidx);
+//             progs.buffer[progIdx].UniformsSetBufferUniform(VIEWPORT.WIDTH, unifBufferResIdx.resXidx);
+//             progs.buffer[progIdx].UniformsSetBufferUniform(VIEWPORT.HEIGHT, unifBufferResIdx.resYidx);
 //         }
 
 //         // TODO: OR Bind Camera's uniform matrix HRE!
@@ -615,8 +626,8 @@ export function GlGenerateContext2(sid, sceneidx, progs_groupidx, progidx, vbidx
 
 //         // Connect the vertex buffer with the atlas texture. 
 //         if (sid.attr & SID.ATTR.TEX2) {
-//             if (sid.shad & SID.SHAD.TEXT_SDF) vb.textidx = Texture.font;
-//             else vb.textidx = Texture.atlas;
+//             if (sid.shad & SID.SHAD.TEXT_SDF) vb.texidx = Texture.font;
+//             else vb.texidx = Texture.atlas;
 //         }
 //         if (dbg.GL_DEBUG_BUFFERS_ALL) console.log('===== VertexBuffer =====\nvbIdx:', vbIdx, 'progIdx:', progIdx);
 
@@ -820,7 +831,7 @@ export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_na
     if(vb_type_flag) vb.type |= vb_type_flag;
 
     /**DEBUG */vb.mesh_indexes.push(meshidx);
-    /**DEBUG */CreateUniqueMesh(vb.debug.meshesNames, mesh_name);
+    /**DEBUG */CreateUniqueMesh(vb.debug.meshesNames, `${mesh_name} start:${start}`);
 
     return start;
 }
@@ -1078,18 +1089,9 @@ export function GlBindVAO(vao) {
     gfxCtx.gl.bindVertexArray(vao);
     GL.BOUND_VAO = vao;
 }
-export function GlBindTexture(texture) {
-    gfxCtx.gl.activeTexture(texture.texId);
-    gfxCtx.gl.bindTexture(gfxCtx.gl.TEXTURE_2D, texture.tex);
-
-    // TODO: Combine the Texture to the global GL
-    GL.BOUND_TEXTURE_ID = texture.texId; // Update the global GL constant object
-    GL.BOUND_TEXTURE_IDX = texture.idx;
-    Texture.boundTexture = texture.idx; // Update the global Texture constant object
-}
 
 // Helpers
-function CreateUniqueMesh(strArr, str) {
+function CreateUniqueMesh(strArr, str, ) {
     for (let i = 0; i < strArr.length; i++) {
         if (strArr[i] === str) {
             return;

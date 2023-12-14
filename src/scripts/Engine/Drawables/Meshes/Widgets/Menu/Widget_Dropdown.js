@@ -40,8 +40,8 @@ function Dropdown_get_root_by_idx(rootidx) {
 }
 
 
-// const temp_transparency = .02;
-const temp_transparency = .5;
+// const tr = .02;
+const tr = .5;
 export class Widget_Dropdown extends Section {
 
    isOn; // Bool for checking a dropdown's menu expanded/contructed.
@@ -50,36 +50,36 @@ export class Widget_Dropdown extends Section {
    dp_symbols; // Text symbols for denoting a dropdown's Expanded/contracted menu. // TODO: Add textured symbols OR create a font texture with symbols for dropdown expansion/contraction.
    depth_level; // The tree depth level that the dropdown exists (root dp = 0 depth).
 
-   constructor(text, pos, dim, col1 = GREY3, col2 = PINK_240_60_160, text_col = WHITE, btn_pad = [0, 0], bold = .6, font = TEXTURES.SDF_CONSOLAS_LARGE, style = [2, 5, 2]) {
+   constructor(text, pos, dim, col1 = GREY3, col2 = PINK_240_60_160, text_col = WHITE, btn_pad = [0, 0], bold = .6, font = FONTS.SDF_CONSOLAS_LARGE, style = [2, 5, 2]) {
 
-      // super(SECTION.VERTICAL, [2, 2], pos, [10, 10], col2);
-      super(SECTION.VERTICAL, [2, 2], pos, [10, 10], TRANSPARENCY(GREY2, .4));
+      // super(SECTION.VERTICAL, [2, 2], pos, [10, 10], TRANSPARENCY(GREY3, tr), null, style);
+      super(SECTION.VERTICAL, [2, 2], pos, [10, 10], col2, null, style);
 
       this.isOn = 0x0;
-      this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
-      this.SetStyle(style);
       this.SetName(`DP-${text}`);
       this.type |= MESH_TYPES_DBG.WIDGET_DROP_DOWN;
-      this.menu = null;
       this.rootidx = INT_NULL;
       this.depth_level = 0;
 
-      // this.menu = new Section(SECTION.VERTICAL, [10, 10], [OUT_OF_VIEW, OUT_OF_VIEW, pos[2] + 1], [1, 1], TRANSPARENCY(GetSequencedColor(), temp_transparency));
-      this.menu = new Section(SECTION.VERTICAL, [10, 10], [OUT_OF_VIEW, OUT_OF_VIEW, pos[2] + 1], [1, 1], TRANSPARENCY(GREY3, temp_transparency));
+      // this.menu = new Section(SECTION.VERTICAL, [10, 10], [OUT_OF_VIEW, OUT_OF_VIEW, pos[2] + 1], [1, 1], TRANSPARENCY(GetSequencedColor(), tr));
+      this.menu = new Section(SECTION.VERTICAL, [10, 10], [OUT_OF_VIEW, OUT_OF_VIEW, pos[2] + 1], [1, 1], TRANSPARENCY(GREY3, tr));
       this.menu.type |= MESH_TYPES_DBG.DROP_DOWN_MENU;
       this.menu.parent = this;
       this.menu.SetName(`MENU-${this.name}`);
-      // this.menu.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
-      // this.menu.mat.col = [WHITE, RED, GREEN, BLUE];
-      // this.menu.mat.defCol = [WHITE, RED, GREEN, BLUE];
-      // this.menu.mat.col[3] = .5;
-      // this.menu.mat.col[7] = .5;
-      // this.menu.mat.col[11] = .5;
-      // this.menu.mat.col[15] = .6;
+      { // Multi color vertex
+         // this.menu.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
+         // this.menu.mat.col = [WHITE, RED, GREEN, BLUE];
+         // this.menu.mat.defCol = [WHITE, RED, GREEN, BLUE];
+         // this.menu.mat.col[3] = .5;
+         // this.menu.mat.col[7] = .5;
+         // this.menu.mat.col[11] = .5;
+         // this.menu.mat.col[15] = .6;
+      }
 
       this.dp_symbols = ['+', '-'];
-      // const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.RIGHT, [pos[0], pos[1], this.menu.geom.pos[2] + 1], 4, col1, text_col, btn_pad, bold, style, font);
-      const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.RIGHT, [pos[0], pos[1], this.menu.geom.pos[2] + 1], 4, TRANSPARENCY(GREY4, .8), text_col, btn_pad, bold, style, font);
+      // const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.RIGHT, [pos[0], pos[1], this.menu.geom.pos[2] + 1], 4, TRANSPARENCY(GREY4, tr), text_col, btn_pad, bold, style, font);
+      // const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.RIGHT, [pos[0], pos[1], this.menu.geom.pos[2] + 1], 4, TRANSPARENCY(GREY4, 0), text_col, btn_pad, bold, style, font);
+      const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.RIGHT, [pos[0], pos[1], this.menu.geom.pos[2] + 1], 6, TRANSPARENCY(GREY4, 0), text_col, btn_pad, bold, style, font);
       btn.SetName(`BTN-${this.name} btn_id:${btn.id}`)
       btn.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;
 
@@ -110,6 +110,10 @@ export class Widget_Dropdown extends Section {
       }
 
       this.menu.AddItem(mesh);
+      mesh.geom.pos[2] += this.geom.pos[2];
+      mesh.geom.pos[2]++;
+      console.log(']]]]]]]]]]]]]]]]]]]]]]]]]]]]]')
+      console.log(mesh.name, mesh.geom.pos[2])
    }
 
 
@@ -175,7 +179,7 @@ export class Widget_Dropdown extends Section {
                   btn.text_mesh.mat.text = `${this.dp_symbols[1]} ${btn.text_mesh.mat.text.slice(2)}`;
                   //*Gfx_end_session(true, true); // Must call end gfx private session before activating item dp's menu to new private gfx buffers.
                   item.GenMenuGfx(root, FLAGS);
-                  if(DEBUG.WIDGET_DROPDOWN) console.log('\n      --------- RETURN FROM ACTIVATE() ')
+                  if (DEBUG.WIDGET_DROPDOWN) console.log('\n      --------- RETURN FROM ACTIVATE() ')
                }
 
             }
@@ -198,7 +202,7 @@ export class Widget_Dropdown extends Section {
 
       if (menu.is_gfx_inserted) { // Case: Menu removed by alpha, justset alpha back to default.
 
-         menu.SetColorAlpha(1);
+         menu.SetColorAlpha(menu.mat.defCol[3]);
 
          // const text_gfx = Find_gfx_context_for_text_in_dp_menu(menu);
          for (let i = 0; i < menu.children.boundary; i++) {
@@ -207,10 +211,10 @@ export class Widget_Dropdown extends Section {
 
             if (item.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) { // Case item is another dropdown
 
-               item.SetColorAlpha(1);
+               item.SetColorAlpha(item.mat.defCol[3]);
 
                const btn = item.children.buffer[0];
-               btn.SetColorAlpha(1, 1);
+               btn.SetColorAlpha(btn.mat.defCol[3], 1);
 
                // Create Click events for any meshes of type Dropdown
                item.CreateClickEvent(root.menu.listeners.buffer);
@@ -225,12 +229,12 @@ export class Widget_Dropdown extends Section {
 
             }
             else { // Case: Generate gfx for any other children meshes (non dropdown meshes).
-
-               item.SetColorAlpha(1, 1);
+               // HACK: Pass 2 alpha values, in case it is of type label-button etc, 1 for the area and 1 for the text.
+               item.SetColorAlpha(item.mat.defCol[3], 1);
             }
          }
       }
-      else { // Case: First time initialization or each dp's menu to its own gfx, add menu to gfx
+      else { // Case: First time initialization OR each dp's menu to its own gfx, add menu to gfx
 
          menu.Render(MESH_TYPES_DBG.UI_INFO_GFX); // Add to the vertex buffers
          //*Gfx_end_session(true, true);
@@ -263,13 +267,13 @@ export class Widget_Dropdown extends Section {
 
       btn.text_mesh.UpdateTextCharacter(dp_symbols[1], 0);
 
-      if(DEBUG.WIDGET_DROPDOWN) console.log('      --------- Activating secondary menus')
+      if (DEBUG.WIDGET_DROPDOWN) console.log('      --------- Activating secondary menus')
 
       menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.geom.num_faces, GFX_CTX_FLAGS.PRIVATE);
 
       const text_gfx = Find_gfx_context_for_text_in_dp_menu(menu);
       if (text_gfx) {
-         if(DEBUG.WIDGET_DROPDOWN) console.log('                FOUNT TEXT!!!!!!!', text_gfx)
+         if (DEBUG.WIDGET_DROPDOWN) console.log('                FOUNT TEXT!!!!!!!', text_gfx)
       }
 
       // Here we have to gfxGen all menus children, NOT private
@@ -342,7 +346,7 @@ export class Widget_Dropdown extends Section {
          }
          else {
 
-            /**DEBUG*/ if(DEBUG.WIDGET_DROPDOWN) if (!item_dp.gfx) console.log(item_dp.name)
+            /**DEBUG*/ if (DEBUG.WIDGET_DROPDOWN) if (!item_dp.gfx) console.log(item_dp.name)
             if (item_dp.gfx) item_dp.SetColorAlpha(0, 0);
 
          }
@@ -391,7 +395,6 @@ export class Widget_Dropdown extends Section {
    CreateHoverEvent() {
       const btn = this.children.buffer[0];
       btn.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
-
    }
 
    CreateClickEvent() {
@@ -519,10 +522,10 @@ export class Widget_Dropdown extends Section {
       const btn = params.source_params;
       const root = Dropdown_get_root_by_idx(dropdown_mesh.rootidx);
 
-      if (!dropdown_mesh.isOn) { // Case: Activete Menu 
+      if (!dropdown_mesh.isOn) { // Case: Activate Menu 
 
-         if(DEBUG.WIDGET_DROPDOWN) console.log('\n\n')
-         if(DEBUG.WIDGET_DROPDOWN) console.log('----------------------- Activating Dropdown:', dropdown_mesh.name)
+         if (DEBUG.WIDGET_DROPDOWN) console.log('\n\n')
+         if (DEBUG.WIDGET_DROPDOWN) console.log('----------------------- Activating Dropdown:', dropdown_mesh.name)
 
          // Create Fake click event in the menu mesh, so that any items that have listen events, will be registered as children events.
          if (false) { // TODO: Implement auto-select which type of events-creation to follow. Case 1: all events added to root dp menu. Case 2: Each menu gets a Fake event to store it's item events
@@ -546,13 +549,27 @@ export class Widget_Dropdown extends Section {
 
          menu.ConstructListeners(dropdown_mesh);
 
-         const size = root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
-         root.UpdateGfxPosDimRecursive(root);
+         // TODO: The scroller section must grow only in width, not inn height.
+         // If dropdown is part of another section, we must recalculate from the parent section to recalculate its position and dimention.
+         // if (root.parent && root.parent.type & MESH_TYPES_DBG.SECTION_MESH) {
+         //    // const size = root.parent.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
+         //    // root.parent.UpdateGfxPosDimRecursive(root.parent);
+         //    const size = root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
+         //    root.parent.TempRecalcAll(size[0]);
+         //    // root.parent.UpdateGfxPosDimRecursive(root);
+         //    root.UpdateGfxPosDimRecursive(root);
+         // }
+         // else {
+         //    root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
+         //    root.UpdateGfxPosDimRecursive(root);
+         // }
 
-         const scroller = root.parent;
-         if (scroller && (scroller.type & MESH_TYPES_DBG.WIDGET_SCROLLER)) {
-            scroller.TempRecalcAll(size);
-         }
+         
+         root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN | SECTION.EXPAND);
+         root.UpdateGfxPosDimRecursive(root);
+         
+         if (root.parent && root.parent.type & MESH_TYPES_DBG.WIDGET_SCROLLER)
+            root.parent.SetScissorBox();
 
       }
       else {  // Case: Deactivete Menu 
@@ -593,9 +610,24 @@ export class Widget_Dropdown extends Section {
             dropdown_mesh.DeactivateMenu(dropdown_mesh);
             dropdown_mesh.RemoveChildByIdx(menu.idx); // Rememove menu from drop down
 
+            // if (root.parent && root.parent.type & MESH_TYPES_DBG.SECTION_MESH) {
+            //    // const size = root.parent.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
+            //    // root.parent.UpdateGfxPosDimRecursive(root.parent);
+            //    const size = root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
+            //    root.parent.TempRecalcAll(size[0]);
+            //    // root.parent.UpdateGfxPosDimRecursive(root);
+            //    root.UpdateGfxPosDimRecursive(root);
+            // }
+            // else {
+            //    root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
+            //    root.UpdateGfxPosDimRecursive(root);
+            // }
+
             root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
             root.UpdateGfxPosDimRecursive(root);
-
+            
+            if (root.parent && root.parent.type & MESH_TYPES_DBG.WIDGET_SCROLLER)
+               root.parent.SetScissorBox();
          }
       }
 

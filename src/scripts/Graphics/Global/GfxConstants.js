@@ -16,7 +16,7 @@ const GL = {
     BOUND_VBO_IDX: INT_NULL, // The current bound vertex buffer index
     BOUND_VBO: INT_NULL, // The current bound vertex buffer 
     BOUND_TEXTURE_IDX: INT_NULL, // The current bound texture index 
-    BOUND_TEXTURE_ID: INT_NULL, // The current bound texture 
+    BOUND_TEXTURE_UNIT_ID: INT_NULL, // The current bound texture 
 };
 
 /** Grouping shader programs. Example: group for debug user interface meshes, default group meshes */
@@ -373,6 +373,7 @@ const TRIG = {
     SIN: 0,
 
 };
+
 
 /** Rotation Matrices */
 class ROTATION3D {

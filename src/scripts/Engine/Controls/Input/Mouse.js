@@ -166,8 +166,8 @@ export function OnMouseMove(e) {
    e.stopPropagation();
    e.preventDefault(); 
 
-   const newPosX = e.clientX - Viewport.leftMargin;
-   const newPosY = e.clientY + Viewport.topMargin;
+   const newPosX = e.clientX - VIEWPORT.MARGIN.LEFT;
+   const newPosY = e.clientY + VIEWPORT.MARGIN.TOP;
    const oldPosx = mouse.pos.x;
    const oldPosy = mouse.pos.y;
       

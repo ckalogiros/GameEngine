@@ -122,7 +122,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 
 	/** Set the max number of characters for the dynamic text, 
 	 * by passing any text as 'dynamic_text' of length= dynamic text number of characters*/
-	constructor(text, dynamic_text, pos, fontSize, text_col1, text_col2, bold) {
+	constructor(text, dynamic_text, ALIGNMENT, pos, fontSize, text_col1, text_col2, bold) {
 
 		super(text, pos, fontSize, text_col1, bold);
 
@@ -135,8 +135,8 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 		this.type |= MESH_TYPES_DBG.WIDGET_TEXT_DYNAMIC | dynamicText.geom.type | dynamicText.mat.type;
 
 		// Default alignment for all children text meshes
-		this.alignment = ALIGN.HORIZONTAL;
-		// this.alignment = ALIGN.VERTICAL;
+		// this.alignment = ALIGN.HORIZONTAL;
+		this.alignment = ALIGNMENT;
 		// this.Align_pre(this, this.alignment)
 
 	}

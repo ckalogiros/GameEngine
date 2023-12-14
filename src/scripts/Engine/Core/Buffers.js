@@ -171,7 +171,7 @@ export class M_Buffer extends Buffer_Interface {
       this.buffer = new Array(this.size);
 
       if (oldData) this.CopyBufferElements(oldData)
-      console.warn('Resizing M_Buffer!', this.size)
+      // console.warn('Resizing M_Buffer!', this.size)
    }
 
    AddAtIndex(idx, elem) {
@@ -211,7 +211,7 @@ export class Int8Buffer extends Buffer_Interface {
       this.buffer = new Int8Array(this.size);
 
       if (oldData) this.CopyBufferElements(oldData)
-      console.warn('Resizing Int8Buffer!')
+      // console.warn('Resizing Int8Buffer!')
    }
 
 }
@@ -286,7 +286,7 @@ export class Int8Buffer2 extends Buffer_Interface {
       this.buffer = new Int8Array(this.size);
 
       if (oldData) this.CopyBufferElements(oldData)
-      console.warn('Resizing Int8Buffer!')
+      // console.warn('Resizing Int8Buffer!')
    }
 
 }

@@ -14,14 +14,14 @@ export class Geometry2D_Text extends Geometry2D {
    text;
    char_ratio;
 
-   constructor(pos=[0,0,0], fontSize=4, scale=[0,0], text='', texId = INT_NULL) {
+   constructor(pos=[0,0,0], fontSize=4, scale=[0,0], text='', texidx = INT_NULL) {
 
       let dim = [0, 0]
       dim = [fontSize, fontSize];
 
-      if (texId !== INT_NULL) {
+      if (texidx !== INT_NULL) {
 
-         var char_ratio = FontGetFontDimRatio(texId);
+         var char_ratio = FontGetFontDimRatio(texidx);
          dim[1] *= char_ratio;
          pos[0] += fontSize; // Case pos is set to 0, then we must add half text face width.
       }

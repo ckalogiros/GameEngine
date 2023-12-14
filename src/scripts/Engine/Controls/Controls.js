@@ -34,8 +34,8 @@ export class OrbitControls extends Controller {
    Rotate(){}
    Pan(){
       const mouseDif = MouseGetPosDif();
-		mouseDif.x /= Viewport.width/2;
-		mouseDif.y /= Viewport.height/2;
+		mouseDif.x /= VIEWPORT.WIDTH/2;
+		mouseDif.y /= VIEWPORT.HEIGHT/2;
 		target.Translate(mouseDif.x, mouseDif.y, 0)
    }
 

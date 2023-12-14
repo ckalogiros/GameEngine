@@ -1,3 +1,5 @@
+// TODO: Move to 'resources' folder???
+
 export const COMIC_FONT_METRICS = `
 ***************************
 *        Image Info       *

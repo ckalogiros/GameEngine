@@ -217,31 +217,32 @@ export class Event_Listener {
 
    CheckHover() {
       _pt6.Start();
+
       const TYPE_IDX = LISTEN_EVENT_TYPES_INDEX.HOVER;
 
       if (this.event_type[TYPE_IDX] === undefined) return;
       /*DEBUG*/if (TYPE_IDX < 0 || TYPE_IDX >= LISTEN_EVENT_TYPES_INDEX.SIZE)
          console.error('Event type index does not exist.');
 
+      let intersected = false;
 
       // console.log('----- CHECK HOVER EVENTS -----')
       for (let i = 0; i < this.event_type[TYPE_IDX].boundary; i++) {
-
          const event = this.event_type[TYPE_IDX].buffer[i];
          if (this.event_type[TYPE_IDX].buffer[i]) { // Some buffer elements maybe null(removed)
-
+            
             const point = MouseGetPos();
             const mesh = event.source_params
             const d = mesh.geom;
-
+            
             const rect = [
                [d.pos[0] - d.dim[0], d.pos[0] + d.dim[0]],     // Left  Right 
                [(d.pos[1] - d.dim[1]), (d.pos[1] + d.dim[1])], // Top  Bottom
             ];
-
+            
             if (Intersection_point_rect(point, rect)) {
                // console.log('Listener!');
-
+               
                if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
                   Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
                }
@@ -249,15 +250,24 @@ export class Event_Listener {
                   // console.log(point)
                   if (Check_hover_recursive(event, point)) return;
                }
-
+               
                Events_handle_immidiate({ type: 'hover', params: { mesh: mesh } });
-               // console.log('', mesh.name)
+               // console.log('0:', STATE.mesh.hovered.name);
 
+               intersected = true;
+               
             } 
-            else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (!mesh.StateCheck(MESH_STATE.IN_MOVE) || !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
-               Events_handle_immidiate({ type: 'unhover', params: { mesh: mesh } });
-            }
+            // else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (!mesh.StateCheck(MESH_STATE.IN_MOVE) || !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
+            //    Events_handle_immidiate({ type: 'unhover', params: { mesh: mesh } });
+            // }
          }
+      }
+
+      // NOTE: The only way to avoid meshes remain hovered, after mouse hover skiping over the root mesh's listener.
+      if(!intersected && STATE.mesh.hovered){ // If mouse is not intersecting with any mesh and there still is a hovered mesh, unhover it.
+         // console.log('1:', STATE.mesh.hovered.name)
+         Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } });
+
       }
       _pt6.Stop();
    }
@@ -704,7 +714,7 @@ export function Listeners_debug_info_create(scene) {
    const dp_btn_pad = [10, 2];
 
    // Create the dropdown that will hold all listen events to display for debuging purposes.
-   const dropdown = new Widget_Dropdown('Info Ui Listeners Root-DP', [Viewport.right - 140, 20, 0], [60, 20], GREY1, TRANSPARENCY(GREY5, .8), WHITE, dp_btn_pad);
+   const dropdown = new Widget_Dropdown('Info Ui Listeners Root-DP', [VIEWPORT.RIGHT - 140, 20, 0], [60, 20], GREY1, TRANSPARENCY(GREY5, .8), WHITE, dp_btn_pad);
    dropdown.CreateClickEvent();
    dropdown.CreateMoveEvent();
    Drop_down_set_root(dropdown, dropdown);

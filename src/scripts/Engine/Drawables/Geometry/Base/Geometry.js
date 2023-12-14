@@ -237,26 +237,6 @@ export class Geometry3D {
         glBufferOps.GlMoveXY(gfx, [0, y]);
     }
     //////////////////////////////////////////////////////////////
-    SetDim(dim) {
-        math.CopyArr2(this.dim, dim);
-        glBufferOps.GlSetDim(gfx, dim);
-    }
-    UpdateScale() {
-        glBufferOps.GlSetScale(gfx, this.scale);
-    }
-    SetScale(s) {
-        this.scale[0] *= s;
-        this.scale[1] *= s;
-        glBufferOps.GlSetScale(gfx, this.scale);
-    }
-    ScaleFromVal(val) {
-        this.scale[0] *= val;
-        this.scale[1] *= val;
-        glBufferOps.GlSetScale(gfx, this.scale);
-        // Also set dim to mirror the scale
-        this.dim[0] *= val;
-        this.dim[1] *= val;
-    }
     StoreDefPos(pos) {
         math.CopyArr2(this.defPos, pos);
     }

@@ -17,11 +17,12 @@ import { Gfx_progs_get_vb_byidx } from "../../Interfaces/Gfx/GfxInterfaceFunctio
 export function Debug_info_ui_performance(scene) {
 
    const tr = .5; // Transparency
-   const pad = [5, 5];
-   const sectionpad = [10, 10];
+   const pad = [3, 3];
+   const sectionpad = [6, 6];
    const fontsize = 4;
 
-   const dp = new Widget_Dropdown('Generic Ui Debug Info', [120, 20, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
+   // const dp = new Widget_Dropdown('Generic Ui Debug Info', [120, 20, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
+   const dp = new Widget_Dropdown('Generic Ui Debug Info', [220, 40, 0], [10, 10], GREEN_140_240_10, TRANSPARENCY(BLUE_10_120_220, .6), WHITE, [8, 3]);
    dp.CreateClickEvent();
    dp.CreateMoveEvent();
    Drop_down_set_root(dp, dp);
@@ -31,7 +32,7 @@ export function Debug_info_ui_performance(scene) {
    /************************************************************************************************************************************************/
    // Performance timers
    {
-      const section = new Section(SECTION.HORIZONTAL, sectionpad, [0, 0, zindex+1], [0, 0], TRANSPARENCY(GREY6, .4), 'InfoUi-Timers section');
+      const section = new Section(SECTION.HORIZONTAL, sectionpad, [0, 0, zindex+1], [0, 0], TRANSPARENCY(GREY6, tr), 'InfoUi-Timers section');
       
       const enable_ui_timers_label = new Widget_Label('Ui Performance Timers', (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), [0, 0, zindex+2], fontsize, TRANSPARENCY(BLUE_10_120_220, tr), WHITE, pad, .4, undefined, [2, 3, 2]);
       enable_ui_timers_label.SetName(`InfoUi-Timers label`);
@@ -48,7 +49,7 @@ export function Debug_info_ui_performance(scene) {
    /************************************************************************************************************************************************/
    // Mouse Info
    {
-      const section = new Section(SECTION.HORIZONTAL, sectionpad, [0, 0, zindex+1], [0, 0], TRANSPARENCY(GREY6, .4), 'InfoUi-Mouse section');
+      const section = new Section(SECTION.HORIZONTAL, sectionpad, [0, 0, zindex+1], [0, 0], TRANSPARENCY(GREY6, tr), 'InfoUi-Mouse section');
       section.SetName('InfoUi-Mouse section');
 
       const label = new Widget_Label('Mouse Info', (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), [0, 0, zindex+2], fontsize, TRANSPARENCY(BLUE_10_120_220, tr), WHITE, pad, .4, undefined, [2, 3, 2]);
@@ -66,7 +67,7 @@ export function Debug_info_ui_performance(scene) {
    /************************************************************************************************************************************************/
    // Gfx Info
    {
-      const section = new Section(SECTION.HORIZONTAL, sectionpad, [0, 0, zindex+1], [0, 0], TRANSPARENCY(GREY6, .4), 'InfoUi-Gfx section');
+      const section = new Section(SECTION.HORIZONTAL, sectionpad, [0, 0, zindex+1], [0, 0], TRANSPARENCY(GREY6, tr), 'InfoUi-Gfx section');
       section.SetName('InfoUi-Gfx section');
 
       const label = new Widget_Label('Gfx Info', (ALIGN.BOTTOM | ALIGN.VERT_CENTER), [0, 0, zindex+2], fontsize, TRANSPARENCY(GREEN_140_240_10, tr), WHITE, pad, .4, undefined, [2, 3, 2]);
@@ -84,7 +85,7 @@ export function Debug_info_ui_performance(scene) {
    /************************************************************************************************************************************************/
    // Mesh Info
    {
-      const section = new Section(SECTION.HORIZONTAL, sectionpad, [0, 0, zindex+1], [0, 0], TRANSPARENCY(GREY6, .4), 'InfoUi-Mesh section');
+      const section = new Section(SECTION.HORIZONTAL, sectionpad, [0, 0, zindex+1], [0, 0], TRANSPARENCY(GREY6, tr), 'InfoUi-Mesh section');
       section.SetName('InfoUi-Mesh section');
 
       const label = new Widget_Label('Mesh Info', (ALIGN.BOTTOM | ALIGN.VERT_CENTER), [0, 0, zindex+2], fontsize, TRANSPARENCY(GREEN_140_240_10, tr), WHITE, pad, .4, undefined, [2, 3, 2]);
@@ -100,7 +101,7 @@ export function Debug_info_ui_performance(scene) {
    }
 
    scene.AddWidget(dp, GFX_CTX_FLAGS.PRIVATE);
-   dp.Calc();
+   dp.Calc(SECTION.EXPAND | SECTION.INHERIT);
    dp.ConstructListeners();
 
 }
@@ -133,7 +134,7 @@ export function Debug_info_create_ui_performance_timers(params) {
    let ms = 200;
 
    { // FPS average
-      const timer = new Widget_Dynamic_Text_Mesh('Fps: | Avg:', '00000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const timer = new Widget_Dynamic_Text_Mesh('Fps: | Avg:', '00000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimersGetFps, _pt_fps); // idx is for use in creating separate time intervals for each dynamic text.
    
       timer.CreateNewText('| deltaAvg ms:', fontsize, BLUE_10_160_220, [pad * 3, 0], .9);
@@ -149,7 +150,7 @@ export function Debug_info_create_ui_performance_timers(params) {
    }
    { // FPS average 1 second
       ms = 1000;
-      const fps1sAvg = new Widget_Dynamic_Text_Mesh('Fps 1sec: | avg:', '00000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const fps1sAvg = new Widget_Dynamic_Text_Mesh('Fps 1sec: | avg:', '00000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       fps1sAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_1s_avg); // idx is for use in creating separate time intervals for each dynamic text.
       fps1sAvg.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
    
@@ -160,7 +161,7 @@ export function Debug_info_create_ui_performance_timers(params) {
    }
    { // FPS average 500 miliseconds
       ms = 500;
-      const fps500msAvg = new Widget_Dynamic_Text_Mesh('Fps 500ms: | avg:', '00000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const fps500msAvg = new Widget_Dynamic_Text_Mesh('Fps 500ms: | avg:', '00000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       fps500msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_500ms_avg); // idx is for use in creating separate time intervals for each dynamic text.
       fps500msAvg.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
    
@@ -170,7 +171,7 @@ export function Debug_info_create_ui_performance_timers(params) {
    }
    { // All Timers Update timer
       ms = 500;
-      const t = new Widget_Dynamic_Text_Mesh(`All timers(${ms}ms):`, '0000000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const t = new Widget_Dynamic_Text_Mesh(`All timers(${ms}ms):`, '0000000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       t.SetDynamicText(`DynamicText ${ms} AllTimersUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt2); // idx is for use in creating separate time intervals for each dynamic text.
 
       t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
@@ -181,7 +182,7 @@ export function Debug_info_create_ui_performance_timers(params) {
    }
    { // Scene Update timer
       ms = 500;
-      const t = new Widget_Dynamic_Text_Mesh(`Scene Update(${ms}ms):`, '000000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const t = new Widget_Dynamic_Text_Mesh(`Scene Update(${ms}ms):`, '000000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       t.SetDynamicText(`DynamicText ${ms} SceneUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt3); // idx is for use in creating separate time intervals for each dynamic text.
 
       t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
@@ -190,20 +191,20 @@ export function Debug_info_create_ui_performance_timers(params) {
 
       section.AddItem(t);
    }
-   { // GlDraw timer
+   { // Gl_draw timer
       ms = 500;
-      const t = new Widget_Dynamic_Text_Mesh(`GlDraw Update(${ms}ms):`, '000000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const t = new Widget_Dynamic_Text_Mesh(`Gl_draw Update(${ms}ms):`, '000000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       t.SetDynamicText(`DynamicText ${ms} GlDrawUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt4); // idx is for use in creating separate time intervals for each dynamic text.
 
       t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
       t.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
-      t.SetDynamicText(`DynamicText ${ms} GlDraw PerformanceTimersGetMilisec`, ms, PerformanceTimersGetMilisec, _pt4); // idx is for use in creating separate time intervals for each dynamic text.
+      t.SetDynamicText(`DynamicText ${ms} Gl_draw PerformanceTimersGetMilisec`, ms, PerformanceTimersGetMilisec, _pt4); // idx is for use in creating separate time intervals for each dynamic text.
 
       section.AddItem(t);
    }
    { // Event Listener timer
       ms = 500;
-      const t = new Widget_Dynamic_Text_Mesh(`HoverListener Update(${ms}ms):`, '000000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const t = new Widget_Dynamic_Text_Mesh(`HoverListener Update(${ms}ms):`, '000000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       t.SetDynamicText(`DynamicText ${ms} HoverListenerUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt6); // idx is for use in creating separate time intervals for each dynamic text.
 
       t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
@@ -214,7 +215,7 @@ export function Debug_info_create_ui_performance_timers(params) {
    }
    { // Event Listener timer
       ms = 500;
-      const t = new Widget_Dynamic_Text_Mesh(`EventListener Update(${ms}ms):`, '000000', [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const t = new Widget_Dynamic_Text_Mesh(`EventListener Update(${ms}ms):`, '000000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       t.SetDynamicText(`DynamicText ${ms} EventListenerUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt5); // idx is for use in creating separate time intervals for each dynamic text.
 
       t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
@@ -266,7 +267,7 @@ export function Debug_info_create_ui_mouse_coords(params) {
 
    const fontsize = 4;
 
-   const infomesh = new Widget_Dynamic_Text_Mesh('Mouse |', 'pos: x:0000, y:0000', [0, 0, 0], fontsize, YELLOW_240_220_10, GREEN_140_240_10, .4);
+   const infomesh = new Widget_Dynamic_Text_Mesh('Mouse |', 'pos: x:0000, y:0000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, YELLOW_240_220_10, GREEN_140_240_10, .4);
    infomesh.CreateNewText('| area: x:0000, y:0000', fontsize, GREEN_140_240_10, [10, 10], .9);
 
 
@@ -351,14 +352,16 @@ export function Debug_info_create_gfx_info(params) {
    }
 
    const tr = .85;
+   const btnpad = [8, 3];
+   const dppad = [10, 10];
 
-   const dp = new Widget_Dropdown(`InfoUi Gfx DP`, [350, 20, 0], [10, 10], GREY1, TRANSPARENCY(GREEN_60_240_100, tr), WHITE, [8, 3]);
+   const dp = new Widget_Dropdown(`InfoUi Gfx DP`, [350, 20, 0], dppad, GREY1, TRANSPARENCY(GREEN_60_240_100, tr), WHITE, btnpad);
    dp.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
    dp.CreateClickEvent();
    dp.CreateMoveEvent();
    Drop_down_set_root(dp, dp);
 
-   ui_gfx_self_state.dp = new Widget_Dropdown(`self-gfx`, [0, 0, 0], [10, 10], TRANSPARENCY(RED_200_10_10, tr), TRANSPARENCY(GREEN_140_240_10, tr), WHITE, [8, 3]);
+   ui_gfx_self_state.dp = new Widget_Dropdown(`self-gfx`, [0, 0, 0], dppad, TRANSPARENCY(RED_200_10_10, tr), TRANSPARENCY(GREEN_140_240_10, tr), WHITE, btnpad);
    ui_gfx_self_state.dp.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
 
    const progs = Gl_progs_get_group(PROGRAMS_GROUPS.GetIdxByMask(dp.sid.progs_group));
@@ -366,7 +369,7 @@ export function Debug_info_create_gfx_info(params) {
    let j = 0;
    for (let i = 0; i < count; i++) {
       
-      const dp_pr = new Widget_Dropdown(`prog:${i} | Vb count:${progs.buffer[i].vertexBufferCount}`, [0, 0, 0], [10, 10], TRANSPARENCY(BLUE_10_120_220, tr), TRANSPARENCY(PURPLE, tr), WHITE, [8, 3]);
+      const dp_pr = new Widget_Dropdown(`prog:${i} | Vb count:${progs.buffer[i].vertexBufferCount}`, [0, 0, 0], dppad, TRANSPARENCY(BLUE_10_120_220, tr), TRANSPARENCY(PURPLE, tr), WHITE, btnpad);
       // dp_pr.SetName(`Program DP:${i}`);
       dp_pr._gfxidx = i;
       dp_pr.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
@@ -380,21 +383,20 @@ export function Debug_info_create_gfx_info(params) {
          const vb = progs.buffer[i].vertexBuffer[j];
          if((vb.type & MESH_TYPES_DBG.UI_INFO_GFX) === 0){ // Add as regular vertex buffers all exept the buffers storing the ui_gfx_ dropdowns.
             
-            const dp_vb = new Widget_Dropdown(`vb:${j} | count:${vb.count}`, [0, 0, 0], [10, 10], TRANSPARENCY(ORANGE_240_130_10, tr), TRANSPARENCY(GREY3, tr), WHITE, [8, 3]);
-            // dp_vb.SetName(`VB DP:${j}`)
+            const dp_vb = new Widget_Dropdown(`vb:${j} | count:${vb.count}`, [0, 0, 0], dppad, TRANSPARENCY(ORANGE_240_130_10, tr), TRANSPARENCY(GREY3, tr), WHITE, btnpad);
             dp_vb._gfxidx = j;
             dp_vb.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
             dp_vb.debug_info.data = { progidx: i, vbidx: j, };
             
             // Create more info to display
             dp_pr.AddToMenu(dp_vb);
-            const infomesh = new Widget_Dynamic_Text_Mesh('isPrivate:', `${vb.isPrivate}`, [0, 0, 0], 4, YELLOW_240_220_10, GREEN_140_240_10, .4);
+            const infomesh = new Widget_Dynamic_Text_Mesh('isPrivate:', `${vb.isPrivate}`, ALIGN.HORIZONTAL, [0, 0, 0], 4, YELLOW_240_220_10, GREEN_140_240_10, .4);
             dp_vb.AddToMenu(infomesh);
             
          }
          else {
             
-            const dp_vb = new Widget_Dropdown(`Self prog:${i} vb:${j} | count:${vb.count}`, [0, 0, 0], [10, 10], TRANSPARENCY(PINK_240_60_160, tr), TRANSPARENCY(GREY3, tr), WHITE, [8, 3]);
+            const dp_vb = new Widget_Dropdown(`Self prog:${i} vb:${j} | count:${vb.count}`, [0, 0, 0], dppad, TRANSPARENCY(PINK_240_60_160, tr), TRANSPARENCY(GREY3, tr), WHITE, btnpad);
             dp_vb._gfxidx = j;
             dp_vb.SetType(MESH_TYPES_DBG.UI_INFO_GFX); // Special recognition of this type, so we skip any infinite loops
             dp_vb.debug_info.data = { progidx: i, vbidx: j, };
@@ -573,11 +575,13 @@ function Debug_info_create_mesh_info(params){
 
    const tr = .45;
 
+   
    const dp = new Widget_Dropdown(`InfoUi Mesh DP`, [600, 20, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
    dp.SetType(MESH_TYPES_DBG.UI_INFO_MESH); // Special recognition of this type, so we skip any infinite loops
    dp.CreateClickEvent();
    dp.CreateMoveEvent();
    Drop_down_set_root(dp, dp);
+
 
    const root_meshes = Scenes_get_root_meshes(STATE.scene.active_idx);
 
@@ -587,67 +591,13 @@ function Debug_info_create_mesh_info(params){
          Debug_info_mesh_add_meshes_as_tree_struct(root_meshes.buffer[i], dp);
    }
 
-
-   /** SAMPLE:
-      alreadyAdded: false
-      attrParams1: Array(4) [ 0, 0, 0, … ]
-      children: Object { boundary: 2, active_count: 2, size: 2, … }
-      debug_info: Object { type: 0, data: null, evtidx: -1 }
-      dp_symbols: Array [ "+", "-" ]
-      eventCallbacks: Object { boundary: 0, active_count: 0, size: -1, … }
-      geom: Object { zIndex: 0, time: 0, type: 2, … }
-      gfx: Object { sceneidx: 0, scene_mesh_in_gfx_idx: 0, isPrivate: false, … }
-      hover_margin: Array [ 0, 0 ]
-      id: 0
-      idx: 0
-      isOn: 1
-      is_gfx_inserted: false
-      listeners: Object { boundary: 0, active_count: 0, size: 2, … }
-      margin: Array [ 0, 0 ]
-      mat: Object { textidx: -1, uvIdx: -1, hasFontTex: false, … }
-      max_size: Array [ 131.2, 124.25 ]
-      menu: Object { idx: 1, is_gfx_inserted: false, sceneidx: 0, … }
-      menu_options: Object { Clbk: null, idx: -1 }
-      menu_options_idx: -1
-      minimized: undefined
-      name: "InfoUi Root-DP id:0"
-      options: 2
-      padding: undefined
-      parent: undefined
-      rootidx: 0
-      scene_rootidx: 0
-      sceneidx: 0
-      sid: Object { shad: 2, attr: 36646, unif: 7, … }
-      state: Object { mask: 0 }
-      time: undefined
-      timeIntervalsIdxBuffer: Object { boundary: 0, active_count: 0, size: -1, … }
-      active_count: 0
-      boundary: 0
-      buffer: null
-      size: -1
-      <prototype>: Object { … }
-      timedEvents: Object { boundary: 0, active_count: 0, size: -1, … }
-      active_count: 0
-      boundary: 0
-      buffer: null
-      size: -1
-      type: 33557120
-      uniforms: Object { time: {…} }
-      time: Object { val: 0, idx: -1 }
-      idx: -1
-      val: 0
-    */
- 
-
-
-   dp.Calc();
    // Create scroller for the ui-mesh info widget
    const scroller = new Widget_Scroller(dp, [100, 300] );
    scroller.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
 
    scene.AddWidget(scroller, GFX_CTX_FLAGS.PRIVATE);
+   scroller.Calc();
    scroller.Render();
-   //*Gfx_end_session(true);
    scroller.ConstructListeners();
    
    DEBUG_INFO.UI_MESH.IDX = scroller.idx;

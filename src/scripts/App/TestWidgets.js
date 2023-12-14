@@ -26,13 +26,48 @@ import { Gl_progs_get_group } from '../Graphics/GlProgram.js';
 import { Debug_info_ui_performance } from '../Engine/Drawables/DebugInfo/DebugInfoUi.js';
 import { Widget_Scroller } from '../Engine/Drawables/Meshes/Widgets/WidgetScroller.js';
 import { GetRandomColor, GetSequencedColor } from '../Helpers/Helpers.js';
+import { Gl_framebuffer_create, Gl_framebuffer_render } from '../Graphics/Buffers/GlFrameBuffer.js';
+import { Rect } from '../Engine/Drawables/Meshes/Rect_Mesh.js';
+import { Textured_Mesh } from '../Engine/Drawables/Meshes/Textured_Mesh.js';
+import { Renderqueue_Add, Renderqueue_set_active } from '../Engine/Renderers/Renderer/RenderQueue.js';
+import { Gfx_progs_get_group, Gfx_progs_get_prog_byidx } from '../Engine/Interfaces/Gfx/GfxInterfaceFunctions.js';
 
 
+/**
+ * // TODO: IMPLEMENT:
+ * 1. Every widget should have a bit-field as to how the renderer will choose the vertex buffers for that mesh(PRIVATE, ANY, ...)
+ * 
+ * 3. Because we want to have a 'clean' 'GenerateGfxContext()', passing specific index for generating buffers,
+ *      the only place to analyze the GFX_CTX_FLAGS is the GenGfxCtx method of each widget.
+ * 
+ * 4. Implement the switch's widget click listener to b automatic from the class.  
+ *
+ * reorganize the functions in GlVuffers.js 
+ */
 
-export function TestWidgetsGeneric(scene){
+
+export function TestWidgetsGeneric(scene) {
+
+    setInterval(()=>{
+        if(STATE.mesh.hovered){
+            console.log('State hovered:', STATE.mesh.hovered.name)
+        }
+        else{
+            console.log('State hovered: null')
+        }
+    }, 500)
+
+    // CreateSectionSectioned(scene);
 
     // Listeners_debug_info_create(scene);
     Debug_info_ui_performance(scene);
+
+    // CreateScroller(scene);
+
+    CreateFramebufferRendering(scene);
+
+    // const texture = new Textured_Mesh([300, 300, 0], [50, 50], GREY7, TEXTURES.TEST_MSDF, 'Testing msdf rendering');
+    // scene.AddWidget(texture, GFX_CTX_FLAGS.PRIVATE)
 
 
     // const label = CreateLabel(scene);
@@ -62,7 +97,7 @@ export function TestWidgetsGeneric(scene){
 
     // CreateSectionedMenuBarsWithNestedSliders(scene);
     // CreateSectionedMenuBarsWithNestedSliders2(scene);
-    CreateSectionedMenuBarsWithNestedWidgets(scene);
+    //  CreateSectionedMenuBarsWithNestedWidgets(scene);
 
     // CreatDynamicText(scene)
     // CreatDynamicTextSectioned(scene)
@@ -74,10 +109,10 @@ export function TestWidgetsGeneric(scene){
 
     // CreateScroller(scene);
 
-    Help(scene)
+    // Help(scene)
 
-    const meshinfo_mesh = MeshInfo(scene)
-    TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: meshinfo_mesh });
+    // const meshinfo_mesh = MeshInfo(scene)
+    // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: meshinfo_mesh });
 
     // const gfxinfo = GfxInfo(scene)
     // TimeIntervalsCreate(100, 'Gfx info tip', TIME_INTERVAL_REPEAT_ALWAYS, GfxInfoUpdate, { gfxinfo: gfxinfo });
@@ -89,6 +124,102 @@ export function TestWidgetsGeneric(scene){
 
 /**************************************************************************************************************************************/
 // 
+
+function CreateFramebufferRendering(scene){
+
+    
+
+    /**
+     * 1. create the framebuffer's dimentions to the dimentions of the widget to take a snapshot.
+     * 2. translate the widget to the bottom left corner of the gl.canvas.
+     * 3. Draw the scene to the framebuffer
+     * 
+     * For static meshes we could just render the whole scene at gl.canvas dimentions
+     * and remove from rendering the static meshes via render queue.
+     * The listeners remain intacked.
+     * On mouse interacting with any of the static widgets, 
+     * we must re-render the frame buffer, this time excluding the interacted widget.
+     * 
+     * Or we render each widget in it's own renderbuffer,
+     * and we just re-render only the widget out of focus and disable its real buffer rendering in the renderqueue
+     */
+    // Test Framebuffer drawing
+    // const w=600, h=600;
+    const w = VIEWPORT.WIDTH, h = VIEWPORT.HEIGHT;
+    const halfw = VIEWPORT.WIDTH / 2, halfh = VIEWPORT.HEIGHT / 2;
+    const framebuffer = Gl_framebuffer_create(gfxCtx.gl, 'texture', gfxCtx.gl.COLOR_ATTACHMENT0, w, h, 'Test ');
+    // const framebuffer = Gl_framebuffer_create(gfxCtx.gl, 'renderbuffer', gfxCtx.gl.COLOR_ATTACHMENT0, w, h, 'Test ');
+    console.log('..........................................:', framebuffer);
+    // Render to framebuffer
+    const gfx_queue = [
+        {
+            progs_groupidx: 0,
+            progidx: 0,
+            vbidx: 0,
+        },
+        {
+            progs_groupidx: 0,
+            progidx: 1,
+            vbidx: 0,
+        },
+        // {
+        //     progs_groupidx:0, 
+        //     progidx:2, 
+        //     vbidx:0,
+        // },
+        // {
+        //     progs_groupidx:0, 
+        //     progidx:0, 
+        //     vbidx:1,
+        // },
+        // {
+        //     progs_groupidx:0, 
+        //     progidx:1, 
+        //     vbidx:1,
+        // },
+    ];
+    setInterval(() => {
+        let k = 0;
+        const progs = Gfx_progs_get_group(0)
+        for (let i = 0; i < progs.count; i++) {
+            for (let j = 0; j < progs.buffer[i].vertexBufferCount; j++) {
+                if(!(i===2 && j===0))
+                gfx_queue[k++] = {
+                    progs_groupidx: 0,
+                    progidx: progs.buffer[i].idx,
+                    vbidx: progs.buffer[i].vertexBuffer[j].idx,
+                }
+            }
+        }
+        // console.log(gfx_queue)
+        // console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+
+        for (let i = 0; i < gfx_queue.length; i++) {
+            Renderqueue_set_active(gfx_queue[i].progs_groupidx, gfx_queue[i].progidx, gfx_queue[i].vbidx, false)
+        }
+    }, 16)
+    // setTimeout(() => { Renderqueue_set_active(gfx_queue[0].progs_groupidx, gfx_queue[0].progidx, gfx_queue[0].vbidx, false) }, 1500);
+    // setTimeout(() => { Renderqueue_set_active(gfx_queue[1].progs_groupidx, gfx_queue[1].progidx, gfx_queue[1].vbidx, false) }, 1500);
+
+    // Create mesh for drawing the framebuffer's texture
+    // const rect = new Textured_Mesh([800, 300, 0], [framebuffer.texture.width/2, framebuffer.texture.height/2], [1.0, 1.0, 1.0, .9], framebuffer.texture.idx, 'Framebuffer 0');
+    // const rect = new Textured_Mesh([halfw, halfh, 0], [framebuffer.texture.width/2, framebuffer.texture.height/2], [1.0, 1.0, 1.0, .7], framebuffer.texture.idx, 'Framebuffer 0');
+    const rect = new Textured_Mesh([halfw, halfh, 0], [halfw, halfh], [1.0, 1.0, 1.0, 1.2], framebuffer.texture.idx, 'Framebuffer 0');
+    // const rect = new Textured_Mesh([600, 400, 0], [framebuffer.texture.width/2, framebuffer.texture.height/2], [.2, .6, .8, .5], 0, 'Framebuffer 0');
+    // rect.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    // rect.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
+    // rect.ConstructListeners();
+    rect.mat.uv[2] = 1;
+    rect.mat.uv[3] = 0;
+
+
+    framebuffer.render_area = rect;
+    console.log('..........................................:', rect);
+    scene.AddWidget(rect, GFX_CTX_FLAGS.PRIVATE)
+
+    // setTimeout(()=>{ Gl_framebuffer_render(gfxCtx.gl, framebuffer, gfx_queue) }, 1000);
+    setInterval(() => { Gl_framebuffer_render(gfxCtx.gl, framebuffer, gfx_queue) }, 10);
+}
 
 let labelCount = 1;
 function CreateLabel(scene) {
@@ -191,7 +322,7 @@ function CreateLabelsInSection(scene) {
 
     // With dynamic text
     {
-        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000', [0, 0, 0], 5, BLUE_10_120_220, PINK_240_60_160);
+        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000', ALIGN.VERTICAL, [0, 0, 0], 5, BLUE_10_120_220, PINK_240_60_160);
         dt.CreateNewText('Text 2', 5, YELLOW_240_220_10, [2, 2]);
         dt.CreateNewText('Text 3', 5, YELLOW_240_220_10, [2, 2]);
         dt.CreateNewText('Text 5', 5, YELLOW_240_220_10, [2, 2]);
@@ -201,7 +332,7 @@ function CreateLabelsInSection(scene) {
         section.AddItem(dt);
     }
     {
-        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000', [0, 0, 0], 5, BLUE_10_120_220, PINK_240_60_160);
+        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000', ALIGN.VERTICAL, [0, 0, 0], 5, BLUE_10_120_220, PINK_240_60_160);
         dt.CreateNewText('Text 2', 5, YELLOW_240_220_10, [2, 2]);
         dt.CreateNewText('Text 3', 5, YELLOW_240_220_10, [2, 2]);
         dt.CreateNewText('Text 5swdszklskldlaskjdlk', 5, YELLOW_240_220_10, [2, 2]);
@@ -280,7 +411,7 @@ function CreateSwitch(scene) {
 
 function CreatDynamicText(scene) {
     const fontsize = 4;
-    const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000', [100, 300, 0], fontsize, BLUE_10_120_220, PINK_240_60_160);
+    const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000', ALIGN.VERTICAL, [100, 300, 0], fontsize, BLUE_10_120_220, PINK_240_60_160);
     dt.CreateNewText('Text 2', fontsize, YELLOW_240_220_10, [2, 2]);
 
     dt.Align_pre(dt, ALIGN.VERTICAL);
@@ -296,11 +427,11 @@ function CreatDynamicTextSectioned(scene) {
     section.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
 
     {
-        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '000000', [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
+        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '000000', ALIGN.VERTICAL, [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
         section.AddItem(dt);
     }
     {
-        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '00', [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
+        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '00', ALIGN.VERTICAL, [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
         section.AddItem(dt);
     }
 
@@ -513,7 +644,7 @@ function CreatSectionedMixWidgets(scene) {
         section.AddItem(lb);
     }
     {
-        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000000', [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
+        const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', '0000000', ALIGN.VERTICAL, [0, 0, 0], 4, BLUE_10_120_220, PINK_240_60_160);
         section.AddItem(dt);
     }
     {
@@ -753,7 +884,7 @@ function CreateSectionedMenuBarsWithNestedWidgets(scene) {
                 s3.AddItem(switch1);
 
                 // With dynamic text
-                const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', 'value', [100, 300, 0], 5, BLUE_10_120_220, PINK_240_60_160);
+                const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', 'value', ALIGN.VERTICAL, [100, 300, 0], 5, BLUE_10_120_220, PINK_240_60_160);
                 dt.CreateNewText('Text 2', 5, PURPLE, [2, 2]);
                 dt.CreateNewText('Text 3', 5, GREEN_60_240_100, [2, 2]);
                 dt.CreateNewText('Text 4 very long text', 5, WHITE, [2, 2]);
@@ -777,7 +908,7 @@ function CreateMenuBarSectioned(count) {
 
     const h = 40;
     let cnt = 1;
-    let posy = Viewport.bottom - h, fontSize = 10;
+    let posy = VIEWPORT.BOTTOM - h, fontSize = 10;
 
     const section = new Section(SECTION.VERTICAL, [10, 10], [0, 0, 0], [10, 10], ORANGE);
 
@@ -937,7 +1068,7 @@ function CreateSectionSectioned(scene) {
     blu.AddItem(red, flags);
 
     scene.AddWidget(blu, GFX_CTX_FLAGS.PRIVATE);
-    //*Gfx_end_session(true);
+    // blu.Calc(SECTION.EXPAND | SECTION.INHERIT);
     blu.Calc();
     blu.ConstructListeners();
 
@@ -945,28 +1076,39 @@ function CreateSectionSectioned(scene) {
 
 function CreateScroller(scene) {
 
-    const fontsize = 4.3;
+    const fontsize = 4.6;
 
-    const section = new Section(SECTION.VERTICAL, [10, 10], [280, 650, 0], [0, 0], TRANSPARENCY(GREY1, .6));
+    const section = new Section(SECTION.VERTICAL, [5, 5], [280, 650, 0], [20, 20], TRANSPARENCY(GREY1, .6));
+    // console.log('Section options = ', section.options, ' section:', section.name);
 
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 5; i++) {
 
-        const s = new Section(SECTION.VERTICAL, [6, 3], [280, 650, 0], [0, 0], TRANSPARENCY(GREEN_140_240_10, .6));
-        const label = new Widget_Label(`Label ${i + 1}`, ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3])
-        s.AddItem(label);
-        section.AddItem(s);
+        {
+            const s = new Section(SECTION.VERTICAL, [5, 5], [280, 650, 0], [0, 0], TRANSPARENCY(GREEN_140_240_10, .6));
+            // console.log('s options = ', s.options, ' s:', s.name);
+            const label = new Widget_Label(`Label ${i + 1}`, ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], fontsize, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3])
+            s.AddItem(label);
+            section.AddItem(s);
+        }
+        {
+            const s = new Section(SECTION.VERTICAL, [5, 5], [280, 650, 0], [0, 0], TRANSPARENCY(GREEN_140_240_10, .6));
+            // console.log('s options = ', s.options, ' s:', s.name);
+            const label = new Widget_Label(`Label Long Text${i + 1}`, ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], fontsize, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3])
+            s.AddItem(label);
+            section.AddItem(s);
+        }
+
+
+        // const label1 = new Widget_Label(`Label long text ${i + 1}`, ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 6], .5, undefined, [0, 4, 3])
+        // s.AddItem(label1);
+        // section.AddItem(s);
     }
 
-    // section.geom.pos[1] -= section.geom.dim[1];
-    section.Calc();
-    // section.geom.pos[1] += 3500;
-
-    const scroller = new Widget_Scroller(section);
+    const scroller = new Widget_Scroller(section, [100, 100]);
     scroller.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
 
     scene.AddWidget(scroller, GFX_CTX_FLAGS.PRIVATE);
-    //*Gfx_end_session(true);
-    // scroller.Recalc();
+    scroller.Calc();
     scroller.ConstructListeners();
 
     // { // Add more items to the scroller's scrolled section, to debug the correct behavior of the scroller's re-size and reposition.
@@ -1015,7 +1157,7 @@ function Help(scene) {
     for (let i = 0; i < DEBUG_PRINT_KEYS.length; i++) {
 
         msgs[i] = '\"' + DEBUG_PRINT_KEYS[i].key + '\": ' + DEBUG_PRINT_KEYS[i].discr
-        //text = 'null', Align = (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos = [200, 300, 0], fontSize = 4.4, col = GREY1, text_col = WHITE, pad = [10, 5], bold = .4, style = [0, 6, 2], font = TEXTURES.SDF_CONSOLAS_LARGE) {
+
         const label = new Widget_Label(msgs[i], ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [400, 300, 0], 4, TRANSPARENCY(ORANGE_240_130_10, .7), WHITE, [7, 3], .5, [0, 4, 3])
         label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
 
@@ -1041,7 +1183,7 @@ function MeshInfo(scene) {
 
     const fontsize = 4.3;
 
-    const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 000000000000', 'id:000', [420, 15, 0], fontsize, GREEN_140_240_10, YELLOW_240_220_10, .4);
+    const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 000000000000', 'id:000', ALIGN.VERTICAL, [420, 15, 0], fontsize, GREEN_140_240_10, YELLOW_240_220_10, .4);
     infomesh.CreateNewText('pos: 00000,00000,0', fontsize, BLUE_10_120_220, [fontsize * 3, 10], .9);
     infomesh.CreateNewText('dim: 00000,00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('idx: 0000', fontsize, ORANGE_240_130_10, [fontsize * 3, 0], .9);
@@ -1050,11 +1192,11 @@ function MeshInfo(scene) {
     infomesh.SetName('Info Mesh 2');
 
     // infomesh.RenderToDebugGfx();
+    infomesh.geom.pos[0] = VIEWPORT.RIGHT - infomesh.GetMaxWidth() * 2 + 70;
 
     infomesh.Align_pre(infomesh, ALIGN.VERTICAL)
     // scene.AddWidget(infomesh, GFX_CTX_FLAGS.PRIVATE);
     scene.AddWidget(infomesh);
-    //*Gfx_end_session(true);
 
     return infomesh;
 }
