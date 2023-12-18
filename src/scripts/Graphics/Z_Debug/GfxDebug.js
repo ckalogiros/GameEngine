@@ -1,5 +1,6 @@
 "use strict";
 
+import { Gl_ib_get_byidx } from "../Buffers/IndexBuffer.js";
 import { Gl_progs_get } from "../GlProgram.js";
 
 
@@ -231,13 +232,14 @@ export function PrintIndexBufferAll() {
         for (let i = 0; i < progs_group.buffer[k].count; i++) {
             console.log('prog:', i)
             for (let j = 0; j < progs_group.buffer[k].buffer[i].ib.length; j++) {
+                const ib = Gl_ib_get_byidx(progs_group.buffer[k].buffer[i].ib[j]);
                 console.log(
                     'ibidx: ', j,
-                    'count: ', progs_group.buffer[k].buffer[i].ib[j].count,
-                    'idx: ', progs_group.buffer[k].buffer[i].ib[j].idx,
-                    'needs Update: ', progs_group.buffer[k].buffer[i].ib[j].needsUpdate,
-                    'show: ', progs_group.buffer[k].buffer[i].ib[j].show,
-                    'vCount: ', progs_group.buffer[k].buffer[i].ib[j].vCount,
+                    'count: ', ib.count,
+                    'idx: ', ib.idx,
+                    'needs Update: ', ib.needs_update,
+                    'show: ', ib.show,
+                    'vCount: ', ib.vCount,
                 );
             }
         }

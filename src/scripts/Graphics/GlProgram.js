@@ -7,6 +7,7 @@ import { SHADER_CONSTANTS } from './Shaders/ShaderBuilder/ShaderBuilder.js';
 import { Renderqueue_set_active } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { Scenes_create_programs_buffer, Scenes_create_programs_group_buffer } from '../Engine/Scenes.js';
 import { Gfx_create_group_buffer, Gfx_create_program_buffer } from '../Engine/Interfaces/Gfx/GfxContextCreate.js';
+import { Gl_ib_create_indexbuffer, Gl_ib_get_byidx, Gl_ib_set_idx_in_prog, Gl_ib_set_show } from './Buffers/IndexBuffer.js';
 
 
 
@@ -377,6 +378,13 @@ export class Gl_Program {
 		this.shaderinfo.uniforms.projection.Update(gl);
 	}
 
+	CreateIndexBuffer(sid, sceneidx, gl, vao, indices_per_rect){
+
+		const ibidx = Gl_ib_create_indexbuffer(sid, sceneidx, gl, indices_per_rect, vao);
+		const ibidx_in_prog = this.ib.push(ibidx) -1; // Store the ibidx...
+		Gl_ib_set_idx_in_prog(ibidx, ibidx_in_prog) // ...and send the programs indexbuffer index to the IndexBuffer.
+	}
+
 	/**
 	 * Update all uniforms of glProgram.
 	 * Not neccesary cause it needs a lot of conditional statements
@@ -458,6 +466,9 @@ export function Gl_progs_get_vb_byidx(programs_groupidx = INT_NULL, progidx, vbI
 export function Gl_progs_get_ib_byidx(programs_groupidx = INT_NULL, progidx, ibIdx) {
 	return _gl_programs_groups.buffer[programs_groupidx].buffer[progidx].ib[ibIdx];
 }
+export function Gl_progs_get_ib_byidx2(programs_groupidx = INT_NULL, progidx, ibIdx) {
+	return Gl_ib_get_byidx(_gl_programs_groups.buffer[programs_groupidx].buffer[progidx].ib[ibIdx]);
+}
 export function Gl_progs_get_shaderinfo(programs_groupidx = INT_NULL, progidx) {
 	return _gl_programs_groups.buffer[programs_groupidx].buffer[progidx].shaderinfo;
 }
@@ -483,7 +494,8 @@ export function Gl_get_progams_count(programs_groupidx = INT_NULL) {
 export function Gl_set_vb_show(progidx, vbIdx, programs_groupidx = INT_NULL, flag) {
 
 	_gl_programs_groups.buffer[programs_groupidx].buffer[progidx].vb[vbIdx].show = flag;
-	_gl_programs_groups.buffer[programs_groupidx].buffer[progidx].ib[vbIdx].show = flag;
+	Gl_ib_set_show(_gl_programs_groups.buffer[programs_groupidx].buffer[progidx].ib[vbIdx], flag)
+	// _gl_programs_groups.buffer[programs_groupidx].buffer[progidx].ib[vbIdx].show = flag;
 	console.log(flag, '000000000000000000000 Gl_set_vb_show ', programs_groupidx, progidx, vbIdx)
 	Renderqueue_set_active(programs_groupidx, progidx, vbIdx, flag); // Update the draw buffer
 }

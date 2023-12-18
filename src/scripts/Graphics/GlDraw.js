@@ -5,6 +5,7 @@ import { Gl_progs_get } from './GlProgram.js';
 import { Gl_texture_unit_bind } from './GlTextureUnit.js';
 import { Framebuffer_get } from './Buffers/GlFrameBuffer.js';
 import { Floor } from '../Helpers/Math/MathOperations.js';
+import { Gl_ib_get_byidx } from './Buffers/IndexBuffer.js';
 
 
 
@@ -43,7 +44,10 @@ export function Gl_draw(gl) {
         progs.buffer[progidx].UniformsUpdate(gl);
 
         const vb = progs.buffer[progidx].vb[vbidx];
-        const ib = progs.buffer[progidx].ib[vbidx];
+        // const ib = progs.buffer[progidx].ib[vbidx];
+        const ib = Gl_ib_get_byidx(progs.buffer[progidx].ib[vbidx]);
+        if(ib===undefined)
+        console.log()
 
         if (GL.BOUND_VAO !== ib.vao)
             GlBindVAO(ib.vao)
@@ -58,7 +62,7 @@ export function Gl_draw(gl) {
         }
         // console.log(progidx, vbidx)
 
-        if (ib.needsUpdate)
+        if (ib.needs_update)
             GlUpdateIndexBufferData(gl, ib)
         if (vb.needsUpdate)
             GlUpdateVertexBufferData(gl, vb);
@@ -172,7 +176,7 @@ export function Gl_draw_specific(gl, gfx_queue, framebuffer) {
             }
         }
 
-        if (ib.needsUpdate)
+        if (ib.FLAGS.NEEDS_UPDATE)
             GlUpdateIndexBufferData(gl, ib)
         if (vb.needsUpdate)
             GlUpdateVertexBufferData(gl, vb);

@@ -31,7 +31,10 @@
 
 --------------------------------------------------- 
 
-
+TODO:
+Dive into how we can efficiently not draw specific vertices.
+1. Like reconstructing the index buffer by exluding the indices not to be drawn (if removed vertices are not contiguous)
+2. If vertices are contiguous, change the start and end of the index buffer on GlDraw()
 
 TODO:
 ORGANIZE class Mesh chaos

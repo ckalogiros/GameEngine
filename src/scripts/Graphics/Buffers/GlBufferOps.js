@@ -1,13 +1,15 @@
 "use strict";
 
 import { RotateZ, Matrix3x3_3x3Mult } from "../../Helpers/Math/Matrix.js";
-import { Gl_progs_get_ib_byidx, Gl_progs_get_group, Gl_progs_get_vb_byidx } from "../GlProgram.js";
+import { Gl_progs_get_ib_byidx, Gl_progs_get_group, Gl_progs_get_vb_byidx, Gl_progs_get_ib_byidx2 } from "../GlProgram.js";
 
 
 export function Gl_remove_geometry(gfx, num_faces = 1) {
 
     const vb = Gl_progs_get_vb_byidx(gfx.progs_groupidx, gfx.prog.idx, gfx.vb.idx);
-    const ib = Gl_progs_get_ib_byidx(gfx.progs_groupidx, gfx.prog.idx, gfx.ib.idx);
+    // const ib = Gl_progs_get_ib_byidx(gfx.progs_groupidx, gfx.prog.idx, gfx.ib.idx);
+    const ib = Gl_progs_get_ib_byidx2(gfx.progs_groupidx, gfx.prog.idx, gfx.ib.idx);
+    // const ib = Gl_ib_get_byidx_in_prog(prog.ib[ibIdx]);
 
     // Structure to use for updating a removed mesh's sttart index pointing to it's location in the vertex buffer..
     const ret = {

@@ -21,13 +21,12 @@ export class VertexBuffer {
    idx = INT_NULL;	    // The vertex buffer (float*) idx that this Mesh is stored to.
    count = 0;			// Current size of the attributes in data buffer (in floats)
    size = 0;			// Total   size of the float buffer (in floats)
-   /*DELETE*/start = 0;			// The current meshe's starting idx in the vertex buffer. 
+   // /*DELETE*/start = 0;			// The current meshe's starting idx in the vertex buffer. 
    vCount = 0;			// Number of vertices
    // /*NO_NEED_TO_EXIST*/mesh_count = 0;
 
    vao = null;		    // Vertex Array 
    vboId = INT_NULL;	// Vertex Buffer Gl-Id
-   iboId = INT_NULL;	// Index Buffer Gl-Id
    tboId = INT_NULL;	// Texture Buffer Gl-Id
    texidx = INT_NULL;	// Stores the index of the texture's location in the texture array
 
@@ -108,7 +107,7 @@ export class VertexBuffer {
            ibCount: gfx.ib.count,
        };
 
-       const start = gfx.vb.start + (gfx.vb.count * num_faces);
+        const start = gfx.vb.start + (gfx.vb.count * num_faces);
        const end = this.count
        let k = gfx.vb.start;
 
