@@ -1,0 +1,8 @@
+2D array to 1D array indexing formula
+index = (i * columns) + j
+
+3D array to 1D array indexing formula
+index = (i * (columns * depth)) + (j * depth) + k
+
+4D array to 1D array indexing formula
+index = (i * (j * columns * depths) + (k * columns) + l

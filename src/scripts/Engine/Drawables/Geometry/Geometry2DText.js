@@ -5,6 +5,7 @@ import { GlSetWposY } from "../../../Graphics/Buffers/GlBufferOps.js";
 import { GfxInfoMesh } from "../../../Graphics/GlProgram.js";
 import { CopyArr2 } from "../../../Helpers/Math/MathOperations.js";
 import { GfxUpdatePosXY } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
+import { Font_get_font_ratio } from "../../Loaders/Font/ChlumskyFontMetricsLoader.js";
 import { FontGetFontDimRatio } from "../../Loaders/Font/Font.js";
 import { Geometry2D } from "./Base/Geometry.js";
 
@@ -21,7 +22,8 @@ export class Geometry2D_Text extends Geometry2D {
 
       if (texidx !== INT_NULL) {
 
-         var char_ratio = FontGetFontDimRatio(texidx);
+         // var char_ratio = Font_get_font_ratio(texidx);
+         var char_ratio = 1;
          dim[1] *= char_ratio;
          pos[0] += fontSize; // Case pos is set to 0, then we must add half text face width.
       }
@@ -67,14 +69,17 @@ export class Geometry2D_Text extends Geometry2D {
 
          GfxUpdatePosXY(gfxCopy, charPos);
          gfxCopy.vb.start += gfxCopy.vb.count;
-         charPos[0] += this.dim[0] * 2;
+         // charPos[0] += this.dim[0] * 2;
+         charPos[0] += this.dim[0];
+         alert('MADE A CHANGE FOR DIMENTION CALCULATION. SEE UpdatePosXY(gfx) @ Geometry2DText TO RESOLVE ANY ISSUES OF THE CHANGE')
       }
    }
 
    /*******************************************************************************************************************************************************/
    // Helpers
    CalcTextWidth() {
-      return this.num_faces * this.dim[0] * 2;
+      // return this.num_faces * this.dim[0] * 2;
+      return this.num_faces * this.dim[0];
    }
 
    Reposition_pre(pos) {

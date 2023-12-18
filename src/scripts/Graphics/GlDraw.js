@@ -42,8 +42,8 @@ export function Gl_draw(gl) {
         // Update all program uniforms
         progs.buffer[progidx].UniformsUpdate(gl);
 
-        const vb = progs.buffer[progidx].vertexBuffer[vbidx];
-        const ib = progs.buffer[progidx].indexBuffer[vbidx];
+        const vb = progs.buffer[progidx].vb[vbidx];
+        const ib = progs.buffer[progidx].ib[vbidx];
 
         if (GL.BOUND_VAO !== ib.vao)
             GlBindVAO(ib.vao)
@@ -92,16 +92,17 @@ export function Gl_draw(gl) {
 
         // offset by: indices per rect times sizeof(gl.UNSIGNED_SHORT)
         // That is, to skip the first face: 6*2, the first 2 faces: 12*2
-        const faces = ib.count/6;
-        if(faces > 200 && progidx===1) {
-            // const threshold = (faces - 60);
-            // const start = Floor((threshold/2 * 6))
-            // const end = Floor(ib.count-start)
-            // console.log(ib.count, faces, 'from index:', start,' to:', end)
-            gl.drawElements(gl.TRIANGLES, ib.count-96, gl.UNSIGNED_SHORT, 96);
-        }
-        else gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
-        // gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
+        // const faces = ib.count/6;
+        // if(faces > 200 && progidx===1) {
+        //     // const threshold = (faces - 60);
+        //     // const start = Floor((threshold/2 * 6))
+        //     // const end = Floor(ib.count-start)
+        //     // console.log(ib.count, faces, 'from index:', start,' to:', end)
+        //     gl.drawElements(gl.TRIANGLES, ib.count-96, gl.UNSIGNED_SHORT, 96);
+        // }
+        // else gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
+        
+        gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
 
 
         // if(progs_groupidx === 0 && progidx===0) gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
@@ -156,8 +157,8 @@ export function Gl_draw_specific(gl, gfx_queue, framebuffer) {
         // Update all program uniforms
         progs.buffer[progidx].UniformsUpdate(gl);
 
-        const vb = progs.buffer[progidx].vertexBuffer[vbidx];
-        const ib = progs.buffer[progidx].indexBuffer[vbidx];
+        const vb = progs.buffer[progidx].vb[vbidx];
+        const ib = progs.buffer[progidx].ib[vbidx];
 
         if (GL.BOUND_VAO !== ib.vao)
             GlBindVAO(ib.vao)

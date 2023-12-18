@@ -7,7 +7,7 @@ import { AddArr3, CopyArr2 } from "../../../../Helpers/Math/MathOperations.js";
 import { Check_intersection_point_rect } from "../../Operations/Collisions.js";
 import { MouseGetPos, MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
 import { Gfx_generate_context } from "../../../Interfaces/Gfx/GfxContextCreate.js";
-import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
+// import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { Scenes_remove_root_mesh } from "../../../Scenes.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals.js";
 import { MESH_ENABLE } from "../Base/Mesh.js";
@@ -15,6 +15,7 @@ import { Rect } from "../Rect_Mesh.js";
 import { Text_Mesh } from "../Text_Mesh.js";
 import { Align } from "../../Operations/Alignment.js";
 import { Find_gfx_from_parent_ascend_descend } from "../../../Interfaces/Gfx/GfxContextFindMatch.js";
+import { Font_get_char_uv_coords } from "../../../Loaders/Font/ChlumskyFontMetricsLoader.js";
 
 
 
@@ -39,17 +40,18 @@ function CalculateAreaNoPadding(text, _dim, pos, pad = [0, 0]) {
 
 function CalculateArea(text, _dim, pos, pad = [0, 0]) {
 
-    const textLen = text.length;
-    const dim = [_dim[0] * textLen, _dim[1]];
+    const numchars = text.length;
+    const dim = [_dim[0]/2 * numchars, _dim[1]];
 
     const areaWpos = [pos[0], pos[1], pos[2]];
-    areaWpos[0] -= _dim[0] + pad[0]; // Subtract half face
-    areaWpos[0] += pad[0]; // Subtract half face
+    areaWpos[0] += _dim[0]/2; // Subtract half face to align area's xpos left bound, to the left bound of the first char, not to the center of it.
+    
+    dim[0] += pad[0] * 2; // Add padding to the total area's width
+    dim[1] += pad[1] * 2; // Add padding to the total area's height
 
-    dim[0] += pad[0] * 2; // Padd height
-    dim[1] += pad[1] * 2; // Padd width
-
-    areaWpos[0] += dim[0]; // center the area arround text
+    areaWpos[0] += dim[0]; // center the area's x pos.
+    areaWpos[0] -= pad[0]*2; // center the area's x pos including the padding.
+    // Area's y pos is already centered
 
     return {
         dim: dim,
@@ -65,7 +67,7 @@ export class Widget_Label extends Rect {
     pad = [0, 0];
 
     // text, Align, pos, col = GREY3, text_col = WHITE, pad = [0, 0], bold = .4, style = [2, 5, 2], font
-    constructor(text = 'null', Align = (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos = [200, 300, 0], fontSize = 4.4, col = GREY1, text_col = WHITE, pad = [10, 5], bold = .4, style = [0, 6, 2], font = FONTS.SDF_CONSOLAS_LARGE) {
+    constructor(text = 'null', Align = (ALIGN.HOR_CENTER | ALIGN.VERT_CENTER), pos = [200, 300, 0], fontSize = 4.4, col = GREY1, text_col = WHITE, pad = [10, 5], bold = .4, style = [0, 6, 2], font=TEXTURES.MSDF_CONSOLAS_1024) {
 
         const sdfouter = CalculateSdfOuterFromDim(fontSize);
         if (sdfouter + bold > 1) bold = 1 - sdfouter;
@@ -74,14 +76,14 @@ export class Widget_Label extends Rect {
         /** Label tex mesh */
         const text_mesh = new Text_Mesh(text, pos, fontSize);
 
-        pos[0] -= pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
+        // pos[0] -= pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
         pos[2] -= 1; // Set z for area 'behind' this.text_mesh
 
         /** Label area mesh */
         const areaMetrics = CalculateArea(text, text_mesh.geom.dim, pos, pad)
         super(areaMetrics.pos, areaMetrics.dim, col);
 
-        // Must call super() before using the 'this'
+        // Must call super() before using the 'this', that is why we write the code here.
         text_mesh.SetSceneIdx(this.sceneidx);
         text_mesh.SetName(`Text-mesh [${text}]`);
         text_mesh.sid.progs_group = this.sid.progs_group; // If the label is a debug ui, so must be the text. 
@@ -188,8 +190,10 @@ export class Widget_Label extends Rect {
 
     Reposition_post(dif_pos) { // Update the widget's position, after it is added to the gfx buffers
 
-        this.MoveXYZ(dif_pos)
-        this.text_mesh.MoveXYZ(dif_pos)
+        if(dif_pos[0]===0 && dif_pos[1]==0) return;
+
+        this.MoveXY(dif_pos[0], dif_pos[1])
+        this.text_mesh.MoveXY(dif_pos[0], dif_pos[1])
     }
 
     /*******************************************************************************************************************************************************/
@@ -371,7 +375,7 @@ export class Widget_Label_Dynamic_Text extends Widget_Label {
             /** Update fps average */
             let uvs = [0, 0, 0, 0];
             if (textFpsAvg[i] !== undefined) {
-                uvs = FontGetUvCoords(mat.uvIdx, textFpsAvg[i]);
+                uvs = Font_get_char_uv_coords(mat.uvIdx, textFpsAvg[i]);
             }
             GlSetTex(gfxInfo, uvs);
             gfxInfo.vb.start += gfxInfo.vb.count

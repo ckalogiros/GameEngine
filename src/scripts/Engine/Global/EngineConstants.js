@@ -88,7 +88,7 @@ const STATE = {
 			if (!mesh) {
 				this.hoveredId = INT_NULL;
 				this.hoveredIdx = INT_NULL;
-			} 
+			}
 			else {
 				this.hoveredId = mesh.id;
 				this.hoveredIdx = mesh.idx;
@@ -99,7 +99,7 @@ const STATE = {
 			if (!mesh) {
 				this.grabedId = INT_NULL;
 				this.grabedIdx = INT_NULL;
-			} 
+			}
 			else {
 				this.grabedId = mesh.id;
 				this.grabedIdx = mesh.idx;
@@ -110,7 +110,7 @@ const STATE = {
 			if (!mesh) {
 				this.clickedId = INT_NULL;
 				this.clickedIdx = INT_NULL;
-			} 
+			}
 			else {
 				this.clickedId = mesh.id;
 				this.clickedIdx = mesh.idx;
@@ -121,7 +121,7 @@ const STATE = {
 			if (!mesh) {
 				this.selectedId = INT_NULL;
 				this.selectedIdx = INT_NULL;
-			} 
+			}
 			else {
 				this.selectedId = mesh.id;
 				this.selectedIdx = mesh.idx;
@@ -349,12 +349,12 @@ const bluePurple = InterpolateRgb(0.361 * 255, 0.020 * 255, 0.839 * 255)
 
 
 const COLOR_ARRAY = new Array(
-	PINK_240_60_160, 
-	PINK_240_60_200, 
-	RED_200_10_10, 
-	GREEN_33_208_40, 
-	GREEN_60_240_100, 
-	GREEN_60_240_60, 
+	PINK_240_60_160,
+	PINK_240_60_200,
+	RED_200_10_10,
+	GREEN_33_208_40,
+	GREEN_60_240_100,
+	GREEN_60_240_60,
 	GREEN_60_240_60,
 	GREEN_140_240_10,
 	BLUE_10_160_220,
@@ -371,8 +371,8 @@ const COLOR_ARRAY = new Array(
 
 const COLORS1 = new Array(
 	ORANGE_240_130_10,
-	PINK_240_60_160, 
-	GREEN_33_208_40, 
+	PINK_240_60_160,
+	GREEN_33_208_40,
 	YELLOW_240_220_10,
 	BLUE_10_160_220,
 	CYAN_10_200_240,
@@ -383,7 +383,7 @@ const COLORS1 = new Array(
 	ORANGE_240_160_10,
 	CYAN_10_230_180,
 	ORANGE_240_75_10,
-	RED_200_10_10, 
+	RED_200_10_10,
 );
 
 
@@ -398,56 +398,40 @@ const TEXTURE_TYPE = {
 };
 
 // Textures
-const TEST_MSDF_FONT_1 = 'msdf_a_char';
-// IMPORTANT: For any texture image file above, must store it to the FONT_PATHS below as shown.
-const TEXTURE_PATHS = [
-		{
-			imgPath: 'textures',
-			imgName: TEST_MSDF_FONT_1,
-			imgType: 'png',
-	
-		},
-];
-g_cnt = 0;
-const TEXTURES = {
-	TEST_MSDF: INT_NULL, // The INT_NULL will be used to create a new texture in the application's texture buffer
-
-	COUNT: 0,
-}
-
 // Font textures
 const FONT_CONSOLAS_SDF_LARGE = 'consolas_sdf_11115w';
 const FONT_CONSOLAS_SDF_SMALL = 'consolas_sdf_2048w';
-// const COMIC_FONT_METRICS_PATH = '../../../../consolas_sdf/metrics/consolas_sdf.txt'
 const COMIC_FONT_METRICS_PATH = '../../../../resources/fonts/consolas_sdf/metrics/consolas_sdf35.txt'
-
-// IMPORTANT: For any font image file above, must store it to the FONT_PATHS below as shown.
-const FONT_PATHS = [
+const TEST_MSDF_FONT_1 = 'msdf_a_char';
+const TEST_MTSDF_FONT_TEST_1024DIM = 'consola_mtsdf_test_1024';
+// const TEST_MSDF_FONT_TEST_256DIM = 'consola_msdf_test_256dim';
+// const TEST_MSDF_FONT_TEST_512DIM = 'consola_msdf_test_512dim';
+// const TEST_MSDF_FONT_TEST_1024DIM = 'consola_msdf_test_1024';
+// const TEST_SDF_FONT_TEST_256DIM = 'consola_sdf_test_256dim';
+// const TEST_SDF_FONT_TEST_512DIM = 'consola_sdf_test_512dim';
+// const TEST_SDF_FONT_TEST_1024DIM = 'consola_sdf_test_1024dim';
+// IMPORTANT: Every texture image file above, must be stored to the FONT_PATHS below as shown.
+const TEXTURE_PATHS = [
 	{
 		imgPath: 'fonts/consolas_sdf',
-		imgName: FONT_CONSOLAS_SDF_LARGE,
+		imgName: TEST_MTSDF_FONT_TEST_1024DIM,
 		imgType: 'png',
-
-	},
-	{
-		imgPath: 'fonts/consolas_sdf',
-		imgName: FONT_CONSOLAS_SDF_SMALL,
-		imgType: 'png',
-
 	},
 ];
 g_cnt = 0;
-const FONTS = {
-
-	SDF_CONSOLAS_LARGE: g_cnt++,
-	SDF_CONSOLAS_SMALL: g_cnt++,
+const TEXTURES = {
+	// POTENTIAL_BUG: 
+	// IMPORTANT:Font textures MUST precede all other textures
+	MSDF_CONSOLAS_1024: g_cnt++,
+	FONT_COUNT: g_cnt,
 
 	COUNT: g_cnt,
-};
+}
 
-const MENU_FONT_IDX = FONTS.SDF_CONSOLAS_LARGE; // Set the font for the options menu
+
+
+const MENU_FONT_IDX = TEXTURES.MSDF_CONSOLAS_1024; // Set the font for the options menu
 const MENU_FONT_SIZE = 4; // Set the font size for the options menu
-
 
 
 
@@ -486,14 +470,14 @@ const MESH_TYPES_DBG = {
 	WIDGET_SLIDER: _cnt <<= 1,
 	WIDGET_SLIDER_BAR: _cnt <<= 1,
 	WIDGET_SLIDER_HANDLE: _cnt <<= 1,
-	
+
 	WIDGET_SCROLLER: _cnt <<= 1,
 	WIDGET_SCROLLER_BAR: _cnt <<= 1,
 	WIDGET_SCROLLER_HANDLE: _cnt <<= 1,
-	
+
 	WIDGET_POP_UP: _cnt <<= 1,
 	WIDGET_MENU_BAR: _cnt <<= 1,
-	
+
 	WIDGET_DROP_DOWN: _cnt <<= 1,
 	DROP_DOWN_MENU: _cnt <<= 1,
 
@@ -615,18 +599,18 @@ _cnt = 0x1;
 const INFO_LISTEN_EVENT_TYPE = {
 
 	GFX: {
-		UPDATE: 		 _cnt <<= 0x1,
+		UPDATE: _cnt <<= 0x1,
 		CREATE_PROG: _cnt <<= 0x1,
-		CREATE_VB:   _cnt <<= 0x1,
-		UPDATE_VB:   _cnt <<= 0x1,
+		CREATE_VB: _cnt <<= 0x1,
+		UPDATE_VB: _cnt <<= 0x1,
 	},
 
 	GFX2: _cnt <<= 0x1, // For the gfx info mesh that updates from the Renderer loop via time interval
 
-	LISTENERS:  _cnt <<= 0x1,
+	LISTENERS: _cnt <<= 0x1,
 	ALL_MESHES: _cnt <<= 0x1,
-	MOUSE: 		_cnt <<= 0x1,
-	MESH:			_cnt <<= 0x1,
+	MOUSE: _cnt <<= 0x1,
+	MESH: _cnt <<= 0x1,
 
 }
 const DEBUG_INFO = {
@@ -634,7 +618,7 @@ const DEBUG_INFO = {
 	UI_TIMERS: {
 		IS_ON: false,
 		IDX: INT_NULL,
-		POS: [240, 820, 0]
+		POS: [280, 800, 0]
 	},
 	UI_MOUSE: {
 		IS_ON: false,
@@ -683,11 +667,12 @@ const DEBUG = {
 	REMOVE_MESH: false,
 
 	GFX: {
+		BUFFERS: false,
 		ADD_MESH: true,
 		REMOVE_MESH: true,
 	},
 
-	EVENTS_LISTENERS:{
+	EVENTS_LISTENERS: {
 		WIDGET_DROP_DOWN: false,
 	},
 

@@ -1,11 +1,18 @@
 "use strict";
 import { COMIC_FONT_METRICS } from './ComicFontMetrics.js'
 
+// POTENTIAL_BUG: 
+// The font texture buffer is build specificaly for fonts, but it gets the font textures from the application's texture buffer.
+// So the indexing is not guarantee to be 1to1 (texture buffer-font buffer).
+// It will work only if the font textures in the texture buffer preceding all the regular textures in the texture buffer
+
+
+
 
 
 // The maximum number of characters for ASCII
 const ASCII_NUM_CHARACTERS = '~'.charCodeAt(0) - (' '.charCodeAt(0));
-const FONTS_MAX_COUNT = FONTS.COUNT; // IMIDIATELY: Must take the fonts count from the global FONTS.COUNT
+const FONTS_MAX_COUNT = TEXTURES.FONT_COUNT; 
 
 const _fontMetricsBuffer = [];
 let _fontMetricsBufferCount = 0;
@@ -17,7 +24,7 @@ function GetNextFreeElem(){
 	const idx = _fontMetricsBufferCount++;
 
 	if(idx >= FONTS_MAX_COUNT) {
-		alert('Fonts buffer overflow. @ FontLoadUvs.js')
+		alert('Fonts buffer overflow. @ Font_load_uvs.js')
 	}
 
 	return idx;
@@ -55,8 +62,8 @@ export function Font_init_fonts_storage_buffer() {
 				advancex: 0,
 				width: 0,
 				height: 0,
-				bearingtop: 0,
-				bearingleft: 0,
+				// bearingtop: 0,
+				// bearingleft: 0,
 				ratio: 0, // Ratio width to height, for each character's. Used for non monospace fonts
 			};
 			// New uv coordinates for everyy character
@@ -69,7 +76,7 @@ export function Font_is_loaded(texidx) {
 	if (_activeFontTextures[texidx] === INT_NULL) return false;
 	return true;
 }
-export function FontRetrieveFontIdx(texidx) {
+export function Font_retrieve_fontidx(texidx) {
 	return _activeFontTextures[texidx];
 }
 
@@ -79,31 +86,32 @@ export function FontRetrieveFontIdx(texidx) {
 export function FontGetUvCoords(fontIdx, ch) {
 	return _fontsUvMap[fontIdx][ch.charCodeAt(0) - CHAR_ARRAY_START_OFFSET]
 }
-export function FontGetCharFaceRatio(fontIdx, ch) {
-	return _fontMetricsBuffer[fontIdx].ch[ch.charCodeAt(0) - CHAR_ARRAY_START_OFFSET].ratio;
-}
+// export function FontGetCharFaceRatio(fontIdx, ch) {
+// 	return _fontMetricsBuffer[fontIdx].ch[ch.charCodeAt(0) - CHAR_ARRAY_START_OFFSET].ratio;
+// }
 export function FontGetFontDimRatio(fontIdx) {
 	return _fontMetricsBuffer[fontIdx].ratio;
 }
-export function FontGetCharWidth(fontIdx, ch) {
-	return _fontMetricsBuffer[fontIdx].ch[ch.charCodeAt(0) - CHAR_ARRAY_START_OFFSET].width;
-}
-export function FontGetCharHeight(fontIdx, ch) {
-	return _fontMetricsBuffer[fontIdx].ch[ch.charCodeAt(0) - CHAR_ARRAY_START_OFFSET].height;
-}
-export function FontGetFaceWidth(fontIdx) {
-	return _fontMetricsBuffer[fontIdx].advancex;
-}
-export function FontGetFaceHeight(fontIdx) {
-	return _fontMetricsBuffer[fontIdx].texHeight;
-}
+// export function FontGetCharWidth(fontIdx, ch) {
+// 	return _fontMetricsBuffer[fontIdx].ch[ch.charCodeAt(0) - CHAR_ARRAY_START_OFFSET].width;
+// }
+// export function FontGetCharHeight(fontIdx, ch) {
+// 	return _fontMetricsBuffer[fontIdx].ch[ch.charCodeAt(0) - CHAR_ARRAY_START_OFFSET].height;
+// }
+// export function FontGetFaceWidth(fontIdx) {
+// 	return _fontMetricsBuffer[fontIdx].advancex;
+// }
+// export function FontGetFaceHeight(fontIdx) {
+// 	return _fontMetricsBuffer[fontIdx].texHeight;
+// }
 
-export function FontLoadUvs(texidx) {
+//IMIDIATELY: Font_load_uvs() should be called upon texture creation. Also a name or an index must be passed so we load the correct metrics.
+export function Font_load_uvs() {
 
 	const fontIdx = LoadMetrics(_fontMetricsBuffer);
-	CreateUvMap(_fontMetricsBuffer[fontIdx], _fontsUvMap[fontIdx]);
+	Create_uv_map(_fontMetricsBuffer[fontIdx], _fontsUvMap[fontIdx]);
 	
-	_activeFontTextures[texidx] = fontIdx; // Font textures and their equivalent metrics have 1to1 indexing.
+	_activeFontTextures[fontIdx] = fontIdx; // Font textures and their equivalent metrics have 1to1 indexing.
 	return fontIdx;
 }
 
@@ -185,7 +193,7 @@ function LoadMetrics(metricsBuffer) {
 	return idx;
 }
 
-function CreateUvMap(metrics, uvmap) {
+function Create_uv_map(metrics, uvmap) {
 
 	let transormedU = 1.0 / metrics.texWidth;	// Transform to 0-1 coords
 	if (metrics.advancex % 2) {

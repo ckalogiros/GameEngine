@@ -1,5 +1,6 @@
 "use strict";
 
+import { GlSetAttrTex, GlSetTex } from "../../../Graphics/Buffers/GlBufferOps.js";
 import { MouseGetPos, MouseGetPosDif } from "../../Controls/Input/Mouse.js";
 import { Gfx_generate_context } from "../../Interfaces/Gfx/GfxContextCreate.js";
 import { Find_gfx_from_parent_ascend_descend } from "../../Interfaces/Gfx/GfxContextFindMatch.js";
@@ -15,9 +16,9 @@ import { Mesh } from "./Base/Mesh.js";
 
 export class Textured_Mesh extends Mesh {
 
-   constructor(pos=[0,0,0], dim, color=WHITE, texidx=INT_NULL, name='UNDEFINED_TEXTURED_MESH_NAME') {
+   constructor(pos=[0,0,0], dim, color=WHITE, textureid=INT_NULL, name='UNDEFINED_TEXTURED_MESH_NAME') {
 
-      const mat = new Texture_Material(color, texidx);
+      const mat = new Texture_Material(color, textureid);
       const geom = new Geometry2D(pos, dim);
 
       super(geom, mat);
@@ -46,7 +47,7 @@ export class Textured_Mesh extends Mesh {
    Render() {
 
       // Get the starting index of the text in the vertex buffer.
-      // this.mat.uv = FontGetUvCoords(this.mat.uvIdx, this.mat.text[0]);
+
       this.gfx.vb.start = Gfx_add_geom_mat_to_vb(this.sid, this.gfx, this.geom, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name);
 
       Scenes_store_mesh_in_gfx(this.sceneidx, this); // For storing meshes by its gfx
@@ -54,8 +55,6 @@ export class Textured_Mesh extends Mesh {
       // If texture exists, store texture index, else if font texture exists, store font texture index, else store null
       // BUG: Make sure the below statement makes sense for Texture_Material(it is copied from the Font_Material)
       this.gfx.tb.idx = (this.mat.texidx !== INT_NULL) ? this.mat.texidx : ((this.mat.uvIdx !== INT_NULL) ? this.mat.uvIdx : INT_NULL);
-
-      // Gfx_add_geom_mat_to_vb(this.sid, this.gfx, this.geom, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name, this.idx);
 
       Gfx_progs_set_vb_texidx(this.gfx.progs_groupidx, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.tb.idx); // Update the vertex buffer to store the texture index
 
@@ -142,7 +141,14 @@ OnMove(params) {
 
    // Move 
    const mouse_pos = MouseGetPosDif();
-   mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, mesh.gfx);
+   // mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, mesh.gfx);
+
+   // HACK: temporarely use the move to chnge the uv coordinates
+   mesh.mat.uv[0] += -mouse_pos.x *.001;
+   mesh.mat.uv[1] += -mouse_pos.x *.001;
+   mesh.mat.uv[2] += mouse_pos.y  *.001;
+   mesh.mat.uv[3] += mouse_pos.y  *.001;
+   GlSetTex(mesh.gfx, mesh.mat.uv);
 }
 
 /********************************************************************************************************************************************************************** */

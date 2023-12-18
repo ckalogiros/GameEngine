@@ -3,7 +3,7 @@
 import * as math from '../../../../Helpers/Math/MathOperations.js'
 import { GlSetColor, GlSetColorAlpha, GlSetColorPerVertex } from "../../../../Graphics/Buffers/GlBufferOps.js";
 import { GlHandlerAddMaterialBuffer } from '../../../../Graphics/Buffers/GlBuffers.js';
-import { Texture_load_texture_byidx } from '../../../Loaders/Textures/Texture.js';
+import { Texture_load_texture_byid } from '../../../Loaders/Textures/Texture.js';
 
 /**
  * // TODO:
@@ -25,13 +25,6 @@ export const MAT_ENABLE = {
    LEN: _cnt,
 }
 
-function TEMP_checkIfFontTexture(id){
-   for(let texidx in FONTS){
-      if(id === FONTS[texidx] && texidx !== 'COUNT') return true;
-   }
-   return false;
-}
-
 export class Material {
 
    sid;
@@ -42,6 +35,7 @@ export class Material {
 
    uvIdx;
    texidx;
+   uv;
    
    constructor(col = [1,1,1,1]) {
 
@@ -52,15 +46,12 @@ export class Material {
          pass: 0,
       };
       
-      this.col = [0,0,0,0];
+      this.col = [0,0,0,1];
       math.CopyArr4(this.col, col);
       this.defCol = [0,0,0,0];
       math.CopyArr4(this.defCol, col);
   
       this.uv = [0,1,0,1];
-      // this.uv = [.01, .99, .01, .99];
-      // this.uv = [0, 1, 0, 1];
-      // this.uv = [.3, .4, .5, .6];
       this.texidx = INT_NULL;
       this.uvIdx  = INT_NULL;
 
@@ -78,16 +69,6 @@ export class Material {
       }
    }
 
-   ////////////////////////////////////////////////////////////////////////////////////////////////////////
-   // AddToGraphicsBuffer(sid, gfx) {
-
-   //    GlAddMaterial(sid, gfx, this.col, this.uv, this.style, this.num_faces);
-   //    this.alreadyAdded = true;
-      
-   // }
-
-
-   ////////////////////////////////////////////////////////////////////////////////////////////////////////
    GetColor() { return this.col; }
    GetColorRed() { return this.col[0]; }
    GetColorGreen() { return this.col[1]; }
@@ -134,7 +115,6 @@ export class Material {
       GlSetColorAlpha(gfx, this.col[3], num_faces);
    }
 
-   ////////////////////////////////////////////////////////////////////////////////////////////////////////
    // Enable shader properties 
    EnableGfxAttributes(which, params = {}) {
 
@@ -190,9 +170,9 @@ export class Material {
          math.CopyArr4(this.defCol, mat.defCol);
          math.CopyArr4(this.uv, mat.uv);
          math.CopyArr3(this.style, mat.style);
+         this.type = mat.type;
          this.texidx = mat.texidx;
          this.uvIdx = mat.uvIdx;
-         this.type = mat.type;
 
 		}
 	}
@@ -212,15 +192,17 @@ export class FontMaterial extends Material {
       this.texidx = texidx;
 
       // Create tex_idxs
-      const tex_idxs = Texture_load_texture_byidx(this.texidx, TEXTURE_TYPE.TYPE_FONT);
+      const tex_idxs = Texture_load_texture_byid(this.texidx, TEXTURE_TYPE.TYPE_FONT);
 
-      this.sid.attr |= SID.ATTR.TEX2; // Enable tex_idxs rendering
-      this.sid.shad |= SID.SHAD.TEXT_SDF; // Enable tex_idxs rendering
-      this.sid.attr |= SID.ATTR.SDF; // Enable tex_idxs rendering
+      // this.sid.shad |= SID.SHAD.; // Enable tex_idxs rendering
+      this.sid.shad |= SID.SHAD.PRE_MULTIPLIED_ALPHA; // E
+      this.sid.attr |= SID.ATTR.TEX2; // 
+      // this.sid.attr |= SID.ATTR.SDF; // 
+      this.sid.attr |= SID.ATTR.MSDF; // 
 
       this.texidx = tex_idxs.texidx;
       this.uvIdx = tex_idxs.uvmapidx;
-      if(this.texidx === INT_NULL) console.error('2222222 Texture Index is NULL')
+      /**DEBUG*/if(this.texidx === INT_NULL) console.error('2222222 Texture Index is NULL')
 
       this.type |= MESH_TYPES_DBG.FONT_MATERIAL;
    }
@@ -235,20 +217,18 @@ export class FontMaterial extends Material {
  */
 export class Texture_Material extends Material {
 
-   constructor(col = [1,1,1,1], texidx=INT_NULL) {
+   constructor(col = [1,1,1,1], textureid=INT_NULL) {
 
       super(col);
       
       this.sid.attr |= SID.ATTR.TEX2; // Enable texture coordinates for the vertex shader
-      this.texidx = texidx;
+      
+      const tex_idxs = Texture_load_texture_byid(textureid, TEXTURE_TYPE.TYPE_TEXTURE);  
+      this.texidx = tex_idxs.texidx;
+
       // Uvs are already set to: this.uv = [0, 1, 0, 1];
-      if(this.texidx === INT_NULL) console.error('2222222 Texture Index is NULL')
-
+      /**DEBUG*/if(this.texidx === INT_NULL) console.error('2222222 Texture Index is NULL')
       this.type |= MESH_TYPES_DBG.TEXTURE_MATERIAL;
-
-      // Load texture
-      if(this.texidx === INT_NULL)
-         Texture_load_texture_byidx(this.texidx, TEXTURE_TYPE.TYPE_TEXTURE);  
    }
 }
 

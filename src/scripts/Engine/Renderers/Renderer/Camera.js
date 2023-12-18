@@ -146,9 +146,9 @@ export class Camera extends Matrix4 {
 
 	}
 
-	StoreProgIdx(progIdx) { // This is the way for a camera to be updated(as a uniform mat4) for all gl programs. 
+	StoreProgIdx(progidx) { // This is the way for a camera to be updated(as a uniform mat4) for all gl programs. 
 
-		this.gfx_buf.push(progIdx);
+		this.gfx_buf.push(progidx);
 	}
 }
 

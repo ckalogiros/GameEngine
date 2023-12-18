@@ -130,16 +130,6 @@ class Buffer_Interface {
       console.log('Count: ', this.boundary)
       console.log(this.buffer)
    }
-
-   PrintMeshInfo() {
-      console.log('Count: ', this.boundary)
-      for (let i = 0; i < this.boundary; i++) {
-         if (this.buffer[i].mesh) {
-
-            console.log(this.buffer[i].mesh.name)
-         }
-      }
-   }
 }
 
 export class M_Buffer extends Buffer_Interface {
@@ -294,7 +284,7 @@ export class Int8Buffer2 extends Buffer_Interface {
 export class Int8_2DBuffer {
 
    buffer;
-   boundary; // CAUTION! Do not rely on the boundary variable.Its use is only for counting how many alements are in use(1 boundary for both rows and columns).
+   boundary; // CAUTION! Do not rely on the boundary variable. Its use is only for counting how many alements are in use(1 boundary for both rows and columns).
    size;
    numcols;
 
@@ -374,16 +364,6 @@ export class Int8_2DBuffer {
    Print() {
       console.log('Count: ', this.boundary)
       console.log(this.buffer)
-   }
-
-   PrintMeshInfo() {
-      console.log('Count: ', this.boundary)
-      for (let i = 0; i < this.boundary; i++) {
-         if (this.buffer[i].mesh) {
-
-            console.log(this.buffer[i].mesh.name)
-         }
-      }
    }
 
 }

@@ -91,7 +91,7 @@ export class Mesh {
         this.mat = mat;
 
         this.sid = {
-            shad: SID.SHAD.INDEXED,
+            shad: SID.SHAD.INDEXED | (this.geom.sid.shad | this.mat.sid.shad),
             attr: (this.geom.sid.attr | this.mat.sid.attr),
             unif: (this.mat.sid.unif) | SID.UNIF.PROJECTION, // Assuming we always have  a projection camera and a uniforms buffer. 
             pass: (this.geom.sid.pass | this.mat.sid.pass | SID.PASS.COL4),

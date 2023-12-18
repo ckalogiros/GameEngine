@@ -1,6 +1,11 @@
 node_modules
 
-docs
-docs/temp.cpp
+docs/ignore
+
+resources/ignore
+
 src/scripts/Graphics/Shaders/OLD
+
 src/scripts/Helpers/THREE_math
+
+

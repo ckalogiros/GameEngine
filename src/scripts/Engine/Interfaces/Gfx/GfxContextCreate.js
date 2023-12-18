@@ -10,7 +10,7 @@ import { Gfx_remove_geometry_from_buffers, Gfx_set_vb_show } from "./GfxInterfac
 /**
  * ### Tracing data
  * 
- * Any gfx in gfx pool is set to active, by 'inUse' variable: 
+ * Any gfx in gfx pool is set to active, by the 'inUse' variable: 
  *    in 'Store()', when new gfx buffer is created.
  *    in 'Gfx_generate_context()'.
  * Any gfx in gfx pool is set to inactive:

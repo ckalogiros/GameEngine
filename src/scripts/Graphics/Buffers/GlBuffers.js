@@ -1,387 +1,17 @@
-import { GfxInfoMesh, GlEnableAttribsLocations, Gl_set_vb_show } from '../GlProgram.js'
 import * as GlOps from './GlBufferOps.js';
+import { Gl_create_program } from '../GlProgram.js'
+import { IndexBuffer } from './IndexBuffer.js';
+import { VertexBuffer } from './VertexBuffer.js';
+import { Gl_progs_get_ib_byidx, Gl_progs_get_prog_byidx, Gl_progs_get_group, Gl_progs_get_vb_byidx } from '../GlProgram.js';
+import { Scenes_create_vertex_buffer_buffer } from '../../Engine/Scenes.js';
+import { Gfx_create_vertexbuffer_buffer } from '../../Engine/Interfaces/Gfx/GfxContextCreate.js';
+import { GfxInfoMesh, GlEnableAttribsLocations, Gl_set_vb_show } from '../GlProgram.js'
 
 // For Debuging
 import * as dbg from '../Z_Debug/GfxDebug.js'
-import { Gl_create_program } from '../GlProgram.js'
-import { Gl_progs_get_ib_byidx, Gl_progs_get_prog_byidx, Gl_progs_get_group, Gl_progs_get_vb_byidx } from '../GlProgram.js';
-import { Renderqueue_get } from '../../Engine/Renderers/Renderer/RenderQueue.js';
-import { M_Buffer } from '../../Engine/Core/Buffers.js';
-import { Scenes_create_vertex_buffer_buffer } from '../../Engine/Scenes.js';
-import { Gfx_create_vertexbuffer_buffer } from '../../Engine/Interfaces/Gfx/GfxContextCreate.js';
 
 
-class VertexBuffer {
 
-    sceneidx = INT_NULL;
-
-    webgl_buffer = null;
-    data = [];
-    // A buffer to store all vertexbuffer's meshes indexes. Used to denote the active meshes in the vertex buffer. 
-    // EXAMPLE: If index === INT_NULL, then the mesh is no longer to be rendered, so maybe we remove it from the vertex buffer.
-    mesh_indexes = []; 
-    // /*DEBUG*/meshes = [];        // An array of pointers to all vertexBuffer's meshes. Has the type of 'GfxInfoMesh'
-
-    idx = INT_NULL;	    // The vertex buffer (float*) idx that this Mesh is stored to.
-    count = 0;			// Current size of the attributes in data buffer (in floats)
-    size = 0;			// Total   size of the float buffer (in floats)
-    /*DELETE*/start = 0;			// The current meshe's starting idx in the vertex buffer. 
-    vCount = 0;			// Number of vertices
-    // /*NO_NEED_TO_EXIST*/mesh_count = 0;
-
-    vao = null;		    // Vertex Array 
-    vboId = INT_NULL;	// Vertex Buffer Gl-Id
-    iboId = INT_NULL;	// Index Buffer Gl-Id
-    tboId = INT_NULL;	// Texture Buffer Gl-Id
-    texidx = INT_NULL;	// Stores the index of the texture's location in the texture array
-
-    type = 0; // Some flags to interpet the type of the vertex buffer(Example: type:INFO_UI_GFX)
-
-    /*NOT_USED*/scissorbox = [];
-    /*NOT_USED*/free_vertex_buffer;
-
-    show = false;
-    needsUpdate = false;
-    hasChanged = false;
-    hasScissorBox = false;
-    isPrivate = false; // SEE ## PRIVATE_BUFFERS
-
-    // Debug
-    debug = { meshesNames: [], sidName: '' };
-
-    constructor(sid, sceneidx, idx, gl) {
-
-        this.debug.sidName = dbg.GetShaderTypeId(sid);
-        this.sceneidx = sceneidx;
-        this.idx = idx;
-
-        this.vao = gl.createVertexArray();
-        gl.bindVertexArray(this.vao);
-        this.webgl_buffer = gl.createBuffer();
-        this.size = MAX_VERTEX_BUFFER_COUNT;
-        this.data = new Float32Array(this.size);
-
-        this.free_vertex_buffer = new M_Buffer();
-
-    }
-
-    // AddGeometry(sid, pos, dim, time, shaderinfo, num_faces, start, count) {
-
-    //     // const start = this.count
-    //     if (sid.attr & SID.ATTR.POS2) { // Add Position, if the program has such an attribute 
-    //         GlOps.VbSetAttribPos(this, start + shaderinfo.attributes.offset.pos,
-    //             count, shaderinfo.attribsPerVertex - shaderinfo.attributes.size.pos, dim, num_faces);
-    //     }
-    //     if (sid.attr & SID.ATTR.WPOS_TIME4) { // Add World Position, if the program has such an attribute 
-    //         if (sid.attr & SID.ATTR.POS3) {
-    //             GlOps.VbSetAttribWpos(this, start + shaderinfo.attributes.offset.wposTime,
-    //                 count, shaderinfo.attribsPerVertex - 3, pos, 2);
-    //         }
-    //         else {
-    //             GlOps.VbSetAttribWpos(this, start + shaderinfo.attributes.offset.wposTime,
-    //                 count, shaderinfo.attribsPerVertex - shaderinfo.attributes.size.wpos, pos, num_faces);
-    //         }
-    //     }
-    //     if (sid.attr & SID.ATTR.TIME) { // Per Vertex Timer (meant to be per mesh, 4 vertices) 
-    //         GlOps.VbSetAttrTime(this, start + shaderinfo.attributes.offset.time,
-    //             count, shaderinfo.attribsPerVertex - shaderinfo.attributes.size.wpos, time, num_faces);
-    //     }
-    //     this.needsUpdate = true;
-    //     this.vCount += shaderinfo.verticesPerRect * num_faces;
-
-    //     /**DEBUG*/if(this.count > this.size) console.error('VERTEX BUFFER OVERFLOW!!!')
-    // }
-    
-    // AddMaterial(sid, shaderinfo, num_faces, start, count, col, tex, style = null, sdf = null) {
-    //     if (sid.attr & SID.ATTR.COL4 && col) { // Add Color, if the program has such an attribute
-
-    //         if (!col && DEBUG.WEB_GL) console.error('Style hasn\'t being set. @AddMaterial(), GlBuffers.js')
-
-    //         // 4 color vertex
-    //         if (sid.attr & SID.ATTR.COL4_PER_VERTEX) {
-    //             GlOps.VbSetAttribColPerVertex(this, start + shaderinfo.attributes.offset.col,
-    //                 count, shaderinfo.attribsPerVertex - shaderinfo.attributes.size.col, col, num_faces);
-    //         }
-    //         else { // Regular color. 1 color for all vertices
-    //             GlOps.VbSetAttribCol(this, start + shaderinfo.attributes.offset.col,
-    //                 count, shaderinfo.attribsPerVertex - shaderinfo.attributes.size.col, col, num_faces);
-    //         }
-    //     }
-    //     if (sid.attr & SID.ATTR.TEX2 && tex) { // Add Texture, if the program has such an attribute 
-    //         if (!tex && DEBUG.WEB_GL) console.error('Style hasn\'t being set. @AddMaterial(), GlBuffers.js')
-    //         GlOps.VbSetAttribTex(this, start + shaderinfo.attributes.offset.tex,
-    //             count, shaderinfo.attribsPerVertex - shaderinfo.attributes.size.tex, tex, num_faces);
-    //     }
-    //     if (sid.attr & SID.ATTR.SDF && sdf) { // Add Texture, if the program has such an attribute 
-    //         if (!sdf && DEBUG.WEB_GL) console.error('Sdf hasn\'t being set. @AddMaterial(), GlBuffers.js')
-    //         // (vb, start, count, stride, sdf_params)
-    //         GlOps.VbSetAttrSdf(this, start + shaderinfo.attributes.offset.sdf,
-    //             count, shaderinfo.attribsPerVertex - shaderinfo.attributes.size.sdf, sdf, num_faces);
-    //     }
-
-    //     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //     let params1Index = 0; //  Handles any unused attributes of the vec4 params1 shader attribute.  
-    //     if (sid.attr & SID.ATTR.BORDER) {
-    //         if (!style && DEBUG.WEB_GL) console.error('Style.border hasn\'t being set. @AddMaterial(), GlBuffers.js')
-    //         else {
-    //             GlOps.VbSetAttrBorderWidth(this, start + shaderinfo.attributes.offset.params1 + params1Index,
-    //                 count, shaderinfo.attribsPerVertex - V_BORDER_WIDTH, style[STYLE.BORDER], num_faces)
-    //             params1Index++;
-    //         }
-    //     }
-    //     if (sid.attr & SID.ATTR.R_CORNERS) {
-    //         if (!style && DEBUG.WEB_GL) console.error('Style.rCorners hasn\'t being set. @AddMaterial(), GlBuffers.js')
-    //         else {
-    //             GlOps.VbSetAttrRoundCorner(this, start + shaderinfo.attributes.offset.params1 + params1Index,
-    //                 count, shaderinfo.attribsPerVertex - V_ROUND_CORNERS, style[STYLE.R_CORNERS], num_faces)
-    //             params1Index++;
-    //         }
-    //     }
-    //     if (sid.attr & SID.ATTR.FEATHER) {
-    //         if (!style && DEBUG.WEB_GL) console.error('Style.feather hasn\'t being set. @AddMaterial(), GlBuffers.js')
-    //         else {
-    //             GlOps.VbSetAttrBorderFeather(this, start + shaderinfo.attributes.offset.params1 + params1Index,
-    //                 count, shaderinfo.attribsPerVertex - V_BORDER_FEATHER, style[STYLE.FEATHER], num_faces)
-    //             params1Index++;
-    //         }
-    //     }
-    //     /** IMPORTANT! The stayle attributes(counts 3 attributes) use the attrParams vector4 to be passed.
-    //      * Therefore, in order to count the totaol attributes we must take into consideration the empty attribute
-    //      */
-    //     if (sid.attr & SID.ATTR.EMPTY) { // Increment vertex count for unused vector elements
-    //         this.count += shaderinfo.verticesPerRect * num_faces;
-    //     }
-
-    //     this.needsUpdate = true;
-    // }
-
-    /** 
-     * Remove geometry fast version. 
-     * We just set the alpha color value to 0.
-     * And we keep the dimention of the mesh in the vertex buffer
-     * in a separate buffer, so we can reuse when possible
-     */
-    Remove_geometry_fast(gfx, num_faces) {
-
-        GlOps.GlSetColor(gfx, [0, 0, 0, 1], num_faces);
-
-        if (!this.free_vertex_buffer.count) this.free_vertex_buffer.Init(1);
-
-        const removedVerticesInfo = {
-            progIdx: gfx.prog.idx,
-            vbIdx: gfx.vb.idx,
-            vbStart: gfx.vb.start,
-            vbCount: gfx.vb.count,
-            ibIdx: gfx.vb.idx,
-            ibStart: gfx.ib.start,
-            ibCount: gfx.ib.count,
-        };
-
-        const meshTotalAttrCount = gfx.vb.count * num_faces;
-        const count = vb.count - (vb.count - meshTotalAttrCount);
-        const vCount = meshTotalAttrCount / gfx.attribsPerVertex;
-        this.count -= count;
-        this.vCount -= vCount;
-        this.needsUpdate = true;
-
-        this.free_vertex_buffer.Add(removedVerticesInfo);
-
-    }
-
-    Remove_geometry(gfx, num_faces) {
-
-        if (!this.free_vertex_buffer.count) this.free_vertex_buffer.Init(1);
-
-        const removedVerticesInfo = {
-            progIdx: gfx.prog.idx,
-            vbIdx: gfx.vb.idx,
-            vbStart: gfx.vb.start,
-            vbCount: gfx.vb.count,
-            ibIdx: gfx.vb.idx,
-            ibStart: gfx.ib.start,
-            ibCount: gfx.ib.count,
-        };
-
-        const start = gfx.vb.start + (gfx.vb.count * num_faces);
-        const end = this.count
-        let k = gfx.vb.start;
-
-        // Shift all attributes left to fil the gap of the removed attributes. 
-        for(let i=start; i<end; i++){
-            this.data[k++] = this.data[i]
-        }
-
-        const meshTotalAttrCount = gfx.vb.count * num_faces;
-        // const count = this.count - (this.count - meshTotalAttrCount);
-        const vCount = meshTotalAttrCount / gfx.attribsPerVertex;
-        this.count -= meshTotalAttrCount;
-        this.vCount -= vCount;
-
-        if(this.count < 0)
-            console.error('[[[[[[[[[[[[[[[[[ Count < 0. vb:', this.idx)
-        // console.log('------------- Removing Num_faces from buffer:', num_faces, ' prog:', gfx.prog.idx, ' vb:', gfx.vb.idx)
-        this.needsUpdate = true;
-
-        this.free_vertex_buffer.Add(removedVerticesInfo);
-
-        return meshTotalAttrCount;
-
-    }
-
-    Shift_geometry(gfx, num_faces, new_num_faces) {
-
-        const total_new_attribs_count = gfx.attribsPerVertex * gfx.vertsPerRect * new_num_faces;
-        if (this.count + total_new_attribs_count >= this.size) this.Realloc(total_new_attribs_count);
-        const start = gfx.vb.start + (gfx.vb.count * (num_faces+new_num_faces));
-        const end = this.count + total_new_attribs_count;
-        
-        let k = this.count-1;
-        for(let i=end-1; i>=start; i--)
-            this.data[i] = this.data[k--]
-
-        // Remove the old data counts, the whole mesh is gonna be added again to the vertex buffers.
-        const vCount = (gfx.attribsPerVertex * gfx.vertsPerRect * num_faces) / gfx.attribsPerVertex;
-        this.count -= gfx.attribsPerVertex * gfx.vertsPerRect * num_faces;
-        this.vCount -= vCount;
-        this.needsUpdate = true;
-
-        return total_new_attribs_count;
-    }
-
-    Realloc(extra_size=0) {
-
-        if(extra_size) this.size += extra_size;
-        else this.size *= 2;
-        const oldData = this.data;
-        this.data = new Float32Array(this.size);
-        this.#CopyBuffer(oldData)
-        console.warn('Resizing vertex buffer!')
-    }
-
-    #CopyBuffer(oldData) {
-
-        const size = oldData.length;
-        for (let i = 0; i < size; i++) {
-            this.data[i] = oldData[i];
-        }
-    }
-
-    SetPrivate() { this.isPrivate = true; }
-
-    EnableScissorBox(){ this.hasScissorBox = true; }
-    
-    SetScissorBox(box=null) { 
-        
-        /**DEBUG */ if(box === null) alert('Scissor box dimentions should be passed as parameter, but null is passed instead.')
-        this.scissorbox[0] = box[0];
-        this.scissorbox[1] = VIEWPORT.HEIGHT - box[1];
-        this.scissorbox[2] = box[2];
-        this.scissorbox[3] = box[3];
-    }
-
-    // Resets (set to 0) the start and counts of the buffer 
-    Reset() {
-        this.count = 0;
-        this.vCount = 0;
-        // this.mesh_count = 0;
-        this.needsUpdate = true;
-        this.mesh_indexes = [];
-        this.debug.meshesNames = [];
-        this.debug.sidName = [];
-    }
-
-};
-
-class IndexBuffer {
-    name = '';
-
-    data = [];
-    webgl_buffer = null;
-
-    idx = INT_NULL;
-    start = 0;
-    count = 0;
-    size = 0;
-    vCount = 0;
-
-    vao = null;
-    iboId = INT_NULL;
-
-    needsUpdate = false;
-
-    constructor(sid, sceneidx, idx, gl, indices_per_rect) {
-
-        this.idx = idx;
-
-        this.webgl_buffer = gl.createBuffer();
-        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.webgl_buffer);
-        this.name = dbg.GetShaderTypeId(sid);
-        this.sceneidx = sceneidx;
-
-        this.size = MAX_INDEX_BUFFER_COUNT;
-        this.data = new Uint16Array(this.size);
-        this.indices_per_rect = indices_per_rect;
-    }
-
-    Add(num_faces) {
-
-        const offset = 4;
-        this.start = this.vCount;
-        
-        let k = this.vCount;
-        for (let i = 0; i < num_faces; ++i) {
-
-            for (let j = 0; j < 2; j++) {
-
-                this.data[this.count++] = k + j;
-                this.data[this.count++] = k + j + 1;
-                this.data[this.count++] = k + j + 2;
-            }
-
-            k += offset;
-            this.vCount += offset;
-        }
-
-        this.needsUpdate = true; // Make sure that we update GL bufferData 
-    }
-
-    Realloc() {
-
-        this.size *= 2;
-        const oldData = this.data;
-        this.data = new Uint16Array(this.size);
-        this.CopyBuffer(oldData)
-        console.warn('Resizing index buffer!')
-    }
-
-    CopyBuffer(oldData) {
-
-        const size = oldData.length;
-        for (let i = 0; i < size; i++) {
-            this.data[i] = oldData[i];
-        }
-    }
-
-    Reset() {
-        this.count = 0;
-        this.vCount = 0;
-        this.needsUpdate = true;
-    }
-
-    Remove_geometry(num_faces) {
-
-        const meshTotalAttrCount = INDICES_PER_RECT * num_faces;
-        const count = this.count - (this.count - meshTotalAttrCount);
-        const vCount = meshTotalAttrCount / INDICES_PER_RECT * VERTS_PER_RECT_INDEXED;
-        this.count -= count;
-        this.vCount -= vCount;
-        this.needsUpdate = true;
-
-        return count;
-
-    }
-
-};
 
 
 
@@ -400,7 +30,7 @@ export function ProgramExists(sid) {
 export function VertexBufferExists(sceneidx, prog) {
 
     for (let i = 0; i < prog.vertexBufferCount; i++) {
-        if (sceneidx === prog.vertexBuffer[i].sceneidx && !prog.vertexBuffer[i].isPrivate){
+        if (sceneidx === prog.vb[i].sceneidx && !prog.vb[i].isPrivate){
             return i;
         }
     }
@@ -410,7 +40,7 @@ export function VertexBufferExists(sceneidx, prog) {
 function IndexBufferExists(ibIdx, sceneidx, prog) {
 
     for (let i = 0; i < prog.indexBufferCount; i++) {
-        if (ibIdx === prog.indexBuffer[i].idx && sceneidx === prog.indexBuffer[i].sceneidx) {
+        if (ibIdx === prog.ib[i].idx && sceneidx === prog.ib[i].sceneidx) {
             return i;
         }
     }
@@ -463,8 +93,8 @@ export function Gl_create_shader_program(sid){
 export function Gl_create_vertex_buffer(sid, sceneidx, prog, progs_groupidx){
 
     const vbidx = prog.vertexBufferCount++;
-    prog.vertexBuffer[vbidx] = new VertexBuffer(sid, sceneidx, vbidx, gfxCtx.gl);
-    const vb = prog.vertexBuffer[vbidx];
+    prog.vb[vbidx] = new VertexBuffer(sid, sceneidx, vbidx, gfxCtx.gl);
+    const vb = prog.vb[vbidx];
 
     Scenes_create_vertex_buffer_buffer(sceneidx, progs_groupidx, prog.idx, vbidx); // For storing meshes by its gfx
     Gfx_create_vertexbuffer_buffer(progs_groupidx, prog.idx, vbidx);
@@ -475,26 +105,18 @@ export function Gl_create_vertex_buffer(sid, sceneidx, prog, progs_groupidx){
     // Initialize attribute locations of the shader program's new vertex buffer.
     GlEnableAttribsLocations(gfxCtx.gl, prog);
 
-    // Connect the vertex buffer with the atlas texture. 
-    if (sid.attr & SID.ATTR.TEX2) {
-        if (sid.shad & SID.SHAD.TEXT_SDF) vb.texidx = Texture.font;
-        else vb.texidx = Texture.atlas;
-    }
     if (dbg.GL_DEBUG_BUFFERS_ALL) console.log('===== VertexBuffer =====\nvbidx:', vbidx, 'progidx:', prog.idx);
 
-    /**
-     * Create Index buffer
-     */
+    // Create Index buffer
     if (sid.shad & SID.SHAD.INDEXED) {
 
         const ibidx = prog.indexBufferCount++;
-        prog.indexBuffer[ibidx] = new IndexBuffer(sid, sceneidx, ibidx, gfxCtx.gl, INDICES_PER_RECT);
-        prog.indexBuffer[ibidx].vao = vb.vao; // Let index buffer have a copy of the vao
+        prog.ib[ibidx] = new IndexBuffer(sid, sceneidx, ibidx, gfxCtx.gl, INDICES_PER_RECT);
+        prog.ib[ibidx].vao = vb.vao; // Let index buffer have a copy of the vao
 
         if (dbg.GL_DEBUG_BUFFERS_ALL) console.log('----- VertexBuffer -----\nibidx:', ibidx, 'progidx:', prog.idx)
     }
 
-    // Gl_set_vb_show(prog.idx, vbidx, progs_groupidx, true);
 
     return vb;
 }
@@ -508,7 +130,7 @@ export function GlGenerateContext2(sid, sceneidx, progs_groupidx, progidx, vbidx
     const vb = Gl_progs_get_vb_byidx(progs_groupidx, progidx, vbidx);
     // Index buffer. // TODO: ibidx always has the same index value as vbidx, 1 to 1 buffers. What if later we want to use arbitary index buffers??? We must implement another way of finding the correct ib(Most probable is to pass the ibidx to this function)
     const ibidx = IndexBufferExists(vbidx, sceneidx, prog);
-    const ib = prog.indexBuffer[ibidx];
+    const ib = prog.ib[ibidx];
     
     // GlUseProgram(prog.webgl_program, progidx);
 
@@ -530,7 +152,7 @@ export function GlGenerateContext2(sid, sceneidx, progs_groupidx, progidx, vbidx
     gfx_ctx.attribsPerVertex = attribsPerVertex;
     gfx_ctx.prog.idx = progidx;
     gfx_ctx.vb.idx = vbidx;
-    gfx_ctx.vb.start = 0; // IMIDIATELY: Remove anesessary vb.start
+    gfx_ctx.vb.start = 0; // BUG: We set each start to 0, but many meshes are added to the vertex buffer. 
     gfx_ctx.progs_groupidx = progs_groupidx;
     gfx_ctx.vb.count = count;
     gfx_ctx.ib.idx = ibidx;
@@ -539,149 +161,6 @@ export function GlGenerateContext2(sid, sceneidx, progs_groupidx, progidx, vbidx
     return gfx_ctx;
 }
 
-// export function GlGenerateContext(sid, sceneidx, GL_BUFFER, addToSpecificGlBuffer, num_faces = 1) {
-
-//     if (ERROR_NULL(sceneidx)) console.error('Scene index is null. @ GlGenerateContext()')
-//     if (Array.isArray(GL_BUFFER) || Array.isArray(addToSpecificGlBuffer)) console.error('Array of indexes instead of vbIdx is passed. @ GlGenerateContext()')
-
-//     // ProgramExists returns 0 index based program or -1 for not found
-//     let progs_groupidx = INT_NULL;
-//     let progs = null;
-//     let progIdx = ProgramExists(sid);
-    
-//     // If the program already exists, add mesh
-//     if (progIdx === INT_NULL) { // Else create new program
-//         // progIdx = Gl_create_program(sid);
-//         const ret = Gl_create_program(sid);
-//         progs_groupidx = ret.progs_groupidx;
-//         progIdx = ret.progidx;
-//         progs = Gl_progs_get_group(progs_groupidx);
-        
-//         // Enable screen_resolution vec2 uniform  
-//         if (sid.unif & SID.UNIF.BUFFER_RES) {
-//             const unifBufferResIdx = progs.buffer[progIdx].UniformsBufferCreateScreenRes();
-//             progs.buffer[progIdx].UniformsSetBufferUniform(VIEWPORT.WIDTH, unifBufferResIdx.resXidx);
-//             progs.buffer[progIdx].UniformsSetBufferUniform(VIEWPORT.HEIGHT, unifBufferResIdx.resYidx);
-//         }
-
-//         // TODO: OR Bind Camera's uniform matrix HRE!
-        
-//         // Enable global_timer float uniform  
-//         if (sid.unif & SID.UNIF.BUFFER_RES) {
-//             const step = 0.1;
-//             progs.buffer[progIdx].UniformsCreateTimer(step);
-//         }
-//     }
-//     else{
-//         progs_groupidx = PROGRAMS_GROUPS.GetIdxByMask(sid.progs_group);
-//         progs = Gl_progs_get_group(progs_groupidx);
-//     }
-
-//     GlUseProgram(progs.buffer[progIdx].webgl_program, progIdx);
-
-//     let vbIdx = INT_NULL;
-//     let ibIdx = INT_NULL;
-
-//     if (GL_BUFFER == GFX_CTX_FLAGS.NEW) {
-//         vbIdx = INT_NULL;
-//     }
-//     else if (GL_BUFFER == GFX_CTX_FLAGS.SPECIFIC) { // Case caller accidentally 'specific buffer' flag but the vbIdx is either null or does not exist. 
-//         if (addToSpecificGlBuffer === INT_NULL) {
-//             vbIdx = VertexBufferExists(sceneidx, progs.buffer[progIdx]);
-//         }
-//         else { //  Check id the vbIdx passed by the caller exists and it is valid for adding the mesh.
-
-//             vbIdx = addToSpecificGlBuffer;
-
-//             // If the passsed vbIdx does not exist or comply with the program, force to create new vertex buffer.
-//             if (!(progs.buffer[progIdx].vertexBuffer[vbIdx] &&
-//                 SID.CheckSidMatch(sid, progs.buffer[progIdx].sid)))
-//                 vbIdx = INT_NULL;
-//         }
-//     }
-//     else if (GL_BUFFER == GFX_CTX_FLAGS.ANY) {
-//         vbIdx = VertexBufferExists(sceneidx, progs.buffer[progIdx]);
-//     }
-
-//     // If the chosen vertexBuffer is used as private by another drawable, then it should not be used if addToSpecificGlBuffer is not passed.
-//     // SEE ## PRIVATE_BUFFERS
-//     if (vbIdx > INT_NULL && vbIdx !== addToSpecificGlBuffer && progs.buffer[progIdx].vertexBuffer[vbIdx].isPrivate) vbIdx = INT_NULL;
-
-//     let vb = null; // Cash for convinience
-//     let ib = null; // Cash for convinience
-
-//     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-//      * Initialize gl buffers
-//      */
-//     if (vbIdx < 0) { // Create gl buffer
-
-//         vbIdx = progs.buffer[progIdx].vertexBufferCount++;
-//         progs.buffer[progIdx].vertexBuffer[vbIdx] = vb = new VertexBuffer(sid, sceneidx, vbIdx, gfxCtx.gl);
-//         Scenes_create_vertex_buffer_buffer(sceneidx, progs_groupidx, progIdx, vbIdx); // For storing meshes by its gfx
-
-//         gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
-
-//         // Initialize attribute locations of the shader for every newly created vertex buffer.
-//         GlEnableAttribsLocations(gfxCtx.gl, progs.buffer[progIdx]);
-
-//         // Connect the vertex buffer with the atlas texture. 
-//         if (sid.attr & SID.ATTR.TEX2) {
-//             if (sid.shad & SID.SHAD.TEXT_SDF) vb.texidx = Texture.font;
-//             else vb.texidx = Texture.atlas;
-//         }
-//         if (dbg.GL_DEBUG_BUFFERS_ALL) console.log('===== VertexBuffer =====\nvbIdx:', vbIdx, 'progIdx:', progIdx);
-
-//         /**
-//          * Create Index buffer
-//          */
-//         if (sid.shad & SID.SHAD.INDEXED) {
-
-//             ibIdx = progs.buffer[progIdx].indexBufferCount++;
-//             progs.buffer[progIdx].indexBuffer[ibIdx] = ib = new IndexBuffer(sid, sceneidx, ibIdx, gfxCtx.gl, INDICES_PER_RECT);
-//             ib.vao = vb.vao; // Let index buffer have a copy of the vao
-
-//             if (dbg.GL_DEBUG_BUFFERS_ALL) console.log('----- VertexBuffer -----\nibIdx:', ibIdx, 'progIdx:', progIdx)
-//         }
-
-//         // Add the new vertexBuffer to render queue
-//         // Gl_set_vb_show(progIdx, vbIdx, progs_groupidx, true);
-//         Renderqueue_get().Add(progs_groupidx, progIdx, vbIdx, vb.show);
-//     }
-//     else {
-
-//         vb = progs.buffer[progIdx].vertexBuffer[vbIdx];
-//         gfxCtx.gl.bindVertexArray(vb.vao)
-//         gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer)
-
-//         // Index buffer. // TODO: we bound the ibIdx with the vbIdx. What if later we want to use arbitary index buffers??? We must implement another way of finding the correct ib(Most probable is to pass the ibIdx to this function)
-//         ibIdx = IndexBufferExists(vbIdx, sceneidx, progs.buffer[progIdx]);
-//         ib = progs.buffer[progIdx].indexBuffer[ibIdx];
-
-//     }
-
-//     // Cash values
-//     const vertsPerRect = progs.buffer[progIdx].shaderinfo.verticesPerRect;
-//     const attribsPerVertex = progs.buffer[progIdx].shaderinfo.attribsPerVertex;
-//     const count = vertsPerRect * attribsPerVertex; // Total attributes of the mesh. All text meshes have only one face registered, the rest of the faces are calculated if needed.
-
-//     // Set meshes gfx info
-//     const gfxInfo = new GfxInfoMesh; // NOTE: This is the only construction of a new GfxInfoMesh object(as for now), all other calls are for creating a copy of an existing GfxInfoMesh. 
-//     gfxInfo.sid = sid;
-//     gfxInfo.sceneidx = sceneidx;
-//     gfxInfo.vao = vb.vao;
-//     gfxInfo.num_faces = num_faces;
-//     gfxInfo.vertsPerRect = vertsPerRect;
-//     gfxInfo.attribsPerVertex = attribsPerVertex;
-//     gfxInfo.prog.idx = progIdx;
-//     gfxInfo.vb.idx = vbIdx;
-//     gfxInfo.vb.start = 0;
-//     gfxInfo.progs_groupidx = PROGRAMS_GROUPS.GetIdxByMask(sid.progs_group);
-//     gfxInfo.vb.count = count;
-//     gfxInfo.ib.idx = ibIdx;
-//     gfxInfo.ib.count = ib.count;
-
-//     return gfxInfo;
-// }
 
 export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_name, meshidx){
 
@@ -694,21 +173,21 @@ export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_na
     // /**DEBUG ERROR*/ if(meshidx === undefined){ console.error('Mesh index is not passed as a param. mesh:', mesh_name)}
 
     const progs_groupidx = gfx.progs_groupidx;
-    const progIdx = gfx.prog.idx;
+    const progidx = gfx.prog.idx;
     const vbIdx = gfx.vb.idx;
     const ibIdx = gfx.ib.idx;
-    const prog = Gl_progs_get_prog_byidx(progs_groupidx, progIdx);
-    const vb = Gl_progs_get_vb_byidx(progs_groupidx, progIdx, vbIdx);
-    const ib = Gl_progs_get_ib_byidx(progs_groupidx, progIdx, ibIdx);
+    const prog = Gl_progs_get_prog_byidx(progs_groupidx, progidx);
+    const vb = Gl_progs_get_vb_byidx(progs_groupidx, progidx, vbIdx);
+    const ib = Gl_progs_get_ib_byidx(progs_groupidx, progidx, ibIdx);
     const num_faces = 1;
     const start = (!gfx.vb.start) ? vb.count : gfx.vb.start;
     vb.vCount += prog.shaderinfo.verticesPerRect * gfx.num_faces;
 
     const count = gfx.vb.count;
 
-    if (GL.BOUND_PROG_IDX !== progIdx) {
-        GlUseProgram(prog.webgl_program, progIdx);
-        GL.BOUND_PROG_IDX = progIdx;
+    if (GL.BOUND_PROG_IDX !== progidx) {
+        GlUseProgram(prog.webgl_program, progidx);
+        GL.BOUND_PROG_IDX = progidx;
         gfxCtx.gl.bindVertexArray(vb.vao);
         gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
         GL.BOUND_VBO_IDX = vbIdx;
@@ -826,9 +305,12 @@ export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_na
     vb.needsUpdate = true;
 
     if(!vb.show)
-        Gl_set_vb_show(progIdx, vbIdx, progs_groupidx, true);
+        Gl_set_vb_show(progidx, vbIdx, progs_groupidx, true);
 
     if(vb_type_flag) vb.type |= vb_type_flag;
+
+    // Store the texture index in the vertex
+    vb.texidx = mat.texidx;
 
     /**DEBUG */vb.mesh_indexes.push(meshidx);
     /**DEBUG */CreateUniqueMesh(vb.debug.meshesNames, `${mesh_name} start:${start}`);
@@ -857,16 +339,16 @@ export function Gl_shift_right_geometry(gfx, num_faces=1, new_num_faces=null) {
 export function GlHandlerAddGeometryBuffer(sid, gfx, meshName, posBuffer, dimBuffer) {
 
     const progs_groupidx = gfx.progs_groupidx;
-    const progIdx = gfx.prog.idx;
+    const progidx = gfx.prog.idx;
     const vbIdx = gfx.vb.idx;
     const ibIdx = gfx.ib.idx;
-    const prog = Gl_progs_get_prog_byidx(progs_groupidx, progIdx);
-    const vb = Gl_progs_get_vb_byidx(progs_groupidx, progIdx, vbIdx);
-    const ib = Gl_progs_get_ib_byidx(progs_groupidx, progIdx, ibIdx);
+    const prog = Gl_progs_get_prog_byidx(progs_groupidx, progidx);
+    const vb = Gl_progs_get_vb_byidx(progs_groupidx, progidx, vbIdx);
+    const ib = Gl_progs_get_ib_byidx(progs_groupidx, progidx, ibIdx);
 
-    if (GL.BOUND_PROG_IDX !== progIdx) {
-        GlUseProgram(prog.webgl_program, progIdx);
-        GL.BOUND_PROG_IDX = progIdx;
+    if (GL.BOUND_PROG_IDX !== progidx) {
+        GlUseProgram(prog.webgl_program, progidx);
+        GL.BOUND_PROG_IDX = progidx;
     }
     if (GL.BOUND_VBO_IDX !== vbIdx) {
         gfxCtx.gl.bindVertexArray(vb.vao)
@@ -917,14 +399,14 @@ export function GlHandlerAddGeometryBuffer(sid, gfx, meshName, posBuffer, dimBuf
 export function GlHandlerAddMaterialBuffer(sid, gfx, colBuffer, texBuffer) {
 
     const progs_groupidx = gfx.progs_groupidx;
-    const progIdx = gfx.prog.idx;
+    const progidx = gfx.prog.idx;
     const vbIdx = gfx.vb.idx;
-    const prog = Gl_progs_get_prog_byidx(progs_groupidx, progIdx);
-    const vb = Gl_progs_get_vb_byidx(progs_groupidx, progIdx, vbIdx);
+    const prog = Gl_progs_get_prog_byidx(progs_groupidx, progidx);
+    const vb = Gl_progs_get_vb_byidx(progs_groupidx, progidx, vbIdx);
 
-    if (GL.BOUND_PROG_IDX !== progIdx) {
-        GlUseProgram(prog.webgl_program, progIdx);
-        GL.BOUND_PROG_IDX = progIdx;
+    if (GL.BOUND_PROG_IDX !== progidx) {
+        GlUseProgram(prog.webgl_program, progidx);
+        GL.BOUND_PROG_IDX = progidx;
     }
     if (GL.BOUND_VBO_IDX !== vbIdx) {
         gfxCtx.gl.bindVertexArray(vb.vao)
@@ -945,15 +427,15 @@ export function GlHandlerAddMaterialBuffer(sid, gfx, colBuffer, texBuffer) {
 export function GlHandlerAddIndicesBuffer(gfx, buffer) {
 
     const progs_groupidx = gfx.progs_groupidx;
-    const progIdx = gfx.prog.idx;
+    const progidx = gfx.prog.idx;
     const vbIdx = gfx.vb.idx;
     const ibIdx = gfx.ib.idx;
-    const prog = Gl_progs_get_prog_byidx(progs_groupidx, progIdx);
-    const ib = Gl_progs_get_ib_byidx(progs_groupidx, progIdx, ibIdx);
+    const prog = Gl_progs_get_prog_byidx(progs_groupidx, progidx);
+    const ib = Gl_progs_get_ib_byidx(progs_groupidx, progidx, ibIdx);
 
-    if (GL.BOUND_PROG_IDX !== progIdx) {
-        GlUseProgram(prog.webgl_program, progIdx);
-        GL.BOUND_PROG_IDX = progIdx;
+    if (GL.BOUND_PROG_IDX !== progidx) {
+        GlUseProgram(prog.webgl_program, progidx);
+        GL.BOUND_PROG_IDX = progidx;
     }
     if (GL.BOUND_VBO_IDX !== vbIdx) {
         console.error('Fix the buffer binding for index buffer insertion. @ GlBuffers.js')
@@ -962,7 +444,7 @@ export function GlHandlerAddIndicesBuffer(gfx, buffer) {
     // gfx.ib.start = ib.count;
     IndicesCreateFromBuffer(ib, buffer);
     gfx.ib.count = ib.count;
-    console.log('indexBuffer:', ib)
+    console.log('ib:', ib)
 }
 
 function IndicesCreateFromBuffer(ib, buffer) {
@@ -1023,40 +505,18 @@ export function GfxSetVbRenderFromSceneId(sceneidx, flag) {
 
     for (let i = 0; i < progs.length; i++) {
         for (let j = 0; j < progs.buffer[i].vertexBufferCount; j++) {
-            if (sceneidx === progs.buffer[i].vertexBuffer[j].sceneidx) {
-                progs.buffer[i].vertexBuffer[j].show = flag;
-                progs.buffer[i].indexBuffer[j].show = flag;
+            if (sceneidx === progs.buffer[i].vb[j].sceneidx) {
+                progs.buffer[i].vb[j].show = flag;
+                progs.buffer[i].ib[j].show = flag;
             }
         }
     }
 }
 
 
-
-function CreateIndices(ib, num_faces) {
-
-    const offset = 4;
-    let k = ib.vCount;
-
-    for (let i = 0; i < num_faces; ++i) {
-
-        for (let j = 0; j < 2; j++) {
-
-            ib.data[ib.count++] = k + j;
-            ib.data[ib.count++] = k + j + 1;
-            ib.data[ib.count++] = k + j + 2;
-        }
-
-        k += offset;
-        ib.vCount += offset;
-    }
-
-    ib.needsUpdate = true; // Make sure that we update GL bufferData 
-}
-
 // Set flag 'isPrivate' to true for specific gfx buffers.
-export function GlSetVertexBufferPrivate(progs_groupidx, progIdx, vbIdx) {
-    const vb = Gl_progs_get_vb_byidx(progs_groupidx, progIdx, vbIdx);
+export function GlSetVertexBufferPrivate(progs_groupidx, progidx, vbIdx) {
+    const vb = Gl_progs_get_vb_byidx(progs_groupidx, progidx, vbIdx);
     vb.SetPrivate();
 }
 
@@ -1080,9 +540,9 @@ export function GlResetIndexBuffer(gfx) {
     ib.Reset();
 }
 
-export function GlUseProgram(webgl_program, progIdx) {
+export function GlUseProgram(webgl_program, progidx) {
     gfxCtx.gl.useProgram(webgl_program);
-    GL.BOUND_PROG_IDX = progIdx;
+    GL.BOUND_PROG_IDX = progidx;
     GL.BOUND_PROG = webgl_program;
 }
 export function GlBindVAO(vao) {

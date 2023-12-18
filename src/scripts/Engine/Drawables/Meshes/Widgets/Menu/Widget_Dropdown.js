@@ -42,6 +42,7 @@ function Dropdown_get_root_by_idx(rootidx) {
 
 // const tr = .02;
 const tr = .5;
+const _font_size = 10;
 export class Widget_Dropdown extends Section {
 
    isOn; // Bool for checking a dropdown's menu expanded/contructed.
@@ -50,10 +51,10 @@ export class Widget_Dropdown extends Section {
    dp_symbols; // Text symbols for denoting a dropdown's Expanded/contracted menu. // TODO: Add textured symbols OR create a font texture with symbols for dropdown expansion/contraction.
    depth_level; // The tree depth level that the dropdown exists (root dp = 0 depth).
 
-   constructor(text, pos, dim, col1 = GREY3, col2 = PINK_240_60_160, text_col = WHITE, btn_pad = [0, 0], bold = .6, font = FONTS.SDF_CONSOLAS_LARGE, style = [2, 5, 2]) {
+   constructor(text, pos, dim, col1 = GREY3, col2 = PINK_240_60_160, text_col = WHITE, btn_pad = [3, 3], bold = .6, font = TEXTURES.MSDF_CONSOLAS_1024, style = [2, 5, 2]) {
 
-      // super(SECTION.VERTICAL, [2, 2], pos, [10, 10], TRANSPARENCY(GREY3, tr), null, style);
-      super(SECTION.VERTICAL, [2, 2], pos, [10, 10], col2, null, style);
+      // super(SECTION.VERTICAL, [2, 2], pos, [10, 10], col2, null, style);
+      super(SECTION.VERTICAL, [2, 2], pos, [10, 10], GREY1, null, style);
 
       this.isOn = 0x0;
       this.SetName(`DP-${text}`);
@@ -61,7 +62,6 @@ export class Widget_Dropdown extends Section {
       this.rootidx = INT_NULL;
       this.depth_level = 0;
 
-      // this.menu = new Section(SECTION.VERTICAL, [10, 10], [OUT_OF_VIEW, OUT_OF_VIEW, pos[2] + 1], [1, 1], TRANSPARENCY(GetSequencedColor(), tr));
       this.menu = new Section(SECTION.VERTICAL, [10, 10], [OUT_OF_VIEW, OUT_OF_VIEW, pos[2] + 1], [1, 1], TRANSPARENCY(GREY3, tr));
       this.menu.type |= MESH_TYPES_DBG.DROP_DOWN_MENU;
       this.menu.parent = this;
@@ -77,9 +77,7 @@ export class Widget_Dropdown extends Section {
       }
 
       this.dp_symbols = ['+', '-'];
-      // const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.RIGHT, [pos[0], pos[1], this.menu.geom.pos[2] + 1], 4, TRANSPARENCY(GREY4, tr), text_col, btn_pad, bold, style, font);
-      // const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.RIGHT, [pos[0], pos[1], this.menu.geom.pos[2] + 1], 4, TRANSPARENCY(GREY4, 0), text_col, btn_pad, bold, style, font);
-      const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.RIGHT, [pos[0], pos[1], this.menu.geom.pos[2] + 1], 6, TRANSPARENCY(GREY4, 0), text_col, btn_pad, bold, style, font);
+      const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.RIGHT, [pos[0], pos[1], this.menu.geom.pos[2] + 1], _font_size, TRANSPARENCY(PINK_240_60_200, .6), text_col, btn_pad, bold, style, font);
       btn.SetName(`BTN-${this.name} btn_id:${btn.id}`)
       btn.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;
 
@@ -113,7 +111,8 @@ export class Widget_Dropdown extends Section {
       mesh.geom.pos[2] += this.geom.pos[2];
       mesh.geom.pos[2]++;
       console.log(']]]]]]]]]]]]]]]]]]]]]]]]]]]]]')
-      console.log(mesh.name, mesh.geom.pos[2])
+      console.log(mesh)
+      console.log(mesh.name, mesh.geom.pos)
    }
 
 
@@ -136,6 +135,21 @@ export class Widget_Dropdown extends Section {
       btn.GenGfxCtx(FLAGS, [this.gfx.prog.idx, this.gfx.vb.idx]); // Set button's area gfx same with dropDown mesh 
 
       return this.gfx;
+   }
+
+   Render() {
+
+      super.AddToGfx();
+      const btn = this.children.buffer[0];
+      btn.Render()
+
+      if (this.isOn) {
+         for (let i = 0; i < this.children.boundary; i++) {
+
+            const child = this.children.buffer[i];
+            if (child) child.Render();
+         }
+      }
    }
 
    GenMenuGfx(root, FLAGS) {
@@ -237,72 +251,58 @@ export class Widget_Dropdown extends Section {
       else { // Case: First time initialization OR each dp's menu to its own gfx, add menu to gfx
 
          menu.Render(MESH_TYPES_DBG.UI_INFO_GFX); // Add to the vertex buffers
-         //*Gfx_end_session(true, true);
          Gfx_activate(this); // activate the gfx buffers
       }
 
    }
 
-   Render() {
-
-      super.AddToGfx();
-      const btn = this.children.buffer[0];
-      btn.Render()
-
-      if (this.isOn) {
-         for (let i = 0; i < this.children.boundary; i++) {
-
-            const child = this.children.buffer[i];
-            if (child) child.Render();
-         }
-      }
-   }
 
    // SEE: ## ActivateMenu() 
-   ActivateMenu(root) {
+   // ActivateMenu(root) {
 
-      const menu = this.menu;
-      const btn = this.children.buffer[0];
-      const dp_symbols = this.dp_symbols;
+   //    const menu = this.menu;
+   //    const btn = this.children.buffer[0];
+   //    const dp_symbols = this.dp_symbols;
 
-      btn.text_mesh.UpdateTextCharacter(dp_symbols[1], 0);
+   //    btn.text_mesh.UpdateTextCharacter(dp_symbols[1], 0);
 
-      if (DEBUG.WIDGET_DROPDOWN) console.log('      --------- Activating secondary menus')
+   //    if (DEBUG.WIDGET_DROPDOWN) console.log('      --------- Activating secondary menus')
 
-      menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.geom.num_faces, GFX_CTX_FLAGS.PRIVATE);
+   //    menu.gfx = Gfx_generate_context(menu.sid, menu.sceneidx, menu.geom.num_faces, GFX_CTX_FLAGS.PRIVATE);
 
-      const text_gfx = Find_gfx_context_for_text_in_dp_menu(menu);
-      if (text_gfx) {
-         if (DEBUG.WIDGET_DROPDOWN) console.log('                FOUNT TEXT!!!!!!!', text_gfx)
-      }
+   //    const text_gfx = Find_gfx_context_for_text_in_dp_menu(menu);
+   //    if (text_gfx) {
+   //       if (DEBUG.WIDGET_DROPDOWN) console.log('                FOUNT TEXT!!!!!!!', text_gfx)
+   //    }
 
-      // Here we have to gfxGen all menus children, NOT private
-      for (let i = 0; i < menu.children.boundary; i++) {
+   //    // Here we have to gfxGen all menus children, NOT private
+   //    for (let i = 0; i < menu.children.boundary; i++) {
 
-         const child = menu.children.buffer[i];
-         if (child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) { // Case child is another dropdown
+   //       const child = menu.children.buffer[i];
+   //       if (child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) { // Case child is another dropdown
 
-            child.gfx = Gfx_generate_context(child.sid, child.sceneidx, child.geom.num_faces, GFX_CTX_FLAGS.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
+   //          child.gfx = Gfx_generate_context(child.sid, child.sceneidx, child.geom.num_faces, GFX_CTX_FLAGS.SPECIFIC, [menu.gfx.prog.idx, menu.gfx.vb.idx]);
 
-            const btn = child.children.buffer[0];
-            btn.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE, [menu.gfx.prog.idx, menu.gfx.vb.idx], text_gfx);
+   //          const btn = child.children.buffer[0];
+   //          btn.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE, [menu.gfx.prog.idx, menu.gfx.vb.idx], text_gfx);
+   //          console.log('999999999999999999999999999999 menu button:', btn.name, btn.geom.pos)
 
-            // Create Click events for any meshes of type Dropdown
-            child.CreateClickEvent(root.menu.listeners.buffer);
-            child.CreateHoverEvent();
+   //          // Create Click events for any meshes of type Dropdown
+   //          child.CreateClickEvent(root.menu.listeners.buffer);
+   //          child.CreateHoverEvent();
 
-            if (child.isOn) {
-               // If the menu was deactivated while open, then on activation keep its '-' expansion symbol
-               const child_btn = child.children.buffer[0];
-               child_btn.text_mesh.mat.text = `${this.dp_symbols[1]} ${child_btn.text_mesh.mat.text.slice(2)}`;
-               child.ActivateMenu(root); // Run recursive for all dropdown's (as items of a root dropdown).
-            }
-         }
-         else { // Case: Generate gfx for children widget meshes 
-            child.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
-         }
-      }
-   }
+   //          if (child.isOn) {
+   //             // If the menu was deactivated while open, then on activation keep its '-' expansion symbol
+   //             const child_btn = child.children.buffer[0];
+   //             child_btn.text_mesh.mat.text = `${this.dp_symbols[1]} ${child_btn.text_mesh.mat.text.slice(2)}`;
+   //             child.ActivateMenu(root); // Run recursive for all dropdown's (as items of a root dropdown).
+   //          }
+   //       }
+   //       else { // Case: Generate gfx for children widget meshes 
+   //          child.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
+   //       }
+   //    }
+   // }
 
    DeactivateMenu(dp) {
 
@@ -311,7 +311,7 @@ export class Widget_Dropdown extends Section {
        * If dp is root-dp: 
        *    just set the vb.count to the root dp's end in the vertex buffer
        *    update the vb
-       *    set the index buffer count to the count of one dropdown's meshes
+       *    set the index buffer count to the count of any of dropdown's meshes
        * if the dp is not root or it does not start at 0 index in the vb:
        *    dectivate all menu's meshes via color alpha value.
        *    Use 'vb.Remove_geometry_fast(gfx, num_faces)' function
@@ -550,20 +550,6 @@ export class Widget_Dropdown extends Section {
          menu.ConstructListeners(dropdown_mesh);
 
          // TODO: The scroller section must grow only in width, not inn height.
-         // If dropdown is part of another section, we must recalculate from the parent section to recalculate its position and dimention.
-         // if (root.parent && root.parent.type & MESH_TYPES_DBG.SECTION_MESH) {
-         //    // const size = root.parent.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
-         //    // root.parent.UpdateGfxPosDimRecursive(root.parent);
-         //    const size = root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
-         //    root.parent.TempRecalcAll(size[0]);
-         //    // root.parent.UpdateGfxPosDimRecursive(root);
-         //    root.UpdateGfxPosDimRecursive(root);
-         // }
-         // else {
-         //    root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
-         //    root.UpdateGfxPosDimRecursive(root);
-         // }
-
          
          root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN | SECTION.EXPAND);
          root.UpdateGfxPosDimRecursive(root);
@@ -609,19 +595,6 @@ export class Widget_Dropdown extends Section {
 
             dropdown_mesh.DeactivateMenu(dropdown_mesh);
             dropdown_mesh.RemoveChildByIdx(menu.idx); // Rememove menu from drop down
-
-            // if (root.parent && root.parent.type & MESH_TYPES_DBG.SECTION_MESH) {
-            //    // const size = root.parent.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
-            //    // root.parent.UpdateGfxPosDimRecursive(root.parent);
-            //    const size = root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
-            //    root.parent.TempRecalcAll(size[0]);
-            //    // root.parent.UpdateGfxPosDimRecursive(root);
-            //    root.UpdateGfxPosDimRecursive(root);
-            // }
-            // else {
-            //    root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
-            //    root.UpdateGfxPosDimRecursive(root);
-            // }
 
             root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN);
             root.UpdateGfxPosDimRecursive(root);
@@ -685,7 +658,7 @@ export class Widget_Dropdown extends Section {
       // Move the mesh
       const mouse_pos = MouseGetPosDif();
       mesh.Move(mouse_pos.x, -mouse_pos.y);
-      console.log(`Moving: ${mesh.name}`)
+      // console.log(`Moving: ${mesh.name}`)
 
    }
 
@@ -744,24 +717,24 @@ export class Widget_Dropdown extends Section {
 /*******************************************************************************************************************************************************/
 // Helpers
 
-function Find_gfx_context_for_text_in_dp_menu(menu) {
+// function Find_gfx_context_for_text_in_dp_menu(menu) {
 
-   for (let i = 0; i < menu.children.boundary; i++) {
+//    for (let i = 0; i < menu.children.boundary; i++) {
 
-      const child = menu.children.buffer[i];
-      if (child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) {
-         const btn_text = child.children.buffer[0].text_mesh; // The button of any dropdown suppose to be the first child.
-         if (btn_text.gfx) return [btn_text.gfx.prog.idx, btn_text.gfx.vb.idx];
-      }
-      if ((child.type & MESH_TYPES_DBG.WIDGET_TEXT)) {
-         return [child.gfx.prog.idx, child.gfx.prog.idx];
-      }
-      if ((child.type & MESH_TYPES_DBG.WIDGET_TEXT_LABEL)) {
-         const btn_text = child.children.buffer[0]; // The text of any label widget suppose to be the first child.
-         return [btn_text.gfx.prog.idx, btn_text.gfx.prog.idx];
-      }
-   }
+//       const child = menu.children.buffer[i];
+//       if (child.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) {
+//          const btn_text = child.children.buffer[0].text_mesh; // The button of any dropdown suppose to be the first child.
+//          if (btn_text.gfx) return [btn_text.gfx.prog.idx, btn_text.gfx.vb.idx];
+//       }
+//       if ((child.type & MESH_TYPES_DBG.WIDGET_TEXT)) {
+//          return [child.gfx.prog.idx, child.gfx.prog.idx];
+//       }
+//       if ((child.type & MESH_TYPES_DBG.WIDGET_TEXT_LABEL)) {
+//          const btn_text = child.children.buffer[0]; // The text of any label widget suppose to be the first child.
+//          return [btn_text.gfx.prog.idx, btn_text.gfx.prog.idx];
+//       }
+//    }
 
-   return null;
-}
+//    return null;
+// }
 

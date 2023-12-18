@@ -23,7 +23,7 @@
 
   with the Scene being responsible to run for the 'gfx.prog[i].vb[j].mesh.Render() ' functionality. 
 
-. Implement set render queue priority for meshes inside a vertexBuffer.
+. Implement set render queue priority for meshes inside a vb.
 
   . Implement destruction of gfx buffers and gl program.
     (Also make sure all suposed private buffers are set private).
@@ -31,22 +31,10 @@
 
 --------------------------------------------------- 
 
-IMIDIATELY:
-Resolve probable issue with texidx.
-It is used for sure from the font file as a fontidx: "FontGetFontDimRatio(fontIdx: passed texidx)"
-but also by the Texture.js file: "texture.texidx = gl.TEXTURE0 + idx; // Advance the texture ID to the next"
 
-IMIDIATELY:
-Implement correctly 'Texture_load_texture_byidx(texidx)'.
-The function must return a texture index based on a tex id.
-The texture is searched in the '_textureBuffer' and '_activeTextures' array.
-The '_textureBuffer' stores all aplications textures with an index.
-The '_activeTextures' has all indexes of the currently used textures in the '_textureBuffer'.
-The activeness of a texture depends upon if it is used by any gfx program/vertex buffer ??? 
 
-IMIDIATELY:
-Currently the vertex buffer has one tex id that is bound in its sampler,
-and it is bound in the Gl_draw() function.
+TODO:
+ORGANIZE class Mesh chaos
 
 TODO:
 Implement all class names to an array and class has only an index to the name.
@@ -88,6 +76,9 @@ Finish with the info widgets, now that we have separation of gfx buffers for deb
 TODO: 
 Render all the meshes that are static to a frame buffer texture and render the texture.
 
+TODO:
+Create a SID flag for textured meshes, since different texture units ought to be drawn in separate vertex buffers.  
+
 IMPORTANT!:
 Batch remove meshes attribs from gfx buffers.
   Example: 
@@ -101,7 +92,7 @@ Batch remove meshes attribs from gfx buffers.
 . Batch activate/deactivate buffers. Use an indexed  by prog and vb buffer.
   Example: StoreForUpdate(arr); arr = prog[progidx].vb[vbidx]
            StoreForUpdate(arr){
-              GfxSetVbShow(progs[arr[i]], progs[arr[i]].vertexBuffer[arr[i].vb[j]])
+              GfxSetVbShow(progs[arr[i]], progs[arr[i]].vb[arr[i].vb[j]])
            }
 
 . Implement second popup menu(from the main popup menu)

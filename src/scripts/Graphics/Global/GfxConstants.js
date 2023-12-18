@@ -16,7 +16,7 @@ const GL = {
     BOUND_VBO_IDX: INT_NULL, // The current bound vertex buffer index
     BOUND_VBO: INT_NULL, // The current bound vertex buffer 
     BOUND_TEXTURE_IDX: INT_NULL, // The current bound texture index 
-    BOUND_TEXTURE_UNIT_ID: INT_NULL, // The current bound texture 
+    // BOUND_TEXTURE_UNIT_ID: INT_NULL, // The current bound texture 
 };
 
 /** Grouping shader programs. Example: group for debug user interface meshes, default group meshes */
@@ -57,6 +57,7 @@ const SID = {
     SHAD: {
         INDEXED: BIT1 <<= 1,
         TEXT_SDF: BIT1 <<= 1,
+        PRE_MULTIPLIED_ALPHA: BIT1 <<= 1,
     },
 
     ATTR: {
@@ -67,6 +68,7 @@ const SID = {
         WPOS_TIME4: BIT2 <<= 1,
         TIME: BIT2 <<= 1,
         SDF: BIT2 <<= 1,
+        MSDF: BIT2 <<= 1,
         PARAMS1: BIT2 <<= 1,
         BORDER: BIT2 <<= 1,
         R_CORNERS: BIT2 <<= 1,
@@ -116,10 +118,7 @@ const SID = {
     },
 
     DEBUG: false,
-    // DEBUG:{
-    //     RECT_SHADER: BIT5 <<= 1,
-    //     TEXT_SHADER: BIT5 <<= 1,
-    // },
+
 
     CheckSidMatch(sid1, sid2) {
 
@@ -129,8 +128,10 @@ const SID = {
             sid1.unif === sid2.unif &&
             sid1.pass === sid2.pass &&
             sid1.progs_group === sid2.progs_group
-        )
+        ){
             return true;
+        }
+        
         return false;
     },
 
@@ -144,45 +145,6 @@ const SID = {
     // },
 };
 
-
-
-/**
- * Global Shader Programs. Not essential, for convinience only.
- * One can pass the SID bellow directly to GlAddMesh(SID) parameter.
- */
-
-
-/**
- * Must OR the SID with TIME and PARAMS1, in order for the 
- * GlBufferOperations to calculate the vb count correctly.
- */
-const SID_DEFAULT = {
-    shad: SID.SHAD.INDEXED,
-    attr: (SID.ATTR.COL4 | SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4 | SID.ATTR.TIME | SID.ATTR.PARAMS1 | SID.ATTR.STYLE),
-    pass: SID.PASS.DIM2,
-}
-const SID_DEFAULT_TEXTURE = {
-    shad: SID.SHAD.INDEXED,
-    attr: (SID.ATTR.COL4 | SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4 | SID.ATTR.TEX2),
-    pass: SID.PASS.DIM2,
-    // pass: 0,
-}
-const SID_DEFAULT_TEXTURE_SDF = {
-    shad: SID.SHAD.INDEXED | SID.SHAD.TEXT_SDF,
-    attr: (SID.ATTR.COL4 | SID.ATTR.POS2 | SID.ATTR.WPOS_TIME4 | SID.ATTR.TEX2 | SID.ATTR.SDF),
-    pass: SID.PASS.DIM2,
-    // pass: 0,
-}
-
-/**
- * GL program's indexes
- */
-const PROGRAMS = {
-    DEBUG_PROGRAM: 0x1,
-};
-
-
-const VS_CRAMBLE_TRIANGLE = 'CrambleTriangle';
 
 // TODO: Create a smaller buffer that ca resize its self
 const MAX_VERTEX_BUFFER_COUNT = 256;
@@ -256,7 +218,7 @@ const UNIFORM_PARAMS = {
         heightIdx: 1,
         timeIdx: 2,
         count: 3,
-        progIdx: INT_NULL,  // reference to the program
+        progidx: INT_NULL,  // reference to the program
     },
     defaultVertex: { // Uniform buffer indexes to pass default vertex shader params
         widthIdx: cnt1++,
@@ -265,13 +227,13 @@ const UNIFORM_PARAMS = {
         mouseXPosIdx: cnt1++,
         mouseYPosIdx: cnt1++,
         count: cnt1,
-        progIdx: INT_NULL,  // reference to the program
+        progidx: INT_NULL,  // reference to the program
     },
     sdf: { // Uniform buffer indexes to pass sdf params
         innerIdx: cnt2++,
         outerIdx: cnt2++,
         count: cnt2,
-        progIdx: INT_NULL,
+        progidx: INT_NULL,
     },
     NOISE: {
         widthIdx: 0,
@@ -279,21 +241,21 @@ const UNIFORM_PARAMS = {
         timeIdx: 1,
         dirIdx: 1,
         count: 2,
-        progIdx: INT_NULL,  // reference to the program
+        progidx: INT_NULL,  // reference to the program
     },
     GLOW: {
         widthIdx: 0,
         heightIdx: 1,
         glowSize: 2,
         count: 3,
-        progIdx: INT_NULL,  // reference to the program
+        progidx: INT_NULL,  // reference to the program
     },
     VORTEX: {
         widthIdx: 0,
         heightIdx: 1,
         radiusIdx: 2,
         count: 3,
-        progIdx: INT_NULL,  // reference to the program
+        progidx: INT_NULL,  // reference to the program
     },
     TWIST: {
         widthIdx: 0,
@@ -301,28 +263,28 @@ const UNIFORM_PARAMS = {
         timeIdx: 2,
         dirIdx: 3,
         count: 4,
-        progIdx: INT_NULL,  // reference to the program
+        progidx: INT_NULL,  // reference to the program
     },
     particles: { // Uniform buffer indexes to pass default vertex shader params
         widthIdx: cntPart++,
         heightIdx: cntPart++,
         speedIdx: cntPart++,
         count: cntPart,
-        progIdx: INT_NULL,  // reference to the program
+        progidx: INT_NULL,  // reference to the program
     },
     CRAMBLE: {
         widthIdx: 0,
         heightIdx: 1,
         timeIdx: 2,
         count: 3,
-        progIdx: INT_NULL,  // reference to the program
+        progidx: INT_NULL,  // reference to the program
     },
     VORONOI_EXPLOSION: {
         widthIdx: 0,
         heightIdx: 1,
         timeIdx: 2,
         count: 3,
-        progIdx: INT_NULL,  // reference to the program
+        progidx: INT_NULL,  // reference to the program
     },
 
 };

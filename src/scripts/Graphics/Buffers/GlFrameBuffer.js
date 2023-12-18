@@ -73,11 +73,6 @@ class Framebuffer {
       this.name = this.#SetName(name);
    }
 
-   GetRenderTarget(){
-      // Texture_get_texture_byidx(idx);
-      // return 
-   }
-
    #SetName(str_name){
       return Framebuffer_store_name(str_name);
    }
@@ -97,15 +92,17 @@ export function Gl_framebuffer_create(gl=null, TEMP_WHICH_RENDER_TARGET=null, AT
    framebuffer.fbo = gl.createFramebuffer();
    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer.fbo);
 
-   const texidx = Texture_create_renderbuffer_texture(gl, width, height, name); 
+   const texidx = Texture_create_renderbuffer_texture(gl, 1, width, height, name); 
    const texture = Texture_get_texture_byidx(texidx); 
-   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.TUO, texture.level); // SEE: ## framebufferTexture2D
+   gl.framebufferTexture2D(gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.TUO, texture.level); // SEE: ## framebufferTexture2D
    framebuffer.texture = texture;
+   
    // Draw via renderbuffer
    const format = gl.DEPTH_COMPONENT16; // TODO: Who decides the type of format? Is it conditionaly chosen OR the caller must pass it as param?
    const renderbuffer = Gl_renderbuffer_create(gl, format, width, height, `Renderbuffer: Framebuffer:${framebuffer.nameid}`);
    
-   gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer.rbo); // SEE: ## framebufferRenderbuffer
+   // gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer.rbo); // SEE: ## framebufferRenderbuffer
+   gl.framebufferRenderbuffer(gl.READ_FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer.rbo); // SEE: ## framebufferRenderbuffer
    framebuffer.render_target = renderbuffer;
 
    // Unbind
@@ -128,6 +125,25 @@ export function Gl_framebuffer_render(gl, framebuffer, gfx_queue) { // Renders g
 
    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer.fbo);
    Gl_draw_specific(gl, gfx_queue, framebuffer); // Render to framebuffer
+
+   const width = framebuffer.texture.width;
+   const height = framebuffer.texture.height;
+   const x = framebuffer.render_area.geom.pos[0] - framebuffer.render_area.geom.dim[0];
+   const y = framebuffer.render_area.geom.pos[1] - framebuffer.render_area.geom.dim[1];
+   const w = framebuffer.render_area.geom.dim[0] *2;
+   const h = framebuffer.render_area.geom.dim[1] *2;
+   console.log(x, y, w, h)
+   const buffer = new Uint8Array(w * h * 4);
+   gl.readPixels(x, y, w, h, gl.RGBA, gl.UNSIGNED_BYTE, buffer)
+   // const buffer = new Uint16Array(w * h * 4);
+   // gl.readPixels(x, y, w, h, gl.RGBA, gl.UNSIGNED_SHORT, buffer)
+   // gl.readPixels(100, 100, width, height, gl.RGBA, gl.UNSIGNED_SHORT, buffer)
+   console.log(buffer)
+
+   for(let i=0; i<buffer.length; i++){
+      if(buffer[i] > 0)
+         console.log(i, buffer[i])
+   }
    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 }
 

@@ -161,7 +161,7 @@ export function Gl_fs_build_fragmentshader(sid){
       // Function definitions
       (sid.attr & SID.ATTR.BORDER) ? frag_round_corners : '',
       (sid.attr & SID.ATTR.SDF) ? frag_sdf : '',
-      // (sid.attr & SID.ATTR.TEX2) ? frag_msdf : '',
+      (sid.attr & SID.ATTR.MSDF) ? frag_msdf : '',
       
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       // Main
@@ -171,12 +171,15 @@ export function Gl_fs_build_fragmentshader(sid){
       // (sid.attr & SID.ATTR.TEX2) ? resolveIncludesFragment(frag_tex) : '',
       (sid.attr & SID.ATTR.BORDER) ? frag_round_corners_call : '',
       // (sid.attr & SID.ATTR.BORDER) ? resolveIncludesFragment(frag_round_corners_call) : '',
-      (sid.attr & SID.ATTR.SDF) ? frag_sdf_call : '',
-      // (sid.attr & SID.ATTR.TEX2) ? frag_msdf_call : '',
-      // true ? '    frag_color = vec4(1.);' : '',
-      (sid.attr & SID.ATTR.TEX2  && !(sid.attr & SID.ATTR.SDF)) ? frag_tex : '', // TODO: Create a better conditional. Idea is that the sdf rendering does not need the implementation of 'frag_tex'
+      (sid.attr & SID.ATTR.TEX2 ) 
+         ? (sid.attr & SID.ATTR.SDF) ? frag_sdf_call // If TEX2 and SDF, build for sdf
+            : (sid.attr & SID.ATTR.MSDF) ? frag_msdf_call  // ELSE If TEX2 and MSDF, build for msdf
+         : frag_tex // ELSE If only TEX2, build for simple texture
+      : '', // ELSE null
       true ? '  frag_color = color;' : '',
-      // true ? '  frag_color.xyz *= color.a;' : '',
+      (sid.shad & SID.SHAD.PRE_MULTIPLIED_ALPHA) ? '  frag_color.rgb *= color.a;' : '',
+      // (true) ? '  frag_color.rgb *= color.a;' : '',
+      // true ? '  frag_color.rgb *= color.a;' : '',
       true ? '}' : '',
    ];
 

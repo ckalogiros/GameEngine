@@ -116,11 +116,11 @@ export const fragment_shader_chunks = {
    in_frag_wpos2     : in_frag_wpos2    ,
    in_frag_tex2      : in_frag_tex2     ,
    // in_frag_style3    : in_frag_style3   ,
-   in_frag_sdf2      : in_frag_sdf2     ,
-   in_frag_v_uniforms_buffer   : in_frag_v_uniforms_buffer  ,
-   in_frag_border_width   : in_frag_border_width  ,
-   in_frag_border_feather   : in_frag_border_feather  ,
-   in_frag_rCorners   : in_frag_rCorners  ,
+   in_frag_sdf2               : in_frag_sdf2             ,
+   in_frag_v_uniforms_buffer  : in_frag_v_uniforms_buffer,
+   in_frag_border_width       : in_frag_border_width     ,
+   in_frag_border_feather     : in_frag_border_feather   ,
+   in_frag_rCorners           : in_frag_rCorners         ,
 
 };
 

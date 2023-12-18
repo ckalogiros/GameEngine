@@ -22,6 +22,7 @@ export function GetShaderTypeId(sid) {
 
     if (sid.shad) str += 'Shader General Properties:'
     if (sid.shad & SID.SHAD.INDEXED) str += 'Indexed Geometry.'
+    if (sid.shad & SID.SHAD.PRE_MULTIPLIED_ALPHA) str += 'Premultiplied Alpha.'
     if (sid.shad) str += '\n'
 
     if (sid.attr) str += 'Attribs:'
@@ -165,11 +166,11 @@ export function PrintVertexBufferDataAndNames() {
     for (let k = 0; k < progs_group.count; k++) {
         for (let i = 0; i < progs_group.buffer[k].count; i++) {
             console.log('prog:', i)
-            for (let j = 0; j < progs_group.buffer[k].buffer[i].vertexBuffer.length; j++) {
+            for (let j = 0; j < progs_group.buffer[k].buffer[i].vb.length; j++) {
                 console.log(
                     'vbidx: ', j,
-                    'meshes: ', progs_group.buffer[k].buffer[i].vertexBuffer[j].debug.meshesNames,
-                    'data: ', progs_group.buffer[k].buffer[i].vertexBuffer[j].data,
+                    'meshes: ', progs_group.buffer[k].buffer[i].vb[j].debug.meshesNames,
+                    'data: ', progs_group.buffer[k].buffer[i].vb[j].data,
                 );
             }
         }
@@ -185,7 +186,7 @@ export function PrintVertexDataAll() {
         console.log(`---[${progs_group_name}]-`)
         for (let i = 0; i < progs_group.buffer[k].count; i++) {
             console.log(' progidx:', i)
-            console.log('vb:', progs_group.buffer[k].buffer[i].vertexBuffer);
+            console.log('vb:', progs_group.buffer[k].buffer[i].vb);
         }
     }
 }
@@ -197,14 +198,14 @@ export function PrintVertexBufferAllPretty() {
     for (let i = 0; i < progs_group.count; i++) {
         console.log('-[Gl Vertex Buffer]-')
         for (let j = 0; j < progs_group.buffer[i].vertexBufferCount; j++) {
-            for (let k = 0; k < progs_group.buffer[i].vertexBuffer[j].count; k++) {
+            for (let k = 0; k < progs_group.buffer[i].vb[j].count; k++) {
                 console.log('vertex', k);
                 console.log('color:')
-                console.log(progs_group.buffer[i].vertexBuffer[j].data[k++], progs_group.buffer[i].vertexBuffer[j].data[k++], progs_group.buffer[i].vertexBuffer[j].data[k++], progs_group.buffer[i].vertexBuffer[j].data[k++])
+                console.log(progs_group.buffer[i].vb[j].data[k++], progs_group.buffer[i].vb[j].data[k++], progs_group.buffer[i].vb[j].data[k++], progs_group.buffer[i].vb[j].data[k++])
                 console.log('wpos:')
-                console.log(progs_group.buffer[i].vertexBuffer[j].data[k++], progs_group.buffer[i].vertexBuffer[j].data[k++], progs_group.buffer[i].vertexBuffer[j].data[k++], progs_group.buffer[i].vertexBuffer[j].data[k++])
-                console.log('vpos:', progs_group.buffer[i].vertexBuffer[j].data[k++], progs_group.buffer[i].vertexBuffer[j].data[k++], progs_group.buffer[i].vertexBuffer[j].data[k++])
-                console.log(progs_group.buffer[i].vertexBuffer[j].data[k++])
+                console.log(progs_group.buffer[i].vb[j].data[k++], progs_group.buffer[i].vb[j].data[k++], progs_group.buffer[i].vb[j].data[k++], progs_group.buffer[i].vb[j].data[k++])
+                console.log('vpos:', progs_group.buffer[i].vb[j].data[k++], progs_group.buffer[i].vb[j].data[k++], progs_group.buffer[i].vb[j].data[k++])
+                console.log(progs_group.buffer[i].vb[j].data[k++])
             }
         }
     }
@@ -217,7 +218,7 @@ export function PrintIndexBuffer(ib) {
     for (let k = 0; k < progs_group.count; k++) {
         for (let i = 0; i < progs_group.buffer[k].count; i++) {
             console.log('prog:', i)
-            console.log('Index buffers:', progs_group.buffer[k].buffer[i].indexBuffer)
+            console.log('Index buffers:', progs_group.buffer[k].buffer[i].ib)
         }
     }
 }
@@ -229,14 +230,14 @@ export function PrintIndexBufferAll() {
     for (let k = 0; k < progs_group.count; k++) {
         for (let i = 0; i < progs_group.buffer[k].count; i++) {
             console.log('prog:', i)
-            for (let j = 0; j < progs_group.buffer[k].buffer[i].indexBuffer.length; j++) {
+            for (let j = 0; j < progs_group.buffer[k].buffer[i].ib.length; j++) {
                 console.log(
                     'ibidx: ', j,
-                    'count: ', progs_group.buffer[k].buffer[i].indexBuffer[j].count,
-                    'idx: ', progs_group.buffer[k].buffer[i].indexBuffer[j].idx,
-                    'needs Update: ', progs_group.buffer[k].buffer[i].indexBuffer[j].needsUpdate,
-                    'show: ', progs_group.buffer[k].buffer[i].indexBuffer[j].show,
-                    'vCount: ', progs_group.buffer[k].buffer[i].indexBuffer[j].vCount,
+                    'count: ', progs_group.buffer[k].buffer[i].ib[j].count,
+                    'idx: ', progs_group.buffer[k].buffer[i].ib[j].idx,
+                    'needs Update: ', progs_group.buffer[k].buffer[i].ib[j].needsUpdate,
+                    'show: ', progs_group.buffer[k].buffer[i].ib[j].show,
+                    'vCount: ', progs_group.buffer[k].buffer[i].ib[j].vCount,
                 );
             }
         }
@@ -249,9 +250,9 @@ export function PrintBuffersAll() {
     const progs_group = Gl_progs_get();
     for (let i = 0; i < progs_group.count; i++) {
 
-        for (let j = 0; j < progs_group.buffer[i].vertexBuffer.length; j++) {
-            console.log('   progIdx:', i, ' vbIdx:', j, ': ', progs_group.buffer[i].vertexBuffer[j])
-            console.log('   progIdx:', i, ' ibIdx:', j, ': ', progs_group.buffer[i].indexBuffer[j])
+        for (let j = 0; j < progs_group.buffer[i].vb.length; j++) {
+            console.log('   progidx:', i, ' vbIdx:', j, ': ', progs_group.buffer[i].vb[j])
+            console.log('   progidx:', i, ' ibIdx:', j, ': ', progs_group.buffer[i].ib[j])
         }
     }
 }
@@ -262,10 +263,10 @@ export function PrintBuffersMeshesNames() {
     console.log('-[Gl Print All GL Buffers Meshes Names]-')
     const progs_group = Gl_progs_get();
     for (let i = 0; i < progs_group.count; i++) {
-        console.log('progIdx:', i, ': ')
-        for (let j = 0; j < progs_group.buffer[i].vertexBuffer.length; j++) {
-            for (let k = 0; k < progs_group.buffer[i].vertexBuffer[j].debug.meshesNames.length; k++) {
-                console.log('   ', j, progs_group.buffer[i].vertexBuffer[j].debug.meshesNames[k])
+        console.log('progidx:', i, ': ')
+        for (let j = 0; j < progs_group.buffer[i].vb.length; j++) {
+            for (let k = 0; k < progs_group.buffer[i].vb[j].debug.meshesNames.length; k++) {
+                console.log('   ', j, progs_group.buffer[i].vb[j].debug.meshesNames[k])
             }
         }
     }
@@ -276,9 +277,9 @@ export function PrintBuffersAttribsCount() {
     console.log('-[Gl Print All GL Buffers Attribs Count]-')
     const progs_group = Gl_progs_get();
     for (let i = 0; i < progs_group.count; i++) {
-        for (let j = 0; j < progs_group.buffer[i].vertexBuffer.length; j++) {
-            console.log('prog:', i, ' vb:', j, ' count:', progs_group.buffer[i].vertexBuffer[j].count, ' size:', progs_group.buffer[i].vertexBuffer[j].size)
-            console.log('Index Buffer count:', progs_group.buffer[i].indexBuffer[j].count, ' size:', progs_group.buffer[i].indexBuffer[j].size)
+        for (let j = 0; j < progs_group.buffer[i].vb.length; j++) {
+            console.log('prog:', i, ' vb:', j, ' count:', progs_group.buffer[i].vb[j].count, ' size:', progs_group.buffer[i].vb[j].size)
+            console.log('Index Buffer count:', progs_group.buffer[i].ib[j].count, ' size:', progs_group.buffer[i].ib[j].size)
         }
     }
 }

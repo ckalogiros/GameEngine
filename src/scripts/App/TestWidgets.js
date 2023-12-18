@@ -31,6 +31,8 @@ import { Rect } from '../Engine/Drawables/Meshes/Rect_Mesh.js';
 import { Textured_Mesh } from '../Engine/Drawables/Meshes/Textured_Mesh.js';
 import { Renderqueue_Add, Renderqueue_set_active } from '../Engine/Renderers/Renderer/RenderQueue.js';
 import { Gfx_progs_get_group, Gfx_progs_get_prog_byidx } from '../Engine/Interfaces/Gfx/GfxInterfaceFunctions.js';
+import { Font_create_uvmap, Parse_json_metrics } from '../Engine/Loaders/Font/ChlumskyFontMetricsLoader.js';
+import { consola_msdf_test_1024_metrics } from '../../../resources/fonts/consolas_sdf/metrics/consola_msdf_test_1024_metrics.js';
 
 
 /**
@@ -45,29 +47,90 @@ import { Gfx_progs_get_group, Gfx_progs_get_prog_byidx } from '../Engine/Interfa
  * reorganize the functions in GlVuffers.js 
  */
 
+const _fontsize = 10;
 
 export function TestWidgetsGeneric(scene) {
 
-    setInterval(()=>{
-        if(STATE.mesh.hovered){
-            console.log('State hovered:', STATE.mesh.hovered.name)
-        }
-        else{
-            console.log('State hovered: null')
-        }
-    }, 500)
-
-    // CreateSectionSectioned(scene);
+    // setInterval(()=>{
+    //     if(STATE.mesh.hovered){
+    //         console.log('State hovered:', STATE.mesh.hovered.name)
+    //     }
+    //     else{
+    //         console.log('State hovered: null')
+    //     }
+    // }, 500)
 
     // Listeners_debug_info_create(scene);
     Debug_info_ui_performance(scene);
 
     // CreateScroller(scene);
 
-    CreateFramebufferRendering(scene);
+    /** */
+    // {
+    //     const label = new Widget_Label('Because hinting aligns the glyph\'s control points to the pixel grid, this process slightly modifies', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [180, 300, 0], 6, TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [14, 4], .5);
+    //     // const label = new Widget_Label('ABCDEFG_YyFfGgJj_[1.2,x.y,{13|(4)}', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [180, 300, 0], 40, TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [14, 4], .5);
+    //     // const label = new Widget_Label('{([_abcdefghijklmnopqrstuvwxyz]12,34.56)}', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [180, 300, 0], 7, TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [14, 4], .5);
+    //     label.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    //     // label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    //     label.ConstructListeners();
+    //     scene.AddWidget(label, GFX_CTX_FLAGS.NEW)
+    // }
+    // {
+    //     // const label = new Widget_Label('ABCDEFG_YyFfGgJj_[1.2,x.y,{13|(4)}', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [180, 300, 0], 40, TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [14, 4], .5);
+    //     const label = new Widget_Label('{([_abcdefghijklmnopqrstuvwxyz]12,34.56)}', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [180, 380, 0], 10, TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [14, 4], .5);
+    //     label.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    //     // label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    //     label.ConstructListeners();
+    //     scene.AddWidget(label, GFX_CTX_FLAGS.NEW)
+    // }
+    // {
+    //     // const label = new Widget_Label('ABCDEFG_YyFfGgJj_[1.2,x.y,{13|(4)}', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [180, 300, 0], 40, TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [14, 4], .5);
+    //     const label = new Widget_Label('[_],\'A\'BCDEFGHIJKLMNOPQRSTUVWXYZ]\'1\'234567890/\\;<>)}', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [180, 460, 0], 30, TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [14, 4], .5);
+    //     label.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    //     // label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    //     label.ConstructListeners();
+    //     scene.AddWidget(label, GFX_CTX_FLAGS.NEW)
+    // }
+    // {
+    //     {
+    //         // const label = new Widget_Label('ABCDEFG_YyFfGgJj_[1.2,x.y,{13|(4)}', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [180, 300, 0], 40, TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [14, 4], .5);
+    //         const label = new Widget_Label('RRRQQQ', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [180, 530, 0], 10, TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [14, 4], .5);
+    //         label.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    //         // label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    //         label.ConstructListeners();
+    //         scene.AddWidget(label, GFX_CTX_FLAGS.NEW)
+    //     }
+    //     {
+    //         // const label = new Widget_Label('ABCDEFG_YyFfGgJj_[1.2,x.y,{13|(4)}', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [180, 300, 0], 40, TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [14, 4], .5);
+    //         const label = new Widget_Label('RRRQQQ', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [280, 540, 0], 20, TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [14, 4], .5);
+    //         label.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    //         // label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    //         label.ConstructListeners();
+    //         scene.AddWidget(label, GFX_CTX_FLAGS.NEW)
+    //     }
+    //     {
+    //         // const label = new Widget_Label('ABCDEFG_YyFfGgJj_[1.2,x.y,{13|(4)}', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [180, 300, 0], 40, TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [14, 4], .5);
+    //         const label = new Widget_Label('RRRQQQ', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [440, 550, 0], 30, TRANSPARENCY(GREEN_140_240_10, .5), WHITE, [14, 4], .5);
+    //         label.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    //         // label.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER);
+    //         label.ConstructListeners();
+    //         scene.AddWidget(label, GFX_CTX_FLAGS.NEW)
+    //     }
+    // }
+    
+    /** */
+    // CreateFramebufferRendering(scene);
 
-    // const texture = new Textured_Mesh([300, 300, 0], [50, 50], GREY7, TEXTURES.TEST_MSDF, 'Testing msdf rendering');
-    // scene.AddWidget(texture, GFX_CTX_FLAGS.PRIVATE)
+    // const texture = new Textured_Mesh([740, 550, 0], [512, 512], [1,1,1,1], TEXTURES.MSDF_CONSOLAS_1024, 'Testing msdf rendering');
+    // texture.sid.attr |= SID.ATTR.MSDF;
+    // texture.mat.uv[0] = .0;
+    // texture.mat.uv[1] = 1.;
+    // texture.mat.uv[2] = .0;
+    // texture.mat.uv[3] = 1.;
+    // texture.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
+    // texture.ConstructListeners();
+    // scene.AddWidget(texture, GFX_CTX_FLAGS.PRIVATE);
+
 
 
     // const label = CreateLabel(scene);
@@ -94,25 +157,18 @@ export function TestWidgetsGeneric(scene) {
 
     // CreateSlider(scene);
     // CreateSliderWithMenuBar(scene);
-
     // CreateSectionedMenuBarsWithNestedSliders(scene);
     // CreateSectionedMenuBarsWithNestedSliders2(scene);
-    //  CreateSectionedMenuBarsWithNestedWidgets(scene);
-
-    // CreatDynamicText(scene)
-    // CreatDynamicTextSectioned(scene)
-
+    // CreateSectionedMenuBarsWithNestedWidgets(scene);
     // CreatSectionedMixWidgets(scene)
-
-
     // CreateSectionSectioned(scene)
 
     // CreateScroller(scene);
 
     // Help(scene)
 
-    // const meshinfo_mesh = MeshInfo(scene)
-    // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: meshinfo_mesh });
+    const meshinfo_mesh = MeshInfo(scene)
+    TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: meshinfo_mesh });
 
     // const gfxinfo = GfxInfo(scene)
     // TimeIntervalsCreate(100, 'Gfx info tip', TIME_INTERVAL_REPEAT_ALWAYS, GfxInfoUpdate, { gfxinfo: gfxinfo });
@@ -187,7 +243,7 @@ function CreateFramebufferRendering(scene){
                 gfx_queue[k++] = {
                     progs_groupidx: 0,
                     progidx: progs.buffer[i].idx,
-                    vbidx: progs.buffer[i].vertexBuffer[j].idx,
+                    vbidx: progs.buffer[i].vb[j].idx,
                 }
             }
         }
@@ -197,15 +253,14 @@ function CreateFramebufferRendering(scene){
         for (let i = 0; i < gfx_queue.length; i++) {
             Renderqueue_set_active(gfx_queue[i].progs_groupidx, gfx_queue[i].progidx, gfx_queue[i].vbidx, false)
         }
-    }, 16)
+    }, 1000)
     // setTimeout(() => { Renderqueue_set_active(gfx_queue[0].progs_groupidx, gfx_queue[0].progidx, gfx_queue[0].vbidx, false) }, 1500);
     // setTimeout(() => { Renderqueue_set_active(gfx_queue[1].progs_groupidx, gfx_queue[1].progidx, gfx_queue[1].vbidx, false) }, 1500);
 
     // Create mesh for drawing the framebuffer's texture
-    // const rect = new Textured_Mesh([800, 300, 0], [framebuffer.texture.width/2, framebuffer.texture.height/2], [1.0, 1.0, 1.0, .9], framebuffer.texture.idx, 'Framebuffer 0');
-    // const rect = new Textured_Mesh([halfw, halfh, 0], [framebuffer.texture.width/2, framebuffer.texture.height/2], [1.0, 1.0, 1.0, .7], framebuffer.texture.idx, 'Framebuffer 0');
-    const rect = new Textured_Mesh([halfw, halfh, 0], [halfw, halfh], [1.0, 1.0, 1.0, 1.2], framebuffer.texture.idx, 'Framebuffer 0');
-    // const rect = new Textured_Mesh([600, 400, 0], [framebuffer.texture.width/2, framebuffer.texture.height/2], [.2, .6, .8, .5], 0, 'Framebuffer 0');
+    // const rect = new Textured_Mesh([halfw, halfh, 0], [halfw, halfh], [1.0, 1.0, 1.0, 1.2], framebuffer.texture.idx, 'Framebuffer 0');
+    const rect = new Textured_Mesh([halfw, halfh, 0], [100, 100], [1.0, 1.0, 1.0, 1.2], framebuffer.texture.idx, 'Framebuffer 0');
+
     // rect.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE)
     // rect.CreateListenEvent(LISTEN_EVENT_TYPES.HOVER)
     // rect.ConstructListeners();
@@ -217,8 +272,8 @@ function CreateFramebufferRendering(scene){
     console.log('..........................................:', rect);
     scene.AddWidget(rect, GFX_CTX_FLAGS.PRIVATE)
 
-    // setTimeout(()=>{ Gl_framebuffer_render(gfxCtx.gl, framebuffer, gfx_queue) }, 1000);
-    setInterval(() => { Gl_framebuffer_render(gfxCtx.gl, framebuffer, gfx_queue) }, 10);
+    setTimeout(()=>{ Gl_framebuffer_render(gfxCtx.gl, framebuffer, gfx_queue) }, 1000);
+    // setInterval(() => { Gl_framebuffer_render(gfxCtx.gl, framebuffer, gfx_queue) }, 1000);
 }
 
 let labelCount = 1;
@@ -873,21 +928,21 @@ function CreateSectionedMenuBarsWithNestedWidgets(scene) {
                 s3.AddItem(sl3);
 
                 // With buttons
-                const btn = new Widget_Button('Button', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [0, 0, 0], 5, GREY1, WHITE, [4, 4], .5);
+                const btn = new Widget_Button('Button', ALIGN.HOR_CENTER | ALIGN.VERT_CENTER, [0, 0, 0], _fontsize, GREY1, WHITE, [4, 4], .5);
                 s3.AddItem(btn);
 
                 // With switch
-                const switch1 = new Widget_Switch('switch on', 'switch off', [0, 0, 0], 5, GREY1, WHITE, [4, 4], .5);
+                const switch1 = new Widget_Switch('switch on', 'switch off', [0, 0, 0], _fontsize, GREY1, WHITE, [4, 4], .5);
                 switch1.StateEnable(MESH_STATE.IS_HOVER_COLORABLE)
                 switch1.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE, { style: [6, 6, 3] })
                 switch1.Bind(function () { console.log('CALLBACK FROM USER !!!!!!!!!!!!!!!!!!!!!!!!!!!') })
                 s3.AddItem(switch1);
 
                 // With dynamic text
-                const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', 'value', ALIGN.VERTICAL, [100, 300, 0], 5, BLUE_10_120_220, PINK_240_60_160);
-                dt.CreateNewText('Text 2', 5, PURPLE, [2, 2]);
-                dt.CreateNewText('Text 3', 5, GREEN_60_240_100, [2, 2]);
-                dt.CreateNewText('Text 4 very long text', 5, WHITE, [2, 2]);
+                const dt = new Widget_Dynamic_Text_Mesh('Dynamic text', 'value', ALIGN.VERTICAL, [100, 300, 0], _fontsize, BLUE_10_120_220, PINK_240_60_160);
+                dt.CreateNewText('Text 2', _fontsize, PURPLE, [2, 2]);
+                dt.CreateNewText('Text 3', _fontsize, GREEN_60_240_100, [2, 2]);
+                dt.CreateNewText('Text 4 very long text', _fontsize, WHITE, [2, 2]);
                 dt.Align_pre(dt, ALIGN.VERTICAL);
                 s3.AddItem(dt);
 
@@ -1181,12 +1236,12 @@ function Help(scene) {
 
 function MeshInfo(scene) {
 
-    const fontsize = 4.3;
+    const fontsize = 10;
 
-    const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 000000000000', 'id:000', ALIGN.VERTICAL, [420, 15, 0], fontsize, GREEN_140_240_10, YELLOW_240_220_10, .4);
-    infomesh.CreateNewText('pos: 00000,00000,0', fontsize, BLUE_10_120_220, [fontsize * 3, 10], .9);
-    infomesh.CreateNewText('dim: 00000,00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
-    infomesh.CreateNewText('idx: 0000', fontsize, ORANGE_240_130_10, [fontsize * 3, 0], .9);
+    const infomesh = new Widget_Dynamic_Text_Mesh('Mesh name 000000000000', 'id:000', ALIGN.VERTICAL, [420, 15, 100], fontsize, GREEN_140_240_10, YELLOW_240_220_10, .4);
+    infomesh.CreateNewText('pos: 0000,0000,0', fontsize, BLUE_10_120_220, [fontsize * 3, 10], .9);
+    infomesh.CreateNewText('dim: 0000,0000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    infomesh.CreateNewText('idx: 0000, alpha: 0.00', fontsize, ORANGE_240_130_10, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('gfx: group: 0, prog:0, vb:0, start:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('text gfx: group: 0, prog:0, vb:0, start:00000, count:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.SetName('Info Mesh 2');
@@ -1211,13 +1266,13 @@ function MeshInfoUpdate(params) {
 
         textMesh.UpdateText(infoMesh.name);
 
-        const gfx = (infoMesh.gfx !== null) ? `gfx: group:${infoMesh.gfx.progs_groupidx}, prog:${infoMesh.gfx.prog.idx}, vb:${infoMesh.gfx.vb.idx}, vb:${infoMesh.gfx.vb.start}` : 'null'
+        const gfx = (infoMesh.gfx !== null) ? `gfx: group:${infoMesh.gfx.progs_groupidx}, prog:${infoMesh.gfx.prog.idx}, vb:${infoMesh.gfx.vb.idx}, start:${infoMesh.gfx.vb.start}` : 'null'
 
         let msgs = [
             `id:${infoMesh.id}`,
             `pos:${FloorArr3(infoMesh.geom.pos)}`,
             `dim: ${infoMesh.geom.dim}`,
-            `idx: ${infoMesh.idx}`,
+            `idx: ${infoMesh.idx} | alpha:${infoMesh.mat.col[3]}`,
             gfx,
         ];
 
@@ -1279,9 +1334,9 @@ function GfxInfoUpdate(params) {
     let any_vb_found = false;
 
     for (let i = 0; i < progs.count; i++) {
-        for (let j = 0; j < progs.buffer[i].vertexBuffer.length; j++) {
+        for (let j = 0; j < progs.buffer[i].vb.length; j++) {
 
-            const vb = progs.buffer[i].vertexBuffer[j];
+            const vb = progs.buffer[i].vb[j];
 
             const gfxid = `${i}${j}`
             if (GfxInfoFindNewMeshEntries(gfxbuffer, gfxid)) {

@@ -13,16 +13,17 @@ import { Info_listener_create_event, Info_listener_destroy_event } from "./InfoL
 import { Widget_Scroller } from "../Meshes/Widgets/WidgetScroller";
 import { Gfx_progs_get_vb_byidx } from "../../Interfaces/Gfx/GfxInterfaceFunctions";
 
-
+const _font_size = 10;
 export function Debug_info_ui_performance(scene) {
 
    const tr = .5; // Transparency
    const pad = [3, 3];
    const sectionpad = [6, 6];
-   const fontsize = 4;
+   const fontsize = _font_size;
 
-   // const dp = new Widget_Dropdown('Generic Ui Debug Info', [120, 20, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [8, 3]);
-   const dp = new Widget_Dropdown('Generic Ui Debug Info', [220, 40, 0], [10, 10], GREEN_140_240_10, TRANSPARENCY(BLUE_10_120_220, .6), WHITE, [8, 3]);
+   const dp = new Widget_Dropdown('Generic Ui Debug Info', [220, 40, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [18, 3]);
+   // const dp = new Widget_Dropdown('Generic +.{) [420, 80, 0]ui_label (!-=.} TEXTURE_PATHS| Widget_Switch(\'on\', \'off\', [0, 0, zindex+2]', [420, 80, 0], [10, 10], GREEN_140_240_10, TRANSPARENCY(BLUE_10_120_220, .6), WHITE, [8, 3]);
+   // const dp = new Widget_Dropdown('A', [220, 40, 0], [10, 10], GREEN_140_240_10, TRANSPARENCY(BLUE_10_120_220, .6), WHITE, [8, 3]);
    dp.CreateClickEvent();
    dp.CreateMoveEvent();
    Drop_down_set_root(dp, dp);
@@ -38,7 +39,7 @@ export function Debug_info_ui_performance(scene) {
       enable_ui_timers_label.SetName(`InfoUi-Timers label`);
       section.AddItem(enable_ui_timers_label);
       
-      const enable_ui_timers_switch = new Widget_Switch('on', 'off', [0, 0, zindex+2], 4.4, BLUE_10_120_220, WHITE, [2, 3]);
+      const enable_ui_timers_switch = new Widget_Switch('on', 'off', [0, 0, zindex+2], 8, BLUE_10_120_220, WHITE, [2, 3]);
       enable_ui_timers_switch.Bind(Debug_info_create_ui_performance_timers, null, scene);
       enable_ui_timers_switch.SetName(`InfoUi-Timers switch`);
       section.AddItem(enable_ui_timers_switch);
@@ -56,7 +57,7 @@ export function Debug_info_ui_performance(scene) {
       label.SetName(`InfoUi-Mouse label`);
       section.AddItem(label);
 
-      const ui_switch = new Widget_Switch('on', 'off', [0, 0, zindex+2], 4.4, BLUE_10_120_220, WHITE, [2, 3]);
+      const ui_switch = new Widget_Switch('on', 'off', [0, 0, zindex+2], 8, BLUE_10_120_220, WHITE, [2, 3]);
       ui_switch.Bind(Debug_info_create_ui_mouse_coords, null, scene);
       ui_switch.SetName(`InfoUi-Mouse switch`);
       section.AddItem(ui_switch);
@@ -74,7 +75,7 @@ export function Debug_info_ui_performance(scene) {
       label.SetName(`InfoUi-Gfx label`);
       section.AddItem(label);
 
-      const ui_switch = new Widget_Switch('on', 'off', [0, 0, zindex+2], 4.4, BLUE_10_120_220, WHITE, [2, 3]);
+      const ui_switch = new Widget_Switch('on', 'off', [0, 0, zindex+2], 8, BLUE_10_120_220, WHITE, [2, 3]);
       ui_switch.Bind(Debug_info_create_gfx_info, null, scene);
       ui_switch.SetName(`InfoUi-Gfx switch`);
       section.AddItem(ui_switch);
@@ -92,7 +93,7 @@ export function Debug_info_ui_performance(scene) {
       label.SetName(`InfoUi-Mesh label`);
       section.AddItem(label);
 
-      const ui_switch = new Widget_Switch('on', 'off', [0, 0, zindex+2], 4.4, BLUE_10_120_220, WHITE, [2, 3]);
+      const ui_switch = new Widget_Switch('on', 'off', [0, 0, zindex+2], 8, BLUE_10_120_220, WHITE, [2, 3]);
       ui_switch.Bind(Debug_info_create_mesh_info, null, scene);
       ui_switch.SetName(`InfoUi-Mesh switch`);
       section.AddItem(ui_switch);
@@ -129,97 +130,96 @@ export function Debug_info_create_ui_performance_timers(params) {
    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
    section.SetName('InfoUi-PerformanceTimers section');
 
-   const fontsize = 4;
+   const fontsize = _font_size;
    let pad = 0;
    let ms = 200;
 
    { // FPS average
-      const timer = new Widget_Dynamic_Text_Mesh('Fps: | Avg:', '00000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const timer = new Widget_Dynamic_Text_Mesh('Fps: | Avg:', '0.000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimersGetFps, _pt_fps); // idx is for use in creating separate time intervals for each dynamic text.
-   
       timer.CreateNewText('| deltaAvg ms:', fontsize, BLUE_10_160_220, [pad * 3, 0], .9);
-      timer.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .9);
+      timer.CreateNewText('0.000', fontsize, ORANGE_240_160_10, [0, 0], .9);
       timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetDeltaAvg`, ms, PerformanceTimersGetMilisec, _pt_fps)
-   
+      
       timer.CreateNewText('| curTime ms:', fontsize, BLUE_10_160_220, [pad * 3, 0], .9);
-      timer.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      timer.CreateNewText('0.000', fontsize, ORANGE_240_160_10, [0, 0], .5);
       timer.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, PerformanceTimersGetCurTime, _pt_fps);
-   
+      
       // timer.RenderToDebugGfx();
       section.AddItem(timer);
    }
    { // FPS average 1 second
       ms = 1000;
-      const fps1sAvg = new Widget_Dynamic_Text_Mesh('Fps 1sec: | avg:', '00000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const fps1sAvg = new Widget_Dynamic_Text_Mesh('Fps 1sec: | avg:', '0.000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       fps1sAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_1s_avg); // idx is for use in creating separate time intervals for each dynamic text.
       fps1sAvg.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
    
-      fps1sAvg.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      fps1sAvg.CreateNewText('0.000', fontsize, ORANGE_240_160_10, [0, 0], .5);
       fps1sAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_1s_avg); // no need for callback, the '_fps_1s_avg' is already in milisec. 
    
       section.AddItem(fps1sAvg);
    }
    { // FPS average 500 miliseconds
       ms = 500;
-      const fps500msAvg = new Widget_Dynamic_Text_Mesh('Fps 500ms: | avg:', '00000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const fps500msAvg = new Widget_Dynamic_Text_Mesh('Fps 500ms: | avg:', '0.000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       fps500msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetFps`, ms, PerformanceTimerGetFps1sAvg, _fps_500ms_avg); // idx is for use in creating separate time intervals for each dynamic text.
       fps500msAvg.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
    
-      fps500msAvg.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      fps500msAvg.CreateNewText('0.000', fontsize, ORANGE_240_160_10, [0, 0], .5);
       fps500msAvg.SetDynamicText(`DynamicText ${ms} Timer TimeGetTimer`, ms, null, _fps_500ms_avg);
       section.AddItem(fps500msAvg);
    }
    { // All Timers Update timer
       ms = 500;
-      const t = new Widget_Dynamic_Text_Mesh(`All timers(${ms}ms):`, '0000000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const t = new Widget_Dynamic_Text_Mesh(`All timers(${ms}ms):`, '0.00000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       t.SetDynamicText(`DynamicText ${ms} AllTimersUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt2); // idx is for use in creating separate time intervals for each dynamic text.
 
       t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-      t.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      t.CreateNewText('0.000', fontsize, ORANGE_240_160_10, [0, 0], .5);
       t.SetDynamicText(`DynamicText ${ms} AllTimersUpdate PerformanceTimersGetMilisec`, ms, PerformanceTimersGetMilisec, _pt2); // idx is for use in creating separate time intervals for each dynamic text.
 
       section.AddItem(t);
    }
    { // Scene Update timer
       ms = 500;
-      const t = new Widget_Dynamic_Text_Mesh(`Scene Update(${ms}ms):`, '000000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const t = new Widget_Dynamic_Text_Mesh(`Scene Update(${ms}ms):`, '0.0000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       t.SetDynamicText(`DynamicText ${ms} SceneUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt3); // idx is for use in creating separate time intervals for each dynamic text.
 
       t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-      t.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      t.CreateNewText('0.000', fontsize, ORANGE_240_160_10, [0, 0], .5);
       t.SetDynamicText(`DynamicText ${ms} SceneUpdate PerformanceTimersGetMilisec`, ms, PerformanceTimersGetMilisec, _pt3); // idx is for use in creating separate time intervals for each dynamic text.
 
       section.AddItem(t);
    }
    { // Gl_draw timer
       ms = 500;
-      const t = new Widget_Dynamic_Text_Mesh(`Gl_draw Update(${ms}ms):`, '000000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const t = new Widget_Dynamic_Text_Mesh(`Gl_draw Update(${ms}ms):`, '0.0000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       t.SetDynamicText(`DynamicText ${ms} GlDrawUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt4); // idx is for use in creating separate time intervals for each dynamic text.
 
       t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-      t.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      t.CreateNewText('0.000', fontsize, ORANGE_240_160_10, [0, 0], .5);
       t.SetDynamicText(`DynamicText ${ms} Gl_draw PerformanceTimersGetMilisec`, ms, PerformanceTimersGetMilisec, _pt4); // idx is for use in creating separate time intervals for each dynamic text.
 
       section.AddItem(t);
    }
    { // Event Listener timer
       ms = 500;
-      const t = new Widget_Dynamic_Text_Mesh(`HoverListener Update(${ms}ms):`, '000000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const t = new Widget_Dynamic_Text_Mesh(`HoverListener Update(${ms}ms):`, '0.0000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       t.SetDynamicText(`DynamicText ${ms} HoverListenerUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt6); // idx is for use in creating separate time intervals for each dynamic text.
 
       t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-      t.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      t.CreateNewText('0.000', fontsize, ORANGE_240_160_10, [0, 0], .5);
       t.SetDynamicText(`DynamicText ${ms} HoverListener PerformanceTimersGetMilisec`, ms, PerformanceTimersGetMilisec, _pt6); // idx is for use in creating separate time intervals for each dynamic text.
 
       section.AddItem(t);
    }
    { // Event Listener timer
       ms = 500;
-      const t = new Widget_Dynamic_Text_Mesh(`EventListener Update(${ms}ms):`, '000000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const t = new Widget_Dynamic_Text_Mesh(`EventListener Update(${ms}ms):`, '0.0000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       t.SetDynamicText(`DynamicText ${ms} EventListenerUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt5); // idx is for use in creating separate time intervals for each dynamic text.
 
       t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
-      t.CreateNewText('00000', fontsize, ORANGE_240_160_10, [0, 0], .5);
+      t.CreateNewText('0.000', fontsize, ORANGE_240_160_10, [0, 0], .5);
       t.SetDynamicText(`DynamicText ${ms} EventListener PerformanceTimersGetMilisec`, ms, PerformanceTimersGetMilisec, _pt5); // idx is for use in creating separate time intervals for each dynamic text.
 
       section.AddItem(t);
@@ -227,8 +227,8 @@ export function Debug_info_create_ui_performance_timers(params) {
 
    // section.RenderToDebugGfx();
    scene.AddWidget(section, GFX_CTX_FLAGS.PRIVATE);
-   // section.Recalc(SECTION.HORIZONTAL);
    section.Calc(SECTION.VERTICAL);
+   // section.Recalc(SECTION.HORIZONTAL);
    section.Render()
    DEBUG_INFO.UI_TIMERS.IDX = section.idx;
    section.ConstructListeners();
@@ -265,7 +265,7 @@ export function Debug_info_create_ui_mouse_coords(params) {
    section.SetName('InfoUi-Mouse section');
 
 
-   const fontsize = 4;
+   const fontsize = _font_size;
 
    const infomesh = new Widget_Dynamic_Text_Mesh('Mouse |', 'pos: x:0000, y:0000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, YELLOW_240_220_10, GREEN_140_240_10, .4);
    infomesh.CreateNewText('| area: x:0000, y:0000', fontsize, GREEN_140_240_10, [10, 10], .9);
@@ -380,7 +380,7 @@ export function Debug_info_create_gfx_info(params) {
       
       for (j = 0; j < progs.buffer[i].vertexBufferCount; j++) {
          
-         const vb = progs.buffer[i].vertexBuffer[j];
+         const vb = progs.buffer[i].vb[j];
          if((vb.type & MESH_TYPES_DBG.UI_INFO_GFX) === 0){ // Add as regular vertex buffers all exept the buffers storing the ui_gfx_ dropdowns.
             
             const dp_vb = new Widget_Dropdown(`vb:${j} | count:${vb.count}`, [0, 0, 0], dppad, TRANSPARENCY(ORANGE_240_130_10, tr), TRANSPARENCY(GREY3, tr), WHITE, btnpad);
@@ -390,7 +390,7 @@ export function Debug_info_create_gfx_info(params) {
             
             // Create more info to display
             dp_pr.AddToMenu(dp_vb);
-            const infomesh = new Widget_Dynamic_Text_Mesh('isPrivate:', `${vb.isPrivate}`, ALIGN.HORIZONTAL, [0, 0, 0], 4, YELLOW_240_220_10, GREEN_140_240_10, .4);
+            const infomesh = new Widget_Dynamic_Text_Mesh('isPrivate:', `${vb.isPrivate}`, ALIGN.HORIZONTAL, [0, 0, 0], _font_size, YELLOW_240_220_10, GREEN_140_240_10, .4);
             dp_vb.AddToMenu(infomesh);
             
          }

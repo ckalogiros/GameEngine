@@ -41,12 +41,14 @@ export class Widget_Slider extends Rect {
       // Calculate the bar's and handle's horizontal pading.
       const ratio = dim[0] / dim[1];
       const pad = [dim[0] * 0.5, dim[1] / 2.8];
+      // const pad = [dim[0], dim[1] / 2.8];
       pad[0] /= ratio;
 
       // Calculate the font size of the sliders texts, base on the sliders dimentions
       const min_font_size = 4, max_font_size = 10;
       const r = 3;
-      const fontSize = max_font_size < (dim[1] / r) ? max_font_size : (min_font_size > (dim[1] / r) ? min_font_size : (dim[1] / r));
+      // const fontSize = max_font_size < (dim[1] / r) ? max_font_size : (min_font_size > (dim[1] / r) ? min_font_size : (dim[1] / r));
+      const fontSize = 10;
 
 
       // Create slider_name_text (it is the text_mesh of the extended Widget_Label class)

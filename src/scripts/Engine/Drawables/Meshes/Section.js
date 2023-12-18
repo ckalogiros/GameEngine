@@ -93,11 +93,11 @@ export class Section extends Rect {
       }
 
       /** OPTIONS:EXPAND 
-       * Happennns on a second pass of all items of current section, since each section may have different options for expand.
+       * Happens on a second pass of all items of current section, since each section may have different options for expand.
        * Expand width of items to match the max width of section, minus the margin.
-       * Only if the section is VERTICAL aligning its items. 
+       * Only if the section has VERTICAL align for its items. 
        */
-      console.log('[ [ ', section.options, ' ] ]')
+      // console.log('[ [ ', section.options, ' ] ]')
       if(options & SECTION.EXPAND)
          Expand(section, section.options, section.max_size[0], 0);
 
@@ -105,15 +105,11 @@ export class Section extends Rect {
       if (options & SECTION.TOP_DOWN) { // Keep stable the top and position everything growing from the bottom
          const x = section.geom.pos[0] + (section.max_size[0] - old_sizex) +section.margin[0];
          const y = section.geom.pos[1] + (section.max_size[1] - old_sizey) +section.margin[1];
-         // const y = section.geom.pos[1] + (section.max_size[1] - old_sizey);
-         // const x = section.geom.pos[0] + (section.max_size[0] - old_sizex);
          section.SetPosXY([x, y]);
       }
 
       section.SetMargin();
       Calculate_positions_recursive(section, options);
-
-      // Expand(this, options, section.max_size[0], 0);
 
       return section.max_size;
 
@@ -366,6 +362,7 @@ function Section_move_children_recursive(x, y, mesh, count=0) {
 
          /**DEBUG ERROR*/ if (!child.Move) { console.error('OnMove function is missing. @ Section.Move(), mesh:', child.name, child); return; }
          child.Move(x, y);
+         // console.log(child.name)
       }
    }
 
@@ -522,16 +519,16 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
 
       if (parent.type & MESH_TYPES_DBG.SECTION_MESH) { // For meshes with a parent of type Section
 
+         // TODO: cash GetMaxWidth() and ...MaxHeight()
          const c_x = cur_pos[0], c_y = cur_pos[1]; // curent mesh position
          const p_dx = parent.GetMaxWidth(), p_dy = parent.GetTotalHeight(); // parent mesh dimention
          const p_mx = parent.margin[0], p_my = parent.margin[1]; // parent mesh margin
 
-         // const new_pos = [(c_x - p_dx) + mesh.GetMaxWidth() + p_mx, c_y - p_dy + mesh.geom.dim[1] + p_my, parent.geom.pos[2] + 1,];
          const new_pos = [(c_x - p_dx) + mesh.GetMaxWidth() + p_mx, c_y - p_dy + mesh.geom.dim[1] + p_my, parent.geom.pos[2] + 1,];
 
+         const pos_dif = [new_pos[0] - (mesh.GetCenterPosX()), new_pos[1] - mesh.GetCenterPosY(), new_pos[2] + 1];
          if ((mesh.type & MESH_TYPES_DBG.SECTION_MESH) === 0) { // Case mesh not of type section, have it update it's new pos-dim on a later when it's gfx exists.
 
-            const pos_dif = [new_pos[0] - (mesh.GetCenterPosX()), new_pos[1] - mesh.GetCenterPosY(), new_pos[2] + 1];
 
             if (mesh.gfx) {
                mesh.Reposition_post(pos_dif);
@@ -539,7 +536,7 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
             else {
                mesh.Reposition_pre(pos_dif);
             }
-
+            
             continue_recur = false; // Stop recursion for mesh's children. Let the mesh deal with it's children.
          }
          else { // Case  mesh is of type section  

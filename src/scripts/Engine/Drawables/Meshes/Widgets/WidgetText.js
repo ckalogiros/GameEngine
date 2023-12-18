@@ -5,7 +5,8 @@ import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr2, CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
 import { MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
-import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
+import { Font_get_char_uv_coords } from "../../../Loaders/Font/ChlumskyFontMetricsLoader.js";
+// import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx, TimeIntervalsGetByIdx } from "../../../Timers/TimeIntervals.js";
 import { Text_Mesh } from "../Text_Mesh.js";
 
@@ -172,7 +173,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 
 			const child = this.children.buffer[i];
 			FLAGS |= GFX_CTX_FLAGS.SPECIFIC;
-			if (child) child.GenGfxCtx(FLAGS, [this.gfx.prog.idx, this.gfx.vb.idx]); // Pass the already exixting gfx buffers for use
+			if (child) child.gfx = child.GenGfxCtx(FLAGS, [this.gfx.prog.idx, this.gfx.vb.idx]); // Pass the already exixting gfx buffers for use
 		}
 		return this.gfx;
 	}
@@ -386,7 +387,8 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 			// Translate to right after the previous dynamicText.
 			pos = [0, 0, 0];
 			CopyArr3(pos, lastChild.geom.pos); // Copy the dynamic's text mesh pos
-			const prevXdim = ((lastChild.geom.dim[0] * 2 * lastChild.mat.text.length) - lastChild.geom.dim[0]);
+			// const prevXdim = ((lastChild.geom.dim[0] * 2 * lastChild.mat.text.length) - lastChild.geom.dim[0]);
+			const prevXdim = ((lastChild.geom.dim[0] * lastChild.mat.text.length) - lastChild.geom.dim[0]);
 			pos[0] += prevXdim + this.geom.dim[0] + pad[0];
 		}
 		else {
@@ -416,8 +418,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 
 
 		for (let i = 0; i < mesheslen; i++) {
-
-			let val = 0;
+						let val = 0;
 			if (params.params.func[i]) {
 
 				if (params.params.func_params[i])
@@ -430,27 +431,44 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 			}
 
 			const text = `${val}`;
-			const geom = meshes[i].geom;
-			const gfx = meshes[i].gfx;
-			const mat = meshes[i].mat;
-
-			let gfxInfoCopy = new GfxInfoMesh(gfx);
-
-			const textLen = text.length;
-			const len = geom.num_faces > textLen ? geom.num_faces :
-				(textLen > geom.num_faces ? geom.num_faces : textLen);
-
-			// Update text faces
-			for (let j = 0; j < len; j++) {
-
-				let uvs = [0, 0, 0, 0];
-				if (text[j] !== undefined) {
-					uvs = FontGetUvCoords(mat.uvIdx, text[j]);
-				}
-				GlSetTex(gfxInfoCopy, uvs);
-				gfxInfoCopy.vb.start += gfxInfoCopy.vb.count
-			}
+			meshes[i].UpdateText(text);
 		}
+		// for (let i = 0; i < mesheslen; i++) {
+
+		// 	let val = 0;
+		// 	if (params.params.func[i]) {
+
+		// 		if (params.params.func_params[i])
+		// 			val = params.params.func[i](params.params.func_params[i]); // Callback with parameters
+
+		// 		else val = params.params.func[i](); // Callback with no parameters
+		// 	}
+		// 	else if (params.params.func_params[i]) {
+		// 		val = params.params.func_params[i].delta_avg; // No callback, just a value
+		// 	}
+
+		// 	const text = `${val}`;
+		// 	const geom = meshes[i].geom;
+		// 	const gfx = meshes[i].gfx;
+		// 	const mat = meshes[i].mat;
+
+		// 	let gfxInfoCopy = new GfxInfoMesh(gfx);
+
+		// 	const textLen = text.length;
+		// 	const len = geom.num_faces > textLen ? geom.num_faces :
+		// 		(textLen > geom.num_faces ? geom.num_faces : textLen);
+
+		// 	// Update text faces
+		// 	for (let j = 0; j < len; j++) {
+
+		// 		let uvs = [0, 0, 0, 0];
+		// 		if (text[j] !== undefined) {
+		// 			uvs = Font_get_char_uv_coords(mat.uvIdx, text[j]);
+		// 		}
+		// 		GlSetTex(gfxInfoCopy, uvs);
+		// 		gfxInfoCopy.vb.start += gfxInfoCopy.vb.count
+		// 	}
+		// }
 	}
 
 	// SEE ### OnMove Events Implementation Logic

@@ -93,6 +93,7 @@ export class Geometry2D {
         glBufferOps.GlMoveXYZ(gfx, pos, num_faces);
     }
     MoveXY(x, y, gfx, num_faces) {
+        if(x===0 && y==0) return;
         this.pos[0] += x;
         this.pos[1] += y;
         glBufferOps.GlMoveXY(gfx, [x, y], num_faces);

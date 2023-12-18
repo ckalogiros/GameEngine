@@ -12,15 +12,15 @@ import { Widget_Label } from "../WidgetLabel.js";
 import { Align } from "../../../Operations/Alignment.js";
 import { TimeIntervalsDestroyByIdx } from "../../../../Timers/TimeIntervals.js";
 
-
+const _fontsize = 10;
 export class Widget_Menu_Bar extends Widget_Label {
 
    close_btn_idx;
    minimize_btn_idx;
 
-   constructor(text, Align, pos, col = GREY3, text_col = WHITE, pad = [14, 6], bold = .4, style = [2, 5, 2], font = FONTS.SDF_CONSOLAS_LARGE) {
+   constructor(text, Align, pos, col = GREY3, text_col = WHITE, pad = [14, 6], bold = .4, style = [2, 5, 2], font = TEXTURES.MSDF_CONSOLAS_1024) {
 
-      super(text, Align, pos, 4, col, text_col, pad, bold, font, style);
+      super(text, Align, pos, _fontsize, col, text_col, pad, bold, font, style);
 
       this.EnableGfxAttributes(MESH_ENABLE.GFX.ATTR_STYLE);
       this.SetStyle(style);
@@ -31,7 +31,7 @@ export class Widget_Menu_Bar extends Widget_Label {
       this.minimize_btn_idx = INT_NULL;
    }
 
-   AddCloseButton(root, text, fontsize = 0, col = GREY3, text_col = WHITE, pad = [4, 2], bold = .4, style = [6, 5, 3], font = FONTS.SDF_CONSOLAS_LARGE) {
+   AddCloseButton(root, text, fontsize = 0, col = GREY3, text_col = WHITE, pad = [4, 2], bold = .4, style = [6, 5, 3], font = TEXTURES.MSDF_CONSOLAS_1024) {
 
       if (!fontsize) fontsize = this.text_mesh.geom.dim[0];
 
@@ -52,7 +52,7 @@ export class Widget_Menu_Bar extends Widget_Label {
       this.ReAlign();
    }
 
-   AddMinimizeButton(root, pos, fontsize, col = GREY3, text_col = WHITE, pad = [4, 2], bold = .4, font = FONTS.SDF_CONSOLAS_LARGE, style = [6, 5, 3]) {
+   AddMinimizeButton(root, pos, fontsize, col = GREY3, text_col = WHITE, pad = [4, 2], bold = .4, font = TEXTURES.MSDF_CONSOLAS_1024, style = [6, 5, 3]) {
 
       CopyArr3(pos, this.geom.pos);
       pos[2] += 1; // Put close button in front of the parent widget.
@@ -242,7 +242,7 @@ export class Widget_Menu_Bar extends Widget_Label {
 
 export class Close_Button extends Widget_Button {
 
-   constructor(root, text, pos, fontsize, col = GREY3, text_col = WHITE, pad = [0, 0], bold = .4, style = [6, 5, 3], font = FONTS.SDF_CONSOLAS_LARGE) {
+   constructor(root, text, pos, fontsize, col = GREY3, text_col = WHITE, pad = [0, 0], bold = .4, style = [6, 5, 3], font = TEXTURES.MSDF_CONSOLAS_1024) {
 
       super(text, ALIGN.RIGHT, pos, fontsize, col, text_col, pad, bold, style, font);
 
