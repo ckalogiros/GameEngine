@@ -7,7 +7,7 @@ import { Find_gfx_from_parent_ascend_descend, Find_textgfx_from_parent_descendin
 import { MESH_ENABLE } from "../Base/Mesh";
 import { Rect } from "../Rect_Mesh";
 import { Section } from "../Section";
-import { Gfx_progs_get_vb_byidx } from "../../../Interfaces/Gfx/GfxInterfaceFunctions";
+import { Gl_progs_get_vb_byidx } from "../../../../Graphics/GlProgram";
 
 
 /** ### Scroller Widget
@@ -259,7 +259,7 @@ export class Widget_Scroller extends Section {
    SetScissorBox(){
 
       // Enable scissoring
-      const vb = Gfx_progs_get_vb_byidx(this.gfx.progs_groupidx, this.gfx.prog.idx, this.gfx.vb.idx);
+      const vb = Gl_progs_get_vb_byidx(this.gfx.prog.groupidx, this.gfx.prog.idx, this.gfx.vb.idx);
       /**DEBUG */ if(!vb) alert('SetScissorBox() in Scroller cannot resolve vertex buffer');
       const scissorbox = [
          this.geom.pos[0] - this.geom.dim[0],
@@ -275,7 +275,7 @@ export class Widget_Scroller extends Section {
       
       const textgfx = Find_textgfx_from_parent_descending(this);
       if(textgfx){
-         const vb_text = Gfx_progs_get_vb_byidx(textgfx.progs_groupidx, textgfx.prog.idx, textgfx.vb.idx);
+         const vb_text = Gl_progs_get_vb_byidx(textgfx.prog.groupidx, textgfx.prog.idx, textgfx.vb.idx);
          /**DEBUG */ if(!vb_text) alert('SetScissorBox() in Scroller cannot resolve vertex buffer for text');
          vb_text.EnableScissorBox();
          vb_text.SetScissorBox(scissorbox);

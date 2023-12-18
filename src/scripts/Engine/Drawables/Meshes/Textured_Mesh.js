@@ -1,10 +1,11 @@
 "use strict";
 
 import { GlSetAttrTex, GlSetTex } from "../../../Graphics/Buffers/GlBufferOps.js";
+import { Gl_add_geom_mat_to_vb } from "../../../Graphics/Buffers/GlBuffers.js";
+import { Gl_progs_set_vb_texidx } from "../../../Graphics/GlProgram.js";
 import { MouseGetPos, MouseGetPosDif } from "../../Controls/Input/Mouse.js";
 import { Gfx_generate_context } from "../../Interfaces/Gfx/GfxContextCreate.js";
 import { Find_gfx_from_parent_ascend_descend } from "../../Interfaces/Gfx/GfxContextFindMatch.js";
-import { Gfx_add_geom_mat_to_vb, Gfx_progs_set_vb_texidx } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 import { Scenes_store_mesh_in_gfx } from "../../Scenes.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../Timers/TimeIntervals.js";
 import { Geometry2D } from "../Geometry/Base/Geometry.js";
@@ -48,7 +49,7 @@ export class Textured_Mesh extends Mesh {
 
       // Get the starting index of the text in the vertex buffer.
 
-      this.gfx.vb.start = Gfx_add_geom_mat_to_vb(this.sid, this.gfx, this.geom, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name);
+      this.gfx.vb.start = Gl_add_geom_mat_to_vb(this.sid, this.gfx, this.geom, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name);
 
       Scenes_store_mesh_in_gfx(this.sceneidx, this); // For storing meshes by its gfx
 
@@ -56,7 +57,7 @@ export class Textured_Mesh extends Mesh {
       // BUG: Make sure the below statement makes sense for Texture_Material(it is copied from the Font_Material)
       this.gfx.tb.idx = (this.mat.texidx !== INT_NULL) ? this.mat.texidx : ((this.mat.uvIdx !== INT_NULL) ? this.mat.uvIdx : INT_NULL);
 
-      Gfx_progs_set_vb_texidx(this.gfx.progs_groupidx, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.tb.idx); // Update the vertex buffer to store the texture index
+      Gl_progs_set_vb_texidx(this.gfx.prog.groupidx, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.tb.idx); // Update the vertex buffer to store the texture index
 
       return this.gfx;
    }

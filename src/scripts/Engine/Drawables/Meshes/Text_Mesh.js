@@ -1,10 +1,9 @@
 "use strict";
 
-import { GfxInfoMesh } from "../../../Graphics/GlProgram.js";
+import { GfxInfoMesh, Gl_progs_set_vb_texidx } from "../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../Helpers/Helpers.js";
 import { AddArr3, CopyArr3 } from "../../../Helpers/Math/MathOperations.js";
 import { Gfx_generate_context } from "../../Interfaces/Gfx/GfxContextCreate.js"; ``
-import { GfxSetTex, Gfx_add_geom_mat_to_vb, Gfx_progs_set_vb_texidx } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 // import { FontGetUvCoords } from "../../Loaders/Font/Font.js";
 import { Scenes_store_mesh_in_gfx } from "../../Scenes.js";
 import { Find_gfx_from_parent_ascend_descend } from "../../Interfaces/Gfx/GfxContextFindMatch.js";
@@ -13,7 +12,8 @@ import { Geometry2D_Text } from "../Geometry/Geometry2DText.js";
 import { FontMaterial } from "../Material/Base/Material.js";
 import { Mesh } from "./Base/Mesh.js";
 import { Font_get_atlas_texture_metrics, Font_get_char_atlas_bounds, Font_get_char_plane_bounds, Font_get_char_uv_coords } from "../../Loaders/Font/ChlumskyFontMetricsLoader.js";
-import { GlSetDim, GlSetDimY, GlSetWposXY } from "../../../Graphics/Buffers/GlBufferOps.js";
+import { GlSetDim, GlSetDimY, GlSetTex, GlSetWposXY } from "../../../Graphics/Buffers/GlBufferOps.js";
+import { Gl_add_geom_mat_to_vb } from "../../../Graphics/Buffers/GlBuffers.js";
 
 
 
@@ -83,7 +83,7 @@ export class Text_Mesh extends Mesh {
 
          geomcopy.pos[0] += this.geom.dim[0];
          // geomcopy.pos[0] += this.geom.dim[0]; // Half advance current face width
-         const start = Gfx_add_geom_mat_to_vb(this.sid, gfxcopy, geomcopy, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, `${this.mat.text[i]} in: ${this.name}`, this.idx);
+         const start = Gl_add_geom_mat_to_vb(this.sid, gfxcopy, geomcopy, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, `${this.mat.text[i]} in: ${this.name}`, this.idx);
          // geomcopy.pos[0] += geomcopy.dim[0]; // Half advance current face width
 
          if(i===0) this.gfx.vb.start = start; // Start of mesh in the vertex buffer hasn't been set from the GenGfx. So we only need the start of the first character in the vertex buffer. All the rest starts are calculated on the fly.
@@ -93,7 +93,7 @@ export class Text_Mesh extends Mesh {
       }
 
       // BUG: If one text has by mistake a different 'this.mat.uvIdx', then the vb will store that uv-map index. Cause a vertex buffer may use only one texture.
-      Gfx_progs_set_vb_texidx(gfxcopy.progs_groupidx, gfxcopy.prog.idx, gfxcopy.vb.idx, gfxcopy.tb.idx); // Update the vertex buffer to store the texture index
+      Gl_progs_set_vb_texidx(gfxcopy.prog.groupidx, gfxcopy.prog.idx, gfxcopy.vb.idx, gfxcopy.tb.idx); // Update the vertex buffer to store the texture index
 
       const params = {
          progidx: this.gfx.prog.idx,
@@ -170,7 +170,7 @@ export class Text_Mesh extends Mesh {
             geomcopy.pos[0] += this.geom.dim[0]; // Advance xpos to next character.
             geomcopy.dim[0] = this.geom.dim[0]; geomcopy.dim[1] = this.geom.dim[1]; geomcopy.pos[1] = this.geom.pos[1]; // Reset 
          }
-         GfxSetTex(gfxInfoCopy, uvs);
+         GlSetTex(gfxInfoCopy, uvs);
          gfxInfoCopy.vb.start += gfxInfoCopy.vb.count
       }
    }
@@ -203,7 +203,7 @@ export class Text_Mesh extends Mesh {
       geomcopy.dim[0] = this.geom.dim[0]; geomcopy.dim[1] = this.geom.dim[1]; geomcopy.pos[1] = this.geom.pos[1]; 
 
       const uvs = Font_get_char_uv_coords(this.mat.uvIdx, _text);
-      GfxSetTex(gfxInfoCopy, uvs);
+      GlSetTex(gfxInfoCopy, uvs);
    }
 
    SetColorRGB(col) {

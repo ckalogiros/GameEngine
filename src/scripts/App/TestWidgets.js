@@ -30,7 +30,6 @@ import { Gl_framebuffer_create, Gl_framebuffer_render } from '../Graphics/Buffer
 import { Rect } from '../Engine/Drawables/Meshes/Rect_Mesh.js';
 import { Textured_Mesh } from '../Engine/Drawables/Meshes/Textured_Mesh.js';
 import { Renderqueue_Add, Renderqueue_set_active } from '../Engine/Renderers/Renderer/RenderQueue.js';
-import { Gfx_progs_get_group, Gfx_progs_get_prog_byidx } from '../Engine/Interfaces/Gfx/GfxInterfaceFunctions.js';
 import { Font_create_uvmap, Parse_json_metrics } from '../Engine/Loaders/Font/ChlumskyFontMetricsLoader.js';
 import { consola_msdf_test_1024_metrics } from '../../../resources/fonts/consolas_sdf/metrics/consola_msdf_test_1024_metrics.js';
 
@@ -209,39 +208,39 @@ function CreateFramebufferRendering(scene){
     // Render to framebuffer
     const gfx_queue = [
         {
-            progs_groupidx: 0,
+            groupidx: 0,
             progidx: 0,
             vbidx: 0,
         },
         {
-            progs_groupidx: 0,
+            groupidx: 0,
             progidx: 1,
             vbidx: 0,
         },
         // {
-        //     progs_groupidx:0, 
+        //     groupidx:0, 
         //     progidx:2, 
         //     vbidx:0,
         // },
         // {
-        //     progs_groupidx:0, 
+        //     groupidx:0, 
         //     progidx:0, 
         //     vbidx:1,
         // },
         // {
-        //     progs_groupidx:0, 
+        //     groupidx:0, 
         //     progidx:1, 
         //     vbidx:1,
         // },
     ];
     setInterval(() => {
         let k = 0;
-        const progs = Gfx_progs_get_group(0)
+        const progs = Gl_progs_get_group(0)
         for (let i = 0; i < progs.count; i++) {
             for (let j = 0; j < progs.buffer[i].vertexBufferCount; j++) {
                 if(!(i===2 && j===0))
                 gfx_queue[k++] = {
-                    progs_groupidx: 0,
+                    groupidx: 0,
                     progidx: progs.buffer[i].idx,
                     vbidx: progs.buffer[i].vb[j].idx,
                 }
@@ -251,11 +250,11 @@ function CreateFramebufferRendering(scene){
         // console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
         for (let i = 0; i < gfx_queue.length; i++) {
-            Renderqueue_set_active(gfx_queue[i].progs_groupidx, gfx_queue[i].progidx, gfx_queue[i].vbidx, false)
+            Renderqueue_set_active(gfx_queue[i].groupidx, gfx_queue[i].progidx, gfx_queue[i].vbidx, false)
         }
     }, 1000)
-    // setTimeout(() => { Renderqueue_set_active(gfx_queue[0].progs_groupidx, gfx_queue[0].progidx, gfx_queue[0].vbidx, false) }, 1500);
-    // setTimeout(() => { Renderqueue_set_active(gfx_queue[1].progs_groupidx, gfx_queue[1].progidx, gfx_queue[1].vbidx, false) }, 1500);
+    // setTimeout(() => { Renderqueue_set_active(gfx_queue[0].groupidx, gfx_queue[0].progidx, gfx_queue[0].vbidx, false) }, 1500);
+    // setTimeout(() => { Renderqueue_set_active(gfx_queue[1].groupidx, gfx_queue[1].progidx, gfx_queue[1].vbidx, false) }, 1500);
 
     // Create mesh for drawing the framebuffer's texture
     // const rect = new Textured_Mesh([halfw, halfh, 0], [halfw, halfh], [1.0, 1.0, 1.0, 1.2], framebuffer.texture.idx, 'Framebuffer 0');
@@ -1266,7 +1265,7 @@ function MeshInfoUpdate(params) {
 
         textMesh.UpdateText(infoMesh.name);
 
-        const gfx = (infoMesh.gfx !== null) ? `gfx: group:${infoMesh.gfx.progs_groupidx}, prog:${infoMesh.gfx.prog.idx}, vb:${infoMesh.gfx.vb.idx}, start:${infoMesh.gfx.vb.start}` : 'null'
+        const gfx = (infoMesh.gfx !== null) ? `gfx: group:${infoMesh.gfx.prog.groupidx}, prog:${infoMesh.gfx.prog.idx}, vb:${infoMesh.gfx.vb.idx}, start:${infoMesh.gfx.vb.start}` : 'null'
 
         let msgs = [
             `id:${infoMesh.id}`,
@@ -1282,10 +1281,10 @@ function MeshInfoUpdate(params) {
             if (child.type & MESH_TYPES_DBG.FONT_MATERIAL) {
 
                 const text_num_faces = (child.text_mesh) ? child.text_mesh.geom.num_faces : child.geom.num_faces; // If child is of type label and has 'text_mesh' else is plain text.
-                msgs.push(`gfx: group:${child.gfx.progs_groupidx}, prog:${child.gfx.prog.idx}, vb:${child.gfx.vb.idx}, start:${child.gfx.vb.start}, faces:${text_num_faces}`);
+                msgs.push(`gfx: group:${child.gfx.prog.groupidx}, prog:${child.gfx.prog.idx}, vb:${child.gfx.vb.idx}, start:${child.gfx.vb.start}, faces:${text_num_faces}`);
             }
             else if (child.text_mesh) {
-                msgs.push(`gfx: group:${child.gfx.progs_groupidx}, prog:${child.text_mesh.gfx.prog.idx}, vb:${child.text_mesh.gfx.vb.idx}, start:${child.text_mesh.gfx.vb.start}, faces:${child.text_mesh.geom.num_faces}`);
+                msgs.push(`gfx: group:${child.gfx.prog.groupidx}, prog:${child.text_mesh.gfx.prog.idx}, vb:${child.text_mesh.gfx.vb.idx}, start:${child.text_mesh.gfx.vb.start}, faces:${child.text_mesh.geom.num_faces}`);
             }
 
         }
@@ -1329,7 +1328,7 @@ function GfxInfoUpdate(params) {
 
     const root_dp = params.params.gfxinfo.infogfx_root;
     const gfxbuffer = params.params.gfxinfo.gfxbuffer;
-    const progs = Gl_progs_get_group(gfxbuffer.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxbuffer.groupidx);
 
     let any_vb_found = false;
 

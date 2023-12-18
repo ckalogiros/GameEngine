@@ -17,8 +17,8 @@ import * as dbg from '../Z_Debug/GfxDebug.js'
 
 export function ProgramExists(sid) {
 
-    const progs_groupidx = PROGRAMS_GROUPS.GetIdxByMask(sid.progs_group)
-    const progs = Gl_progs_get_group(progs_groupidx);
+    const groupidx = PROGRAMS_GROUPS.GetIdxByMask(sid.progs_group)
+    const progs = Gl_progs_get_group(groupidx);
     if(ERROR_NULL(progs) || ERROR_NULL(progs.buffer)) return INT_NULL
     for (let i = 0; i < progs.count; i++)
         if (SID.CheckSidMatch(sid, progs.buffer[i].sid)) return i;
@@ -64,10 +64,10 @@ export function GlCheckContext(sid, sceneidx) {
 export function Gl_create_shader_program(sid){
 
     const gfx_idxs = Gl_create_program(sid);
-    const progs_groupidx = gfx_idxs.progs_groupidx;
+    const groupidx = gfx_idxs.groupidx;
     const progidx = gfx_idxs.progidx;
-    // const progs = Gl_progs_get_group(progs_groupidx);
-    const prog = Gl_progs_get_prog_byidx(progs_groupidx, progidx);
+    // const progs = Gl_progs_get_group(groupidx);
+    const prog = Gl_progs_get_prog_byidx(groupidx, progidx);
     
 
     /**********************************************************************/
@@ -90,14 +90,14 @@ export function Gl_create_shader_program(sid){
     return gfx_idxs;
 }
 
-export function Gl_create_vertex_buffer(sid, sceneidx, prog, progs_groupidx){
+export function Gl_create_vertex_buffer(sid, sceneidx, prog, groupidx){
 
     const vbidx = prog.vertexBufferCount++;
     prog.vb[vbidx] = new VertexBuffer(sid, sceneidx, vbidx, gfxCtx.gl);
     const vb = prog.vb[vbidx];
 
-    Scenes_create_vertex_buffer_buffer(sceneidx, progs_groupidx, prog.idx, vbidx); // For storing meshes by its gfx
-    Gfx_create_vertexbuffer_buffer(progs_groupidx, prog.idx, vbidx);
+    Scenes_create_vertex_buffer_buffer(sceneidx, groupidx, prog.idx, vbidx); // For storing meshes by its gfx
+    Gfx_create_vertexbuffer_buffer(groupidx, prog.idx, vbidx);
 
     gfxCtx.gl.bindVertexArray(vb.vao);
     gfxCtx.gl.bindBuffer(gfxCtx.gl.ARRAY_BUFFER, vb.webgl_buffer);
@@ -126,19 +126,15 @@ export function Gl_create_vertex_buffer(sid, sceneidx, prog, progs_groupidx){
 }
 
 
-export function GlGenerateContext2(sid, sceneidx, progs_groupidx, progidx, vbidx, num_faces = 1) {
+export function Gl_generate_context(sid, sceneidx, groupidx, progidx, vbidx, num_faces = 1) {
 
     // ProgramExists returns 0 index based program or -1 for not found
-    // const progs_groupidx = PROGRAMS_GROUPS.GetIdxByMask(sid.progs_group);
-    const prog = Gl_progs_get_prog_byidx(progs_groupidx, progidx);
-    const vb = Gl_progs_get_vb_byidx(progs_groupidx, progidx, vbidx);
-    // Index buffer. // TODO: ibidx always has the same index value as vbidx, 1 to 1 buffers. What if later we want to use arbitary index buffers??? We must implement another way of finding the correct ib(Most probable is to pass the ibidx to this function)
+    // const groupidx = PROGRAMS_GROUPS.GetIdxByMask(sid.progs_group);
+    const prog = Gl_progs_get_prog_byidx(groupidx, progidx);
+    const vb = Gl_progs_get_vb_byidx(groupidx, progidx, vbidx);
     const ibidx = Gl_ib_exists(prog.ib[vbidx], sceneidx);
+    // IMPORTANT: ibidx always has the same index value as vbidx, 1 to 1 buffers. What if later we want to use arbitary index buffers??? We must implement another way of finding the correct ib(Most probable is to pass the ibidx to this function)
     const ib = Gl_ib_get_byidx(prog.ib[ibidx]);
-    if(ib===undefined)
-        console.log()
-    // const ibidx = IndexBufferExists(vbidx, sceneidx, prog);
-    // const ib = prog.ib[ibidx];
     
     // Cash values
     const vertsPerRect = prog.shaderinfo.verticesPerRect;
@@ -150,15 +146,20 @@ export function GlGenerateContext2(sid, sceneidx, progs_groupidx, progidx, vbidx
     gfx_ctx.sid = sid;
     gfx_ctx.sceneidx = sceneidx;
     gfx_ctx.vao = vb.vao;
+    // gfx_ctx.groupidx = groupidx;
     gfx_ctx.num_faces = num_faces;
     gfx_ctx.vertsPerRect = vertsPerRect;
     gfx_ctx.attribsPerVertex = attribsPerVertex;
+    
+    gfx_ctx.prog.groupidx = groupidx;
     gfx_ctx.prog.idx = progidx;
+
     gfx_ctx.vb.idx = vbidx;
-    gfx_ctx.vb.start = 0; // BUG: We set each start to 0, but many meshes are added to the vertex buffer. 
-    gfx_ctx.progs_groupidx = progs_groupidx;
+    gfx_ctx.vb.start = 0; // NOTE: The start of the mesh in the vertex buffer is calculated when the mesh is added to the vertex buffer.
     gfx_ctx.vb.count = count;
+
     gfx_ctx.ib.idx = ibidx; // Stores the programs index for the indexbuffer.
+    gfx_ctx.ib.start = 0;
     gfx_ctx.ib.count = ib.count;
 
     return gfx_ctx;
@@ -175,13 +176,12 @@ export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_na
     /**DEBUG ERROR*/ if(mat.style[0] === undefined){ console.error('Style is UNDEFINED. mesh:', mesh_name)}
     // /**DEBUG ERROR*/ if(meshidx === undefined){ console.error('Mesh index is not passed as a param. mesh:', mesh_name)}
 
-    const progs_groupidx = gfx.progs_groupidx;
+    const groupidx = gfx.prog.groupidx;
     const progidx = gfx.prog.idx;
     const vbIdx = gfx.vb.idx;
     const ibIdx = gfx.ib.idx;
-    const prog = Gl_progs_get_prog_byidx(progs_groupidx, progidx);
-    const vb = Gl_progs_get_vb_byidx(progs_groupidx, progidx, vbIdx);
-    // const ib = Gl_progs_get_ib_byidx(progs_groupidx, progidx, ibIdx);
+    const prog = Gl_progs_get_prog_byidx(groupidx, progidx);
+    const vb = Gl_progs_get_vb_byidx(groupidx, progidx, vbIdx);
     const ib = Gl_ib_get_byidx_in_prog(prog.ib[ibIdx]);
     if(ib===undefined)
     console.log()
@@ -311,7 +311,7 @@ export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_na
     vb.needsUpdate = true;
 
     if(!vb.show)
-        Gl_set_vb_show(progidx, vbIdx, progs_groupidx, true);
+        Gl_set_vb_show(groupidx, progidx, vbIdx, true);
 
     if(vb_type_flag) vb.type |= vb_type_flag;
 
@@ -326,7 +326,7 @@ export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_na
 
 export function Gl_shift_right_geometry(gfx, num_faces=1, new_num_faces=null) {
 
-    const vb = Gl_progs_get_vb_byidx(gfx.progs_groupidx, gfx.prog.idx, gfx.vb.idx);
+    const vb = Gl_progs_get_vb_byidx(gfx.prog.groupidx, gfx.prog.idx, gfx.vb.idx);
 
     const ret = {
         counts:[0,0],
@@ -344,14 +344,14 @@ export function Gl_shift_right_geometry(gfx, num_faces=1, new_num_faces=null) {
 
 export function GlHandlerAddGeometryBuffer(sid, gfx, meshName, posBuffer, dimBuffer) {
 
-    const progs_groupidx = gfx.progs_groupidx;
+    const groupidx = gfx.prog.groupidx;
     const progidx = gfx.prog.idx;
     const vbIdx = gfx.vb.idx;
     const ibIdx = gfx.ib.idx;
-    const prog = Gl_progs_get_prog_byidx(progs_groupidx, progidx);
-    const vb = Gl_progs_get_vb_byidx(progs_groupidx, progidx, vbIdx);
-    const ib = Gl_progs_get_ib_byidx2(gfx.progs_groupidx, gfx.prog.idx, gfx.ib.idx);
-    // const ib = Gl_progs_get_ib_byidx(progs_groupidx, progidx, ibIdx);
+    const prog = Gl_progs_get_prog_byidx(groupidx, progidx);
+    const vb = Gl_progs_get_vb_byidx(groupidx, progidx, vbIdx);
+    const ib = Gl_progs_get_ib_byidx(gfx.prog.groupidx, gfx.prog.idx, gfx.ib.idx);
+    // const ib = Gl_progs_get_ib_byidx(groupidx, progidx, ibIdx);
 
     if (GL.BOUND_PROG_IDX !== progidx) {
         GlUseProgram(prog.webgl_program, progidx);
@@ -405,11 +405,11 @@ export function GlHandlerAddGeometryBuffer(sid, gfx, meshName, posBuffer, dimBuf
 
 export function GlHandlerAddMaterialBuffer(sid, gfx, colBuffer, texBuffer) {
 
-    const progs_groupidx = gfx.progs_groupidx;
+    const groupidx = gfx.prog.groupidx;
     const progidx = gfx.prog.idx;
     const vbIdx = gfx.vb.idx;
-    const prog = Gl_progs_get_prog_byidx(progs_groupidx, progidx);
-    const vb = Gl_progs_get_vb_byidx(progs_groupidx, progidx, vbIdx);
+    const prog = Gl_progs_get_prog_byidx(groupidx, progidx);
+    const vb = Gl_progs_get_vb_byidx(groupidx, progidx, vbIdx);
 
     if (GL.BOUND_PROG_IDX !== progidx) {
         GlUseProgram(prog.webgl_program, progidx);
@@ -433,13 +433,13 @@ export function GlHandlerAddMaterialBuffer(sid, gfx, colBuffer, texBuffer) {
 
 export function GlHandlerAddIndicesBuffer(gfx, buffer) {
 
-    const progs_groupidx = gfx.progs_groupidx;
+    const groupidx = gfx.prog.groupidx;
     const progidx = gfx.prog.idx;
     const vbIdx = gfx.vb.idx;
     const ibIdx = gfx.ib.idx;
-    const prog = Gl_progs_get_prog_byidx(progs_groupidx, progidx);
-    // const ib = Gl_progs_get_ib_byidx(progs_groupidx, progidx, ibIdx);
-    const ib = Gl_progs_get_ib_byidx2(gfx.progs_groupidx, gfx.prog.idx, gfx.ib.idx);
+    const prog = Gl_progs_get_prog_byidx(groupidx, progidx);
+    // const ib = Gl_progs_get_ib_byidx(groupidx, progidx, ibIdx);
+    const ib = Gl_progs_get_ib_byidx(gfx.prog.groupidx, gfx.prog.idx, gfx.ib.idx);
 
     if (GL.BOUND_PROG_IDX !== progidx) {
         GlUseProgram(prog.webgl_program, progidx);
@@ -523,8 +523,8 @@ export function GfxSetVbRenderFromSceneId(sceneidx, flag) {
 
 
 // Set flag 'isPrivate' to true for specific gfx buffers.
-export function GlSetVertexBufferPrivate(progs_groupidx, progidx, vbIdx) {
-    const vb = Gl_progs_get_vb_byidx(progs_groupidx, progidx, vbIdx);
+export function GlSetVertexBufferPrivate(groupidx, progidx, vbIdx) {
+    const vb = Gl_progs_get_vb_byidx(groupidx, progidx, vbIdx);
     vb.SetPrivate();
 }
 
@@ -540,12 +540,12 @@ export function GlSetVertexBufferPrivate(progs_groupidx, progidx, vbIdx) {
 // }
 
 export function GlResetVertexBuffer(gfx) {
-    const vb = Gl_progs_get_vb_byidx(gfx.progs_groupidx, gfx.prog.idx, gfx.vb.idx);
+    const vb = Gl_progs_get_vb_byidx(gfx.prog.groupidx, gfx.prog.idx, gfx.vb.idx);
     vb.Reset();
 }
 export function GlResetIndexBuffer(gfx) {
-    // const ib = Gl_progs_get_ib_byidx(gfx.progs_groupidx, gfx.prog.idx, gfx.ib.idx);
-    const ib = Gl_progs_get_ib_byidx2(gfx.progs_groupidx, gfx.prog.idx, gfx.ib.idx);
+    // const ib = Gl_progs_get_ib_byidx(gfx.prog.groupidx, gfx.prog.idx, gfx.ib.idx);
+    const ib = Gl_progs_get_ib_byidx(gfx.prog.groupidx, gfx.prog.idx, gfx.ib.idx);
     ib.Reset();
 }
 

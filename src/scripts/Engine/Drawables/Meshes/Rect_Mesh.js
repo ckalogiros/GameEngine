@@ -1,13 +1,13 @@
 "use strict";
 
 import { Gfx_generate_context } from "../../Interfaces/Gfx/GfxContextCreate.js";
-import { Gfx_add_geom_mat_to_vb } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 import { Scenes_store_mesh_in_gfx } from "../../Scenes.js";
 import { Find_gfx_from_parent_ascend_descend } from "../../Interfaces/Gfx/GfxContextFindMatch.js";
 import { Info_listener_dispatch_event } from "../DebugInfo/InfoListeners.js";
 import { Geometry2D } from "../Geometry/Base/Geometry.js";
 import { Material } from "../Material/Base/Material.js";
 import { Mesh } from "./Base/Mesh.js";
+import { Gl_add_geom_mat_to_vb } from "../../../Graphics/Buffers/GlBuffers.js";
 
 
 export class Rect extends Mesh {
@@ -48,7 +48,7 @@ export class Rect extends Mesh {
 
    AddToGfx() {
 
-      this.gfx.vb.start = Gfx_add_geom_mat_to_vb(this.sid, this.gfx, this.geom, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name, this.idx);
+      this.gfx.vb.start = Gl_add_geom_mat_to_vb(this.sid, this.gfx, this.geom, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name, this.idx);
       this.is_gfx_inserted = true;
 
       Scenes_store_mesh_in_gfx(this.sceneidx, this); // For storing meshes by its gfx

@@ -17,19 +17,15 @@ export class GfxInfoMesh {
 	sceneidx = INT_NULL;
 	scene_mesh_in_gfx_idx = INT_NULL; // The index of the mesh inside the scenes gfx buffer.
 	isPrivate = false;
-	numFaces = 0;
+	num_faces = 0;
 	vertsPerRect = 0;
 	attribsPerVertex = 0;
 	meshIdx = INT_NULL; // The index of the current mesh from scene's mesh buffer.
 	vao = null;
-	progs_groupidx = INT_NULL; // TODO: Decide if this var should be a bool or a bi-field.
-
-	gfx_ctx = { // This refers to the GfxCtx2 class interface. GfxCtx2 is used to connect Engine system with application's Graphic System. 
-		sessionId: INT_NULL, // If the vertex buffer has private use, the sessionid 'categorizes' all the vertex buffers belonging to a session. 
-		idx: INT_NULL // The index of the GfxCtx buffer. 
-	}
+	// groupidx = INT_NULL; // TODO: Decide if this var should be a bool or a bi-field.
 
 	prog = {
+		groupidx: INT_NULL,
 		idx: INT_NULL,
 	}
 
@@ -43,7 +39,6 @@ export class GfxInfoMesh {
 		idx: INT_NULL,	// The idx buffer's  idx.
 		start: 0,		// The current meshe's starting idx in vertex buffer. 
 		count: 0,		// Number of total meshe's attributes  
-		vertices_per_rect: 0,
 	};
 
 	tb = { // The Texture info for the mesh
@@ -57,13 +52,14 @@ export class GfxInfoMesh {
 
 			this.sid = gfxInfoMesh.sid;
 			this.sceneidx = gfxInfoMesh.sceneidx;
-			this.numFaces = gfxInfoMesh.numFaces;
+			this.num_faces = gfxInfoMesh.num_faces;
 			this.vertsPerRect = gfxInfoMesh.vertsPerRect;
 			this.attribsPerVertex = gfxInfoMesh.attribsPerVertex;
 			this.meshIdx = gfxInfoMesh.meshIdx;
-			this.progs_groupidx = gfxInfoMesh.progs_groupidx;
+			// this.groupidx = gfxInfoMesh.groupidx;
 			this.vao = gfxInfoMesh.vao;
 
+			this.prog.groupidx = gfxInfoMesh.prog.groupidx;
 			this.prog.idx = gfxInfoMesh.prog.idx;
 
 			this.vb.idx = gfxInfoMesh.vb.idx;
@@ -85,11 +81,11 @@ export class GfxInfoMesh {
 
 			this.sid.Copy(gfx.sid);
 			this.sceneidx = gfx.sceneidx;
-			this.numFaces = gfx.numFaces;
+			this.num_faces = gfx.num_faces;
 			this.vertsPerRect = gfx.vertsPerRect;
 			this.attribsPerVertex = gfx.attribsPerVertex;
 			this.meshIdx = gfx.meshIdx;
-			this.progs_groupidx = gfx.progs_groupidx;
+			// this.groupidx = gfx.prog.groupidx;
 			this.vao = gfx.vao;
 
 			this.prog.idx = gfx.prog.idx;
@@ -438,7 +434,7 @@ const _gl_programs_groups = {
 		
 		console.log('++++ Program shader group:', PROGRAMS_GROUPS.GetName(sid.progs_group), ' groupidx:', groupidx, ' progidx:', progidx)
 
-		return { progidx: progidx, progs_groupidx: groupidx };
+		return { progidx: progidx, groupidx: groupidx };
 	},
 
 	GroupExists(prog_group_idx) {
@@ -452,52 +448,52 @@ const _gl_programs_groups = {
 export function Gl_progs_get() {
 	return _gl_programs_groups;
 }
-export function Gl_progs_get_group(programs_groupidx = INT_NULL) {
-	return _gl_programs_groups.buffer[programs_groupidx];
+export function Gl_progs_get_group(groupidx = INT_NULL) {
+	return _gl_programs_groups.buffer[groupidx];
 }
-export function Gl_progs_get_prog_byidx(programs_groupidx = INT_NULL, progidx) {
-	return _gl_programs_groups.buffer[programs_groupidx].buffer[progidx];
+export function Gl_progs_get_prog_byidx(groupidx = INT_NULL, progidx) {
+	return _gl_programs_groups.buffer[groupidx].buffer[progidx];
 }
-export function Gl_progs_get_vb_byidx(programs_groupidx = INT_NULL, progidx, vbIdx) {
-	if (_gl_programs_groups.buffer[programs_groupidx] === undefined)
+export function Gl_progs_get_vb_byidx(groupidx = INT_NULL, progidx, vbIdx) {
+	if (_gl_programs_groups.buffer[groupidx] === undefined)
 		console.log
-	return _gl_programs_groups.buffer[programs_groupidx].buffer[progidx].vb[vbIdx];
+	return _gl_programs_groups.buffer[groupidx].buffer[progidx].vb[vbIdx];
 }
-export function Gl_progs_get_ib_byidx(programs_groupidx = INT_NULL, progidx, ibIdx) {
-	return _gl_programs_groups.buffer[programs_groupidx].buffer[progidx].ib[ibIdx];
+// export function Gl_progs_get_ib_byidx(groupidx = INT_NULL, progidx, ibIdx) {
+// 	return _gl_programs_groups.buffer[groupidx].buffer[progidx].ib[ibIdx];
+// }
+export function Gl_progs_get_ib_byidx(groupidx = INT_NULL, progidx, ibIdx) {
+	return Gl_ib_get_byidx(_gl_programs_groups.buffer[groupidx].buffer[progidx].ib[ibIdx]);
 }
-export function Gl_progs_get_ib_byidx2(programs_groupidx = INT_NULL, progidx, ibIdx) {
-	return Gl_ib_get_byidx(_gl_programs_groups.buffer[programs_groupidx].buffer[progidx].ib[ibIdx]);
+export function Gl_progs_get_shaderinfo(groupidx = INT_NULL, progidx) {
+	return _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo;
 }
-export function Gl_progs_get_shaderinfo(programs_groupidx = INT_NULL, progidx) {
-	return _gl_programs_groups.buffer[programs_groupidx].buffer[progidx].shaderinfo;
+export function Gl_progs_get_shaderinfo_uniforms(groupidx = INT_NULL, progidx) {
+	return _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.uniforms;
 }
-export function Gl_progs_get_shaderinfo_uniforms(programs_groupidx = INT_NULL, progidx) {
-	return _gl_programs_groups.buffer[programs_groupidx].buffer[progidx].shaderinfo.uniforms;
-}
-export function Gl_progs_set_vb_texidx(programs_groupidx = INT_NULL, progidx, vbIdx, texidx) {
-	_gl_programs_groups.buffer[programs_groupidx].buffer[progidx].vb[vbIdx].texidx = texidx;
+export function Gl_progs_set_vb_texidx(groupidx = INT_NULL, progidx, vbIdx, texidx) {
+	_gl_programs_groups.buffer[groupidx].buffer[progidx].vb[vbIdx].texidx = texidx;
 }
 
 
 export function Gl_create_program(sid) {
 	return _gl_programs_groups.CreateProgram(gfxCtx.gl, sid);
 }
-export function Gl_progs_get_programs_count(programs_groupidx = INT_NULL) {
-	return _gl_programs_groups.buffer[programs_groupidx].count;
+export function Gl_progs_get_programs_count(groupidx = INT_NULL) {
+	return _gl_programs_groups.buffer[groupidx].count;
 }
 
-export function Gl_get_progams_count(programs_groupidx = INT_NULL) {
-	return _gl_programs_groups.buffer[programs_groupidx].count;
+export function Gl_get_progams_count(groupidx = INT_NULL) {
+	return _gl_programs_groups.buffer[groupidx].count;
 }
 
-export function Gl_set_vb_show(progidx, vbIdx, programs_groupidx = INT_NULL, flag) {
-
-	_gl_programs_groups.buffer[programs_groupidx].buffer[progidx].vb[vbIdx].show = flag;
-	Gl_ib_set_show(_gl_programs_groups.buffer[programs_groupidx].buffer[progidx].ib[vbIdx], flag)
-	// _gl_programs_groups.buffer[programs_groupidx].buffer[progidx].ib[vbIdx].show = flag;
-	console.log(flag, '000000000000000000000 Gl_set_vb_show ', programs_groupidx, progidx, vbIdx)
-	Renderqueue_set_active(programs_groupidx, progidx, vbIdx, flag); // Update the draw buffer
+export function Gl_set_vb_show(groupidx = INT_NULL, progidx, vbIdx, flag) {
+if(!_gl_programs_groups.buffer[groupidx])
+console.log
+	_gl_programs_groups.buffer[groupidx].buffer[progidx].vb[vbIdx].show = flag;
+	Gl_ib_set_show(_gl_programs_groups.buffer[groupidx].buffer[progidx].ib[vbIdx], flag)
+	// _gl_programs_groups.buffer[groupidx].buffer[progidx].ib[vbIdx].show = flag;
+	Renderqueue_set_active(groupidx, progidx, vbIdx, flag); // Update the draw buffer
 }
 
 /**
@@ -552,9 +548,9 @@ export function GlEnableAttribsLocations(gl, prog) {
 	}
 }
 
-export function GlProgramUpdateUniformProjectionMatrix(gl, progidx, mat4, programs_groupidx = INT_NULL) {
+export function GlProgramUpdateUniformProjectionMatrix(gl, progidx, mat4, groupidx = INT_NULL) {
 
-	const prog = _gl_programs_groups.buffer[programs_groupidx].buffer[progidx];
+	const prog = _gl_programs_groups.buffer[groupidx].buffer[progidx];
 	GlUseProgram(prog.webgl_program);
 	prog.UniformsSetUpdateProjectionMatrix(gl, mat4);
 
@@ -562,10 +558,10 @@ export function GlProgramUpdateUniformProjectionMatrix(gl, progidx, mat4, progra
 
 export function GlCheckSid(sid, progidx) {
 
-	const progs_groupidx = PROGRAMS_GROUPS.GetIdxByMask(sid.progs_group);
-	if (progs_groupidx === INT_NULL) return false; // Case  programs group hasn't been created
+	const groupidx = PROGRAMS_GROUPS.GetIdxByMask(sid.progs_group);
+	if (groupidx === INT_NULL) return false; // Case  programs group hasn't been created
 
-	const progs_group = Gl_progs_get_group(progs_groupidx);
+	const progs_group = Gl_progs_get_group(groupidx);
 	if (!progs_group.buffer[progidx]) return false;	// Case  program in programs group hasn't been created
 
 	const prog = progs_group.buffer[progidx];

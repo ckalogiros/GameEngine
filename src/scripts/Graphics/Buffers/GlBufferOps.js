@@ -1,15 +1,14 @@
 "use strict";
 
 import { RotateZ, Matrix3x3_3x3Mult } from "../../Helpers/Math/Matrix.js";
-import { Gl_progs_get_ib_byidx, Gl_progs_get_group, Gl_progs_get_vb_byidx, Gl_progs_get_ib_byidx2 } from "../GlProgram.js";
+import { Gl_progs_get_group, Gl_progs_get_vb_byidx, Gl_progs_get_ib_byidx } from "../GlProgram.js";
 
 
 export function Gl_remove_geometry(gfx, num_faces = 1) {
 
-    const vb = Gl_progs_get_vb_byidx(gfx.progs_groupidx, gfx.prog.idx, gfx.vb.idx);
-    // const ib = Gl_progs_get_ib_byidx(gfx.progs_groupidx, gfx.prog.idx, gfx.ib.idx);
-    const ib = Gl_progs_get_ib_byidx2(gfx.progs_groupidx, gfx.prog.idx, gfx.ib.idx);
-    // const ib = Gl_ib_get_byidx_in_prog(prog.ib[ibIdx]);
+    const vb = Gl_progs_get_vb_byidx(gfx.prog.groupidx, gfx.prog.idx, gfx.vb.idx);
+    // const ib = Gl_progs_get_ib_byidx(gfx.prog.groupidx, gfx.prog.idx, gfx.ib.idx);
+    const ib = Gl_progs_get_ib_byidx(gfx.prog.groupidx, gfx.prog.idx, gfx.ib.idx);
 
     // Structure to use for updating a removed mesh's sttart index pointing to it's location in the vertex buffer..
     const ret = {
@@ -37,9 +36,9 @@ export function Gl_remove_geometry_with_alpha(gfx, num_faces = 1) {
     GlSetColorAlpha(gfx, 0, num_faces);
 }
 
-export function Gl_set_vb_mesh_priority(progs_groupidx, progidx, vbIdx, meshIdx, meshCount) {
+export function Gl_set_vb_mesh_priority(groupidx, progidx, vbIdx, meshIdx, meshCount) {
 
-    const vb = Gl_progs_get_vb_byidx(progs_groupidx, progidx, vbIdx);
+    const vb = Gl_progs_get_vb_byidx(groupidx, progidx, vbIdx);
 
     const meshStart = vb.meshes[meshIdx].vb.start;
     const meshSize = vb.meshes[meshIdx].vb.count;
@@ -362,7 +361,7 @@ export function GlSetColorPerVertex(gfxInfo, color, num_faces = 1) {
 
     /**DEBUG*/if (gfxInfo === null) { alert('GFX is null. @ GlSetColor()'); }
     
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.col;
@@ -393,7 +392,7 @@ export function GlSetColor(gfxInfo, color, num_faces = 1) {
 
     /**DEBUG*/if (gfxInfo === null) { alert('GFX is null. @ GlSetColor()'); }
     
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.col;
@@ -433,7 +432,7 @@ export function GlSetColor(gfxInfo, color, num_faces = 1) {
 }
 export function GlSetColorAlpha(gfxInfo, val, num_faces) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.col;
@@ -453,7 +452,7 @@ export function GlSetColorAlpha(gfxInfo, val, num_faces) {
 }
 export function GlSetDim(gfxInfo, dim, num_faces = 1) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.pos;
@@ -485,7 +484,7 @@ export function GlSetDim(gfxInfo, dim, num_faces = 1) {
 }
 export function GlSetDimY(gfxInfo, y, num_faces = 1) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.pos + 1;
@@ -512,7 +511,7 @@ export function GlSetDimY(gfxInfo, y, num_faces = 1) {
 }
 export function GlSetTex(gfxInfo, uvs, num_faces = 1) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.tex;
@@ -544,7 +543,7 @@ export function GlSetTex(gfxInfo, uvs, num_faces = 1) {
 }
 export function GlMoveXY(gfxInfo, wpos, num_faces = 1) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.wposTime;
@@ -564,7 +563,7 @@ export function GlMoveXY(gfxInfo, wpos, num_faces = 1) {
 }
 export function GlMoveXYZ(gfxInfo, wpos, num_faces = 1) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.wposTime;
@@ -585,7 +584,7 @@ export function GlMoveXYZ(gfxInfo, wpos, num_faces = 1) {
 
 export function GlSetWpos(gfxInfo, pos, num_faces = 1) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.wposTime;
@@ -606,7 +605,7 @@ export function GlSetWpos(gfxInfo, pos, num_faces = 1) {
 }
 export function GlSetWposXY(gfxInfo, pos, num_faces = 1) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.wposTime;
@@ -626,7 +625,7 @@ export function GlSetWposXY(gfxInfo, pos, num_faces = 1) {
 }
 export function GlSetWposX(gfxInfo, posx, num_faces = 1) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.wposTime;
@@ -650,7 +649,7 @@ export function GlSetWposX(gfxInfo, posx, num_faces = 1) {
 }
 export function GlSetWposY(gfxInfo, posy, num_faces = 1) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.wposTime + 1;
@@ -674,7 +673,7 @@ export function GlSetWposY(gfxInfo, posy, num_faces = 1) {
 }
 export function GlSetWposZ(gfxInfo, posz, num_faces = 1) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.wposTime + 2;
@@ -698,7 +697,7 @@ export function GlSetWposZ(gfxInfo, posz, num_faces = 1) {
 }
 export function GlSetAttrRoundCorner(gfxInfo, val) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.style + V_ROUND_CORNER_STRIDE;
@@ -716,7 +715,7 @@ export function GlSetAttrRoundCorner(gfxInfo, val) {
 }
 export function GlSetAttrBorderWidth(gfxInfo, val) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.style + V_BORDER_WIDTH_STRIDE;
@@ -734,7 +733,7 @@ export function GlSetAttrBorderWidth(gfxInfo, val) {
 }
 export function GlSetAttrBorderFeather(gfxInfo, val) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.style + V_BORDER_FEATHER_STRIDE;
@@ -752,7 +751,7 @@ export function GlSetAttrBorderFeather(gfxInfo, val) {
 }
 export function GlSetAttrTime(gfxInfo, val) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.time;
@@ -770,7 +769,7 @@ export function GlSetAttrTime(gfxInfo, val) {
 }
 export function GlSetAttrSdfParams(gfxInfo, val) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.sdf;
@@ -789,7 +788,7 @@ export function GlSetAttrSdfParams(gfxInfo, val) {
 }
 export function GlSetAttrSdfParamsOuter(gfxInfo, val) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.sdf;
@@ -808,7 +807,7 @@ export function GlSetAttrSdfParamsOuter(gfxInfo, val) {
 }
 export function GlSetAttrTex(gfxInfo, uvs) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.tex;
@@ -846,7 +845,7 @@ export function GlSetAttrTex(gfxInfo, uvs) {
  */
 export function GlSetAttrParams1(gfxInfo, param, paramOffset) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.params1 + paramOffset;
@@ -865,7 +864,7 @@ export function GlSetAttrParams1(gfxInfo, param, paramOffset) {
 // Move all meshes from a buffer with the starting indexes
 export function GlSetWposXYMany(gfxInfo, pos, startsBuffer) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.wposTime;
@@ -891,7 +890,7 @@ export function GlSetWposXYMany(gfxInfo, pos, startsBuffer) {
 
 export function GlRotate2D(gfxInfo, dim, angle) {
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.pos;
@@ -922,7 +921,7 @@ export function GlRotateY3D2(mesh, angle) {
     const gfxInfo = mesh.gfx;
     const dim = mesh.geom.dim;
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.pos;
@@ -1043,7 +1042,7 @@ export function GlRotateX3D(mesh, angle) {
     const faces = mesh.geom.faces;
     let fLen = faces.length;
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.pos;
@@ -1080,7 +1079,7 @@ export function GlRotateY3D(mesh, angle) {
     const faces = mesh.geom.faces;
     let fLen = faces.length;
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.pos;
@@ -1119,7 +1118,7 @@ export function GlRotateZ3D(mesh, angle) {
     const faces = mesh.geom.faces;
     let fLen = faces.length;
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.pos;
@@ -1158,7 +1157,7 @@ export function GlRotateXY3D(mesh, angle) {
     const faces = mesh.geom.faces;
     let fLen = faces.length;
 
-    const progs = Gl_progs_get_group(gfxInfo.progs_groupidx);
+    const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.pos;

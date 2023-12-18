@@ -1,8 +1,9 @@
-import { GlProgramUpdateUniformProjectionMatrix } from '../../../Graphics/GlProgram.js';
+import { GlProgramUpdateUniformProjectionMatrix, Gl_get_progams_count } from '../../../Graphics/GlProgram.js';
 import { MouseGetPosDif, MouseGetWheel } from '../../Controls/Input/Mouse.js';
 import { TimerGetGlobalTimer } from '../../Timers/Timers.js';
 import { Matrix4 } from '../../../Helpers/Math/Matrix4.js';
-import { Gfx_get_progams_count } from '../../Interfaces/Gfx/GfxInterfaceFunctions.js';
+
+
 
 /**
  * // TODO:
@@ -72,14 +73,14 @@ export class Camera extends Matrix4 {
 		const default_shader_programs_index = PROGRAMS_GROUPS.DEFAULT.IDX;
 		const debug_ui_shader_programs_index = PROGRAMS_GROUPS.DEBUG.IDX;
 		if(default_shader_programs_index !== INT_NULL){
-			const count = Gfx_get_progams_count(default_shader_programs_index);
+			const count = Gl_get_progams_count(default_shader_programs_index);
 			// TODO!!!: IMPLEMENT CORECTLY. We need to pass the index of the gl_programs index
 			for(let i=0; i<count; i++){
 				GlProgramUpdateUniformProjectionMatrix(gl, i, this.elements, default_shader_programs_index);
 			}
 		}
 		if(debug_ui_shader_programs_index !== INT_NULL){
-			const count = Gfx_get_progams_count(debug_ui_shader_programs_index);
+			const count = Gl_get_progams_count(debug_ui_shader_programs_index);
 			// TODO!!!: IMPLEMENT CORECTLY. We need to pass the index of the gl_programs index
 			for(let i=0; i<count; i++){
 				GlProgramUpdateUniformProjectionMatrix(gl, i, this.elements, debug_ui_shader_programs_index);

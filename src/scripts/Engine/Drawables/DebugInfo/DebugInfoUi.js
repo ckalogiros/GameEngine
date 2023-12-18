@@ -1,6 +1,6 @@
 "use strict";
 
-import { Gl_progs_get_group } from "../../../Graphics/GlProgram";
+import { Gl_progs_get_group, Gl_progs_get_vb_byidx } from "../../../Graphics/GlProgram";
 import { Section } from "../Meshes/Section";
 import { Drop_down_set_root, Widget_Dropdown } from "../Meshes/Widgets/Menu/Widget_Dropdown";
 import { Widget_Switch } from "../Meshes/Widgets/WidgetButton";
@@ -11,7 +11,8 @@ import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimers
 import { PerformanceTimerGetFps1sAvg, _fps_1s_avg, _fps_500ms_avg } from "../../Timers/Time";
 import { Info_listener_create_event, Info_listener_destroy_event } from "./InfoListeners";
 import { Widget_Scroller } from "../Meshes/Widgets/WidgetScroller";
-import { Gfx_progs_get_vb_byidx } from "../../Interfaces/Gfx/GfxInterfaceFunctions";
+
+
 
 const _font_size = 10;
 export function Debug_info_ui_performance(scene) {
@@ -464,7 +465,7 @@ function Debug_info_gfx_update(params) {
 
    if(!dp_prog) console.error('dropdown program not found')
    
-   const vb = Gfx_progs_get_vb_byidx(progidx, vbidx);
+   const vb = Gl_progs_get_vb_byidx(progidx, vbidx);
    // /*DEBUG*/const progs = Gl_progs_get_group();
    // console.log(`Debug_info_gfx_update prog:${progidx} vb:${vbidx} vb.count:${vb.count}`);
    if(foundvbidx !== INT_NULL) {
@@ -536,7 +537,7 @@ function UpdateUiGfxSelfText(){
       const vbidxs = ui_gfx_self_state.progs.buffer[i].vb;
       for (let j=0; j<vbidxs.length; j++){
    
-         const vb = Gfx_progs_get_vb_byidx(ui_gfx_self_state.progs.buffer[i].idx, vbidxs[j]);
+         const vb = Gl_progs_get_vb_byidx(ui_gfx_self_state.progs.buffer[i].idx, vbidxs[j]);
    
          const child = dp_self.menu.children.buffer[stride+j];
          const text = `prog:${ui_gfx_self_state.progs.buffer[i].idx} vb:${vbidxs[j]} | count:${vb.count}`;

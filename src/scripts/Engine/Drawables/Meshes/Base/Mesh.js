@@ -7,8 +7,8 @@ import { CopyArr4 } from "../../../../Helpers/Math/MathOperations.js";
 import { Scenes_get_count, Scenes_update_all_gfx_starts, Scenes_get_root_meshes, Scenes_remove_mesh_from_gfx, Scenes_remove_root_mesh } from "../../../Scenes.js";
 import { Gfx_remove_geometry } from "../../../Interfaces/Gfx/GfxContextCreate.js";
 import { TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals.js";
-import { Gfx_set_vb_show } from "../../../Interfaces/Gfx/GfxInterfaceFunctions.js";
 import { Info_listener_dispatch_event } from "../../DebugInfo/InfoListeners.js";
+import { Gl_set_vb_show } from "../../../../Graphics/GlProgram.js";
 
 
 
@@ -196,10 +196,10 @@ export class Mesh {
         // Remove from gfx buffers.
         const ret = Gfx_remove_geometry(this.gfx, this.geom.num_faces)
         // Remove from scene
-        Scenes_update_all_gfx_starts(this.sceneidx, this.gfx.progs_groupidx, this.gfx.prog.idx, this.gfx.vb.idx, ret); // Update the gfx.start of all meshes that are inserted in the same vertex buffer.
+        Scenes_update_all_gfx_starts(this.sceneidx, this.gfx.prog.groupidx, this.gfx.prog.idx, this.gfx.vb.idx, ret); // Update the gfx.start of all meshes that are inserted in the same vertex buffer.
         Scenes_remove_root_mesh(this, this.sceneidx);
         // console.log('Destroy mesh:', this.name)
-        const error = Scenes_remove_mesh_from_gfx(this.sceneidx, this.gfx.progs_groupidx, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.scene_mesh_in_gfx_idx); // Remove mesh from the scene's gfx buffer
+        const error = Scenes_remove_mesh_from_gfx(this.sceneidx, this.gfx.prog.groupidx, this.gfx.prog.idx, this.gfx.vb.idx, this.gfx.scene_mesh_in_gfx_idx); // Remove mesh from the scene's gfx buffer
         if (error) { console.error('ERROR REMOVING MESH: ', this.name); }
 
         if (this.parent) this.parent.RemoveChildByIdx(this.idx); // Remove the current mesh from the parent
@@ -241,7 +241,7 @@ export class Mesh {
 
     Set_graphics_vertex_buffer_render(flag) {
 
-        Gfx_set_vb_show(this.gfx.progs_groupidx, this.gfx.prog.idx, this.gfx.vb.idx, flag);
+        Gl_set_vb_show(this.gfx.prog.groupidx, this.gfx.prog.idx, this.gfx.vb.idx, flag);
         if (flag) this.StateEnable(MESH_STATE.IS_HOVERABLE);
         else this.StateDisable(MESH_STATE.IS_HOVERABLE);
     }

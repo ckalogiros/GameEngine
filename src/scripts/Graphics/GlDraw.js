@@ -31,11 +31,11 @@ export function Gl_draw(gl) {
     for (let i = 0; i < drawQueueCount; i++) {
         // for (let i = drawQueueCount-1; i >= 0 ; i--) {
 
-        const progs_groupidx = drawQueue[i].progs_groupidx;
+        const groupidx = drawQueue[i].groupidx;
         const progidx = drawQueue[i].progidx;
         const vbidx = drawQueue[i].vbidx;
 
-        const progs = progs_group.buffer[progs_groupidx];
+        const progs = progs_group.buffer[groupidx];
 
         if (GL.BOUND_PROG_IDX !== progidx)
             GlUseProgram(progs.buffer[progidx].webgl_program, progidx)
@@ -109,7 +109,7 @@ export function Gl_draw(gl) {
         gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
 
 
-        // if(progs_groupidx === 0 && progidx===0) gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
+        // if(groupidx === 0 && progidx===0) gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 0);
         // else gl.drawElements(gl.POINTS, ib.count, gl.UNSIGNED_SHORT, 0);
         // gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
         // gl.drawElements(gl.TRIANGLES, ib.count, gl.UNSIGNED_SHORT, 6);
@@ -125,7 +125,7 @@ export function Gl_draw(gl) {
     // }
 }
 
-// Pass an array[] as 'gfx_queue' from which to draw gfx buffers. 'gfx_queue' must be of struct: {progs_groupidx, progidx, vbidx}
+// Pass an array[] as 'gfx_queue' from which to draw gfx buffers. 'gfx_queue' must be of struct: {groupidx, progidx, vbidx}
 export function Gl_draw_specific(gl, gfx_queue, framebuffer) {
 
     const progs_group = Gl_progs_get();
@@ -149,11 +149,11 @@ export function Gl_draw_specific(gl, gfx_queue, framebuffer) {
 
     for (let i = 0; i < count; i++) {
 
-        const progs_groupidx = gfx_queue[i].progs_groupidx;
+        const groupidx = gfx_queue[i].groupidx;
         const progidx = gfx_queue[i].progidx;
         const vbidx = gfx_queue[i].vbidx;
 
-        const progs = progs_group.buffer[progs_groupidx];
+        const progs = progs_group.buffer[groupidx];
 
         if (GL.BOUND_PROG_IDX !== progidx)
             GlUseProgram(progs.buffer[progidx].webgl_program, progidx)

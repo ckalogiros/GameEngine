@@ -38,17 +38,17 @@ export class Twist extends MeshBuffer{
       for (let i = 0; i < this.size; i++) {
          if (this.buffer[i].isActive) {
             this.buffer[i].Move(this.buffer[i].translation.xAdvance, this.buffer[i].translation.yAdvance);
-            const prog = Gl_progs_get_prog_byidx(this.buffer[i].gfxInfo.progs_groupidx, this.buffer[i].gfxInfo.prog.idx);
+            const prog = Gl_progs_get_prog_byidx(this.buffer[i].gfxInfo.prog.groupidx, this.buffer[i].gfxInfo.prog.idx);
             prog.SetTimer(0.1, UNIFORM_PARAMS.TWIST.timeIdx);
          }
       }
    }
    SetTimer() {
-      const prog = Gl_progs_get_prog_byidx(this.buffer[i].gfxInfo.progs_groupidx, this.buffer[i].gfx.prog.idx);
+      const prog = Gl_progs_get_prog_byidx(this.buffer[i].gfxInfo.prog.groupidx, this.buffer[i].gfx.prog.idx);
       prog.SetTimer(0.1, UNIFORM_PARAMS.TWIST.timeIdx);
    }
    SetAmtxSpeed(val) {
-      const prog = Gl_progs_get_prog_byidx(this.buffer[0].gfxInfo.progs_groupidx, this.buffer[0].gfxInfo.prog.idx);
+      const prog = Gl_progs_get_prog_byidx(this.buffer[0].gfxInfo.prog.groupidx, this.buffer[0].gfxInfo.prog.idx);
       prog.UniformsSetBufferUniform(val, UNIFORM_PARAMS.TWIST.dirIdx);
    }
 };

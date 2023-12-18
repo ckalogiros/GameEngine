@@ -1,12 +1,9 @@
 "use strict";
 
-import { GlSetWposY } from "../../../Graphics/Buffers/GlBufferOps.js";
+import { GlSetWposXY, GlSetWposY } from "../../../Graphics/Buffers/GlBufferOps.js";
 // import { GlAddGeometry } from "../../../Graphics/Buffers/GlBuffers.js";
 import { GfxInfoMesh } from "../../../Graphics/GlProgram.js";
 import { CopyArr2 } from "../../../Helpers/Math/MathOperations.js";
-import { GfxUpdatePosXY } from "../../Interfaces/Gfx/GfxInterfaceFunctions.js";
-import { Font_get_font_ratio } from "../../Loaders/Font/ChlumskyFontMetricsLoader.js";
-import { FontGetFontDimRatio } from "../../Loaders/Font/Font.js";
 import { Geometry2D } from "./Base/Geometry.js";
 
 
@@ -67,7 +64,7 @@ export class Geometry2D_Text extends Geometry2D {
       let gfxCopy = new GfxInfoMesh(gfx);
       for (let i = 0; i < this.num_faces; i++) {
 
-         GfxUpdatePosXY(gfxCopy, charPos);
+         GlSetWposXY(gfxCopy, charPos);
          gfxCopy.vb.start += gfxCopy.vb.count;
          // charPos[0] += this.dim[0] * 2;
          charPos[0] += this.dim[0];

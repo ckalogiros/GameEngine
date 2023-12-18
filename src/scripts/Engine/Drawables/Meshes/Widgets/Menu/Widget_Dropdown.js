@@ -86,7 +86,6 @@ export class Widget_Dropdown extends Section {
 
    AddToMenu(mesh) {
 
-
       if (mesh.type & MESH_TYPES_DBG.WIDGET_DROP_DOWN) {
 
          mesh.depth_level = this.depth_level + 1; // Set the depth of the new dp.
@@ -110,9 +109,6 @@ export class Widget_Dropdown extends Section {
       this.menu.AddItem(mesh);
       mesh.geom.pos[2] += this.geom.pos[2];
       mesh.geom.pos[2]++;
-      console.log(']]]]]]]]]]]]]]]]]]]]]]]]]]]]]')
-      console.log(mesh)
-      console.log(mesh.name, mesh.geom.pos)
    }
 
 
@@ -372,6 +368,7 @@ export class Widget_Dropdown extends Section {
 
       }
 
+      console.warn('{{DESTROY}}, child:', mesh.name, mesh)
       mesh.Destroy();
    }
 
@@ -385,6 +382,7 @@ export class Widget_Dropdown extends Section {
       }
 
       this.RemoveAllListenEvents();
+      console.warn('{{DESTROY}}, mesh:', this.name, this)
       super.Destroy();
    }
 
