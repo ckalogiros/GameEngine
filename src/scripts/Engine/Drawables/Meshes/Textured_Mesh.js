@@ -62,98 +62,97 @@ export class Textured_Mesh extends Mesh {
       return this.gfx;
    }
 
-/********************************************************************************************************************************************************************** */
-// TODO: The: ConstructListeners(), OnClick() and OnMove(), belong to a widget rather than a _Mesh. Neither Text_Mesh or Rect_Mesh have these functions. Maybe create the apropriate widget for the Textured_mesh too.
-ConstructListeners(_root = null) {
-   
-   const mesh = this; // If in recursion, use as the current mesh the passed param. 
-   const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
-   // console.log('****', mesh.name, mesh.listeners.buffer)
-   
-   const root_evt = root.listeners.buffer;
-   
-   for (let etypeidx = 0; etypeidx < mesh.listeners.boundary; etypeidx++) {
+   /********************************************************************************************************************************************************************** */
+   // TODO: The: ConstructListeners(), OnClick() and OnMove(), belong to a widget rather than a _Mesh. Neither Text_Mesh or Rect_Mesh have these functions. Maybe create the apropriate widget for the Textured_mesh too.
+   ConstructListeners(_root = null) {
       
-      const evt = mesh.listeners.buffer[etypeidx];
-      if (evt) { // If event is not null
-         const target_params = {
-            EventClbk: null,
-            targetBindingFunctions: null,
-            target_mesh: mesh,
-            params: null,
+      const mesh = this; // If in recursion, use as the current mesh the passed param. 
+      const root = (_root) ? _root : this; // If in recursion, use as the current mesh the passed param. 
+      // console.log('****', mesh.name, mesh.listeners.buffer)
+      
+      const root_evt = root.listeners.buffer;
+      
+      for (let etypeidx = 0; etypeidx < mesh.listeners.boundary; etypeidx++) {
+         
+         const evt = mesh.listeners.buffer[etypeidx];
+         if (evt) { // If event is not null
+            const target_params = {
+               EventClbk: null,
+               targetBindingFunctions: null,
+               target_mesh: mesh,
+               params: null,
+            }
+            mesh.AddListenEvent(etypeidx, mesh.OnClick, target_params, root_evt);
          }
-         mesh.AddListenEvent(etypeidx, mesh.OnClick, target_params, root_evt);
       }
    }
-}
 
-OnClick(params) {
+   OnClick(params) {
 
-   const mesh = params.target_params.target_mesh;
-   const OnMoveFn = mesh.OnMove;
+      const mesh = params.target_params.target_mesh;
+      const OnMoveFn = mesh.OnMove;
 
-   const point = MouseGetPos();
-   const g = mesh.geom;
-   if (Check_intersection_point_rect(g.pos, g.dim, point, [0, 8])) {
+      const point = MouseGetPos();
+      const g = mesh.geom;
+      if (Check_intersection_point_rect(g.pos, g.dim, point, [0, 8])) {
 
-       STATE.mesh.SetClicked(mesh);
-       console.log('Clicked:', mesh.name)
+         STATE.mesh.SetClicked(mesh);
+         console.log('Clicked:', mesh.name)
 
-       if (mesh.timeIntervalsIdxBuffer.boundary <= 0) {
+         if (mesh.timeIntervalsIdxBuffer.boundary <= 0) {
 
-           /**
-            * Create Move event.
-            * The Move event runs only when the mesh is GRABED. That means that the timeInterval 
-            * is created and destroyed upon 'onClickDown' and 'onClickUp' respectively.
-           */
-           const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, OnMoveFn, mesh);
-           console.log('Time interval idx:', idx)
-           mesh.timeIntervalsIdxBuffer.Add(idx);
+            /**
+               * Create Move event.
+               * The Move event runs only when the mesh is GRABED. That means that the timeInterval 
+               * is created and destroyed upon 'onClickDown' and 'onClickUp' respectively.
+            */
+            const idx = TimeIntervalsCreate(10, 'Move Widget_Text', TIME_INTERVAL_REPEAT_ALWAYS, OnMoveFn, mesh);
+            console.log('Time interval idx:', idx)
+            mesh.timeIntervalsIdxBuffer.Add(idx);
 
-           if (mesh.StateCheck(MESH_STATE.IS_GRABABLE)) {
+            if (mesh.StateCheck(MESH_STATE.IS_GRABABLE)) {
 
-               STATE.mesh.SetGrabed(mesh);
-               mesh.StateEnable(MESH_STATE.IN_GRAB);
-           }
+                  STATE.mesh.SetGrabed(mesh);
+                  mesh.StateEnable(MESH_STATE.IN_GRAB);
+            }
 
-       }
-       return true;
-   }
-   return false;
-}
-
-// SEE ### OnMove Events Implementation Logic
-OnMove(params) {
-
-   // The 'OnMove' function is called by the timeInterval.
-   // The timeInterval has been set by the 'OnClick' event.
-   const mesh = params.params;
-
-   // Destroy the time interval and the Move operation, if the mesh is not grabed
-   // MESH_STATE.IN_GRAB is deactivated upon mouse 'click up' in Events.js.
-   if (mesh.StateCheck(MESH_STATE.IN_GRAB) === 0 && mesh.timeIntervalsIdxBuffer.boundary) {
-
-       const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
-       TimeIntervalsDestroyByIdx(intervalIdx);
-       mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
-
-       return;
+         }
+         return true;
+      }
+      return false;
    }
 
-   // Move 
-   const mouse_pos = MouseGetPosDif();
-   // mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, mesh.gfx);
+   // SEE ### OnMove Events Implementation Logic
+   OnMove(params) {
 
-   // HACK: temporarely use the move to chnge the uv coordinates
-   mesh.mat.uv[0] += -mouse_pos.x *.001;
-   mesh.mat.uv[1] += -mouse_pos.x *.001;
-   mesh.mat.uv[2] += mouse_pos.y  *.001;
-   mesh.mat.uv[3] += mouse_pos.y  *.001;
-   GlSetTex(mesh.gfx, mesh.mat.uv);
-}
+      // The 'OnMove' function is called by the timeInterval.
+      // The timeInterval has been set by the 'OnClick' event.
+      const mesh = params.params;
 
-/********************************************************************************************************************************************************************** */
-SetZindex(z) {
+      // Destroy the time interval and the Move operation, if the mesh is not grabed
+      // MESH_STATE.IN_GRAB is deactivated upon mouse 'click up' in Events.js.
+      if (mesh.StateCheck(MESH_STATE.IN_GRAB) === 0 && mesh.timeIntervalsIdxBuffer.boundary) {
+
+         const intervalIdx = mesh.timeIntervalsIdxBuffer.buffer[0];// HACK !!!: We need a way to know what interval is what, in the 'timeIntervalsIdxBuffer' in a mesh. 
+         TimeIntervalsDestroyByIdx(intervalIdx);
+         mesh.timeIntervalsIdxBuffer.RemoveByIdx(0); // HACK
+
+         return;
+      }
+
+      // Move 
+      const mouse_pos = MouseGetPosDif();
+      // mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, mesh.gfx);
+
+      // HACK: temporarely use the move to chnge the uv coordinates
+      mesh.mat.uv[0] += -mouse_pos.x *.001;
+      mesh.mat.uv[1] += -mouse_pos.x *.001;
+      mesh.mat.uv[2] += mouse_pos.y  *.001;
+      mesh.mat.uv[3] += mouse_pos.y  *.001;
+      GlSetTex(mesh.gfx, mesh.mat.uv);
+   }
+
+   SetZindex(z) {
    this.geom.SetZindex(z, this.gfx, this.geom.num_faces);
    }
 
@@ -163,22 +162,10 @@ SetZindex(z) {
 
 
    /*******************************************************************************************************************************************************/
-   // Setters-Getters
-
-
-
-   /*******************************************************************************************************************************************************/
    // Alignment
-
    Reposition_pre(pos_dif) {
       // TODO: If needed: implemnt. Else Delete
    }
-
-
-   /*******************************************************************************************************************************************************/
-   // Helpers
-
-
 }
 
 

@@ -2,15 +2,7 @@
 
 import * as math from '../../../../Helpers/Math/MathOperations.js'
 import { GlSetColor, GlSetColorAlpha, GlSetColorPerVertex } from "../../../../Graphics/Buffers/GlBufferOps.js";
-import { GlHandlerAddMaterialBuffer } from '../../../../Graphics/Buffers/GlBuffers.js';
 import { Texture_load_texture_byid } from '../../../Loaders/Textures/Texture.js';
-
-/**
- * // TODO:
- * Remove useless 'num_faces' variable.
- */
-
-
 
 
 let _materialId = 0;
@@ -85,11 +77,12 @@ export class Material {
       }
    }
    SetHoverColor(gfx) {
+      const intensity = 1.4;
       if(gfx.sid.attr & SID.ATTR.COL4_PER_VERTEX){
-         GlSetColorPerVertex(gfx, math.Mult_mat4_scalar2(this.col, 1.3));
+         GlSetColorPerVertex(gfx, math.Mult_mat4_scalar2(this.col, intensity));
       }
       else {
-         GlSetColor(gfx, math.Mult_arr4_scalar2(this.col, 1.3));
+         GlSetColor(gfx, math.Mult_arr4_scalar2(this.col, intensity));
       }
    }
    SeHoverColortDefault(gfx) {
@@ -116,41 +109,41 @@ export class Material {
    }
 
    // Enable shader properties 
-   EnableGfxAttributes(which, params = {}) {
+   // EnableGfxAttributes(which, params = {}) {
 
-      if (this.alreadyAdded === true) {
-         console.error(`You are trying to enable ${which} but the shaders have been already created. Try Enable() before inserting the mesh to a Scene().`);
-      }
+   //    if (this.alreadyAdded === true) {
+   //       console.error(`You are trying to enable ${which} but the shaders have been already created. Try Enable() before inserting the mesh to a Scene().`);
+   //    }
 
-      if (Array.isArray(which)) {
-         const count = which.length;
-         for (let i = 0; i < count; i++) {
-            this.CheckCase(which[i]);
-         }
+   //    if (Array.isArray(which)) {
+   //       const count = which.length;
+   //       for (let i = 0; i < count; i++) {
+   //          this.CheckCase(which[i]);
+   //       }
 
-      }
-      else {
-         this.CheckCase(which, params);
-      }
+   //    }
+   //    else {
+   //       this.CheckCase(which, params);
+   //    }
 
-   }
-   CheckCase(which, params = {}) {
-      switch (which) {
-         case MAT_ENABLE.ATTR_VERTEX_COLOR: {
-            // this.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
-            this.sid.attr &= ~ SID.ATTR.COL4;
-            this.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
+   // }
+   // CheckCase(which, params = {}) {
+   //    switch (which) {
+   //       case MAT_ENABLE.ATTR_VERTEX_COLOR: {
+   //          // this.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
+   //          this.sid.attr &= ~ SID.ATTR.COL4;
+   //          this.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
             
-            if(DEBUG.CORE && !Object.hasOwn(params, 'color')){
-               alert(`Property of:${params} does not exist. Make sure you pass the corect property with the parameter. @ Material.js`);
-               return null;
-            }
-            this.col = params.color;
-            break;
-         }
-         default: console.error('Enable material\'s shader param failed. @ Material.js');
-      }
-   }
+   //          if(DEBUG.CORE && !Object.hasOwn(params, 'color')){
+   //             alert(`Property of:${params} does not exist. Make sure you pass the corect property with the parameter. @ Material.js`);
+   //             return null;
+   //          }
+   //          this.col = params.color;
+   //          break;
+   //       }
+   //       default: console.error('Enable material\'s shader param failed. @ Material.js');
+   //    }
+   // }
    SetStyle(style) {
       if(!Array.isArray(style)) console.error
       math.CopyArr3(this.style, style); 
@@ -195,7 +188,7 @@ export class FontMaterial extends Material {
       const tex_idxs = Texture_load_texture_byid(this.texidx, TEXTURE_TYPE.TYPE_FONT);
 
       // this.sid.shad |= SID.SHAD.; // Enable tex_idxs rendering
-      this.sid.shad |= SID.SHAD.PRE_MULTIPLIED_ALPHA; // E
+      // this.sid.shad |= SID.SHAD.PRE_MULTIPLIED_ALPHA; // E
       this.sid.attr |= SID.ATTR.TEX2; // 
       // this.sid.attr |= SID.ATTR.SDF; // 
       this.sid.attr |= SID.ATTR.MSDF; // 

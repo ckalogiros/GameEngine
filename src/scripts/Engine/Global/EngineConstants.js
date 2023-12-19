@@ -343,6 +343,39 @@ const ORANGE_240_160_10 = InterpolateRgb(240, 160, 10);
 const ORANGE_240_200_10 = InterpolateRgb(240, 200, 10);
 const ORANGE_240_130_10 = InterpolateRgb(240, 130, 10);
 const ORANGE_240_75_10 = InterpolateRgb(255, 75, 10);
+
+const BLUE_A1 = InterpolateRgb(0, 34, 71);
+const BLUE_A2 = InterpolateRgb(0, 55, 114  );
+const BLUE_A3 = InterpolateRgb(0, 75, 155  );
+const BLUE_A4 = InterpolateRgb(0, 100, 206 );
+const GREEN_B1 = InterpolateRgb(0, 58, 0);
+const GREEN_B2 = InterpolateRgb(0, 94, 0);
+const GREEN_B3 = InterpolateRgb(0, 150, 0);
+const GREEN_B4 = InterpolateRgb(0, 210, 0);
+const ORANGE_B1 = InterpolateRgb(63, 36, 0);
+const ORANGE_B2 = InterpolateRgb(114, 65, 0);
+const ORANGE_B3 = InterpolateRgb(158, 89, 0);
+const ORANGE_B4 = InterpolateRgb(210, 118, 0);
+const ORANGE_C1 = InterpolateRgb(63, 48, 0);
+const ORANGE_C2 = InterpolateRgb(114, 86, 0);
+const ORANGE_C3 = InterpolateRgb(158, 118, 0);
+const ORANGE_C4 = InterpolateRgb(210, 158, 0);
+const PURPLE_COOL1 = InterpolateRgb(33, 0, 71);
+const PURPLE_COOL2 = InterpolateRgb(60, 0, 130);
+const PURPLE_COOL3 = InterpolateRgb(88, 0, 188);
+const PURPLE_COOL4 = InterpolateRgb(108, 0, 226);
+const PURPLE_HOT1 = InterpolateRgb(71, 0, 71);
+const PURPLE_HOT2 = InterpolateRgb(130, 0, 130);
+const PURPLE_HOT3 = InterpolateRgb(188, 0, 188);
+const PURPLE_HOT4 = InterpolateRgb(226, 0, 226);
+const PINK1 = InterpolateRgb(71 , 0, 33 	);
+const PINK2 = InterpolateRgb(130, 0, 60 	);
+const PINK3 = InterpolateRgb(188, 0, 88 	);
+const PINK4 = InterpolateRgb(226, 0, 108	);
+const RED1 = InterpolateRgb(66 , 0, 12 	);
+const RED2 = InterpolateRgb(114, 0, 21 	);
+const RED3 = InterpolateRgb(163, 0, 31 	);
+const RED4 = InterpolateRgb(220, 0, 40	);
 const BLUE_LIGHT = InterpolateRgb(76, 171, 254);
 const blue = InterpolateRgb(0.345 * 255, 0.780 * 255, 0.988 * 255)
 const bluePurple = InterpolateRgb(0.361 * 255, 0.020 * 255, 0.839 * 255)
@@ -694,3 +727,13 @@ function ERROR_TYPE(obj, type, msg) {
 		return true;
 	}
 }
+
+
+/***********************************************************************************************************************************************/
+// TEMPORARY
+const TEMP_TEST_PERFORMANE_COUNTERS = {
+
+	MESH_INFO_UI:{
+		 COUNT: 0,
+	},
+};

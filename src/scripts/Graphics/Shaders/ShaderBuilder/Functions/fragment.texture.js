@@ -23,7 +23,7 @@ export const frag_msdf_call = '  color *= Msdf();';
 export const frag_msdf = '\n\
 // set to distance fields pixel range\n\
 // uniform float pxRange;\n\
-float pxRange = 16.5;\n\
+float pxRange = 12.5;\n\
 \n\
 float median(float r, float g, float b) {\n\
   return max(min(r, g), min(max(r, g), b));\n\
@@ -49,7 +49,7 @@ vec4 Msdf() {\n\
   \n\
   float pxDist = screenPxRange() * (dist - 0.5);\n\
   float opacity = clamp(pxDist + 0.5, 0.0, 1.0);\n\
-  opacity += blur * .3; // Combine the original texture with the blurred alpha\n\
+  // opacity += blur * .3; // Combine the original texture with the blurred alpha\n\
   vec4 alpha = vec4(opacity+.0); \n\
   return alpha; \n\
 }\n\

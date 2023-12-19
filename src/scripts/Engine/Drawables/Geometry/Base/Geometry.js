@@ -2,7 +2,6 @@
 
 import * as math from '../../../../Helpers/Math/MathOperations.js'
 import * as glBufferOps from '../../../../Graphics/Buffers/GlBufferOps.js'
-// import { GlAddGeometry } from '../../../../Graphics/Buffers/GlBuffers.js';
 
 let _geometryId = 0;
 
@@ -16,11 +15,21 @@ export class Geometry2D {
     defDim = [0, 0];
     defScale = [0, 0];
     zIndex = 0;
-    time = 0;
     type = 0;
     num_faces;
 
     constructor(pos = [0, 0, 0], dim = [0, 0], scale = [1, 1]) {
+
+        // this.sid=0;
+        // this.pos = [0, 0, 0];
+        // this.dim = [0, 0];
+        // this.scale = [0, 0];
+        // this.defPos = [0, 0, 0];
+        // this.defDim = [0, 0];
+        // this.defScale = [0, 0];
+        // this.zIndex = 0;
+        // this.type = 0;
+        // this.num_faces=0;
 
         this.sid = {
             shad: 0,
@@ -50,9 +59,6 @@ export class Geometry2D {
 
     /*******************************************************************************************************************************************************/
     // Graphics
-    // AddToGraphicsBuffer(sid, gfx, meshName) {
-    //     GlAddGeometry(sid, this.pos, this.dim, this.time, gfx, meshName, 1);
-    // }
 
     SetPosXYZ(pos, gfx, numFaces = 1) {
         math.CopyArr3(this.pos, pos);
@@ -158,7 +164,6 @@ export class Geometry2D {
             math.CopyArr2(this.defDim, geom.defDim);
             math.CopyArr2(this.defScale, geom.defScale);
             this.zIndex = geom.zIndex;
-            this.time = geom.time;
             this.type = geom.type;
             this.num_faces = geom.num_faces;
 
@@ -173,7 +178,6 @@ export class Geometry3D {
     pos = [0, 0, 0];
     dim = [0, 0, 0];
     scale = [0, 0, 0];
-    time = 0;
     zIndex = 0;
     type;
 

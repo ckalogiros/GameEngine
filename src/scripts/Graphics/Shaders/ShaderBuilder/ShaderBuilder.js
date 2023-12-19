@@ -178,7 +178,6 @@ export function Gl_fs_build_fragmentshader(sid){
       : '', // ELSE null
       true ? '  frag_color = color;' : '',
       (sid.shad & SID.SHAD.PRE_MULTIPLIED_ALPHA) ? '  frag_color.rgb *= color.a;' : '',
-      // (true) ? '  frag_color.rgb *= color.a;' : '',
       // true ? '  frag_color.rgb *= color.a;' : '',
       true ? '}' : '',
    ];

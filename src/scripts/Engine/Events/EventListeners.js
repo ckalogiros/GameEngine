@@ -185,7 +185,6 @@ export class Event_Listener {
 
                      // Set any clicked mesh IN_FOCUS
                      const mesh = event_found.source_params;
-                     // console.log(mesh.name)
                      In_focus_set(mesh);
 
                      if (event_found.Clbk) {
@@ -195,9 +194,6 @@ export class Event_Listener {
                      }
                   }
                }
-
-               // Set any clicked mesh IN_FOCUS
-               const mesh = evt.source_params;
 
                if (evt.Clbk) {
                   // Else if no children event was triggered, run any events of the main event.
@@ -241,33 +237,30 @@ export class Event_Listener {
             ];
             
             if (Intersection_point_rect(point, rect)) {
-               // console.log('Listener!');
                
-               if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
-                  Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
-               }
+               /** NO USE */
+               // if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
+               //    Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
+               // }
                if (event.has_child_events && event.children) {
-                  // console.log(point)
-                  if (Check_hover_recursive(event, point)) return;
+                  // console.log('\n\n-----------------------------------')
+                  if (Check_hover_recursive(event, point)) {
+                     intersected = true;
+                     return;
+                  }
                }
                
+               // console.log('\n\n-----------------------------------')
                Events_handle_immidiate({ type: 'hover', params: { mesh: mesh } });
-               // console.log('0:', STATE.mesh.hovered.name);
-
                intersected = true;
                
             } 
-            // else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (!mesh.StateCheck(MESH_STATE.IN_MOVE) || !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
-            //    Events_handle_immidiate({ type: 'unhover', params: { mesh: mesh } });
-            // }
          }
       }
 
       // NOTE: The only way to avoid meshes remain hovered, after mouse hover skiping over the root mesh's listener.
       if(!intersected && STATE.mesh.hovered){ // If mouse is not intersecting with any mesh and there still is a hovered mesh, unhover it.
-         // console.log('1:', STATE.mesh.hovered.name)
          Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } });
-
       }
       _pt6.Stop();
    }
@@ -302,13 +295,8 @@ export class Event_Listener {
    }
 }
 
-function In_focus_set(mesh) {
-
-   // do{
-
-   //    parent = mesh.parent 
-   // }while(parent){
-   // }
+function In_focus_set(mesh) { 
+   // TODO: implement
 }
 
 function Check_hover_recursive(events, point) {
@@ -318,11 +306,14 @@ function Check_hover_recursive(events, point) {
       if (events.children.buffer[i]) {
 
          const evt = events.children.buffer[i];
-
-         if (evt.has_child_events) {
-            const ret = Check_hover_recursive(evt, point);
-            if (ret) return true; // If the most inner hovered found, return recursively so that we do not check annd set a hover of the parent meshes(that are obviusly hovered in the first place).
-         }
+         
+         /* The recursion happening here has big impact on performance, because it goes to the leaf child, even if there is no mouse hover */
+         /** NO USE */
+         // if (evt.has_child_events) {
+         //    console.log('+')
+         //    const ret = Check_hover_recursive(evt, point);
+         //    if (ret) return true; // If the most inner hovered found, return recursively so that we do not check annd set a hover of the parent meshes(that are obviusly hovered in the first place).
+         // }
 
 
          const mesh = evt.source_params
@@ -335,20 +326,38 @@ function Check_hover_recursive(events, point) {
          // if (evt.isActive && Intersection_point_rect(point, rect)) {
          if (Intersection_point_rect(point, rect)) {
 
-            if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
-               // console.log(mesh.name)
-               Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
+            
+            if (evt.has_child_events) {
+               // console.log('+')
+               const ret = Check_hover_recursive(evt, point);
+               if (ret) return true; // If the most inner hovered found, return recursively so that we do not check annd set a hover of the parent meshes(that are obviusly hovered in the first place).
             }
+
+            /** NO USE */
+            // if (STATE.mesh.hoveredId !== INT_NULL && STATE.mesh.hoveredId !== mesh.id) { // Case of doublehover
+            //    // console.log(mesh.name)
+            //    Events_handle_immidiate({ type: 'unhover', params: { mesh: STATE.mesh.hovered } }); // Unhover previous mesh.
+            // }
 
             Events_handle_immidiate({ type: 'hover', params: { mesh: mesh } });
             return true;
 
-         } 
-         else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (
-            !mesh.StateCheck(MESH_STATE.IN_MOVE) || !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
+            /** NO USE */
+            // if (evt.has_child_events) {
+            //    console.log('+')
+            //    const ret = Check_hover_recursive(evt, point);
+            //    if (ret) return true; // If the most inner hovered found, return recursively so that we do not check annd set a hover of the parent meshes(that are obviusly hovered in the first place).
+            // }
 
-            Events_handle_immidiate({ type: 'unhover', params: { mesh: mesh } });
-         }
+         } 
+
+         /** NO USE */
+         // else if (mesh.StateCheck(MESH_STATE.IN_HOVER) && (
+         //    !mesh.StateCheck(MESH_STATE.IN_MOVE) || !mesh.StateCheck(MESH_STATE.IN_GRAB))) {
+
+         //    Events_handle_immidiate({ type: 'unhover', params: { mesh: mesh } });
+         //    TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.COUNT--;
+         // }
       }
 
    }

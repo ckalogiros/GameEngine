@@ -62,6 +62,8 @@ export function TestWidgetsGeneric(scene) {
     // Listeners_debug_info_create(scene);
     Debug_info_ui_performance(scene);
 
+    CreateSectionSectioned(scene)
+
     // CreateScroller(scene);
 
     /** */
@@ -986,40 +988,42 @@ function CreateMenuBarSectioned(count) {
  */
 function CreateSectionSectioned(scene) {
 
+    const tr = 1.;
     const flags = (SECTION.ITEM_FIT | SECTION.EXPAND);
 
-    const blu = new Section(SECTION.VERTICAL, [15, 15], [350, 500, 0], [10, 0], TRANSPARENCY(BLUE, .2));
+    const blu = new Section(SECTION.VERTICAL, [15, 15], [350, 500, 0], [10, 0], TRANSPARENCY(BLUE_A2, tr));
 
-    const red = new Section(SECTION.VERTICAL, [15, 15], [0, 0, 0], [20, 20], TRANSPARENCY(PURPLE, .2));
-    const gre = new Section(SECTION.VERTICAL, [12, 12], [0, 0, 0], [20, 20], TRANSPARENCY(GREEN, .4));
-    const yel = new Section(SECTION.HORIZONTAL, [12, 12], [0, 0, 0], [20, 20], TRANSPARENCY(YELLOW, .4));
-    const ora = new Section(SECTION.HORIZONTAL, [12, 12], [0, 0, 0], [20, 20], TRANSPARENCY(ORANGE, .4));
-    const cie = new Section(SECTION.HORIZONTAL, [15, 15], [0, 0, 0], [20, 20], TRANSPARENCY(BLUE_LIGHT, .4));
-    const bla = new Section(SECTION.VERTICAL, [15, 15], [0, 0, 0], [20, 20], TRANSPARENCY(BLACK, .4));
+    const red = new Section(SECTION.VERTICAL, [15, 15], [0, 0, 0], [20, 20], TRANSPARENCY(PURPLE_HOT3, tr));
+    const gre = new Section(SECTION.VERTICAL, [12, 12], [0, 0, 0], [20, 20], TRANSPARENCY(GREEN_B2, tr));
+    const yel = new Section(SECTION.HORIZONTAL, [12, 12], [0, 0, 0], [20, 20], TRANSPARENCY(ORANGE_B3, tr));
+    const ora = new Section(SECTION.HORIZONTAL, [12, 12], [0, 0, 0], [20, 20], TRANSPARENCY(PINK2, tr));
+    const cie = new Section(SECTION.HORIZONTAL, [15, 15], [0, 0, 0], [20, 20], TRANSPARENCY(RED1, tr));
+    const bla = new Section(SECTION.VERTICAL, [15, 15], [0, 0, 0], [20, 20], TRANSPARENCY(GREY1, tr));
+
 
     { // Construct sub-sections
-        var bla_1 = new Section(SECTION.HORIZONTAL, [15, 15], [0, 0, 0], [20, 20], TRANSPARENCY(BLACK, .3));
-        var pin_1 = new Section(SECTION.VERTICAL, [25, 10], [0, 0, 0], [20, 20], TRANSPARENCY(PINK_240_60_160, .3));
-        var blu_1 = new Section(SECTION.VERTICAL, [25, 10], [0, 0, 0], [20, 20], TRANSPARENCY(BLUE, .3));
-        var pur_1 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(PURPLE, .8));
-        var red_1 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(RED, .8));
-        var yel_1 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
-        var yel_2 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
-        var red_3 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(RED, .8));
-        var yel_3 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
-        var gre_3 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(GREEN, .8));
-        var red_4 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(RED, .8));
-        var yel_4 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(YELLOW, .8));
-        var gre_4 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(GREEN, .8));
-        var ora_4 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(ORANGE, .8));
-        var gry1_1 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(GREY3, .8));
-        var gry1_2 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(GREY5, .8));
-        var gry1_3 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(GREY7, .8));
-        var gry2_1 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(GREY1, .9));
-        var gry2_2 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(GREY1, .9));
-        var gry2_3 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(GREY1, .9));
-        var gry2_4 = new Section(SECTION.VERTICAL, [5, 5], [0, 0, 0], [20, 20], TRANSPARENCY(GREY1, .9));
-        var vert_0 = new Section(SECTION.VERTICAL, [20, 20], [0, 0, 0], [20, 20], TRANSPARENCY(GREY2, .4));
+        var bla_1  = new Section(SECTION.HORIZONTAL, [15, 15], [0, 0, 0], [20, 20], TRANSPARENCY(GREY1, tr));
+        var pin_1  = new Section(SECTION.VERTICAL,   [25, 10], [0, 0, 0], [20, 20], TRANSPARENCY(PINK_240_60_160, tr));
+        var blu_1  = new Section(SECTION.VERTICAL,   [25, 10], [0, 0, 0], [20, 20], TRANSPARENCY(BLUE_10_160_220, tr));
+        var pur_1  = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(PURPLE, tr));
+        var red_1  = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(RED4, tr));
+        var yel_1  = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(PURPLE_HOT2, tr));
+        var yel_2  = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(YELLOW_240_220_10, tr));
+        var red_3  = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(RED2, tr));
+        var yel_3  = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(ORANGE_B2, tr));
+        var gre_3  = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(GREEN_B3, tr));
+        var red_4  = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(PINK3, tr));
+        var yel_4  = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(PURPLE_COOL2, tr));
+        var gre_4  = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(GREEN_B2,  tr));
+        var ora_4  = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(ORANGE_C3, tr));
+        var gry1_1 = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(GREEN_B3,  tr));
+        var gry1_2 = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(GREY5,  tr));
+        var gry1_3 = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(GREY7,  tr));
+        var gry2_1 = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(GREY1,  tr));
+        var gry2_2 = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(GREY1,  tr));
+        var gry2_3 = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(GREY1,  tr));
+        var gry2_4 = new Section(SECTION.VERTICAL,   [10, 10],   [0, 0, 0], [20, 20], TRANSPARENCY(GREY1,  tr));
+        var vert_0 = new Section(SECTION.VERTICAL,   [20, 20], [0, 0, 0], [20, 20], TRANSPARENCY(GREY1,  tr));
 
     }
 
@@ -1233,6 +1237,8 @@ function Help(scene) {
     section.ConstructListeners()
 }
 
+
+
 function MeshInfo(scene) {
 
     const fontsize = 10;
@@ -1242,6 +1248,7 @@ function MeshInfo(scene) {
     infomesh.CreateNewText('dim: 0000,0000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('idx: 0000, alpha: 0.00', fontsize, ORANGE_240_130_10, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('gfx: group: 0, prog:0, vb:0, start:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    infomesh.CreateNewText('PERFORMANCE COUNTER AND HOVERED MESH NAME', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('text gfx: group: 0, prog:0, vb:0, start:00000, count:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.SetName('Info Mesh 2');
 
@@ -1273,6 +1280,8 @@ function MeshInfoUpdate(params) {
             `dim: ${infoMesh.geom.dim}`,
             `idx: ${infoMesh.idx} | alpha:${infoMesh.mat.col[3]}`,
             gfx,
+            `counter:${TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.COUNT}`,
+            // `mesh: ${STATE.mesh.hovered.name} counter${TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.COUNT}`,
         ];
 
         // Create info for any text gfx, if exists

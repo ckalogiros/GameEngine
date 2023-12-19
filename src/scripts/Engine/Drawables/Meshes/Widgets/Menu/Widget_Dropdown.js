@@ -67,13 +67,13 @@ export class Widget_Dropdown extends Section {
       this.menu.parent = this;
       this.menu.SetName(`MENU-${this.name}`);
       { // Multi color vertex
-         // this.menu.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
-         // this.menu.mat.col = [WHITE, RED, GREEN, BLUE];
-         // this.menu.mat.defCol = [WHITE, RED, GREEN, BLUE];
-         // this.menu.mat.col[3] = .5;
-         // this.menu.mat.col[7] = .5;
-         // this.menu.mat.col[11] = .5;
-         // this.menu.mat.col[15] = .6;
+      //    this.menu.sid.attr |= SID.ATTR.COL4_PER_VERTEX;
+      //    this.menu.mat.col = [WHITE, RED, GREEN, BLUE];
+      //    this.menu.mat.defCol = [WHITE, RED, GREEN, BLUE];
+         // this.menu.mat.col[1][3] = .5;
+         // this.menu.mat.col[1][7] = .5;
+         // this.menu.mat.col[1][11] = .5;
+         // this.menu.mat.col[1][15] = .6;
       }
 
       this.dp_symbols = ['+', '-'];

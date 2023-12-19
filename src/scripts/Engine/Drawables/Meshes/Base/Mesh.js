@@ -59,31 +59,39 @@ export class Mesh {
      * // TODO: Organize all buffers to an object
      */
 
-    sid; // Shader Identifier
-    idx; // This is the index of the mesh in the scene's children buffer;
-    geom;
-    mat;
-    time;
-    attrParams1;
-    gfx;
-    is_gfx_inserted; // A way to tell if the mesh has been inserted to the graphics pipeline;
-    uniforms;
-    sceneidx; // A reference to the scene that the mesh belongs to(index only).
-    type; // A bit masked large integer to 'name' all different types of a mesh. 
-    listeners; // Indexes to the EventListeners class.
-    eventCallbacks; // A buffer to store all callback for any event enabled for the mesh.
-    parent; // Pointer to the parent mesh.
-    children; // buffer of pointers to children mesh.
-    state;  // Bitfield integer. Stores enebled-dissabled mesh state. 
-    timeIntervalsIdxBuffer; // This buffer stores indexes of the timeIntervals this mesh is using.
-    timedEvents; // A buffer to set a one time event that is triggered by another event. E.x. When we need to set the mesh priority in the renderQueue and the mesh does not have a gfx yet. 
-    hover_margin; // A margin to be set for hovering. // TODO: Abstract to a struct.
-    menu_options; // A callback and an index. Constructs the options popup menu for the mesh
-    menu_options_idx; // An index to the menu options handler's buffer
-    minimized; // Pointer to a minimized version of the mesh.
-    name;
-    debug_info; // Debug_info_ui data.
 
+    // Bit masks and single values
+    sid;        // BitField: Shader Identifier
+    idx;        // Value: This is the index of the mesh in the scene's children buffer;
+    type;       // A bit masked large integer to 'name' all different types of a mesh. 
+    state;      // BitField: Bitfield integer. Stores enebled-dissabled mesh state. 
+    hover_margin; // Value: A margin to be set for hovering. // TODO: Abstract to a struct.
+    
+    sceneidx; // Value: A reference to the scene that the mesh belongs to(index only).
+    
+    parent;     // Pointer: to the parent mesh.
+    children;   // Buffer: of pointers to children mesh.
+    
+    geom;   // Class:
+    mat;    // Class:
+    gfx;    // Class
+    
+    is_gfx_inserted; // Bool: A way to tell if the mesh has been inserted to the graphics pipeline;
+    
+    attrParams1; // Array: A vec4 array which a mesh can pass any values the the shaders.
+    uniforms;   // Struct: Some uniform values that need to be stored mesh-side
+    
+    listeners;      // Buffer: Indexes to the EventListeners class.
+    eventCallbacks; // Buffer: A buffer to store all callbacks, for any event enabled for the mesh.
+    timedEvents;    // Buffer: A buffer to set a one time event that is triggered by another event. E.x. When we need to set the mesh priority in the renderQueue and the mesh does not have a gfx yet. 
+    timeIntervalsIdxBuffer; // Buffer: This buffer stores indexes of the timeIntervals this mesh is using.
+    
+    debug_info; // Struct: Debug_info_ui bit mask.
+    minimized;      // Pointer: to a minimized version of the mesh.
+    menu_options;   // Struct: A callback and an index. Constructs the options popup menu for the mesh
+    menu_options_idx; //Value: An index to the menu options handler's buffer
+
+    name; // String:
 
     constructor(geom = null, mat = null, time = 0, attrParams1 = [0, 0, 0, 0], name = '???') {
 
@@ -104,11 +112,8 @@ export class Mesh {
         this.sceneidx = STATE.scene.active_idx;
         this.idx = INT_NULL;
 
-        if (time) this.time = time;
-
         this.attrParams1 = [0, 0, 0, 0];
-        if (attrParams1)
-            CopyArr4(this.attrParams1, attrParams1);
+        if (attrParams1) CopyArr4(this.attrParams1, attrParams1);
 
         this.uniforms = {
             time: {
@@ -121,18 +126,15 @@ export class Mesh {
         this.alreadyAdded = false;
 
         // Add the type 'Mesh'
-        this.type |= MESH_TYPES_DBG.MESH;
-        this.state = { mask: 0 }; // Unfortunately js cannot create a pointer for integers, so we have to wrap the mask to a class;
+        this.type = MESH_TYPES_DBG.MESH;
+        this.state = { mask: 0x0 }; // Unfortunately js cannot create a pointer for integers, so we have to wrap the mask to a class;
 
         this.listeners = new M_Buffer();
         this.listeners.Init(LISTEN_EVENT_TYPES_INDEX.SIZE);
 
         this.eventCallbacks = new M_Buffer();
-
         this.timedEvents = new M_Buffer();
-
         this.children = new M_Buffer();
-
         this.timeIntervalsIdxBuffer = new Int8Buffer();
 
 
@@ -259,7 +261,7 @@ export class Mesh {
     /*******************************************************************************************************************************************************/
     // Listeners
 
-    CreateListenEvent(etype, is_fake_event=false) {
+    CreateListenEvent(etype, is_fake_event = false) {
 
         if (etype & LISTEN_EVENT_TYPES.HOVER) {
 
@@ -268,7 +270,7 @@ export class Mesh {
                 is_child_event: false,
             });
             this.StateEnable(MESH_STATE.IS_HOVERABLE | MESH_STATE.IS_HOVER_COLORABLE);
-            if(is_fake_event) this.StateEnable(MESH_STATE.IS_FAKE_EVENT | MESH_STATE.IS_FAKE_HOVERABLE);
+            if (is_fake_event) this.StateEnable(MESH_STATE.IS_FAKE_EVENT | MESH_STATE.IS_FAKE_HOVERABLE);
         }
         else if (etype & LISTEN_EVENT_TYPES.CLICK_UP) {
 
@@ -277,23 +279,23 @@ export class Mesh {
                 is_child_event: false,
             });
             this.StateEnable(MESH_STATE.IS_CLICKABLE);
-            if(is_fake_event) this.StateEnable(MESH_STATE.IS_FAKE_EVENT | MESH_STATE.IS_FAKE_CLICKABLE);
+            if (is_fake_event) this.StateEnable(MESH_STATE.IS_FAKE_EVENT | MESH_STATE.IS_FAKE_CLICKABLE);
         }
         else if (etype & LISTEN_EVENT_TYPES.MOVE) {
-            
+
             this.listeners.AddAtIndex(LISTEN_EVENT_TYPES_INDEX.CLICK, {
                 evt: null,
                 is_child_event: false,
             });
             this.StateEnable(MESH_STATE.IS_GRABABLE | MESH_STATE.IS_MOVABLE | MESH_STATE.IS_CLICKABLE);
-            if(is_fake_event) this.StateEnable(MESH_STATE.IS_FAKE_EVENT | MESH_STATE.IS_FAKE_CLICKABLE);
+            if (is_fake_event) this.StateEnable(MESH_STATE.IS_FAKE_EVENT | MESH_STATE.IS_FAKE_CLICKABLE);
         }
 
     }
 
     AddListenEvent(etypeidx, Clbk = null, params = null, parent_event = null) {
 
-        if(!this.listeners.buffer[etypeidx])
+        if (!this.listeners.buffer[etypeidx])
             console.error('NO LISTENER IN this.listeners.buffer[etypeidx]')
         if (parent_event && parent_event[etypeidx] && parent_event[etypeidx].evt) {
             this.listeners.buffer[etypeidx].evt = Listener_create_child_event(etypeidx, parent_event[etypeidx].evt, Clbk, this, params);
@@ -313,7 +315,7 @@ export class Mesh {
 
             if (this.listeners.buffer[etype] && this.listeners.buffer[etype].evt) {
                 if (!this.listeners.buffer[etype].is_child_event) {
-    
+
                     Listener_remove_event_by_idx(etype, this.listeners.buffer[etype].evt);
                 }
                 else {
@@ -330,7 +332,7 @@ export class Mesh {
         return eventIdx;
     }
 
-    
+
     /*******************************************************************************************************************************************************
      * Set mesh's menu options (on left mouse click).
      * If the callback that will create the menu options for this mesh
@@ -344,26 +346,26 @@ export class Mesh {
     }
 
     /*******************************************************************************************************************************************************/
-    // Setters-Getters
-    SetHoverColor() { this.mat.SetHoverColor(this.gfx); }
-    SetColor(col) { this.mat.SetColor(col, this.gfx); }
-    SeHoverColortDefault() { this.mat.SeHoverColortDefault(this.gfx); }
-    SetDefaultColor() { this.mat.SetDefaultColor(this.gfx, this.geom.num_faces); }
-    SetDefaultPosXY() { this.geom.SetDefaultPosXY(this.gfx); }
-    SetColorRGB(col) { this.mat.SetColorRGB(col, this.gfx, this.geom.num_faces); }
-    SetColorAlpha(alpha) { this.mat.SetColorAlpha(alpha, this.gfx, this.geom.num_faces); }
-    SetPosXYZ(pos) { this.geom.SetPosXYZ(pos, this.gfx); }
-    SetPosXY(pos) { this.geom.SetPosXY(pos, this.gfx); }
-    SetPosX(x) { this.geom.SetPosX(x, this.gfx); }
-    SetPosY(y) { this.geom.SetPosY(y, this.gfx); }
-    SetDim(dim) { this.geom.SetDim(dim, this.gfx); }
-    UpdatePosXY() { this.geom.UpdatePosXY(this.gfx); }
-    UpdatePosXYZ() { this.geom.UpdatePosXYZ(this.gfx); }
-    UpdateDim() { this.geom.UpdateDim(this.gfx); }
-    UpdateZindex(z) { this.geom.SetZindex(z, this.gfx); }
-    SetStyle(style) { this.mat.SetStyle(style); }
-    MoveXY(x, y) { this.geom.MoveXY(x, y, this.gfx); }
-    MoveXYZ(pos) { this.geom.MoveXYZ(pos, this.gfx); }
+    // Setters-Getters                                            // Function Calls 'number of calls':'in number of files'
+    SetHoverColor()         { this.mat.SetHoverColor(this.gfx); } //5:3
+    SetColor(col)           { this.mat.SetColor(col, this.gfx); } //16:11
+    SeHoverColortDefault()  { this.mat.SeHoverColortDefault(this.gfx); } //4:3
+    SetDefaultColor()       { this.mat.SetDefaultColor(this.gfx, this.geom.num_faces); }//5:3
+    SetDefaultPosXY()       { this.geom.SetDefaultPosXY(this.gfx); }//3:2
+    SetColorRGB(col)        { this.mat.SetColorRGB(col, this.gfx, this.geom.num_faces); }//14:7
+    SetColorAlpha(alpha)    { this.mat.SetColorAlpha(alpha, this.gfx, this.geom.num_faces); }//27:8
+    SetPosXYZ(pos)          { this.geom.SetPosXYZ(pos, this.gfx); }//5:3
+    SetPosXY(pos)           { this.geom.SetPosXY(pos, this.gfx); }//14:8
+    SetPosX(x)              { this.geom.SetPosX(x, this.gfx); }//18:7
+    SetPosY(y)              { this.geom.SetPosY(y, this.gfx); }//16:5
+    SetDim(dim)             { this.geom.SetDim(dim, this.gfx); }//10:7
+    UpdatePosXY()           { this.geom.UpdatePosXY(this.gfx); }//7:4
+    UpdatePosXYZ()          { this.geom.UpdatePosXYZ(this.gfx); }//5:4
+    UpdateDim()             { this.geom.UpdateDim(this.gfx); }//8:5
+    UpdateZindex(z)         { this.geom.SetZindex(z, this.gfx); }//
+    SetStyle(style)         { this.mat.SetStyle(style); }//19:10
+    MoveXY(x, y)            { this.geom.MoveXY(x, y, this.gfx); }//42:10 from which 33 calls are directly to geom.MoveXY
+    MoveXYZ(pos)            { this.geom.MoveXYZ(pos, this.gfx); }//20:8
     MoveRecursive(x, y) {
 
         this.geom.MoveXY(x, y, this.gfx);
@@ -450,8 +452,8 @@ export class Mesh {
 
     OnFakeClick() { console.log('FAKE CLICK! : ', this.source_params.name); }
 
-    /*******************************************************************************************************************************************************
-    /** Debug */
+    /*******************************************************************************************************************************************************/
+    // Debug
     SetName(name = null) {
 
         // if(name) this.name = name + this.id;
@@ -478,8 +480,8 @@ export function Recursive_gfx_operations(_mesh, Clbk, params) {
 }
 
 
-/*******************************************************************************************************************************************************
-/** DEBUG PRINT*/
+/******************************************************************************************************************************************************/
+// DEBUG PRINT
 export function Mesh_print_all_mesh_listeners() {
 
     const children = Scenes_get_root_meshes(STATE.scene.active_idx);
@@ -505,4 +507,3 @@ function Mesh_print_all_mesh_listeners_recursive(meshes) {
 }
 
 
-/**SAVES */
