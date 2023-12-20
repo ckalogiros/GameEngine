@@ -4,8 +4,10 @@ import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
 import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr2, CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
+import { BatchStore, TEMP_move_through_here } from "../../../Batch/Batch.js";
 import { MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
 import { Font_get_char_uv_coords } from "../../../Loaders/Font/ChlumskyFontMetricsLoader.js";
+import { _pt7 } from "../../../Timers/PerformanceTimers.js";
 // import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx, TimeIntervalsGetByIdx } from "../../../Timers/TimeIntervals.js";
 import { Text_Mesh } from "../Text_Mesh.js";
@@ -104,7 +106,12 @@ export class Widget_Text extends Text_Mesh {
 	/*******************************************************************************************************************************************************/
 	// Transformations
 	Move(x, y) {
-		this.geom.MoveXY(x, y, this.gfx);
+		// _pt7.Start(); 
+		// this.geom.MoveXY(x, y, this.gfx);
+		// _pt7.Stop();
+		TEMP_move_through_here(x,y,this);
+		
+		BatchStore(this, 'MoveXY', [x,y]);
 	}
 
 }
@@ -493,14 +500,26 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 	// Transformations
 	Move(x, y) {
 
+		// _pt7.Start(); 
+		// this.geom.MoveXY(x, y, this.gfx);
+		// _pt7.Stop();
+
+		TEMP_move_through_here(x,y,this);
 		// Move 'this' text
-		this.geom.MoveXY(x, y, this.gfx);
+		BatchStore(this, 'MoveXY', [x,y]);
 
 		// Move children text
 		for (let i = 0; i < this.children.boundary; i++) {
 
 			const child = this.children.buffer[i];
-			if (child) child.geom.MoveXY(x, y, child.gfx);
+			if (child) {
+				// _pt7.Start(); 
+				// child.geom.MoveXY(x, y, child.gfx);
+				// _pt7.Stop();
+
+				TEMP_move_through_here(x,y,child);
+				BatchStore(this, 'MoveXY', [x,y]);
+			}
 		}
 
 	}

@@ -32,6 +32,7 @@ export class GfxInfoMesh {
 	vb = { // The vertex buffer info the mesh belongs to
 		idx: INT_NULL,	// The vertex buffer (float*) idx that this Mesh is stored to.
 		start: 0,		// The current meshe's starting idx in vertex buffer. 
+		end: 0,
 		count: 0,		// Current size of the float buffer (in floats)
 	};
 

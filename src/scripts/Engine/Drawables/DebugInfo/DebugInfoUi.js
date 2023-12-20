@@ -7,7 +7,7 @@ import { Widget_Switch } from "../Meshes/Widgets/WidgetButton";
 import { Widget_Label } from "../Meshes/Widgets/WidgetLabel";
 import { Widget_Dynamic_Text_Mesh } from "../Meshes/Widgets/WidgetText";
 import { Scenes_get_root_meshes } from "../../Scenes.js";
-import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _pt2, _pt3, _pt4, _pt5, _pt6, _pt_fps } from "../../Timers/PerformanceTimers";
+import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _pt2, _pt3, _pt4, _pt5, _pt6, _pt7, _pt8, _pt_fps } from "../../Timers/PerformanceTimers";
 import { PerformanceTimerGetFps1sAvg, _fps_1s_avg, _fps_500ms_avg } from "../../Timers/Time";
 import { Info_listener_create_event, Info_listener_destroy_event } from "./InfoListeners";
 import { Widget_Scroller } from "../Meshes/Widgets/WidgetScroller";
@@ -131,7 +131,7 @@ export function Debug_info_create_ui_performance_timers(params) {
    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
    section.SetName('InfoUi-PerformanceTimers section');
 
-   const fontsize = _font_size;
+   const fontsize = 8;
    let pad = 0;
    let ms = 200;
 
@@ -223,6 +223,18 @@ export function Debug_info_create_ui_performance_timers(params) {
       t.CreateNewText('0.000', fontsize, ORANGE_240_160_10, [0, 0], .5);
       t.SetDynamicText(`DynamicText ${ms} EventListener PerformanceTimersGetMilisec`, ms, PerformanceTimersGetMilisec, _pt5); // idx is for use in creating separate time intervals for each dynamic text.
 
+      section.AddItem(t);
+   }
+   { // MOVE_OLD
+      ms = 500;
+      const t = new Widget_Dynamic_Text_Mesh(`Move(${ms}ms): `, '00000000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      t.SetDynamicText(`DynamicText ${ms} EventListenerUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt7); // idx is for use in creating separate time intervals for each dynamic text.
+      section.AddItem(t);
+   }
+   { // MOVE_NEW
+      ms = 500;
+      const t = new Widget_Dynamic_Text_Mesh(`Batch(${ms}ms):`, '00000000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      t.SetDynamicText(`DynamicText ${ms} EventListenerUpdate PerformanceTimersGetFps`, ms, PerformanceTimersGetFps, _pt8); // idx is for use in creating separate time intervals for each dynamic text.
       section.AddItem(t);
    }
 

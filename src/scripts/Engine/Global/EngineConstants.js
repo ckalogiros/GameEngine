@@ -735,5 +735,7 @@ const TEMP_TEST_PERFORMANE_COUNTERS = {
 
 	MESH_INFO_UI:{
 		 COUNT: 0,
+		 MOVE: 0,
+		 BATCH_MOVE: 0,
 	},
 };

@@ -146,7 +146,6 @@ export function Gl_generate_context(sid, sceneidx, groupidx, progidx, vbidx, num
     gfx_ctx.sid = sid;
     gfx_ctx.sceneidx = sceneidx;
     gfx_ctx.vao = vb.vao;
-    // gfx_ctx.groupidx = groupidx;
     gfx_ctx.num_faces = num_faces;
     gfx_ctx.vertsPerRect = vertsPerRect;
     gfx_ctx.attribsPerVertex = attribsPerVertex;
@@ -156,7 +155,8 @@ export function Gl_generate_context(sid, sceneidx, groupidx, progidx, vbidx, num
 
     gfx_ctx.vb.idx = vbidx;
     gfx_ctx.vb.start = 0; // NOTE: The start of the mesh in the vertex buffer is calculated when the mesh is added to the vertex buffer.
-    gfx_ctx.vb.count = count;
+    gfx_ctx.vb.end = num_faces * vertsPerRect * attribsPerVertex; 
+    gfx_ctx.vb.count = count; // The number of attributes per face
 
     gfx_ctx.ib.idx = ibidx; // Stores the programs index for the indexbuffer.
     gfx_ctx.ib.start = 0;

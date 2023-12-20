@@ -9,6 +9,7 @@ import { Gfx_remove_geometry } from "../../../Interfaces/Gfx/GfxContextCreate.js
 import { TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals.js";
 import { Info_listener_dispatch_event } from "../../DebugInfo/InfoListeners.js";
 import { Gl_set_vb_show } from "../../../../Graphics/GlProgram.js";
+import { BatchStore, TEMP_move_through_here } from "../../../Batch/Batch.js";
 
 
 
@@ -364,15 +365,22 @@ export class Mesh {
     UpdateDim()             { this.geom.UpdateDim(this.gfx); }//8:5
     UpdateZindex(z)         { this.geom.SetZindex(z, this.gfx); }//
     SetStyle(style)         { this.mat.SetStyle(style); }//19:10
-    MoveXY(x, y)            { this.geom.MoveXY(x, y, this.gfx); }//42:10 from which 33 calls are directly to geom.MoveXY
+    MoveXY(x, y)            { 
+        // _pt7.Start(); 
+        // this.geom.MoveXY(x, y, this.gfx);  
+        // _pt7.Stop();
+        TEMP_move_through_here(x,y,this);
+        BatchStore(this, 'MoveXY', [x,y]); 
+    }//42:10 from which 33 calls are directly to geom.MoveXY
+    // MoveXY(x, y)            { this.geom.MoveXY(x, y, this.gfx);  }//42:10 from which 33 calls are directly to geom.MoveXY
     MoveXYZ(pos)            { this.geom.MoveXYZ(pos, this.gfx); }//20:8
-    MoveRecursive(x, y) {
+    // MoveRecursive(x, y) {
 
-        this.geom.MoveXY(x, y, this.gfx);
+    //     this.geom.MoveXY(x, y, this.gfx);
 
-        if (this.children.boundary)
-            Recursive_mesh_move(this.children, x, y)
-    }
+    //     if (this.children.boundary)
+    //         Recursive_mesh_move(this.children, x, y)
+    // }
     SetAttrTime() {
         if (this.sid.attr & SID.ATTR.TIME) {
             this.geom.timer = TimerGetGlobalTimer();

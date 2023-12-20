@@ -50,20 +50,20 @@ import { HandleEvents } from './Events/Events.js';
 // }
 
 
-function UpdaterRunRecursive(mesh, params, level) {
+// function UpdaterRunRecursive(mesh, params, level) {
 
-    AddArr3(mesh.geom.pos, params)
-    mesh.UpdateGfx();
+//     AddArr3(mesh.geom.pos, params)
+//     mesh.UpdateGfx();
 
-    for (let i = 0; i < mesh.children.boundary; i++) {
+//     for (let i = 0; i < mesh.children.boundary; i++) {
 
-        const child = mesh.children.buffer[i];
+//         const child = mesh.children.buffer[i];
 
-        if (child) {
-            UpdaterRunRecursive(child, params, level++)
-        }
-    }
-}
+//         if (child) {
+//             UpdaterRunRecursive(child, params, level++)
+//         }
+//     }
+// }
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -390,7 +390,10 @@ export function Scenes_update_all_gfx_starts(sceneidx, groupidx, progidx, vbidx,
                 gfx.prog.groupidx === groupidx && gfx.prog.idx === progidx && gfx.vb.idx === vbidx) {
 
                 gfx.vb.start -= ret.counts[0];
-                if (gfx.ib.start > 0) gfx.ib.start -= ret.counts[1];
+                gfx.vb.end -= ret.counts[0];
+                if (gfx.ib.start > 0) {
+                    gfx.ib.start -= ret.counts[1];
+                }
             }
         } 
     }

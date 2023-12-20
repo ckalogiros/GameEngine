@@ -5,7 +5,8 @@ import { MouseResetDif, MouseResetWheel } from "../Controls/Input/Mouse.js";
 import { FpsGet, TimeSample, TimeUpdate } from "../Timers/Time.js";
 import { TimersUpdateGlobalTimer } from "../Timers/Timers.js";
 import { TimeIntervalsUpdateAll } from "../Timers/TimeIntervals.js";
-import {_pt_fps ,_pt2, _pt3, _pt4 } from '../Timers/PerformanceTimers.js'
+import {_pt_fps ,_pt2, _pt3, _pt4, _pt8, PerformanceTimersTick } from '../Timers/PerformanceTimers.js'
+import { BatchDo } from "../Batch/Batch.js";
 
 /**
  * WebGl
@@ -87,6 +88,8 @@ export class WebGlRenderer {
          // TimersUpdateTimers();
          // TimersUpdateStepTimers();
          _pt2.Stop();
+
+         _pt8.Start(); BatchDo(); _pt8.Stop();
          
          // TODO!!! Update camera uniform if camera needs update 
          // this.camera.Update(this.gl)
@@ -102,7 +105,8 @@ export class WebGlRenderer {
          TimeSample()
          this.fpsTimer.Stop();
 
-         // TEMP_check_for_not_isPrivate()
+
+         PerformanceTimersTick()
       }
 
 

@@ -37,9 +37,8 @@ class PerformanceTimer {
       this.cur = performance.now(); // In miliseconds
       this.delta = this.cur - this.prev;
       this.accum += this.delta;
-      this.cnt++;
    }
-
+   
    GetFps(){ return Math.floor( 1 / (this.accum * MILISEC / this.cnt)); }
    GetMilisec(){ 
       return (this.accum / this.cnt).toFixed(4);
@@ -78,6 +77,19 @@ export function PerformanceTimerCreate(name = '') {
    return _timeMeasures.buffer[idx];
 }
 
+export function PerformanceTimersTick(){
+   /**
+    * This updates the tick count uppon every frame.
+    * Enables a timer to  Start and Stop more than 1 times during a frame.
+    * The reason is: if the count would update on every Start() call, then the 
+    * mesurement would be false, providing greater speed for mesurements 
+    * that are calle may times per frame.  
+    */
+   for(let i=0; i<_timeMeasures.boundary; i++){
+
+      _timeMeasures.buffer[i].cnt++;
+   }
+}
 
 export function PerformanceTimersGetFps(timer){
    return Math.floor( 1 / (timer.accum * MILISEC / timer.cnt));
@@ -109,6 +121,8 @@ export const _pt3 = new PerformanceTimerCreate('SceneUpdate'); // Generic perfor
 export const _pt4 = new PerformanceTimerCreate('Gl_draw'); // Generic performance timer
 export const _pt5 = new PerformanceTimerCreate('EventListener'); // Generic performance timer
 export const _pt6 = new PerformanceTimerCreate('HoverListener'); // Generic performance timer
+export const _pt7 = new PerformanceTimerCreate('MOVE_OLD'); // 
+export const _pt8 = new PerformanceTimerCreate('MOVE_NEW'); // 
 // export const _gfxctxtimer = new PerformanceTimerCreate('Measure GfxContext buffer'); // Generic performance timer
 
 

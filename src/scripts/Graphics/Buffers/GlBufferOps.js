@@ -25,7 +25,7 @@ export function Gl_remove_geometry(gfx, num_faces = 1) {
 
     if (vb.count <= 0) ret.empty = true;
 
-    if(ret.empty) vb.Reset();
+    if (ret.empty) vb.Reset();
 
 
     return ret;
@@ -121,7 +121,7 @@ export function VbSetAttribColPerVertex(vb, start, count, stride, col, num_faces
     let k = 1;
 
     while (index < end) {
-        vb.data[index++] = col[k][0]; 
+        vb.data[index++] = col[k][0];
         vb.data[index++] = col[k][1];
         vb.data[index++] = col[k][1];
         vb.data[index++] = col[k][0];
@@ -360,7 +360,7 @@ export function VbSetAttribBuffer(vb, start, count, stride, buffer, attribSize) 
 export function GlSetColorPerVertex(gfxInfo, color, num_faces = 1) {
 
     /**DEBUG*/if (gfxInfo === null) { alert('GFX is null. @ GlSetColor()'); }
-    
+
     const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
@@ -391,7 +391,7 @@ export function GlSetColorPerVertex(gfxInfo, color, num_faces = 1) {
 export function GlSetColor(gfxInfo, color, num_faces = 1) {
 
     /**DEBUG*/if (gfxInfo === null) { alert('GFX is null. @ GlSetColor()'); }
-    
+
     const progs = Gl_progs_get_group(gfxInfo.prog.groupidx);
     const vb = progs.buffer[gfxInfo.prog.idx].vb[gfxInfo.vb.idx];
 
@@ -489,7 +489,7 @@ export function GlSetDimY(gfxInfo, y, num_faces = 1) {
 
     let index = gfxInfo.vb.start + progs.buffer[gfxInfo.prog.idx].shaderinfo.attributes.offset.pos + 1;
     let faces = num_faces;
-    let stride = gfxInfo.attribsPerVertex - (V_POS_COUNT-1);
+    let stride = gfxInfo.attribsPerVertex - (V_POS_COUNT - 1);
 
     while (faces) {
 
@@ -859,6 +859,97 @@ export function GlSetAttrParams1(gfxInfo, param, paramOffset) {
     }
     vb.needsUpdate = true;
 }
+
+/*************************************************************************************************/
+// Batch
+export function GlSetColorBatch(gfxbuffer, color) {
+
+    /**DEBUG*/if (gfxbuffer === null) { alert('GFX BUFFER is null. @ GlSetColorBatch()'); }
+
+
+    for (let i = 0; i < gfxbuffer.length; i++) {
+
+        const progs = Gl_progs_get_group(i);
+        for (let j = 0; j < gfxbuffer[i].length; j++) {
+            
+            if(gfxbuffer[i][j] !== undefined)
+            for (let k = 0; k < gfxbuffer[i][j].length; k++) {
+                
+                const vb = progs.buffer[j].vb[k];
+                let stride = progs.buffer[j].shaderinfo.attribsPerVertex - V_COL_COUNT;
+                
+                if(gfxbuffer[i][j][k] !== undefined)
+                for (let l = 0; l < gfxbuffer[i][j][k].length; l++) {
+
+                    // Index calculation for color
+                    // let index = gfxbuffer[i][j][k][l].start + progs.buffer[j].shaderinfo.attributes.offset.col;
+                    // Index calculation for wpos
+                    let index = gfxbuffer[i][j][k][l].start + progs.buffer[j].shaderinfo.attributes.offset.wposTime;
+                    const pos = gfxbuffer[i][j][k][l].pos;
+    
+                    while (index < gfxbuffer[i][j][k][l].end) {
+    
+                        // vb.data[index++] = color[0]; // Move mesh's x pos by amt
+                        // vb.data[index++] = color[1]; // Move mesh's x pos by amt
+                        // vb.data[index++] = color[2]; // Move mesh's x pos by amt
+                        // vb.data[index++] = color[3]; // Move mesh's x pos by amt
+
+                        // vb.data[index++] = pos[0]; // Move mesh's x pos by amt
+                        // vb.data[index++] = pos[1]; // Move mesh's x pos by amt
+                        // vb.data[index++] = pos[2]; // Move mesh's x pos by amt
+                        index++;
+                        index++;
+                        index++;
+                        index++;
+    
+                        index += stride; // Go to next vertice's pos. +1 for skipping pos.z
+                    }
+                }
+
+                vb.needsUpdate = true;
+            }
+        }
+    }
+}
+/**OLD-Batch with merge starts-ends */
+// export function GlSetColorBatch(gfxbuffer, color) {
+
+//     /**DEBUG*/if (gfxbuffer === null) { alert('GFX BUFFER is null. @ GlSetColorBatch()'); }
+
+
+//     for(let i=0; i<gfxbuffer.length; i++){
+//         for(let j=0; j<gfxbuffer[i].length; j++){
+
+//             const progs = Gl_progs_get_group(gfxbuffer[i][j].groupidx);
+//             const vb = progs.buffer[gfxbuffer[i][j].progidx].vb[gfxbuffer[i][j].vbidx];
+
+//             let index = gfxbuffer[i][j].start + progs.buffer[gfxbuffer[i][j].progidx].shaderinfo.attributes.offset.col;
+//             let stride = progs.buffer[gfxbuffer[i][j].progidx].shaderinfo.attribsPerVertex - V_COL_COUNT;
+
+//             while (index<gfxbuffer[i][j].end){
+
+//                 vb.data[index++] = color[0]; // Move mesh's x pos by amt
+//                 vb.data[index++] = color[1]; // Move mesh's x pos by amt
+//                 vb.data[index++] = color[2]; // Move mesh's x pos by amt
+//                 vb.data[index++] = color[3]; // Move mesh's x pos by amt
+
+//                 index += stride; // Go to next vertice's pos. +1 for skipping pos.z
+//             }
+
+//             // while (verts) {
+
+//             //     vb.data[index++] = color[0]; // Move mesh's x pos by amt
+//             //     vb.data[index++] = color[1]; // Move mesh's x pos by amt
+//             //     vb.data[index++] = color[2]; // Move mesh's x pos by amt
+//             //     vb.data[index++] = color[3]; // Move mesh's x pos by amt
+
+//             //     index += stride; // Go to next vertice's pos. +1 for skipping pos.z
+//             //     verts--;
+//             // }
+//             vb.needsUpdate = true;
+//         }
+//     }
+// }
 
 /** Set many meshes in a loop */
 // Move all meshes from a buffer with the starting indexes

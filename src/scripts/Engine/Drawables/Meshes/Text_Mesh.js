@@ -85,8 +85,11 @@ export class Text_Mesh extends Mesh {
          // geomcopy.pos[0] += this.geom.dim[0]; // Half advance current face width
          const start = Gl_add_geom_mat_to_vb(this.sid, gfxcopy, geomcopy, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, `${this.mat.text[i]} in: ${this.name}`, this.idx);
          // geomcopy.pos[0] += geomcopy.dim[0]; // Half advance current face width
-
-         if(i===0) this.gfx.vb.start = start; // Start of mesh in the vertex buffer hasn't been set from the GenGfx. So we only need the start of the first character in the vertex buffer. All the rest starts are calculated on the fly.
+         
+         if(i===0) {
+            this.gfx.vb.start = start; // Start of mesh in the vertex buffer hasn't been set from the GenGfx. So we only need the start of the first character in the vertex buffer. All the rest starts are calculated on the fly.
+            this.gfx.vb.end += start; // DICISION: Where to add the start index to the end? 
+         }
 
          // Reset geometry copy
          geomcopy.dim[0] = this.geom.dim[0]; geomcopy.dim[1] = this.geom.dim[1]; geomcopy.pos[1] = this.geom.pos[1]; 

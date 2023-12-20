@@ -16,6 +16,8 @@ import { Text_Mesh } from "../Text_Mesh.js";
 import { Align } from "../../Operations/Alignment.js";
 import { Find_gfx_from_parent_ascend_descend } from "../../../Interfaces/Gfx/GfxContextFindMatch.js";
 import { Font_get_char_uv_coords } from "../../../Loaders/Font/ChlumskyFontMetricsLoader.js";
+import { BatchStore, TEMP_move_through_here } from "../../../Batch/Batch.js";
+import { _pt7 } from "../../../Timers/PerformanceTimers.js";
 
 
 
@@ -201,8 +203,14 @@ export class Widget_Label extends Rect {
     Move(x, y) {
 
         // Move 'this' text
-        this.geom.MoveXY(x, y, this.gfx);
-        this.text_mesh.geom.MoveXY(x, y, this.text_mesh.gfx);
+        // _pt7.Start(); 
+        // this.geom.MoveXY(x, y, this.gfx);
+        // this.text_mesh.geom.MoveXY(x, y, this.text_mesh.gfx);
+        // _pt7.Stop();
+        TEMP_move_through_here(x,y,this);
+        TEMP_move_through_here(x,y,this.text_mesh);
+        BatchStore(this, 'MoveXY', [x,y]);
+        BatchStore(this.text_mesh, 'MoveXY', [x,y]);
     }
 
     MoveY(y) {

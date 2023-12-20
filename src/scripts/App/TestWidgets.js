@@ -14,9 +14,6 @@ import { MAT_ENABLE, Material, Material_TEMP_fromBufferFor3D } from '../Engine/D
 import { Section } from '../Engine/Drawables/Meshes/Section.js';
 
 
-/** Performance Timers */
-import { _pt_fps, _pt2, _pt3, _pt4, _pt5, _pt6 } from '../Engine/Timers/PerformanceTimers.js';
-
 import { DEBUG_PRINT_KEYS } from '../Engine/Controls/Input/Keys.js';
 import { GetShaderTypeId } from '../Graphics/Z_Debug/GfxDebug.js';
 
@@ -62,7 +59,7 @@ export function TestWidgetsGeneric(scene) {
     // Listeners_debug_info_create(scene);
     Debug_info_ui_performance(scene);
 
-    CreateSectionSectioned(scene)
+    // CreateSectionSectioned(scene)
 
     // CreateScroller(scene);
 
@@ -1250,6 +1247,8 @@ function MeshInfo(scene) {
     infomesh.CreateNewText('gfx: group: 0, prog:0, vb:0, start:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('PERFORMANCE COUNTER AND HOVERED MESH NAME', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('text gfx: group: 0, prog:0, vb:0, start:00000, count:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    infomesh.CreateNewText('MOVEX: 0000000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    infomesh.CreateNewText('BATCH: 0000000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.SetName('Info Mesh 2');
 
     // infomesh.RenderToDebugGfx();
@@ -1281,6 +1280,8 @@ function MeshInfoUpdate(params) {
             `idx: ${infoMesh.idx} | alpha:${infoMesh.mat.col[3]}`,
             gfx,
             `counter:${TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.COUNT}`,
+            `Batch :${TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.MOVE}`,
+            `Batch:${TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.BATCH_MOVE}`,
             // `mesh: ${STATE.mesh.hovered.name} counter${TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.COUNT}`,
         ];
 

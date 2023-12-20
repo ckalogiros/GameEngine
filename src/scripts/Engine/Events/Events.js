@@ -1,5 +1,6 @@
 "use strict";
 
+import { BatchStore } from "../Batch/Batch.js";
 import { Listener_dispatch_check_hover_event, Listener_dispatch_event } from "./EventListeners.js";
 
 
@@ -35,6 +36,7 @@ export function HandleEvents() {
 
         }
 
+        /** NO USE */
         // else if (e.type === 'unhover') {
         //     // console.debug('unhover: ', e.params.mesh.id)
 
@@ -149,6 +151,8 @@ export function Events_handle_immidiate(e) {
             STATE.mesh.SetHovered(e.params.mesh);
             TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.COUNT++;
 
+            // BatchStore(e.params.mesh, 'Set Hover Color')
+
         }
 
     }
@@ -158,16 +162,12 @@ export function Events_handle_immidiate(e) {
         if (e.params.mesh.StateCheck(MESH_STATE.IN_HOVER_COLOR)) {
             e.params.mesh.SeHoverColortDefault();
             e.params.mesh.StateDisable(MESH_STATE.IN_HOVER_COLOR);
-
             // TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.COUNT--;
-
             // console.log('*******')
         }
 
         e.params.mesh.StateDisable(MESH_STATE.IN_HOVER); // Set false
         STATE.mesh.SetHovered(null);
-
-
     }
 
 }

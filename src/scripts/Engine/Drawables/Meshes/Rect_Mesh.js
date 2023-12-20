@@ -49,6 +49,7 @@ export class Rect extends Mesh {
    AddToGfx() {
 
       this.gfx.vb.start = Gl_add_geom_mat_to_vb(this.sid, this.gfx, this.geom, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, this.name, this.idx);
+      this.gfx.vb.end += this.gfx.vb.start; // DICISION: Where to add the start index to the end? 
       this.is_gfx_inserted = true;
 
       Scenes_store_mesh_in_gfx(this.sceneidx, this); // For storing meshes by its gfx
