@@ -3,6 +3,7 @@
 import { GlSetAttrTex, GlSetTex } from "../../../Graphics/Buffers/GlBufferOps.js";
 import { Gl_add_geom_mat_to_vb } from "../../../Graphics/Buffers/GlBuffers.js";
 import { Gl_progs_set_vb_texidx } from "../../../Graphics/GlProgram.js";
+import { BatchStore } from "../../Batch/Batch.js";
 import { MouseGetPos, MouseGetPosDif } from "../../Controls/Input/Mouse.js";
 import { Gfx_generate_context } from "../../Interfaces/Gfx/GfxContextCreate.js";
 import { Find_gfx_from_parent_ascend_descend } from "../../Interfaces/Gfx/GfxContextFindMatch.js";
@@ -143,9 +144,11 @@ export class Textured_Mesh extends Mesh {
 
       // Move 
       const mouse_pos = MouseGetPosDif();
-      // mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, mesh.gfx);
+      // mesh.geom.pos[0] += mouse_pos.x;
+      // mesh.geom.pos[1] -= mouse_pos.y;
+      BatchStore(mesh, 'MoveXY', [mouse_pos.x, -mouse_pos.y]);
 
-      // HACK: temporarely use the move to chnge the uv coordinates
+      // HACK: temporarely use the move to change the uv coordinates
       mesh.mat.uv[0] += -mouse_pos.x *.001;
       mesh.mat.uv[1] += -mouse_pos.x *.001;
       mesh.mat.uv[2] += mouse_pos.y  *.001;

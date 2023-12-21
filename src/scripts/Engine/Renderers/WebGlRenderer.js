@@ -5,8 +5,8 @@ import { MouseResetDif, MouseResetWheel } from "../Controls/Input/Mouse.js";
 import { FpsGet, TimeSample, TimeUpdate } from "../Timers/Time.js";
 import { TimersUpdateGlobalTimer } from "../Timers/Timers.js";
 import { TimeIntervalsUpdateAll } from "../Timers/TimeIntervals.js";
-import {_pt_fps ,_pt2, _pt3, _pt4, _pt8, PerformanceTimersTick } from '../Timers/PerformanceTimers.js'
-import { BatchDo } from "../Batch/Batch.js";
+import {_pt_fps ,_pt2, _pt3, _pt4, _pt8, PerformanceTimersTick, _pt9 } from '../Timers/PerformanceTimers.js'
+import { BatchDoNoMerge, BatchDoNoMerge2 } from "../Batch/Batch.js";
 
 /**
  * WebGl
@@ -77,7 +77,7 @@ export class WebGlRenderer {
 
       if (STATE.loop.paused === false) {
          
-         this.scene.camera.UpdateProjectionUniformAll(gfxCtx.gl)
+         this.scene.camera.UpdateProjectionUniformAll(gfxCtx.gl); // FIXME: Do we need to update the camera uniform every frame????
 
          TimeUpdate(); 
          _pt_fps.Start();
@@ -89,11 +89,9 @@ export class WebGlRenderer {
          // TimersUpdateStepTimers();
          _pt2.Stop();
 
-         _pt8.Start(); BatchDo(); _pt8.Stop();
-         
-         // TODO!!! Update camera uniform if camera needs update 
-         // this.camera.Update(this.gl)
-         
+         // _pt8.Start(); BatchDo(); _pt8.Stop();
+         _pt8.Start(); BatchDoNoMerge2(); _pt8.Stop();
+         // _pt9.Start(); BatchDoNoMerge(); _pt9.Stop();
          _pt3.Start(); this.scene.OnUpdate(); _pt3.Stop();
          
          _pt4.Start(); Gl_draw(this.gl); _pt4.Stop();
@@ -155,8 +153,10 @@ export class WebGlRenderer {
       gl.ONE_MINUS_CONSTANT_ALPHA 	   Multiplies all colors by 1 minus a constant alpha value.
       gl.SRC_ALPHA_SATURATE 	         Multiplies the RGB colors by the smaller of either the source alpha value or the value of 1 minus the destination alpha value. The alpha value is multiplied by 1. 
       */
-      this.gl.blendFunc(this.gl.DST_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-      // this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+     this.gl.blendFunc(this.gl.DST_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+     // this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+   //   this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_DST_ALPHA);
+   //   this.gl.blendFunc(this.gl.DST_ALPHA, this.gl.ONE_MINUS_DST_ALPHA);
 
       // this.gl.blendFunc(this.gl.ONE_MINUS_SRC_ALPHA, this.gl.DST_ALPHA);
       // this.gl.blendFunc(this.gl.ONE_MINUS_DST_ALPHA, this.gl.DST_ALPHA);

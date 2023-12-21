@@ -9,7 +9,7 @@ import { Gfx_remove_geometry } from "../../../Interfaces/Gfx/GfxContextCreate.js
 import { TimeIntervalsDestroyByIdx } from "../../../Timers/TimeIntervals.js";
 import { Info_listener_dispatch_event } from "../../DebugInfo/InfoListeners.js";
 import { Gl_set_vb_show } from "../../../../Graphics/GlProgram.js";
-import { BatchStore, TEMP_move_through_here } from "../../../Batch/Batch.js";
+import { BatchStore } from "../../../Batch/Batch.js";
 
 
 
@@ -124,7 +124,7 @@ export class Mesh {
         }
 
         // Guard against enable a param for the shaders after the gl program has been created
-        this.alreadyAdded = false;
+        this.is_gfx_inserted = false;
 
         // Add the type 'Mesh'
         this.type = MESH_TYPES_DBG.MESH;
@@ -352,35 +352,29 @@ export class Mesh {
     SetColor(col)           { this.mat.SetColor(col, this.gfx); } //16:11
     SeHoverColortDefault()  { this.mat.SeHoverColortDefault(this.gfx); } //4:3
     SetDefaultColor()       { this.mat.SetDefaultColor(this.gfx, this.geom.num_faces); }//5:3
-    SetDefaultPosXY()       { this.geom.SetDefaultPosXY(this.gfx); }//3:2
+    SetDefaultPosXY()       { alert('SetDefaultPosXY'); this.geom.SetDefaultPosXY(this.gfx); }//3:2
     SetColorRGB(col)        { this.mat.SetColorRGB(col, this.gfx, this.geom.num_faces); }//14:7
     SetColorAlpha(alpha)    { this.mat.SetColorAlpha(alpha, this.gfx, this.geom.num_faces); }//27:8
-    SetPosXYZ(pos)          { this.geom.SetPosXYZ(pos, this.gfx); }//5:3
-    SetPosXY(pos)           { this.geom.SetPosXY(pos, this.gfx); }//14:8
-    SetPosX(x)              { this.geom.SetPosX(x, this.gfx); }//18:7
-    SetPosY(y)              { this.geom.SetPosY(y, this.gfx); }//16:5
-    SetDim(dim)             { this.geom.SetDim(dim, this.gfx); }//10:7
-    UpdatePosXY()           { this.geom.UpdatePosXY(this.gfx); }//7:4
-    UpdatePosXYZ()          { this.geom.UpdatePosXYZ(this.gfx); }//5:4
+    SetPosXYZ(pos)          { alert('SetPosXYZ');this.geom.SetPosXYZ(pos, this.gfx); }//5:3
+    SetPosXY(pos)           { alert('SetPosXY');this.geom.SetPosXY(pos, this.gfx); }//14:8
+    SetPosX(x)              { alert('SetPosX');this.geom.SetPosX(x, this.gfx); }//18:7
+    SetPosY(y)              { alert('SetPosY');this.geom.SetPosY(y, this.gfx); }//16:5
+    SetDim(dim)             { alert('SetDim');this.geom.SetDim(dim, this.gfx); }//10:7
+    UpdatePosXY()           { alert('UpdatePosXY');this.geom.UpdatePosXY(this.gfx); }//7:4
+    UpdatePosXYZ()          { alert('UpdatePosXYZ');this.geom.UpdatePosXYZ(this.gfx); }//5:4
     UpdateDim()             { this.geom.UpdateDim(this.gfx); }//8:5
     UpdateZindex(z)         { this.geom.SetZindex(z, this.gfx); }//
     SetStyle(style)         { this.mat.SetStyle(style); }//19:10
     MoveXY(x, y)            { 
-        // _pt7.Start(); 
-        // this.geom.MoveXY(x, y, this.gfx);  
-        // _pt7.Stop();
-        TEMP_move_through_here(x,y,this);
+        // this.geom.pos[0] += x;
+        // this.geom.pos[1] += y;
         BatchStore(this, 'MoveXY', [x,y]); 
     }//42:10 from which 33 calls are directly to geom.MoveXY
-    // MoveXY(x, y)            { this.geom.MoveXY(x, y, this.gfx);  }//42:10 from which 33 calls are directly to geom.MoveXY
-    MoveXYZ(pos)            { this.geom.MoveXYZ(pos, this.gfx); }//20:8
-    // MoveRecursive(x, y) {
-
-    //     this.geom.MoveXY(x, y, this.gfx);
-
-    //     if (this.children.boundary)
-    //         Recursive_mesh_move(this.children, x, y)
-    // }
+    MoveXYZ(pos)            { 
+        // this.geom.pos[0] += pos[0];
+        // this.geom.pos[1] += pos[1];
+        BatchStore(this, 'MoveXY', pos); 
+    }//20:8
     SetAttrTime() {
         if (this.sid.attr & SID.ATTR.TIME) {
             this.geom.timer = TimerGetGlobalTimer();

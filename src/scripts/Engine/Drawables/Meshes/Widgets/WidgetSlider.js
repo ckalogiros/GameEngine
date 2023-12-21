@@ -249,6 +249,7 @@ export class Widget_Slider extends Rect {
 
 		const mouse_pos = MouseGetPosDif();
 		
+      alert('MoveY @ WidgetLabel')
 		// Move 'this' text
 		mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, mesh.gfx);
       

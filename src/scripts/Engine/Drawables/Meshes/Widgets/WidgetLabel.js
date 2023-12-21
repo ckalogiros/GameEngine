@@ -16,7 +16,7 @@ import { Text_Mesh } from "../Text_Mesh.js";
 import { Align } from "../../Operations/Alignment.js";
 import { Find_gfx_from_parent_ascend_descend } from "../../../Interfaces/Gfx/GfxContextFindMatch.js";
 import { Font_get_char_uv_coords } from "../../../Loaders/Font/ChlumskyFontMetricsLoader.js";
-import { BatchStore, TEMP_move_through_here } from "../../../Batch/Batch.js";
+import { BatchStore } from "../../../Batch/Batch.js";
 import { _pt7 } from "../../../Timers/PerformanceTimers.js";
 
 
@@ -46,13 +46,14 @@ function CalculateArea(text, _dim, pos, pad = [0, 0]) {
     const dim = [_dim[0]/2 * numchars, _dim[1]];
 
     const areaWpos = [pos[0], pos[1], pos[2]];
-    areaWpos[0] += _dim[0]/2; // Subtract half face to align area's xpos left bound, to the left bound of the first char, not to the center of it.
+    // areaWpos[0] += _dim[0]/2; // Subtract half face to align area's xpos left bound, to the left bound of the first char, not to the center of it.
+    // areaWpos[0] += _dim[0]; // Subtract half face to align area's xpos left bound, to the left bound of the first char, not to the center of it.
     
     dim[0] += pad[0] * 2; // Add padding to the total area's width
     dim[1] += pad[1] * 2; // Add padding to the total area's height
 
     areaWpos[0] += dim[0]; // center the area's x pos.
-    areaWpos[0] -= pad[0]*2; // center the area's x pos including the padding.
+    // areaWpos[0] -= pad[0]*2; // center the area's x pos including the padding.
     // Area's y pos is already centered
 
     return {
@@ -73,11 +74,12 @@ export class Widget_Label extends Rect {
 
         const sdfouter = CalculateSdfOuterFromDim(fontSize);
         if (sdfouter + bold > 1) bold = 1 - sdfouter;
-        pos[2] += 1; // In essence we set as the left (start of text label) the label area and not the left of text.
+        pos[2] += 1; // Text in front of the label's area.
 
         /** Label tex mesh */
         const text_mesh = new Text_Mesh(text, pos, fontSize);
 
+        // TODO: uncomment this and remove "geomcopy.pos[0] += this.geom.dim[0]; // Advance half char width"
         // pos[0] -= pad[0] * 2; // In essence we set as the left (start of text label) the label area and not the left of text.
         pos[2] -= 1; // Set z for area 'behind' this.text_mesh
 
@@ -202,19 +204,18 @@ export class Widget_Label extends Rect {
     // Transformations
     Move(x, y) {
 
-        // Move 'this' text
-        // _pt7.Start(); 
-        // this.geom.MoveXY(x, y, this.gfx);
-        // this.text_mesh.geom.MoveXY(x, y, this.text_mesh.gfx);
-        // _pt7.Stop();
-        TEMP_move_through_here(x,y,this);
-        TEMP_move_through_here(x,y,this.text_mesh);
+        // this.geom.pos[0] += x;
+        // this.geom.pos[1] += y;
         BatchStore(this, 'MoveXY', [x,y]);
+        // this.text_mesh.geom.pos[0] += x;
+        // this.text_mesh.geom.pos[1] += y;
         BatchStore(this.text_mesh, 'MoveXY', [x,y]);
+        
     }
 
     MoveY(y) {
 
+        alert('MoveY @ WidgetLabel')
         // Move 'this' text
         this.geom.MoveY(y, this.gfx);
         this.text_mesh.geom.MoveY(y, this.text_mesh.gfx);
@@ -316,8 +317,12 @@ export class Widget_Label extends Rect {
 
         // Move 
         const mouse_pos = MouseGetPosDif();
-        mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, mesh.gfx);
-        text_mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, text_mesh.gfx);
+        // mesh.geom.pos[0] += mouse_pos.x;
+        // mesh.geom.pos[1] += -mouse_pos.y;
+        BatchStore(mesh, 'MoveXY', [mouse_pos.x, -mouse_pos.y]);
+        // text_mesh.geom.pos[0] += mouse_pos.x;
+        // text_mesh.geom.pos[1] += -mouse_pos.y;
+        BatchStore(text_mesh, 'MoveXY', [mouse_pos.x, -mouse_pos.y]);
 
     }
 

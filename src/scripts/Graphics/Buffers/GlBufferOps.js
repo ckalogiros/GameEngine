@@ -1,7 +1,7 @@
 "use strict";
 
 import { RotateZ, Matrix3x3_3x3Mult } from "../../Helpers/Math/Matrix.js";
-import { Gl_progs_get_group, Gl_progs_get_vb_byidx, Gl_progs_get_ib_byidx } from "../GlProgram.js";
+import { Gl_progs_get_group, Gl_progs_get_vb_byidx, Gl_progs_get_ib_byidx, Gl_progs_get_shaderinfo_wposTime_offset } from "../GlProgram.js";
 
 
 export function Gl_remove_geometry(gfx, num_faces = 1) {
@@ -10,7 +10,7 @@ export function Gl_remove_geometry(gfx, num_faces = 1) {
     // const ib = Gl_progs_get_ib_byidx(gfx.prog.groupidx, gfx.prog.idx, gfx.ib.idx);
     const ib = Gl_progs_get_ib_byidx(gfx.prog.groupidx, gfx.prog.idx, gfx.ib.idx);
 
-    // Structure to use for updating a removed mesh's sttart index pointing to it's location in the vertex buffer..
+    // Structure to use for updating a removed mesh's start index pointing to it's location in the vertex buffer..
     const ret = {
         counts: [0, 0], // 0:vb, 1:ib
         start: gfx.vb.start,
@@ -872,7 +872,7 @@ export function GlSetColorBatch(gfxbuffer, color) {
         const progs = Gl_progs_get_group(i);
         for (let j = 0; j < gfxbuffer[i].length; j++) {
             
-            if(gfxbuffer[i][j] !== undefined)
+            if(gfxbuffer[i][j] !== undefined) // FIXME: Is there a better way of dealing with the empty buffers???
             for (let k = 0; k < gfxbuffer[i][j].length; k++) {
                 
                 const vb = progs.buffer[j].vb[k];
@@ -894,22 +894,47 @@ export function GlSetColorBatch(gfxbuffer, color) {
                         // vb.data[index++] = color[2]; // Move mesh's x pos by amt
                         // vb.data[index++] = color[3]; // Move mesh's x pos by amt
 
-                        // vb.data[index++] = pos[0]; // Move mesh's x pos by amt
-                        // vb.data[index++] = pos[1]; // Move mesh's x pos by amt
+                        vb.data[index++] += pos[0]; // Move mesh's x pos by amt
+                        vb.data[index++] += pos[1]; // Move mesh's x pos by amt
+                        console.log()
                         // vb.data[index++] = pos[2]; // Move mesh's x pos by amt
-                        index++;
-                        index++;
+                        // index++;
+                        // index++;
                         index++;
                         index++;
     
                         index += stride; // Go to next vertice's pos. +1 for skipping pos.z
                     }
+
+                    vb.needsUpdate = true;
                 }
 
-                vb.needsUpdate = true;
             }
         }
     }
+}
+export function GlVbBatch(meshdata, count, groupidx, progidx, vbidx, attribsPerVertex) {
+
+    const vb = Gl_progs_get_vb_byidx(groupidx, progidx, vbidx);
+    let stride = attribsPerVertex - V_COL_COUNT;
+        
+    for(let i=0; i<count; i++){ // Runs for each mesh in the vertex buffer
+
+        let index = meshdata[i].start + Gl_progs_get_shaderinfo_wposTime_offset(groupidx, progidx);
+        const pos = meshdata[i].data.pos;
+    
+        while (index < meshdata[i].end) {
+    
+            vb.data[index++] += pos[0]; // Move mesh's x pos by amt
+            vb.data[index++] += pos[1]; // Move mesh's x pos by amt
+            index++;
+            index++;
+    
+            index += stride; // Go to next vertice's pos. +1 for skipping pos.z
+        }
+    }
+
+    vb.needsUpdate = true;
 }
 /**OLD-Batch with merge starts-ends */
 // export function GlSetColorBatch(gfxbuffer, color) {

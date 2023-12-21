@@ -22,7 +22,7 @@ export class Material {
    sid;
    col;
    defCol;
-   type = 0;
+   type;
    style;
 
    uvIdx;
@@ -52,7 +52,7 @@ export class Material {
       
       this.alreadyAdded = false; // To check if the shaders have been created
 
-      this.type |= MESH_TYPES_DBG.MATERIAL;
+      this.type = MESH_TYPES_DBG.MATERIAL;
 
       /** Debug properties */
       if (DEBUG.MATERIAL) {
@@ -188,7 +188,7 @@ export class FontMaterial extends Material {
       const tex_idxs = Texture_load_texture_byid(this.texidx, TEXTURE_TYPE.TYPE_FONT);
 
       // this.sid.shad |= SID.SHAD.; // Enable tex_idxs rendering
-      // this.sid.shad |= SID.SHAD.PRE_MULTIPLIED_ALPHA; // E
+      this.sid.shad |= SID.SHAD.PRE_MULTIPLIED_ALPHA; // E
       this.sid.attr |= SID.ATTR.TEX2; // 
       // this.sid.attr |= SID.ATTR.SDF; // 
       this.sid.attr |= SID.ATTR.MSDF; // 

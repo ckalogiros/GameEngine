@@ -31,6 +31,23 @@
 
 --------------------------------------------------- 
 
+// MEDDLE with
+-// root.UpdateGfxPosDimRecursive(root);
+
+Set UpdatePosXYZ() in Mesh to update with the Batch.
+
+IMIDIATELY:
+Implement TYPE naming for Batch :('MoveXY' becomes MOVEXY bit mask)
+
+IMIDIATELY:
+If OnMove mesh, keep the Batch buffer to use on next frame!!!
+
+TODO:
+For time intervals that need updated every frame,
+set a special case, pass a CONSTANT as a number in milisecs,
+that will update the intervals callback on every frame of the application,
+without checking a timer.
+
 TODO:
 Gfx attributes may be removed from the mesh, 
 and instead have an index to a collor buffer

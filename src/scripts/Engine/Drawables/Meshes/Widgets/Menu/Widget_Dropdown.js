@@ -62,7 +62,8 @@ export class Widget_Dropdown extends Section {
       this.rootidx = INT_NULL;
       this.depth_level = 0;
 
-      this.menu = new Section(SECTION.VERTICAL, [10, 10], [OUT_OF_VIEW, OUT_OF_VIEW, pos[2] + 1], [1, 1], TRANSPARENCY(GREY3, tr));
+      pos[2]+=1;
+      this.menu = new Section(SECTION.VERTICAL, [10, 10], [OUT_OF_VIEW, OUT_OF_VIEW, pos[2]], [1, 1], TRANSPARENCY(GREY3, tr));
       this.menu.type |= MESH_TYPES_DBG.DROP_DOWN_MENU;
       this.menu.parent = this;
       this.menu.SetName(`MENU-${this.name}`);
@@ -77,7 +78,7 @@ export class Widget_Dropdown extends Section {
       }
 
       this.dp_symbols = ['+', '-'];
-      const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.RIGHT, [pos[0], pos[1], this.menu.geom.pos[2] + 1], _font_size, TRANSPARENCY(PINK_240_60_200, .6), text_col, btn_pad, bold, style, font);
+      const btn = new Widget_Button(`${this.dp_symbols[0]} ${text}`, ALIGN.LEFT, [pos[0], pos[1], this.menu.geom.pos[2] + 1], _font_size, TRANSPARENCY(PINK_240_60_200, .6), text_col, btn_pad, bold, style, font);
       btn.SetName(`BTN-${this.name} btn_id:${btn.id}`)
       btn.debug_info.type |= INFO_LISTEN_EVENT_TYPE.LISTENERS;
 
@@ -107,8 +108,16 @@ export class Widget_Dropdown extends Section {
       }
 
       this.menu.AddItem(mesh);
-      mesh.geom.pos[2] += this.geom.pos[2];
-      mesh.geom.pos[2]++;
+      this.SetMenuItemsZindex(); 
+
+   }
+
+   SetMenuItemsZindex(){
+      // DICISION: What about any children recursive???
+      for (let i=0; i<this.menu.children.boundary; i++){
+         const child = this.menu.children.buffer[i];
+         child.geom.pos[2] = this.menu.geom.pos[2] +1;
+      }
    }
 
 
@@ -550,7 +559,7 @@ export class Widget_Dropdown extends Section {
          // TODO: The scroller section must grow only in width, not inn height.
          
          root.Recalc(SECTION.INHERIT | SECTION.TOP_DOWN | SECTION.EXPAND);
-         root.UpdateGfxPosDimRecursive(root);
+         // root.UpdateGfxPosDimRecursive(root);
          
          if (root.parent && root.parent.type & MESH_TYPES_DBG.WIDGET_SCROLLER)
             root.parent.SetScissorBox();

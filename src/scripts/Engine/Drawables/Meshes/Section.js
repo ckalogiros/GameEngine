@@ -6,6 +6,7 @@ import { MouseGetPos, MouseGetPosDif } from "../../Controls/Input/Mouse.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx } from "../../Timers/TimeIntervals.js";
 import { MESH_ENABLE } from "./Base/Mesh.js";
 import { Rect } from "./Rect_Mesh.js";
+import { BatchStore } from "../../Batch/Batch.js";
 
 
 
@@ -97,15 +98,24 @@ export class Section extends Rect {
        * Expand width of items to match the max width of section, minus the margin.
        * Only if the section has VERTICAL align for its items. 
        */
-      // console.log('[ [ ', section.options, ' ] ]')
-      if(options & SECTION.EXPAND)
-         Expand(section, section.options, section.max_size[0], 0);
+      // if(options & SECTION.EXPAND)
+      //    Expand(section, section.options, section.max_size[0], 0);
 
 
-      if (options & SECTION.TOP_DOWN) { // Keep stable the top and position everything growing from the bottom
-         const x = section.geom.pos[0] + (section.max_size[0] - old_sizex) +section.margin[0];
-         const y = section.geom.pos[1] + (section.max_size[1] - old_sizey) +section.margin[1];
-         section.SetPosXY([x, y]);
+      // Calculate the parent section's position, so that its items are positioned from top to bottom, (Ex. when a dropdown menu is opened). 
+      if (options & SECTION.TOP_DOWN) { 
+         // const x = section.geom.pos[0] + (section.max_size[0] - old_sizex) +section.margin[0];
+         // const y = section.geom.pos[1] + (section.max_size[1] - old_sizey) +section.margin[1];
+         // section.SetPosXY([x, y]);
+         // BatchStore(section, 'SetPosXY',
+         //    [ 0,
+         //    // [ (section.max_size[0] - old_sizex) +section.margin[0],
+         //    0]
+         //    // -((section.max_size[1] - old_sizey) +section.margin[1])]
+         // );
+         // NOTE: The position in the gfx buffers is updated at Calculate_positions_recursive().
+         section.geom.pos[0] += (section.max_size[0] - old_sizex) +section.margin[0];
+         section.geom.pos[1] += (section.max_size[1] - old_sizey) +section.margin[1];
       }
 
       section.SetMargin();
@@ -326,6 +336,7 @@ export class Section extends Rect {
    // Transformations
    Move(x, y) { 
       const count = Section_move_children_recursive(x, y, this); 
+
       // console.log('++++++++++++++++++++++++++++++++++++++++++++++\n', count)
    }
    SetPosX(x) { super.SetPosX(x); } // TODO: IMPLEMENT
@@ -339,7 +350,6 @@ export class Section extends Rect {
          child.SetColorAlpha(alpha, alpha)
       }
    }
-   
    Resize(){
 
       // console.log('\n==== Resizing:', this.name)
@@ -362,12 +372,16 @@ function Section_move_children_recursive(x, y, mesh, count=0) {
 
          /**DEBUG ERROR*/ if (!child.Move) { console.error('OnMove function is missing. @ Section.Move(), mesh:', child.name, child); return; }
          child.Move(x, y);
-         // console.log(child.name)
       }
    }
 
    count++;
-   mesh.geom.MoveXY(x, y, mesh.gfx);
+   
+   // Move parent
+   // mesh.geom.pos[0] += x;
+   // mesh.geom.pos[1] += y;
+   BatchStore(mesh, 'MoveXY', [x,y]);
+
    return count;
 
 }
@@ -512,14 +526,11 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
       let continue_recur = true;
       let opt = options
 
-      if(mesh.type & MESH_TYPES_DBG.WIDGET_SCROLLER_BAR)
-      console.log()
-
       if (options & SECTION.INHERIT) opt = parent.options
 
       if (parent.type & MESH_TYPES_DBG.SECTION_MESH) { // For meshes with a parent of type Section
 
-         // TODO: cash GetMaxWidth() and ...MaxHeight()
+         // IMIDIATELY: cash GetMaxWidth() and ...MaxHeight()
          const c_x = cur_pos[0], c_y = cur_pos[1]; // curent mesh position
          const p_dx = parent.GetMaxWidth(), p_dy = parent.GetTotalHeight(); // parent mesh dimention
          const p_mx = parent.margin[0], p_my = parent.margin[1]; // parent mesh margin
@@ -531,6 +542,7 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
 
 
             if (mesh.gfx) {
+               // pos_dif[0]/=2
                mesh.Reposition_post(pos_dif);
             }
             else {
@@ -579,14 +591,14 @@ function Calculate_sizes_recursive(section, top, left, options, total_margin = [
       opt = section.options
    
       const mesh = section.children.buffer[i];
-      if(mesh.type & MESH_TYPES_DBG.WIDGET_SCROLLER_BAR)
-      console.log()
 
       if (mesh.children.active_count && (mesh.type & MESH_TYPES_DBG.SECTION_MESH)) {
 
          margin[1] += mesh.margin[1];
          margin[0] += mesh.margin[0];
          const size = Calculate_sizes_recursive(mesh, top, left, SECTION.INHERIT, margin, total_size); // Recurse if child mesh is of type of Section
+         if(isNaN(mesh.geom.pos[1]))
+         console.log()
          total_size[0] += size[0];
          total_size[1] += size[1];
 
@@ -650,6 +662,8 @@ function Calculate_sizes_recursive(section, top, left, options, total_margin = [
          }
       }
    }
+   if(isNaN(section.geom.pos[1]))
+   console.log()
 
    AddArr2(total_size, accum_size_per_section);
    return total_size;

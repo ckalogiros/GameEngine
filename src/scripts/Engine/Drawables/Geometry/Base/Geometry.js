@@ -99,14 +99,11 @@ export class Geometry2D {
         glBufferOps.GlMoveXYZ(gfx, pos, num_faces);
     }
     MoveXY(x, y, gfx, num_faces) {
-        if(x===0 && y==0) return;
-        this.pos[0] += x;
-        this.pos[1] += y;
-        glBufferOps.GlMoveXY(gfx, [x, y], num_faces);
+        // if(x===0 && y==0) return;
+        alert('MoveXY() @ Geometry.js')
     }
     MoveX(x, gfx) {
-        this.pos[0] += x;
-        glBufferOps.GlMoveXY(gfx, [x, 0]);
+        alert('MoveX() @ Geometry.js')
     }
     MoveY(y, gfx) {
         this.pos[1] += y;
@@ -227,19 +224,6 @@ export class Geometry3D {
     SetZindex(z) {
         this.pos[2] = z;
         glBufferOps.GlSetWposZ(gfx, z);
-    }
-    MoveXY(x, y) {
-        this.pos[0] += x;
-        this.pos[1] += y;
-        GlMoveXY(gfx, [x, y]);
-    }
-    MoveX(x) {
-        this.pos[0] += x;
-        glBufferOps.GlMoveXY(gfx, [x, 0]);
-    }
-    MoveY(y) {
-        this.pos[1] += y;
-        glBufferOps.GlMoveXY(gfx, [0, y]);
     }
     //////////////////////////////////////////////////////////////
     StoreDefPos(pos) {

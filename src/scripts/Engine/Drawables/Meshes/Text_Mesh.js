@@ -27,8 +27,6 @@ export class Text_Mesh extends Mesh {
       const mat = new FontMaterial(color, font, text, [bold, sdfouter])
       const geom = new Geometry2D_Text(pos, fontsize, scale, text, font);
 
-
-
       super(geom, mat);
       this.SetName(text);
       this.type |= MESH_TYPES_DBG.TEXT_MESH;
@@ -62,34 +60,33 @@ export class Text_Mesh extends Mesh {
       geomcopy.Copy(this.geom)
 
       gfxcopy.tb.idx = this.mat.texidx;
-
+      geomcopy.pos[0] += this.geom.dim[0]; // Advance half char width
+      
       for (let i = 0; i < geomcopy.num_faces; i++) {
          
          if (this.mat.text[i]){
             
             this.mat.uv = Font_get_char_uv_coords(this.mat.uvIdx, this.mat.text[i]);
             const plane_bounds = Font_get_char_plane_bounds(this.mat.uvIdx, this.mat.text[i]);
-            
             geomcopy.dim[0] *= plane_bounds.width;
             geomcopy.dim[1] *= plane_bounds.height;
-            
-            const yoffset = plane_bounds.yoffset;
-            geomcopy.pos[1] += yoffset*this.fontsize;
-            
+            geomcopy.pos[1] += plane_bounds.yoffset*this.fontsize;
+
          }
          else { // Case the text changed to a shorter text, fill up the absent texts in the graphics buffer with empty text(space char).
             this.mat.uv = Font_get_char_uv_coords(this.mat.uvIdx, ' ');
          }
 
-         geomcopy.pos[0] += this.geom.dim[0];
          // geomcopy.pos[0] += this.geom.dim[0]; // Half advance current face width
          const start = Gl_add_geom_mat_to_vb(this.sid, gfxcopy, geomcopy, this.mat, this.type & MESH_TYPES_DBG.UI_INFO_GFX, `${this.mat.text[i]} in: ${this.name}`, this.idx);
+         geomcopy.pos[0] += this.geom.dim[0];
          // geomcopy.pos[0] += geomcopy.dim[0]; // Half advance current face width
          
          if(i===0) {
             this.gfx.vb.start = start; // Start of mesh in the vertex buffer hasn't been set from the GenGfx. So we only need the start of the first character in the vertex buffer. All the rest starts are calculated on the fly.
             this.gfx.vb.end += start; // DICISION: Where to add the start index to the end? 
          }
+
 
          // Reset geometry copy
          geomcopy.dim[0] = this.geom.dim[0]; geomcopy.dim[1] = this.geom.dim[1]; geomcopy.pos[1] = this.geom.pos[1]; 
@@ -154,23 +151,24 @@ export class Text_Mesh extends Mesh {
       const len = (this.geom.num_faces > numchars) ? this.geom.num_faces :
          (numchars > this.geom.num_faces ? this.geom.num_faces : numchars);
 
+      geomcopy.pos[0] += this.geom.dim[0]; // Advance half char width
+
       // Update text faces
       for (let i = 0; i < len; i++) {
 
          let uvs = [0, 0, 0, 0];
          if (text[i] !== undefined) {
-            uvs = Font_get_char_uv_coords(this.mat.uvIdx, text[i]);
-
-            if(text[i] !== ' '){
-
-               const plane_bounds = Font_get_char_plane_bounds(this.mat.uvIdx, text[i]);
-               geomcopy.dim[0] *= plane_bounds.width;
-               geomcopy.dim[1] *= plane_bounds.height;
-               geomcopy.pos[1] += plane_bounds.yoffset * this.fontsize;
-               GlSetDim(gfxInfoCopy, geomcopy.dim);
-               GlSetWposXY(gfxInfoCopy, geomcopy.pos);
-            }
+            
+            const plane_bounds = Font_get_char_plane_bounds(this.mat.uvIdx, text[i]);
+            geomcopy.dim[0] *= plane_bounds.width;
+            geomcopy.dim[1] *= plane_bounds.height;
+            geomcopy.pos[1] += plane_bounds.yoffset * this.fontsize;
+            // GlSetDim(gfxInfoCopy, geomcopy.dim);
+            // GlSetWposXY(gfxInfoCopy, geomcopy.pos);
             geomcopy.pos[0] += this.geom.dim[0]; // Advance xpos to next character.
+            
+            uvs = Font_get_char_uv_coords(this.mat.uvIdx, text[i]);
+            
             geomcopy.dim[0] = this.geom.dim[0]; geomcopy.dim[1] = this.geom.dim[1]; geomcopy.pos[1] = this.geom.pos[1]; // Reset 
          }
          GlSetTex(gfxInfoCopy, uvs);
@@ -190,9 +188,7 @@ export class Text_Mesh extends Mesh {
       let gfxInfoCopy = new GfxInfoMesh(this.gfx);
       gfxInfoCopy.vb.start += this.gfx.vb.start + (gfxInfoCopy.vb.count * idx); // Calc the characters position inside the char array.
 
-      // if(text !== ' '){
 
-      // }
       const geomcopy = new Geometry2D_Text();
       geomcopy.Copy(this.geom);
 
@@ -200,13 +196,15 @@ export class Text_Mesh extends Mesh {
       geomcopy.dim[0] *= plane_bounds.width;
       geomcopy.dim[1] *= plane_bounds.height;
       geomcopy.pos[1] += plane_bounds.yoffset * this.fontsize;
-      GlSetDim(gfxInfoCopy, geomcopy.dim);
-      GlSetWposXY(gfxInfoCopy, geomcopy.pos);
       geomcopy.pos[0] += this.geom.dim[0];
-      geomcopy.dim[0] = this.geom.dim[0]; geomcopy.dim[1] = this.geom.dim[1]; geomcopy.pos[1] = this.geom.pos[1]; 
-
+      // GlSetDim(gfxInfoCopy, geomcopy.dim);
+      // GlSetWposXY(gfxInfoCopy, geomcopy.pos);
+      
       const uvs = Font_get_char_uv_coords(this.mat.uvIdx, _text);
       GlSetTex(gfxInfoCopy, uvs);
+      
+      // this.geom.pos[0] = geomcopy.pos[0]
+      // this.geom.pos[1] = geomcopy.pos[1]
    }
 
    SetColorRGB(col) {

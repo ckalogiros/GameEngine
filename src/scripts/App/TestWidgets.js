@@ -165,8 +165,8 @@ export function TestWidgetsGeneric(scene) {
 
     // Help(scene)
 
-    const meshinfo_mesh = MeshInfo(scene)
-    TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: meshinfo_mesh });
+    // const meshinfo_mesh = MeshInfo(scene)
+    // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: meshinfo_mesh });
 
     // const gfxinfo = GfxInfo(scene)
     // TimeIntervalsCreate(100, 'Gfx info tip', TIME_INTERVAL_REPEAT_ALWAYS, GfxInfoUpdate, { gfxinfo: gfxinfo });
@@ -1245,10 +1245,14 @@ function MeshInfo(scene) {
     infomesh.CreateNewText('dim: 0000,0000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('idx: 0000, alpha: 0.00', fontsize, ORANGE_240_130_10, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('gfx: group: 0, prog:0, vb:0, start:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
-    infomesh.CreateNewText('PERFORMANCE COUNTER AND HOVERED MESH NAME', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    // infomesh.CreateNewText('PERFORMANCE COUNTER AND HOVERED MESH NAME', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    // infomesh.CreateNewText('MOVEX: 0000000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    // infomesh.CreateNewText('BATCH: 0000000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+
+    // For child
+    infomesh.CreateNewText('Text: name of the text and id', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
+    infomesh.CreateNewText('pos: 0000,0000,0, dim: 0000,0000, alpha: 0.00', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.CreateNewText('text gfx: group: 0, prog:0, vb:0, start:00000, count:00000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
-    infomesh.CreateNewText('MOVEX: 0000000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
-    infomesh.CreateNewText('BATCH: 0000000', fontsize, BLUE_10_120_220, [fontsize * 3, 0], .9);
     infomesh.SetName('Info Mesh 2');
 
     // infomesh.RenderToDebugGfx();
@@ -1279,22 +1283,28 @@ function MeshInfoUpdate(params) {
             `dim: ${infoMesh.geom.dim}`,
             `idx: ${infoMesh.idx} | alpha:${infoMesh.mat.col[3]}`,
             gfx,
-            `counter:${TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.COUNT}`,
-            `Batch :${TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.MOVE}`,
-            `Batch:${TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.BATCH_MOVE}`,
+            // `Text:`,
+            // `counter:${TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.COUNT}`,
+            // `Batch :${TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.MOVE}`,
+            // `Batch:${TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.BATCH_MOVE}`,
             // `mesh: ${STATE.mesh.hovered.name} counter${TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.COUNT}`,
         ];
 
         // Create info for any text gfx, if exists
         const child = (infoMesh.children.boundary && infoMesh.children.buffer[0]) ? infoMesh.children.buffer[0] : null;
         if (child) {
-            if (child.type & MESH_TYPES_DBG.FONT_MATERIAL) {
+            if (child.type & MESH_TYPES_DBG.FONT_MATERIAL) { // Plain text
 
                 const text_num_faces = (child.text_mesh) ? child.text_mesh.geom.num_faces : child.geom.num_faces; // If child is of type label and has 'text_mesh' else is plain text.
+                
+                msgs.push(`Plain Text:${child.name}, dim: ${child.id}`);
+                msgs.push(`pos:${FloorArr3(child.geom.pos)}, dim: ${child.geom.dim}, alpha:${child.mat.col[3]}`);
                 msgs.push(`gfx: group:${child.gfx.prog.groupidx}, prog:${child.gfx.prog.idx}, vb:${child.gfx.vb.idx}, start:${child.gfx.vb.start}, faces:${text_num_faces}`);
             }
-            else if (child.text_mesh) {
-                msgs.push(`gfx: group:${child.gfx.prog.groupidx}, prog:${child.text_mesh.gfx.prog.idx}, vb:${child.text_mesh.gfx.vb.idx}, start:${child.text_mesh.gfx.vb.start}, faces:${child.text_mesh.geom.num_faces}`);
+            else if (child.text_mesh) { // Text in label or any other mesh that has text_mesh
+                msgs.push(`Text_mesh: id:${child.text_mesh.id}, name:${child.text_mesh.name},`);
+                msgs.push(`pos:${FloorArr3(child.text_mesh.geom.pos)}, dim: ${child.text_mesh.geom.dim}, alpha:${child.text_mesh.mat.col[3]}`);
+                msgs.push(`gfx: group:${child.text_mesh.gfx.prog.groupidx}, prog:${child.text_mesh.gfx.prog.idx}, vb:${child.text_mesh.gfx.vb.idx}, start:${child.text_mesh.gfx.vb.start}, faces:${child.text_mesh.geom.num_faces}`);
             }
 
         }

@@ -48,7 +48,7 @@ export function Parse_json_metrics(json_metrics_object){
    const uvmap = [];
    uvmap[0] = [0.0, 0.0, 0.0, 0.0];          // Set for space character
    const plane_bounds = [];
-   plane_bounds[0] = {left:0, right:0, top:0, bottom:0, width:0, height:0};   // Set for space character
+   plane_bounds[0] = {left:0, right:0, top:0, bottom:0, width:0, height:0, yoffset:0};   // Set for space character
    const atlas_bounds = [];
    atlas_bounds[0] = {left:0, right:0, top:0, bottom:0, width:0, height:0};   // Set for space character
 

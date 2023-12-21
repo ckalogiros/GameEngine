@@ -156,6 +156,7 @@ export function Gl_generate_context(sid, sceneidx, groupidx, progidx, vbidx, num
     gfx_ctx.vb.idx = vbidx;
     gfx_ctx.vb.start = 0; // NOTE: The start of the mesh in the vertex buffer is calculated when the mesh is added to the vertex buffer.
     gfx_ctx.vb.end = num_faces * vertsPerRect * attribsPerVertex; 
+    // gfx_ctx.vb.end = 0; 
     gfx_ctx.vb.count = count; // The number of attributes per face
 
     gfx_ctx.ib.idx = ibidx; // Stores the programs index for the indexbuffer.
@@ -165,6 +166,17 @@ export function Gl_generate_context(sid, sceneidx, groupidx, progidx, vbidx, num
     return gfx_ctx;
 }
 
+function temp_check_nan(arr){
+    if(arr.length === 2){
+        if(arr[0]===NaN || arr[1]===NaN) alert('NaN value to gfx buffers')
+    }
+    if(arr.length === 3){
+        if(arr[0]===NaN || arr[1]===NaN || arr[2]===NaN) alert('NaN value to gfx buffers')
+    }
+    if(arr.length === 3){
+        if(arr[0]===NaN || arr[1]===NaN || arr[2]===NaN || arr[3]===NaN) alert('NaN value to gfx buffers')
+    }
+}
 
 export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_name, meshidx){
 
@@ -174,6 +186,7 @@ export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_na
     /**DEBUG ERROR*/ if(geom.dim[0] === undefined){ console.error('Dim is UNDEFINED. mesh:', mesh_name)}
     /**DEBUG ERROR*/ if(mat.col[0] === undefined){ console.error('Col is UNDEFINED. mesh:', mesh_name)}
     /**DEBUG ERROR*/ if(mat.style[0] === undefined){ console.error('Style is UNDEFINED. mesh:', mesh_name)}
+    /**DEBUG ERROR*/ temp_check_nan(geom.pos); temp_check_nan(geom.dim);  temp_check_nan(mat.col);  temp_check_nan(mat.style);
     // /**DEBUG ERROR*/ if(meshidx === undefined){ console.error('Mesh index is not passed as a param. mesh:', mesh_name)}
 
     const groupidx = gfx.prog.groupidx;
@@ -186,7 +199,8 @@ export function Gl_add_geom_mat_to_vb(sid, gfx, geom, mat, vb_type_flag, mesh_na
     if(ib===undefined)
     console.log()
     const num_faces = 1;
-    const start = (!gfx.vb.start) ? vb.count : gfx.vb.start;
+    // const start = (!gfx.vb.start) ? vb.count : gfx.vb.start;
+    const start = vb.count;
     vb.vCount += prog.shaderinfo.verticesPerRect * gfx.num_faces;
 
     const count = gfx.vb.count;

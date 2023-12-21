@@ -28,7 +28,8 @@ class Explosion {
         GlSetAttrTime(this.gfxInfo, this.timer.t);
     }
     Move(){
-        GlMoveXY(this.gfxInfo, [0, this.translation.yAdvance]);
+        alert('Move @')
+        // GlMoveXY(this.gfxInfo, [0, this.translation.yAdvance]);
     }
     Clear(){
         this.isActive = false;

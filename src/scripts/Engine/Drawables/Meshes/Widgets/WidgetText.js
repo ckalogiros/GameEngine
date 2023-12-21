@@ -1,14 +1,10 @@
 "use strict";
 
-import { GlSetTex } from "../../../../Graphics/Buffers/GlBufferOps.js";
-import { GfxInfoMesh } from "../../../../Graphics/GlProgram.js";
 import { CalculateSdfOuterFromDim } from "../../../../Helpers/Helpers.js";
 import { CopyArr2, CopyArr3 } from "../../../../Helpers/Math/MathOperations.js";
-import { BatchStore, TEMP_move_through_here } from "../../../Batch/Batch.js";
+import { BatchStore } from "../../../Batch/Batch.js";
 import { MouseGetPosDif } from "../../../Controls/Input/Mouse.js";
-import { Font_get_char_uv_coords } from "../../../Loaders/Font/ChlumskyFontMetricsLoader.js";
 import { _pt7 } from "../../../Timers/PerformanceTimers.js";
-// import { FontGetUvCoords } from "../../../Loaders/Font/Font.js";
 import { TimeIntervalsCreate, TimeIntervalsDestroyByIdx, TimeIntervalsGetByIdx } from "../../../Timers/TimeIntervals.js";
 import { Text_Mesh } from "../Text_Mesh.js";
 
@@ -106,11 +102,9 @@ export class Widget_Text extends Text_Mesh {
 	/*******************************************************************************************************************************************************/
 	// Transformations
 	Move(x, y) {
-		// _pt7.Start(); 
-		// this.geom.MoveXY(x, y, this.gfx);
-		// _pt7.Stop();
-		TEMP_move_through_here(x,y,this);
-		
+
+		// this.geom.pos[0] += x;
+		// this.geom.pos[1] += y;
 		BatchStore(this, 'MoveXY', [x,y]);
 	}
 
@@ -440,42 +434,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 			const text = `${val}`;
 			meshes[i].UpdateText(text);
 		}
-		// for (let i = 0; i < mesheslen; i++) {
 
-		// 	let val = 0;
-		// 	if (params.params.func[i]) {
-
-		// 		if (params.params.func_params[i])
-		// 			val = params.params.func[i](params.params.func_params[i]); // Callback with parameters
-
-		// 		else val = params.params.func[i](); // Callback with no parameters
-		// 	}
-		// 	else if (params.params.func_params[i]) {
-		// 		val = params.params.func_params[i].delta_avg; // No callback, just a value
-		// 	}
-
-		// 	const text = `${val}`;
-		// 	const geom = meshes[i].geom;
-		// 	const gfx = meshes[i].gfx;
-		// 	const mat = meshes[i].mat;
-
-		// 	let gfxInfoCopy = new GfxInfoMesh(gfx);
-
-		// 	const textLen = text.length;
-		// 	const len = geom.num_faces > textLen ? geom.num_faces :
-		// 		(textLen > geom.num_faces ? geom.num_faces : textLen);
-
-		// 	// Update text faces
-		// 	for (let j = 0; j < len; j++) {
-
-		// 		let uvs = [0, 0, 0, 0];
-		// 		if (text[j] !== undefined) {
-		// 			uvs = Font_get_char_uv_coords(mat.uvIdx, text[j]);
-		// 		}
-		// 		GlSetTex(gfxInfoCopy, uvs);
-		// 		gfxInfoCopy.vb.start += gfxInfoCopy.vb.count
-		// 	}
-		// }
 	}
 
 	// SEE ### OnMove Events Implementation Logic
@@ -487,7 +446,9 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 		const mouse_pos = MouseGetPosDif();
 
 		// Move 'this' text
-		mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, mesh.gfx);
+		// this.geom.pos[0] += mouse_pos.x;
+		// this.geom.pos[1] += -mouse_pos.y;
+		BatchStore(this, 'MoveXY', [mouse_pos.x, -mouse_pos.y,]);
 		// Move children text
 		for (let i = 0; i < this.children.boundary; i++) {
 
@@ -500,12 +461,8 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 	// Transformations
 	Move(x, y) {
 
-		// _pt7.Start(); 
-		// this.geom.MoveXY(x, y, this.gfx);
-		// _pt7.Stop();
-
-		TEMP_move_through_here(x,y,this);
-		// Move 'this' text
+		// this.geom.pos[0] += x;
+		// this.geom.pos[1] += y;
 		BatchStore(this, 'MoveXY', [x,y]);
 
 		// Move children text
@@ -513,12 +470,9 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 
 			const child = this.children.buffer[i];
 			if (child) {
-				// _pt7.Start(); 
-				// child.geom.MoveXY(x, y, child.gfx);
-				// _pt7.Stop();
-
-				TEMP_move_through_here(x,y,child);
-				BatchStore(this, 'MoveXY', [x,y]);
+				// child.geom.pos[0] += x;
+				// child.geom.pos[1] += y;
+				BatchStore(child, 'MoveXY', [x,y]);
 			}
 		}
 
@@ -530,11 +484,10 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 		const dim = this.geom.dim;
 		CopyArr2(pos, this.geom.pos);
 		let ypos = pos[1] + dim[1] * 2;
-
 		if (flags & ALIGN.VERTICAL) {
-
+			
 			for (let i = 0; i < this.children.boundary; i++) {
-
+				
 				const child = this.children.buffer[i];
 				pos[1] = ypos;
 

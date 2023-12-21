@@ -122,7 +122,8 @@ export const _pt4 = new PerformanceTimerCreate('Gl_draw'); // Generic performanc
 export const _pt5 = new PerformanceTimerCreate('EventListener'); // Generic performance timer
 export const _pt6 = new PerformanceTimerCreate('HoverListener'); // Generic performance timer
 export const _pt7 = new PerformanceTimerCreate('MOVE_OLD'); // 
-export const _pt8 = new PerformanceTimerCreate('MOVE_NEW'); // 
+export const _pt8 = new PerformanceTimerCreate('BATCH'); // 
+export const _pt9 = new PerformanceTimerCreate('BATCH_TEST_2_BATCHES'); // 
 // export const _gfxctxtimer = new PerformanceTimerCreate('Measure GfxContext buffer'); // Generic performance timer
 
 

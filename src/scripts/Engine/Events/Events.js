@@ -1,6 +1,5 @@
 "use strict";
 
-import { BatchStore } from "../Batch/Batch.js";
 import { Listener_dispatch_check_hover_event, Listener_dispatch_event } from "./EventListeners.js";
 
 
@@ -162,8 +161,6 @@ export function Events_handle_immidiate(e) {
         if (e.params.mesh.StateCheck(MESH_STATE.IN_HOVER_COLOR)) {
             e.params.mesh.SeHoverColortDefault();
             e.params.mesh.StateDisable(MESH_STATE.IN_HOVER_COLOR);
-            // TEMP_TEST_PERFORMANE_COUNTERS.MESH_INFO_UI.COUNT--;
-            // console.log('*******')
         }
 
         e.params.mesh.StateDisable(MESH_STATE.IN_HOVER); // Set false

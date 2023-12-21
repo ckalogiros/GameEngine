@@ -31,8 +31,8 @@ export class GfxInfoMesh {
 
 	vb = { // The vertex buffer info the mesh belongs to
 		idx: INT_NULL,	// The vertex buffer (float*) idx that this Mesh is stored to.
-		start: 0,		// The current meshe's starting idx in vertex buffer. 
-		end: 0,
+		start: 0,		// The current meshe's starting index in vertex buffer. 
+		end: 0,			// The meshe's end index in the vertex buffer.
 		count: 0,		// Current size of the float buffer (in floats)
 	};
 
@@ -207,7 +207,7 @@ export class Gl_Program {
 	#PrivateCalculateAttributesSize(sid) {
 		return {
 			col: (sid.attr & SID.ATTR.COL4) ? 4 : (0),
-			wpos: (sid.attr & SID.ATTR.WPOS_TIME4) ? 3 : (0),
+			wpos: (sid.attr & SID.ATTR.WPOS_TIME4) ? 3 : (0), // BUG: There should be a '.wpos' but there is not, and it should be 'SID.ATTR.WPOS3'
 			wposTime: (sid.attr & SID.ATTR.WPOS_TIME4) ? 4 : (0),
 			pos: (sid.attr & SID.ATTR.POS2) ? 2 : (sid.attr & SID.ATTR.POS3) ? 3 : (0),
 			tex: (sid.attr & SID.ATTR.TEX2) ? 2 : (0),
@@ -456,13 +456,8 @@ export function Gl_progs_get_prog_byidx(groupidx = INT_NULL, progidx) {
 	return _gl_programs_groups.buffer[groupidx].buffer[progidx];
 }
 export function Gl_progs_get_vb_byidx(groupidx = INT_NULL, progidx, vbIdx) {
-	if (_gl_programs_groups.buffer[groupidx] === undefined)
-		console.log
 	return _gl_programs_groups.buffer[groupidx].buffer[progidx].vb[vbIdx];
 }
-// export function Gl_progs_get_ib_byidx(groupidx = INT_NULL, progidx, ibIdx) {
-// 	return _gl_programs_groups.buffer[groupidx].buffer[progidx].ib[ibIdx];
-// }
 export function Gl_progs_get_ib_byidx(groupidx = INT_NULL, progidx, ibIdx) {
 	return Gl_ib_get_byidx(_gl_programs_groups.buffer[groupidx].buffer[progidx].ib[ibIdx]);
 }
@@ -476,6 +471,28 @@ export function Gl_progs_set_vb_texidx(groupidx = INT_NULL, progidx, vbIdx, texi
 	_gl_programs_groups.buffer[groupidx].buffer[progidx].vb[vbIdx].texidx = texidx;
 }
 
+// Get program's shder info
+// Offsets
+export function Gl_progs_get_shaderinfo_wposTime_offset(groupidx, progidx) { return _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.offset.wposTime }
+export function Gl_progs_get_shaderinfo_col_offset(groupidx, progidx) { return _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.offset.col }
+export function Gl_progs_get_shaderinfo_dim_offset(groupidx, progidx) { return _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.offset.pos }
+export function Gl_progs_get_shaderinfo_tex_offset(groupidx, progidx) { return _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.offset.tex }
+export function Gl_progs_get_shaderinfo_params1_offset(groupidx, progidx) { return _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.offset.params1 }
+export function Gl_progs_get_shaderinfo_sdf_offset(groupidx, progidx) { return _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.offset.sdf }
+// Sizes
+// export function Gl_progs_get_shaderinfo_wpos_offset(groupidx, progidx) { _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.size.wposTime }
+// export function Gl_progs_get_shaderinfo_wpos_offset(groupidx, progidx) { _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.size.col }
+// export function Gl_progs_get_shaderinfo_wpos_offset(groupidx, progidx) { _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.size.pos }
+// export function Gl_progs_get_shaderinfo_wpos_offset(groupidx, progidx) { _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.size.tex }
+// export function Gl_progs_get_shaderinfo_wpos_offset(groupidx, progidx) { _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.size.params1 }
+// export function Gl_progs_get_shaderinfo_wpos_offset(groupidx, progidx) { _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.size.sdf }
+// Locations
+// export function Gl_progs_get_shaderinfo_wpos_offset(groupidx, progidx) { _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.loc.wposTime }
+// export function Gl_progs_get_shaderinfo_wpos_offset(groupidx, progidx) { _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.loc.col }
+// export function Gl_progs_get_shaderinfo_wpos_offset(groupidx, progidx) { _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.loc.pos }
+// export function Gl_progs_get_shaderinfo_wpos_offset(groupidx, progidx) { _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.loc.tex }
+// export function Gl_progs_get_shaderinfo_wpos_offset(groupidx, progidx) { _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.loc.params1 }
+// export function Gl_progs_get_shaderinfo_wpos_offset(groupidx, progidx) { _gl_programs_groups.buffer[groupidx].buffer[progidx].shaderinfo.attributes.loc.sdf }
 
 export function Gl_create_program(sid) {
 	return _gl_programs_groups.CreateProgram(gfxCtx.gl, sid);
@@ -489,8 +506,6 @@ export function Gl_get_progams_count(groupidx = INT_NULL) {
 }
 
 export function Gl_set_vb_show(groupidx = INT_NULL, progidx, vbIdx, flag) {
-if(!_gl_programs_groups.buffer[groupidx])
-console.log
 	_gl_programs_groups.buffer[groupidx].buffer[progidx].vb[vbIdx].show = flag;
 	Gl_ib_set_show(_gl_programs_groups.buffer[groupidx].buffer[progidx].ib[vbIdx], flag)
 	// _gl_programs_groups.buffer[groupidx].buffer[progidx].ib[vbIdx].show = flag;

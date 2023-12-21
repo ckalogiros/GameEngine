@@ -144,15 +144,24 @@ export class Widget_Menu_Bar extends Widget_Label {
       // Move menu widget
       const mouse_pos = MouseGetPosDif();
       menu.geom.MoveXY(mouse_pos.x, -mouse_pos.y, menu.gfx);
-      text_mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, text_mesh.gfx);
+      menu.geom.pos[0] += x;
+		menu.geom.pos[1] += y;
+		BatchStore(menu, 'MoveXY', [x,y]);
+      text_mesh.geom.pos[0] += x;
+		text_mesh.geom.pos[1] += y;
+		BatchStore(text_mesh, 'MoveXY', [x,y]);
 
 
       // Move menu children widgets(close/minimize buttons)
       for (let i = 0; i < menu.children.boundary; i++) {
 
          const widget_child = menu.children.buffer[i];
-         widget_child.geom.MoveXY(mouse_pos.x, -mouse_pos.y, widget_child.gfx);
-         widget_child.text_mesh.geom.MoveXY(mouse_pos.x, -mouse_pos.y, widget_child.text_mesh.gfx);
+         widget_child.geom.pos[0] += x;
+         widget_child.geom.pos[1] += y;
+         BatchStore(widget_child, 'MoveXY', [x,y]);
+         widget_child.text_mesh.geom.pos[0] += x;
+         widget_child.text_mesh.geom.pos[1] += y;
+         BatchStore(widget_child.text_mesh, 'MoveXY', [x,y]);
       }
 
    }
@@ -225,15 +234,23 @@ export class Widget_Menu_Bar extends Widget_Label {
    Move(x, y) {
 
       // Move 'this' text
-      this.geom.MoveXY(x, y, this.gfx);
-      this.text_mesh.geom.MoveXY(x, y, this.text_mesh.gfx);
+      this.geom.pos[0] += x;
+		this.geom.pos[1] += y;
+		BatchStore(this, 'MoveXY', [x,y]);
+      this.text_mesh.geom.pos[0] += x;
+		this.text_mesh.geom.pos[1] += y;
+		BatchStore(this.text_mesh, 'MoveXY', [x,y]);
 
       // Move menu children widgets(close/minimize buttons)
       for (let i = 0; i < this.children.boundary; i++) {
 
          const widget_child = this.children.buffer[i];
-         widget_child.geom.MoveXY(x, y, widget_child.gfx);
-         widget_child.text_mesh.geom.MoveXY(x, y, widget_child.text_mesh.gfx);
+         widget_child.geom.pos[0] += x;
+         widget_child.geom.pos[1] += y;
+         BatchStore(widget_child, 'MoveXY', [x,y]);
+         widget_child.text_mesh.geom.pos[0] += x;
+         widget_child.text_mesh.geom.pos[1] += y;
+         BatchStore(widget_child.text_mesh, 'MoveXY', [x,y]);
       }
    }
 
