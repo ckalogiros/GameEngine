@@ -160,7 +160,7 @@ export class VertexBuffer {
        const oldData = this.data;
        this.data = new Float32Array(this.size);
        this.#CopyBuffer(oldData)
-       console.warn('Resizing vertex buffer!')
+       if(DEBUG.GFX.BUFFERS) console.log('Resizing vertex buffer!')
    }
 
    #CopyBuffer(oldData) {

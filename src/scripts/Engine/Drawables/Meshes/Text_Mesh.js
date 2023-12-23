@@ -14,6 +14,7 @@ import { Mesh } from "./Base/Mesh.js";
 import { Font_get_atlas_texture_metrics, Font_get_char_atlas_bounds, Font_get_char_plane_bounds, Font_get_char_uv_coords } from "../../Loaders/Font/ChlumskyFontMetricsLoader.js";
 import { GlSetDim, GlSetDimY, GlSetTex, GlSetWposXY } from "../../../Graphics/Buffers/GlBufferOps.js";
 import { Gl_add_geom_mat_to_vb } from "../../../Graphics/Buffers/GlBuffers.js";
+import { BatchStore } from "../../Batch/Batch.js";
 
 
 
@@ -96,6 +97,7 @@ export class Text_Mesh extends Mesh {
       Gl_progs_set_vb_texidx(gfxcopy.prog.groupidx, gfxcopy.prog.idx, gfxcopy.vb.idx, gfxcopy.tb.idx); // Update the vertex buffer to store the texture index
 
       const params = {
+         groupidx: this.gfx.prog.groupidx,
          progidx: this.gfx.prog.idx,
          vbidx: this.gfx.vb.idx,
          sceneidx: this.sceneidx,
@@ -139,9 +141,7 @@ export class Text_Mesh extends Mesh {
 
       if (!this.gfx) return; // Case replace text before insert to gfx buffers;
 
-      let text = '';
-      if (typeof (_text) === 'number') text = `${_text}`;
-      else text = _text;
+      let text = (typeof (_text) === 'number') ? `${_text}` : _text; // Takes arithmetic values or just a char.
 
       const gfxInfoCopy = new GfxInfoMesh(this.gfx);
       const geomcopy = new Geometry2D_Text();
@@ -153,58 +153,77 @@ export class Text_Mesh extends Mesh {
 
       geomcopy.pos[0] += this.geom.dim[0]; // Advance half char width
 
+      // EFFICIENCY: Do we need a geom copy??? The .pos[1] needs no recall, and the pos[0] thhat needs to be accumulated can be a simple variable.
+
       // Update text faces
       for (let i = 0; i < len; i++) {
 
          let uvs = [0, 0, 0, 0];
-         if (text[i] !== undefined) {
-            
+         
+         if (text[i] !== undefined) // If char=' ' space, just render [0,0] uv coordinates.
+         {
+            // Set character dimentions.
             const plane_bounds = Font_get_char_plane_bounds(this.mat.uvIdx, text[i]);
             geomcopy.dim[0] *= plane_bounds.width;
             geomcopy.dim[1] *= plane_bounds.height;
-            geomcopy.pos[1] += plane_bounds.yoffset * this.fontsize;
-            // GlSetDim(gfxInfoCopy, geomcopy.dim);
-            // GlSetWposXY(gfxInfoCopy, geomcopy.pos);
-            geomcopy.pos[0] += this.geom.dim[0]; // Advance xpos to next character.
+            GlSetDim(gfxInfoCopy, geomcopy.dim);
             
+            // Set character y position and advance.
+            geomcopy.pos[1] += plane_bounds.yoffset * this.fontsize;
+            GlSetWposXY(gfxInfoCopy, geomcopy.pos);
+            geomcopy.pos[0] += this.geom.dim[0]; // Advance xpos to next character.
+
+            // Get the correct uv coordinates.
             uvs = Font_get_char_uv_coords(this.mat.uvIdx, text[i]);
             
             geomcopy.dim[0] = this.geom.dim[0]; geomcopy.dim[1] = this.geom.dim[1]; geomcopy.pos[1] = this.geom.pos[1]; // Reset 
          }
+         
          GlSetTex(gfxInfoCopy, uvs);
          gfxInfoCopy.vb.start += gfxInfoCopy.vb.count
       }
+      
+      // HERE !!!!
+      /**
+       * We must set a gfx that starts at the first chars start and ends at the last character's end
+       * But the BatchStore takes a mesh.
+       * So either we change the BatchStore to take gfx or we construct a fake mesh to pass
+       */
+
    }
 
    /** Update a specific character in text char array */
    UpdateTextCharacter(_text, idx) {
 
-      if (!this.gfx) return; // Case replace text before insert to gfx buffers;
+      /**DEBUG */ if(_text.length>1) alert('Try to use a char update function but string is passed');
+      if (!this.gfx) return; // Case this called before text is inserted to gfx buffers.
 
-      let text = '';
-      if (typeof (_text) === 'number') text = `${_text}`;
-      else text = _text;
+      const text = (typeof (_text) === 'number') ? `${_text}` : _text; // Takes arithmetic values or just a char.
 
+      // Make a copy to not change the default .start value of the first char(face).
       let gfxInfoCopy = new GfxInfoMesh(this.gfx);
-      gfxInfoCopy.vb.start += this.gfx.vb.start + (gfxInfoCopy.vb.count * idx); // Calc the characters position inside the char array.
+      gfxInfoCopy.vb.start = this.gfx.vb.start + (gfxInfoCopy.vb.count * idx); // Calc the characters position inside the char array.
 
-
+      // Make a copy to not change the default face.
       const geomcopy = new Geometry2D_Text();
       geomcopy.Copy(this.geom);
 
       const plane_bounds = Font_get_char_plane_bounds(this.mat.uvIdx, text);
+      
+      // Set character dimentions. 
       geomcopy.dim[0] *= plane_bounds.width;
       geomcopy.dim[1] *= plane_bounds.height;
+      GlSetDim(gfxInfoCopy, geomcopy.dim);
+      
+      // Set character y position and advance.
       geomcopy.pos[1] += plane_bounds.yoffset * this.fontsize;
       geomcopy.pos[0] += this.geom.dim[0];
-      // GlSetDim(gfxInfoCopy, geomcopy.dim);
-      // GlSetWposXY(gfxInfoCopy, geomcopy.pos);
+      GlSetWposXY(gfxInfoCopy, geomcopy.pos);
       
+      // Set the correct uv coordinates.
       const uvs = Font_get_char_uv_coords(this.mat.uvIdx, _text);
       GlSetTex(gfxInfoCopy, uvs);
-      
-      // this.geom.pos[0] = geomcopy.pos[0]
-      // this.geom.pos[1] = geomcopy.pos[1]
+
    }
 
    SetColorRGB(col) {

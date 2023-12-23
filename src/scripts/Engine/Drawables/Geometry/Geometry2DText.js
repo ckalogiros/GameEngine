@@ -84,7 +84,7 @@ export class Geometry2D_Text extends Geometry2D {
       CopyArr2(this.defPos, pos)
    }
 
-   Copy(geom = {}) {
+   static Copy(geom = {}) {
 
       if (geom instanceof Geometry2D) {
 

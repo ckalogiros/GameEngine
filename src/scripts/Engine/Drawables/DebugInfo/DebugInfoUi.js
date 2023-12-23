@@ -8,7 +8,7 @@ import { Widget_Label } from "../Meshes/Widgets/WidgetLabel";
 import { Widget_Dynamic_Text_Mesh } from "../Meshes/Widgets/WidgetText";
 import { Scenes_get_root_meshes } from "../../Scenes.js";
 import { PerformanceTimersGetCurTime, PerformanceTimersGetFps, PerformanceTimersGetMilisec, _pt2, _pt3, _pt4, _pt5, _pt6, _pt7, _pt8, _pt9, _pt_fps } from "../../Timers/PerformanceTimers";
-import { PerformanceTimerGetFps1sAvg, _fps_1s_avg, _fps_500ms_avg } from "../../Timers/Time";
+import { PerformanceTimerGetFps1sAvg, _fps_1s_avg, _fps_500ms_avg, _gldraw_500ms_avg } from "../../Timers/Time";
 import { Info_listener_create_event, Info_listener_destroy_event } from "./InfoListeners";
 import { Widget_Scroller } from "../Meshes/Widgets/WidgetScroller";
 
@@ -22,7 +22,7 @@ export function Debug_info_ui_performance(scene) {
    const sectionpad = [6, 6];
    const fontsize = _font_size;
 
-   const dp = new Widget_Dropdown('Generic Ui Debug Info', [220, 40, 0], [10, 10], GREY1, TRANSPARENCY(GREY1, tr), WHITE, [18, 3]);
+   const dp = new Widget_Dropdown('Generic Ui Debug Info', [220, 40, 0], [10, 10], BLUE_A2, TRANSPARENCY(ORANGE_C2, tr), WHITE, [18, 3]);
    // const dp = new Widget_Dropdown('Generic +.{) [420, 80, 0]ui_label (!-=.} TEXTURE_PATHS| Widget_Switch(\'on\', \'off\', [0, 0, zindex+2]', [420, 80, 0], [10, 10], GREEN_140_240_10, TRANSPARENCY(BLUE_10_120_220, .6), WHITE, [8, 3]);
    // const dp = new Widget_Dropdown('A', [220, 40, 0], [10, 10], GREEN_140_240_10, TRANSPARENCY(BLUE_10_120_220, .6), WHITE, [8, 3]);
    dp.CreateClickEvent();
@@ -126,10 +126,10 @@ function Debug_info_create_ui_performance_timers(params) {
       DEBUG_INFO.UI_TIMERS.IS_ON = false;
       return;
    }
-
    const section = new Section(SECTION.HORIZONTAL, [10, 10], DEBUG_INFO.UI_TIMERS.POS, [0, 0], TRANSPARENCY(GREY1, .4), 'ui performance timers panel');
    section.CreateListenEvent(LISTEN_EVENT_TYPES.MOVE);
    section.SetName('InfoUi-PerformanceTimers section');
+ 
 
    const fontsize = 8;
    let pad = 0;
@@ -192,14 +192,21 @@ function Debug_info_create_ui_performance_timers(params) {
 
       section.AddItem(t);
    }
-   { // Gl_draw timer
+   { // Gl_draw timer. Averages infinetly.
       ms = 500;
-      const t = new Widget_Dynamic_Text_Mesh(`Gl_draw Update(${ms}ms):`, '0.0000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      const t = new Widget_Dynamic_Text_Mesh(`Gl_draw(${ms}ms):`, '0.0000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
       t.SetDynamicText(`DynText ${ms} GlDrawUpdate`, ms, PerformanceTimersGetFps, _pt4); // idx is for use in creating separate time intervals for each dynamic text.
 
       t.CreateNewText('| ms:', fontsize, BLUE_10_160_220, [fontsize * 3, 0], .9);
       t.CreateNewText('0.000', fontsize, ORANGE_240_160_10, [0, 0], .5);
       t.SetDynamicText(`DynText ${ms} Gl_draw`, ms, PerformanceTimersGetMilisec, _pt4); // idx is for use in creating separate time intervals for each dynamic text.
+
+      section.AddItem(t);
+   }
+   { // Gl_draw reset timer. Avarages for the duration of the interval time and then resets.  
+      ms = 500;
+      const t = new Widget_Dynamic_Text_Mesh(`Gl_draw(${ms}ms R):`, '0.0000', ALIGN.HORIZONTAL, [0, 0, 0], fontsize, BLUE_10_160_220, ORANGE_240_160_10, .5);
+      t.SetDynamicText(`DynText ${ms} GlDrawUpdate`, ms, PerformanceTimerGetFps1sAvg, _gldraw_500ms_avg); // idx is for use in creating separate time intervals for each dynamic text.
 
       section.AddItem(t);
    }
@@ -243,7 +250,7 @@ function Debug_info_create_ui_performance_timers(params) {
       section.AddItem(t);
    }
 
-   // section.RenderToDebugGfx();
+   section.RenderToDebugGfx();
    scene.AddWidget(section, GFX_CTX_FLAGS.PRIVATE);
    section.Calc(SECTION.VERTICAL);
    // section.Recalc(SECTION.HORIZONTAL);
@@ -623,7 +630,7 @@ function Debug_info_create_mesh_info(params){
    DEBUG_INFO.UI_MESH.IS_ON = true;
 
    // Create an Info listener to update the mouse position ui text
-   // dp.debug_info.evtidx = Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.MESH, Debug_info_mesh_update, params, dp);
+   dp.debug_info.evtidx = Info_listener_create_event(INFO_LISTEN_EVENT_TYPE.GFX2, Debug_info_mesh_update, params, dp);
 
 }
 
@@ -632,9 +639,9 @@ function Debug_info_mesh_add_meshes_as_tree_struct(mesh, parent){
    const dp_mesh = new Widget_Dropdown(` ${mesh.name}`, [0, 0, 0], [10, 10], TRANSPARENCY(GREEN_140_240_10, .5), GREY1, WHITE, [8, 3]);
    // dp_mesh.SetName(`${mesh.name}`);
    dp_mesh.SetType(MESH_TYPES_DBG.UI_INFO_MESH);
-   console.log('1. id:', dp_mesh.id, dp_mesh.geom.pos[2])
+   // console.log('1. id:', dp_mesh.id, dp_mesh.geom.pos[2])
    parent.AddToMenu(dp_mesh);
-   console.log('2. id:', dp_mesh.id, dp_mesh.geom.pos[2])
+   // console.log('2. id:', dp_mesh.id, dp_mesh.geom.pos[2])
 
    for (let i=0; i<mesh.children.boundary; i++){
       
@@ -647,11 +654,13 @@ function Debug_info_mesh_add_meshes_as_tree_struct(mesh, parent){
 
 function Debug_info_mesh_update(params){
 
-   // const root_info_dp = params.target_params;
-   // const scene = params.source_params.params;
-   // const clicked_mesh = params.source_params.target_mesh;
-   // const added_mesh = params.trigger_params
-   // const parent = added_mesh.parent ? added_mesh.parent : null 
+   console.log('!!!!!!!!!!!!!!!!!!!!!!!')
+
+   const root_info_dp = params.target_params;
+   const scene = params.source_params.params;
+   const clicked_mesh = params.source_params.target_mesh;
+   const added_mesh = params.trigger_params
+   const parent = added_mesh.parent ? added_mesh.parent : null 
 
 
    // /**
@@ -666,25 +675,30 @@ function Debug_info_mesh_update(params){
 
 
    // const parent_name = added_mesh.parent ? added_mesh.parent.name : 'null' 
-   // console.log( ' root_dp:', root_info_dp.name,  ' clicked_mesh:', clicked_mesh.name,' added mesh:', added_mesh.name)
-   // console.log(' Parent: ', parent_name, parent)
-   // console.log(' root_info_dp: ', root_info_dp)
-
-   // if(!parent && !(added_mesh.type & MESH_TYPES_DBG.UI_INFO_MESH)){
-
-   //    const dp_mesh = new Widget_Dropdown(` ${added_mesh.name}`, [0, 0, 0], [10, 10], TRANSPARENCY(GREEN_140_240_10, .5), GREY1, WHITE, [8, 3]);
-   //    dp_mesh.SetName(`${added_mesh.name}`);
-   //    dp_mesh.SetType(MESH_TYPES_DBG.UI_INFO_MESH);
-   //    root_info_dp.AddToMenu(dp_mesh);
-
-
-   //    // dp_mesh.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
-   //    const gfx_idxs = [root_info_dp.menu.gfx.prog.idx, root_info_dp.menu.gfx.vb.idx];
-   //    dp_mesh.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE, gfx_idxs);
-   //    // Gfx_add_geom_mat_to_vb(dp_mesh.sid, dp_mesh.gfx, dp_mesh.geom, dp_mesh.mat, dp_mesh.type & MESH_TYPES_DBG.MESH, dp_mesh.name);
-   //    dp_mesh.Render();
-   //    root_info_dp.Recalc();
-
+   // if(added_mesh.groupidx === 1){
+      
+   //    console.log(' {}{}{}}{}{}{}{}{}{}{}{}{}{}{}{}{}{}} ')
+   
+   //    // console.log( ' root_dp:', root_info_dp.name,  ' clicked_mesh:', clicked_mesh.name,' added mesh:', added_mesh.name)
+   //    // console.log(' Parent: ', parent_name, parent)
+   //    // console.log(' root_info_dp: ', root_info_dp)
+   
+   //    if(!parent && !(added_mesh.type & MESH_TYPES_DBG.UI_INFO_MESH)){
+   
+   //       const dp_mesh = new Widget_Dropdown(` ${added_mesh.name}`, [0, 0, 0], [10, 10], TRANSPARENCY(GREEN_140_240_10, .5), GREY1, WHITE, [8, 3]);
+   //       dp_mesh.SetName(`${added_mesh.name}`);
+   //       dp_mesh.SetType(MESH_TYPES_DBG.UI_INFO_MESH);
+   //       root_info_dp.AddToMenu(dp_mesh);
+   
+   
+   //       // dp_mesh.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE);
+   //       const gfx_idxs = [root_info_dp.menu.gfx.prog.idx, root_info_dp.menu.gfx.vb.idx];
+   //       dp_mesh.GenGfxCtx(GFX_CTX_FLAGS.PRIVATE, gfx_idxs);
+   //       // Gfx_add_geom_mat_to_vb(dp_mesh.sid, dp_mesh.gfx, dp_mesh.geom, dp_mesh.mat, dp_mesh.type & MESH_TYPES_DBG.MESH, dp_mesh.name);
+   //       dp_mesh.Render();
+   //       root_info_dp.Recalc();
+   
+   //    }
    // }
 
 }

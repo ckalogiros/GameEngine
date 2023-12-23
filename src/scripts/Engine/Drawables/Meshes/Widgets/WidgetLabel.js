@@ -206,10 +206,10 @@ export class Widget_Label extends Rect {
 
         // this.geom.pos[0] += x;
         // this.geom.pos[1] += y;
-        BatchStore(this, 'MoveXY', [x,y]);
+        BatchStore(this, BATCH_TYPE.MOVE, [x,y]);
         // this.text_mesh.geom.pos[0] += x;
         // this.text_mesh.geom.pos[1] += y;
-        BatchStore(this.text_mesh, 'MoveXY', [x,y]);
+        BatchStore(this.text_mesh, BATCH_TYPE.MOVE, [x,y]);
         
     }
 
@@ -319,10 +319,10 @@ export class Widget_Label extends Rect {
         const mouse_pos = MouseGetPosDif();
         // mesh.geom.pos[0] += mouse_pos.x;
         // mesh.geom.pos[1] += -mouse_pos.y;
-        BatchStore(mesh, 'MoveXY', [mouse_pos.x, -mouse_pos.y]);
+        BatchStore(mesh, BATCH_TYPE.MOVE, [mouse_pos.x, -mouse_pos.y]);
         // text_mesh.geom.pos[0] += mouse_pos.x;
         // text_mesh.geom.pos[1] += -mouse_pos.y;
-        BatchStore(text_mesh, 'MoveXY', [mouse_pos.x, -mouse_pos.y]);
+        BatchStore(text_mesh, BATCH_TYPE.MOVE, [mouse_pos.x, -mouse_pos.y]);
 
     }
 

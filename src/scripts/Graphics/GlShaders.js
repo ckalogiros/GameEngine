@@ -43,7 +43,9 @@ function LoadShaders(gl, shader) {
 
 	gl.attachShader(webgl_program, vShader);
 	gl.attachShader(webgl_program, fShader);
-	console.log('Validate program', gl.validateProgram(webgl_program));
+	const success = gl.validateProgram(webgl_program);
+	const msg = (success === undefined) ? 'Success!' : success;
+	console.log('Validate program', msg);
 	gl.linkProgram(webgl_program);
 
 	const status = gl.getProgramParameter(webgl_program, gl.LINK_STATUS);
@@ -54,7 +56,7 @@ function LoadShaders(gl, shader) {
 		return null;
 	} 
 	else {
-		console.log('Shaders Linked Successfully!\n status:', gl.validateProgram(webgl_program));
+		console.log('Shaders Linked Successfully!\n status:', msg);
 	}
 
 	return webgl_program;

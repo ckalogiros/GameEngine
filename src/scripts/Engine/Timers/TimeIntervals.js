@@ -59,7 +59,7 @@ class Interval {
       this.name = name;
    }
 
-   Update() {
+   Update() {  // HOT-PATH
 
       this.t += _time.delta;
       

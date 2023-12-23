@@ -12,15 +12,15 @@ export function Gl_remove_geometry(gfx, num_faces = 1) {
 
     // Structure to use for updating a removed mesh's start index pointing to it's location in the vertex buffer..
     const ret = {
+        /**DEBUG */gfx_temp:[gfx.prog.groupidx, gfx.prog.idx, gfx.vb.idx],
         counts: [0, 0], // 0:vb, 1:ib
         start: gfx.vb.start,
         last: (gfx.vb.start + gfx.vb.count * num_faces >= vb.count) ? true : false,
         empty: false, // Is the buffer is empty?
     };
+
     // if(DEBUG.GFX.REMOVE_MESH) console.log('idx:', gfx.prog.idx, gfx.vb.idx, 'vb count:', vb.count, ' attributes from start:', gfx.vb.start, ' to:', gfx.vb.start+gfx.vb.count*num_faces)
     ret.counts[0] = vb.Remove_geometry(gfx, num_faces);
-    // if (DEBUG.GFX.REMOVE_MESH) console.log('idx:', gfx.prog.idx, gfx.vb.idx, 'vb count:', vb.count)
-    // if(DEBUG.GFX.REMOVE_MESH) console.log('vb count:', vb.count, ' remove:', ret.counts[0], ' attributes from start:', gfx.vb.start)
     ret.counts[1] = ib.Remove_geometry(num_faces);
 
     if (vb.count <= 0) ret.empty = true;
@@ -917,7 +917,7 @@ export function GlVbBatch(meshdata, count, groupidx, progidx, vbidx, attribsPerV
 
     const vb = Gl_progs_get_vb_byidx(groupidx, progidx, vbidx);
     let stride = attribsPerVertex - V_COL_COUNT;
-        
+
     for(let i=0; i<count; i++){ // Runs for each mesh in the vertex buffer
 
         let index = meshdata[i].start + Gl_progs_get_shaderinfo_wposTime_offset(groupidx, progidx);

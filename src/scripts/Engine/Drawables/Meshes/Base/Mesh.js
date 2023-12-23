@@ -67,26 +67,26 @@ export class Mesh {
     type;       // A bit masked large integer to 'name' all different types of a mesh. 
     state;      // BitField: Bitfield integer. Stores enebled-dissabled mesh state. 
     hover_margin; // Value: A margin to be set for hovering. // TODO: Abstract to a struct.
-    
+
     sceneidx; // Value: A reference to the scene that the mesh belongs to(index only).
-    
+
     parent;     // Pointer: to the parent mesh.
     children;   // Buffer: of pointers to children mesh.
-    
+
     geom;   // Class:
     mat;    // Class:
     gfx;    // Class
-    
+
     is_gfx_inserted; // Bool: A way to tell if the mesh has been inserted to the graphics pipeline;
-    
+
     attrParams1; // Array: A vec4 array which a mesh can pass any values the the shaders.
     uniforms;   // Struct: Some uniform values that need to be stored mesh-side
-    
+
     listeners;      // Buffer: Indexes to the EventListeners class.
     eventCallbacks; // Buffer: A buffer to store all callbacks, for any event enabled for the mesh.
     timedEvents;    // Buffer: A buffer to set a one time event that is triggered by another event. E.x. When we need to set the mesh priority in the renderQueue and the mesh does not have a gfx yet. 
     timeIntervalsIdxBuffer; // Buffer: This buffer stores indexes of the timeIntervals this mesh is using.
-    
+
     debug_info; // Struct: Debug_info_ui bit mask.
     minimized;      // Pointer: to a minimized version of the mesh.
     menu_options;   // Struct: A callback and an index. Constructs the options popup menu for the mesh
@@ -197,8 +197,10 @@ export class Mesh {
         }
 
         // Remove from gfx buffers.
-        const ret = Gfx_remove_geometry(this.gfx, this.geom.num_faces)
+        const ret = Gfx_remove_geometry(this.gfx, this.geom.num_faces);
+        // console.log('ret:', ret.gfx_temp, ret.start)
         // Remove from scene
+        // EFFICIENCY: the re
         Scenes_update_all_gfx_starts(this.sceneidx, this.gfx.prog.groupidx, this.gfx.prog.idx, this.gfx.vb.idx, ret); // Update the gfx.start of all meshes that are inserted in the same vertex buffer.
         Scenes_remove_root_mesh(this, this.sceneidx);
         // console.log('Destroy mesh:', this.name)
@@ -208,6 +210,7 @@ export class Mesh {
         if (this.parent) this.parent.RemoveChildByIdx(this.idx); // Remove the current mesh from the parent
 
         const params = {
+            groupidx: this.gfx.prog.groupidx,
             progidx: this.gfx.prog.idx,
             vbidx: this.gfx.vb.idx,
             sceneidx: this.sceneidx,
@@ -348,33 +351,25 @@ export class Mesh {
 
     /*******************************************************************************************************************************************************/
     // Setters-Getters                                            // Function Calls 'number of calls':'in number of files'
-    SetHoverColor()         { this.mat.SetHoverColor(this.gfx); } //5:3
-    SetColor(col)           { this.mat.SetColor(col, this.gfx); } //16:11
-    SeHoverColortDefault()  { this.mat.SeHoverColortDefault(this.gfx); } //4:3
-    SetDefaultColor()       { this.mat.SetDefaultColor(this.gfx, this.geom.num_faces); }//5:3
-    SetDefaultPosXY()       { alert('SetDefaultPosXY'); this.geom.SetDefaultPosXY(this.gfx); }//3:2
-    SetColorRGB(col)        { this.mat.SetColorRGB(col, this.gfx, this.geom.num_faces); }//14:7
-    SetColorAlpha(alpha)    { this.mat.SetColorAlpha(alpha, this.gfx, this.geom.num_faces); }//27:8
-    SetPosXYZ(pos)          { alert('SetPosXYZ');this.geom.SetPosXYZ(pos, this.gfx); }//5:3
-    SetPosXY(pos)           { alert('SetPosXY');this.geom.SetPosXY(pos, this.gfx); }//14:8
-    SetPosX(x)              { alert('SetPosX');this.geom.SetPosX(x, this.gfx); }//18:7
-    SetPosY(y)              { alert('SetPosY');this.geom.SetPosY(y, this.gfx); }//16:5
-    SetDim(dim)             { alert('SetDim');this.geom.SetDim(dim, this.gfx); }//10:7
-    UpdatePosXY()           { alert('UpdatePosXY');this.geom.UpdatePosXY(this.gfx); }//7:4
-    UpdatePosXYZ()          { alert('UpdatePosXYZ');this.geom.UpdatePosXYZ(this.gfx); }//5:4
-    UpdateDim()             { this.geom.UpdateDim(this.gfx); }//8:5
-    UpdateZindex(z)         { this.geom.SetZindex(z, this.gfx); }//
-    SetStyle(style)         { this.mat.SetStyle(style); }//19:10
-    MoveXY(x, y)            { 
-        // this.geom.pos[0] += x;
-        // this.geom.pos[1] += y;
-        BatchStore(this, 'MoveXY', [x,y]); 
-    }//42:10 from which 33 calls are directly to geom.MoveXY
-    MoveXYZ(pos)            { 
-        // this.geom.pos[0] += pos[0];
-        // this.geom.pos[1] += pos[1];
-        BatchStore(this, 'MoveXY', pos); 
-    }//20:8
+    SetHoverColor() { this.mat.SetHoverColor(this.gfx); } //5:3
+    SetColor(col) { this.mat.SetColor(col, this.gfx); } //16:11
+    SeHoverColortDefault() { this.mat.SeHoverColortDefault(this.gfx); } //4:3
+    SetDefaultColor() { this.mat.SetDefaultColor(this.gfx, this.geom.num_faces); }//5:3
+    SetDefaultPosXY() { this.geom.SetDefaultPosXY(this.gfx); }//3:2
+    SetColorRGB(col) { this.mat.SetColorRGB(col, this.gfx, this.geom.num_faces); }//14:7
+    SetColorAlpha(alpha) { this.mat.SetColorAlpha(alpha, this.gfx, this.geom.num_faces); }//27:8
+    SetPosXYZ(pos) { this.geom.SetPosXYZ(pos, this.gfx); }//5:3
+    SetPosXY(pos) { this.geom.SetPosXY(pos, this.gfx); }//14:8
+    SetPosX(x) { this.geom.SetPosX(x, this.gfx); }//18:7
+    SetPosY(y) { this.geom.SetPosY(y, this.gfx); }//16:5
+    SetDim(dim) { this.geom.SetDim(dim, this.gfx); }//10:7
+    UpdatePosXY() { this.geom.UpdatePosXY(this.gfx); }//7:4
+    UpdatePosXYZ() { this.geom.UpdatePosXYZ(this.gfx); }//5:4
+    UpdateDim() { this.geom.UpdateDim(this.gfx); }//8:5
+    UpdateZindex(z) { this.geom.SetZindex(z, this.gfx); }//
+    SetStyle(style) { this.mat.SetStyle(style); }//19:10
+    MoveXY(x, y) { BatchStore(this, BATCH_TYPE.MOVE, [x, y]); }//42:10 from which 33 calls are directly to geom.MoveXY
+    MoveXYZ(pos) { BatchStore(this, BATCH_TYPE.MOVE, pos); }//20:8
     SetAttrTime() {
         if (this.sid.attr & SID.ATTR.TIME) {
             this.geom.timer = TimerGetGlobalTimer();

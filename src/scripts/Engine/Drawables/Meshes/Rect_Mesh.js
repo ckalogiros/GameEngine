@@ -55,14 +55,16 @@ export class Rect extends Mesh {
       Scenes_store_mesh_in_gfx(this.sceneidx, this); // For storing meshes by its gfx
 
       const params = {
+         groupidx: this.gfx.prog.groupidx,
          progidx: this.gfx.prog.idx,
          vbidx: this.gfx.vb.idx,
          sceneidx: this.sceneidx,
          isActive: true,
          isPrivate: (FLAGS & GFX_CTX_FLAGS.PRIVATE) ? true : false,
-         type: INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB,
+         type: INFO_LISTEN_EVENT_TYPE.GFX2,
+         // type: INFO_LISTEN_EVENT_TYPE.GFX.UPDATE_VB,
       }
-      Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX.UPDATE, params);
+      Info_listener_dispatch_event(INFO_LISTEN_EVENT_TYPE.GFX2, params);
    }
 
    /*******************************************************************************************************************************************************/

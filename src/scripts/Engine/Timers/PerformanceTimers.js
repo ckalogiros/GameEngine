@@ -77,7 +77,8 @@ export function PerformanceTimerCreate(name = '') {
    return _timeMeasures.buffer[idx];
 }
 
-export function PerformanceTimersTick(){
+
+export function PerformanceTimersTick(){ // HOT-PATH
    /**
     * This updates the tick count uppon every frame.
     * Enables a timer to  Start and Stop more than 1 times during a frame.

@@ -105,7 +105,7 @@ export class Widget_Text extends Text_Mesh {
 
 		// this.geom.pos[0] += x;
 		// this.geom.pos[1] += y;
-		BatchStore(this, 'MoveXY', [x,y]);
+		BatchStore(this, BATCH_TYPE.MOVE, [x,y]);
 	}
 
 }
@@ -448,7 +448,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 		// Move 'this' text
 		// this.geom.pos[0] += mouse_pos.x;
 		// this.geom.pos[1] += -mouse_pos.y;
-		BatchStore(this, 'MoveXY', [mouse_pos.x, -mouse_pos.y,]);
+		BatchStore(this, BATCH_TYPE.MOVE, [mouse_pos.x, -mouse_pos.y,]);
 		// Move children text
 		for (let i = 0; i < this.children.boundary; i++) {
 
@@ -463,7 +463,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 
 		// this.geom.pos[0] += x;
 		// this.geom.pos[1] += y;
-		BatchStore(this, 'MoveXY', [x,y]);
+		BatchStore(this, BATCH_TYPE.MOVE, [x,y]);
 
 		// Move children text
 		for (let i = 0; i < this.children.boundary; i++) {
@@ -472,7 +472,7 @@ export class Widget_Dynamic_Text_Mesh extends Widget_Text {
 			if (child) {
 				// child.geom.pos[0] += x;
 				// child.geom.pos[1] += y;
-				BatchStore(child, 'MoveXY', [x,y]);
+				BatchStore(child, BATCH_TYPE.MOVE, [x,y]);
 			}
 		}
 

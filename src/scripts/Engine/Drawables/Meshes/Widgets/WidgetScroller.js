@@ -364,7 +364,7 @@ export class Widget_Scroller extends Section {
       // Move 'this' text
 		// scroller.geom.pos[0] += mouse_pos.x; 
       // scroller.geom.pos[1] += -mouse_pos.y; 
-      BatchStore(scroller, 'MoveXY', [mouse_pos.x, -mouse_pos.y]);
+      BatchStore(scroller, BATCH_TYPE.MOVE, [mouse_pos.x, -mouse_pos.y]);
       
       const scrolled_mesh = scroller.children.buffer[SCROLL_MESH_IDX];
       scrolled_mesh.Move(mouse_pos.x, -mouse_pos.y); // Let the scrolled mesh handle the Move().
@@ -372,12 +372,12 @@ export class Widget_Scroller extends Section {
       const bar = scroller.children.buffer[SCROLL_BAR_IDX];
 		// bar.geom.pos[0] += mouse_pos.x; 
       // bar.geom.pos[1] += -mouse_pos.y; 
-      BatchStore(bar, 'MoveXY', [mouse_pos.x, -mouse_pos.y]);
+      BatchStore(bar, BATCH_TYPE.MOVE, [mouse_pos.x, -mouse_pos.y]);
       
       const handle = bar.children.buffer[0];
 		// handle.geom.pos[0] += mouse_pos.x; 
       // handle.geom.pos[1] += -mouse_pos.y; 
-      BatchStore(handle, 'MoveXY', [mouse_pos.x, -mouse_pos.y]);
+      BatchStore(handle, BATCH_TYPE.MOVE, [mouse_pos.x, -mouse_pos.y]);
 
       scroller.SetScissorBox();
 

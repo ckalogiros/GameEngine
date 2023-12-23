@@ -98,8 +98,8 @@ export class Section extends Rect {
        * Expand width of items to match the max width of section, minus the margin.
        * Only if the section has VERTICAL align for its items. 
        */
-      // if(options & SECTION.EXPAND)
-      //    Expand(section, section.options, section.max_size[0], 0);
+      if(options & SECTION.EXPAND)
+         Expand(section, section.options, section.max_size[0], 0);
 
 
       // Calculate the parent section's position, so that its items are positioned from top to bottom, (Ex. when a dropdown menu is opened). 
@@ -380,7 +380,7 @@ function Section_move_children_recursive(x, y, mesh, count=0) {
    // Move parent
    // mesh.geom.pos[0] += x;
    // mesh.geom.pos[1] += y;
-   BatchStore(mesh, 'MoveXY', [x,y]);
+   BatchStore(mesh, BATCH_TYPE.MOVE, [x,y]);
 
    return count;
 
@@ -542,7 +542,6 @@ function Calculate_positions_recursive(parent, options = SECTION.INHERIT, _accum
 
 
             if (mesh.gfx) {
-               // pos_dif[0]/=2
                mesh.Reposition_post(pos_dif);
             }
             else {
@@ -597,8 +596,7 @@ function Calculate_sizes_recursive(section, top, left, options, total_margin = [
          margin[1] += mesh.margin[1];
          margin[0] += mesh.margin[0];
          const size = Calculate_sizes_recursive(mesh, top, left, SECTION.INHERIT, margin, total_size); // Recurse if child mesh is of type of Section
-         if(isNaN(mesh.geom.pos[1]))
-         console.log()
+
          total_size[0] += size[0];
          total_size[1] += size[1];
 
@@ -662,8 +660,6 @@ function Calculate_sizes_recursive(section, top, left, options, total_margin = [
          }
       }
    }
-   if(isNaN(section.geom.pos[1]))
-   console.log()
 
    AddArr2(total_size, accum_size_per_section);
    return total_size;

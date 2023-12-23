@@ -344,10 +344,14 @@ const ORANGE_240_200_10 = InterpolateRgb(240, 200, 10);
 const ORANGE_240_130_10 = InterpolateRgb(240, 130, 10);
 const ORANGE_240_75_10 = InterpolateRgb(255, 75, 10);
 
-const BLUE_A1 = InterpolateRgb(0, 34, 71);
-const BLUE_A2 = InterpolateRgb(0, 55, 114  );
-const BLUE_A3 = InterpolateRgb(0, 75, 155  );
-const BLUE_A4 = InterpolateRgb(0, 100, 206 );
+const BLUE_A1 = InterpolateRgb(0, 46, 71);
+const BLUE_A2 = InterpolateRgb(0, 77, 119  );
+const BLUE_A3 = InterpolateRgb(0, 112, 173  );
+const BLUE_A4 = InterpolateRgb(0, 140, 220 );
+const BLUE_B1 = InterpolateRgb(0, 29, 73);
+const BLUE_B2 = InterpolateRgb(0, 48, 122  );
+const BLUE_B3 = InterpolateRgb(0, 71, 178  );
+const BLUE_B4 = InterpolateRgb(0, 100, 220 );
 const GREEN_B1 = InterpolateRgb(0, 58, 0);
 const GREEN_B2 = InterpolateRgb(0, 94, 0);
 const GREEN_B3 = InterpolateRgb(0, 150, 0);
@@ -376,6 +380,7 @@ const RED1 = InterpolateRgb(66 , 0, 12 	);
 const RED2 = InterpolateRgb(114, 0, 21 	);
 const RED3 = InterpolateRgb(163, 0, 31 	);
 const RED4 = InterpolateRgb(220, 0, 40	);
+
 const BLUE_LIGHT = InterpolateRgb(76, 171, 254);
 const blue = InterpolateRgb(0.345 * 255, 0.780 * 255, 0.988 * 255)
 const bluePurple = InterpolateRgb(0.361 * 255, 0.020 * 255, 0.839 * 255)
@@ -583,6 +588,12 @@ function GetMeshHighOrderNameFromType(type) {
 	// console.log(MESH_TYPES_DBG.WIDGET_SLIDER);
 	return meshType;
 }
+
+
+const BATCH_TYPE = {
+	MOVE: 0x1,
+	COLOR: 0x2,
+};
 
 
 

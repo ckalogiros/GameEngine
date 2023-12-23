@@ -131,11 +131,7 @@
       because the activation/deactivation hapens on the menu level. 
 
    ## ActivateMenu()
-      Activate a menu and all of its items.
-      Genarate gfx: Ask for a private vertex buffer for the menu and its items.
-      The menu's items must be stored in private(or same buffers if the shaders match) 
-      in order to  be able to destroy-deactivate the menu AN its items.
-      For the menu rendering and all its items, we build all gfx buffers from scratch.
+      TODO: Implement
 
 
  */

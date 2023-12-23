@@ -144,24 +144,24 @@ export class Widget_Menu_Bar extends Widget_Label {
       // Move menu widget
       const mouse_pos = MouseGetPosDif();
       menu.geom.MoveXY(mouse_pos.x, -mouse_pos.y, menu.gfx);
-      menu.geom.pos[0] += x;
-		menu.geom.pos[1] += y;
-		BatchStore(menu, 'MoveXY', [x,y]);
-      text_mesh.geom.pos[0] += x;
-		text_mesh.geom.pos[1] += y;
-		BatchStore(text_mesh, 'MoveXY', [x,y]);
+      // menu.geom.pos[0] += x;
+		// menu.geom.pos[1] += y;
+		BatchStore(menu, BATCH_TYPE.MOVE, [x,y]);
+      // text_mesh.geom.pos[0] += x;
+		// text_mesh.geom.pos[1] += y;
+		BatchStore(text_mesh, BATCH_TYPE.MOVE, [x,y]);
 
 
       // Move menu children widgets(close/minimize buttons)
       for (let i = 0; i < menu.children.boundary; i++) {
 
          const widget_child = menu.children.buffer[i];
-         widget_child.geom.pos[0] += x;
-         widget_child.geom.pos[1] += y;
-         BatchStore(widget_child, 'MoveXY', [x,y]);
-         widget_child.text_mesh.geom.pos[0] += x;
-         widget_child.text_mesh.geom.pos[1] += y;
-         BatchStore(widget_child.text_mesh, 'MoveXY', [x,y]);
+         // widget_child.geom.pos[0] += x;
+         // widget_child.geom.pos[1] += y;
+         BatchStore(widget_child, BATCH_TYPE.MOVE, [x,y]);
+         // widget_child.text_mesh.geom.pos[0] += x;
+         // widget_child.text_mesh.geom.pos[1] += y;
+         BatchStore(widget_child.text_mesh, BATCH_TYPE.MOVE, [x,y]);
       }
 
    }
@@ -234,23 +234,23 @@ export class Widget_Menu_Bar extends Widget_Label {
    Move(x, y) {
 
       // Move 'this' text
-      this.geom.pos[0] += x;
-		this.geom.pos[1] += y;
-		BatchStore(this, 'MoveXY', [x,y]);
-      this.text_mesh.geom.pos[0] += x;
-		this.text_mesh.geom.pos[1] += y;
-		BatchStore(this.text_mesh, 'MoveXY', [x,y]);
+      // this.geom.pos[0] += x;
+		// this.geom.pos[1] += y;
+		BatchStore(this, BATCH_TYPE.MOVE, [x,y]);
+      // this.text_mesh.geom.pos[0] += x;
+		// this.text_mesh.geom.pos[1] += y;
+		BatchStore(this.text_mesh, BATCH_TYPE.MOVE, [x,y]);
 
       // Move menu children widgets(close/minimize buttons)
       for (let i = 0; i < this.children.boundary; i++) {
 
          const widget_child = this.children.buffer[i];
-         widget_child.geom.pos[0] += x;
-         widget_child.geom.pos[1] += y;
-         BatchStore(widget_child, 'MoveXY', [x,y]);
-         widget_child.text_mesh.geom.pos[0] += x;
-         widget_child.text_mesh.geom.pos[1] += y;
-         BatchStore(widget_child.text_mesh, 'MoveXY', [x,y]);
+         // widget_child.geom.pos[0] += x;
+         // widget_child.geom.pos[1] += y;
+         BatchStore(widget_child, BATCH_TYPE.MOVE, [x,y]);
+         // widget_child.text_mesh.geom.pos[0] += x;
+         // widget_child.text_mesh.geom.pos[1] += y;
+         BatchStore(widget_child.text_mesh, BATCH_TYPE.MOVE, [x,y]);
       }
    }
 

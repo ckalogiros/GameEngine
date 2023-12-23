@@ -39,8 +39,8 @@ export const _time = new Time();
 
 export function TimeGet() { return _time; }
 
-export function TimeUpdate() { _time.Update(); }
-export function TimeSample() { _time.Sample(); }
+export function TimeUpdate() { _time.Update(); }   // HOT-PATH
+export function TimeSample() { _time.Sample(); }  // HOT-PATH
 export function TimeStart() { _time.Start(); }
 export function TimeStop() { _time.Stop(); }
 
@@ -54,17 +54,22 @@ export function TimeGetFps() { return Math.floor(1 / ((_time.deltaAvg*MILISEC) /
  * Time Averages
  * Time Average does not need call to Date.now() or performance.now(). 
  * It updates its accumulator directly from the '_time' variable of class Time.
+ * 
+ * 
  * IMPORTANT: 
  *    The PerformanceTimerGetFps1sAvg() does not run by its self on a time interval,
  *    so it is the user's responsibility to set an interval timer (calling PerformanceTimerGetFps1sAvg)
  *    with 1 second interval.
+ *    
+ *    For any timer to be able to reset on a time interval, a separate variable has to be used.
  */
 
-
+// Static Time Acumulators
 export const _fps_1s_avg      = { accum: 0, cnt: 0, delta_avg: 0, };
 export const _fps_500ms_avg   = { accum: 0, cnt: 0, delta_avg: 0, };
 export const _fps_200ms_avg   = { accum: 0, cnt: 0, delta_avg: 0, };
 export const _fps_100ms_avg   = { accum: 0, cnt: 0, delta_avg: 0, };
+export const _gldraw_500ms_avg= { accum: 0, cnt: 0, delta_avg: 0, };
 
 
 

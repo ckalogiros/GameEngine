@@ -92,7 +92,7 @@ export class Scene {
 
     }
 
-    OnUpdate() {
+    OnUpdate() {  // HOT-PATH
 
         const animations = AnimationsGet();
 
@@ -414,7 +414,6 @@ export function Scenes_update_all_gfx_starts2(sceneidx, progidx, vbidx, ret) {
         if (start > ret.start) {
 
             meshes.buffer[i].gfx.vb.start += ret.counts[0];
-            // if(meshes.buffer[i].gfx.ib.start > 0) mesh.gfx.ib.start += ret.counts[1]; // Also decrent the indexBuffer, if > 0. // TODO!!!: implement correctly the index buffer, so we donot have to check for ib > 0
         }
     }
 
@@ -452,11 +451,13 @@ export function ScenesPrintAllMeshes(children, count) {
         if (child) {
 
             let r = ' ';
+            let s = ' ';
 
             for (let j = 0; j < count; j++) r += '->';
+            for (let j = 0; j < 6-count; j++) s += '  ';
 
             // console.log(`${i} ${r} ${child.name} idx:${child.idx} pos:[${child.geom.pos[0]},${child.geom.pos[1]} dim:[${child.geom.dim[0]},${child.geom.dim[1]}] gfx:{prog:${child.gfx.prog.idx}, vb:${child.gfx.vb.idx}, start${child.gfx.vb.start}}`);
-            console.log(`${i} ${r} ${child.id} idx:${child.idx} pos:[${child.geom.pos[0]},${child.geom.pos[1]} dim:[${child.geom.dim[0]},${child.geom.dim[1]}] gfx:{prog:${child.gfx.prog.idx}, vb:${child.gfx.vb.idx}, start:${child.gfx.vb.start}}`);
+            console.log(`id:${child.id} ${r}${s} idx:${child.idx} pos:[${child.geom.pos[0]},${child.geom.pos[1]} dim:[${child.geom.dim[0]},${child.geom.dim[1]}] gfx:{prog:${child.gfx.prog.idx}, vb:${child.gfx.vb.idx}, start:${child.gfx.vb.start}}`);
             total_count++;
 
             if (child.children.boundary) {

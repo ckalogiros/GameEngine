@@ -43,6 +43,9 @@ IMIDIATELY:
 If OnMove mesh, keep the Batch buffer to use on next frame!!!
 
 TODO:
+Set batch for removing meshes (from vertexbuffers)
+
+TODO:
 For time intervals that need updated every frame,
 set a special case, pass a CONSTANT as a number in milisecs,
 that will update the intervals callback on every frame of the application,

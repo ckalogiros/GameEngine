@@ -6,7 +6,7 @@ import { FpsGet, TimeSample, TimeUpdate } from "../Timers/Time.js";
 import { TimersUpdateGlobalTimer } from "../Timers/Timers.js";
 import { TimeIntervalsUpdateAll } from "../Timers/TimeIntervals.js";
 import {_pt_fps ,_pt2, _pt3, _pt4, _pt8, PerformanceTimersTick, _pt9 } from '../Timers/PerformanceTimers.js'
-import { BatchDoNoMerge, BatchDoNoMerge2 } from "../Batch/Batch.js";
+import { Batch_update_gfx_buffer_attributes_no_merge } from "../Batch/Batch.js";
 
 /**
  * WebGl
@@ -65,8 +65,6 @@ export class WebGlRenderer {
       STATE.scene.active = this.scene;
       STATE.scene.active_idx = this.scene.sceneidx;
 
-      // this.camera = camera;
-      // this.camera.Init();
       camera.Init();
 
       this.fpsTimer = FpsGet();
@@ -89,9 +87,7 @@ export class WebGlRenderer {
          // TimersUpdateStepTimers();
          _pt2.Stop();
 
-         // _pt8.Start(); BatchDo(); _pt8.Stop();
-         _pt8.Start(); BatchDoNoMerge2(); _pt8.Stop();
-         // _pt9.Start(); BatchDoNoMerge(); _pt9.Stop();
+         _pt8.Start(); Batch_update_gfx_buffer_attributes_no_merge(); _pt8.Stop();
          _pt3.Start(); this.scene.OnUpdate(); _pt3.Stop();
          
          _pt4.Start(); Gl_draw(this.gl); _pt4.Stop();

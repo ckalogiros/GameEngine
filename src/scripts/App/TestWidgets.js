@@ -1,6 +1,6 @@
 "use strict";
-import { PerformanceTimerGetFps1sAvg, TimeGetDeltaAvg, TimeGetFps, TimeGetTimer, _fps_100ms_avg, _fps_1s_avg, _fps_200ms_avg, _fps_500ms_avg } from '../Engine/Timers/Time.js';
-import { Widget_Label_Dynamic_Text, Widget_Label, Widget_Label_Text_Mesh_Menu_Options } from '../Engine/Drawables/Meshes/Widgets/WidgetLabel.js';
+import { _fps_100ms_avg, _fps_1s_avg, _fps_200ms_avg, _fps_500ms_avg } from '../Engine/Timers/Time.js';
+import { Widget_Label } from '../Engine/Drawables/Meshes/Widgets/WidgetLabel.js';
 import { Widget_Button, Widget_Switch } from '../Engine/Drawables/Meshes/Widgets/WidgetButton.js';
 import { Widget_Text, Widget_Dynamic_Text_Mesh } from '../Engine/Drawables/Meshes/Widgets/WidgetText.js';
 import { CubeGeometry } from '../Engine/Drawables/Geometry/Geometry3DCube.js';
@@ -22,13 +22,10 @@ import { Drop_down_set_root, Widget_Dropdown } from '../Engine/Drawables/Meshes/
 import { Gl_progs_get_group } from '../Graphics/GlProgram.js';
 import { Debug_info_ui_performance } from '../Engine/Drawables/DebugInfo/DebugInfoUi.js';
 import { Widget_Scroller } from '../Engine/Drawables/Meshes/Widgets/WidgetScroller.js';
-import { GetRandomColor, GetSequencedColor } from '../Helpers/Helpers.js';
+import { GetSequencedColor } from '../Helpers/Helpers.js';
 import { Gl_framebuffer_create, Gl_framebuffer_render } from '../Graphics/Buffers/GlFrameBuffer.js';
-import { Rect } from '../Engine/Drawables/Meshes/Rect_Mesh.js';
 import { Textured_Mesh } from '../Engine/Drawables/Meshes/Textured_Mesh.js';
-import { Renderqueue_Add, Renderqueue_set_active } from '../Engine/Renderers/Renderer/RenderQueue.js';
-import { Font_create_uvmap, Parse_json_metrics } from '../Engine/Loaders/Font/ChlumskyFontMetricsLoader.js';
-import { consola_msdf_test_1024_metrics } from '../../../resources/fonts/consolas_sdf/metrics/consola_msdf_test_1024_metrics.js';
+import { Renderqueue_set_active } from '../Engine/Renderers/Renderer/RenderQueue.js';
 
 
 /**
@@ -165,8 +162,8 @@ export function TestWidgetsGeneric(scene) {
 
     // Help(scene)
 
-    // const meshinfo_mesh = MeshInfo(scene)
-    // TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: meshinfo_mesh });
+    const meshinfo_mesh = MeshInfo(scene)
+    TimeIntervalsCreate(10, 'Mesh info tip', TIME_INTERVAL_REPEAT_ALWAYS, MeshInfoUpdate, { mesh: meshinfo_mesh });
 
     // const gfxinfo = GfxInfo(scene)
     // TimeIntervalsCreate(100, 'Gfx info tip', TIME_INTERVAL_REPEAT_ALWAYS, GfxInfoUpdate, { gfxinfo: gfxinfo });
@@ -1136,7 +1133,7 @@ function CreateScroller(scene) {
     const section = new Section(SECTION.VERTICAL, [5, 5], [280, 650, 0], [20, 20], TRANSPARENCY(GREY1, .6));
     // console.log('Section options = ', section.options, ' section:', section.name);
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 400; i++) {
 
         {
             const s = new Section(SECTION.VERTICAL, [5, 5], [280, 650, 0], [0, 0], TRANSPARENCY(GREEN_140_240_10, .6));

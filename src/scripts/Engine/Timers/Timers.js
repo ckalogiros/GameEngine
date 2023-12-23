@@ -4,14 +4,17 @@
  * Generic Timers
  */
 let g_timer = 0;
-export function TimerUpdateGlobalTimer(){  g_timer += .01; }
+export function TimerUpdateGlobalTimer(){  g_timer += .01; }  // HOT-PATH
 export function TimerGetGlobalTimer(){ return g_timer; }
 export function TimerResetGlobalTimer(){ g_timer = 0.0; }
+
 let g_timer_cycle_upper_limit = .99;
 let g_timer_cycle_lower_limit = .1;
 let g_timer_cycle = g_timer_cycle_lower_limit;
 let g_timer_cycle_rate = 0.01;
-export function TimerUpdateGlobalTimerCycle(){
+
+export function TimerUpdateGlobalTimerCycle(){  // HOT-PATH
+
     if(g_timer_cycle > g_timer_cycle_upper_limit)
         g_timer_cycle_rate  =  -0.01;
     else if(g_timer_cycle < g_timer_cycle_lower_limit)

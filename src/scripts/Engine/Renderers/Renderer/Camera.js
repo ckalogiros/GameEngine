@@ -64,7 +64,7 @@ export class Camera extends Matrix4 {
 		this.UpdateProjectionUniformAll(gl);
 	}
 
-	UpdateProjectionUniformAll(gl){
+	UpdateProjectionUniformAll(gl){  // HOT-PATH
 
 		/** For now all gfx programs use the same camera projection uniform. So we update all shader program's uniforms 
 		 * // TODO: What if there are many cameras for different programs??? Should the camera know about the programs indexes that it renders???

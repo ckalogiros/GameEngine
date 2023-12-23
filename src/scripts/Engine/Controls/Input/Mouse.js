@@ -147,13 +147,13 @@ export function MouseGetYdir() {
 export function MouseGetArea() {
    return mouse.click.drag;
 }
-export function MouseResetDif(factor) {
+export function MouseResetDif(factor) {  // HOT-PATH
    mouse.pos.DampenDif(factor)
 }
 export function MouseGetWheel(){
    return mouse.wheel;
 }
-export function MouseResetWheel(){
+export function MouseResetWheel(){  // HOT-PATH
    mouse.wheel.Reset();
 }
 

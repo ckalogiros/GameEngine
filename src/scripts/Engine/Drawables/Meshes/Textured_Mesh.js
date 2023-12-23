@@ -146,7 +146,7 @@ export class Textured_Mesh extends Mesh {
       const mouse_pos = MouseGetPosDif();
       // mesh.geom.pos[0] += mouse_pos.x;
       // mesh.geom.pos[1] -= mouse_pos.y;
-      BatchStore(mesh, 'MoveXY', [mouse_pos.x, -mouse_pos.y]);
+      BatchStore(mesh, BATCH_TYPE.MOVE, [mouse_pos.x, -mouse_pos.y]);
 
       // HACK: temporarely use the move to change the uv coordinates
       mesh.mat.uv[0] += -mouse_pos.x *.001;
